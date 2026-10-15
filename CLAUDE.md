@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-How the books are built. For how to write book content (chapter structure, voice, derivations, code and figure rules), see [AGENTS.md](AGENTS.md).
+How the books are built. For how to write book content (chapter structure, voice, derivations, code and figure rules), see [AGENTS.md](AGENTS.md); for how to check and fix the readability of the prose, see [PROSE.md](PROSE.md).
 
 ## Build: Quarto
 
@@ -83,3 +83,5 @@ uv run pytest
 uv run pyright
 make website                          # a chapter that fails to render, or warns, is a broken chapter
 ```
+
+Prose quality has its own process, [PROSE.md](PROSE.md): `make prose BOOK=... PAGE=...` reports hard-to-read sentences, `make prose-check BOOK=...` gates a book, and `tests/test_prose.py` keeps the checks calibrated to passages the author accepted or rejected.

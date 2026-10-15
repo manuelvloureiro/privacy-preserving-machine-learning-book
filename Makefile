@@ -30,7 +30,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
 
 .DEFAULT_GOAL := help
 .PHONY: help setup hooks tex-deps figures figures-force full full-pdf exercises practitioner practitioner-pdf \
-        website pdf book preview terms-check acronyms index-candidates format test typecheck check all clean
+        website pdf book preview terms-check acronyms index-candidates prose prose-check format test typecheck check all clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-17s %s\n", $$1, $$2}'
@@ -148,6 +148,12 @@ acronyms: ## Report every acronym, its expansion and the pages that use it (BOOK
 
 index-candidates: ## Suggest index terms (bold phrases) not yet in terms.toml (BOOK=book-full)
 	uv run python tools/terms.py candidates --book $(or $(BOOK),book-full)
+
+prose: ## Report hard-to-read prose, worst paragraphs first (BOOK=book-practitioner, PAGE=part../NN-x.md); see PROSE.md
+	uv run python tools/prose.py report --book $(or $(BOOK),book-practitioner) $(if $(PAGE),--page $(PAGE)) --worst $(or $(WORST),5)
+
+prose-check: ## Fail if a page's prose is past its book's limits in tools/prose.toml (BOOK=book-practitioner)
+	uv run python tools/prose.py check --book $(or $(BOOK),book-practitioner)
 
 format: ## Format all Python with ruff, as VSCode and the pre-commit hook do
 	uv run ruff check --fix --exit-zero --quiet .

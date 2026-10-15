@@ -1,0 +1,62 @@
+# Thresholds for tools/prose.py, one profile per book. See PROSE.md for what each check means and
+# where its threshold comes from. A sentence or paragraph past a limit is flagged; `check` fails a
+# page whose rate of flagged sentences, or whose mean sentence length, is past the page limits.
+
+[books]
+book-full = "full"
+book-exercises = "exercises"
+book-practitioner = "practitioner"
+
+[profiles.practitioner]
+mean_sentence_words = 20      # page average; plain-language guides aim for about 15-20
+max_sentence_words = 30       # a sentence longer than this is flagged
+max_sentence_punctuation = 4  # commas, semicolons, colons, parentheses and dashes in one sentence
+max_chained_clauses = 1       # semicolons plus colons in one sentence
+max_math_per_sentence = 3     # inline formulas in one sentence
+max_numbers_per_sentence = 2  # numeric values in one sentence (a formula with digits counts)
+max_new_symbols_per_sentence = 2   # new symbols introduced in one sentence, even if each is named
+max_new_concepts_per_paragraph = 3   # bold terms, new symbols and new acronyms introduced together
+max_paragraph_words = 150
+max_opening_clause_words = 12 # words before the main clause in a sentence that opens with "If", "When", ...
+max_nominalizations_per_sentence = 3
+grade_max = 12                # Flesch-Kincaid grade of a section's prose, formulas counted as one word
+page_flagged_sentence_share = 0.15   # `check` fails a page if more of its sentences are flagged
+
+[profiles.full]
+mean_sentence_words = 22
+max_sentence_words = 35
+max_sentence_punctuation = 5
+max_chained_clauses = 1
+max_math_per_sentence = 5
+max_numbers_per_sentence = 3
+max_new_symbols_per_sentence = 2
+max_new_concepts_per_paragraph = 4
+max_paragraph_words = 180
+max_opening_clause_words = 15
+max_nominalizations_per_sentence = 4
+grade_max = 14
+page_flagged_sentence_share = 0.25
+
+# Worked solutions are derivations in numbered steps, so they carry more formulas and numbers per
+# sentence than chapter prose; the limits on sentence length, chaining and explanation stay.
+[profiles.exercises]
+mean_sentence_words = 22
+max_sentence_words = 35
+max_sentence_punctuation = 5
+max_chained_clauses = 1
+max_math_per_sentence = 7
+max_numbers_per_sentence = 5
+max_new_symbols_per_sentence = 2
+max_new_concepts_per_paragraph = 4
+max_paragraph_words = 180
+max_opening_clause_words = 15
+max_nominalizations_per_sentence = 4
+grade_max = 14
+page_flagged_sentence_share = 0.25
+
+# Symbols every page of a book may use without introducing them, because the book's notation fixes
+# them early and a reader cannot reach a page without them. Keep this list short.
+[allowed_symbols]
+book-practitioner = []
+book-full = []
+book-exercises = []
