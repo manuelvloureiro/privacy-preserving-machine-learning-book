@@ -2,29 +2,15 @@
 
 ## Why this matters
 
-You train a model with differential privacy (DP) using stochastic gradient descent (SGD) with clipped per-example gradients and Gaussian noise, called DP-SGD. You want to stop when the validation loss stalls, lower the noise mid-run, or let well-fitted records keep training. What $\varepsilon$ can you claim?
+You train a model with differential privacy (DP) using stochastic gradient descent (SGD) with clipped per-example gradients and Gaussian noise, called DP-SGD. You may want to stop when the validation loss stalls, lower the noise mid-run, or let well-fitted records keep training. Every composition theorem so far assumes the opposite: the per-step budgets $\varepsilon_1, \dots, \varepsilon_k$ and the number of steps $k$ are fixed before the run ([Advanced and optimal composition](../part03-dp-foundations/04-composition.md)). Once they depend on what the run released, they are random, and plugging the values you happened to use into a fixed-parameter theorem afterwards is not valid.
 
-Every composition theorem so far assumes that the per-step budgets $\varepsilon_1, \dots, \varepsilon_k$, and the number of steps $k$, are fixed before the run starts ([Advanced and optimal composition](../part03-dp-foundations/04-composition.md)). Data-dependent stopping, adaptive noise and per-record budgets make them random. Plugging the parameters you actually used into a fixed-parameter theorem after the run is not valid.
-
-The one idea is to split "what is the $\varepsilon$ of this run?" in two. A **privacy filter** answers "may I run one more step without exceeding a budget fixed in advance?" A **privacy odometer** answers "how much have I spent so far?", and must hold at every step at once, since you may stop at any time. In Rényi differential privacy (RDP), a filter at a fixed order costs nothing, and an odometer costs a small union bound. @tbl-adapt-overview maps the decisions to the sections.
-
-| Decision | Rule | Section |
-| --- | --- | --- |
-| Can I report a fixed-time bound at a time I chose from the outputs? | No: that bound fails more often than its $\delta$ | @sec-adapt-why-breaks |
-| A global budget, pure-DP queries with $\varepsilon_t$ chosen on the fly | Whitehouse filter: advanced composition, valid under adaptivity | @sec-adapt-dp-filters |
-| Adaptive noise or stopping in an RDP accountant | Rényi filter at an order fixed before the run | @sec-adapt-renyi-filter |
-| No budget; report the spend so far | Ville odometer over a small grid of orders | @sec-adapt-odometers |
-| Let well-fitted records keep training | Individual filter on each record's own spend | @sec-adapt-individual |
-
-: The decisions behind adaptive privacy budgets, and where this chapter makes each one. {#tbl-adapt-overview}
+So the question splits in two. A **privacy filter** answers "may I run one more step without exceeding a budget fixed in advance?" A **privacy odometer** answers "how much have I spent so far?", and since you may stop at any moment, its answer must hold at every step at once. Both rest on one fact about Rényi differential privacy (RDP): at an order fixed before the run, adding up the spends as you go is as safe as if they had been fixed. That makes a filter free, an odometer cheap, and per-record accounting possible.
 
 ## Why plugging in the realized parameters fails {#sec-adapt-why-breaks}
 
-**Idea.** Advanced composition bounds the total privacy loss at a time fixed in advance: except with probability $\delta$, the loss after $t$ steps is below a bound $U_t$. An analyst who stops when the loss happens to be high picks exactly the paths where the bound fails. Stopping on anything correlated with the loss, such as "the answers look unusual", has the same effect.
+Advanced composition is a high-probability statement: at a time $t$ fixed in advance, the total privacy loss exceeds a bound $U_t$, its mean plus a spread growing like $\sqrt t$, only with probability $\delta$. It says nothing about a time chosen by watching the outputs. An analyst who stops when the loss happens to be high picks exactly the paths on which the bound fails, and so does stopping on anything correlated with it, such as "these answers look unusual".
 
-**Result.** A filter with budget $(\varepsilon_g, \delta)$ looks, before each step, at the parameters so far, including the step about to run, and says continue or halt; it is valid if the stopped run is $(\varepsilon_g, \delta)$-DP however the steps were chosen. An odometer is a running bound $U_t$; it is valid if the probability that the loss *ever* exceeds it is at most $\delta$. That "ever" is what plugging in misses, and paying for it costs an extra $\ln\ln n$ inside the logarithm for $n$ steps (Rogers et al. 2016). A filter makes no running claim, so it need not pay.
-
-**Example.** Take randomized response with $\varepsilon = 0.1$ on one person's bit, every step, and the plug-in advanced-composition bound at $\delta = 0.01$. At any single fixed step up to 1,000, the bound fails with probability at most 0.0016. But an analyst who stops at the first crossing makes it fail with the probability in @tbl-adapt-plugin: by $10^4$ steps, 0.0318, so a report "$\varepsilon = U_T$ with $\delta = 0.01$" is wrong 3.18 times as often as it claims.
+Ask randomized response with $\varepsilon = 0.1$ about one person's bit at every step. Each report moves the privacy loss up or down by 0.1, so the loss is a random walk with a slight upward drift. At any single step up to 1,000, the plug-in bound at $\delta = 0.01$ fails with probability at most 0.0016. Now stop at the first crossing and report $U_T$. The bound is narrow early, when $\sqrt t$ is small, so a few walks cross it early and are frozen there (@fig-adapt-plugin-failure). By $10^4$ steps a fraction 0.0318 of runs have crossed (@tbl-adapt-plugin): "$\varepsilon = U_T$ with $\delta = 0.01$" is wrong 3.18 times as often as it claims. A smaller $\delta$ does not save it (@tbl-adapt-plugin, last row).
 
 | Horizon $n$ | 100 | 1000 | 10,000 |
 | --- | --- | --- | --- |
@@ -36,17 +22,33 @@ The one idea is to split "what is the $\varepsilon$ of this run?" in two. A **pr
 
 ![Left: forty runs of randomized response with $\varepsilon = 0.1$, the loss in units of $\varepsilon$, and the plug-in bound at $\delta = 0.01$; an analyst who stops at the first crossing freezes the red paths there. Right: the probability that the bound is crossed by step $n$, for $\delta = 0.05$ and $0.01$ (dashed lines); it passes $\delta$ and keeps growing.](figures/adaptive_composition_plugin_failure.svg){#fig-adapt-plugin-failure}
 
-**Pitfalls.** A smaller $\delta$ does not fix it: at $\delta = 10^{-5}$ the crossing probability by step $10^4$ is $3.69\times10^{-5}$, 3.69 times $\delta$. Basic composition is immune, because the sum of the realized $\varepsilon_t$ bounds the loss of every output; summing what you spent is a valid filter and odometer for pure DP. Every high-probability bound, the kind you want for long runs, is exposed.
+The probability keeps growing because a random walk eventually wanders further than any fixed multiple of $\sqrt t$ (its reach grows like $\sqrt{t\ln\ln t}$), so given time it crosses with certainty. A valid running bound must be wider, and Rogers et al. (2016) showed that every odometer pays at least an extra $\ln\ln n$ inside the logarithm for $n$ steps.
+
+Basic composition escapes the problem: the sum of the realized $\varepsilon_t$ bounds the loss of every output, so there is no bad event for a stopping rule to select. A filter escapes it too, because it makes no running claim to catch at a bad moment; it only asks whether the next step fits a budget fixed in advance.
+
+## The Rényi filter {#sec-adapt-renyi-filter}
+
+RDP describes each step by a curve $\varepsilon_t(\alpha)$ over orders $\alpha > 1$, and with fixed parameters the curves of a run add ([Rényi DP](01-renyi-dp.md)). This survives adaptivity at one fixed order. Fix an order $\alpha$ and an RDP budget $B$ before the run. Let step $t$ be $(\alpha, \varepsilon_t(\alpha))$-RDP whatever happened before it, with $\varepsilon_t(\alpha)$ known before the step runs. Run step $t$ only if the spends so far, its own included, fit:
+$$\sum_{j \le t}\varepsilon_j(\alpha) \le B.$$ {#eq-adapt-renyi-filter}
+Then the stopped run is $(\alpha, B)$-RDP, as if the spends had been fixed.
+
+The reason is a betting argument. Treat $e^{(\alpha - 1)(\text{loss} - \text{spend})}$ as your wealth in a game. RDP at order $\alpha$ bounds the average of $e^{(\alpha - 1)\times\text{loss}}$, so a step charged its RDP spend cannot make this wealth grow on average: the game is fair or tilted against you. In such a game no quitting rule raises your expected final wealth, as long as you decide whether to play each round before seeing its result. If the total spend is at most $B$ on every path, the average of $e^{(\alpha - 1)\times\text{loss}}$ at the end is at most $e^{(\alpha - 1)B}$, which is exactly what $(\alpha, B)$-RDP says.
+
+Each condition is a step of that argument. A step's price must be known before it runs: a mechanism allowed to charge little on exactly the outputs that reveal most would make the game a winning one. The budget must hold on every path, not on average, because the paths that spend most may be those where the loss is high. And the order must be fixed in advance. You may track several orders and halt when any one is exhausted, since then each held on every path; continuing while *some* order still fits, chosen after seeing the spends, is not free (@sec-adapt-odometers prices it).
+
+You train with full-batch noisy gradient descent towards $(5.299, 10^{-5})$ at order $\alpha = 5.8$. Mironov's conversion turns $(\alpha, B)$-RDP into $(B + \ln(1/\delta)/(\alpha - 1), \delta)$-DP, so run backwards it sets $B = 5.299 - \ln(10^5)/4.8 = 2.900$. A full-batch Gaussian step with noise multiplier $\sigma_t$ spends $\alpha/(2\sigma_t^2)$. With $\sigma_t = 10$ each step spends $5.8/200 = 0.0290$ and you get 100 steps. If training plateaus at step 60 and you drop to $\sigma_t = 5$, each later step costs $5.8/50 = 0.1160$, and the filter allows $(2.900 - 60\times0.0290)/0.1160 = 10$ more. Either way the run is $(5.8, 2.900)$-RDP, whatever rule decided the switch.
+
+At a fixed order the filter costs nothing. It can even beat fixed-curve composition, which charges every step its worst branch, while the filter charges what each path spent.
 
 ## Filters for pure differential privacy {#sec-adapt-dp-filters}
 
-**Idea.** An interactive system has a global budget, and each query brings its own $\varepsilon_t$, chosen after earlier answers. Summing the $\varepsilon_t$ is valid but grows like $k$. The best filter that grows like $\sqrt k$ turns out to be advanced composition itself, with a slightly different mean term.
+An interactive query system has a global budget $(\varepsilon_g, \delta)$, and each query brings a pure-DP $\varepsilon_t$ chosen after earlier answers. Summing the $\varepsilon_t$ is valid but grows like the number of queries $k$; you want advanced composition's $\sqrt k$ without the failure of @sec-adapt-why-breaks.
 
-**Result.** For steps that are each $\varepsilon_t$-DP given the past, the **Whitehouse filter** (Whitehouse et al. 2023) continues while
+The Rényi filter delivers it. An $\varepsilon_t$-DP step spends at most $\alpha\varepsilon_t^2/2$ at every order $\alpha$ ([Concentrated differential privacy](03-concentrated-dp.md)). So a rule that keeps $\frac12\sum_t\varepsilon_t^2$ below a fixed level is a Rényi filter at every order at once, and because the rule does not mention the order, the conversion may pick the best one afterwards. Doing that conversion gives the **Whitehouse filter** (Whitehouse et al. 2023): continue while
 $$\sqrt{2\ln(1/\delta)\textstyle\sum_t\varepsilon_t^2} + \tfrac12\textstyle\sum_t\varepsilon_t^2 \le \varepsilon_g,$$ {#eq-adapt-whitehouse}
-where the sums run over every step so far, including the one about to run. The first term is the typical spread of the total loss, the second its mean, and the stopped run is $(\varepsilon_g, \delta)$-DP. Equivalently, keep $\frac12\sum_t\varepsilon_t^2 \le \rho^* = (\sqrt{\ln(1/\delta) + \varepsilon_g} - \sqrt{\ln(1/\delta)})^2$; equal steps of $\varepsilon_0$ then number $\lfloor 2\rho^*/\varepsilon_0^2\rfloor$. The Rogers et al. (2016) filter has the same shape with worse constants; the **basic filter**, $\sum_t\varepsilon_t \le \varepsilon_g$, gives $(\varepsilon_g, 0)$-DP.
+with sums over every step so far. It reads like advanced composition, the first term the spread of the total loss and the second its mean, and the stopped run is $(\varepsilon_g, \delta)$-DP.
 
-**Example.** At $\delta = 10^{-6}$ and $\varepsilon_g = 1$, the Whitehouse filter has $\rho^* = 0.017469$ and allows 349 steps of 0.01, slightly more than the 337 of advanced composition with $k$ fixed in advance (@tbl-adapt-steps). Conversely, 1,000 steps of 0.01 need a budget of 1.712 under the Whitehouse filter, 1.763 under fixed-$k$ advanced composition and 10.000 under the basic filter.
+At $\delta = 10^{-6}$ and $\varepsilon_g = 1$, the filter allows 349 steps of 0.01, slightly more than the 337 of advanced composition with $k$ fixed in advance (@tbl-adapt-steps). It wins, despite allowing adaptivity, because its mean term, $\varepsilon_t^2/2$ per step, is tighter than the $\varepsilon_t(e^{\varepsilon_t} - 1)$ of the fixed-$k$ form. From the budget side, 1,000 steps of 0.01 need 1.712 under the Whitehouse filter, 1.763 under fixed-$k$ advanced composition and 10.000 under the basic filter $\sum_t\varepsilon_t \le \varepsilon_g$.
 
 | $\varepsilon_0$ | Basic | Advanced (fixed $k$) | Rogers filter | Whitehouse filter |
 | --- | --- | --- | --- | --- |
@@ -57,29 +59,17 @@ where the sums run over every step so far, including the one about to run. The f
 
 ![Global budget needed to run $k$ steps of $\varepsilon_0 = 0.01$ at $\delta = 10^{-6}$: basic composition, advanced composition with $k$ fixed in advance, and the Rogers and Whitehouse filters. The Whitehouse filter lies on or below fixed-$k$ advanced composition; the Rogers filter sits a constant factor above.](figures/adaptive_composition_filter_budgets.svg){#fig-adapt-filter-budgets}
 
-**Pitfalls.** The Rogers et al. filter needs 1.40 to 1.51 times the budget of the Whitehouse filter and lets through fewer than half as many steps; use the Whitehouse form. For steps with $\delta_t > 0$, add a second rule, $\sum_t\delta_t \le \delta''$, and the guarantee becomes $(\varepsilon_g, \delta + \delta'')$. Check the filter *before* each step, with that step's $\varepsilon_t$ included.
-
-## The Rényi filter {#sec-adapt-renyi-filter}
-
-**Idea.** RDP describes each step by a curve $\varepsilon_t(\alpha)$ over orders $\alpha > 1$, and the curves of a run add ([Rényi DP](01-renyi-dp.md)). This still holds when each curve depends on earlier outputs, provided you fix one order and check a budget there on every path. In words: a rescaled exponential of the privacy loss never grows on average from one step to the next, and no stopping rule can raise its average.
-
-**Result.** Fix an order $\alpha$ and an RDP budget $B$ before the run. Let step $t$ be $(\alpha, \varepsilon_t(\alpha))$-RDP given the past, with $\varepsilon_t(\alpha)$ known before the step runs. Run step $t$ only if
-$$\sum_{j \le t}\varepsilon_j(\alpha) \le B.$$ {#eq-adapt-renyi-filter}
-Then the stopped run is $(\alpha, B)$-RDP, exactly as if the spends had been fixed. For a DP target $(\varepsilon_g, \delta)$, set $B = \varepsilon_g - \ln(1/\delta)/(\alpha - 1)$, Mironov's conversion run backwards. A full-batch Gaussian step with noise multiplier $\sigma_t$ spends $\alpha/(2\sigma_t^2)$.
-
-**Example.** You train with full-batch noisy gradient descent and a budget of $(5.299, 10^{-5})$ at order $\alpha = 5.8$, so $B = 5.299 - \ln(10^5)/4.8 = 2.900$. With $\sigma_t = 10$ throughout, each step spends $5.8/200 = 0.0290$ and you get 100 steps. If you switch to $\sigma_t = 5$ after a plateau at step 60, each later step costs $5.8/50 = 0.1160$, and the filter allows $(2.900 - 60\times0.0290)/0.1160 = 10$ more. Either way the run is $(5.8, 2.900)$-RDP, whatever rule decided the switch. When branches trade costs, the filter even beats fixed-curve composition, which charges every step its worst branch: 1.8487 against 2.5419 in the full edition's three-step example.
-
-**Pitfalls.** A step's spend must be known before it runs; a price that depends on the step's own output breaks the theorem. The budget must hold on every path, not on average. Fix the order before the run: you may track several orders and halt when any one is exhausted, but continuing while *some* order still fits costs a union bound (@sec-adapt-odometers). And the per-step spend must match the sampling the code actually runs ([Choosing an accountant](09-choosing-an-accountant.md)).
+The older Rogers et al. (2016) filter has the same shape, but its inequality must hold for every value of $\sum_t\varepsilon_t^2$ at once, and that costs 1.40 to 1.51 times the budget and fewer than half the steps; use the Whitehouse form. Check it *before* each step, with that step's $\varepsilon_t$ included, since the guarantee is about the decision to run it. For steps with $\delta_t > 0$, add a second rule, $\sum_t\delta_t \le \delta''$, and the guarantee becomes $(\varepsilon_g, \delta + \delta'')$.
 
 ## Odometers {#sec-adapt-odometers}
 
-**Idea.** Early stopping and open-ended analyses have no budget to stop at; they need a running "how much have I spent?" that stays valid however the stopping time is chosen. At one order fixed in advance, Mironov's conversion of the running spend is such an answer, for free. The cost comes from picking the best order after the fact.
+Early stopping and open-ended analyses need a running "how much have I spent?" that is true whenever the run stops. Return to the betting game of @sec-adapt-renyi-filter. Markov's inequality says that the wealth, which starts at 1, reaches $c$ at one given time with probability at most $1/c$. Ville's inequality extends this to reaching $c$ at *any* time, because "stop the first time you reach $c$" is itself a quitting rule and cannot raise the mean. Unpacked, at one order fixed in advance, Mironov's conversion of the running spend holds at every step at once, for free.
 
-**Result.** Track the running spend $S_t(\alpha) = \sum_{j\le t}\varepsilon_j(\alpha)$ at each order $\alpha$ in a grid $\Lambda$ of $|\Lambda|$ orders fixed in advance. The **Ville odometer** reports
+The cost comes from the order: the best order for 10 steps is not the best for 1,000. To choose it late, fix a grid $\Lambda$ of $|\Lambda|$ orders, track the spend $S_t(\alpha) = \sum_{j\le t}\varepsilon_j(\alpha)$ at each, and give each order a share $\delta/|\Lambda|$ of the failure probability. The **Ville odometer** reports the best order's conversion,
 $$U_t = \min_{\alpha\in\Lambda}\Big[S_t(\alpha) + \frac{\ln(|\Lambda|/\delta)}{\alpha - 1}\Big],$$ {#eq-adapt-ville-odometer}
-and with probability at least $1 - \delta$ the loss stays below $U_t$ at every step simultaneously. It is Mironov's conversion with $\delta$ replaced by $\delta/|\Lambda|$: the union bound over orders is the whole price. Lécuyer (2021) gives an alternative from Rényi filters with doubling budgets, slightly looser below.
+and with probability at least $1 - \delta$ the loss stays below $U_t$ at every step. It is Mironov's conversion with $\delta$ replaced by $\delta/|\Lambda|$; that union bound is the whole price.
 
-**Example.** For full-batch Gaussian steps with $\sigma = 10$ at $\delta = 10^{-5}$ and the part's 154 orders (@tbl-adapt-odometers), the Ville odometer costs 15–19% over the fixed-time value: 6.253 against 5.299 at $t = 100$. A single order fixed in advance (5.8, best for $t = 100$) is free at its design point and poor elsewhere: 31.399 at $t = 1000$. For the part's running example (DP-SGD with $q = 0.01$, $\sigma = 1$, $10^4$ steps, $\delta = 10^{-5}$), the fixed-time RDP value is 7.43, and an odometer valid whenever the run stops costs 8.82 (Ville) or 9.08 (Lécuyer).
+For full-batch Gaussian steps with $\sigma = 10$ at $\delta = 10^{-5}$, the part's 154 orders raise $\ln(1/\delta) = 11.513$ to 16.550, and the odometer costs 15–19% over the fixed-time value: 6.253 against 5.299 at $t = 100$ (@tbl-adapt-odometers). A single order chosen in advance, 5.8, is free at $t = 100$, its design point, and poor elsewhere: 31.399 at $t = 1000$. On the part's running example (DP-SGD with $q = 0.01$, $\sigma = 1$, $10^4$ steps, $\delta = 10^{-5}$), the fixed-time RDP value is 7.43, and an odometer valid whenever the run stops costs 8.82 (Ville) or 9.08 (the slightly looser odometer of Lécuyer 2021).
 
 | Steps $t$ | Fixed-time conversion | Ville odometer (154 orders) | Lécuyer odometer | Ville at $\alpha = 5.8$ only |
 | --- | --- | --- | --- | --- |
@@ -91,17 +81,17 @@ and with probability at least $1 - \delta$ the loss stays below $U_t$ at every s
 
 ![Running privacy bounds at $\delta = 10^{-5}$ for full-batch Gaussian steps with $\sigma = 10$: the fixed-time conversion (dashed, not a valid odometer), the Ville odometer over 154 orders, Lécuyer's odometer, and a Ville odometer at the single order 5.8.](figures/adaptive_composition_odometers.svg){#fig-adapt-odometers}
 
-**Pitfalls.** An odometer is a tail bound, not a DP guarantee: "$\varepsilon = U_T$" says the loss exceeds the random $U_T$ with probability at most $\delta$. For an $(\varepsilon_g, \delta)$-DP guarantee, stop by a rule that keeps $U_T \le \varepsilon_g$, a filter over the grid. Keep the grid small: 154 orders raise $\ln(10^5) = 11.513$ to 16.550. If you have a budget, a filter is cheaper.
+Keep the grid small. Read an odometer for what it is: "$\varepsilon = U_T$" says the loss exceeds the random number $U_T$ with probability at most $\delta$, a tail bound rather than an $(\varepsilon, \delta)$-DP guarantee. To get a guarantee, stop by a rule that keeps $U_T \le \varepsilon_g$, which turns the odometer into a filter; if you have a budget anyway, a Rényi filter at one order is cheaper.
 
 ## Individual privacy accounting in DP-SGD {#sec-adapt-individual}
 
-**Idea.** DP-SGD's usual analysis charges every record the worst case at every step, as if its clipped gradient always had norm $C$, the clipping norm. Once the model fits a record, its gradient shrinks and it moves the noisy sum less. That cost is known before the step (it depends on the record and the current model), so the Rényi filter applies record by record: track each record's spend and drop it from the sum once its budget is used.
+DP-SGD's usual analysis charges every record at every step as if its clipped gradient had norm $C$, the clipping norm. But once the model fits a record, its gradient shrinks and it moves the noisy sum less, so the same noise hides it better.
 
-**Result.** With full-batch steps and noise of standard deviation $\sigma C$ on the summed clipped gradients, record $i$'s spend at step $t$ is
-$$\varepsilon_{i,t}(\alpha) = \frac{\alpha\|\bar g_{i,t}\|^2}{2\sigma^2C^2} \le \frac{\alpha}{2\sigma^2},$$ {#eq-adapt-individual-rdp}
-where $\bar g_{i,t}$ is its clipped gradient. The **individual filter** (Feldman & Zrnic 2021) lets record $i$ take part only while its own spends sum to at most $B$, and the run is $(\alpha, B)$-RDP. No step costs more than the worst case, so every record trains at least as long as in the worst-case run.
+That cost is exact. With full-batch steps and noise of standard deviation $\sigma C$ on the summed clipped gradients, removing record $i$ shifts the output by its clipped gradient $\bar g_{i,t}$, so its spend is the Gaussian RDP for that shift:
+$$\varepsilon_{i,t}(\alpha) = \frac{\alpha\|\bar g_{i,t}\|^2}{2\sigma^2C^2} \le \frac{\alpha}{2\sigma^2}.$$ {#eq-adapt-individual-rdp}
+It depends only on the record and the current model, which depends only on earlier releases, so it is known before the step: what the Rényi filter needs. The **individual filter** (Feldman & Zrnic 2021) runs one Rényi filter per record. Record $i$ joins the sum only while its own spends total at most $B$; once dropped, it no longer changes the output and spends nothing. Neighbouring datasets differ in one record, whose filter held, so the run is $(\alpha, B)$-RDP. No step costs more than the worst case, so every record trains at least as long as in the worst-case run.
 
-**Example.** The full edition simulates 10,000 records with $C = 1$, $\sigma = 10$ and full-batch steps: 90% typical records whose gradients shrink as the model fits them, and 10% hard records never fitted. The worst-case run has 100 steps and $\varepsilon = 5.299$ at $\delta = 10^{-5}$, best at order 5.8, where $B = 2.900$. After 100 steps, individual $\varepsilon$ values (@tbl-adapt-individual) have typical median 3.17 and hard median 5.02, and 16.3% of all records are below half the worst case. Over 300 steps under the individual filter, hard records are dropped from step 101 (the median one at step 111), no typical record ever is, and the typical median spend at step 300 is 0.778, a quarter of the budget. Every record keeps $(5.8, 2.900)$-RDP.
+The full edition simulates 10,000 records ($C = 1$, $\sigma = 10$, full batch): 90% typical records whose gradients shrink as the model fits them, 10% hard records it never fits. The worst-case run has 100 steps and $\varepsilon = 5.299$ at $\delta = 10^{-5}$, best at order 5.8, where $B = 2.900$. Converting each record's own spend after 100 steps (@tbl-adapt-individual) gives a typical median of 3.17 and a hard median of 5.02, near the worst case. Run the individual filter for 300 steps and hard records reach the budget and are dropped from step 101 (the median one at step 111), while no typical record ever is: their median spend at step 300 is 0.778, a quarter of the budget (@fig-adapt-individual-spend).
 
 | Records | 10th percentile | Median | 90th percentile |
 | --- | --- | --- | --- |
@@ -113,7 +103,7 @@ where $\bar g_{i,t}$ is its clipped gradient. The **individual filter** (Feldman
 
 ![Left: cumulative spend at order 5.8 under the individual filter for four typical records (blue) and three hard records (red), against the worst case (dotted) and the budget $B = 2.90$ (dashed). Hard records reach the budget and stop; typical records level off far below it. Right: the fraction of each group taking part at each step.](figures/adaptive_composition_individual_spend.svg){#fig-adapt-individual-spend}
 
-**Pitfalls.** The filter certifies one guarantee for everyone. A per-record $\varepsilon$ from the realized spend is an estimate, not a guarantee (@sec-adapt-why-breaks), and at a fixed order it cannot fall below $\ln(1/\delta)/(\alpha - 1) = 2.399$ here. Individual $\varepsilon$ is itself sensitive, since a small spend says "this record is well fitted": show it to the record's owner, never publish all of them. The records the model fits worst, often from under-represented groups, spend first and are dropped first, so the model sees even less of them. With Poisson subsampling the argument still works, using the subsampled Gaussian at noise multiplier $\sigma C/\|\bar g_{i,t}\|$ ([Amplification by subsampling](05-subsampling.md)), but it needs every record's gradient norm at every step, sampled or not.
+The filter certifies one guarantee for everyone, $(5.8, 2.900)$-RDP. The per-record values in the table are estimates: each is a fixed-time conversion of a random spend, the mistake of @sec-adapt-why-breaks, and at a fixed order none can fall below the conversion's toll $\ln(1/\delta)/(\alpha - 1) = 2.399$. They are also sensitive, since a small spend says "the model fits this record well": show a value to the record's owner, never publish them all. There is a fairness cost too: records the model fits worst, often from under-represented groups, keep large gradients, exhaust their budget first and are dropped first, so the model sees even less of them. With Poisson subsampling the argument still works, using the subsampled Gaussian at noise multiplier $\sigma C/\|\bar g_{i,t}\|$ ([Amplification by subsampling](05-subsampling.md)), but you need every record's gradient norm at every step, sampled or not.
 
 ## Code {#sec-adapt-code}
 
@@ -193,10 +183,8 @@ uv run python code/part04-privacy-accounting/adaptive_composition.py
 
 **Rules of thumb**
 
-- Never report a fixed-time bound at a time chosen from the outputs. Use a filter if you have a budget, an odometer if you do not.
-- For adaptive noise or early stopping in RDP, fix the order before the run and use a Rényi filter: it costs nothing.
-- An odometer costs a union over orders: $\ln(1/\delta)$ becomes $\ln(|\Lambda|/\delta)$, about 15–19% in $\varepsilon$ on the examples here. Keep the grid small.
-- Individual accounting gives every record the same guarantee and well-fitted records more training. Per-record $\varepsilon$ values are sensitive estimates, not guarantees.
+- Never report a fixed-time bound at a time chosen from the outputs. With a budget, use a Rényi filter at an order fixed before the run: it costs nothing. Without one, use an odometer over a small grid of orders.
+- Per-record $\varepsilon$ values are sensitive estimates, not guarantees.
 
 ## Further reading
 

@@ -4,48 +4,33 @@
 
 You train a model with 1000 steps of full-batch noisy gradient descent. Each step computes a quantity whose **sensitivity** is 1, meaning one person's record moves it by at most 1, and adds Gaussian noise whose standard deviation is $\sigma = 20$ times that sensitivity; $\sigma$ is the **noise multiplier**. What is the total differential privacy (DP) guarantee at $\delta = 10^{-5}$?
 
-Turn each step into one $(\varepsilon_0, \delta_0)$ pair and apply advanced composition ([Advanced and optimal composition](../part03-dp-foundations/04-composition.md)): with the best split of $\delta$ you get $\varepsilon = 68.01$. The true answer is $\varepsilon = 7.51$, nine times smaller. A Gaussian step has a whole curve of valid $(\varepsilon_0, \delta_0)$ pairs, and collapsing it to one point throws away exactly the information composition needs.
+[Advanced composition](../part03-dp-foundations/04-composition.md) turns each step into one $(\varepsilon_0, \delta_0)$ pair and composes the pairs; with the best split of $\delta$ it gives $\varepsilon = 68.01$. The true answer is $\varepsilon = 7.51$, nine times smaller, and the damage is done in the first move. A Gaussian step has no single $(\varepsilon_0, \delta_0)$: for every $\varepsilon_0$ there is a smallest $\delta_0$ that works, so it has a whole curve of valid pairs. Picking one point throws away the rest of the curve, which composition needs.
 
-The one idea of this chapter is to **track a curve that adds**. **Rényi differential privacy (RDP)** records, for each **order** $\alpha > 1$, an exponential moment of the privacy loss. These curves add up over the steps of a run, with no $\delta$ spent along the way, and you convert the total to $(\varepsilon, \delta)$ once, at the end. For the 1000 Gaussian steps this gives $\varepsilon = 8.84$, 18% above the exact 7.51. @tbl-rdp-overview maps the decisions to the sections.
-
-| Decision or question | What to know | Section |
-| --- | --- | --- |
-| What does an RDP guarantee say? | A curve $\varepsilon(\alpha)$ between the average loss and the worst loss | @sec-rdp-definition |
-| What is the curve of my mechanism? | Closed forms for Gaussian, Laplace and randomized response | @sec-rdp-curves |
-| How do thousands of steps combine? | Add the curves order by order | @sec-rdp-composition |
-| Releasing a model; correlated records | Post-processing is free; groups cost order as well as $\varepsilon$ | @sec-rdp-properties |
-| Is a "moments accountant" something else? | No, the same numbers in other units | @sec-rdp-moments |
-| What $(\varepsilon, \delta)$ do I report? | Convert once, at the best order | @sec-rdp-conversion |
-
-: The decisions behind RDP accounting, and where this chapter covers each. {#tbl-rdp-overview}
+So keep a curve that is easy to compose. **Rényi differential privacy (RDP)** records, for each **order** $\alpha > 1$, an exponential moment of the privacy loss. These curves add up over a run, with no $\delta$ spent along the way, and you convert the total to $(\varepsilon, \delta)$ once, at the end. For the 1000 Gaussian steps this gives $\varepsilon = 8.84$, 18% above the exact 7.51.
 
 ## The RDP curve {#sec-rdp-definition}
 
-**Idea.** Run a mechanism $M$ on neighbouring datasets $D$ and $D'$, which differ in one person's record, and get output distributions $P = M(D)$ and $Q = M(D')$. The **privacy loss** of an output $y$ is $L(y) = \ln\frac{p(y)}{q(y)}$, the log of how much more likely $y$ is under $D$ than under $D'$. Pure $\varepsilon$-DP bounds the largest loss. RDP summarizes the loss by an exponential moment instead: the larger the order $\alpha$, the more heavily large losses count, so small orders look at the typical loss and large orders at the worst case.
+Run a mechanism $M$ on neighbouring datasets $D$ and $D'$ to get output distributions $P = M(D)$ and $Q = M(D')$. The **privacy loss** of an output $y$ is $L(y) = \ln\frac{p(y)}{q(y)}$, the log of how much more likely $y$ is under $D$ than under $D'$. Over several steps the losses add, because the likelihood ratios multiply.
 
-**Result.** The **Rényi divergence** of order $\alpha$ is the log of the average of $e^{(\alpha - 1)L}$ over outputs drawn from $P$, divided by $\alpha - 1$:
+Which summary of a loss survives being summed? Not a tail probability, which is what $(\varepsilon, \delta)$ records. Exponential moments do: for independent losses, the average of $e^{\lambda(L_1 + L_2)}$ is the product of the averages of $e^{\lambda L_1}$ and $e^{\lambda L_2}$, so their logarithms add. The **Rényi divergence** of order $\alpha$ is the log of one such moment, scaled:
 $$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\mathbb E_P\big[e^{(\alpha - 1)L}\big] = \frac{1}{\alpha - 1}\ln\int p^\alpha q^{1-\alpha}\,dy.$$
-A mechanism is **$(\alpha, \varepsilon)$-RDP** if $D_\alpha(M(D)\|M(D')) \le \varepsilon$ for every pair of neighbours. The **RDP curve** $\varepsilon(\alpha)$ is the smallest such $\varepsilon$ at each order, the divergence of the worst pair. It never decreases in $\alpha$. As $\alpha \to 1$ it tends to the average loss, the Kullback–Leibler (KL) divergence; as $\alpha \to \infty$ it tends to the largest loss, so a mechanism is $\varepsilon$-DP exactly when $\varepsilon(\infty) \le \varepsilon$.
+A mechanism is **$(\alpha, \varepsilon)$-RDP** if $D_\alpha(M(D)\|M(D')) \le \varepsilon$ for every pair of neighbours, and its **RDP curve** $\varepsilon(\alpha)$ is the smallest such $\varepsilon$ at each order, the divergence of the worst pair.
 
-**Example.** **Randomized response** reports one person's bit truthfully with probability $p = 0.75$ and flips it otherwise, so every output is 3 times or $1/3$ as likely under one value of the bit as under the other: the mechanism is $\ln 3$-DP. Its RDP curve rises from the average loss, 0.5493 as $\alpha \to 1$, through 0.8473 at order 2 and 1.0666 at order 10, to the worst loss $\ln 3 = 1.0986$.
+The order sets how much large losses count, since an exponential moment is dominated by them, the more so the larger $\alpha$. As $\alpha \to 1$ the curve tends to the average loss, the Kullback–Leibler (KL) divergence; as $\alpha \to \infty$ it tends to the largest loss of any output, so a mechanism is $\varepsilon$-DP exactly when $\varepsilon(\infty) \le \varepsilon$. In between it never decreases. A loss that is usually small but sometimes huge is caught only at large orders.
 
-**Pitfalls.** An RDP guarantee is a curve, not a number. "$(2, 0.8473)$-RDP" is one point of it, and a point at one order says nothing about higher orders: the curve may keep rising there. Accountants store the curve on a grid of orders.
+**Randomized response** shows both ends. It reports one person's bit truthfully with probability $p = 0.75$ and flips it otherwise, so the loss is $\ln 3$ on an output that agrees with the bit and $-\ln 3$ on one that doesn't. The average loss is $(0.75 - 0.25)\ln 3 = 0.5493$, the curve's value as $\alpha \to 1$; it rises through 0.8473 at order 2 and 1.0666 at order 10 to the largest loss, $\ln 3 = 1.0986$. A single point such as "$(2, 0.8473)$-RDP" says nothing about higher orders, where the curve may keep rising, so accountants store the whole curve on a grid of orders.
 
 ## RDP curves of the basic mechanisms {#sec-rdp-curves}
 
-**Idea.** A mechanism that adds noise to a query's answer produces the same noise distribution centred at two answers. Its curve is the Rényi divergence between the noise and a shifted copy, at the largest shift one record can cause, the sensitivity.
+A mechanism that adds noise to a query's answer produces the same noise centred at two different answers. Its curve is the divergence between the noise and a shifted copy, and since a larger shift makes the copies easier to tell apart, the worst pair is the one with the largest shift, the sensitivity.
 
-**Result.** With sensitivity 1, the **Gaussian mechanism** with noise multiplier $\sigma$ has a straight-line curve,
+For the **Gaussian mechanism** the log of the ratio of two normal densities is a difference of two squares whose quadratic terms cancel, so the loss is linear in the output and therefore itself normal. The log of a normal variable's exponential moment is quadratic in $\lambda$, and dividing by $\alpha - 1$ leaves a straight line. With sensitivity 1,
 $$\varepsilon(\alpha) = \frac{\alpha}{2\sigma^2}.$$ {#eq-rdp-gauss}
-For a vector query, $\sigma$ is the noise standard deviation in units of the $\ell_2$ sensitivity. The **Laplace mechanism**, which adds noise of density $\frac{1}{2b}e^{-|y|/b}$ to a real-valued query, has
-$$\varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln\left(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)/b} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha/b}\right),$$
-and randomized response with keep-probability $p$ has
-$$\varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln\Big(p^\alpha(1-p)^{1-\alpha} + (1-p)^\alpha p^{1-\alpha}\Big).$$
-These are exact (Mironov 2017). The Laplace and randomized-response curves level off at their pure-DP levels $1/b$ and $\ln\frac{p}{1-p}$, because their loss is bounded. The Gaussian loss is unbounded, so its curve grows without limit: the Gaussian mechanism is not $\varepsilon$-DP for any $\varepsilon$, but it is RDP at every finite order, and that is all composition and conversion need (@fig-rdp-curves).
+For a vector query only the Euclidean distance between the two answers matters, because the noise looks the same in every direction, so $\sigma$ is the noise standard deviation in units of the $\ell_2$ sensitivity. In the differentially private version of stochastic gradient descent (SGD), DP-SGD, which clips each example's gradient and adds Gaussian noise, that sensitivity is the clipping norm, so the $\sigma$ you plug in is the noise standard deviation divided by the clipping norm.
+
+A linear loss has no maximum, so the curve grows without limit: the Gaussian mechanism is not $\varepsilon$-DP for any $\varepsilon$. It is RDP at every finite order, though, and that is all composition and conversion need. The **Laplace mechanism**, which adds noise of density $\frac{1}{2b}e^{-|y|/b}$, behaves differently. Its loss at $y$ is $(|y - 1| - |y|)/b$, which the triangle inequality keeps between $-1/b$ and $1/b$, so its curve levels off at its pure-DP level $1/b$; randomized response levels off at $\ln\frac{p}{1-p}$ for the same reason. All three curves are exact (Mironov 2017); the closed forms are in @tbl-rdp-cheat, and @fig-rdp-curves and @tbl-rdp-curves compare them.
 
 ![RDP curves of the Gaussian mechanism ($\sigma = 1$), the Laplace mechanism ($b = 1$) and randomized response ($p = 0.75$), all with sensitivity 1, on a log scale in $\alpha$ (so the straight line $\alpha/2$ looks curved). The Laplace and randomized response curves level off at their pure DP levels $1/b$ and $\ln 3$ (dotted); the Gaussian curve keeps growing.](figures/renyi_dp_curves.svg){#fig-rdp-curves}
-
-**Example.** @tbl-rdp-curves reads the three curves at a few orders. The Gaussian row is $\alpha/2$. The Laplace value at order 2 is $\ln\big(\frac23e + \frac13e^{-2}\big) = 0.6191$.
 
 | Mechanism | $\varepsilon(1.5)$ | $\varepsilon(2)$ | $\varepsilon(10)$ | $\varepsilon(64)$ | $\varepsilon(\infty)$ |
 | --- | --- | --- | --- | --- | --- |
@@ -55,55 +40,41 @@ These are exact (Mironov 2017). The Laplace and randomized-response curves level
 
 : RDP curves of the three basic mechanisms with sensitivity 1. {#tbl-rdp-curves}
 
-**Pitfalls.** The Gaussian formula assumes $\sigma$ is the noise standard deviation divided by the $\ell_2$ sensitivity. In the differentially private version of stochastic gradient descent (SGD), DP-SGD, which clips each example's gradient and adds Gaussian noise, that sensitivity is the clipping norm, so the $\sigma$ you plug in is the noise standard deviation over the clipping norm, not the raw standard deviation. These are the curves of a step that uses the whole dataset. A step on a random subset has a different curve, derived in [Amplification by subsampling](05-subsampling.md).
+These are curves of a step that uses the whole dataset. A step on a random subset has a smaller curve, derived in [Amplification by subsampling](05-subsampling.md).
 
 ## Composition adds curves {#sec-rdp-composition}
 
-**Idea.** The order-$\alpha$ moment of independent steps is a product of the steps' moments, and the logarithm turns it into a sum. The bound survives when each step is chosen after seeing earlier outputs, as in training.
-
-**Result.** Running mechanisms with curves $\varepsilon_1, \dots, \varepsilon_k$ in sequence, adaptively, gives
+Training steps are not independent, since each gradient depends on the model so far, so the product argument of @sec-rdp-definition needs one more idea. Fix the first output and look at the second step alone. Whatever the first output was, the second step is some mechanism with curve at most $\varepsilon_2$, so its moment is at most $e^{(\alpha - 1)\varepsilon_2(\alpha)}$; averaging over the first output leaves the first step's moment times that constant. Taking the log, the curves add:
 $$\varepsilon_M(\alpha) \le \sum_{i=1}^k \varepsilon_i(\alpha) \qquad\text{for every } \alpha > 1,$$ {#eq-rdp-compose}
-with equality for independent steps (Mironov 2017). For Gaussian steps this has a convenient form: $k$ steps with noise multiplier $\sigma$ have the curve $k\alpha/(2\sigma^2)$, which is the curve of a single Gaussian step with noise multiplier $\sigma/\sqrt k$.
+with equality for independent steps (Mironov 2017). The argument also shows the limit of adaptivity: each step's bound must hold whatever the earlier outputs were, so it has to be fixed in advance. A noise level or step count chosen on the fly from the data needs the filters of [Adaptive composition](08-adaptive-composition.md).
 
-**Example.** With $\sigma = 20$ each step has curve $\alpha/800$, and 1000 steps have the curve of one Gaussian with $\sigma = 0.6325$. Different mechanisms add order by order: a Laplace step with $b = 1$ then a Gaussian step with $\sigma = 1$ have $\varepsilon(2) = 0.6191 + 1 = 1.6191$.
+The smallest $\delta$ for a given $\varepsilon$ has no such product structure. It is the probability by which one output distribution exceeds $e^\varepsilon$ times the other, a positive part of a difference, which does not factor over steps. So never convert each step first and compose afterwards: that is where the factor of nine in the opening example comes from.
 
-Now the part's running example, 10,000 steps of DP-SGD with $\sigma = 1$, but with every step using the whole dataset. The composed curve is $5000\,\alpha$, and even the exact guarantee at $\delta = 10^{-5}$ is $\varepsilon = 5425.5$: no guarantee at all. DP-SGD is private only because each step touches a random 1% of the data, which [Amplification by subsampling](05-subsampling.md) accounts for.
+For Gaussian steps the sum has a picture. Each of $k$ steps shifts its output by at most 1, and the $k$ shifts together form a vector of length $\sqrt k$; a shift of $\sqrt k$ under noise $\sigma$ is the same as a shift of 1 under noise $\sigma/\sqrt k$. So $k$ steps with noise multiplier $\sigma$ have the curve $k\alpha/(2\sigma^2)$, the curve of one Gaussian step with noise multiplier $\sigma/\sqrt k$. With $\sigma = 20$ and 1000 steps that is one Gaussian with $\sigma = 0.6325$.
 
-**Pitfalls.** Never convert each step to $(\varepsilon_0, \delta_0)$ and then compose: that is where the factor of nine in the opening example comes from. The steps may be chosen adaptively, but each step's curve bound must be fixed in advance. If the noise level or the number of steps is chosen on the fly from the data, plain composition does not apply; use the filters of [Adaptive composition](08-adaptive-composition.md).
+The same picture shows why DP-SGD needs more than noise. If every step of the part's running example, 10,000 steps with $\sigma = 1$, used the whole dataset, the run would be one Gaussian with noise multiplier $1/\sqrt{10{,}000} = 0.01$, and even the exact guarantee at $\delta = 10^{-5}$ is $\varepsilon = 5425.5$: no guarantee at all. DP-SGD is private only because each step touches a random 1% of the data, which [Amplification by subsampling](05-subsampling.md) accounts for.
 
 ## Post-processing and group privacy {#sec-rdp-properties}
 
-**Idea.** Anything computed from a private output without looking at the data again cannot raise the curve. Groups are a different story: the Rényi divergence has no plain triangle inequality, so going from one record to two costs order as well as $\varepsilon$.
+Anything computed from a private output without looking at the data again, such as a released model's predictions, cannot raise the curve: $\varepsilon_{g\circ M}(\alpha) \le \varepsilon_M(\alpha)$ for any map $g$ that ignores the data. A processed output's likelihood ratio is an average of the ratios of the outputs that could have produced it, and averaging can only lower an exponential moment.
 
-**Result.** Post-processing is free: $\varepsilon_{g\circ M}(\alpha) \le \varepsilon_M(\alpha)$ for any map $g$ that ignores the data. For groups, if $M$ is $(\alpha, \varepsilon)$-RDP with $\alpha \ge 2^{c+1}$, then on datasets that differ in $2^c$ records it satisfies the RDP bound of order $\alpha/2^c$ with $\varepsilon$ replaced by $3^c\varepsilon$ (Mironov 2017, Proposition 2).
-
-**Example.** For the Gaussian mechanism a group of $2^c$ records shifts the answer by $2^c$, so the exact group curve is @eq-rdp-gauss with sensitivity $2^c$. At $\sigma = 1$ and group order 2 the generic bound is 1.5 times too large for two records and 3.375 times for eight. For the Laplace mechanism with $b = 1$ at order 2, two records apart, the exact value is 1.5958, the generic bound 2.4411, and the pure-DP group bound $2/b = 2$.
-
-**Pitfalls.** Use the generic group bound only when you cannot compute the mechanism's curve on far-apart inputs. For a mechanism that is already $\varepsilon$-DP, the pure-DP group bound $k\varepsilon$ for $k$ records holds at every order, and it can beat the RDP route, as the Laplace example shows.
+Groups are harder. For pure DP a group of $k$ records costs $k\varepsilon$, because likelihood ratios along a chain of neighbours multiply. For RDP, bounding the average of that product needs higher moments of each factor, so a bound at order $\alpha$ for one record buys one at only about order $\alpha/2$ for two. Mironov's (2017) Proposition 2: if $M$ is $(\alpha, \varepsilon)$-RDP with $\alpha \ge 2^{c+1}$, then on datasets that differ in $2^c$ records it satisfies the bound of order $\alpha/2^c$ with $3^c\varepsilon$ in place of $\varepsilon$. This bound is loose, so use the mechanism when you can: a group of $2^c$ records shifts a Gaussian answer by $2^c$, so the exact group curve is @eq-rdp-gauss with sensitivity $2^c$, and at $\sigma = 1$ the generic bound is 1.5 times too large for two records and 3.375 times for eight. A mechanism that is already $\varepsilon$-DP keeps the pure-DP bound $k\varepsilon$ at every order, which can win: for Laplace with $b = 1$, two records apart at order 2, the exact value is 1.5958, the generic bound 2.4411 and the pure-DP bound 2.
 
 ## The moments accountant is RDP {#sec-rdp-moments}
 
-**Idea.** Abadi et al. (2016) trained neural networks with DP by tracking the log of the moment generating function (MGF) of the privacy loss, $K(\lambda) = \ln\mathbb E_P[e^{\lambda L}]$, for the worst pair of neighbours, and called it the **moments accountant**. By the definition of @sec-rdp-definition, that is the RDP curve one order up, in different units.
-
-**Result.**
+Abadi et al. (2016) trained neural networks with DP by tracking, for the worst pair of neighbours, the log of the moment generating function (MGF) of the privacy loss, $K(\lambda) = \ln\mathbb E_P[e^{\lambda L}]$: the **moments accountant**. The definition of @sec-rdp-definition says that $(\alpha - 1)D_\alpha$ is exactly this log-MGF at $\lambda = \alpha - 1$, so the two are the same curve in different units:
 $$K(\lambda) = \lambda\,\varepsilon(\lambda + 1), \qquad \varepsilon(\alpha) = \frac{K(\alpha - 1)}{\alpha - 1}.$$
-Both add over steps, and both convert to $(\varepsilon, \delta)$ by the same tail bound.
-
-**Example.** For randomized response with $p = 0.75$, $K(1) = \ln(0.75 \times 3 + 0.25 \times \frac13) = 0.8473 = 1 \cdot \varepsilon(2)$.
-
-**Pitfalls.** Libraries that say "moments accountant" and libraries that say "RDP accountant" compute the same thing; a difference in their reported $\varepsilon$ comes from the curve of the subsampled step, the order grid or the conversion, not from the bookkeeping.
+For randomized response, $K(1) = \ln(0.75 \times 3 + 0.25 \times \frac13) = 0.8473 = 1 \cdot \varepsilon(2)$. What was new in 2016 was not the bookkeeping but a bound on the curve of the subsampled step. So when a "moments accountant" and an "RDP accountant" disagree, look at that curve, the order grid or the conversion.
 
 ## From RDP to $(\varepsilon, \delta)$ {#sec-rdp-conversion}
 
-**Idea.** Only outputs whose privacy loss exceeds $\varepsilon$ can break the $e^\varepsilon$ bound, so charge their total probability to $\delta$. An exponential moment, which each point of the RDP curve provides, bounds that tail probability. Every order gives a valid pair; pick the best one after composing.
-
-**Result.** **Mironov's conversion**: an $(\alpha, \varepsilon(\alpha))$-RDP mechanism is $(\varepsilon_\delta, \delta)$-DP for every $0 < \delta < 1$, with
+After composing you hold a curve, but you report a pair. An output whose loss is at most some threshold $c$ already satisfies the $e^c$ bound of DP, so only outputs with loss above $c$ can break it, and you can charge their total probability to $\delta$. That probability is a tail of the loss, and Markov's inequality bounds a tail by an exponential moment, which is exactly what each point of the curve provides. Setting the bound equal to $\delta$ and solving for $c$ gives **Mironov's conversion**: an $(\alpha, \varepsilon(\alpha))$-RDP mechanism is $(\varepsilon_\delta, \delta)$-DP for every $0 < \delta < 1$, with
 $$\varepsilon_\delta = \varepsilon(\alpha) + \frac{\ln(1/\delta)}{\alpha - 1}.$$ {#eq-rdp-mironov}
-The first term grows with the order and the second shrinks, so minimize over the grid of orders. For a Gaussian curve $\alpha/(2\sigma^2)$ the best real order and the result are
+Every order gives a valid pair. The curve grows with the order and the tail term shrinks, so you minimize over the grid after composing. For a Gaussian curve $\alpha/(2\sigma^2)$ the minimum has a closed form, where the two order-dependent terms are equal:
 $$\alpha^* = 1 + \sigma\sqrt{2\ln(1/\delta)}, \qquad \varepsilon_\delta = \frac{1}{2\sigma^2} + \frac{\sqrt{2\ln(1/\delta)}}{\sigma}.$$ {#eq-rdp-gauss-opt}
 For $k$ steps, put $\sigma/\sqrt k$ in place of $\sigma$.
 
-**Example.** One Gaussian step with $\sigma = 1$ at $\delta = 10^{-5}$, where $\ln(1/\delta) = 11.5129$: order 2 gives $1 + 11.5129 = 12.5129$, and the best grid order, 5.8, gives 5.2985. The exact $\varepsilon$ of the Gaussian mechanism is 4.3772, so the conversion is 21% too large; at $\varepsilon = 5.2985$ the true $\delta$ is $1.300 \times 10^{-7}$, 76.9 times smaller than promised. @tbl-rdp-compare repeats the comparison for $k$ steps with $\sigma = 20$, and @fig-rdp-conversion shows the trade-off over orders.
+For one Gaussian step with $\sigma = 1$ at $\delta = 10^{-5}$, where $\ln(1/\delta) = 11.5129$, order 2 gives $1 + 11.5129 = 12.5129$, dominated by the tail term, and the best grid order, 5.8, gives 5.2985. The exact $\varepsilon$ is 4.3772, so the conversion is 21% too large, and at $\varepsilon = 5.2985$ the true $\delta$ is $1.300 \times 10^{-7}$, 76.9 times smaller than promised. @tbl-rdp-compare and @fig-rdp-conversion return to the opening example.
 
 | $k$ | Basic | Advanced | RDP + Mironov (best order) | Exact |
 | --- | --- | --- | --- | --- |
@@ -116,9 +87,9 @@ For $k$ steps, put $\sigma/\sqrt k$ in place of $\sigma$.
 
 ![Left: converting the curve of 1000 Gaussian steps with $\sigma = 20$ at $\delta = 10^{-5}$. The converted $\varepsilon$ (black) is the RDP curve (dashed) plus the tail term $\ln(1/\delta)/(\alpha - 1)$ (dotted); its minimum over the grid, 8.84 at $\alpha = 4$, sits above the exact 7.51 (green). Right: total $\varepsilon$ against the number of steps, for advanced composition, RDP with Mironov's conversion, and the exact value.](figures/renyi_dp_conversion.svg){#fig-rdp-conversion}
 
-RDP is 18% to 57% above exact here, while advanced composition is 5 to 9 times above. Most of the gain comes from composing curves rather than points.
+Advanced composition is 5 to 9 times the exact value, worse as $k$ grows, because every step was collapsed to a point; RDP is 18% to 57% above, better as $k$ grows. The best order falls as the run grows, because a steeper composed curve makes large orders expensive: one step with $\sigma = 20$ wants $\alpha \approx 97$, a thousand steps want $\alpha \approx 4$, and the full-batch run of @sec-rdp-composition wants 1.048, below the grid's smallest order 1.1. So a grid must run from just above 1 to a few hundred; a best order at its end means it is too short.
 
-**Pitfalls.** The best order moves down as the composed curve grows: one step with $\sigma = 20$ wants $\alpha \approx 97$, a thousand steps want $\alpha \approx 4$, and the full-batch run of @sec-rdp-composition wants 1.048, below the grid's smallest order 1.1. So keep a grid from just above 1 to a few hundred, and if the best order sits at an end of the grid, extend it. Mironov's conversion is loose: 1.07 times exact for a composed Gaussian at $\mu = 10$, 1.21 at $\mu = 1$ and 1.76 at $\mu = 0.01$, where $\mu = \sqrt k/\sigma$. Don't report it; use the improved conversion of [From Rényi DP to (ε, δ) and to tests](02-rdp-conversions.md), or a numerical accountant.
+The remaining gap is slack: the conversion charges the whole probability of every output above the threshold to $\delta$, although an output just over the line breaks the bound only slightly, and Markov's inequality then overestimates that tail. The slack depends on the composed $\mu = \sqrt k/\sigma$: 1.07 times exact at $\mu = 10$, 1.21 at $\mu = 1$ and 1.76 at $\mu = 0.01$. Weak mechanisms pay most, because as $\mu$ shrinks the exact $\varepsilon$ falls faster than the tail bound. So don't report this conversion; use the improved one of [From Rényi DP to (ε, δ) and to tests](02-rdp-conversions.md), or a numerical accountant.
 
 ## Code {#sec-rdp-code}
 
@@ -174,10 +145,8 @@ uv run python code/part04-privacy-accounting/renyi_dp.py
 **Rules of thumb**
 
 - Compose in RDP and convert once at the end. Never convert each step to $(\varepsilon_0, \delta_0)$ first.
-- $k$ full-batch Gaussian steps with noise multiplier $\sigma$ are one Gaussian step with $\sigma/\sqrt k$.
 - Keep an order grid from just above 1 to a few hundred, and check that the best order is not at its edge.
 - Report the noise multiplier, the number of steps and the sampling scheme along with $\varepsilon$, so others can recompute it.
-- Use the improved conversion of the next chapter, not Mironov's, for the number you publish.
 
 ## Further reading
 

@@ -2,43 +2,33 @@
 
 ## Why this matters
 
-A Rényi differential privacy (RDP) accountant adds up the curves $\varepsilon(\alpha)$ of a run's steps, one value per **order** $\alpha > 1$ ([Rényi differential privacy](01-renyi-dp.md)). Nobody reports that curve. A paper, a model card or a regulator asks for an $(\varepsilon, \delta)$ differential privacy (DP) guarantee, so every RDP analysis ends with a conversion, and the conversion decides the number you publish. You need to know which conversion to use, which orders to give it, and how much of the reported $\varepsilon$ is slack that no conversion can remove.
+A Rényi differential privacy (RDP) accountant adds up the curves $\varepsilon(\alpha)$ of a run's steps, one value per **order** $\alpha > 1$ ([Rényi differential privacy](01-renyi-dp.md)). Nobody reports that curve. A paper, a model card or a regulator asks for an $(\varepsilon, \delta)$ differential privacy (DP) guarantee, or for a statement about attacks, so every RDP analysis ends with a conversion, and the conversion decides the number you publish.
 
-The one idea: **an RDP curve is only a summary of the privacy loss, and a conversion must give a $\delta$ that is safe for every mechanism with that curve.** The privacy loss of an output is the log of how much more likely it is under one neighbouring dataset than under the other. The curve records exponential moments of that loss, and nothing else. Mironov's conversion, the original one, uses those moments crudely. The **improved conversion** uses them almost as well as possible, at no cost. What remains, 5 to 10% of $\varepsilon$ for the Gaussian mechanism, belongs to the summary itself. @tbl-conv-uses maps the decisions to the sections.
+Ask what a conversion is allowed to know. The **privacy loss** of an output is the log of how much more likely it is under one neighbouring dataset than under the other, and the RDP curve records exponential moments of that loss and nothing else. A conversion must therefore give a $\delta$ that is safe for every mechanism with that curve, not just for yours. Mironov's conversion, the original one, uses the moments crudely. The **improved conversion** uses them almost as well as anything can, at no cost. What remains, 5 to 10% of $\varepsilon$ for the Gaussian mechanism, belongs to the summary itself.
 
-| Decision or question | Rule | Section |
-| --- | --- | --- |
-| Is an old accountant overstating $\varepsilon$? | Mironov's conversion adds tens of percent | @sec-conv-mironov |
-| Which conversion should I use? | The improved one, always | @sec-conv-improved |
-| Which orders should the grid contain? | Dense just above 1, out to a few hundred; extend it if the best order is at an edge | @sec-conv-order |
-| Can a better formula lower $\varepsilon$ further? | No; switch to a numerical accountant | @sec-conv-slack |
-| What does an RDP result say about attacks? | More than its $(\varepsilon, \delta)$ pair, at low false-positive rates | @sec-conv-tests |
-
-: The decisions behind converting an RDP curve, and where this chapter covers each. {#tbl-conv-uses}
-
-The running example is the Gaussian mechanism. A step adds noise with standard deviation $\sigma$ times the sensitivity, and $k$ such steps compose to one Gaussian whose two output distributions are $\mu = \sqrt k/\sigma$ noise standard deviations apart. Its RDP curve is $\varepsilon(\alpha) = \alpha\mu^2/2$, and every number below depends only on $\mu$. All use $\delta = 10^{-5}$ and the part's grid of 154 orders, from 1.1 to 512.
+The running example is the Gaussian mechanism. A step adds noise with standard deviation $\sigma$ times the sensitivity, and $k$ such steps compose to one Gaussian whose two output distributions are $\mu = \sqrt k/\sigma$ noise standard deviations apart. Its RDP curve is $\varepsilon(\alpha) = \alpha\mu^2/2$, so every number below depends only on $\mu$. All use $\delta = 10^{-5}$ and the part's grid of 154 orders, from 1.1 to 512.
 
 ## Mironov's conversion and where it loses {#sec-conv-mironov}
 
-**Idea.** The smallest valid $\delta$ at a given $\varepsilon$ is an average over outputs: each output whose privacy loss $L$ exceeds $\varepsilon$ contributes only the fraction $1 - e^{\varepsilon - L}$ of its probability. Mironov's conversion takes two shortcuts. It charges the whole probability of every such output to $\delta$, and it bounds that tail probability with Markov's inequality applied to an exponential moment, which is what the RDP curve provides.
+Start from what $\delta$ is. The smallest valid $\delta$ at a given $\varepsilon$ is an average over outputs: an output whose loss $L$ exceeds $\varepsilon$ breaks the $e^\varepsilon$ bound only by its excess probability, which is the fraction $1 - e^{\varepsilon - L}$ of its probability. An output just over the line contributes almost nothing, and one far over it contributes almost all of its probability.
 
-**Result.** An $(\alpha, \varepsilon(\alpha))$-RDP mechanism is $(\varepsilon', \delta)$-DP with
+Mironov's conversion bounds that average in two steps. It first charges the whole probability of every output with $L > \varepsilon$ to $\delta$, which replaces $\delta$ by the tail probability of the loss. It then bounds the tail with Markov's inequality applied to $e^{(\alpha - 1)L}$, whose average is what the RDP curve provides. Setting the result equal to $\delta$ gives
 $$\varepsilon' = \varepsilon(\alpha) + \frac{\ln(1/\delta)}{\alpha - 1},$$ {#eq-conv-mironov}
 minimized over the orders of the grid.
 
-**Example.** A mean released with the Gaussian mechanism at $\sigma = 1$, so $\mu = 1$: Mironov's conversion gives 5.299 at order 5.8. The exact $\varepsilon$ is 4.377. At $\varepsilon = 5.299$ the true $\delta$ is $1.300\times10^{-7}$, so the claimed $\delta = 10^{-5}$ is far from tight.
+Both steps lose on the Gaussian. Its loss is normal, and $\varepsilon$ sits several standard deviations above the mean, where the density falls steeply; most of the tail lies just above $\varepsilon$, exactly where each output's true contribution is near zero, so the first step overcounts. The second step loses more. Markov's inequality is tight only for a variable that puts all its mass at 0 and at the threshold, and a normal loss is nothing like that.
 
-**Pitfalls.** The conversion is valid, just loose, so a number computed with it is safe but overstated. Older code and papers, including the original moments accountant, use it. If you are comparing your $\varepsilon$ with a published one, check which conversion each used before you compare.
+For a mean released with the Gaussian mechanism at $\sigma = 1$, so $\mu = 1$, the exact $\varepsilon$ is 4.377. Charging the whole tail alone raises it to 4.765, and the Markov step to 5.299, at order 5.8. At $\varepsilon = 5.299$ the true $\delta$ is $1.300\times10^{-7}$: you pay for $\delta = 10^{-5}$ and get far less. The conversion is valid, just loose: safe but overstated. Older code and papers, including the original moments accountant, use it, so check which conversion each side used before comparing your $\varepsilon$ with a published one.
 
 ## The improved conversion {#sec-conv-improved}
 
-**Idea.** Both of Mironov's shortcuts amount to bounding the per-output contribution $(1 - e^{\varepsilon - L})_+$ by an exponential in $L$, because an exponential is the only function whose average the RDP curve tells you. Mironov's exponential passes through 1 at $L = \varepsilon$, where the true contribution is still 0. The smallest exponential that stays above the contribution sits lower, and using it is the whole improvement (Balle, Barthe, Gaboardi, Hsu & Sato 2020; Canonne, Kamath & Steinke 2020).
-
-**Result.** An $(\alpha, \varepsilon(\alpha))$-RDP mechanism is $(\varepsilon', \delta)$-DP with
+Taken together, the two steps replace each output's contribution $(1 - e^{\varepsilon - L})_+$ by an exponential in $L$ that lies above it, and an exponential is used because it is the only function whose average the RDP curve tells you. Mironov's exponential equals 1 at $L = \varepsilon$, where the true contribution is still 0. A lower exponential still stays above the contribution, touching it just to the right of $\varepsilon$. Using the lowest one is the whole improvement (Balle, Barthe, Gaboardi, Hsu & Sato 2020; Canonne, Kamath & Steinke 2020). An $(\alpha, \varepsilon(\alpha))$-RDP mechanism is then $(\varepsilon', \delta)$-DP with
 $$\varepsilon' = \varepsilon(\alpha) + \ln\frac{\alpha - 1}{\alpha} - \frac{\ln\delta + \ln\alpha}{\alpha - 1},$$ {#eq-conv-improved}
-again minimized over the grid; report 0 if it comes out negative. In words, it is Mironov's $\varepsilon'$ minus a saving that depends only on the order, not on the mechanism or $\delta$:
+again minimized over the grid, and reported as 0 if it comes out negative.
+
+Compare the two formulas at the same order and both the curve and the $\ln(1/\delta)$ term cancel. What is left, the saving, depends only on the order, not on the mechanism or $\delta$:
 $$\Delta(\alpha) = \frac{\ln\alpha}{\alpha - 1} + \ln\frac{\alpha}{\alpha - 1}.$$ {#eq-conv-gain}
-@tbl-conv-gain gives the saving at a few orders, and the factor by which the improved $\delta$ is smaller than Mironov's at the same order.
+It is large at small orders and fades at large ones (@tbl-conv-gain). That gives you a diagnostic. If two accountants report values about 0.4 apart from the same curve at a best order near 10, one of them is using Mironov's conversion. Opacus and Google's `dp_accounting` both use the improved one, and if you implement a conversion yourself, use @eq-conv-improved.
 
 | $\alpha$ | $\delta$ factor | $\varepsilon$ saving $\Delta(\alpha)$ |
 | --- | --- | --- |
@@ -46,21 +36,17 @@ $$\Delta(\alpha) = \frac{\ln\alpha}{\alpha - 1} + \ln\frac{\alpha}{\alpha - 1}.$
 | 10 | 0.0387 | 0.3612 |
 | 100 | 0.0037 | 0.0566 |
 
-: What the improved conversion gains over Mironov's at the same order. {#tbl-conv-gain}
+: What the improved conversion gains over Mironov's at the same order: the factor by which its $\delta$ is smaller, and the saving in $\varepsilon$. {#tbl-conv-gain}
 
-**Example.** For the mean released at $\sigma = 1$, the improved conversion gives $(4.729, 10^{-5})$-DP at order 5.4, against Mironov's 5.299 and the exact 4.377. It removes 0.570 of the 0.921 excess, from the same curve, with one extra line of code. At $\mu = 10$, which is 100 steps at $\sigma = 1$, it gives 96.116 against Mironov's 98.026 and the exact 91.817.
-
-**Pitfalls.** The saving is large at small orders and small at large ones, so you can diagnose an accountant from its best order: if two accountants report values about 0.4 apart from the same curve at a best order near 10, one of them is using Mironov's conversion. Opacus and Google's `dp_accounting` both use the improved one. If you implement a conversion yourself, use @eq-conv-improved.
+For the mean released at $\sigma = 1$, the improved conversion gives $(4.729, 10^{-5})$-DP at order 5.4, against Mironov's 5.299 and the exact 4.377. It removes 0.570 of the 0.921 excess, from the same curve. It even beats the 4.765 of charging the whole tail, because its exponential is allowed to dip below 1 just above $\varepsilon$, where the true contributions are small. At $\mu = 10$, which is 100 steps at $\sigma = 1$, it gives 96.116 against Mironov's 98.026 and the exact 91.817.
 
 ## Choosing the order {#sec-conv-order}
 
-**Idea.** The converted $\varepsilon'$ is the curve, which grows with the order, plus a term in $\ln(1/\delta)/(\alpha - 1)$, which shrinks with it. The best order balances the two, and it moves with the length of the run.
-
-**Result.** For a composed Gaussian with curve $\rho\alpha$, where $\rho = \mu^2/2 = k/(2\sigma^2)$, the improved conversion's best order solves $\rho(\alpha - 1)^2 = \ln\frac{1}{\alpha\delta}$, so roughly
+The converted $\varepsilon'$ is the curve, which grows with the order, plus a term in $\ln(1/\delta)/(\alpha - 1)$, which shrinks with it, and the best order balances the two. For a composed Gaussian with curve $\rho\alpha$, where $\rho = \mu^2/2 = k/(2\sigma^2)$, setting the derivative to zero gives $\rho(\alpha - 1)^2 = \ln\frac{1}{\alpha\delta}$, so roughly
 $$\alpha^* - 1 \approx \sqrt{\ln(1/\delta)/\rho} = \sigma\sqrt{2\ln(1/\delta)/k}.$$
-More steps or less noise push the best order toward 1. A smaller $\delta$ pushes it up, but only through a square root of a logarithm.
+The formula says how the best order moves. More steps or less noise make the curve steeper, so high orders get expensive and the best order moves toward 1. A smaller $\delta$ pushes it up, but only through the square root of a logarithm, so $\delta$ hardly matters: at $\mu = 1$, going from $\delta = 10^{-5}$ to $10^{-10}$ moves the best order only from 5.432 to 7.483.
 
-**Example.** @tbl-conv-orders shows four settings. One release at $\sigma = 10$ wants order 40.525, a long run at $\sigma = 1$ wants 1.048. At $k = 10{,}000$ that order is below the grid's smallest, 1.1, and the grid's answer is 135.987 larger than the continuous optimum.
+@tbl-conv-orders shows the range a grid must cover. One release at $\sigma = 10$ wants order 40.525, a long run at $\sigma = 1$ wants 1.048. At $k = 10{,}000$ that order is below the grid's smallest, 1.1, and the grid's answer is 135.987 larger than the continuous optimum.
 
 | $\sigma$ | $k$ | Best order (continuous / grid) | $\varepsilon$ (continuous / grid) |
 | --- | --- | --- | --- |
@@ -71,13 +57,13 @@ More steps or less noise push the best order toward 1. A smaller $\delta$ pushes
 
 : Best orders of the improved conversion for the composed Gaussian at $\delta = 10^{-5}$. {#tbl-conv-orders}
 
-**Pitfalls.** If an accountant reports its best order at either end of its grid, the true optimum lies outside and the reported $\varepsilon$ is larger than necessary: extend the grid in that direction. Subsampled training steps, the kind the differentially private version of stochastic gradient descent (SGD), DP-SGD, runs ([Amplification by subsampling](05-subsampling.md)), have tiny curves at small orders, which is why the grid ends at 128, 256 and 512.
+So if an accountant reports its best order at either end of its grid, the true optimum lies outside and the reported $\varepsilon$ is larger than necessary: extend the grid in that direction. The other end matters too. The differentially private version of stochastic gradient descent (SGD), DP-SGD, runs subsampled steps ([Amplification by subsampling](05-subsampling.md)), whose curves are tiny at small orders and therefore want large ones, which is why the grid ends at 128, 256 and 512.
 
 ## The slack no conversion removes {#sec-conv-slack}
 
-**Idea.** The improved conversion is already essentially the best that any method can certify from the curve alone. A different mechanism, with only two possible outputs, satisfies the Gaussian's RDP curve at every order and has a larger $\delta$. A certificate computed from the curve must cover both, so it cannot reach the Gaussian's exact $\varepsilon$.
+The improved conversion still stays above the exact $\varepsilon$. That is the summary's fault, not the formula's, and a counterexample shows why. Take a mechanism with only two outputs: almost all its probability sits on an output with loss close to 0, and a sliver on an output with loss 4.5956. This mechanism satisfies the Gaussian's RDP curve at $\mu = 1$ at every order, yet at $\varepsilon = 4.377$, the Gaussian's exact value, its $\delta$ is $4.4698\times10^{-5}$, not $10^{-5}$. A certificate computed from the curve alone cannot tell the two mechanisms apart, so it must cover both, and it cannot certify 4.377. The best any method can certify from the curve is 4.7284 to four decimals, which is what the improved conversion gives.
 
-**Result.** For the Gaussian, the best conversion from the RDP values on the grid and the improved conversion agree to three decimals, and both exceed the exact $\varepsilon$ by 5 to 10% (@tbl-conv-slack, @fig-conv-slack). Two further facts govern mixing RDP with other guarantees. An $(\varepsilon, \delta)$-DP guarantee with $\delta > 0$ implies no RDP bound at any order, because it allows a rare output with infinite privacy loss. A pure $\varepsilon$-DP guarantee does: it implies $(\alpha, \min(\varepsilon, \alpha\varepsilon^2/2))$-RDP at every order (Bun & Steinke 2016).
+Across run lengths (@tbl-conv-slack, @fig-conv-slack), the best conversion from the curve and the improved conversion agree to three decimals, and both exceed the exact $\varepsilon$ by 5 to 10%.
 
 | $k$ | $\mu$ | Exact | Optimal from the curve | Improved | Mironov |
 | --- | --- | --- | --- | --- | --- |
@@ -91,19 +77,17 @@ More steps or less noise push the best order toward 1. A smaller $\delta$ pushes
 
 ![Left: $\varepsilon$ at $\delta = 10^{-5}$ for the Gaussian with $\sigma = 10$ composed $k$ times, exact (black), optimal from the RDP curve (wide green), improved (blue, on top of the green) and Mironov (red). Right: each divided by the exact value. The improved conversion is as good as any conversion from the curve; the remaining 5 to 10% belongs to the RDP summary itself.](figures/rdp_conversions_slack.svg){#fig-conv-slack}
 
-**Example.** Your paper reports $(4.729, 10^{-5})$-DP from an RDP accountant for a mechanism that is in fact a Gaussian with $\mu = 1$, and a reviewer asks whether a better conversion would lower it. It would not. A two-outcome mechanism with the same RDP curve has $\delta = 4.4698\times10^{-5}$ at $\varepsilon = 4.377$, so any certificate computed from the curve alone must stay above 4.377; the best possible one is 4.7284 to four decimals. Reaching 4.377 needs an accountant that sees the mechanism itself.
+So if a reviewer asks whether a better conversion would lower your $(4.729, 10^{-5})$ for a Gaussian with $\mu = 1$, the answer is no. When the slack matters, change the summary, not the formula: track the trade-off function ([f-DP and Gaussian differential privacy](04-gaussian-dp.md)) or the whole privacy loss distribution ([Numerical accounting with privacy loss distributions](06-numerical-accounting.md)). The 5 to 10% is for the plain Gaussian. DP-SGD's subsampled steps have a curve that is not a line, and the gap can be much larger; for the part's running example ($q = 0.01$, $\sigma = 1$, $k = 10{,}000$), RDP gives 7.43 with Mironov's conversion and 6.71 with the improved one, and [Choosing an accountant](09-choosing-an-accountant.md) measures the gap.
 
-**Pitfalls.** The 5 to 10% is for the plain Gaussian. DP-SGD composes subsampled Gaussian steps, whose RDP curve is not a line, and the gap to the exact value can be much larger; for the part's running example ($q = 0.01$, $\sigma = 1$, $k = 10{,}000$) RDP gives 7.43 with Mironov's conversion and 6.71 with the improved one, and [Choosing an accountant](09-choosing-an-accountant.md) measures the gap. When the slack matters, change the summary, not the formula: track the trade-off function ([f-DP and Gaussian differential privacy](04-gaussian-dp.md)) or the whole privacy loss distribution ([Numerical accounting with privacy loss distributions](06-numerical-accounting.md)). And never feed an $(\varepsilon, \delta)$ component into an RDP accountant as if it had a curve: you need to know how its $\delta$ arises, for example from Gaussian noise.
+The same reasoning governs mixing RDP with other guarantees. An $(\varepsilon, \delta)$-DP guarantee with $\delta > 0$ implies no RDP bound at any order. A mechanism that publishes your record with probability $\delta$ is $(0, \delta)$-DP, but it has an output that is impossible without you, an infinite likelihood ratio, and so an infinite exponential moment. Never feed an $(\varepsilon, \delta)$ component into an RDP accountant as if it had a curve; you need to know how its $\delta$ arises, for example from Gaussian noise. A pure $\varepsilon$-DP guarantee has no such outputs, and it implies $(\alpha, \min(\varepsilon, \alpha\varepsilon^2/2))$-RDP at every order (Bun & Steinke 2016).
 
 ## RDP as a bound on attacks {#sec-conv-tests}
 
-**Idea.** A membership test looks at the output and decides "your record was used" or "it was not". It has a false-positive rate $a$ and a power, its true positive rate, $1 - b$. An $(\varepsilon, \delta)$ pair constrains every test by one straight line, power $\le e^\varepsilon a + \delta$. An RDP curve constrains it once per order, and the constraints bend differently: large orders guard small false-positive rates, small orders the bulk. Together they bound attack power far more tightly at low false-positive rates than any single $(\varepsilon, \delta)$ pair read off the curve.
+A membership test looks at the output and decides "your record was used" or "it was not". Whatever it computes, its verdict is a coin: it says "used" with probability $a$, its false-positive rate, when the record was absent, and with probability $1 - b$, its power, when it was present. The verdict is computed from the output, so it cannot be further apart in the two worlds than the output itself, and the Rényi divergence between the two coins is at most $\varepsilon(\alpha)$ at every order (Balle et al. 2020). Each order thus constrains every test's $(a, b)$.
 
-**Result.** Each order gives a constraint on the pair $(a, b)$ of every test (Balle et al. 2020): the Rényi divergence between the test's two coin flips, "reject with probability $a$" and "reject with probability $1 - b$", is at most $\varepsilon(\alpha)$. The full edition computes the resulting largest power at each $a$ by bisection.
+The constraints of different orders bend differently. Large orders weigh the extreme outputs heavily, so they guard small false-positive rates; small orders guard the bulk. An $(\varepsilon, \delta)$ pair, by contrast, constrains every test by one straight line, power $\le e^\varepsilon a + \delta$, which can touch the curved region the orders allow at only one point and lies far above it elsewhere.
 
-**Example.** An auditor attacks the mean released at $\sigma = 1$ with a false-positive rate of $a = 10^{-3}$. The RDP curve alone guarantees that no test has power above $2.4910\times10^{-2}$; the best test against the Gaussian actually reaches $1.8298\times10^{-2}$. The $(4.729, 10^{-5})$ guarantee from the improved conversion only says power $\le e^{4.729}\times10^{-3} + 10^{-5} = 0.1131$, more than four times the curve's bound.
-
-**Pitfalls.** When you translate an RDP result into attack risk, don't go through one $(\varepsilon, \delta)$ pair: at low false-positive rates, the rates that matter for membership attacks, it throws away most of what the curve says. Use the curve, or better, the trade-off function of [f-DP and Gaussian differential privacy](04-gaussian-dp.md).
+The gap matters for audits. An auditor attacks the mean released at $\sigma = 1$ with a false-positive rate of $a = 10^{-3}$. The RDP curve guarantees that no test has power above $2.4910\times10^{-2}$; the best test against the Gaussian actually reaches $1.8298\times10^{-2}$. The $(4.729, 10^{-5})$ guarantee from the improved conversion only says power $\le e^{4.729}\times10^{-3} + 10^{-5} = 0.1131$, more than four times the curve's bound. So when you translate an RDP result into attack risk, don't go through one $(\varepsilon, \delta)$ pair: at low false-positive rates, the ones that matter for membership attacks, it throws away most of what the curve says. Use the curve, or better, the trade-off function of [f-DP and Gaussian differential privacy](04-gaussian-dp.md).
 
 ## Code {#sec-conv-code}
 
