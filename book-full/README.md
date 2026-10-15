@@ -49,4 +49,17 @@ The book follows the [study plan](study_plan.md), one phase per part. Each folde
 34. [Adaptive composition: filters, odometers and individual accounting](part04-privacy-accounting/08-adaptive-composition.md) · [code](../code/part04-privacy-accounting/adaptive_composition.py)
 35. [Choosing an accountant](part04-privacy-accounting/09-choosing-an-accountant.md) · [code](../code/part04-privacy-accounting/choosing_an_accountant.py)
 
-The exercise book (a separate website, [book-exercises/](../book-exercises/)) has every chapter's exercises and worked solutions, one page per chapter: [Part 1](../book-exercises/part01-prerequisites/), [Part 2](../book-exercises/part02-attacks/), [Part 3](../book-exercises/part03-dp-foundations/), [Part 4](../book-exercises/part04-privacy-accounting/).
+## Part 5 · [Differential privacy in machine learning](part05-dp-ml/README.md) · [introduction](part05-dp-ml/00-introduction.md)
+
+36. [Private empirical risk minimization](part05-dp-ml/01-dp-erm.md) · [code](../code/part05-dp-ml/dp_erm.py)
+37. [DP-SGD](part05-dp-ml/02-dp-sgd.md) · [code](../code/part05-dp-ml/dp_sgd.py)
+38. [Hyperparameter tuning and private selection](part05-dp-ml/03-hyperparameter-tuning.md) · [code](../code/part05-dp-ml/hyperparameter_tuning.py)
+39. [DP-FTRL and matrix factorization](part05-dp-ml/04-matrix-mechanisms.md) · [code](../code/part05-dp-ml/matrix_mechanisms.py)
+40. [Private prediction: PATE and in-context learning](part05-dp-ml/05-private-prediction.md) · [code](../code/part05-dp-ml/private_prediction.py)
+41. [Public data and private fine-tuning](part05-dp-ml/06-public-data.md) · [code](../code/part05-dp-ml/public_data.py)
+42. [User-level differential privacy](part05-dp-ml/07-user-level.md) · [code](../code/part05-dp-ml/user_level.py)
+43. [Disparate impact](part05-dp-ml/08-disparate-impact.md) · [code](../code/part05-dp-ml/disparate_impact.py)
+44. [Choosing ε](part05-dp-ml/09-choosing-epsilon.md) · [code](../code/part05-dp-ml/choosing_epsilon.py)
+45. [Auditing private training](part05-dp-ml/10-auditing.md) · [code](../code/part05-dp-ml/auditing.py)
+
+The exercise book (a separate website, [book-exercises/](../book-exercises/)) has every chapter's exercises and worked solutions, one page per chapter: [Part 1](../book-exercises/part01-prerequisites/), [Part 2](../book-exercises/part02-attacks/), [Part 3](../book-exercises/part03-dp-foundations/), [Part 4](../book-exercises/part04-privacy-accounting/), [Part 5](../book-exercises/part05-dp-ml/).

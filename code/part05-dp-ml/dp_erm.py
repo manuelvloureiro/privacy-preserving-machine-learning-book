@@ -314,8 +314,8 @@ def noisy_gd(
     return w
 
 
-def noisy_gd_bound(steps: int, n: int, d: int, lam: float, eps: float, delta: float) -> float:
-    """A public bound on noisy GD's excess risk with step 1/β, as a function of the step count T.
+def noisy_gd_estimate(steps: int, n: int, d: int, lam: float, eps: float, delta: float) -> float:
+    """A public estimate of noisy GD's excess risk with step 1/β, as a function of the step count T.
 
     Optimization: J is λ-strongly convex and β-smooth, so T noiseless steps shrink J - J* by (1 - λ/β)^T
     from at most J(0) = ln 2. Noise: at stationarity each step's noise costs d σ²/(4β) in expectation,
@@ -327,8 +327,8 @@ def noisy_gd_bound(steps: int, n: int, d: int, lam: float, eps: float, delta: fl
 
 
 def noisy_gd_steps_rule(n: int, d: int, lam: float, eps: float, delta: float) -> int:
-    """The step count that minimizes the public bound: chosen without looking at the data."""
-    return min(range(1, 5001), key=lambda t: noisy_gd_bound(t, n, d, lam, eps, delta))
+    """The step count that minimizes the public estimate: chosen without looking at the data."""
+    return min(range(1, 5001), key=lambda t: noisy_gd_estimate(t, n, d, lam, eps, delta))
 
 
 def noisy_gd_lr(lam: float) -> float:
@@ -503,7 +503,7 @@ def print_table(rng: np.random.Generator) -> None:
         print(
             f"n={n}: steps T={steps}  per-step sigma on the mean gradient="
             f"{noisy_gd_sigma(n, steps, EPS_RUN, DELTA_RUN):.4g}  "
-            f"bound={noisy_gd_bound(steps, n, D_RUN, LAM_RUN, EPS_RUN, DELTA_RUN):.3e}"
+            f"estimate={noisy_gd_estimate(steps, n, D_RUN, LAM_RUN, EPS_RUN, DELTA_RUN):.3e}"
         )
     data = make_logistic_data(rng, 10_000)
     for steps in (20, 100, 400):
