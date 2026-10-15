@@ -1,0 +1,45 @@
+[project]
+name = "privacy"
+version = "0.1.0"
+description = "Notes and code for a book on privacy-preserving machine learning"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=7.4.0",
+    "matplotlib>=3.11.2",
+    "mplfonts>=0.0.11",
+    "numpy>=2.5.4",
+    "pandas>=3.0.6",
+    "scipy>=1.18.1",
+]
+
+[dependency-groups]
+dev = [
+    "jupyter>=1.1.1",
+    "pyright>=1.1.414",
+    "pytest>=9.1.1",
+    "pyyaml>=6.0.3",
+    "quarto-cli>=1.10.19",
+    "ruff>=0.17.0",
+    "types-pyyaml>=6.0.12.20260906",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+
+[tool.pyright]
+include = ["book", "tests", "tools"]
+exclude = ["archive", ".venv"]
+typeCheckingMode = "strict"
+# matplotlib's stubs leave **kwargs untyped, which flags every Axes call in strict mode.
+reportUnknownMemberType = false
+
+# Matches the VSCode setup: ruff formats on save, fixes what it can and sorts imports.
+[tool.ruff]
+line-length = 120
+extend-exclude = ["archive"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+ignore = ["E402"]

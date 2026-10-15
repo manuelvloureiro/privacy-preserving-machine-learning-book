@@ -1,0 +1,11 @@
+#!/bin/sh
+# Reject commit messages that credit Claude or Anthropic: Co-Authored-By trailers,
+# "Generated with Claude Code" lines, or any other mention. The file name CLAUDE.md is allowed.
+
+msg=$(grep -v '^#' "$1" | sed 's/CLAUDE\.md//g')
+
+if printf '%s\n' "$msg" | grep -qiE 'claude|anthropic|🤖 generated'; then
+    echo "commit-msg: the message mentions Claude or Anthropic. Remove these lines:" >&2
+    printf '%s\n' "$msg" | grep -niE 'claude|anthropic|🤖 generated' | sed 's/^/  /' >&2
+    exit 1
+fi
