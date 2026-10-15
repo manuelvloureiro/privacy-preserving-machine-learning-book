@@ -4,7 +4,7 @@
 
 How much does an observation tell you about something you cannot see, such as the word "offer" about whether an email is spam? There are two honest answers, because there are two questions. How many bits does the observation save you, on average, when you describe the hidden value? Shannon entropy and mutual information answer that. How much more likely is a single best guess to be right? Min-entropy and vulnerability answer that.
 
-Every quantity here is the logarithm of a probability, and the two families differ only in where the logarithm sits: Shannon's average the log over all outcomes, the one-guess quantities take the log of the best probability. Usually they agree. When a rare outcome reveals a lot they disagree by orders of magnitude, and knowing which to trust is the skill this chapter builds.
+Every quantity here is the logarithm of a probability, and the two families differ only in where the logarithm sits: Shannon's quantities average the log over all outcomes, the one-guess quantities take the log of the best probability. Usually they agree. When a rare outcome reveals a lot they disagree by orders of magnitude, and knowing which to trust is the skill this chapter builds.
 
 Logarithms are base 2, so quantities are in **bits**; one nat, the unit of natural logarithms, is $1/\ln 2 \approx 1.443$ bits.
 

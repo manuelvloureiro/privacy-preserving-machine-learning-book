@@ -82,7 +82,7 @@ These readings also show where the guarantee weakens. At $\varepsilon = 5$ the a
 
 A deliberately terrible mechanism shows how small $\delta$ must be. Publish each record, in full, with probability $\delta$. Any one person is exposed only with probability $\delta$, and otherwise the output ignores them, so this is $(0, \delta)$-DP.
 
-But it publishes $n\delta$ records on average, and at least one with probability about $1 - e^{-n\delta}$. With $n = 10{,}000$ and $\delta = 1/n$, someone's record is published verbatim with probability 0.6321. So $\delta$ must be much smaller than $1/n$, where $n$ counts people, not records: $10^{-5}$ suits 60,000 training examples, but 10 million users need $\delta$ well below $10^{-7}$.
+But it publishes $n\delta$ records on average, and at least one with probability about $1 - e^{-n\delta}$. With $n = 10{,}000$ and $\delta = 1/n$, someone's record is published verbatim with probability 0.6321. So $\delta$ must be much smaller than $1/n$, where $n$ counts people, not records. The common choice of $10^{-5}$ for 60,000 training examples is only just below $1/n$, and 10 million users need $\delta$ well below $10^{-7}$.
 
 This usually costs little: reasonable mechanisms, like the Gaussian count, spread $\delta$ over many outputs of moderate loss, so their privacy curve falls steeply and a slightly larger $\varepsilon$ buys a much smaller $\delta$.
 
@@ -90,7 +90,7 @@ This usually costs little: reasonable mechanisms, like the Gaussian count, sprea
 
 The guarantee compares the world with your record to the world without it, so anything learned in both worlds is outside it. If a study shows that smokers often get cancer, beliefs about every smoker change, including those never in the data; that is the study doing its job.
 
-It also treats records as separate. If five people in a household always answer alike, an attacker who learns one answer learns all five, and hiding the household means hiding five records at once. Under $\varepsilon = 1$ per record, the household's privacy loss can reach 5.0000, and an attacker asking whether the household took part can be right with probability up to 0.959. Match the unit of privacy to the unit of correlation: protect households or users, not rows.
+It also treats records as separate. If five people in a household always answer alike, an attacker who learns one answer learns all five, and hiding the household means hiding five records at once. For a count released with Laplace noise at $\varepsilon = 1$ per record, the household's privacy loss can reach 5.0000, and an attacker asking whether the household took part can be right with probability up to 0.959. Match the unit of privacy to the unit of correlation: protect households or users, not rows.
 
 Finally, a DP proof covers the algorithm, not the code: floating-point noise samplers can leak through their low-order bits ([Discrete and floating-point-safe mechanisms](07-discrete-mechanisms.md)), and timing can leak. The implementation needs its own review.
 

@@ -36,14 +36,14 @@ so power 0.9 at $\alpha = 0.01$ for $\delta/\sigma = 0.25$ needs 209 readings.
 
 Near $\alpha = 0$ the normal curve is vertical, because the normal likelihood ratio is unbounded far out: the first sliver of false-alarm budget buys power at an unbounded rate. A Laplace shift is different. For $\mathrm{Lap}(0, b)$ against $\mathrm{Lap}(s, b)$, with $\kappa = s/b$, the ratio is clipped to $[e^{-\kappa}, e^\kappa]$, so the ends of the curve are straight lines with those slopes:
 $$T(\alpha) = \begin{cases} 1 - e^{\kappa}\alpha, & \alpha < \tfrac12 e^{-\kappa}, \\ e^{-\kappa}/(4\alpha), & \tfrac12 e^{-\kappa} \le \alpha \le \tfrac12, \\ e^{-\kappa}(1 - \alpha), & \alpha > \tfrac12. \end{cases}$$ {#eq-ht-laplace-tradeoff}
-No test can buy power faster than $e^\kappa$ per unit of FPR, so no test has power above $e^\kappa\alpha$. @tbl-ht-laplace-vs-gaussian compares a Laplace pair ($\kappa = 1$) with a normal pair ($\mu = 1.0301$) whose curves nearly coincide in the bulk. At $\alpha = 10^{-6}$ the normal pair is 36 times easier, because its unbounded ratio lets a test find rare, overwhelming evidence (@fig-ht-laplace-tradeoff). Plan for the level you will use.
+No test can buy power faster than $e^\kappa$ per unit of FPR, so no test has power above $e^\kappa\alpha$. @tbl-ht-laplace-vs-gaussian compares a Laplace pair ($\kappa = 1$) with a normal pair ($\mu = 1.0301$) with the same best advantage, 0.3935 (@sec-ht-auc). At $\alpha = 10^{-6}$ the normal pair is 36 times easier, because its unbounded ratio lets a test find rare, overwhelming evidence (@fig-ht-laplace-tradeoff). Plan for the level you will use.
 
 | $\alpha$ | Laplace power, $\kappa = 1$ | Normal power, $\mu = 1.0301$ |
 | --- | --- | --- |
 | $10^{-3}$ | $2.718\times10^{-3}$ | $1.969\times10^{-2}$ |
 | $10^{-6}$ | $2.718\times10^{-6}$ | $9.829\times10^{-5}$ |
 
-: Best power at small false positive rates for a Laplace pair and a normal pair that agree in the bulk. {#tbl-ht-laplace-vs-gaussian}
+: Best power at small false positive rates for a Laplace pair and a normal pair with the same best advantage. {#tbl-ht-laplace-vs-gaussian}
 
 ![Left: the log likelihood ratio of $\mathrm{Lap}(1, 1)$ against $\mathrm{Lap}(0, 1)$ is clipped at $\pm1$, while the normal one with the same best advantage is a straight line. Right: best power on log axes. The Laplace curve follows $e\alpha$ for small $\alpha$; the normal curve rises far above it.](figures/hypothesis_testing_laplace_tradeoff.svg){#fig-ht-laplace-tradeoff}
 

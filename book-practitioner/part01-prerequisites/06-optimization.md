@@ -32,7 +32,7 @@ The two terms are a trade-off. The first is the cost of travelling the distance 
 
 : Projected SGD on logistic regression against the convex Lipschitz bound, averaged over 20 runs. {#tbl-opt-sgd-convex}
 
-The bound holds, loose by a factor of 11 at $T = 100$ and 65 at $T = 10{,}000$. The gap grows because the observed error falls almost like $1/T$: the data curve the loss near the minimizer, and the convex bound does not know it. Every constant in a bound is a worst case the run does not reach, so trust how a bound scales, not its size.
+The bound holds, loose by a factor of 11 at $T = 100$ and 65 at $T = 10{,}000$. The gap grows because the observed error falls much faster than $1/\sqrt T$, closer to $1/T$: the data curve the loss near the minimizer, and the convex bound does not know it. Every constant in a bound is a worst case the run does not reach, so trust how a bound scales, not its size.
 
 Curvature is what speeds SGD up. On a $\lambda$-strongly convex loss, the farther the iterate is from the minimizer, the harder the gradient pulls it back, and with steps $\eta_t = 2/(\lambda(t + 1))$ and an average that weights later iterates more, the error falls to $2G^2/(\lambda(T + 1))$. The price is the $1/\lambda$: a weak regularizer gives a fast rate only after many steps.
 
@@ -68,7 +68,7 @@ With $n = 1{,}000$ and $\lambda = 0.1$ the bound is $2/(0.1 \times 1{,}000) = 0.
 
 ![Left: largest observed movement of the regularized logistic minimizer when one of $n$ examples is replaced (solid), against $2L/(\lambda n)$ (dashed), for three values of $\lambda$. Right: the same at $n = 1000$ as a function of $\lambda$: the bound blows up as $\lambda \to 0$, while the observed movement levels off.](figures/optimization_erm_sensitivity.svg){#fig-opt-erm-sensitivity}
 
-The argument shows what the bound needs. It is about the exact minimizer, so an optimizer stopped early adds its own error. And it needs the curvature: without a regularizer, the absolute loss gives the median, which one replaced value can move by 1 whatever $n$ is. On a non-convex loss with two valleys, one label can flip which valley is deeper, and the minimizer of a double-well loss jumps by 2.0854 at $n = 11$ and still by 2.0010 at $n = 1{,}001$. For non-convex models, bound one example's influence on the *algorithm* instead, such as a fixed number of SGD steps ([Algorithmic stability and generalization](07-stability-generalization.md)).
+The argument shows what the bound needs. It is about the exact minimizer, so an optimizer stopped early adds its own error. And it needs the curvature: without a regularizer, the absolute loss gives the median, and on data made of 0s and 1s one replaced value can move it by 1 whatever $n$ is. On a non-convex loss with two valleys, one label can flip which valley is deeper, and the minimizer of a double-well loss jumps by 2.0854 at $n = 11$ and still by 2.0010 at $n = 1{,}001$. For non-convex models, bound one example's influence on the *algorithm* instead, such as a fixed number of SGD steps ([Algorithmic stability and generalization](07-stability-generalization.md)).
 
 ## Code
 

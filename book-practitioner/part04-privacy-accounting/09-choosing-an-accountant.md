@@ -90,7 +90,7 @@ Other assumptions fail quietly. If you tune 10 configurations on the private dat
 | Item | The accountant assumes | Check in the code | If it does not match |
 | --- | --- | --- | --- |
 | Sampling scheme | Poisson sampling at rate $q$ | Each record included independently, variable batch sizes? | Fixed-size random batches: account with noise multiplier $\sigma/2$. Shuffle and partition: report the guarantee without amplification, for zero-out neighbours |
-| Neighbouring relation | Add/remove one record | Add/remove, replace-one or zero-out? | Replace-one costs about twice as much per step for small $\varepsilon$ |
+| Neighbouring relation | Add/remove one record | Add/remove, replace-one or zero-out? | Under Poisson sampling, replace-one costs more per step: about twice the add/remove cost for a pure-DP step with small $\varepsilon$ |
 | Privacy unit | One example | Can one person contribute several examples? | Clip and sample per user, or pay group privacy |
 | Hyperparameter tuning | Not counted | Was anything chosen from results on the private data? | Account for the tuning runs, or tune on public data |
 | Adaptive parameters | $\sigma$, $q$, $k$ fixed in advance | Early stopping, noise schedules, per-record budgets? | Use a filter |
@@ -128,7 +128,7 @@ Test an accountant on cases whose answers you know. With $q = 1$ there is no sub
 
 Two properties hold for every correct accountant, so a violation is a bug, not slack. The orderings of @sec-choose-compare must hold at every $k$, with no reported upper bound below the optimistic PLD. And $\varepsilon$ must never decrease with $k$, because what the first $k$ steps release is part of what $k + 1$ steps release.
 
-Then compare against an independent library: Google's `dp_accounting` (RDP and PLD), Opacus (RDP, GDP, and a privacy loss random variable (PRV) accountant, its default), or Microsoft's `prv_accountant`. When two RDP accountants disagree, the size of the gap says why: the improved conversion beats Mironov's by $\frac{\ln\alpha}{\alpha - 1} + \ln\frac{\alpha}{\alpha - 1}$ at order $\alpha$ (0.3612 at order 10), the difference between 7.43 and 6.71 on the running example. Certified PLD and PRV brackets from different libraries each contain the truth, so they must overlap; if they do not, one has a bug.
+Then compare against an independent library: Google's `dp_accounting` (RDP and PLD), Opacus (RDP, GDP, and a privacy loss random variable (PRV) accountant, its default), or Microsoft's `prv_accountant`. When two RDP accountants disagree, the size of the gap says why: the improved conversion beats Mironov's by $\frac{\ln\alpha}{\alpha - 1} + \ln\frac{\alpha}{\alpha - 1}$ at order $\alpha$ (0.3612 at order 10); on the running example it is what separates Mironov's 7.43 from the improved 6.71. Certified PLD and PRV brackets from different libraries each contain the truth, so they must overlap; if they do not, one has a bug.
 
 ## Code {#sec-choose-code}
 

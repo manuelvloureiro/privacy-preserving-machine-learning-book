@@ -70,7 +70,7 @@ DP-SGD is the case that matters. Each step runs on a Poisson sample that include
 $$\mu = q\sqrt{k\big(e^{1/\sigma^2} - 1\big)}$$ {#eq-gdp-sgd-mu}
 (Bu, Dong, Long & Su 2020). Compared with full-batch training, $\sqrt k/\sigma$, subsampling multiplies $\mu$ by about $q\sigma\sqrt{e^{1/\sigma^2} - 1}$, which is $q \times 1.3108$ at $\sigma = 1$.
 
-This is a limit, used at finite $k$ as an approximation. It is not a bound, and for the running example, $q = 0.01$ and $\sigma = 1$, it errs on the unsafe side. @tbl-gdp-sgd turns each $\mu$ into $\varepsilon$ at $\delta = 10^{-5}$ and compares it with a numerical accountant's bracket, whose lower end is a certified lower bound on the true $\varepsilon$. At $k = 10{,}000$ the CLT says 6.0071; the true $\varepsilon$ is at least 6.1377 (@fig-gdp-subsampled).
+This is a limit, used at finite $k$ as an approximation. It is not a bound, and for the running example, $q = 0.01$ and $\sigma = 1$, it errs on the unsafe side. @tbl-gdp-sgd turns each $\mu$ into $\varepsilon$ at $\delta = 10^{-5}$ and compares it with a numerical accountant's bracket, whose lower end is a lower bound on the true $\varepsilon$, exact up to a small quadrature error. At $k = 10{,}000$ the CLT says 6.0071; the true $\varepsilon$ is at least 6.1377 (@fig-gdp-subsampled).
 
 | Steps $k$ | CLT $\mu$ | CLT $\varepsilon$ at $10^{-5}$ | Numerical accountant $\varepsilon$ | Full batch, $\mu = \sqrt k$ |
 | --- | --- | --- | --- | --- |
@@ -133,7 +133,7 @@ mu = clt_mu_dpsgd(q=0.01, sigma=1.0, steps=10_000)
 print(f"{mu:.4f} {gdp_eps(mu, 1e-5):.4f}")  # 1.3108 6.0071
 ```
 
-The last line is the CLT estimate for the running example, below the certified lower bound 6.1377. The full edition's script, [gaussian_dp.py](../../code/part04-privacy-accounting/gaussian_dp.py), computes every number in this chapter, including the numerical brackets:
+The last line is the CLT estimate for the running example, below the numerical lower bound 6.1377. The full edition's script, [gaussian_dp.py](../../code/part04-privacy-accounting/gaussian_dp.py), computes every number in this chapter, including the numerical brackets:
 
 ```bash
 uv run python code/part04-privacy-accounting/gaussian_dp.py

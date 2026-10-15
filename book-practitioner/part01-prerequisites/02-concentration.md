@@ -32,7 +32,7 @@ To keep $k$ draws small at once, ask each to fail with probability $\beta/k$. Th
 
 A sum of $k$ Laplace draws has a normal-looking bulk, as the central limit theorem (CLT) predicts, but its far tail keeps the Laplace's exponential decay. A valid bound is Gaussian for small deviations and exponential for large ones:
 $$\Pr[S \ge t] \le \exp\Big(-\min\Big(\frac{t^2}{8kb^2}, \frac{t}{4b}\Big)\Big).$$
-For $k = 10$ and $b = 1$, the normal approximation puts $\Pr[S \ge 20]$ at $3.9\times10^{-6}$; the truth is $3.4\times10^{-5}$, nine times more (@fig-laplace-sum). When the answer must be a guarantee, use a bound, not the CLT.
+For $k = 10$ and $b = 1$, the normal approximation puts $\Pr[S \ge 20]$ at $3.9\times10^{-6}$; simulation gives $3.4\times10^{-5}$, nine times more (@fig-laplace-sum). When the answer must be a guarantee, use a bound, not the CLT.
 
 ![Empirical tail of a sum of 10 $\mathrm{Lap}(1)$ draws, against the sub-exponential bound and the normal approximation, which badly underestimates the far tail.](figures/laplace_sum.svg){#fig-laplace-sum}
 
@@ -52,7 +52,7 @@ A variable confined to an interval $[a, b]$ cannot have a heavy tail, and the mo
 $$|\bar X_n - \mu| < (b - a)\sqrt{\frac{\ln(2/\beta)}{2n}}.$$
 For a finite set $H$ of models with losses in $[0, 1]$, the union bound puts $\ln|H|$ inside the logarithm: every model's training error is within $\sqrt{\ln(2|H|/\beta)/(2n)}$ of its true error.
 
-Assuming the worst-case variance is also its weakness, serious for small rates. A classifier makes 1 false positive on 1,000 negatives, and you want a 95% upper bound on its true rate. One-sided Hoeffding adds about 0.039, some 40 times the measured rate, because it assumes a variance of 0.25 when the true one is about 0.001. **Bernstein's inequality** keeps the variance $\sigma^2$: for $|X_i - \mu| \le M$ its width is about $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)$, driven by the variance except far out. With the variance estimated as 0.001 it adds about 0.0045. That is a heuristic, since the variance came from the same data. The exact binomial (Clopper–Pearson) bound is 0.0047, and [Hypothesis testing](04-hypothesis-testing.md) shows how to compute it. For the mean of 200 Bernoulli(0.1) variables reaching 0.15, Hoeffding gives 0.37, losing even to Chebyshev's 0.18; Chernoff gives 0.135 (@fig-bernoulli-tails).
+Assuming the worst-case variance is also its weakness, serious for small rates. A classifier makes 1 false positive on 1,000 negatives, and you want a 95% upper bound on its true rate. One-sided Hoeffding adds about 0.039, some 40 times the measured rate, because it assumes a variance of 0.25 when the true one is about 0.001. **Bernstein's inequality** keeps the variance $\sigma^2$: for $|X_i - \mu| \le M$ its width is about $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)$, driven by the variance except far out. With the variance estimated as 0.001 it adds about 0.0045. That is a heuristic, since the variance came from the same data. The exact binomial (Clopper–Pearson) upper bound on the rate itself is 0.0047, and [Hypothesis testing](04-hypothesis-testing.md) shows how to compute it. For the mean of 200 Bernoulli(0.1) variables reaching 0.15, Hoeffding gives 0.37, losing even to Chebyshev's 0.18; Chernoff gives 0.135 (@fig-bernoulli-tails).
 
 ![Empirical tail of the mean of 200 Bernoulli(0.1) variables against the Markov, Chebyshev, Hoeffding and Chernoff bounds.](figures/bernoulli_tails.svg){#fig-bernoulli-tails}
 

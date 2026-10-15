@@ -18,7 +18,7 @@ To bound the gap, bound each bracket. $A$ is **$\beta$-uniformly stable** if rep
 
 You train once, though, so you want the gap of your model, not its average over training sets. The gap is a function of $n$ independent examples, none of which can move it by much, and that is the situation of McDiarmid's inequality ([Concentration inequalities](02-concentration.md)). With losses in $[0, M]$, with probability at least $1 - \delta$,
 $$R(A(S)) \le \hat R_S(A(S)) + \beta + (2n\beta + M)\sqrt{\frac{\ln(1/\delta)}{2n}}.$$
-The $M$ part is the usual $1/\sqrt n$ fluctuation you would pay even for a fixed model. The $2n\beta$ part is the price of learning, and it vanishes only if $\beta$ falls faster than $1/\sqrt n$. It is loose, because it charges every example the full $2\beta$ although their effects largely cancel; sharper bounds (Bousquet, Klochkov & Zhivotovskiy) need only $\beta \to 0$.
+The $M$ part is the usual $1/\sqrt n$ fluctuation you would pay even for a fixed model. The $2n\beta$ part is the price of learning, and it vanishes only if $\beta$ falls faster than $1/\sqrt n$. It is loose, because it charges every example the full $2\beta$ although their effects largely cancel; sharper bounds (Feldman & Vondrák 2018) are meaningful whenever $\beta \to 0$, at any rate.
 
 The running example is logistic regression on 10-dimensional features uniform on the unit sphere, regularized with $\lambda = 0.01$. With $n = 50$ the training loss is 0.4603 and the test loss 0.5781, a gap of about 0.119; with $n = 1000$ the gap is about 0.006. At $n = 10{,}000$ and $\delta = 0.05$, the high-probability bound adds 0.065 to the training loss at $\lambda = 1$ but 0.614 at $\lambda = 0.1$, mostly through the $2n\beta$ term.
 

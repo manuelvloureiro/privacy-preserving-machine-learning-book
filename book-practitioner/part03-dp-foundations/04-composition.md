@@ -24,7 +24,7 @@ Each step's loss can reach $\varepsilon$, but its average is much smaller. When 
 
 ![The distribution of the total privacy loss of 100 rounds of randomized response at $\varepsilon = 0.1$. The vertical lines mark its mean, the $\varepsilon'$ of optimal composition at $\delta' = 10^{-5}$, the $\varepsilon'$ of advanced composition, and basic composition's $k\varepsilon = 10$, which the loss reaches with probability $10^{-28}$.](figures/comp_loss_distribution.svg){#fig-comp-loss-distribution}
 
-Two consequences follow. The spread grows like $\sqrt k\,\varepsilon$ but the drift like $k\varepsilon^2/2$, so once $\varepsilon\sqrt k$ reaches 1 the drift is as large as the spread, and the savings over $k\varepsilon$ shrink. And the trick needs $\delta > 0$: with $\delta = 0$ you must cover even the all-truthful output, which has positive probability, so you are stuck with $k\varepsilon$.
+Two consequences follow. The spread grows like $\sqrt k\,\varepsilon$ but the drift like $k\varepsilon^2/2$, so once $\varepsilon\sqrt k$ is of order 1 or more the drift is comparable to the spread, and the savings over $k\varepsilon$ shrink. And the trick needs $\delta > 0$: with $\delta = 0$ you must cover even the all-truthful output, which has positive probability, so you are stuck with $k\varepsilon$.
 
 ## Advanced composition {#sec-comp-advanced}
 
@@ -32,7 +32,7 @@ Dwork, Rothblum & Vadhan (2010) turned this picture into a theorem. Split the to
 $$\varepsilon' = \varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\tanh(\varepsilon/2).$$ {#eq-comp-advanced}
 The original theorem uses a cruder drift, $k\varepsilon(e^\varepsilon - 1)$, about twice as large for small $\varepsilon$; both are valid. The extra $k\delta$ is the chance that some step uses its own slack.
 
-The price of the $\sqrt k$ is the factor $\sqrt{2\ln(1/\delta')}$, which is 4.80 at $\delta' = 10^{-5}$, the cost of cutting far into the tail. So the bound beats $k\varepsilon$ only once $\sqrt k$ has outgrown that factor. At $\varepsilon = 0.1$ with the original drift, that is from $k = 29$ on; at $k = 10$ the bound gives 1.567, worse than basic composition's 1, so always take the smaller of the two. Inverting the leading term gives a budget: to be $(\varepsilon_{\text{total}}, \delta')$-DP after $k$ steps, give each step roughly $\varepsilon = \varepsilon_{\text{total}}/\sqrt{2k\ln(1/\delta')}$, much more than the $\varepsilon_{\text{total}}/k$ basic composition allows.
+The price of the $\sqrt k$ is the factor $\sqrt{2\ln(1/\delta')}$, which is 4.80 at $\delta' = 10^{-5}$, the cost of cutting far into the tail. So the bound beats $k\varepsilon$ only once $\sqrt k$ has outgrown that factor. At $\varepsilon = 0.1$ with the original drift, that is from $k = 29$ on; at $k = 10$ it gives 1.623 (1.567 with the $\tanh$ drift), worse than basic composition's 1, so always take the smaller of the two. Inverting the leading term gives a budget: to be $(\varepsilon_{\text{total}}, \delta')$-DP after $k$ steps, give each step roughly $\varepsilon = \varepsilon_{\text{total}}/\sqrt{2k\ln(1/\delta')}$, much more than the $\varepsilon_{\text{total}}/k$ basic composition allows.
 
 For the 100 counts at $\delta' = 10^{-5}$, the fluctuation term is 4.7985 and the drift $100 \times 0.1\tanh(0.05) = 0.4996$, so $\varepsilon' = 5.2981$; with the original drift, 5.8502. @tbl-comp-vs-k and @fig-comp-epsilon-vs-k follow the bounds as $k$ grows. At $k = 10{,}000$, where $\varepsilon\sqrt k = 10$, the drift has taken over: the original drift costs 105 of the 153, which is why the $\tanh$ form is worth using.
 
@@ -75,7 +75,7 @@ An analyst who runs 100 steps at $\varepsilon = 0.1$, choosing a Laplace query a
 
 The same reasoning shows where adaptivity breaks. The theorems fix $k$, $\varepsilon$ and $\delta$ in advance. If each $\varepsilon_i$ is picked after seeing earlier outputs, the width of each term's range depends on the history, and Azuma's inequality, which needs those widths fixed, no longer applies. A rule such as "keep querying until the budget is spent" therefore needs its own theorem, a **privacy filter**, and reporting the spend so far at every moment needs a **privacy odometer**, which costs more ([Adaptive composition](../part04-privacy-accounting/08-adaptive-composition.md)). Pure DP under basic composition is the exception: each loss is bounded by its $\varepsilon_i$ on every output, so $\sum_i\varepsilon_i$ bounds the total whatever order the budgets came in.
 
-Choices must also be made from the outputs. A stopping rule that looks at the noisy answers is post-processing and free; one that looks at the raw data leaks: a system that answers private counts until the *true* count of some group crosses a threshold reveals that count through the number of answers it gives, and the run is not DP for any finite $\varepsilon$, even though every answer is.
+Choices must also be made from the outputs, never from the raw data. A stopping rule that looks at the noisy answers is post-processing and free; one that looks at the raw data leaks: a system that answers private counts until the *true* count of some group crosses a threshold reveals that count through the number of answers it gives, and the run is not DP for any finite $\varepsilon$, even though every answer is.
 
 ## Code {#sec-comp-code}
 

@@ -14,7 +14,7 @@ A model fits its training data better than other data, so the simplest attack, d
 $$\mathrm{Adv} = \frac{\text{expected test loss} - \text{expected training loss}}{B}.$$
 With the 0-1 loss the attack is "member if classified correctly", with advantage test error minus training error.
 
-In the running example the training error is 0.1495 and the test error 0.2663, and "member if correctly classified" has TPR 0.8505, FPR 0.7337 and advantage 0.1168, exactly the gap. Yet it identifies nobody, flagging almost three non-members in four (@fig-mia-loss-distributions).
+In the running example the training error is 0.1495 and the test error 0.2663, and "member if correctly classified" has TPR 0.8505, FPR 0.7337 and advantage 0.1168, exactly the gap. Yet it identifies nobody with confidence, flagging almost three non-members in four (@fig-mia-loss-distributions).
 
 ![Distribution of $\phi$, the logit of the target model's confidence in the true label, over member and non-member pairs. The dashed line is the mean-training-loss threshold: the attack says "member" to its right.](figures/mia_loss_distributions.svg){#fig-mia-loss-distributions}
 
@@ -24,7 +24,7 @@ So **overfitting implies leakage**, and you can read a lower bound off train and
 
 A better attack needs to know what members' outputs look like, without seeing the target's training set. Shokri et al. (2017) had the attacker train **shadow models** of its own, with the same recipe on data from the same population, so that it knows who was a member of each. It labels their outputs "in" and "out" and trains an **attack model** to classify them. With enough shadow data the attack model learns the probability of membership given the output, which is the best test that output allows. But the output is pooled over records, so this is the best attack *among those that treat all records alike*: it cannot know that a given confidence is high for one record and low for another. Here it amounts to a per-class loss threshold.
 
-What shadow models really buy is **calibration**: the attacker sets its threshold where a chosen fraction of its own shadow non-members pass, and trusts the real non-members to behave the same. Set for an FPR of 1% on the shadows, the threshold gives 0.0095 on the target models, but its TPR there is 0.0098, chance. Imitate the target's recipe, since it sets how strongly each record is fitted; a mismatch mostly spoils calibration, because "lower loss means member" transfers across tasks (Salem et al. 2019).
+What shadow models really buy is **calibration**: the attacker sets its threshold where a chosen fraction of its own shadow non-members pass, and trusts the real non-members to behave the same. Set for an FPR of 1% on the shadows, the threshold gives 0.0095 on the target models, but its TPR there is 0.0098, chance. Imitate the target's recipe, since it sets how strongly each record is fitted: shadows trained differently estimate the wrong IN and OUT distributions. A crude imitation, even shadow data from another distribution, often still works, because "lower loss means member" transfers across tasks (Salem et al. 2019).
 
 ## LiRA: a likelihood-ratio test per record {#sec-mia-lira}
 

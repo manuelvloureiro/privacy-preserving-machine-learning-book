@@ -10,7 +10,7 @@ These families are built from one another. A binomial is a sum of coin flips, a 
 
 Every measured rate (accuracy, error rate, false positive rate) is a count of yes/no outcomes divided by the number of trials. With $n$ independent trials, each a yes with probability $p$, the count is $\mathrm{Binomial}(n, p)$. Its mean is $np$ and its variance $np(1-p)$, because one trial has variance $p(1-p)$ and variances add over independent terms. Dividing the count by $n$, the measured rate $\hat p$ has standard deviation $\sqrt{p(1-p)/n}$: four times the data only halves the error.
 
-The variance vanishes near $p = 0$, which sounds like good news for rare events but is not. What matters is the error relative to the rate, and the count's standard deviation, about $\sqrt{np}$, divided by its mean $np$ is about $1/\sqrt{np}$. So relative precision is set by the expected count, not by the number of trials. A classifier that errs with probability 0.05 on 2,000 test examples makes about 100 errors, with standard deviation about 9.7, and the measured rate is within about half a point of 5%. At an error rate of 0.001 the same test set expects 2 errors, with standard deviation about 1.4, a relative error of about 70%, and one test set in seven shows no error at all.
+The variance vanishes near $p = 0$, which sounds like good news for rare events but is not. What matters is the error relative to the rate, and the count's standard deviation, about $\sqrt{np}$, divided by its mean $np$ is about $1/\sqrt{np}$. So relative precision is set by the expected count, not by the number of trials. A classifier that errs with probability 0.05 on 2,000 test examples makes about 100 errors, with standard deviation about 9.7, and the measured rate is typically within about half a point of 5%. At an error rate of 0.001 the same test set expects 2 errors, with standard deviation about 1.4, a relative error of about 70%, and one test set in seven shows no error at all.
 
 When the trials are many and each is unlikely, the binomial depends only on the expected count $\mu = np$, and the limit is the **Poisson distribution** $\mathrm{Poisson}(\mu)$. Its variance equals its mean, $\mu$, because the factor $1 - p$ in the binomial variance tends to 1. A training loop that includes each of 60,000 examples independently with probability 0.01 gets batches whose size is close to $\mathrm{Poisson}(600)$: mean 600, standard deviation about 24.5 (@fig-poisson-limit).
 
@@ -23,7 +23,7 @@ $$f(x) = \frac{1}{2b}e^{-|x - \mu|/b}.$$
 So the size $|X - \mu|$ is exactly $\mathrm{Exp}(b)$: the average absolute error is $b$, the variance is $2b^2$ (so a standard deviation $\sigma$ means $b = \sigma/\sqrt2$), and the two-sided tail is exact,
 $$\Pr[|X - \mu| \ge t] = e^{-t/b}.$$
 
-The Laplace has heavier tails than a normal of the same variance, and the log scale shows why (@fig-laplace-vs-normal). The logarithm of each density is its exponent: two straight lines $-|x|/b$ for the Laplace, a parabola $-x^2/(2\sigma^2)$ for the normal. Far enough out a parabola always falls below a line, so the normal's tail eventually becomes far lighter. With the same variance, the Laplace exceeds three times its scale with probability $e^{-3} \approx 0.050$, the normal only with probability about 0.034, and the gap widens. So a tail bound shaped for the normal is false for Laplace noise.
+The Laplace has heavier tails than a normal of the same variance, and the log scale shows why (@fig-laplace-vs-normal). The logarithm of each density is its exponent: two straight lines $-|x|/b$ for the Laplace, a parabola $-x^2/(2\sigma^2)$ for the normal. Far enough out a parabola always falls below a line, so the normal's tail eventually becomes far lighter. With the same variance, the Laplace exceeds three times its scale with probability $e^{-3} \approx 0.050$, the normal only with probability about 0.034, and the gap widens. So a tail bound shaped for the normal fails for Laplace noise far enough out.
 
 ![Normal and Laplace densities with variance 2, on linear and log scales. The log of the normal density is a parabola; the log of the Laplace density is two straight lines.](figures/laplace_vs_normal.svg){#fig-laplace-vs-normal}
 
@@ -85,7 +85,7 @@ But "unbounded" does not mean "often large": the normal's extreme ratios sit in 
 
 - A measured rate has standard deviation $\sqrt{p(1-p)/n}$; its relative precision is set by the expected count $np$.
 - Normal noise in $d$ dimensions has norm $\approx \sigma\sqrt d$ and is $\mathcal N(0, \sigma^2)$ along every fixed direction.
-- Laplace shifted by $s$: log ratio at most $|s|/b$. Normal: unbounded, but large only in the tails, where the CLT says nothing useful.
+- Laplace shifted by $s$: log ratio at most $|s|/b$. Normal: unbounded, but large only in the tails, which carry very little probability.
 
 ## Further reading
 

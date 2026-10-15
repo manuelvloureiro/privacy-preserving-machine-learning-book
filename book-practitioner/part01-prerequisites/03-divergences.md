@@ -13,6 +13,7 @@ $$D_{\mathrm{KL}}(P\|Q) = \mathbb E_P\left[\ln\frac{p(X)}{q(X)}\right] = \sum_x 
 Independent observations multiply their likelihoods, so their evidence adds: $n$ samples carry $n$ times the KL of one. And since the drift grows like $n$ while its fluctuation grows like $\sqrt n$, telling the two apart takes on the order of $1/\mathrm{KL}$ samples. For the die, $D_{\mathrm{KL}}(P\|Q) = 0.2939$ per roll.
 
 KL is never negative and is zero only when $P = Q$, but it averages over its first argument, so it is asymmetric. The fair die proves its innocence more slowly, $D_{\mathrm{KL}}(Q\|P) = 0.2426$, because its evidence is the absence of sixes.
+
 The direction also shapes fitted models. Maximum likelihood minimizes the forward KL, averaged over the data, so wherever the data go and the model has almost no mass, $\ln(p/q)$ explodes: the fit must cover everything. Variational inference minimizes the reverse KL, averaged over the model, which only punishes mass where the data aren't. Fitting one Gaussian to two separated bumps, the forward fit spreads over both and the reverse fit locks onto one; the second has forward KL 15.307, against 0.724 for the first. If $Q$ gives zero probability to anything $P$ can produce, that outcome is infinite evidence and KL is infinite.
 
 For two normals with the same variance and means $\mu$ standard deviations apart, $D_{\mathrm{KL}} = \mu^2/2$; for $\mathrm{Lap}(0, b)$ against $\mathrm{Lap}(s, b)$, with $t = s/b$, $D_{\mathrm{KL}} = t + e^{-t} - 1$. The normal's is quadratic in the shift, which is why small drifts need many samples.
@@ -137,7 +138,7 @@ The full edition's script, [divergences.py](../../code/part01-prerequisites/dive
 **Rules of thumb**
 
 - Compute in KL or Rényi, where independent samples add; convert to TV at the end.
-- A bounded likelihood ratio gives a finite max-divergence; an unbounded one gives finite $D_\alpha$ at every finite order but $D_\infty = \infty$.
+- A bounded likelihood ratio (Laplace) gives a finite max-divergence; an unbounded one (normal) gives $D_\infty = \infty$, though for the normal pair every finite order stays finite.
 - Processing never increases a divergence.
 
 ## Further reading
