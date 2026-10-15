@@ -1823,7 +1823,7 @@ Figure&nbsp;44.5: Left: test accuracy of the running example against <span class
 </section>
 <section id="code-check-every-number-by-computation" class="level2" data-number="44.10">
 <h2 data-number="44.10" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">44.10</span> Code: check every number by computation</h2>
-<p>The script <a href="../../../code/part05-dp-ml/choosing_epsilon.py">code/choosing_epsilon.py</a> calibrates the running example’s noise multipliers with the RDP accountant of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, discretizes the one-step privacy loss of the subsampled Gaussian pessimistically and optimistically, composes it 10,000 times by FFT, and reads off the trade-off curve, the privacy loss quantiles and the bounds of this chapter. It also trains one model per budget and runs the loss-threshold attack. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/choosing_epsilon.py">code/choosing_epsilon.py</a> calibrates the running example’s noise multipliers with the RDP accountant of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, discretizes the one-step privacy loss of the subsampled Gaussian pessimistically and optimistically, composes it 10,000 times by FFT, and reads off the trade-off curve, the privacy loss quantiles and the bounds of this chapter. It also trains one model per budget and runs the loss-threshold attack. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/choosing_epsilon.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>It takes two to three minutes, most of it in the PLD compositions. <strong>Output</strong> (seed 0), summarized in <a href="#tbl-epsc-code" class="quarto-xref">Table&nbsp;<span>44.12</span></a>:</p>
 <div id="tbl-epsc-code" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1881,7 +1881,7 @@ Table&nbsp;44.12: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_choosing_epsilon.py">tests/test_choosing_epsilon.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_choosing_epsilon.py">tests/test_choosing_epsilon.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> The exact trade-off curve of DP-SGD is cheap to compute, with the same machinery as a numerical accountant, and it changes the conversation: at the budgets machine learning uses, the curve is far below the line that the reported <span class="math inline">\((\varepsilon, \delta)\)</span> draws, and it, not the line, is what an attacker faces.</p>
 </section>
 <section id="references" class="level2" data-number="44.11">

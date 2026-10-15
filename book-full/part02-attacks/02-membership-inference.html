@@ -1254,7 +1254,7 @@ Figure&nbsp;10.6: Each pool point’s separation <span class="math inline">\((\m
 </section>
 <section id="code-run-every-attack-on-the-running-example" class="level2" data-number="10.9">
 <h2 data-number="10.9" class="anchored" data-anchor-id="code-run-every-attack-on-the-running-example"><span class="header-section-number">10.9</span> Code: run every attack on the running example</h2>
-<p>The script <a href="../../../code/part02-attacks/membership_inference.py">code/membership_inference.py</a> builds the pool, trains the 128 target and 64 shadow models, runs every attack, and prints every number in this chapter. It also computes the closed-form examples. Each attack is a small typed function of the margins <span class="math inline">\(\phi\)</span> and the shadow models’ fits, and the figures loop over those functions. It runs in about ten seconds. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/membership_inference.py">code/membership_inference.py</a> builds the pool, trains the 128 target and 64 shadow models, runs every attack, and prints every number in this chapter. It also computes the closed-form examples. Each attack is a small typed function of the margins <span class="math inline">\(\phi\)</span> and the shadow models’ fits, and the figures loop over those functions. It runs in about ten seconds. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/membership_inference.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-mia-code" class="quarto-xref">Table&nbsp;<span>10.6</span></a>:</p>
 <div id="tbl-mia-code" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1324,7 +1324,7 @@ Table&nbsp;10.6: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_membership_inference.py">tests/test_membership_inference.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_membership_inference.py">tests/test_membership_inference.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it</strong></p>
 <p>Start with the loss attack, where theory and experiment meet exactly. <strong>Yeom’s identity is exact:</strong> the 0-1 attack’s advantage equals the error gap to four decimals, and the simulated bounded-loss attack matches gap<span class="math inline">\(/B\)</span> to within sampling noise.</p>
 <p>That identity measures an average, and the average is misleading where it matters. <strong>Pooled attacks are at chance at the low-FPR end.</strong> The loss threshold and the shadow attack model have AUC 0.577 and best advantage above 0.12, yet their TPR at FPR <span class="math inline">\(10^{-3}\)</span> is below <span class="math inline">\(10^{-3}\)</span>.</p>

@@ -1261,7 +1261,7 @@ Figure&nbsp;23.5: Left: root-mean-square error of the clipped private mean of lo
 </section>
 <section id="code-check-every-number-by-computation" class="level2" data-number="23.8">
 <h2 data-number="23.8" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">23.8</span> Code: check every number by computation</h2>
-<p>The script <a href="../../../code/part03-dp-foundations/sensitivity.py">code/sensitivity.py</a> computes every number in this chapter and draws its figures. Local and smooth sensitivity, the noise parameters, propose-test-release, subsample-and-aggregate and the clipped mean are each small typed functions; the table calls them once and the figures loop over them. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part03-dp-foundations/sensitivity.py">code/sensitivity.py</a> computes every number in this chapter and draws its figures. Local and smooth sensitivity, the noise parameters, propose-test-release, subsample-and-aggregate and the clipped mean are each small typed functions; the table calls them once and the figures loop over them. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/sensitivity.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><a href="#tbl-sens-results" class="quarto-xref">Table&nbsp;<span>23.6</span></a> shows the output with seed 0.</p>
 <div id="tbl-sens-results" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1315,7 +1315,7 @@ Table&nbsp;23.6: Results of the chapter’s script with seed 0.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_sensitivity.py">tests/test_sensitivity.py</a> checks that the output still matches this table.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_sensitivity.py">tests/test_sensitivity.py</a> checks that the output still matches this table.</p>
 <p><strong>What to take from it.</strong> The first lesson is that a data-dependent noise scale can leak more than the answer: in the leak example both datasets have the same median, so the whole <span class="math inline">\(\delta = 0.477\)</span> comes from the spread of the noise. The repair for the median rests on an exact formula, and the <span class="math inline">\(O(n^2)\)</span> formula for <span class="math inline">\(A^{(k)}\)</span> matches brute force at every distance <span class="math inline">\(k\)</span>, so the smooth sensitivities it produces can be trusted. With it, smooth sensitivity and propose-test-release buy about two orders of magnitude over global sensitivity for the median of a thousand points, though they lose to it on tiny datasets, where a few changes can open a gap across the whole range. Finally, every method ends in a bias–noise trade-off you can compute: the number of blocks and the clip bound both have optima you can find in closed form before touching the data.</p>
 </section>
 <section id="references" class="level2" data-number="23.9">

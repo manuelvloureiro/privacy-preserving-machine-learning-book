@@ -1077,7 +1077,7 @@ Figure&nbsp;36.4: Excess risk of the four private releases against the dataset s
 </section>
 <section id="code-check-every-number-by-computation" class="level2" data-number="36.8">
 <h2 data-number="36.8" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">36.8</span> Code: check every number by computation</h2>
-<p>The script <a href="../../../code/part05-dp-ml/dp_erm.py">code/dp_erm.py</a> implements the three methods for regularized logistic regression with exact Newton solves, computes the exact output densities of objective perturbation in one dimension, and runs the comparison. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/dp_erm.py">code/dp_erm.py</a> implements the three methods for regularized logistic regression with exact Newton solves, computes the exact output densities of objective perturbation in one dimension, and runs the comparison. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/dp_erm.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Its public functions are used by later chapters of this part: <code>make_logistic_data</code>, <code>fit_logistic</code>, <code>logistic_objective</code>, <code>logistic_grad</code>, <code>excess_risk</code>, <code>gaussian_delta(eps, mu)</code>, <code>gaussian_mu(eps, delta)</code> and <code>gaussian_sigma(sensitivity, eps, delta)</code>.</p>
 <p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-dperm-code" class="quarto-xref">Table&nbsp;<span>36.4</span></a>:</p>
@@ -1136,7 +1136,7 @@ Table&nbsp;36.4: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_dp_erm.py">tests/test_dp_erm.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_dp_erm.py">tests/test_dp_erm.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> Three things. First, the privacy proofs can be checked numerically where the output distribution is computable: in one dimension the change-of-variables density is exact, and the log ratio stays inside its bound with room to spare. Second, the second-order predictions of excess risk match simulation to within the sampling error, so you can predict the cost of privacy before training. Third, all methods have the same <span class="math inline">\(1/n^2\)</span> rate on this problem, and the constant, a factor of ten here, comes from how each method uses the data’s curvature.</p>
 </section>
 <section id="references" class="level2" data-number="36.9">

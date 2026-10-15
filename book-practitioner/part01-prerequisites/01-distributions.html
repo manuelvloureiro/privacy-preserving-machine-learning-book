@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -507,12 +542,19 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">1.1</span> Why this matters</a></li>
-  <li><a href="#sec-dist-counts" id="toc-sec-dist-counts" class="nav-link" data-scroll-target="#sec-dist-counts"><span class="header-section-number">1.2</span> Counts: binomial and Poisson</a></li>
-  <li><a href="#sec-dist-laplace" id="toc-sec-dist-laplace" class="nav-link" data-scroll-target="#sec-dist-laplace"><span class="header-section-number">1.3</span> Laplace and exponential</a></li>
-  <li><a href="#sec-dist-normal" id="toc-sec-dist-normal" class="nav-link" data-scroll-target="#sec-dist-normal"><span class="header-section-number">1.4</span> Normal</a></li>
-  <li><a href="#sec-dist-shift" id="toc-sec-dist-shift" class="nav-link" data-scroll-target="#sec-dist-shift"><span class="header-section-number">1.5</span> A density against its shifted copy</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">1.6</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">1.7</span> Further reading</a></li>
+  <li><a href="#sec-dist-moments" id="toc-sec-dist-moments" class="nav-link" data-scroll-target="#sec-dist-moments"><span class="header-section-number">1.2</span> Mean and variance</a></li>
+  <li><a href="#sec-dist-tails" id="toc-sec-dist-tails" class="nav-link" data-scroll-target="#sec-dist-tails"><span class="header-section-number">1.3</span> Tails and the moment generating function</a></li>
+  <li><a href="#sec-dist-counts" id="toc-sec-dist-counts" class="nav-link" data-scroll-target="#sec-dist-counts"><span class="header-section-number">1.4</span> Counts: Bernoulli and binomial</a></li>
+  <li><a href="#sec-dist-poisson" id="toc-sec-dist-poisson" class="nav-link" data-scroll-target="#sec-dist-poisson"><span class="header-section-number">1.5</span> Rare events: Poisson</a></li>
+  <li><a href="#sec-dist-exponential" id="toc-sec-dist-exponential" class="nav-link" data-scroll-target="#sec-dist-exponential"><span class="header-section-number">1.6</span> Waiting times: exponential</a></li>
+  <li><a href="#sec-dist-laplace" id="toc-sec-dist-laplace" class="nav-link" data-scroll-target="#sec-dist-laplace"><span class="header-section-number">1.7</span> Laplace</a></li>
+  <li><a href="#sec-dist-normal" id="toc-sec-dist-normal" class="nav-link" data-scroll-target="#sec-dist-normal"><span class="header-section-number">1.8</span> Normal</a></li>
+  <li><a href="#sec-dist-highdim" id="toc-sec-dist-highdim" class="nav-link" data-scroll-target="#sec-dist-highdim"><span class="header-section-number">1.9</span> Normal noise in many dimensions</a></li>
+  <li><a href="#sec-dist-clt" id="toc-sec-dist-clt" class="nav-link" data-scroll-target="#sec-dist-clt"><span class="header-section-number">1.10</span> The central limit theorem</a></li>
+  <li><a href="#sec-dist-shift" id="toc-sec-dist-shift" class="nav-link" data-scroll-target="#sec-dist-shift"><span class="header-section-number">1.11</span> A density against its shifted copy</a></li>
+  <li><a href="#sec-dist-code" id="toc-sec-dist-code" class="nav-link" data-scroll-target="#sec-dist-code"><span class="header-section-number">1.12</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">1.13</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">1.14</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
@@ -540,14 +582,39 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="1.1">
 <h2 data-number="1.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">1.1</span> Why this matters</h2>
-<p>Later parts keep asking two questions about a random output: how wide is it, and how hard is it to tell apart from a slightly different one? Both answers depend on its distribution, and a handful of families cover almost every case: counts of events, such as errors on a test set, and additive noise, usually normal or Laplace.</p>
-<p>These families are built from one another. A binomial is a sum of coin flips, a Poisson is a binomial with many unlikely trials, a Laplace is two exponential waiting times back to back, and a normal is what many small independent pieces add up to. Each family’s spread and tail follow from how it is built, and so does what matters most later: how far a density drifts from a shifted copy of itself.</p>
+<p>Almost every number in a private machine-learning system is either a count or a draw of noise. The number of mistakes a model makes on a test set is a count. So is the number of examples that land in a randomly sampled minibatch. The noise a system adds to a statistic on purpose is a draw from a distribution that someone chose, usually a normal or a Laplace distribution. Before you can trust any of these numbers, you need to know how it is spread. You need to know where it usually lands, how far it can stray, and how rare the large values are.</p>
+<p>A handful of distribution families covers almost every case, and they are not a collection of unrelated formulas. Each one is built from simpler ones. A binomial count is a sum of coin flips. A Poisson count is a binomial with many trials, each unlikely to succeed. An exponential is the time you wait for the first of those rare events. A Laplace distribution is two exponentials placed back to back. A normal distribution is what a sum of many small independent pieces looks like. Because each family is built from simpler pieces, its average and its spread follow from the pieces, and this chapter explains each fact that way.</p>
+<p>The chapter ends with a question that later chapters keep asking. Suppose noise is added to one of two values that differ by a known amount, and you see the result. How strongly can that one observation favour one value over the other? With normal noise, some observations settle the question almost for certain. With Laplace noise, no observation can ever favour either value by more than a fixed factor. The difference comes straight from the shapes of the two distributions.</p>
 </section>
-<section id="sec-dist-counts" class="level2" data-number="1.2">
-<h2 data-number="1.2" class="anchored" data-anchor-id="sec-dist-counts"><span class="header-section-number">1.2</span> Counts: binomial and Poisson</h2>
-<p>Every measured rate (accuracy, error rate, false positive rate) is a count of yes/no outcomes divided by the number of trials. With <span class="math inline">\(n\)</span> independent trials, each a yes with probability <span class="math inline">\(p\)</span>, the count is <span class="math inline">\(\mathrm{Binomial}(n, p)\)</span>. Its mean is <span class="math inline">\(np\)</span> and its variance <span class="math inline">\(np(1-p)\)</span>, because one trial has variance <span class="math inline">\(p(1-p)\)</span> and variances add over independent terms. Dividing the count by <span class="math inline">\(n\)</span>, the measured rate <span class="math inline">\(\hat p\)</span> has standard deviation <span class="math inline">\(\sqrt{p(1-p)/n}\)</span>: four times the data only halves the error.</p>
-<p>The variance vanishes near <span class="math inline">\(p = 0\)</span>, which sounds like good news for rare events but is not. What matters is the error relative to the rate, and the count’s standard deviation, about <span class="math inline">\(\sqrt{np}\)</span>, divided by its mean <span class="math inline">\(np\)</span> is about <span class="math inline">\(1/\sqrt{np}\)</span>. So relative precision is set by the expected count, not by the number of trials. A classifier that errs with probability 0.05 on 2,000 test examples makes about 100 errors, with standard deviation about 9.7, and the measured rate is typically within about half a point of 5%. At an error rate of 0.001 the same test set expects 2 errors, with standard deviation about 1.4, a relative error of about 70%, and one test set in seven shows no error at all.</p>
-<p>When the trials are many and each is unlikely, the binomial depends only on the expected count <span class="math inline">\(\mu = np\)</span>, and the limit is the <strong>Poisson distribution</strong> <span class="math inline">\(\mathrm{Poisson}(\mu)\)</span>. Its variance equals its mean, <span class="math inline">\(\mu\)</span>, because the factor <span class="math inline">\(1 - p\)</span> in the binomial variance tends to 1. A training loop that includes each of 60,000 examples independently with probability 0.01 gets batches whose size is close to <span class="math inline">\(\mathrm{Poisson}(600)\)</span>: mean 600, standard deviation about 24.5 (<a href="#fig-poisson-limit" class="quarto-xref">Figure&nbsp;<span>1.1</span></a>).</p>
+<section id="sec-dist-moments" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="sec-dist-moments"><span class="header-section-number">1.2</span> Mean and variance</h2>
+<p>The <strong>mean</strong> of a random quantity <span class="math inline">\(X\)</span>, written <span class="math inline">\(\mathbb E[X]\)</span>, is the long-run average of many independent draws of it. The mean says where a distribution sits, but not how wide it is. The <strong>variance</strong> measures the width. It takes each draw’s distance from the mean and squares it, so that distances on either side count the same. Then it averages these squares. A second form is often easier to compute. The variance is the mean of the square minus the square of the mean: <span id="eq-auto-01distributions-1"><span class="math display">\[\operatorname{Var}(X) = \mathbb E\big[(X - \mathbb E X)^2\big] = \mathbb E[X^2] - (\mathbb E X)^2. \tag{1.1}\]</span></span> The <strong>standard deviation</strong> is the square root of the variance. It is in the same units as <span class="math inline">\(X\)</span>, so it is the number to compare with the mean. For a fair die, the mean is 3.5 and the variance is about 2.92. The standard deviation is about 1.71, so a typical roll lands between one and two pips from the mean.</p>
+<p>Three rules cover almost every calculation in this chapter. The first rule says that the mean of a sum is the sum of the means. It holds always, even when the quantities depend on each other, because an average over outcomes splits term by term. The second rule says what scaling does to the spread. Multiplying <span class="math inline">\(X\)</span> by a constant <span class="math inline">\(c\)</span> multiplies every distance from the mean by <span class="math inline">\(c\)</span>. Squaring turns that factor into <span class="math inline">\(c^2\)</span>, so <span class="math inline">\(\operatorname{Var}(cX) = c^2\operatorname{Var}(X)\)</span>.</p>
+<p>The third rule says that variances add, but only under a condition. For two quantities <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span>, the variance of the sum is the sum of the variances when <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent. In general the variance of a sum has an extra term, the <strong>covariance</strong>, which measures how much <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> tend to move together. Independence makes the covariance zero, and only then do the variances simply add. Without independence the rule fails. If <span class="math inline">\(Y\)</span> is an exact copy of <span class="math inline">\(X\)</span>, the sum is <span class="math inline">\(2X\)</span>, and by the second rule its variance is four times that of <span class="math inline">\(X\)</span>, not twice.</p>
+<p>The second and third rules together say how fast an average becomes precise. Take <span class="math inline">\(n\)</span> independent draws of <span class="math inline">\(X\)</span> and average them. Their sum has <span class="math inline">\(n\)</span> times the variance of one draw, by the third rule. Dividing the sum by <span class="math inline">\(n\)</span> divides that variance by <span class="math inline">\(n^2\)</span>, by the second rule. So the average has variance <span class="math inline">\(\operatorname{Var}(X)/n\)</span>, and its standard deviation is that of one draw divided by <span class="math inline">\(\sqrt n\)</span>. Four times as much data therefore only halves the error.</p>
+</section>
+<section id="sec-dist-tails" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="sec-dist-tails"><span class="header-section-number">1.3</span> Tails and the moment generating function</h2>
+<p>The mean and the variance describe the bulk of a distribution, where most draws land. A guarantee that must hold except in rare cases depends instead on the <strong>tail</strong>. The tail is the chance <span class="math inline">\(\Pr[X \ge t]\)</span> that the quantity lands at or above a threshold <span class="math inline">\(t\)</span> far from the mean. What matters is how fast the tail shrinks as the threshold grows, and three shapes recur in this book. Evaluate each of them at <span class="math inline">\(t = 5\)</span>. A polynomial decay such as <span class="math inline">\(1/t^2\)</span> gives 0.04. An exponential decay such as <span class="math inline">\(e^{-t}\)</span> gives about <span class="math inline">\(6.7\times10^{-3}\)</span>. A Gaussian decay such as <span class="math inline">\(e^{-t^2/2}\)</span> gives about <span class="math inline">\(3.7\times10^{-6}\)</span>.</p>
+<p>The gap widens quickly as <span class="math inline">\(t\)</span> grows. The exponent of the Gaussian decay grows like <span class="math inline">\(t^2\)</span>, while that of the exponential decay grows only like <span class="math inline">\(t\)</span>. The exponential and Laplace distributions below have exponential tails. The normal distribution has a Gaussian tail. Which decay a distribution has decides which tail bounds apply to it.</p>
+<p>One function connects a distribution to its tail, and also makes sums of independent quantities easy. The <strong>moment generating function</strong> (MGF) of <span class="math inline">\(X\)</span> is the average of <span class="math inline">\(e^{\lambda X}\)</span>: <span id="eq-auto-01distributions-2"><span class="math display">\[M_X(\lambda) = \mathbb E\big[e^{\lambda X}\big]. \tag{1.2}\]</span></span> The number <span class="math inline">\(\lambda\)</span> is not a parameter of the distribution. It is a dial that you set. When <span class="math inline">\(\lambda\)</span> is positive, the weight <span class="math inline">\(e^{\lambda X}\)</span> grows exponentially with <span class="math inline">\(X\)</span>, so large values dominate the average. The larger you set <span class="math inline">\(\lambda\)</span>, the further into the right tail the MGF looks.</p>
+<p>A coin shows where the formulas in this chapter come from. Take a quantity that is 1 with probability <span class="math inline">\(p\)</span> and 0 otherwise. At the outcome 0 the weight is <span class="math inline">\(e^0 = 1\)</span>, and at the outcome 1 it is <span class="math inline">\(e^\lambda\)</span>. The MGF is the average of the two weights, <span class="math inline">\((1 - p) + pe^\lambda\)</span>, which is <span class="math inline">\(1 + p(e^\lambda - 1)\)</span>. The factor <span class="math inline">\(e^\lambda\)</span> that keeps returning for counts is just the weight of the outcome 1. The function’s name comes from the <strong>moments</strong> <span class="math inline">\(\mathbb E[X^k]\)</span>, which its derivatives at <span class="math inline">\(\lambda = 0\)</span> recover. The full edition derives every mean and variance in this chapter that way.</p>
+<p>Two properties of the MGF matter in practice. The first is that adding independent quantities multiplies their MGFs: <span id="eq-auto-01distributions-3"><span class="math display">\[M_{X+Y}(\lambda) = M_X(\lambda)\,M_Y(\lambda) \quad\text{when $X$ and $Y$ are independent.} \tag{1.3}\]</span></span> The exponential of a sum is the product of the exponentials. Independence then lets the average of that product split into the product of the averages. Without independence the average of a product does not split, and the rule fails. A related theorem, which the full edition cites rather than proves, says that two distributions with the same MGF near zero are the same distribution. So when the MGF of a sum matches a known family’s MGF, the sum belongs to that family.</p>
+<p>The second property links the MGF to the tail. For every positive <span class="math inline">\(\lambda\)</span>, <span id="eq-auto-01distributions-4"><span class="math display">\[\Pr[X \ge t] \le M_X(\lambda)\,e^{-\lambda t}. \tag{1.4}\]</span></span> The reason takes one step. Whenever <span class="math inline">\(X\)</span> is at least <span class="math inline">\(t\)</span>, the weight <span class="math inline">\(e^{\lambda X}\)</span> is at least <span class="math inline">\(e^{\lambda t}\)</span>. The weight is never negative, so the other outcomes cannot pull its average down. The average is therefore at least <span class="math inline">\(e^{\lambda t}\)</span> times the chance that <span class="math inline">\(X\)</span> is at least <span class="math inline">\(t\)</span>. If the MGF is finite for some positive <span class="math inline">\(\lambda\)</span>, the tail must therefore shrink at least exponentially. For a heavy-tailed distribution, the MGF is infinite for every positive <span class="math inline">\(\lambda\)</span>, and this bound says nothing. <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> turns the bound into usable error bars by choosing <span class="math inline">\(\lambda\)</span> well.</p>
+</section>
+<section id="sec-dist-counts" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="sec-dist-counts"><span class="header-section-number">1.4</span> Counts: Bernoulli and binomial</h2>
+<p>The simplest random quantity is a yes-or-no outcome. A test example is misclassified or not, and a record is included in a sample or not. A <strong>Bernoulli</strong> variable with probability <span class="math inline">\(p\)</span> is 1 with probability <span class="math inline">\(p\)</span> and 0 otherwise. Its mean is <span class="math inline">\(p\)</span>. Its square equals itself, so its variance is <span class="math inline">\(p - p^2\)</span>, which is <span class="math inline">\(p(1-p)\)</span>.</p>
+<p>Count the yeses over <span class="math inline">\(n\)</span> independent trials and you get a <strong>binomial</strong> count, written <span class="math inline">\(\mathrm{Binomial}(n, p)\)</span>. The chance of exactly <span class="math inline">\(k\)</span> yeses has two parts. Any one sequence with <span class="math inline">\(k\)</span> yeses has probability <span class="math inline">\(p^k(1-p)^{n-k}\)</span>, because the trials are independent and their probabilities multiply. There are <span class="math inline">\(\binom nk\)</span> such sequences, one for each way to choose which trials say yes. So the probability of <span class="math inline">\(k\)</span> yeses is <span id="eq-auto-01distributions-5"><span class="math display">\[\Pr[S = k] = \binom nk p^k(1-p)^{n-k}, \qquad k = 0, 1, \dots, n, \tag{1.5}\]</span></span> where <span class="math inline">\(S\)</span> is the count.</p>
+<p>You rarely need this formula to get the mean and the variance. Write the count as a sum of <span class="math inline">\(n\)</span> independent Bernoulli trials and apply the rules for sums. The mean is <span class="math inline">\(np\)</span>, the sum of <span class="math inline">\(n\)</span> means. The trials are independent, so the variance is <span class="math inline">\(np(1-p)\)</span>. The MGF of the count is the product of <span class="math inline">\(n\)</span> coin MGFs, <span class="math inline">\((1 + p(e^\lambda - 1))^n\)</span>.</p>
+<p>The variance of one trial, <span class="math inline">\(p(1-p)\)</span>, is zero at <span class="math inline">\(p = 0\)</span> and at <span class="math inline">\(p = 1\)</span>. It is largest halfway between, where it equals a quarter. So a rate near zero is measured much more precisely than a rate near one half. A bound that uses only the fact that each trial lies between 0 and 1 must assume the worst case of a quarter. Hoeffding’s inequality in <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> is such a bound, and it pays for this blindness when rates are small.</p>
+<p>Every measured rate, such as accuracy or a false-positive rate, is a binomial count divided by <span class="math inline">\(n\)</span>. Write <span class="math inline">\(\hat p\)</span> for the measured rate. By the scaling rule its mean is <span class="math inline">\(p\)</span> and its variance is <span class="math inline">\(p(1-p)/n\)</span>, so its standard deviation is <span class="math inline">\(\sqrt{p(1-p)/n}\)</span>.</p>
+<p>Here is what this means for a test set. Suppose a classifier makes a mistake on each test example independently with probability 0.05. On 2,000 test examples it makes 100 mistakes on average. The standard deviation of that count is about 9.7. Divided by the 2,000 examples, this is about 0.005 of the rate. So the measured error rate is typically within about half a percentage point of the true 5%.</p>
+<p>Now lower the true error rate to 0.001. The same test set expects only 2 mistakes, with a standard deviation of about 1.4. The error relative to the count is now about 70%. A single test set can easily show no mistakes at all. The chance of that is <span class="math inline">\(0.999^{2000}\)</span>, which is about <span class="math inline">\(e^{-2}\)</span>, or one test set in seven. What sets the relative precision is the expected number of mistakes, not the number of test examples.</p>
+</section>
+<section id="sec-dist-poisson" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="sec-dist-poisson"><span class="header-section-number">1.5</span> Rare events: Poisson</h2>
+<p>Many counts in machine learning add up many trials that are each unlikely. Examples are the mistakes of an accurate model on a large test set, or the examples drawn into a minibatch when each is included with a small probability. When the number of trials is large and each success is rare, the binomial depends only on the expected count <span class="math inline">\(\mu = np\)</span>. Holding <span class="math inline">\(\mu\)</span> fixed while the number of trials grows gives the <strong>Poisson distribution</strong>, written <span class="math inline">\(\mathrm{Poisson}(\mu)\)</span>. Its probability of a count <span class="math inline">\(k\)</span> is <span id="eq-auto-01distributions-6"><span class="math display">\[\Pr[N = k] = e^{-\mu}\frac{\mu^k}{k!}, \qquad k = 0, 1, 2, \dots \tag{1.6}\]</span></span> The factor <span class="math inline">\(e^{-\mu}\)</span> comes from the chance that every other trial fails, <span class="math inline">\((1 - \mu/n)^n\)</span>, which tends to <span class="math inline">\(e^{-\mu}\)</span> as the number of trials grows. <a href="#fig-poisson-limit" class="quarto-xref">Figure&nbsp;<span>1.1</span></a> shows how quickly the binomial approaches its limit. At 10 trials the binomial is visibly narrower than the Poisson. At 100 trials the two almost coincide.</p>
 <div id="fig-poisson-limit" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-poisson-limit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -558,27 +625,75 @@ Figure&nbsp;1.1: <span class="math inline">\(\mathrm{Binomial}(n, 5/n)\)</span> 
 </figcaption>
 </figure>
 </div>
+<p>A Poisson count has its variance equal to its mean, both <span class="math inline">\(\mu\)</span>. The reason is visible in the binomial variance <span class="math inline">\(np(1-p)\)</span>. As the success probability <span class="math inline">\(p\)</span> shrinks, the factor <span class="math inline">\(1 - p\)</span> tends to 1, and only <span class="math inline">\(np = \mu\)</span> is left. The standard deviation is therefore <span class="math inline">\(\sqrt\mu\)</span>, and the spread relative to the mean is <span class="math inline">\(1/\sqrt\mu\)</span>. A Poisson count becomes precise relative to its mean only once you expect many events. With <span class="math inline">\(\mu = 4\)</span> the standard deviation is 2. A count of 0 or 8, two standard deviations from the mean, is then unremarkable.</p>
+<p>The Poisson MGF is <span class="math inline">\(\exp(\mu(e^\lambda - 1))\)</span>. Its form makes sums easy. Multiplying the MGFs of two independent Poisson counts adds their exponents, which gives the Poisson MGF with the two means added. So the sum of independent Poisson counts is again a Poisson count, with the means added.</p>
+<p>The same MGF also bounds every count of independent yes-or-no outcomes, which is why it reappears in the Chernoff bound. The inequality <span class="math inline">\(1 + x \le e^x\)</span> holds for every <span class="math inline">\(x\)</span>, because the line <span class="math inline">\(1 + x\)</span> touches the curve <span class="math inline">\(e^x\)</span> at zero and the curve bends upward away from it. Applied to the coin, it says that the MGF <span class="math inline">\(1 + p(e^\lambda - 1)\)</span> is at most <span class="math inline">\(\exp(p(e^\lambda - 1))\)</span>. Multiplying over independent outcomes gives the result. A sum of independent outcomes with expected total <span class="math inline">\(\mu\)</span> has an MGF no larger than the Poisson MGF with mean <span class="math inline">\(\mu\)</span>. This holds even when each outcome has its own probability. <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> starts its Chernoff bound from this fact.</p>
+<p>Counts are skewed to the right. A count cannot go below zero, but it can run far above its mean. For large <span class="math inline">\(k\)</span>, the probability of a count <span class="math inline">\(k\)</span> is at most <span class="math inline">\((e\mu/k)^k\)</span>. This falls faster than any exponential decay, but more slowly than the tail of a normal distribution with the same variance.</p>
+<p>Here is a count you will meet again. Some training procedures form each minibatch by including each of 60,000 examples independently with probability 0.01. The batch size is then a binomial count with many trials, each unlikely, so it is very close to <span class="math inline">\(\mathrm{Poisson}(600)\)</span>. Its mean is 600 and its standard deviation is about 24.5. Batch sizes between 550 and 650, about two standard deviations on either side, are typical. <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> shows how rarely a batch leaves the range of 600 plus or minus 20%.</p>
 </section>
-<section id="sec-dist-laplace" class="level2" data-number="1.3">
-<h2 data-number="1.3" class="anchored" data-anchor-id="sec-dist-laplace"><span class="header-section-number">1.3</span> Laplace and exponential</h2>
-<p>The waiting time for a rare event, with many independent chances each unlikely, follows the <strong>exponential distribution</strong> <span class="math inline">\(\mathrm{Exp}(b)\)</span>: density <span class="math inline">\(\frac1be^{-y/b}\)</span> on <span class="math inline">\(y \ge 0\)</span>, mean <span class="math inline">\(b\)</span>, tail <span class="math inline">\(e^{-t/b}\)</span>. The <strong>Laplace distribution</strong> puts one exponential on each side of a centre. <span class="math inline">\(\mathrm{Lap}(\mu, b)\)</span>, with centre <span class="math inline">\(\mu\)</span> and scale <span class="math inline">\(b\)</span>, has density <span id="eq-auto-01distributions-1"><span class="math display">\[f(x) = \frac{1}{2b}e^{-|x - \mu|/b}. \tag{1.1}\]</span></span> So the size <span class="math inline">\(|X - \mu|\)</span> is exactly <span class="math inline">\(\mathrm{Exp}(b)\)</span>: the average absolute error is <span class="math inline">\(b\)</span>, the variance is <span class="math inline">\(2b^2\)</span> (so a standard deviation <span class="math inline">\(\sigma\)</span> means <span class="math inline">\(b = \sigma/\sqrt2\)</span>), and the two-sided tail is exact, <span id="eq-auto-01distributions-2"><span class="math display">\[\Pr[|X - \mu| \ge t] = e^{-t/b}. \tag{1.2}\]</span></span></p>
-<p>The Laplace has heavier tails than a normal of the same variance, and the log scale shows why (<a href="#fig-laplace-vs-normal" class="quarto-xref">Figure&nbsp;<span>1.2</span></a>). The logarithm of each density is its exponent: two straight lines <span class="math inline">\(-|x|/b\)</span> for the Laplace, a parabola <span class="math inline">\(-x^2/(2\sigma^2)\)</span> for the normal. Far enough out a parabola always falls below a line, so the normal’s tail eventually becomes far lighter. With the same variance, the Laplace exceeds three times its scale with probability <span class="math inline">\(e^{-3} \approx 0.050\)</span>, the normal only with probability about 0.034, and the gap widens. So a tail bound shaped for the normal fails for Laplace noise far enough out.</p>
+<section id="sec-dist-exponential" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="sec-dist-exponential"><span class="header-section-number">1.6</span> Waiting times: exponential</h2>
+<p>The Poisson counts how many rare events fall in a fixed window. The exponential answers the reverse question: starting now, how long until the first event? A deployed model makes a rare mistake, or a request arrives at a server. For this book the exponential matters mainly as a building block, because the Laplace distribution is made from two of them.</p>
+<p>The exponential comes out of the same construction as the Poisson. Chop time into many short slots, and let each slot hold an event independently with a small probability. Write <span class="math inline">\(b\)</span> for the average time between events, the <strong>scale</strong>. With <span class="math inline">\(n\)</span> slots per unit of time, each slot holds an event with probability <span class="math inline">\(1/(bn)\)</span>. That keeps the expected number of events per unit of time at <span class="math inline">\(1/b\)</span>, however finely you chop. The first <span class="math inline">\(j\)</span> slots are all empty with probability <span class="math inline">\((1 - 1/(bn))^j\)</span>, since the slots are independent. As the slots shrink, the chance that the wait exceeds a time <span class="math inline">\(t\)</span> tends to a simple limit: <span id="eq-exponential-survival"><span class="math display">\[\Pr[T &gt; t] = e^{-t/b}, \qquad t \ge 0. \tag{1.7}\]</span></span> The same answer comes from the Poisson count. The first event comes after time <span class="math inline">\(t\)</span> exactly when no event falls before <span class="math inline">\(t\)</span>. The number of events before <span class="math inline">\(t\)</span> is a Poisson count with mean <span class="math inline">\(t/b\)</span>, and it is zero with probability <span class="math inline">\(e^{-t/b}\)</span>.</p>
+<p><a href="#fig-exponential-limit" class="quarto-xref">Figure&nbsp;<span>1.2</span></a> shows the limit for a scale of 2. With one slot per unit of time, each slot holds an event with probability one half. The chance of waiting past <span class="math inline">\(t\)</span> is then a staircase that halves at every whole number. With five slots per unit of time, the staircase already hugs the curve <span class="math inline">\(e^{-t/2}\)</span>. At <span class="math inline">\(t = 4\)</span>, the full edition’s script finds 0.0625 with one slot per unit of time. With five slots it finds 0.1216, and with a hundred slots 0.1347. The limit is 0.1353.</p>
+<div id="fig-exponential-limit" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-exponential-limit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/exponential_limit.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exponential-limit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.2: <span class="math inline">\(\Pr[T_n &gt; t]\)</span> for the slotted waiting time with <span class="math inline">\(b = 2\)</span> and <span class="math inline">\(n = 1\)</span> or <span class="math inline">\(5\)</span> slots per unit of time, against the exponential tail <span class="math inline">\(e^{-t/2}\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>The <strong>exponential distribution</strong> <span class="math inline">\(\mathrm{Exp}(b)\)</span> has the density <span class="math inline">\(\frac1be^{-y/b}\)</span> for <span class="math inline">\(y \ge 0\)</span>. Its mean is the scale <span class="math inline">\(b\)</span>, so <span class="math inline">\(b\)</span> really is the average wait. Its variance is <span class="math inline">\(b^2\)</span>. Some texts and libraries use the rate <span class="math inline">\(1/b\)</span> instead of the scale. NumPy’s <code>rng.exponential(b)</code> takes the scale, so check which one a library expects before you trust a noise level.</p>
+<p>The exponential’s MGF is <span class="math inline">\(1/(1 - b\lambda)\)</span>, but only for <span class="math inline">\(\lambda &lt; 1/b\)</span>. The MGF averages <span class="math inline">\(e^{\lambda y}\)</span> against the density <span class="math inline">\(e^{-y/b}\)</span>. Once <span class="math inline">\(\lambda\)</span> reaches <span class="math inline">\(1/b\)</span>, the growing weight cancels or beats the shrinking density, and the average is infinite. An MGF that exists only on part of the line is the mark of an exponential tail.</p>
+<p>The exponential also forgets how long you have waited. Suppose you have already waited a time <span class="math inline">\(s\)</span> without an event. The chance of waiting at least <span class="math inline">\(t\)</span> more is the same as the chance of waiting <span class="math inline">\(t\)</span> from scratch: <span id="eq-auto-01distributions-7"><span class="math display">\[\Pr[Y \ge s + t \mid Y \ge s] = \Pr[Y \ge t]. \tag{1.8}\]</span></span> The slots explain why. The slots after time <span class="math inline">\(s\)</span> are independent of the empty slots before it, so the wait starts afresh. This <strong>memorylessness</strong> depends on that independence. If one event made the next more or less likely, a long quiet spell would carry information about the future, and the exponential would be the wrong model. The exponential is the only continuous distribution with this property.</p>
+<p>Here is an example. A deployed classifier serves 50 requests per second. It misclassifies each request independently with probability <span class="math inline">\(10^{-4}\)</span>. Each request is a slot, so mistakes arrive at a rate of 0.005 per second. The time to the first mistake is then approximately exponential with a scale of 200 seconds. A 10-minute window lasts 600 seconds, so the chance of a window with no mistake is <span class="math inline">\(e^{-600/200} = e^{-3}\)</span>, about 0.050. The exact answer, <span class="math inline">\((1 - 10^{-4})^{30000}\)</span>, has one factor for each of the 30,000 requests. It agrees to three decimals, because each request’s chance of a mistake is tiny. By memorylessness, after 10 clean minutes you still expect to wait 200 seconds for the first mistake.</p>
+</section>
+<section id="sec-dist-laplace" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="sec-dist-laplace"><span class="header-section-number">1.7</span> Laplace</h2>
+<p>The Laplace distribution is symmetric noise with exponential tails. Compared with a normal distribution of the same variance, it puts more probability near its centre and more far out. It is one of the two standard noise distributions in later parts of this book.</p>
+<p>The Laplace density is an exponential density on each side of a centre <span class="math inline">\(\mu\)</span>, mirrored, with each side carrying half the probability. With scale <span class="math inline">\(b\)</span>, written <span class="math inline">\(\mathrm{Lap}(\mu, b)\)</span>, the density is <span id="eq-auto-01distributions-8"><span class="math display">\[f(x) = \frac{1}{2b}e^{-|x - \mu|/b}. \tag{1.9}\]</span></span> This chapter writes <span class="math inline">\(\mathrm{Lap}(b)\)</span> when the centre is zero.</p>
+<p>Most facts about the Laplace follow from the exponential. Take the centre to be zero. The density takes the same value at <span class="math inline">\(x\)</span> and at <span class="math inline">\(-x\)</span>, so the size <span class="math inline">\(|X|\)</span> collects the density from both sides. Its density is then <span class="math inline">\(\frac1be^{-x/b}\)</span>, which is exactly <span class="math inline">\(\mathrm{Exp}(b)\)</span>. Three facts follow at once. The two-sided tail is the exponential tail: <span id="eq-auto-01distributions-9"><span class="math display">\[\Pr[|X| \ge t] = e^{-t/b}. \tag{1.10}\]</span></span> Each side carries half of it, so the chance of landing at or above <span class="math inline">\(t\)</span> is <span class="math inline">\(\frac12e^{-t/b}\)</span>. The average size of a draw is <span class="math inline">\(b\)</span>.</p>
+<p>The variance is <span class="math inline">\(2b^2\)</span>. The square of <span class="math inline">\(X\)</span> is the square of <span class="math inline">\(|X|\)</span>, and the exponential’s second moment is <span class="math inline">\(2b^2\)</span>. The mean is zero by symmetry, so nothing is subtracted. Turned around, a Laplace distribution with standard deviation <span class="math inline">\(\sigma\)</span> has scale <span class="math inline">\(b = \sigma/\sqrt2\)</span>. The MGF is <span class="math inline">\(1/(1 - b^2\lambda^2)\)</span>, again only for <span class="math inline">\(|\lambda| &lt; 1/b\)</span>, because each side has an exponential tail.</p>
+<p>The picture of two exponentials back to back suggests a way to build a Laplace draw. Subtract one exponential draw from another, independent one. The positive draw supplies the right half, and the negated draw supplies the left half. The MGFs confirm it. The difference has the MGF <span class="math inline">\(1/(1 - b\lambda)\)</span> times <span class="math inline">\(1/(1 + b\lambda)\)</span>, which is the Laplace MGF. In the full edition’s script, the difference of a million pairs of <span class="math inline">\(\mathrm{Exp}(1)\)</span> draws has a cumulative distribution function (CDF) within 0.0006 of the <span class="math inline">\(\mathrm{Lap}(1)\)</span> CDF everywhere between <span class="math inline">\(-5\)</span> and 5 (<a href="#fig-difference-of-exponentials" class="quarto-xref">Figure&nbsp;<span>1.3</span></a>).</p>
+<div id="fig-difference-of-exponentials" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-difference-of-exponentials-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/difference_of_exponentials.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-difference-of-exponentials-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.3: Histogram of <span class="math inline">\(\mathrm{Exp}(1) - \mathrm{Exp}(1)\)</span> samples against the <span class="math inline">\(\mathrm{Lap}(0, 1)\)</span> density.
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-laplace-vs-normal" class="quarto-xref">Figure&nbsp;<span>1.4</span></a> puts a Laplace and a normal distribution side by side, both with variance 2. That means a Laplace scale of 1 and a normal standard deviation of <span class="math inline">\(\sqrt2\)</span>. On a linear scale, the Laplace has a sharp peak at zero and fatter tails. On a log scale the difference is structural. The logarithm of each density removes the exponential and leaves its exponent, plus a constant. The normal’s log density is a parabola, <span class="math inline">\(-x^2/(2\sigma^2)\)</span>. The Laplace’s log density is two straight lines, <span class="math inline">\(-|x|/b\)</span>. Far enough out, a parabola always falls below a line, so the normal’s tails are much lighter.</p>
 <div id="fig-laplace-vs-normal" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-laplace-vs-normal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/laplace_vs_normal.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laplace-vs-normal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1.2: Normal and Laplace densities with variance 2, on linear and log scales. The log of the normal density is a parabola; the log of the Laplace density is two straight lines.
+Figure&nbsp;1.4: Normal and Laplace densities with variance 2, on linear and log scales. The log of the normal density is a parabola; the log of the Laplace density is two straight lines.
 </figcaption>
 </figure>
 </div>
-<p>Libraries differ in whether they take the scale <span class="math inline">\(b\)</span> or the rate <span class="math inline">\(1/b\)</span> (NumPy’s <code>rng.exponential(b)</code> takes the scale), so check before trusting a noise level.</p>
+<p>The numbers show the gap opening up. A Laplace draw lands at least three scales from zero with probability <span class="math inline">\(e^{-3}\)</span>, about 0.050. A normal draw with the same variance travels that far with probability about 0.034. Further out the gap grows quickly. The same shapes explain the MGFs. The Laplace’s straight-line decay can only beat the weight <span class="math inline">\(e^{\lambda x}\)</span> when <span class="math inline">\(\lambda\)</span> is small. The normal’s parabola beats it for every <span class="math inline">\(\lambda\)</span>.</p>
+<p>The Laplace distribution also has a use in fitting models. Suppose each target is a linear function of its features plus independent Laplace noise. The log-likelihood of the data is then a constant minus the sum of absolute errors divided by <span class="math inline">\(b\)</span>. Maximizing the likelihood therefore minimizes the sum of absolute errors, just as normal noise leads to least squares. With no features, the fit estimates the centre by the median. Moving a candidate centre to the right lowers the error of every point above it and raises the error of every point below it. The sum stops falling exactly when half the points lie on each side. The median ignores how far out an extreme point lies, so it resists outliers far better than the mean does. Under a Laplace model, large errors are not surprising enough to dominate the fit.</p>
 </section>
-<section id="sec-dist-normal" class="level2" data-number="1.4">
-<h2 data-number="1.4" class="anchored" data-anchor-id="sec-dist-normal"><span class="header-section-number">1.4</span> Normal</h2>
-<p><span class="math inline">\(\mathcal N(\mu, \sigma^2)\)</span> has density <span class="math inline">\(\frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}\)</span>, and every probability reduces to the standard normal cumulative distribution function (CDF) <span class="math inline">\(\Phi\)</span>, through <span class="math inline">\(\Pr[X \le x] = \Phi((x - \mu)/\sigma)\)</span>. It stays normal under sums: <span class="math inline">\(\sum_ia_iX_i\)</span> for independent normals is normal with mean <span class="math inline">\(\sum_ia_i\mu_i\)</span> and variance <span class="math inline">\(\sum_ia_i^2\sigma_i^2\)</span>.</p>
-<p>That rule explains normal noise in many dimensions. A vector <span class="math inline">\(X \sim \mathcal N(0, \sigma^2I_d)\)</span> has <span class="math inline">\(d\)</span> independent coordinates, so its squared length is a sum of <span class="math inline">\(d\)</span> terms of mean <span class="math inline">\(\sigma^2\)</span>, and like any sum of many independent terms its relative spread shrinks: the length sits at <span class="math inline">\(\sigma\sqrt d\)</span>, with relative spread about <span class="math inline">\(1/\sqrt{2d}\)</span> (<a href="#tbl-gaussian-norms" class="quarto-xref">Table&nbsp;<span>1.1</span></a>). Yet the projection onto a fixed unit vector is a weighted sum whose squared weights add to 1, so it is just <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span>. Noise <span class="math inline">\(\mathcal N(0, 0.01^2I_d)\)</span> on a model with <span class="math inline">\(d = 10^6\)</span> parameters has length about <span class="math inline">\(0.01 \times 1000 = 10\)</span>, yet along any direction fixed in advance it is only <span class="math inline">\(\mathcal N(0, 0.01^2)\)</span>: large in norm, small in every direction.</p>
+<section id="sec-dist-normal" class="level2" data-number="1.8">
+<h2 data-number="1.8" class="anchored" data-anchor-id="sec-dist-normal"><span class="header-section-number">1.8</span> Normal</h2>
+<p>The normal distribution appears whenever many small independent effects add up. It is the default model for measurement noise, and it is the light-tailed counterpart of the Laplace. Its log density is a downward parabola centred at the mean <span class="math inline">\(\mu\)</span>, with its width set by the standard deviation <span class="math inline">\(\sigma\)</span>. The normal distribution <span class="math inline">\(\mathcal N(\mu, \sigma^2)\)</span> has the density <span id="eq-auto-01distributions-10"><span class="math display">\[f(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}. \tag{1.11}\]</span></span></p>
+<p>Every normal probability reduces to one function. Subtracting the mean and dividing by the standard deviation turns any normal quantity into a <strong>standard normal</strong>, with mean 0 and variance 1. Write <span class="math inline">\(\Phi(t)\)</span> for the chance that a standard normal lands below <span class="math inline">\(t\)</span>. Then the chance that <span class="math inline">\(X\)</span> lands below <span class="math inline">\(x\)</span> is <span class="math inline">\(\Phi((x - \mu)/\sigma)\)</span>. The function <span class="math inline">\(\Phi\)</span> has no closed form. In code you compute it from the complementary error function, <span class="math inline">\(\operatorname{erfc}\)</span>, which every maths library provides. That matters in the tails, as the code at the end of this chapter shows.</p>
+<p>The normal MGF is <span id="eq-auto-01distributions-11"><span class="math display">\[M_X(\lambda) = e^{\mu\lambda + \sigma^2\lambda^2/2}, \tag{1.12}\]</span></span> and it is finite for every <span class="math inline">\(\lambda\)</span>. Inside the MGF the weight <span class="math inline">\(e^{\lambda x}\)</span> grows like a straight line in the exponent. The density shrinks like a parabola in the exponent, and a parabola always wins. The exponent of the MGF is a quadratic in <span class="math inline">\(\lambda\)</span>, which is what makes normal noise easy to combine.</p>
+<p>Scaling and adding independent normal quantities gives another normal quantity. Scaling a quantity by <span class="math inline">\(a\)</span> evaluates its MGF at <span class="math inline">\(a\lambda\)</span>. Adding independent quantities multiplies their MGFs, which adds the exponents. Both operations keep the exponent quadratic in <span class="math inline">\(\lambda\)</span>. So for independent normal quantities <span class="math inline">\(X_i\)</span> with means <span class="math inline">\(\mu_i\)</span> and variances <span class="math inline">\(\sigma_i^2\)</span>, <span id="eq-auto-01distributions-12"><span class="math display">\[\sum_i a_iX_i \sim \mathcal N\Big(\sum_i a_i\mu_i,\ \sum_i a_i^2\sigma_i^2\Big). \tag{1.13}\]</span></span> Among distributions with finite variance, only the normal stays in its own family under every such combination. This is a classical result of Lévy, which the full edition cites. The Laplace fails the test. The sum of two independent <span class="math inline">\(\mathrm{Lap}(b)\)</span> draws has the MGF <span class="math inline">\(1/(1 - b^2\lambda^2)^2\)</span>, which is not a Laplace MGF.</p>
+</section>
+<section id="sec-dist-highdim" class="level2" data-number="1.9">
+<h2 data-number="1.9" class="anchored" data-anchor-id="sec-dist-highdim"><span class="header-section-number">1.9</span> Normal noise in many dimensions</h2>
+<p>Noise is often added to a whole vector at once, such as a model’s parameters. Write <span class="math inline">\(X \sim \mathcal N(0, \sigma^2I_d)\)</span> for a vector of <span class="math inline">\(d\)</span> independent normal coordinates, each with mean 0 and standard deviation <span class="math inline">\(\sigma\)</span>. Two facts about such a vector are used constantly, and they seem to pull in opposite directions.</p>
+<p>The first fact is that the noise looks the same in every direction. Project <span class="math inline">\(X\)</span> onto a fixed direction, given by a unit vector <span class="math inline">\(u\)</span> whose squared entries add up to 1. The projection is a weighted sum of independent normal coordinates. By the rule for sums, it is normal with variance <span class="math inline">\(\sigma^2\)</span> times the sum of the squared weights, which is just <span class="math inline">\(\sigma^2\)</span>. So along any direction, the noise is a single <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> draw. This needs the direction to be fixed in advance, independently of the noise. Along the noise’s own direction, the projection is the vector’s full length.</p>
+<p>The second fact is that the length of the vector is large and predictable. Its squared length is a sum of <span class="math inline">\(d\)</span> independent squared coordinates, each with mean <span class="math inline">\(\sigma^2\)</span>. So the squared length has mean <span class="math inline">\(d\sigma^2\)</span>. Its spread relative to that mean shrinks like <span class="math inline">\(1/\sqrt d\)</span>, as for any average of independent terms. The length itself therefore sits close to <span class="math inline">\(\sigma\sqrt d\)</span>, with a relative spread of about <span class="math inline">\(1/\sqrt{2d}\)</span>. A normal vector in high dimension is almost never near the origin. It lives on a thin shell. <a href="#tbl-gaussian-norms" class="quarto-xref">Table&nbsp;<span>1.1</span></a> shows the shell forming as <span class="math inline">\(d\)</span> grows.</p>
 <div id="tbl-gaussian-norms" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gaussian-norms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -618,17 +733,88 @@ Table&nbsp;1.1: Mean and standard deviation of <span class="math inline">\(\|X\|
 </div>
 </figure>
 </div>
-<p>The <strong>central limit theorem (CLT)</strong> explains why the normal is everywhere: the standardized sum of <span class="math inline">\(n\)</span> independent draws with finite variance approaches <span class="math inline">\(\mathcal N(0, 1)\)</span>. But the skew of the summands averages out only like <span class="math inline">\(1/\sqrt n\)</span>: for sums of exponentials the largest error in the CDF is still 0.0243 at <span class="math inline">\(n = 30\)</span>. That is fine for the bulk and useless in the far tail, whose probabilities are much smaller than that error; tails need <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>. Small tails need care in code too: <span class="math inline">\(1 - \Phi(x)\)</span> subtracts two nearly equal numbers and loses every digit, so compute the tail directly as <span class="math inline">\(\frac12\operatorname{erfc}(x/\sqrt2)\)</span>.</p>
+<div id="fig-gaussian-norms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gaussian-norms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/gaussian_norms.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gaussian-norms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.5: Histograms of <span class="math inline">\(\|X\|/\sqrt d\)</span> for <span class="math inline">\(X \sim \mathcal N(0, I_d)\)</span> and <span class="math inline">\(d\)</span> from 1 to 10,000.
+</figcaption>
+</figure>
+</div>
+<p>Put the two facts together on a model with a million parameters and noise of standard deviation 0.01 on each. The noise vector has a length of about <span class="math inline">\(0.01 \times 1000 = 10\)</span>. Its relative spread is under 0.1%, so the length is almost exactly 10. Yet its projection onto any fixed direction is only a <span class="math inline">\(\mathcal N(0, 0.01^2)\)</span> draw. The noise is large in length and small in every fixed direction (<a href="#fig-gaussian-norms" class="quarto-xref">Figure&nbsp;<span>1.5</span></a>).</p>
 </section>
-<section id="sec-dist-shift" class="level2" data-number="1.5">
-<h2 data-number="1.5" class="anchored" data-anchor-id="sec-dist-shift"><span class="header-section-number">1.5</span> A density against its shifted copy</h2>
-<p>You observe <span class="math inline">\(x = \mu + X\)</span> with noise density <span class="math inline">\(f\)</span>, and <span class="math inline">\(\mu\)</span> is either 0 or a known shift <span class="math inline">\(s\)</span>. The two candidates give <span class="math inline">\(x\)</span> the densities <span class="math inline">\(f(x)\)</span> and <span class="math inline">\(f(x - s)\)</span>, the same curve moved sideways, and how much one observation favours the first is the <strong>log ratio</strong> <span id="eq-auto-01distributions-3"><span class="math display">\[L(x) = \ln f(x) - \ln f(x - s). \tag{1.3}\]</span></span> If <span class="math inline">\(|L(x)|\)</span> is bounded, no single observation can settle the question; if not, some observations settle it almost for certain.</p>
-<p>The log of each density is its exponent, so the answer comes from the shapes in <a href="#fig-laplace-vs-normal" class="quarto-xref">Figure&nbsp;<span>1.2</span></a>. Two copies of the normal’s parabola have the same curvature, so subtracting them cancels the <span class="math inline">\(x^2\)</span> terms and leaves a straight line, unbounded: <span id="eq-auto-01distributions-4"><span class="math display">\[L(x) = \frac{s^2 - 2sx}{2\sigma^2}. \tag{1.4}\]</span></span> The Laplace’s log density is <span class="math inline">\(-|x|/b\)</span>, a distance from the centre divided by <span class="math inline">\(b\)</span>. Moving the centre by <span class="math inline">\(s\)</span> changes the distance from any point by at most <span class="math inline">\(|s|\)</span>, so <span id="eq-auto-01distributions-5"><span class="math display">\[L(x) = \frac{|x - s| - |x|}{b}, \qquad |L(x)| \le \frac{|s|}{b}, \tag{1.5}\]</span></span> and the bound is reached on whole half-lines, every <span class="math inline">\(x \le 0\)</span> and every <span class="math inline">\(x \ge s\)</span>, where both distances change by exactly <span class="math inline">\(s\)</span>.</p>
-<p>Take <span class="math inline">\(s = 1\)</span>, <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(b = 1\)</span> (<a href="#tbl-shifted-log-ratio" class="quarto-xref">Table&nbsp;<span>1.2</span></a> and <a href="#fig-shifted-log-ratio" class="quarto-xref">Figure&nbsp;<span>1.3</span></a>). At <span class="math inline">\(x = 10\)</span> the normal log ratio is <span class="math inline">\(-9.5\)</span>: the observation is about 13,360 times more likely under <span class="math inline">\(\mu = 1\)</span>. The Laplace never says more than <span class="math inline">\(e \approx 2.72\)</span> times, however far out <span class="math inline">\(x\)</span> lies.</p>
+<section id="sec-dist-clt" class="level2" data-number="1.10">
+<h2 data-number="1.10" class="anchored" data-anchor-id="sec-dist-clt"><span class="header-section-number">1.10</span> The central limit theorem</h2>
+<p>The <strong>central limit theorem</strong> (CLT) explains why the normal distribution is everywhere. Take a sum of <span class="math inline">\(n\)</span> independent draws from the same distribution, with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. The sum has mean <span class="math inline">\(n\mu\)</span> and standard deviation <span class="math inline">\(\sigma\sqrt n\)</span>. Subtract the mean and divide by the standard deviation, and the result always has mean 0 and variance 1. The CLT says more. Whatever the distribution of each draw, the shape of this standardized sum approaches the standard normal as <span class="math inline">\(n\)</span> grows. The theorem needs the variance to be finite, because the standardization divides by it. The full edition states the theorem and cites its proof.</p>
+<p>The best way to see the theorem work is to start from a distribution that looks nothing like a normal. The exponential with scale 1 is badly skewed. It cannot go below zero, its density is highest at zero, and it has a long right tail. <a href="#fig-clt-exponential" class="quarto-xref">Figure&nbsp;<span>1.6</span></a> shows the standardized sum of <span class="math inline">\(n\)</span> such draws. At <span class="math inline">\(n = 1\)</span> it is the exponential itself, with a hard wall where the draw would be zero. At <span class="math inline">\(n = 2\)</span> the peak rounds off, because two draws are rarely both near zero. At <span class="math inline">\(n = 5\)</span> the bump is in the right place but still leans. At <span class="math inline">\(n = 30\)</span> the curve is close to the standard normal, though a small lean remains.</p>
+<div id="fig-clt-exponential" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-clt-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/clt_exponential.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clt-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.6: The standardized sum of <span class="math inline">\(n\)</span> independent <span class="math inline">\(\mathrm{Exp}(1)\)</span> variables for <span class="math inline">\(n = 1, 2, 5, 30\)</span>: histogram of 50,000 simulated sums, the exact density from <span class="math inline">\(\mathrm{Gamma}(n, 1)\)</span>, and the <span class="math inline">\(\mathcal N(0, 1)\)</span> density. The skewed exponential becomes a normal step by step.
+</figcaption>
+</figure>
+</div>
+<p>The leftover lean is measured by the <strong>skewness</strong>, the average cubed distance from the mean in units of the standard deviation. Cubing keeps the sign, so a long right tail makes the skewness positive. A normal distribution is symmetric, so its skewness is zero. For a sum of <span class="math inline">\(n\)</span> exponential draws, the skewness is <span class="math inline">\(2/\sqrt n\)</span>. It falls, but only like <span class="math inline">\(1/\sqrt n\)</span>. The largest gap between the sum’s CDF and the normal CDF falls at the same rate, as <a href="#tbl-clt-exponential" class="quarto-xref">Table&nbsp;<span>1.2</span></a> shows.</p>
+<div id="tbl-clt-exponential" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-clt-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.2: How far the standardized sum of <span class="math inline">\(n\)</span> <span class="math inline">\(\mathrm{Exp}(1)\)</span> variables is from <span class="math inline">\(\mathcal N(0, 1)\)</span>. The CDF gap is the maximum of <span class="math inline">\(|F_n(z) - \Phi(z)|\)</span> over <span class="math inline">\(z \in [-5, 5]\)</span> in steps of 0.01.
+</figcaption>
+<div aria-describedby="tbl-clt-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th>Skewness <span class="math inline">\(2/\sqrt n\)</span></th>
+<th>Largest CDF gap to <span class="math inline">\(\mathcal N(0, 1)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>2.000</td>
+<td>0.1587</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1.414</td>
+<td>0.0945</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>0.894</td>
+<td>0.0596</td>
+</tr>
+<tr class="even">
+<td>30</td>
+<td>0.365</td>
+<td>0.0243</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Multiply each gap by <span class="math inline">\(\sqrt n\)</span> and the product settles near 0.133, so the error decays like <span class="math inline">\(1/\sqrt n\)</span>. This rate holds in general. The Berry–Esseen theorem bounds the gap by a constant times the third moment of the draws, divided by <span class="math inline">\(\sigma^3\sqrt n\)</span>. The constant is below 0.48 (Shevtsova, 2011). The third moment measures skew, so the more skewed the draws, the more of them you need. A common rule of thumb says that the normal approximation to a binomial count is reasonable once its variance <span class="math inline">\(np(1-p)\)</span> is about 10 or more. The normal curve fits the Poisson in <a href="#fig-poisson-limit" class="quarto-xref">Figure&nbsp;<span>1.1</span></a> for the same reason, because a Poisson count with mean 5 is a sum of five independent Poisson counts with mean 1.</p>
+<p>The CLT describes the bulk of the distribution, not its far tails. The error it controls is an absolute error of order <span class="math inline">\(1/\sqrt n\)</span>. A tail probability that a guarantee depends on can be far smaller than that error. In the far tail the normal approximation can then be wrong by a large factor. Bounds on tails are the job of <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>.</p>
+</section>
+<section id="sec-dist-shift" class="level2" data-number="1.11">
+<h2 data-number="1.11" class="anchored" data-anchor-id="sec-dist-shift"><span class="header-section-number">1.11</span> A density against its shifted copy</h2>
+<p>Here is the question that later chapters build on. You see a noisy measurement <span class="math inline">\(x = \mu + X\)</span> of an unknown value <span class="math inline">\(\mu\)</span>. The noise <span class="math inline">\(X\)</span> has density <span class="math inline">\(f\)</span> centred at zero. The unknown value can be only one of two candidates, zero or a known <strong>shift</strong> <span class="math inline">\(s\)</span>. How strongly can one observation favour one candidate over the other?</p>
+<p>Each candidate gives <span class="math inline">\(x\)</span> its own density. If the value is zero, the density of <span class="math inline">\(x\)</span> is <span class="math inline">\(f(x)\)</span>. If the value is <span class="math inline">\(s\)</span>, the density is <span class="math inline">\(f(x - s)\)</span>, the same curve moved sideways by <span class="math inline">\(s\)</span>. Its value at <span class="math inline">\(x\)</span> is the value that <span class="math inline">\(f\)</span> had at <span class="math inline">\(x - s\)</span>. With a shift of 1, for example, the shifted density at 1 equals <span class="math inline">\(f(0)\)</span>, so its peak sits at 1.</p>
+<p>To compare the candidates, compare the two densities at the observation. Their ratio says how many times more likely <span class="math inline">\(x\)</span> is under the first candidate than under the second. Its logarithm is the <strong>log ratio</strong>: <span id="eq-auto-01distributions-13"><span class="math display">\[L(x) = \ln f(x) - \ln f(x - s). \tag{1.14}\]</span></span> It is positive when <span class="math inline">\(x\)</span> favours zero, negative when <span class="math inline">\(x\)</span> favours <span class="math inline">\(s\)</span>, and zero when <span class="math inline">\(x\)</span> says nothing. If the log ratio is bounded, no single observation can make one candidate much more likely than the other. If it is unbounded, some observations settle the question almost for certain.</p>
+<p>The answer comes from the shapes of the two log densities in <a href="#fig-laplace-vs-normal" class="quarto-xref">Figure&nbsp;<span>1.4</span></a>. The normal’s log density is a parabola, and both copies have the same curvature. Subtracting them cancels the squared terms and leaves a straight line: <span id="eq-auto-01distributions-14"><span class="math display">\[L(x) = \frac{s^2 - 2sx}{2\sigma^2}. \tag{1.15}\]</span></span> A line with a nonzero slope has no bound, so for normal noise the log ratio grows without limit as <span class="math inline">\(x\)</span> moves out.</p>
+<p>The Laplace’s log density is <span class="math inline">\(-|x|/b\)</span>, a distance from the centre divided by the scale. Moving the centre by <span class="math inline">\(s\)</span> changes the distance from any point by at most <span class="math inline">\(|s|\)</span>. So the log ratio can never exceed <span class="math inline">\(|s|/b\)</span> in size: <span id="eq-auto-01distributions-15"><span class="math display">\[L(x) = \frac{|x - s| - |x|}{b}, \qquad |L(x)| \le \frac{|s|}{b}. \tag{1.16}\]</span></span> The ratio of the two densities therefore never exceeds <span class="math inline">\(e^{|s|/b}\)</span>. The bound is reached, not just approached. For a positive shift, every observation at or below zero is exactly <span class="math inline">\(s\)</span> closer to one centre than to the other. The same holds for every observation at or above <span class="math inline">\(s\)</span>. Between the two centres, the log ratio falls along a straight line from one limit to the other.</p>
+<p><a href="#tbl-shifted-log-ratio" class="quarto-xref">Table&nbsp;<span>1.3</span></a> puts numbers on both formulas, with a shift of 1 and both noise scales set to 1. Both log ratios are zero at the midpoint, 0.5, where the two candidates are equally plausible. Far out they part ways. At <span class="math inline">\(x = 10\)</span> the normal log ratio is <span class="math inline">\(-9.5\)</span>. The observation is then about 13,360 times more likely under the shifted candidate. The Laplace never says more than about 2.72 times, however far out <span class="math inline">\(x\)</span> lies (<a href="#fig-shifted-log-ratio" class="quarto-xref">Figure&nbsp;<span>1.7</span></a>).</p>
 <div id="tbl-shifted-log-ratio" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shifted-log-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1.2: The log ratio of a density and its copy shifted by <span class="math inline">\(s = 1\)</span>, for <span class="math inline">\(\mathcal N(0, 1)\)</span> and <span class="math inline">\(\mathrm{Lap}(1)\)</span>.
+Table&nbsp;1.3: The log ratio of a density and its copy shifted by <span class="math inline">\(s = 1\)</span>, for <span class="math inline">\(\mathcal N(0, 1)\)</span> and <span class="math inline">\(\mathrm{Lap}(1)\)</span>.
 </figcaption>
 <div aria-describedby="tbl-shifted-log-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -682,64 +868,105 @@ Table&nbsp;1.2: The log ratio of a density and its copy shifted by <span class="
 <img src="figures/shifted_log_ratio.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-shifted-log-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1.3: The log ratio <span class="math inline">\(L(x)\)</span> of a density and its copy shifted by <span class="math inline">\(s = 1\)</span>: a straight line for the standard normal, clipped at <span class="math inline">\(\pm1\)</span> for <span class="math inline">\(\mathrm{Lap}(1)\)</span>.
+Figure&nbsp;1.7: The log ratio <span class="math inline">\(L(x)\)</span> of a density and its copy shifted by <span class="math inline">\(s = 1\)</span>: a straight line for the standard normal, clipped at <span class="math inline">\(\pm1\)</span> for <span class="math inline">\(\mathrm{Lap}(1)\)</span>.
 </figcaption>
 </figure>
 </div>
-<p>But “unbounded” does not mean “often large”: the normal’s extreme ratios sit in tails with very little probability. How little, and what it buys an observer, is what <a href="../part01-prerequisites/03-divergences.html">Divergences</a> and <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a> measure. And only shift over scale matters: doubling the noise is the same as halving the shift.</p>
+<p>For the Laplace, the two copies stay within a fixed factor of each other everywhere. For the normal, they are close in the bulk, but the ratio is unbounded in the tails. Unbounded does not mean often large, though. The observations that give extreme ratios sit in tails that carry very little probability. The next three chapters make this precise. <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> bounds how rare those observations are. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> averages the log ratio over <span class="math inline">\(x\)</span>. <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a> says what an observer can decide from it.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="1.6">
-<h2 data-number="1.6" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">1.6</span> Cheat sheet</h2>
+<section id="sec-dist-code" class="level2" data-number="1.12">
+<h2 data-number="1.12" class="anchored" data-anchor-id="sec-dist-code"><span class="header-section-number">1.12</span> Code</h2>
+<p>Normal tails need care in code. The obvious way to get the chance of exceeding <span class="math inline">\(t\)</span> is <span class="math inline">\(1 - \Phi(t)\)</span>. Far out, <span class="math inline">\(\Phi(t)\)</span> is so close to 1 that the subtraction loses every digit and returns zero. The complementary error function computes the small tail directly. The snippet also checks the Laplace and normal tails from <a href="#sec-dist-laplace" class="quarto-xref"><span>Section 1.7</span></a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> erfc, exp, sqrt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> normal_cdf(x: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Chance that a standard normal lands below x."""</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.5</span> <span class="op">*</span> erfc(<span class="op">-</span>x <span class="op">/</span> sqrt(<span class="dv">2</span>))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> normal_tail(t: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Chance that a standard normal lands at or above t, computed without subtraction."""</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.5</span> <span class="op">*</span> erfc(t <span class="op">/</span> sqrt(<span class="dv">2</span>))</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> laplace_two_sided_tail(t: <span class="bu">float</span>, b: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Chance that a Lap(b) draw lands at least t from zero."""</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> exp(<span class="op">-</span>t <span class="op">/</span> b)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="dv">1</span> <span class="op">-</span> normal_cdf(<span class="fl">10.0</span>)<span class="sc">:.3e}</span><span class="ss">"</span>)  <span class="co"># 0.000e+00</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>normal_tail(<span class="fl">10.0</span>)<span class="sc">:.3e}</span><span class="ss">"</span>)  <span class="co"># 7.620e-24</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Same variance 2: Laplace scale 1 against normal sigma sqrt(2), at three Laplace scales.</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>laplace_two_sided_tail(<span class="fl">3.0</span>, <span class="fl">1.0</span>)<span class="sc">:.3f}</span><span class="ss"> </span><span class="sc">{</span><span class="dv">2</span> <span class="op">*</span> normal_tail(<span class="fl">3.0</span> <span class="op">/</span> sqrt(<span class="dv">2</span>))<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.050 0.034</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The full edition’s script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/distributions.py">distributions.py</a>, draws every figure in this chapter and checks each mean and variance against a million samples. Run it from the repository root with <code>uv run python code/part01-prerequisites/distributions.py</code>.</p>
+</section>
+<section id="cheat-sheet" class="level2" data-number="1.13">
+<h2 data-number="1.13" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">1.13</span> Cheat sheet</h2>
 <div id="tbl-distributions-cheat-sheet" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-distributions-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1.3: The five families: density or probability mass function, moments and tail.
+Table&nbsp;1.4: The six families of this chapter: density or probability, mean, variance, moment generating function and tail.
 </figcaption>
 <div aria-describedby="tbl-distributions-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Distribution</th>
-<th>Density or probability mass function</th>
+<th>Density or probability of <span class="math inline">\(k\)</span></th>
 <th>Mean</th>
 <th>Variance</th>
+<th>MGF</th>
 <th>Tail</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td><span class="math inline">\(\mathrm{Bernoulli}(p)\)</span></td>
+<td>1 with probability <span class="math inline">\(p\)</span>, else 0</td>
+<td><span class="math inline">\(p\)</span></td>
+<td><span class="math inline">\(p(1-p)\)</span></td>
+<td><span class="math inline">\(1 + p(e^\lambda - 1)\)</span></td>
+<td>—</td>
+</tr>
+<tr class="even">
 <td><span class="math inline">\(\mathrm{Binomial}(n, p)\)</span></td>
 <td><span class="math inline">\(\binom nk p^k(1-p)^{n-k}\)</span></td>
 <td><span class="math inline">\(np\)</span></td>
 <td><span class="math inline">\(np(1-p)\)</span></td>
+<td><span class="math inline">\((1 + p(e^\lambda - 1))^n\)</span></td>
 <td>Chernoff, see <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><span class="math inline">\(\mathrm{Poisson}(\mu)\)</span></td>
 <td><span class="math inline">\(e^{-\mu}\mu^k/k!\)</span></td>
 <td><span class="math inline">\(\mu\)</span></td>
 <td><span class="math inline">\(\mu\)</span></td>
-<td><span class="math inline">\(\approx(e\mu/k)^k\)</span></td>
+<td><span class="math inline">\(e^{\mu(e^\lambda - 1)}\)</span></td>
+<td><span class="math inline">\(\Pr[N = k] \le (e\mu/k)^k\)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><span class="math inline">\(\mathrm{Exp}(b)\)</span></td>
 <td><span class="math inline">\(\frac1be^{-y/b}\)</span>, <span class="math inline">\(y \ge 0\)</span></td>
 <td><span class="math inline">\(b\)</span></td>
 <td><span class="math inline">\(b^2\)</span></td>
+<td><span class="math inline">\(\frac{1}{1 - b\lambda}\)</span>, <span class="math inline">\(\lambda &lt; \frac1b\)</span></td>
 <td><span class="math inline">\(e^{-t/b}\)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><span class="math inline">\(\mathrm{Lap}(\mu, b)\)</span></td>
 <td><span class="math inline">\(\frac{1}{2b}e^{-\lvert x-\mu\rvert/b}\)</span></td>
 <td><span class="math inline">\(\mu\)</span></td>
 <td><span class="math inline">\(2b^2\)</span></td>
+<td><span class="math inline">\(\frac{e^{\mu\lambda}}{1 - b^2\lambda^2}\)</span>, <span class="math inline">\(\lvert\lambda\rvert &lt; \frac1b\)</span></td>
 <td><span class="math inline">\(\Pr[\lvert X - \mu\rvert \ge t] = e^{-t/b}\)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><span class="math inline">\(\mathcal N(\mu, \sigma^2)\)</span></td>
 <td><span class="math inline">\(\frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}\)</span></td>
 <td><span class="math inline">\(\mu\)</span></td>
 <td><span class="math inline">\(\sigma^2\)</span></td>
+<td><span class="math inline">\(e^{\mu\lambda + \sigma^2\lambda^2/2}\)</span></td>
 <td><span class="math inline">\(\Pr[X - \mu \ge t] \le \frac12e^{-t^2/(2\sigma^2)}\)</span></td>
 </tr>
 </tbody>
@@ -749,19 +976,22 @@ Table&nbsp;1.3: The five families: density or probability mass function, moments
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>A measured rate has standard deviation <span class="math inline">\(\sqrt{p(1-p)/n}\)</span>; its relative precision is set by the expected count <span class="math inline">\(np\)</span>.</li>
-<li>Normal noise in <span class="math inline">\(d\)</span> dimensions has norm <span class="math inline">\(\approx \sigma\sqrt d\)</span> and is <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> along every fixed direction.</li>
-<li>Laplace shifted by <span class="math inline">\(s\)</span>: log ratio at most <span class="math inline">\(|s|/b\)</span>. Normal: unbounded, but large only in the tails, which carry very little probability.</li>
+<li>Means always add. Variances add only for independent quantities. An average of <span class="math inline">\(n\)</span> independent draws has its standard deviation divided by <span class="math inline">\(\sqrt n\)</span>.</li>
+<li>A measured rate has standard deviation <span class="math inline">\(\sqrt{p(1-p)/n}\)</span>. Its relative precision is set by the expected count <span class="math inline">\(np\)</span>, not by <span class="math inline">\(n\)</span>.</li>
+<li>Many unlikely trials give a Poisson count, whose variance equals its mean. The waiting time for the first event is exponential, and two exponentials back to back make a Laplace.</li>
+<li>Normal noise in <span class="math inline">\(d\)</span> dimensions has length about <span class="math inline">\(\sigma\sqrt d\)</span>, but it is only <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> along any direction fixed in advance.</li>
+<li>The CLT describes the bulk, with an error of order <span class="math inline">\(1/\sqrt n\)</span>. Never use it for small tail probabilities.</li>
+<li>For a shift <span class="math inline">\(s\)</span>, the Laplace log ratio is at most <span class="math inline">\(|s|/b\)</span>. The normal log ratio is unbounded, but large only in tails that carry very little probability.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="1.7">
-<h2 data-number="1.7" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">1.7</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="1.14">
+<h2 data-number="1.14" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">1.14</span> Further reading</h2>
 <ul>
-<li>Blitzstein &amp; Hwang, <em>Introduction to Probability</em> (2nd ed., 2019), ch.&nbsp;3–5 and 7: every distribution here, with worked examples.</li>
+<li>Blitzstein &amp; Hwang, <em>Introduction to Probability</em> (2nd ed., 2019), ch.&nbsp;3–5 and 7: every distribution here, with worked examples, and the proof that the MGF determines the distribution.</li>
 <li>Wasserman, <em>All of Statistics</em> (2004), ch.&nbsp;2–3: a compact reference.</li>
-<li>Vershynin, <em>High-Dimensional Probability</em> (2018), §3.1: why the norm of a normal vector concentrates.</li>
+<li>Vershynin, <em>High-Dimensional Probability</em> (2018), §3.1: why the length of a normal vector concentrates.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part01-prerequisites/01-distributions.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part01-prerequisites/01-distributions.html">the full edition’s chapter</a>, except the central limit theorem, the Berry–Esseen bound, Lévy’s result and the fact that the MGF determines the distribution, which it cites.</p>
 
 
 </section>

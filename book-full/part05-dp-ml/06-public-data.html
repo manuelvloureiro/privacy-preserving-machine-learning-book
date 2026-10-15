@@ -1212,7 +1212,7 @@ Figure&nbsp;41.3: Test accuracy of the four strategies against <span class="math
 </section>
 <section id="code-check-every-number-by-computation" class="level2" data-number="41.9">
 <h2 data-number="41.9" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">41.9</span> Code: check every number by computation</h2>
-<p>The script <a href="../../../code/part05-dp-ml/public_data.py">code/public_data.py</a> builds the public task, pretrains the student, implements the last-layer and low-rank-adapter versions of DP-SGD with their per-example gradients (ghost norms included), estimates the curvature and the public gradient subspace, and runs the comparison. It imports the model, DP-SGD and the accountant from <a href="../../../code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a>. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/public_data.py">code/public_data.py</a> builds the public task, pretrains the student, implements the last-layer and low-rank-adapter versions of DP-SGD with their per-example gradients (ghost norms included), estimates the curvature and the public gradient subspace, and runs the comparison. It imports the model, DP-SGD and the accountant from <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a>. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/public_data.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>It takes about four minutes on a laptop, most of it in about 70 training runs of 10,000 steps.</p>
 <p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-pub-code" class="quarto-xref">Table&nbsp;<span>41.6</span></a>:</p>
@@ -1271,7 +1271,7 @@ Table&nbsp;41.6: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_public_data.py">tests/test_public_data.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_public_data.py">tests/test_public_data.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> A related public dataset is worth more than any choice made afterwards: it moves accuracy at <span class="math inline">\(\varepsilon = 1\)</span> from 0.9246 to about 0.96. After that, the right number of trainable weights depends on the budget: few at very small <span class="math inline">\(\varepsilon\)</span>, more as the noise allows. The noise length predicts the ranking at small budgets; the feature ceiling and the effective dimension explain the rest.</p>
 </section>
 <section id="references" class="level2" data-number="41.10">

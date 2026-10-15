@@ -542,14 +542,18 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">4.1</span> Why this matters</a></li>
-  <li><a href="#sec-ht-np" id="toc-sec-ht-np" class="nav-link" data-scroll-target="#sec-ht-np"><span class="header-section-number">4.2</span> Errors and the Neyman–Pearson lemma</a></li>
-  <li><a href="#sec-ht-tradeoff" id="toc-sec-ht-tradeoff" class="nav-link" data-scroll-target="#sec-ht-tradeoff"><span class="header-section-number">4.3</span> Trade-off curves</a></li>
-  <li><a href="#sec-ht-auc" id="toc-sec-ht-auc" class="nav-link" data-scroll-target="#sec-ht-auc"><span class="header-section-number">4.4</span> One-number summaries</a></li>
-  <li><a href="#sec-ht-bayes" id="toc-sec-ht-bayes" class="nav-link" data-scroll-target="#sec-ht-bayes"><span class="header-section-number">4.5</span> Base rates: the Bayesian view</a></li>
-  <li><a href="#sec-ht-estimation" id="toc-sec-ht-estimation" class="nav-link" data-scroll-target="#sec-ht-estimation"><span class="header-section-number">4.6</span> Measuring rates from finite trials</a></li>
-  <li><a href="#sec-ht-code" id="toc-sec-ht-code" class="nav-link" data-scroll-target="#sec-ht-code"><span class="header-section-number">4.7</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">4.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">4.9</span> Further reading</a></li>
+  <li><a href="#sec-ht-setup" id="toc-sec-ht-setup" class="nav-link" data-scroll-target="#sec-ht-setup"><span class="header-section-number">4.2</span> Tests and their two errors</a></li>
+  <li><a href="#sec-ht-np" id="toc-sec-ht-np" class="nav-link" data-scroll-target="#sec-ht-np"><span class="header-section-number">4.3</span> The Neyman–Pearson lemma</a></li>
+  <li><a href="#sec-ht-tradeoff" id="toc-sec-ht-tradeoff" class="nav-link" data-scroll-target="#sec-ht-tradeoff"><span class="header-section-number">4.4</span> Trade-off curves</a></li>
+  <li><a href="#sec-ht-gaussian" id="toc-sec-ht-gaussian" class="nav-link" data-scroll-target="#sec-ht-gaussian"><span class="header-section-number">4.5</span> The Gaussian trade-off curve</a></li>
+  <li><a href="#sec-ht-laplace" id="toc-sec-ht-laplace" class="nav-link" data-scroll-target="#sec-ht-laplace"><span class="header-section-number">4.6</span> The Laplace trade-off curve</a></li>
+  <li><a href="#sec-ht-tv" id="toc-sec-ht-tv" class="nav-link" data-scroll-target="#sec-ht-tv"><span class="header-section-number">4.7</span> Best advantage and total variation</a></li>
+  <li><a href="#sec-ht-auc" id="toc-sec-ht-auc" class="nav-link" data-scroll-target="#sec-ht-auc"><span class="header-section-number">4.8</span> ROC summaries: why AUC hides the low-FPR regime</a></li>
+  <li><a href="#sec-ht-bayes" id="toc-sec-ht-bayes" class="nav-link" data-scroll-target="#sec-ht-bayes"><span class="header-section-number">4.9</span> The Bayesian view</a></li>
+  <li><a href="#sec-ht-estimation" id="toc-sec-ht-estimation" class="nav-link" data-scroll-target="#sec-ht-estimation"><span class="header-section-number">4.10</span> Measuring rates from finite trials</a></li>
+  <li><a href="#sec-ht-code" id="toc-sec-ht-code" class="nav-link" data-scroll-target="#sec-ht-code"><span class="header-section-number">4.11</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">4.12</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">4.13</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
@@ -577,14 +581,14 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">4.1</span> Why this matters</h2>
-<p>A spam filter, a fraud detector and a drift monitor all face one problem: <strong>an observation came from one of two distributions, and you must decide which.</strong> Later parts ask it about any test anyone could run, so you need the best test, how good it can be, and how to measure a given test from finite data.</p>
-<p>The answer runs through the <strong>likelihood ratio</strong> <span class="math inline">\(\Lambda(x) = q(x)/p(x)\)</span>, how many times more likely the observation is under the alternative <span class="math inline">\(Q\)</span> than under the default <span class="math inline">\(P\)</span>. The best test thresholds it, and sliding the threshold traces a curve of the best achievable errors that belongs to <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> alone. Most of what goes wrong in practice comes from summarizing that curve by one number and losing the corner where false alarms are rare.</p>
+<p>A spam filter reads an email and must say “ham” or “spam”. A fraud detector sees a transaction and must say “normal” or “fraud”. A monitoring job reads a batch of sensor readings and must say whether the sensor has drifted. These are all the same problem. An observation came from one of two distributions, and you must decide which one. Hypothesis testing is the study of that decision.</p>
+<p>Later parts of this book ask how well <em>any</em> test could tell two distributions apart, not just the test someone happened to build. To answer that, you need to know what the best possible test looks like and how good it can be. You also need to know how to measure a real test’s error rates from a finite number of trials. This chapter covers all three.</p>
+<p>Everything rests on one quantity, the <strong>likelihood ratio</strong>. It says how many times more likely the observation is under one distribution than under the other. The best test compares this ratio with a threshold. Moving the threshold trades one kind of mistake for the other, and the best tests at all thresholds trace a curve that depends on the two distributions alone. Most of what goes wrong in practice comes from summarizing that curve by a single number. A single number loses the corner of the curve where false alarms are rare, and that corner is often the one that matters.</p>
 </section>
-<section id="sec-ht-np" class="level2" data-number="4.2">
-<h2 data-number="4.2" class="anchored" data-anchor-id="sec-ht-np"><span class="header-section-number">4.2</span> Errors and the Neyman–Pearson lemma</h2>
-<p>Test the null hypothesis <span class="math inline">\(H_0: X \sim P\)</span> against the alternative <span class="math inline">\(H_1: X \sim Q\)</span> with a rule <span class="math inline">\(\phi(x) \in [0, 1]\)</span>, the probability of rejecting <span class="math inline">\(H_0\)</span> on seeing <span class="math inline">\(x\)</span>. Its <strong>false positive rate (FPR)</strong>, or type I error, is <span class="math inline">\(\alpha = \mathbb E_P[\phi]\)</span>; its <strong>type II error</strong> is <span class="math inline">\(\beta = 1 - \mathbb E_Q[\phi]\)</span>, and <span class="math inline">\(1 - \beta\)</span> is its <strong>power</strong> or <strong>true positive rate (TPR)</strong>. The two pull against each other: rejecting one more outcome raises <span class="math inline">\(\alpha\)</span> and lowers <span class="math inline">\(\beta\)</span>. A coin that rejects with probability <span class="math inline">\(\alpha\)</span> ignoring the data has <span class="math inline">\(\beta = 1 - \alpha\)</span>; a useful test beats it.</p>
-<p>For the most power on a fixed false-alarm budget, note that rejecting an outcome <span class="math inline">\(x\)</span> costs <span class="math inline">\(p(x)\)</span> of budget and buys <span class="math inline">\(q(x)\)</span> of power, an exchange rate of <span class="math inline">\(\Lambda(x)\)</span>. So spend the budget on the best rates first: reject where <span class="math inline">\(\Lambda(x)\)</span> is above a cut-off <span class="math inline">\(\eta\)</span>. That is the <strong>Neyman–Pearson lemma</strong>: the test that rejects when <span class="math inline">\(q(x) &gt; \eta\,p(x)\)</span>, keeps <span class="math inline">\(H_0\)</span> when <span class="math inline">\(q(x) &lt; \eta\,p(x)\)</span>, and randomizes on ties so its FPR is exactly <span class="math inline">\(\alpha\)</span>, has the smallest <span class="math inline">\(\beta\)</span> of any test with FPR at most <span class="math inline">\(\alpha\)</span>.</p>
-<p>A spam filter counts suspicious words, capped at 3 (<a href="#tbl-ht-spam" class="quarto-xref">Table&nbsp;<span>4.1</span></a>). The ratio increases with the count, so the best tests are thresholds on it, but on discrete data a threshold only reaches a few FPRs: rejecting counts of 3 spends 0.1, counts of 2 or 3 spend 0.3. To spend a budget of exactly 0.25, reject a count of 3 always and a count of 2 with probability 0.75, for power 0.625. No test does better: the best of 200,000 random tests with FPR at most 0.25 reaches 0.587.</p>
+<section id="sec-ht-setup" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="sec-ht-setup"><span class="header-section-number">4.2</span> Tests and their two errors</h2>
+<p>The chapter’s running example is a spam filter that counts suspicious words in an email, capped at 3. The default assumption is that an email is ham. This default is called the <strong>null hypothesis</strong> and written <span class="math inline">\(H_0\)</span>. Under it, the count has a distribution we call <span class="math inline">\(P\)</span>. We write <span class="math inline">\(p(x)\)</span> for the probability, under <span class="math inline">\(P\)</span>, that the count equals <span class="math inline">\(x\)</span>.</p>
+<p>The <strong>alternative hypothesis</strong> <span class="math inline">\(H_1\)</span> is that the email is spam. Under it, the count has a distribution <span class="math inline">\(Q\)</span>, and <span class="math inline">\(q(x)\)</span> is the probability of the count <span class="math inline">\(x\)</span>. <a href="#tbl-ht-spam" class="quarto-xref">Table&nbsp;<span>4.1</span></a> gives both distributions. Its last row is the likelihood ratio, written <span class="math inline">\(\Lambda(x) = q(x)/p(x)\)</span>. A large ratio points to spam. Spam tends to contain more suspicious words, so the ratio grows with the count. A count of 3 is four times as likely in spam as in ham, and a count of 0 is a quarter as likely.</p>
 <div id="tbl-ht-spam" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ht-spam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
@@ -628,17 +632,153 @@ Table&nbsp;4.1: Word-count distributions under ham (<span class="math inline">\(
 </div>
 </figure>
 </div>
-<p>Whenever <span class="math inline">\(\Lambda\)</span> increases with a statistic, “ratio above <span class="math inline">\(\eta\)</span>” is “statistic above some <span class="math inline">\(t\)</span>”, which is why thresholding a score works. A calibrated score <span class="math inline">\(\Pr[H_1 \mid x]\)</span> increases with <span class="math inline">\(\Lambda(x)\)</span>, so thresholding it is optimal; a score that ranks outcomes differently from <span class="math inline">\(\Lambda\)</span> can be beaten by re-ranking.</p>
+<p><a href="../part01-prerequisites/03-divergences.html">Divergences</a> writes the ratio the other way up, with <span class="math inline">\(p\)</span> on top. In this chapter the ratio always has the alternative on top.</p>
+<p>A <strong>test</strong> is a rule that looks at the count and decides whether to say “spam”, which is called rejecting <span class="math inline">\(H_0\)</span>. The simplest test picks a set of counts and rejects exactly when the count lands in it. It helps to allow one more thing. On some counts the test may reject only with some probability, by flipping a biased coin. So we describe a test by a function <span class="math inline">\(\phi\)</span>, where <span class="math inline">\(\phi(x)\)</span> is the probability of rejecting after seeing the count <span class="math inline">\(x\)</span>. A test that never flips a coin takes only the values 0 and 1. One that does is called a <strong>randomized test</strong>.</p>
+<p>A test can make two kinds of mistake. The first is to reject when the email is ham, flagging a good email as spam. This is a <strong>type I error</strong>, or false positive. Its probability is the <strong>false positive rate (FPR)</strong> of the test, written <span class="math inline">\(\alpha\)</span>.</p>
+<p>The second mistake is to keep <span class="math inline">\(H_0\)</span> when the email is spam, letting spam through. This is a <strong>type II error</strong>, or false negative, and its probability is written <span class="math inline">\(\beta\)</span>.</p>
+<p>Each error has a matching success rate. The <strong>power</strong> of a test is <span class="math inline">\(1 - \beta\)</span>, the probability that it catches spam. In classification the power is called the <strong>true positive rate (TPR)</strong>, or recall.</p>
+<p>A test has <strong>level</strong> <span class="math inline">\(\alpha\)</span> if its FPR is at most <span class="math inline">\(\alpha\)</span>. The level is a budget, and the FPR is what the test actually spends.</p>
+<p>Both error rates are averages of <span class="math inline">\(\phi\)</span>. On a ham email the test rejects with probability <span class="math inline">\(\phi(x)\)</span>, so averaging <span class="math inline">\(\phi\)</span> over counts drawn from <span class="math inline">\(P\)</span> gives the FPR. Averaging <span class="math inline">\(\phi\)</span> over counts drawn from <span class="math inline">\(Q\)</span> gives the power. Take the test “reject when the count is at least 2”. Its FPR is the ham probability of the counts 2 and 3, which is <span class="math inline">\(0.2 + 0.1 = 0.3\)</span>. Its power is the spam probability of the same counts, <span class="math inline">\(0.3 + 0.4 = 0.7\)</span>, so its type II error is 0.3.</p>
+<p>The two errors pull in opposite directions. Each count you add to the rejection set adds its ham probability to the FPR and its spam probability to the power. So you cannot lower both errors by changing the set. You can only trade one for the other. The convention is to treat them asymmetrically on purpose. You fix the level first, because a false alarm is the error you want to control first. Then you look for the most powerful test at that level.</p>
+<p>A useful yardstick is a test that ignores the email and rejects with probability <span class="math inline">\(\alpha\)</span> by flipping a coin. It rejects ham and spam equally often, so its FPR is <span class="math inline">\(\alpha\)</span> and its power is also <span class="math inline">\(\alpha\)</span>. Any test worth using must beat it. The test that rejects only a count of 0 does not. Its FPR is 0.4 and its power is only 0.1, below the coin’s 0.4. It rejects the count most typical of ham, where spam is four times rarer.</p>
+<p>Randomized tests matter because a set of counts can only spend certain budgets. Tests that reject every count from some cut-off upward have FPRs of 0, 0.1, 0.3, 0.6 and 1. Suppose your policy allows an FPR of 0.25. Rejecting only a count of 3 spends just 0.1, and rejecting 2 or 3 overspends at 0.3. The randomized test that always rejects 3 and rejects 2 with probability 0.75 spends exactly 0.25.</p>
+<p>The reason this works is that mixing two tests mixes their errors. The randomized test is the same as picking the test “reject 3” with probability 0.25 and the test “reject 2 or 3” with probability 0.75. Both error rates are averages of <span class="math inline">\(\phi\)</span>, so its errors are the same weighted average of the two tests’ errors. Its FPR is a quarter of 0.1 plus three quarters of 0.3, which is exactly 0.25. Plot each test as a point, its FPR against its type II error. Then every point on the segment between two achievable points is achievable too.</p>
+<p>Randomization is needed only for discrete data, where moving a threshold makes the FPR jump from one count to the next. For a continuous score, moving the threshold changes the FPR smoothly, so a plain threshold can hit any budget. <a href="#fig-ht-errors" class="quarto-xref">Figure&nbsp;<span>4.1</span></a> shows a continuous example. A biomarker follows a standard normal distribution in healthy patients and a normal distribution centred at 2 in ill ones. A screening test flags patients above a threshold of 1.645, which flags 5% of healthy patients. Ill patients fall below the threshold with probability 0.361, so the test catches about two in three of them. Lowering the threshold catches more ill patients and alarms more healthy ones.</p>
+<div id="fig-ht-errors" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ht-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hypothesis_testing_errors.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.1: The two errors of the threshold test “reject when <span class="math inline">\(x &gt; t\)</span>” for <span class="math inline">\(P = \mathcal N(0, 1)\)</span> against <span class="math inline">\(Q = \mathcal N(2, 1)\)</span>, with <span class="math inline">\(t\)</span> set so that <span class="math inline">\(\alpha = 0.05\)</span>. The blue area under <span class="math inline">\(P\)</span> beyond <span class="math inline">\(t\)</span> is <span class="math inline">\(\alpha\)</span>; the orange area under <span class="math inline">\(Q\)</span> before <span class="math inline">\(t\)</span> is <span class="math inline">\(\beta = 0.361\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>Which point to pick is a policy decision. What the mathematics can say is which points are achievable at all, and the next section answers that.</p>
 </section>
-<section id="sec-ht-tradeoff" class="level2" data-number="4.3">
-<h2 data-number="4.3" class="anchored" data-anchor-id="sec-ht-tradeoff"><span class="header-section-number">4.3</span> Trade-off curves</h2>
-<p>A single test is one point <span class="math inline">\((\alpha, \beta)\)</span>. To say how hard it is to tell <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span>, take the best <span class="math inline">\(\beta\)</span> at every <span class="math inline">\(\alpha\)</span>: the <strong>trade-off function</strong> <span class="math inline">\(T(\alpha) = \inf\{\beta_\phi : \alpha_\phi \le \alpha\}\)</span>. It lies below the coin flip’s <span class="math inline">\(1 - \alpha\)</span>, and the further below, the easier the problem. Its slope is minus the likelihood ratio at the threshold, since rejecting a little more of <span class="math inline">\(x\)</span> trades <span class="math inline">\(p(x)\)</span> of FPR for <span class="math inline">\(q(x)\)</span> of power. The best test adds outcomes in decreasing order of <span class="math inline">\(\Lambda\)</span>, so the curve flattens as it goes and is convex. Plotted as power against FPR, it is the optimal <strong>receiver operating characteristic (ROC)</strong> curve.</p>
-<p>For <span class="math inline">\(\mathcal N(0, 1)\)</span> against <span class="math inline">\(\mathcal N(\mu, 1)\)</span>, with <span class="math inline">\(\Phi\)</span> the standard normal cumulative distribution function (CDF), the best test thresholds <span class="math inline">\(x\)</span>, and <span id="eq-ht-gaussian-tradeoff"><span class="math display">\[T(\alpha) = \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big). \tag{4.1}\]</span></span> With <span class="math inline">\(n\)</span> draws, the log ratios add up to a function of the sample mean, which shifts by <span class="math inline">\(\delta\)</span> with standard deviation <span class="math inline">\(\sigma/\sqrt n\)</span>, so the same curve applies with <span class="math inline">\(\mu = \delta\sqrt n/\sigma\)</span>: distinguishability grows like <span class="math inline">\(\sqrt n\)</span>. A monitor that averages 100 readings to detect a drift of <span class="math inline">\(0.2\sigma\)</span> has <span class="math inline">\(\mu = 2\)</span>, power 0.6388 at <span class="math inline">\(\alpha = 0.05\)</span>, and only 0.1378 at <span class="math inline">\(10^{-3}\)</span>. Solving for <span class="math inline">\(n\)</span> gives the sample size for power <span class="math inline">\(1 - \beta'\)</span> at level <span class="math inline">\(\alpha\)</span>, <span id="eq-auto-04hypothesistesting-1"><span class="math display">\[n \ge \left(\frac{\Phi^{-1}(1 - \alpha) + \Phi^{-1}(1 - \beta')}{\delta/\sigma}\right)^2, \tag{4.2}\]</span></span> so power 0.9 at <span class="math inline">\(\alpha = 0.01\)</span> for <span class="math inline">\(\delta/\sigma = 0.25\)</span> needs 209 readings.</p>
-<p>Near <span class="math inline">\(\alpha = 0\)</span> the normal curve is vertical, because the normal likelihood ratio is unbounded far out: the first sliver of false-alarm budget buys power at an unbounded rate. A Laplace shift is different. For <span class="math inline">\(\mathrm{Lap}(0, b)\)</span> against <span class="math inline">\(\mathrm{Lap}(s, b)\)</span>, with <span class="math inline">\(\kappa = s/b\)</span>, the ratio is clipped to <span class="math inline">\([e^{-\kappa}, e^\kappa]\)</span>, so the ends of the curve are straight lines with those slopes: <span id="eq-ht-laplace-tradeoff"><span class="math display">\[T(\alpha) = \begin{cases} 1 - e^{\kappa}\alpha, &amp; \alpha &lt; \tfrac12 e^{-\kappa}, \\ e^{-\kappa}/(4\alpha), &amp; \tfrac12 e^{-\kappa} \le \alpha \le \tfrac12, \\ e^{-\kappa}(1 - \alpha), &amp; \alpha &gt; \tfrac12. \end{cases} \tag{4.3}\]</span></span> No test can buy power faster than <span class="math inline">\(e^\kappa\)</span> per unit of FPR, so no test has power above <span class="math inline">\(e^\kappa\alpha\)</span>. <a href="#tbl-ht-laplace-vs-gaussian" class="quarto-xref">Table&nbsp;<span>4.2</span></a> compares a Laplace pair (<span class="math inline">\(\kappa = 1\)</span>) with a normal pair (<span class="math inline">\(\mu = 1.0301\)</span>) with the same best advantage, 0.3935 (<a href="#sec-ht-auc" class="quarto-xref"><span>Section 4.4</span></a>). At <span class="math inline">\(\alpha = 10^{-6}\)</span> the normal pair is 36 times easier, because its unbounded ratio lets a test find rare, overwhelming evidence (<a href="#fig-ht-laplace-tradeoff" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>). Plan for the level you will use.</p>
+<section id="sec-ht-np" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="sec-ht-np"><span class="header-section-number">4.3</span> The Neyman–Pearson lemma</h2>
+<p>Among all tests with a given level, which one has the most power? There are infinitely many tests, one for every function <span class="math inline">\(\phi\)</span> with values between 0 and 1. The answer is that you only need to look at one family.</p>
+<p>The reasoning is about a budget. Rejecting a count <span class="math inline">\(x\)</span> costs <span class="math inline">\(p(x)\)</span> of false-positive budget, and it buys <span class="math inline">\(q(x)\)</span> of power. So the exchange rate at <span class="math inline">\(x\)</span> is <span class="math inline">\(q(x)/p(x)\)</span>, which is the likelihood ratio <span class="math inline">\(\Lambda(x)\)</span>. To get the most power for a fixed budget, spend it on the counts with the best exchange rate first. That means rejecting exactly where the likelihood ratio is above some cut-off.</p>
+<p>A <strong>likelihood ratio (LR) test</strong> does exactly this. It picks a threshold, written <span class="math inline">\(\eta\)</span>, and rejects wherever <span class="math inline">\(q(x)\)</span> is more than <span class="math inline">\(\eta\,p(x)\)</span>. It keeps <span class="math inline">\(H_0\)</span> wherever <span class="math inline">\(q(x)\)</span> is less. On ties, where the two are equal, it may reject with any probability. Writing the rule this way, rather than as a comparison of the ratio with the threshold, also covers counts that <span class="math inline">\(P\)</span> never produces. There any positive <span class="math inline">\(q(x)\)</span> counts as above every threshold, because rejecting such a count costs no budget at all.</p>
+<p>The <strong>Neyman–Pearson lemma</strong> says that this family contains the best tests, in two parts. First, no test whose FPR is at most that of an LR test has a smaller type II error. Second, for every level between 0 and 1 there is an LR test whose FPR is exactly that level. To reach the level exactly, it may need to randomize on the ties. Together, the two parts say that the most powerful test at level <span class="math inline">\(\alpha\)</span> is the LR test whose FPR is exactly <span class="math inline">\(\alpha\)</span>.</p>
+<p>The budget picture also explains why no other test can beat it. Wherever the LR test rejects, each unit of budget buys at least <span class="math inline">\(\eta\)</span> units of power. Wherever it keeps <span class="math inline">\(H_0\)</span>, each unit would buy at most <span class="math inline">\(\eta\)</span>. Any other test with the same budget must move some spending from the first kind of count to the second. Each such move gives up at least as much power as it gains.</p>
+<p>Back to the spam filter with a budget of 0.25. The count 3 has the highest ratio, 4, and costs 0.1 of budget. The next best count is 2, with ratio 1.5 and cost 0.2, which would overspend. So the threshold is 1.5. The LR test rejects 3 always and spends the remaining 0.15 on the count 2, rejecting it with probability 0.75. This is the randomized test from <a href="#sec-ht-setup" class="quarto-xref"><span>Section 4.2</span></a>. Its power is 0.625. As a check, the full edition draws 200,000 random tests, of which 11,727 spend at most 0.25. The most powerful of them reaches only 0.587. <a href="#fig-ht-discrete-tradeoff" class="quarto-xref">Figure&nbsp;<span>4.2</span></a> plots 400 random tests, and every one lies on or above the curve of the LR tests.</p>
+<div id="fig-ht-discrete-tradeoff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ht-discrete-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hypothesis_testing_discrete_tradeoff.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-discrete-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.2: Errors <span class="math inline">\((\alpha, \beta)\)</span> of 400 random tests on the spam example (grey), against the curve of likelihood-ratio tests. Black dots are the deterministic thresholds, the red square is the randomized test of size 0.25, and the dotted line is the coin-flip test.
+</figcaption>
+</figure>
+</div>
+<p>The lemma has several consequences for practice. The best test looks at an observation only through its likelihood ratio. Two observations with the same ratio are interchangeable for testing, and everything else about them is noise.</p>
+<p>Often the likelihood ratio grows with some simple statistic, such as the word count. Then “the ratio is above <span class="math inline">\(\eta\)</span>” is the same event as “the statistic is above some threshold”. So the best test is a plain threshold on that statistic. This is why thresholding a score works. A fraud model whose score is calibrated, meaning the score is the probability of fraud given the transaction, is an example. That probability grows with the likelihood ratio, as <a href="#sec-ht-bayes" class="quarto-xref"><span>Section 4.9</span></a> shows. So thresholding a calibrated score is an LR test, and no other use of the data catches more fraud at the same false-alarm rate. If a score ranks transactions differently from the likelihood ratio, re-ranking them by an estimate of the ratio can only help.</p>
+<p>With several independent observations, the probability of the whole sample is the product of the individual probabilities. So the likelihood ratio of the sample is the product of the individual ratios. The LR test thresholds its logarithm, which is a sum of independent terms. Sums of independent terms concentrate (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>), so both errors shrink exponentially as the number of observations <span class="math inline">\(n\)</span> grows. With the FPR held fixed, the type II error shrinks like <span class="math inline">\(e^{-n\,\mathrm{KL}(P\|Q)}\)</span>. Here <span class="math inline">\(\mathrm{KL}(P\|Q)\)</span> is the Kullback–Leibler (KL) divergence of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>. It is the average log-ratio by which a ham observation favours ham over spam. This result is the Chernoff–Stein lemma.</p>
+<p>The lemma needs both hypotheses to be <strong>simple</strong>. That means each one names a single, fully specified distribution. A <strong>composite</strong> hypothesis, such as “the mean is positive”, names a whole family of distributions. Each member has its own LR test, so there is usually no single test that is best against all of them at once. The main exception is a one-sided test in a family where the likelihood ratio grows with one statistic. Then every member’s LR test is the same threshold on that statistic, and the threshold is best against all of them.</p>
+</section>
+<section id="sec-ht-tradeoff" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="sec-ht-tradeoff"><span class="header-section-number">4.4</span> Trade-off curves</h2>
+<p>A single test gives one pair of errors. To say how hard it is to tell <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span>, you want the best type II error at every level at once. For each budget <span class="math inline">\(\alpha\)</span>, look at every test whose FPR stays within it, and record the smallest type II error any of them achieves. As a function of the budget, this is the <strong>trade-off function</strong> of <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>, written <span class="math inline">\(T(\alpha)\)</span>. By the Neyman–Pearson lemma, the LR test at each level achieves the best value. So in practice you compute the curve by sweeping the LR threshold.</p>
+<p>The <strong>receiver operating characteristic (ROC)</strong> curve of the best test plots its power against its FPR, which is <span class="math inline">\(1 - T(\alpha)\)</span> against <span class="math inline">\(\alpha\)</span>. It holds the same information as the trade-off curve, turned upside down. A particular score, thresholded at every value, also traces an ROC curve. By the lemma, that curve lies on or below the best one.</p>
+<p>Every trade-off curve has four properties, and each has a simple reason. It never increases, because a bigger budget allows every test a smaller budget allowed, and more. It lies on or below the line <span class="math inline">\(1 - \alpha\)</span>, because the coin-flip test is always available. It is continuous. And it is convex, meaning that it bends upward like a bowl, because mixing two tests reaches every point between them. These four properties are exactly what a possible trade-off means. Every function with all four is the trade-off curve of some pair of distributions.</p>
+<p>The slope of the curve has a meaning too. Moving along it means rejecting one more count with a little more probability. That spends <span class="math inline">\(p(x)\)</span> of budget and buys <span class="math inline">\(q(x)\)</span> of power, so the curve falls by the likelihood ratio <span class="math inline">\(\Lambda(x)\)</span> for each unit the FPR rises. In other words, the slope at a point is minus the likelihood ratio at the threshold. In <a href="#fig-ht-discrete-tradeoff" class="quarto-xref">Figure&nbsp;<span>4.2</span></a> the four segments have slopes of <span class="math inline">\(-4\)</span>, <span class="math inline">\(-1.5\)</span>, <span class="math inline">\(-0.667\)</span> and <span class="math inline">\(-0.25\)</span>. The LR test adds counts in decreasing order of their ratio, so each segment is less steep than the last. That is another way to see why the curve is convex.</p>
+<p>The two extremes of the curve are the two extremes of difficulty. If the curve is the line <span class="math inline">\(1 - \alpha\)</span>, no test beats a coin flip, which happens exactly when <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> are the same. If it is zero everywhere, some test makes no errors at all, which happens when the two distributions never produce the same outcome. In between, the further the curve bends below the line, the easier the problem.</p>
+<p>One problem is harder than another if its curve is higher everywhere, so that the best test misses more at every budget. Two curves can cross, though. Then neither problem is harder at every level, and you have to know the level you care about.</p>
+<p>Two details matter later. The curve need not start at 1. If <span class="math inline">\(Q\)</span> puts some probability on outcomes that <span class="math inline">\(P\)</span> never produces, a test can catch that probability with no false alarms. And the curve depends on which distribution is the null. Swapping <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> reflects the curve across the diagonal line <span class="math inline">\(1 - \alpha\)</span>.</p>
+</section>
+<section id="sec-ht-gaussian" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="sec-ht-gaussian"><span class="header-section-number">4.5</span> The Gaussian trade-off curve</h2>
+<p>The most common pair in practice is a shifted normal distribution. A score, a biomarker or a sample mean is normal under both hypotheses, with the same spread but different centres. Its curve has a closed form.</p>
+<p>The formula uses the standard normal cumulative distribution function (CDF), written <span class="math inline">\(\Phi\)</span>. The value <span class="math inline">\(\Phi(x)\)</span> is the probability that a standard normal variable is at most <span class="math inline">\(x\)</span>. Its inverse <span class="math inline">\(\Phi^{-1}\)</span> gives the point below which a standard normal has a given probability. For example, <span class="math inline">\(\Phi^{-1}(0.95) = 1.6449\)</span>. A standard normal exceeds that point with probability 0.05.</p>
+<p>Take <span class="math inline">\(P = \mathcal N(0, 1)\)</span>, the standard normal, against <span class="math inline">\(Q = \mathcal N(\mu, 1)\)</span>, the same distribution shifted right by <span class="math inline">\(\mu\)</span>. The likelihood ratio is <span class="math inline">\(e^{\mu x - \mu^2/2}\)</span>, which grows with <span class="math inline">\(x\)</span>. So the best test is a threshold on <span class="math inline">\(x\)</span>, as in <a href="#fig-ht-errors" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>. To spend a budget <span class="math inline">\(\alpha\)</span>, the threshold must leave probability <span class="math inline">\(\alpha\)</span> of <span class="math inline">\(P\)</span> above it. That point is <span class="math inline">\(\Phi^{-1}(1 - \alpha)\)</span>. The test misses when <span class="math inline">\(Q\)</span>, centred <span class="math inline">\(\mu\)</span> higher, falls below that threshold. So <span id="eq-ht-gaussian-tradeoff"><span class="math display">\[T(\alpha) = \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big). \tag{4.1}\]</span></span> The same curve holds for any two normal distributions with a common standard deviation. There <span class="math inline">\(\mu\)</span> is the distance between their means, measured in standard deviations. Rescaling the observation changes no test’s errors, so only that distance matters. <a href="#fig-ht-gaussian-tradeoff" class="quarto-xref">Figure&nbsp;<span>4.3</span></a> shows the family.</p>
+<div id="fig-ht-gaussian-tradeoff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ht-gaussian-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hypothesis_testing_gaussian_tradeoff.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-gaussian-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.3: The Gaussian trade-off curve <span class="math inline">\(\Phi(\Phi^{-1}(1 - \alpha) - \mu)\)</span> for <span class="math inline">\(\mu = 0, 0.5, 1, 2, 3\)</span>. Crosses are simulated errors of threshold tests at <span class="math inline">\(\mu = 1\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>Near <span class="math inline">\(\alpha = 0\)</span> the normal curve is vertical. The slope of the curve is minus the likelihood ratio at the threshold. A small budget means a high threshold, and the normal likelihood ratio grows without limit as the threshold rises. So the first sliver of false-alarm budget buys power at an unlimited exchange rate. The Laplace pair in the next section behaves differently.</p>
+<p>Averaging many observations makes the shift larger. Suppose you take <span class="math inline">\(n\)</span> independent readings, each with the standard deviation <span class="math inline">\(\sigma\)</span>. The alternative shifts their mean by an amount <span class="math inline">\(\delta\)</span>. The log likelihood ratios of the readings add up to a quantity that depends on the data only through the sample mean. So the best test thresholds the sample mean. The sample mean has standard deviation <span class="math inline">\(\sigma/\sqrt n\)</span>, so the curve is <a href="#eq-ht-gaussian-tradeoff" class="quarto-xref">Equation&nbsp;<span>4.1</span></a> with <span id="eq-auto-04hypothesistesting-1"><span class="math display">\[\mu = \frac{\delta\sqrt n}{\sigma}. \tag{4.2}\]</span></span> How easily you can tell the two apart grows like <span class="math inline">\(\sqrt n\)</span>, the rate at which a sample mean concentrates.</p>
+<p>Here is an example. A monitoring job averages 100 readings and must detect a drift of <span class="math inline">\(0.2\sigma\)</span> in the mean, so <span class="math inline">\(\mu = 2\)</span>. At a false-alarm rate of 5%, the threshold is 1.6449. The job then catches the drift with probability 0.6388. A simulation with a million draws per hypothesis agrees, with an FPR of 0.0503 and a type II error of 0.3617.</p>
+<div id="tbl-ht-gaussian" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ht-gaussian-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.2: The Gaussian trade-off curve at two shifts and two levels.
+</figcaption>
+<div aria-describedby="tbl-ht-gaussian-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\mu\)</span></th>
+<th><span class="math inline">\(\alpha\)</span></th>
+<th>Threshold <span class="math inline">\(\Phi^{-1}(1 - \alpha)\)</span></th>
+<th><span class="math inline">\(\beta = T(\alpha)\)</span></th>
+<th>Power</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0.05</td>
+<td>1.6449</td>
+<td>0.7405</td>
+<td>0.2595</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td><span class="math inline">\(10^{-3}\)</span></td>
+<td>3.0902</td>
+<td>0.9817</td>
+<td>0.0183</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.05</td>
+<td>1.6449</td>
+<td>0.3612</td>
+<td>0.6388</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><span class="math inline">\(10^{-3}\)</span></td>
+<td>3.0902</td>
+<td>0.8622</td>
+<td>0.1378</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>If false alarms must be rare, at a rate of <span class="math inline">\(10^{-3}\)</span>, the threshold moves out to 3.0902. The power drops to 0.1378 (<a href="#tbl-ht-gaussian" class="quarto-xref">Table&nbsp;<span>4.2</span></a>). A strict threshold costs a lot of power when the shift is moderate.</p>
+<p>You can also turn the question around and ask how many readings you need. Say you want power at least <span class="math inline">\(1 - \beta'\)</span> at level <span class="math inline">\(\alpha\)</span>. The curve reaches that power once <span class="math inline">\(\mu\)</span> is at least <span class="math inline">\(\Phi^{-1}(1 - \alpha) + \Phi^{-1}(1 - \beta')\)</span>. Substituting <span class="math inline">\(\mu = \delta\sqrt n/\sigma\)</span> and solving for <span class="math inline">\(n\)</span> gives <span id="eq-auto-04hypothesistesting-2"><span class="math display">\[n \ge \left(\frac{\Phi^{-1}(1 - \alpha) + \Phi^{-1}(1 - \beta')}{\delta/\sigma}\right)^2. \tag{4.3}\]</span></span> For power 0.9 at a level of 0.01, the two quantiles are 2.3263 and 1.2816. With a drift of <span class="math inline">\(0.25\sigma\)</span>, the bound is 208.3, so you need 209 readings.</p>
+</section>
+<section id="sec-ht-laplace" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="sec-ht-laplace"><span class="header-section-number">4.6</span> The Laplace trade-off curve</h2>
+<p>Replace the normal by a Laplace distribution, which has exponential tails. The Laplace distribution <span class="math inline">\(\mathrm{Lap}(m, b)\)</span> has the centre <span class="math inline">\(m\)</span> and the scale <span class="math inline">\(b\)</span>. Its density is proportional to <span class="math inline">\(e^{-|x - m|/b}\)</span> (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). Take <span class="math inline">\(P = \mathrm{Lap}(0, b)\)</span> against <span class="math inline">\(Q = \mathrm{Lap}(s, b)\)</span>, a shift by <span class="math inline">\(s\)</span>. Write <span class="math inline">\(\kappa = s/b\)</span> for the shift measured in units of the scale.</p>
+<p>The key fact is that the likelihood ratio of this pair is capped. Moving the centre by <span class="math inline">\(s\)</span> changes the distance from any point to the centre by at most <span class="math inline">\(s\)</span>. So the exponent changes by at most <span class="math inline">\(\kappa\)</span>, and the shifted density is within a factor <span class="math inline">\(e^\kappa\)</span> of the original everywhere. The likelihood ratio therefore stays between <span class="math inline">\(e^{-\kappa}\)</span> and <span class="math inline">\(e^{\kappa}\)</span>. A shifted normal has no such cap, as the previous section showed.</p>
+<p>The cap shapes the whole curve. The slope of the curve is minus the likelihood ratio at the threshold. Far out on either side, the ratio sits at its cap, so the two ends of the curve are straight lines with slopes <span class="math inline">\(-e^{\kappa}\)</span> and <span class="math inline">\(-e^{-\kappa}\)</span>. In between, where the ratio varies, the curve bends. The full curve is <span id="eq-ht-laplace-tradeoff"><span class="math display">\[T(\alpha) = \begin{cases} 1 - e^{\kappa}\alpha, &amp; \alpha &lt; \tfrac12 e^{-\kappa}, \\[2pt] \dfrac{e^{-\kappa}}{4\alpha}, &amp; \tfrac12 e^{-\kappa} \le \alpha \le \tfrac12, \\[6pt] e^{-\kappa}(1 - \alpha), &amp; \alpha &gt; \tfrac12. \end{cases} \tag{4.4}\]</span></span> The three pieces correspond to a threshold above the spam-side centre <span class="math inline">\(s\)</span>, between the two centres, and below the ham-side centre 0.</p>
+<p>The first piece is the one that matters most. Since the ratio is never above <span class="math inline">\(e^\kappa\)</span>, no test can buy power faster than <span class="math inline">\(e^\kappa\)</span> per unit of FPR. So no test at level <span class="math inline">\(\alpha\)</span> has power above <span class="math inline">\(e^\kappa\alpha\)</span>. For small budgets, the best test reaches exactly that power.</p>
+<p>As an example, suppose a regression model’s residuals are roughly Laplace, and you suspect a batch of inputs carries an offset of one scale, so <span class="math inline">\(\kappa = 1\)</span>. At a level of 0.05, which falls on the first piece, the best power is 0.1359. At a level of 0.25, which falls on the middle piece, the type II error is <span class="math inline">\(e^{-1}\)</span>, or 0.3679. A simulation of the threshold test with a million draws per hypothesis gives 0.3685.</p>
+<p>To compare the two shapes fairly, match a Laplace pair and a normal pair by their best advantage, defined in <a href="#sec-ht-tv" class="quarto-xref"><span>Section 4.7</span></a>. At <span class="math inline">\(\kappa = 1\)</span> the Laplace pair’s best advantage is 0.3935. A normal pair with <span class="math inline">\(\mu = 1.0301\)</span> has the same. In the middle of the curve the two nearly coincide. At small levels they do not (<a href="#tbl-ht-laplace-vs-gaussian" class="quarto-xref">Table&nbsp;<span>4.3</span></a>).</p>
 <div id="tbl-ht-laplace-vs-gaussian" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ht-laplace-vs-gaussian-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;4.2: Best power at small false positive rates for a Laplace pair and a normal pair with the same best advantage.
+Table&nbsp;4.3: Best power at small false positive rates for a Laplace pair and a normal pair with the same best advantage.
 </figcaption>
 <div aria-describedby="tbl-ht-laplace-vs-gaussian-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -670,45 +810,177 @@ Table&nbsp;4.2: Best power at small false positive rates for a Laplace pair and 
 </div>
 </figure>
 </div>
+<p>At a level of <span class="math inline">\(10^{-6}\)</span> the normal pair is 36 times easier to tell apart. Its unbounded likelihood ratio lets a test find rare observations that are overwhelmingly more likely under <span class="math inline">\(Q\)</span>. The capped Laplace ratio rules that out (<a href="#fig-ht-laplace-tradeoff" class="quarto-xref">Figure&nbsp;<span>4.4</span></a>). So two problems that look equally hard on average can differ enormously when false alarms must be rare. Plan for the level you will actually use.</p>
 <div id="fig-ht-laplace-tradeoff" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ht-laplace-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/hypothesis_testing_laplace_tradeoff.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-laplace-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.1: Left: the log likelihood ratio of <span class="math inline">\(\mathrm{Lap}(1, 1)\)</span> against <span class="math inline">\(\mathrm{Lap}(0, 1)\)</span> is clipped at <span class="math inline">\(\pm1\)</span>, while the normal one with the same best advantage is a straight line. Right: best power on log axes. The Laplace curve follows <span class="math inline">\(e\alpha\)</span> for small <span class="math inline">\(\alpha\)</span>; the normal curve rises far above it.
+Figure&nbsp;4.4: Left: the log likelihood ratio of <span class="math inline">\(\mathrm{Lap}(1, 1)\)</span> against <span class="math inline">\(\mathrm{Lap}(0, 1)\)</span> is clipped at <span class="math inline">\(\pm1\)</span>, while the normal one with the same best advantage is a straight line. Right: best power on log axes. The Laplace curve follows <span class="math inline">\(e\alpha\)</span> for small <span class="math inline">\(\alpha\)</span>; the normal curve rises far above it.
 </figcaption>
 </figure>
 </div>
 </section>
-<section id="sec-ht-auc" class="level2" data-number="4.4">
-<h2 data-number="4.4" class="anchored" data-anchor-id="sec-ht-auc"><span class="header-section-number">4.4</span> One-number summaries</h2>
-<p>The <strong>advantage</strong> of a test, <span class="math inline">\(\mathrm{TPR} - \mathrm{FPR}\)</span>, is how much more often it fires under <span class="math inline">\(Q\)</span> than under <span class="math inline">\(P\)</span>. Its maximum over all tests is the <strong>total variation (TV)</strong> distance <span class="math inline">\(\frac12\sum_x|q(x) - p(x)|\)</span>, reached by rejecting where <span class="math inline">\(q &gt; p\)</span>: <span class="math inline">\(2\Phi(\mu/2) - 1\)</span> for the normal pair and <span class="math inline">\(1 - e^{-\kappa/2}\)</span> for the Laplace pair. But that is one point of the curve, at <span class="math inline">\(\eta = 1\)</span>, and the two pairs above share it, 0.3935, despite their 36-fold gap at small <span class="math inline">\(\alpha\)</span>.</p>
-<p>The <strong>area under the curve (AUC)</strong> of a ROC curve is the probability that a random positive scores above a random negative. It weights all FPRs equally, so the region below <span class="math inline">\(10^{-3}\)</span> barely moves it. If negatives score <span class="math inline">\(\mathcal N(0, 1)\)</span> and positives <span class="math inline">\(\mathcal N(m, \sigma^2)\)</span>, then <span class="math inline">\(\mathrm{AUC} = \Phi(m/\sqrt{1 + \sigma^2})\)</span> and <span id="eq-auto-04hypothesistesting-2"><span class="math display">\[\mathrm{TPR}(\mathrm{FPR}) = 1 - \Phi\Big(\frac{\Phi^{-1}(1 - \mathrm{FPR}) - m}{\sigma}\Big). \tag{4.4}\]</span></span> Detector A has positives scoring <span class="math inline">\(\mathcal N(1, 1)\)</span>, detector B <span class="math inline">\(\mathcal N(1.5811, 2^2)\)</span>. Both have AUC 0.7602, but at an FPR of <span class="math inline">\(10^{-3}\)</span> their TPRs are 0.0183 and 0.2253: B catches 12 times as many positives (<a href="#fig-ht-auc-low-fpr" class="quarto-xref">Figure&nbsp;<span>4.2</span></a>). Report the TPR at a fixed low FPR chosen by the application, and plot ROC curves on log–log axes, where that corner is visible.</p>
+<section id="sec-ht-tv" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="sec-ht-tv"><span class="header-section-number">4.7</span> Best advantage and total variation</h2>
+<p>Sometimes you want a single number for how distinguishable two distributions are. A natural choice is the <strong>advantage</strong> of a test, its TPR minus its FPR. It says how much more often the test fires under <span class="math inline">\(Q\)</span> than under <span class="math inline">\(P\)</span>. The coin-flip test fires equally often under both, so its advantage is 0. In medicine, the advantage at a threshold is called Youden’s index.</p>
+<p>The advantage is a sum over outcomes of <span class="math inline">\(\phi(x)\)</span> times <span class="math inline">\(q(x) - p(x)\)</span>. Each term can be made as large as possible on its own. So the best test fires exactly on the outcomes where <span class="math inline">\(q\)</span> exceeds <span class="math inline">\(p\)</span>, which is the LR test with threshold 1. Its advantage is the total amount by which <span class="math inline">\(q\)</span> exceeds <span class="math inline">\(p\)</span>. That total is the <strong>total variation (TV)</strong> distance of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>. It equals half the sum of <span class="math inline">\(|q(x) - p(x)|\)</span> over all outcomes.</p>
+<p>In the spam example the differences are 0.3, 0.1, 0.1 and 0.3, so the TV distance is 0.40. Spam is more likely than ham at the counts 2 and 3, so the best test rejects those two counts. Its FPR and type II error are both 0.3, so its advantage is indeed 0.4.</p>
+<p>For the normal pair, the best test rejects above <span class="math inline">\(\mu/2\)</span>, halfway between the means, where the two bell curves cross. Its advantage is <span class="math inline">\(2\Phi(\mu/2) - 1\)</span>, which is 0.3829 at <span class="math inline">\(\mu = 1\)</span>. For the Laplace pair the best advantage is <span class="math inline">\(1 - e^{-\kappa/2}\)</span>, which is 0.3935 at <span class="math inline">\(\kappa = 1\)</span>.</p>
+<p>On the trade-off curve, the advantage at level <span class="math inline">\(\alpha\)</span> is the vertical gap between the line <span class="math inline">\(1 - \alpha\)</span> and the curve. The gap is largest where the curve’s slope is <span class="math inline">\(-1\)</span>, which is where the LR threshold is 1 (<a href="#fig-ht-tv-advantage" class="quarto-xref">Figure&nbsp;<span>4.5</span></a>).</p>
+<div id="fig-ht-tv-advantage" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ht-tv-advantage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hypothesis_testing_tv_advantage.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-tv-advantage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.5: The Gaussian trade-off curve at <span class="math inline">\(\mu = 1\)</span>, the diagonal <span class="math inline">\(1 - \alpha\)</span>, and the advantage <span class="math inline">\(1 - \alpha - T(\alpha)\)</span> (dashed). The red segment is the largest gap, at <span class="math inline">\(\alpha = 0.3085\)</span>, and its length is the total variation 0.3829.
+</figcaption>
+</figure>
+</div>
+<p>The TV distance is the best a summary can do if it uses one threshold and weighs the two errors equally. But it measures the curve at one point, where the threshold is 1, and says nothing about the ends. The Laplace and normal pairs of <a href="#tbl-ht-laplace-vs-gaussian" class="quarto-xref">Table&nbsp;<span>4.3</span></a> share the same TV distance. Yet at a level of <span class="math inline">\(10^{-6}\)</span> their powers differ by a factor of 36. If false alarms must be rare, the TV distance is the wrong summary, and the whole curve is the right one.</p>
+</section>
+<section id="sec-ht-auc" class="level2" data-number="4.8">
+<h2 data-number="4.8" class="anchored" data-anchor-id="sec-ht-auc"><span class="header-section-number">4.8</span> ROC summaries: why AUC hides the low-FPR regime</h2>
+<p>Real detectors are compared on held-out data by their ROC curves. The usual summary of such a curve is the <strong>area under the curve (AUC)</strong>. In many applications only a small corner of the curve matters. A fraud team can review only a tiny fraction of transactions, and a spam filter must almost never discard real mail. Two detectors with the same AUC can differ by a factor of ten in that corner.</p>
+<p>The AUC has a direct meaning. Write <span class="math inline">\(S_-\)</span> for the score of a random negative and <span class="math inline">\(S_+\)</span> for the score of a random positive, drawn independently. The AUC is the probability that <span class="math inline">\(S_+\)</span> is above <span class="math inline">\(S_-\)</span>, the chance that the detector ranks a random positive above a random negative. The reason is that the area adds up, over all thresholds, the TPR weighted by how much FPR each threshold adds. Each small step in the FPR corresponds to the score of one negative. So the area is the chance that a positive beats a negative’s score, averaged over the negatives. This reading assumes continuous scores. With ties, part of the area counts tied pairs.</p>
+<p>A common model has normal scores in both classes. Negatives score <span class="math inline">\(\mathcal N(0, 1)\)</span>. Positives score <span class="math inline">\(\mathcal N(m, \sigma^2)\)</span>, with the mean <span class="math inline">\(m\)</span> and the standard deviation <span class="math inline">\(\sigma\)</span>. The difference of the two scores is then normal, with mean <span class="math inline">\(m\)</span> and variance <span class="math inline">\(1 + \sigma^2\)</span>, which gives <span id="eq-auto-04hypothesistesting-3"><span class="math display">\[\mathrm{AUC} = \Phi\big(m/\sqrt{1 + \sigma^2}\big). \tag{4.5}\]</span></span> The ROC curve follows from setting the threshold from the FPR, as in <a href="#sec-ht-gaussian" class="quarto-xref"><span>Section 4.5</span></a>: <span id="eq-auto-04hypothesistesting-4"><span class="math display">\[\mathrm{TPR}(\mathrm{FPR}) = 1 - \Phi\Big(\frac{\Phi^{-1}(1 - \mathrm{FPR}) - m}{\sigma}\Big). \tag{4.6}\]</span></span></p>
+<p>Now compare two detectors. Detector A has positives that score <span class="math inline">\(\mathcal N(1, 1)\)</span>. Detector B has positives that score <span class="math inline">\(\mathcal N(1.5811, 2^2)\)</span>, more spread out, with the mean chosen to give the same AUC. Both have an AUC of 0.7602. <a href="#tbl-ht-auc" class="quarto-xref">Table&nbsp;<span>4.4</span></a> shows their TPRs at two FPRs.</p>
+<div id="tbl-ht-auc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ht-auc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.4: Two binormal detectors with equal AUC. The simulated AUC counts correctly ranked pairs among 1,000,000.
+</figcaption>
+<div aria-describedby="tbl-ht-auc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Detector</th>
+<th>AUC (formula / simulated)</th>
+<th>TPR at FPR <span class="math inline">\(= 0.1\)</span></th>
+<th>TPR at FPR <span class="math inline">\(= 10^{-3}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A, <span class="math inline">\(\mathcal N(1, 1)\)</span></td>
+<td>0.7602 / 0.7605</td>
+<td>0.3891</td>
+<td>0.0183</td>
+</tr>
+<tr class="even">
+<td>B, <span class="math inline">\(\mathcal N(1.5811, 2^2)\)</span></td>
+<td>0.7602 / 0.7601</td>
+<td>0.5595</td>
+<td>0.2253</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>At an FPR of <span class="math inline">\(10^{-3}\)</span>, detector B catches 12 times as many positives as detector A. B’s positives are more spread out, so a few of them score far above every negative, and those are exactly the cases a strict threshold catches. On linear axes the two ROC curves cross and look comparable. On log axes the gap at low FPR is obvious (<a href="#fig-ht-auc-low-fpr" class="quarto-xref">Figure&nbsp;<span>4.6</span></a>).</p>
 <div id="fig-ht-auc-low-fpr" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ht-auc-low-fpr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/hypothesis_testing_auc_low_fpr.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-auc-low-fpr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;4.2: ROC curves of two detectors with the same AUC of 0.760. Left, linear axes: the curves cross and look comparable. Right, log axes: at an FPR of <span class="math inline">\(10^{-3}\)</span> detector B has 12 times the TPR of detector A.
+Figure&nbsp;4.6: ROC curves of two detectors with the same AUC of 0.760. Left, linear axes: the curves cross and look comparable. Right, log axes: at an FPR of <span class="math inline">\(10^{-3}\)</span> detector B has 12 times the TPR of detector A.
 </figcaption>
 </figure>
 </div>
+<p>The AUC hides this because it weighs all FPRs equally. The region of FPRs below <span class="math inline">\(10^{-3}\)</span> is a tenth of a percent of the horizontal axis, so it barely changes the area. Most of the AUC comes from FPRs nobody would operate at. An extreme case makes the point. A detector whose ROC curve jumps to a TPR of 0.05 at an FPR of 0, and then follows the diagonal, has an AUC of only about 0.525. Yet it catches 5% of positives with no false alarms. So report the TPR at a fixed low FPR chosen by the application, and plot ROC curves on log–log axes, where that corner is visible.</p>
+<p>Neither curve in this example is the best possible for its detector. B’s positives and negatives have different spreads. Its log likelihood ratio then contains a term in the square of the score, so the ratio is large at both ends. The best test for B would also flag very <em>low</em> scores. The Neyman–Pearson lemma guarantees that the best ROC curve is at least as good as the one plotted.</p>
 </section>
-<section id="sec-ht-bayes" class="level2" data-number="4.5">
-<h2 data-number="4.5" class="anchored" data-anchor-id="sec-ht-bayes"><span class="header-section-number">4.5</span> Base rates: the Bayesian view</h2>
-<p>With a known base rate, the useful question is how likely <span class="math inline">\(H_1\)</span> is given the observation, and the likelihood ratio answers it in one multiplication. With prior probability <span class="math inline">\(\pi\)</span> for <span class="math inline">\(H_1\)</span>, <span id="eq-auto-04hypothesistesting-3"><span class="math display">\[\frac{\Pr[H_1 \mid x]}{\Pr[H_0 \mid x]} = \frac{\pi}{1 - \pi} \times \Lambda(x). \tag{4.5}\]</span></span> If all you know is that the test fired, the likelihood ratio of that event is <span class="math inline">\(\mathrm{TPR}/\mathrm{FPR}\)</span>. Use the <span class="math inline">\(\mu = 2\)</span> test where 1% of cases are positive. At an FPR of 0.05 an alarm has ratio <span class="math inline">\(0.6388/0.05 = 12.8\)</span>, and the chance it is real is only 0.114. At <span class="math inline">\(10^{-3}\)</span> the ratio is 137.8 and the chance is 0.582. When positives are rare, the FPR, not the power, decides whether an alarm is worth acting on.</p>
+<section id="sec-ht-bayes" class="level2" data-number="4.9">
+<h2 data-number="4.9" class="anchored" data-anchor-id="sec-ht-bayes"><span class="header-section-number">4.9</span> The Bayesian view</h2>
+<p>The Neyman–Pearson lemma uses no prior. But often you know a base rate, such as 1% of patients being ill or one transaction in a thousand being fraud. Then the useful question is how likely <span class="math inline">\(H_1\)</span> is, given the observation. The likelihood ratio answers it with one multiplication.</p>
+<p>Write <span class="math inline">\(\pi\)</span> for the base rate, the probability of <span class="math inline">\(H_1\)</span> before seeing anything. The odds of <span class="math inline">\(H_1\)</span> are its probability divided by the probability of <span class="math inline">\(H_0\)</span>. Bayes’ rule says that the odds after seeing <span class="math inline">\(x\)</span> are the odds before, multiplied by the likelihood ratio: <span id="eq-ht-posterior-odds"><span class="math display">\[\frac{\Pr[H_1 \mid x]}{\Pr[H_0 \mid x]} = \frac{\pi}{1 - \pi} \times \Lambda(x). \tag{4.7}\]</span></span> The reason is short. The chance that <span class="math inline">\(H_1\)</span> holds and you see <span class="math inline">\(x\)</span> is <span class="math inline">\(\pi\,q(x)\)</span>. The chance that <span class="math inline">\(H_0\)</span> holds and you see <span class="math inline">\(x\)</span> is <span class="math inline">\((1 - \pi)\,p(x)\)</span>. Dividing each by the total chance of seeing <span class="math inline">\(x\)</span> gives the two posterior probabilities. That total cancels in their ratio.</p>
+<p>The rule also tells you how to decide. To make as few mistakes as possible, say <span class="math inline">\(H_1\)</span> whenever its posterior odds exceed 1. That happens exactly when <span class="math inline">\(\Lambda(x)\)</span> is above <span class="math inline">\((1 - \pi)/\pi\)</span>. So the decision with the fewest errors is again an LR test, with its threshold set by the base rate. Unequal costs change only the threshold. If a miss costs <span class="math inline">\(c\)</span> times as much as a false alarm, the threshold becomes <span class="math inline">\((1 - \pi)/(c\pi)\)</span>. The test then moves along the same trade-off curve. With equal base rates, the smallest possible error is half of one minus the TV distance. For the normal pair at <span class="math inline">\(\mu = 1\)</span>, that is 0.3085.</p>
+<p>The same rule applies to any evidence, not only to the raw observation. If all you know is that the test fired, the likelihood ratio of that event is the chance of firing under <span class="math inline">\(H_1\)</span> divided by the chance under <span class="math inline">\(H_0\)</span>. That is the TPR divided by the FPR.</p>
+<p>Take the biomarker test with <span class="math inline">\(\mu = 2\)</span> in a population where 1% are ill.&nbsp;At an FPR of 0.05 the power is 0.6388, so a positive result has likelihood ratio 12.8. The chance that a positive patient is ill is then only 0.114, so nine in ten positives are false alarms. At an FPR of <span class="math inline">\(10^{-3}\)</span> the power is 0.1378 and the likelihood ratio is 137.8. A positive patient is then ill with probability 0.582 (<a href="#fig-ht-posterior" class="quarto-xref">Figure&nbsp;<span>4.7</span></a>).</p>
+<div id="fig-ht-posterior" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ht-posterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hypothesis_testing_posterior.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-posterior-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.7: Posterior probability of illness after a positive result, as a function of the prior, for the <span class="math inline">\(\mu = 2\)</span> biomarker test at two thresholds. At 1% prevalence (dashed line) the stricter test gives 0.582 against 0.114.
+</figcaption>
+</figure>
+</div>
+<p>The stricter threshold catches fewer ill patients, but it makes each positive result far more informative. This is the second reason that behaviour at low FPR matters. When positives are rare, the FPR, not the power, decides whether an alarm is worth acting on.</p>
+<p>The test with the fewest errors at this base rate is stricter still. It rejects when the ratio exceeds 99, which for this pair means a reading above 3.2976. Its FPR is <span class="math inline">\(4.88\times10^{-4}\)</span>, and its power is only 0.0972. When both kinds of error count equally and the disease is rare, it is cheapest to rarely say “ill”.</p>
 </section>
-<section id="sec-ht-estimation" class="level2" data-number="4.6">
-<h2 data-number="4.6" class="anchored" data-anchor-id="sec-ht-estimation"><span class="header-section-number">4.6</span> Measuring rates from finite trials</h2>
-<p>A measured FPR is <span class="math inline">\(k\)</span> false positives among <span class="math inline">\(n\)</span> negatives, a binomial count. A count of <span class="math inline">\(k\)</span> fluctuates by about <span class="math inline">\(\sqrt k\)</span>, so the relative uncertainty, about <span class="math inline">\(1/\sqrt k\)</span>, is set by the number of events. The <strong>Clopper–Pearson</strong> interval at confidence <span class="math inline">\(1 - a\)</span> is the range of rates <span class="math inline">\([l, u]\)</span> that make the observed count unsurprising: <span class="math inline">\(\Pr[\mathrm{Bin}(n, l) \ge k] = a/2\)</span> and <span class="math inline">\(\Pr[\mathrm{Bin}(n, u) \le k] = a/2\)</span>. It covers the true rate with probability at least <span class="math inline">\(1 - a\)</span>. With no events the 95% upper bound is about <span class="math inline">\(3/n\)</span>, the <strong>rule of three</strong>. Measuring an FPR of <span class="math inline">\(\alpha\)</span> to within a factor of about 1.2 takes some 100 expected events, so about <span class="math inline">\(100/\alpha\)</span> negatives.</p>
-<p>Evaluate the <span class="math inline">\(\mu = 2\)</span> monitor at its <span class="math inline">\(10^{-3}\)</span> threshold on 10,000 negatives and 10,000 positives. One run gives 1,350 true positives, interval <span class="math inline">\([0.1284, 0.1419]\)</span>, but only 10 false positives, interval <span class="math inline">\([0.00048, 0.00184]\)</span>: the FPR is known only to within a factor of two. To certify an FPR below <span class="math inline">\(10^{-3}\)</span> at 95% confidence you need 2,995 negatives with no false positive at all.</p>
-<p>The normal-approximation (Wald) interval is symmetric, too narrow for a skewed count, and collapses to <span class="math inline">\([0, 0]\)</span> at <span class="math inline">\(k = 0\)</span>. Hoeffding’s interval uses only the range and ignores the tiny variance: its half-width here is 0.0136, over 13 times the rate. And a threshold tuned on the same data has a true FPR as uncertain as that interval, so choose it on one split and measure on another.</p>
+<section id="sec-ht-estimation" class="level2" data-number="4.10">
+<h2 data-number="4.10" class="anchored" data-anchor-id="sec-ht-estimation"><span class="header-section-number">4.10</span> Measuring rates from finite trials</h2>
+<p>Everything so far assumed that you know <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>. In practice you measure a detector’s FPR on test data, where you count the false positives among the negatives. Write <span class="math inline">\(n\)</span> for the number of negatives and <span class="math inline">\(k\)</span> for the number of false positives among them. If each negative is falsely flagged independently, with the same probability <span class="math inline">\(\alpha\)</span>, then <span class="math inline">\(k\)</span> follows a binomial distribution (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). The intervals below are computed from that distribution, so they are only as valid as this model.</p>
+<p>The measured rate <span class="math inline">\(k/n\)</span> is uncertain, and at low rates the uncertainty is large compared with the rate itself. A count of <span class="math inline">\(k\)</span> events fluctuates by about <span class="math inline">\(\sqrt k\)</span>, so its relative uncertainty is about <span class="math inline">\(1/\sqrt k\)</span>. So the precision of a measured rate depends mainly on how many events you see, not on <span class="math inline">\(n\)</span> alone.</p>
+<p>The <strong>Clopper–Pearson interval</strong> turns the observed count into a range of plausible true rates. It asks which true rates would make the observed count unsurprising. A true rate far above <span class="math inline">\(k/n\)</span> would make a count as small as <span class="math inline">\(k\)</span> very unlikely. So the upper end <span class="math inline">\(u\)</span> is the rate at which seeing <span class="math inline">\(k\)</span> or fewer events has a small probability. Likewise, the lower end <span class="math inline">\(l\)</span> is the rate at which seeing <span class="math inline">\(k\)</span> or more events has that small probability.</p>
+<p>For a two-sided interval at confidence <span class="math inline">\(1 - a\)</span>, each end gets half of the allowed failure probability <span class="math inline">\(a\)</span>. So <span class="math inline">\(l\)</span> and <span class="math inline">\(u\)</span> solve <span id="eq-auto-04hypothesistesting-5"><span class="math display">\[\Pr[\mathrm{Bin}(n, l) \ge k] = \frac a2, \qquad \Pr[\mathrm{Bin}(n, u) \le k] = \frac a2. \tag{4.8}\]</span></span> By convention, the lower end is 0 when no events are seen, and the upper end is 1 when every trial is an event. The interval contains the true rate with probability at least <span class="math inline">\(1 - a\)</span>.</p>
+<p>The reason is that each end can miss on only one side. The true rate lies above the upper end only when the observed count was unusually small for it. By the choice of <span class="math inline">\(u\)</span>, that happens with probability at most <span class="math inline">\(a/2\)</span>. The same holds for the lower end, and the union bound adds the two. The interval is called exact because it uses the binomial distribution itself, not an approximation. It is also conservative, because its coverage is at least <span class="math inline">\(1 - a\)</span> and often more. The full edition checks this by simulation, with a true FPR of <span class="math inline">\(10^{-3}\)</span> and 10,000 negatives. Over 2,000 runs, the 95% interval covered the true rate 97.20% of the time.</p>
+<p>Often you need only an upper bound, for example to claim that an FPR is below a target. The upper end on its own misses with probability at most <span class="math inline">\(a/2\)</span>. So the upper end of a two-sided interval at confidence <span class="math inline">\(1 - a\)</span> is a one-sided upper bound at confidence <span class="math inline">\(1 - a/2\)</span>. In particular, a one-sided 95% upper bound is the upper end of a two-sided 90% interval. You compute it by solving <span class="math inline">\(\Pr[\mathrm{Bin}(n, u) \le k] = 0.05\)</span>. For 1 false positive in 1,000 negatives, this bound is 0.0047 (the code below prints it).</p>
+<p>With no events at all, the chance of seeing none at rate <span class="math inline">\(u\)</span> is <span class="math inline">\((1 - u)^n\)</span>. The one-sided 95% upper bound solves <span class="math inline">\((1 - u)^n = 0.05\)</span>, which gives <span class="math inline">\(u = 1 - 0.05^{1/n}\)</span>. For large <span class="math inline">\(n\)</span> this is about <span class="math inline">\(3/n\)</span>, a shortcut called the <strong>rule of three</strong>. With 3,000 negatives and no false positives, the bound is <span class="math inline">\(9.981\times10^{-4}\)</span>. Turned around, to certify an FPR below <span class="math inline">\(10^{-3}\)</span> at 95% confidence, you need 2,995 negatives with no false positive at all.</p>
+<p>Here is what this means for the monitor with <span class="math inline">\(\mu = 2\)</span>, run at its <span class="math inline">\(10^{-3}\)</span> threshold. Its true FPR is <span class="math inline">\(10^{-3}\)</span>, and its true TPR is 0.1378. Test it on 10,000 negatives and 10,000 positives. <a href="#tbl-ht-one-run" class="quarto-xref">Table&nbsp;<span>4.5</span></a> shows one simulated run.</p>
+<div id="tbl-ht-one-run" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ht-one-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.5: One simulated evaluation of the <span class="math inline">\(\mu = 2\)</span> test at its <span class="math inline">\(10^{-3}\)</span> threshold, with 10,000 examples per class.
+</figcaption>
+<div aria-describedby="tbl-ht-one-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Quantity</th>
+<th>Count</th>
+<th>Estimate</th>
+<th>95% Clopper–Pearson interval</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>False positives</td>
+<td>10</td>
+<td>0.0010</td>
+<td><span class="math inline">\([0.00048, 0.00184]\)</span></td>
+</tr>
+<tr class="even">
+<td>True positives</td>
+<td>1,350</td>
+<td>0.1350</td>
+<td><span class="math inline">\([0.1284, 0.1419]\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The TPR is pinned down to about <span class="math inline">\(\pm 0.007\)</span>. The FPR is not, because it rests on only 10 events. The data are consistent with a true FPR anywhere from about half to almost twice the target. With 100,000 negatives you would expect about 100 false positives. The interval would then be <span class="math inline">\([0.00081, 0.00122]\)</span>, about 20% on either side. This gives a rule of thumb. You need on the order of <span class="math inline">\(100/\alpha\)</span> negatives to measure an FPR of <span class="math inline">\(\alpha\)</span> to within a factor of about 1.2. <a href="#fig-ht-rate-ci" class="quarto-xref">Figure&nbsp;<span>4.8</span></a> shows how slowly the interval tightens as the number of negatives grows.</p>
+<div id="fig-ht-rate-ci" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ht-rate-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hypothesis_testing_rate_ci.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-rate-ci-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.8: 95% Clopper–Pearson intervals for an observed false-positive rate of exactly <span class="math inline">\(10^{-3}\)</span>, as the number of negatives grows from <span class="math inline">\(10^3\)</span> to <span class="math inline">\(10^6\)</span>, with the upper end of the two-sided Hoeffding interval for comparison.
+</figcaption>
+</figure>
+</div>
+<p>Two other common intervals do worse on the same 10 false positives. The <strong>Wald interval</strong> uses a normal approximation to the binomial. Here it gives <span class="math inline">\([0.00038, 0.00162]\)</span>, which is too narrow. It is also symmetric, while a count of rare events is skewed to the right. And with no events it collapses to <span class="math inline">\([0, 0]\)</span>, claiming certainty from no data.</p>
+<p>The Hoeffding interval comes from Hoeffding’s inequality (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>). That inequality uses only the fact that each outcome lies between 0 and 1. So it assumes the largest variance such an outcome can have, a quarter, while the true variance of a rare false positive is tiny. Here its half-width is 0.0136, more than 13 times the rate being measured.</p>
+<p>One last trap is that the threshold is often estimated too. Suppose you choose the threshold on the same data so that the measured FPR is <span class="math inline">\(10^{-3}\)</span>. The true FPR of that threshold is then as uncertain as the interval above. So choose thresholds on one split of the data, and measure their rates on another.</p>
 </section>
-<section id="sec-ht-code" class="level2" data-number="4.7">
-<h2 data-number="4.7" class="anchored" data-anchor-id="sec-ht-code"><span class="header-section-number">4.7</span> Code</h2>
-<p>The normal trade-off curve and the Clopper–Pearson interval need only the standard library; bisection on the upper tail keeps precision when <span class="math inline">\(\alpha\)</span> is tiny:</p>
+<section id="sec-ht-code" class="level2" data-number="4.11">
+<h2 data-number="4.11" class="anchored" data-anchor-id="sec-ht-code"><span class="header-section-number">4.11</span> Code</h2>
+<p>The normal trade-off curve and the Clopper–Pearson interval need only the standard library. The quantile is found by bisection on the upper tail, which keeps full precision when <span class="math inline">\(\alpha\)</span> is tiny. Computing <span class="math inline">\(\Phi^{-1}(1 - \alpha)\)</span> directly would round <span class="math inline">\(1 - \alpha\)</span> to a number very close to 1 and lose the digits that matter.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections.abc <span class="im">import</span> Callable</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> erfc, exp, lgamma, log, log1p, sqrt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -763,18 +1035,24 @@ Figure&nbsp;4.2: ROC curves of two detectors with the same AUC of 0.760. Left, l
 <span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lower, upper</span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>gaussian_power(<span class="fl">0.05</span>, <span class="fl">2.0</span>)<span class="sc">:.4f}</span><span class="ss"> </span><span class="sc">{</span>gaussian_power(<span class="fl">1e-3</span>, <span class="fl">2.0</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.6388 0.1378</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>low, high <span class="op">=</span> clopper_pearson(<span class="dv">10</span>, <span class="dv">10_000</span>)</span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"[</span><span class="sc">{</span>low<span class="sc">:.5f}</span><span class="ss">, </span><span class="sc">{</span>high<span class="sc">:.5f}</span><span class="ss">]"</span>)  <span class="co"># [0.00048, 0.00184]</span></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="dv">1</span> <span class="op">-</span> <span class="fl">0.05</span> <span class="op">**</span> (<span class="dv">1</span> <span class="op">/</span> <span class="dv">3000</span>)<span class="sc">:.3e}</span><span class="ss">"</span>)  <span class="co"># 9.981e-04</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The last line is the exact 95% upper bound after no events in 3,000 trials, close to the rule of three’s <span class="math inline">\(3/n\)</span>.</p>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> upper_bound(k: <span class="bu">int</span>, n: <span class="bu">int</span>, confidence: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.95</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""One-sided upper bound: the upper end of the two-sided interval at confidence 2 * confidence - 1."""</span></span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> clopper_pearson(k, n, <span class="dv">2</span> <span class="op">*</span> confidence <span class="op">-</span> <span class="dv">1</span>)[<span class="dv">1</span>]</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>gaussian_power(<span class="fl">0.05</span>, <span class="fl">2.0</span>)<span class="sc">:.4f}</span><span class="ss"> </span><span class="sc">{</span>gaussian_power(<span class="fl">1e-3</span>, <span class="fl">2.0</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.6388 0.1378</span></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>low, high <span class="op">=</span> clopper_pearson(<span class="dv">10</span>, <span class="dv">10_000</span>)</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"[</span><span class="sc">{</span>low<span class="sc">:.5f}</span><span class="ss">, </span><span class="sc">{</span>high<span class="sc">:.5f}</span><span class="ss">]"</span>)  <span class="co"># [0.00048, 0.00184]</span></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>upper_bound(<span class="dv">1</span>, <span class="dv">1_000</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.0047</span></span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>upper_bound(<span class="dv">0</span>, <span class="dv">3_000</span>)<span class="sc">:.3e}</span><span class="ss">"</span>)  <span class="co"># 9.981e-04</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The last two lines are one-sided 95% upper bounds. The first is for 1 false positive in 1,000 negatives. The second is for no false positives in 3,000, close to the rule of three’s <span class="math inline">\(3/n\)</span>.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="4.8">
-<h2 data-number="4.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">4.8</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="4.12">
+<h2 data-number="4.12" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">4.12</span> Cheat sheet</h2>
 <div id="tbl-ht-cheat-sheet" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ht-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;4.3: The results of this chapter.
+Table&nbsp;4.6: The results of this chapter.
 </figcaption>
 <div aria-describedby="tbl-ht-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -791,35 +1069,43 @@ Table&nbsp;4.3: The results of this chapter.
 <tbody>
 <tr class="odd">
 <td>Errors of a test <span class="math inline">\(\phi\)</span></td>
-<td><span class="math inline">\(\alpha = \mathbb E_P\phi\)</span> (FPR), <span class="math inline">\(\beta = 1 - \mathbb E_Q\phi\)</span>, power <span class="math inline">\(= 1 - \beta\)</span> (TPR)</td>
+<td>FPR <span class="math inline">\(\alpha\)</span> is the average of <span class="math inline">\(\phi\)</span> under <span class="math inline">\(P\)</span>; power <span class="math inline">\(1 - \beta\)</span> (TPR) is its average under <span class="math inline">\(Q\)</span></td>
 </tr>
 <tr class="even">
 <td>Neyman–Pearson</td>
-<td>Rejecting where <span class="math inline">\(q/p &gt; \eta\)</span>, randomizing at ties, is most powerful at its level</td>
+<td>The LR test, rejecting where <span class="math inline">\(q &gt; \eta p\)</span> and randomizing at ties, is most powerful at its level</td>
 </tr>
 <tr class="odd">
-<td>Normal shift <span class="math inline">\(\mu\)</span></td>
-<td><span class="math inline">\(T(\alpha) = \Phi(\Phi^{-1}(1 - \alpha) - \mu)\)</span>; <span class="math inline">\(n\)</span> averaged draws: <span class="math inline">\(\mu = \delta\sqrt n/\sigma\)</span></td>
+<td>Trade-off curve <span class="math inline">\(T(\alpha)\)</span></td>
+<td>Best <span class="math inline">\(\beta\)</span> at level <span class="math inline">\(\alpha\)</span>; non-increasing, at most <span class="math inline">\(1 - \alpha\)</span>, convex, continuous; slope <span class="math inline">\(-\Lambda\)</span> at the threshold</td>
 </tr>
 <tr class="even">
-<td>Laplace shift <span class="math inline">\(\kappa = s/b\)</span></td>
-<td><a href="#eq-ht-laplace-tradeoff" class="quarto-xref">Equation&nbsp;<span>4.3</span></a>; power <span class="math inline">\(\le e^\kappa\alpha\)</span></td>
+<td>Normal shift <span class="math inline">\(\mu\)</span></td>
+<td><span class="math inline">\(T(\alpha) = \Phi(\Phi^{-1}(1 - \alpha) - \mu)\)</span>; <span class="math inline">\(n\)</span> averaged readings: <span class="math inline">\(\mu = \delta\sqrt n/\sigma\)</span></td>
 </tr>
 <tr class="odd">
+<td>Laplace shift <span class="math inline">\(\kappa = s/b\)</span></td>
+<td><a href="#eq-ht-laplace-tradeoff" class="quarto-xref">Equation&nbsp;<span>4.4</span></a>; power at most <span class="math inline">\(e^\kappa\alpha\)</span></td>
+</tr>
+<tr class="even">
 <td>Best advantage</td>
 <td><span class="math inline">\(\max(\mathrm{TPR} - \mathrm{FPR}) = \mathrm{TV}\)</span>; normal <span class="math inline">\(2\Phi(\mu/2) - 1\)</span>, Laplace <span class="math inline">\(1 - e^{-\kappa/2}\)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>AUC</td>
 <td><span class="math inline">\(\Pr[S_+ &gt; S_-]\)</span>; binormal <span class="math inline">\(\Phi(m/\sqrt{1 + \sigma^2})\)</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Bayes</td>
 <td>Posterior odds <span class="math inline">\(=\)</span> prior odds <span class="math inline">\(\times\,\Lambda\)</span>; an alarm has <span class="math inline">\(\Lambda = \mathrm{TPR}/\mathrm{FPR}\)</span></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Clopper–Pearson</td>
-<td><span class="math inline">\(\Pr[\mathrm{Bin}(n, l) \ge k] = \Pr[\mathrm{Bin}(n, u) \le k] = a/2\)</span>; zero events: <span class="math inline">\(u \approx 3/n\)</span></td>
+<td><span class="math inline">\(\Pr[\mathrm{Bin}(n, l) \ge k] = \Pr[\mathrm{Bin}(n, u) \le k] = a/2\)</span></td>
+</tr>
+<tr class="even">
+<td>One-sided upper bound</td>
+<td>95% one-sided <span class="math inline">\(=\)</span> upper end of the two-sided 90% interval; zero events: <span class="math inline">\(u \approx 3/n\)</span></td>
 </tr>
 </tbody>
 </table>
@@ -828,20 +1114,21 @@ Table&nbsp;4.3: The results of this chapter.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>To find the best test, compute the likelihood ratio and threshold it.</li>
-<li>Compare detectors by their TPR at a fixed low FPR, on log axes; AUC and TV hide that regime.</li>
-<li>A bounded likelihood ratio caps power at small <span class="math inline">\(\alpha\)</span>: power <span class="math inline">\(\le \Lambda_{\max}\,\alpha\)</span>.</li>
-<li>To measure a rate near <span class="math inline">\(\alpha\)</span>, plan for about <span class="math inline">\(100/\alpha\)</span> trials and report a Clopper–Pearson interval.</li>
+<li>To find the best test, compute the likelihood ratio and threshold it. If the ratio grows with a statistic, threshold the statistic.</li>
+<li>Compare detectors by their TPR at a fixed low FPR, on log axes. AUC and TV hide that regime.</li>
+<li>A capped likelihood ratio caps power at small levels: power is at most the cap times <span class="math inline">\(\alpha\)</span>.</li>
+<li>To measure a rate near <span class="math inline">\(\alpha\)</span>, plan for about <span class="math inline">\(100/\alpha\)</span> trials, and report a Clopper–Pearson interval.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="4.9">
-<h2 data-number="4.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">4.9</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="4.13">
+<h2 data-number="4.13" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">4.13</span> Further reading</h2>
 <ul>
-<li>Casella &amp; Berger, <em>Statistical Inference</em> (2nd ed., 2002), §8.3: the Neyman–Pearson lemma and its one-sided extensions.</li>
+<li>Casella &amp; Berger, <em>Statistical Inference</em> (2nd ed., 2002), §8.3: the Neyman–Pearson lemma and the Karlin–Rubin theorem for one-sided composite tests.</li>
+<li>Cover &amp; Thomas, <em>Elements of Information Theory</em> (2nd ed., 2006), §11.7–11.9: the Chernoff–Stein lemma, on how fast errors fall with many observations.</li>
 <li>Fawcett, “An introduction to ROC analysis” (Pattern Recognition Letters, 2006): ROC curves, AUC as a ranking probability, and convex hulls.</li>
 <li>Brown, Cai &amp; DasGupta, “Interval Estimation for a Binomial Proportion” (Statistical Science, 2001): why the Wald interval fails and what to use instead.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result in this chapter except the Chernoff–Stein lemma, which it cites, is derived step by step in <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html">the full edition’s chapter</a>.</p>
 
 
 </section>

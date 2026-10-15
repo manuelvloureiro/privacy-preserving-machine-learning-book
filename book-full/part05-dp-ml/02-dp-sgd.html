@@ -1280,7 +1280,7 @@ Figure&nbsp;37.4: Left: test accuracy during training with clipping alone, with 
 </section>
 <section id="code-check-every-number-by-computation" class="level2" data-number="37.8">
 <h2 data-number="37.8" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">37.8</span> Code: check every number by computation</h2>
-<p>The script <a href="../../../code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a> implements the two-layer network, its per-example gradients by ghost norms, DP-SGD with Poisson sampling, and the RDP accountant of Part 4, rewritten in a few dozen lines so the part stands on its own. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a> implements the two-layer network, its per-example gradients by ghost norms, DP-SGD with Poisson sampling, and the RDP accountant of Part 4, rewritten in a few dozen lines so the part stands on its own. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/dp_sgd.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Later chapters import its model and accountant: <code>make_task()</code>, <code>train_dpsgd(rng, data, config)</code>, <code>accuracy</code>, <code>clipped_grad_sum</code>, <code>dpsgd_epsilon(q, sigma, steps, delta)</code> and <code>noise_multiplier_for(q, steps, eps, delta)</code>.</p>
 <p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-dpsgd-code" class="quarto-xref">Table&nbsp;<span>37.8</span></a>:</p>
@@ -1335,7 +1335,7 @@ Table&nbsp;37.8: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_dp_sgd.py">tests/test_dp_sgd.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_dp_sgd.py">tests/test_dp_sgd.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> DP-SGD is short: sampling, clipping, a noisy sum and a step take about twenty lines, and the accountant a few dozen more. What takes care is everything around it, the conditions of <a href="#sec-dpsgd-algorithm" class="quarto-xref"><span>Section 37.3</span></a> and the choice of knobs. On this task the clipping norm hardly matters once <span class="math inline">\(\eta C\)</span> is tuned, the batch size matters a little, and the noise multiplier, set by the budget, matters most.</p>
 </section>
 <section id="references" class="level2" data-number="37.9">

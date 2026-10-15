@@ -1302,7 +1302,7 @@ Figure&nbsp;5.6: MAP error against Fano’s lower bound, for <span class="math i
 </section>
 <section id="code-check-every-formula-numerically" class="level2" data-number="5.10">
 <h2 data-number="5.10" class="anchored" data-anchor-id="code-check-every-formula-numerically"><span class="header-section-number">5.10</span> Code: check every formula numerically</h2>
-<p>The script <a href="../../../code/part01-prerequisites/information_theory.py">code/information_theory.py</a> computes every number quoted in this chapter and draws its figures. Entropy, mutual information, vulnerability, leakage, capacity and the Fano bound are small typed functions of a joint table or a channel matrix; the script calls them once for the numbers and loops them over parameters for the figures. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/information_theory.py">code/information_theory.py</a> computes every number quoted in this chapter and draws its figures. Entropy, mutual information, vulnerability, leakage, capacity and the Fano bound are small typed functions of a joint table or a channel matrix; the script calls them once for the numbers and loops them over parameters for the figures. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/information_theory.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><a href="#tbl-info-output" class="quarto-xref">Table&nbsp;<span>5.6</span></a> summarizes the output (seed 0; only the guessing simulation uses the seed).</p>
 <div id="tbl-info-output" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1352,7 +1352,7 @@ Table&nbsp;5.6: Output of the chapter’s script with seed 0. All quantities are
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_information_theory.py">tests/test_information_theory.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_information_theory.py">tests/test_information_theory.py</a> checks that the output still matches.</p>
 <p>Five lessons come out of these runs. The first is that two formulas give one number: mutual information computed as an entropy difference and as a KL divergence agree, which is a useful check on any implementation. The second is that the closed forms are right. Blahut–Arimoto, which knows nothing about the binary symmetric channel, finds <span class="math inline">\(1 - h(p)\)</span> and the uniform input, and the leakage closed forms match the explicit matrices. The third is that vulnerability is a real success rate: the simulated MAP guesser wins at the rate <span class="math inline">\(V(X \mid Y)\)</span> predicts. The fourth is that Shannon and min-entropy measure different things. They can rank channels in opposite orders, and neither sees a single exposed secret value. The last is that Fano’s bound is tight only when errors are spread out over the wrong values; concentrated errors make it loose.</p>
 </section>
 <section id="references" class="level2" data-number="5.11">

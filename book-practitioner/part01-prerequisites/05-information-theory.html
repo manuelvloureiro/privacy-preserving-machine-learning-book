@@ -544,12 +544,13 @@ window.Quarto = {
   <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">5.1</span> Why this matters</a></li>
   <li><a href="#sec-info-entropy" id="toc-sec-info-entropy" class="nav-link" data-scroll-target="#sec-info-entropy"><span class="header-section-number">5.2</span> Entropy</a></li>
   <li><a href="#sec-info-mi" id="toc-sec-info-mi" class="nav-link" data-scroll-target="#sec-info-mi"><span class="header-section-number">5.3</span> Mutual information and data processing</a></li>
-  <li><a href="#sec-info-min" id="toc-sec-info-min" class="nav-link" data-scroll-target="#sec-info-min"><span class="header-section-number">5.4</span> Min-entropy and one-guess leakage</a></li>
-  <li><a href="#sec-info-shannon-vs-min" id="toc-sec-info-shannon-vs-min" class="nav-link" data-scroll-target="#sec-info-shannon-vs-min"><span class="header-section-number">5.5</span> Shannon against min-entropy leakage</a></li>
-  <li><a href="#sec-info-fano" id="toc-sec-info-fano" class="nav-link" data-scroll-target="#sec-info-fano"><span class="header-section-number">5.6</span> Fano’s inequality</a></li>
-  <li><a href="#sec-info-code" id="toc-sec-info-code" class="nav-link" data-scroll-target="#sec-info-code"><span class="header-section-number">5.7</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">5.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">5.9</span> Further reading</a></li>
+  <li><a href="#sec-info-capacity" id="toc-sec-info-capacity" class="nav-link" data-scroll-target="#sec-info-capacity"><span class="header-section-number">5.4</span> Channels and capacity</a></li>
+  <li><a href="#sec-info-min" id="toc-sec-info-min" class="nav-link" data-scroll-target="#sec-info-min"><span class="header-section-number">5.5</span> Min-entropy and one-guess leakage</a></li>
+  <li><a href="#sec-info-shannon-vs-min" id="toc-sec-info-shannon-vs-min" class="nav-link" data-scroll-target="#sec-info-shannon-vs-min"><span class="header-section-number">5.6</span> Shannon against min-entropy leakage</a></li>
+  <li><a href="#sec-info-fano" id="toc-sec-info-fano" class="nav-link" data-scroll-target="#sec-info-fano"><span class="header-section-number">5.7</span> Fano’s inequality</a></li>
+  <li><a href="#sec-info-code" id="toc-sec-info-code" class="nav-link" data-scroll-target="#sec-info-code"><span class="header-section-number">5.8</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">5.9</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">5.10</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
@@ -577,65 +578,213 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">5.1</span> Why this matters</h2>
-<p>How much does an observation tell you about something you cannot see, such as the word “offer” about whether an email is spam? There are two honest answers, because there are two questions. How many bits does the observation save you, on average, when you describe the hidden value? Shannon entropy and mutual information answer that. How much more likely is a single best guess to be right? Min-entropy and vulnerability answer that.</p>
-<p>Every quantity here is the logarithm of a probability, and the two families differ only in where the logarithm sits: Shannon’s quantities average the log over all outcomes, the one-guess quantities take the log of the best probability. Usually they agree. When a rare outcome reveals a lot they disagree by orders of magnitude, and knowing which to trust is the skill this chapter builds.</p>
-<p>Logarithms are base 2, so quantities are in <strong>bits</strong>; one nat, the unit of natural logarithms, is <span class="math inline">\(1/\ln 2 \approx 1.443\)</span> bits.</p>
+<p>You often observe one thing and want to know how much it tells you about another thing you cannot see. A word in an email says something about whether the email is spam. A noisy sensor reading says something about the true state of a machine. A model’s output says something about the data it was trained on. Information theory turns “how much” into a number. It does so in two different ways, because there are two different questions you might be asking.</p>
+<p>The first question is how many bits the observation saves you, on average, when you describe the hidden value. Shannon entropy and mutual information answer it. They are the language of compression, of the cross-entropy loss you train classifiers with, of decision-tree splits and of sending data over noisy links. The second question is how much more likely a single best guess becomes once you have seen the observation. Min-entropy and vulnerability answer that one. They are the language of password strength, and of anyone who gets only one try.</p>
+<p>Every quantity in this chapter is built from the logarithm of a probability. The two families differ in where the logarithm sits. Shannon’s quantities average the logarithm over all outcomes. The one-guess quantities take the logarithm of the single best probability. Usually the two agree. When a rare outcome reveals a lot, they can disagree by many orders of magnitude, and later parts of the book need to know which one to trust.</p>
+<p>Logarithms in this chapter are base 2, so every quantity is in <strong>bits</strong>. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> uses natural logarithms, whose unit is the nat. One nat is about 1.443 bits.</p>
 </section>
 <section id="sec-info-entropy" class="level2" data-number="5.2">
 <h2 data-number="5.2" class="anchored" data-anchor-id="sec-info-entropy"><span class="header-section-number">5.2</span> Entropy</h2>
-<p>A measure of uncertainty should give a fair coin one unit and two independent fair coins two. Probabilities of independent events multiply, so to make uncertainties add you take a logarithm: an outcome of probability <span class="math inline">\(p(x)\)</span> has <strong>surprisal</strong> <span class="math inline">\(\log(1/p(x))\)</span>, one bit for a fair coin’s heads, nothing for a certainty. <strong>Entropy</strong> is the average surprisal, <span id="eq-auto-05informationtheory-1"><span class="math display">\[H(X) = -\sum_x p(x)\log p(x), \qquad 0 \le H(X) \le \log\lvert\mathcal X\rvert, \tag{5.1}\]</span></span> zero for a constant and largest when all values are equally likely, since then no outcome is less surprising than another. For a coin with heads probability <span class="math inline">\(p\)</span> it is the <strong>binary entropy</strong> <span class="math inline">\(h(p)\)</span>. The <strong>conditional entropy</strong> <span class="math inline">\(H(X \mid Y) = \sum_y p(y)\,H(X \mid Y = y)\)</span> is the uncertainty left after seeing <span class="math inline">\(Y\)</span>, averaged over what you might see.</p>
-<p>Take a spam filter. One email in eight is spam; every spam contains “offer”, and so does one ham email in seven. Before reading, <span class="math inline">\(H(X) = h(1/8) = 0.5436\)</span> bits. If the word is absent the email is certainly ham: 0 bits. If it is present, which happens a quarter of the time, spam and ham are equally likely: a full bit, more than before. On average the word still helps, <span class="math inline">\(H(X \mid Y) = 0.25\)</span> bits, because the common observation settles the question and the rare one only muddies it (<a href="#fig-conditioning" class="quarto-xref">Figure&nbsp;<span>5.1</span></a>). So observing never increases uncertainty on average, <span class="math inline">\(H(X \mid Y) \le H(X)\)</span>, but a particular observation can.</p>
+<p>A measure of uncertainty should give a fair coin one unit and two fair coins two units. It should give a coin that always lands heads no uncertainty at all. Shannon entropy is the measure with these properties. It is also the average number of bits that the best possible code needs to describe each value.</p>
+<p>The construction starts from single outcomes. A rare outcome tells you more when it happens than a common one. So measure the information in an outcome by its <strong>surprisal</strong>, the logarithm of one over its probability. An outcome of probability one half has a surprisal of 1 bit. An outcome of probability one quarter has 2 bits, and a certain outcome has none. The logarithm is what makes two independent coins count twice. Their probabilities multiply, and the logarithm turns that product into a sum.</p>
+<p>Write <span class="math inline">\(H(X)\)</span> for the <strong>entropy</strong> of a random variable <span class="math inline">\(X\)</span>, its average surprisal. Write <span class="math inline">\(p(x)\)</span> for the probability that <span class="math inline">\(X\)</span> takes the value <span class="math inline">\(x\)</span>. Then <span id="eq-auto-05informationtheory-1"><span class="math display">\[H(X) = -\sum_x p(x)\log p(x). \tag{5.1}\]</span></span> An outcome of probability zero adds nothing to the sum. For a coin that lands heads with probability <span class="math inline">\(p\)</span>, the sum has two terms, and it is called the <strong>binary entropy</strong> <span class="math inline">\(h(p)\)</span>. <a href="#fig-binary-entropy" class="quarto-xref">Figure&nbsp;<span>5.1</span></a> plots it. It is 1 bit for a fair coin and zero for a coin whose outcome is certain.</p>
+<p>The binary entropy is very steep near the ends. So even a quite lopsided coin keeps a lot of uncertainty. A coin with an 11% chance of heads still carries <span class="math inline">\(h(0.11) = 0.4999\)</span> bits, about half a bit.</p>
+<div id="fig-binary-entropy" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-binary-entropy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/information_theory_binary_entropy.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-binary-entropy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: The binary entropy <span class="math inline">\(h(p)\)</span> against the min-entropy <span class="math inline">\(-\log_2\max(p, 1-p)\)</span> of the same coin. Both are 1 bit at <span class="math inline">\(p = \frac12\)</span>; the min-entropy is lower everywhere else.
+</figcaption>
+</figure>
+</div>
+<p>Entropy has a floor and a ceiling. It cannot be negative, because no probability exceeds 1, so no surprisal is negative. It is zero only when one value is certain. Its ceiling depends on the number of possible values. Write <span class="math inline">\(\lvert\mathcal X\rvert\)</span> for that number. Then <span class="math inline">\(H(X)\)</span> is at most <span class="math inline">\(\log\lvert\mathcal X\rvert\)</span>, and it reaches this ceiling only when every value is equally likely. The reason is that the gap between the ceiling and <span class="math inline">\(H(X)\)</span> equals the Kullback–Leibler (KL) divergence from the distribution of <span class="math inline">\(X\)</span> to the uniform one. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> shows that this divergence is never negative, and zero only when the two distributions are the same. A uniform 4-digit PIN, for example, has <span class="math inline">\(\log_2 10{,}000 = 13.2877\)</span> bits.</p>
+<p>Entropy depends only on the probabilities, never on the values themselves. Calling the outcomes “red” and “blue” instead of 0 and 1 does not change it.</p>
+<p>Two variables need two more quantities. The <strong>joint entropy</strong> <span class="math inline">\(H(X, Y)\)</span> is the entropy of the pair, computed from the table of joint probabilities. The <strong>conditional entropy</strong> <span class="math inline">\(H(X \mid Y)\)</span> is the uncertainty about <span class="math inline">\(X\)</span> that remains once you have seen <span class="math inline">\(Y\)</span>. Write <span class="math inline">\(y\)</span> for one observed value of <span class="math inline">\(Y\)</span>. Once you see it, the uncertainty is the entropy of the distribution of <span class="math inline">\(X\)</span> given <span class="math inline">\(y\)</span>. Before you observe <span class="math inline">\(Y\)</span>, you do not know which value you will see. So the conditional entropy is the average of these entropies, weighted by how likely each <span class="math inline">\(y\)</span> is.</p>
+<p>The <strong>chain rule</strong> links the three. The uncertainty in the pair is the uncertainty in <span class="math inline">\(Y\)</span>, plus whatever uncertainty about <span class="math inline">\(X\)</span> remains once you know it: <span id="eq-chain-rule"><span class="math display">\[H(X, Y) = H(Y) + H(X \mid Y). \tag{5.2}\]</span></span> It holds because the probability of a pair is the probability of <span class="math inline">\(y\)</span> times the probability of <span class="math inline">\(x\)</span> given <span class="math inline">\(y\)</span>. Taking logarithms turns this product into a sum of surprisals, and averaging keeps the sum. Applied again and again, it splits the uncertainty of many variables into one piece per variable. Each piece is a variable’s uncertainty given the ones before it.</p>
+<p>Learning something should not make you more uncertain. That is true on average. The conditional entropy <span class="math inline">\(H(X \mid Y)\)</span> is never larger than <span class="math inline">\(H(X)\)</span>, and the two are equal only when the variables are independent. The next section explains why. But a particular observation can increase the uncertainty, and a spam filter shows how.</p>
+<p>Let <span class="math inline">\(X\)</span> be the label of an email, ham or spam, and let <span class="math inline">\(Y\)</span> say whether it contains the word “offer”. One email in eight is spam. Every spam email contains the word, and so does one ham email in seven. <a href="#tbl-spam" class="quarto-xref">Table&nbsp;<span>5.1</span></a> gives the joint probabilities.</p>
+<div id="tbl-spam" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-spam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.1: Joint distribution of an email’s label and whether it contains the keyword.
+</figcaption>
+<div aria-describedby="tbl-spam-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th></th>
+<th>Word absent</th>
+<th>Word present</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ham</td>
+<td>3/4</td>
+<td>1/8</td>
+<td>7/8</td>
+</tr>
+<tr class="even">
+<td>spam</td>
+<td>0</td>
+<td>1/8</td>
+<td>1/8</td>
+</tr>
+<tr class="odd">
+<td>Total</td>
+<td>3/4</td>
+<td>1/4</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Before you read the email, it is spam with probability one in eight, so <span class="math inline">\(H(X) = h(1/8) = 0.5436\)</span> bits. The label is fairly predictable, because most email is ham. If the word is absent, the email is certainly ham, and no uncertainty is left. If the word is present, ham and spam are equally likely, so the uncertainty is a full bit. Seeing the word made you more uncertain than you were before.</p>
+<p>On average, though, the word helps. It is absent three times in four, and then the uncertainty is zero. It is present one time in four, and then the uncertainty is 1 bit. So <span class="math inline">\(H(X \mid Y)\)</span> is 0.25 bits, less than <span class="math inline">\(H(X)\)</span>. The common observation settles the question, and the rare one only muddies it (<a href="#fig-conditioning" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>). Conditioning reduces entropy on average, not for every observation.</p>
 <div id="fig-conditioning" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-conditioning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/information_theory_conditioning.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-conditioning-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.1: Entropy of the spam label before observing the keyword, after each of the two possible observations, and on average. The rare observation raises the entropy above <span class="math inline">\(H(X)\)</span> (dashed line); the average falls below it.
+Figure&nbsp;5.2: Entropy of the spam label before observing the keyword, after each of the two possible observations, and on average. The rare observation raises the entropy above <span class="math inline">\(H(X)\)</span> (dashed line); the average falls below it.
 </figcaption>
 </figure>
 </div>
+<p>The same table checks the chain rule. The word is present with probability one quarter, so its entropy is <span class="math inline">\(H(Y) = h(1/4) = 0.8113\)</span> bits. Adding the 0.25 bits that remain about the label gives 1.0613 bits. That is the entropy of the pair, computed directly from the three non-zero cells of the table.</p>
+<p>Entropy is also the first half of the loss you train classifiers with. The cross-entropy loss, averaged over the data, is the entropy of the true labels plus a KL divergence from the true label distribution to the model’s predictions. No model can remove the first part. Training drives down the second.</p>
 </section>
 <section id="sec-info-mi" class="level2" data-number="5.3">
 <h2 data-number="5.3" class="anchored" data-anchor-id="sec-info-mi"><span class="header-section-number">5.3</span> Mutual information and data processing</h2>
-<p>What <span class="math inline">\(Y\)</span> tells you about <span class="math inline">\(X\)</span> is the drop in uncertainty it causes, the <strong>mutual information</strong> <span id="eq-auto-05informationtheory-2"><span class="math display">\[I(X; Y) = H(X) - H(X \mid Y) = D\big(P_{XY}\,\big\|\,P_XP_Y\big). \tag{5.2}\]</span></span> The second form, a Kullback–Leibler (KL) divergence (<a href="../part01-prerequisites/03-divergences.html">Divergences</a>), says why it behaves as it does: <span class="math inline">\(Y\)</span> helps exactly to the extent that the joint distribution differs from what independence would give. So it is non-negative, zero only under independence, and symmetric. For the keyword, <span class="math inline">\(I(X; Y) = 0.5436 - 0.25 = 0.2936\)</span> bits.</p>
-<p>The <strong>data processing inequality</strong> says that if <span class="math inline">\(Z\)</span> is computed from <span class="math inline">\(Y\)</span> alone, possibly with fresh randomness, then <span class="math inline">\(I(X; Z) \le I(X; Y)\)</span>. <span class="math inline">\(Z\)</span> has no access to <span class="math inline">\(X\)</span> except through <span class="math inline">\(Y\)</span>, so whatever it knows about <span class="math inline">\(X\)</span> it learned from <span class="math inline">\(Y\)</span>, and the computation can only lose some on the way. Detect the keyword with a tokenizer that errs 10% of the time, and the feature keeps 0.1668 bits, 57% of the clean one. Denoising, feature extraction and training are all processing; they can make information easier to use, never larger. So a bound on the raw observation covers everything anyone computes from it.</p>
-<p>But mutual information is an average over <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, and a small average can hide a few outcomes on which <span class="math inline">\(Y\)</span> gives <span class="math inline">\(X\)</span> away completely (<a href="#sec-info-shannon-vs-min" class="quarto-xref"><span>Section 5.5</span></a>).</p>
+<p>How much does observing <span class="math inline">\(Y\)</span> tell you about <span class="math inline">\(X\)</span>? A natural answer is the drop in uncertainty that it causes on average. This drop is the <strong>mutual information</strong>, <span id="eq-mi-kl"><span class="math display">\[I(X; Y) = H(X) - H(X \mid Y) = D\big(P_{XY}\,\big\|\,P_XP_Y\big). \tag{5.3}\]</span></span> A decision tree calls it the <strong>information gain</strong> and uses it to choose a split. Many feature-selection methods use it to rank features.</p>
+<p>The second form says why mutual information behaves as it does. In it, <span class="math inline">\(P_{XY}\)</span> is the true joint distribution. The product <span class="math inline">\(P_XP_Y\)</span> of the two separate distributions is what the joint distribution would be if <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> were independent. The mutual information is the KL divergence <span class="math inline">\(D\)</span> between the two. So <span class="math inline">\(Y\)</span> helps exactly to the extent that the joint distribution differs from independence.</p>
+<p>Three properties follow from this form. Mutual information is never negative, because a KL divergence is never negative. That is why <span class="math inline">\(H(X \mid Y)\)</span> can never exceed <span class="math inline">\(H(X)\)</span> on average. It is zero only when <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent. And it is symmetric, because swapping <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> does not change the joint distribution or its product form. So <span class="math inline">\(Y\)</span> tells you exactly as much about <span class="math inline">\(X\)</span> as the other way round.</p>
+<p>Mutual information measures dependence of any kind, not only linear correlation. Take a variable that is symmetric around zero, and its square. Their correlation is zero, yet the square is fully determined by the variable, and their mutual information is positive.</p>
+<p>Sometimes you already know <span class="math inline">\(Y\)</span> and then learn a third variable, written <span class="math inline">\(Z\)</span>. The <strong>conditional mutual information</strong> <span class="math inline">\(I(X; Z \mid Y)\)</span> is the further drop in uncertainty about <span class="math inline">\(X\)</span> that <span class="math inline">\(Z\)</span> causes. It is an average of KL divergences, one for each value of <span class="math inline">\(Y\)</span>, so it is never negative. Mutual information obeys a chain rule like entropy’s. What the pair <span class="math inline">\((Y, Z)\)</span> tells you about the hidden value is what <span class="math inline">\(Y\)</span> tells you, plus what <span class="math inline">\(Z\)</span> adds on top.</p>
+<p>The chain rule leads to the most useful fact in this chapter, the <strong>data-processing inequality</strong>. Suppose <span class="math inline">\(Z\)</span> is computed from <span class="math inline">\(Y\)</span> alone, possibly with fresh randomness of its own. Once you know <span class="math inline">\(Y\)</span>, also knowing <span class="math inline">\(X\)</span> tells you nothing more about <span class="math inline">\(Z\)</span>. This condition is written <span class="math inline">\(X \to Y \to Z\)</span>. Then <span class="math inline">\(Z\)</span> cannot know more about the hidden value than <span class="math inline">\(Y\)</span> does: <span id="eq-auto-05informationtheory-2"><span class="math display">\[I(X; Z) \le I(X; Y). \tag{5.4}\]</span></span> The reason is that the pair <span class="math inline">\((Y, Z)\)</span> tells you the same amount about <span class="math inline">\(X\)</span> whichever of the two you reveal first. If you reveal <span class="math inline">\(Y\)</span> first, <span class="math inline">\(Z\)</span> adds nothing, because it was computed from <span class="math inline">\(Y\)</span>. If you reveal <span class="math inline">\(Z\)</span> first, <span class="math inline">\(Y\)</span> may still add something. So <span class="math inline">\(Z\)</span> alone carries at most what <span class="math inline">\(Y\)</span> carries. The condition is essential. A <span class="math inline">\(Z\)</span> that also looked at the hidden value directly could know more about it than <span class="math inline">\(Y\)</span> does.</p>
+<p>The two sides are equal only when <span class="math inline">\(Y\)</span> adds nothing about <span class="math inline">\(X\)</span> once <span class="math inline">\(Z\)</span> is known. Such a <span class="math inline">\(Z\)</span> keeps everything in <span class="math inline">\(Y\)</span> that matters for <span class="math inline">\(X\)</span>, and is called a <strong>sufficient statistic</strong>. An invertible function of <span class="math inline">\(Y\)</span> is one, because you can compute <span class="math inline">\(Y\)</span> back from it.</p>
+<p>For the spam filter, the word reduced the uncertainty from 0.5436 bits to 0.25 bits on average. So <span class="math inline">\(I(X; Y) = 0.2936\)</span> bits. Now suppose the word is detected by a sloppy tokenizer that gets the answer wrong 10% of the time, whatever the email. The tokenizer looks only at the word, not at the label, so the condition of the inequality holds. Its output keeps 0.1668 bits about the label. That is 57% of what the clean feature carries. So a 10% error rate in the detector costs over 40% of the information.</p>
+<p>The data-processing inequality says that no function of the data, however clever, can contain more information about the source than the data itself. Denoising, feature extraction and training a model are all processing steps. They can make information easier to use, but never larger. So a bound on what the raw observation reveals also covers everything anyone computes from it. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> gives the same inequality for KL divergence, and the version here follows from that one.</p>
+<p>Mutual information has a blind spot. It is an average over all pairs of values. A small average can hide a few outcomes in which <span class="math inline">\(Y\)</span> gives <span class="math inline">\(X\)</span> away completely, because those outcomes carry little weight in the average. <a href="#sec-info-shannon-vs-min" class="quarto-xref"><span>Section 5.6</span></a> shows how large the gap can be.</p>
 </section>
-<section id="sec-info-min" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="sec-info-min"><span class="header-section-number">5.4</span> Min-entropy and one-guess leakage</h2>
-<p>Someone with one guess does not care how many bits describe a value on average, only how likely their best guess is: the probability of the most likely value. That is the <strong>vulnerability</strong>, and its log the <strong>min-entropy</strong>, <span id="eq-auto-05informationtheory-3"><span class="math display">\[V(X) = \max_x p(x), \qquad H_\infty(X) = -\log V(X) \le H(X). \tag{5.3}\]</span></span> A uniform 4-digit PIN has 13.2877 bits of both. If 10% of people choose 1234, the Shannon entropy barely moves, to 12.4278 bits, because the other 90% is still spread evenly and dominates the average. The min-entropy falls to 3.3219 bits: one guess in ten succeeds.</p>
-<p>If the guesser sees <span class="math inline">\(Y\)</span> first, the best strategy is the <strong>maximum a posteriori (MAP)</strong> guess, the value most likely given <span class="math inline">\(y\)</span>. On observation <span class="math inline">\(y\)</span> it wins with probability <span class="math inline">\(\max_x p(x \mid y)\)</span>, and weighting by <span class="math inline">\(p(y)\)</span> gives the <strong>posterior vulnerability</strong>, the sum of the largest entry in each column of the joint table: <span id="eq-auto-05informationtheory-4"><span class="math display">\[V(X \mid Y) = \sum_y\max_x p(x, y). \tag{5.4}\]</span></span> The <strong>min-entropy leakage</strong> <span class="math inline">\(\mathcal L = \log\big(V(X \mid Y)/V(X)\big)\)</span> is the factor by which the observation multiplies the chance of a correct first guess, in bits: 1 bit doubles it. For four secret values with prior <span class="math inline">\((0.4, 0.3, 0.2, 0.1)\)</span>, observed through the channel of <a href="#sec-info-code" class="quarto-xref"><span>Section 5.7</span></a>, a blind guess wins with probability 0.4 and the MAP guesser with 0.66 (<a href="#fig-guessing" class="quarto-xref">Figure&nbsp;<span>5.2</span></a>), a leakage of 0.7225 bits.</p>
+<section id="sec-info-capacity" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="sec-info-capacity"><span class="header-section-number">5.4</span> Channels and capacity</h2>
+<p>A <strong>channel</strong> is a rule that turns an input into a random output. A noisy storage device, a communication link and a lossy sensor are examples. A channel is a table. Each row is an input, and the row gives the probability of each output for that input, so it sums to 1.</p>
+<p>The channel fixes the noise, but you choose how often to send each input. How much information gets through depends on that choice. The <strong>capacity</strong> of a channel is the largest mutual information between input and output, over all ways of choosing the inputs. Shannon’s channel coding theorem gives it a concrete meaning. Capacity is exactly the rate, in bits per use of the channel, at which you can send data with an error rate as small as you like. The codes only have to be long enough. The full edition cites this theorem rather than proving it.</p>
+<p>The simplest noisy channel is the binary symmetric channel (BSC). It takes a bit and flips it with a fixed probability <span class="math inline">\(p\)</span>. Its capacity is <span id="eq-bsc-capacity"><span class="math display">\[\mathcal C_{\mathrm{BSC}}(p) = 1 - h(p), \tag{5.5}\]</span></span> and the uniform input attains it. The formula says that the channel carries one bit, the most a binary output can hold, minus the entropy of the noise.</p>
+<p>The reason is easiest to see from the symmetric form of mutual information. It is the uncertainty in the output, minus the part of that uncertainty that comes from the noise. The noise part is <span class="math inline">\(h(p)\)</span> whatever you send, because each input is flipped with the same probability. So to maximize the mutual information, you only have to make the output as uncertain as possible. A binary output has at most 1 bit of entropy. Sending 0 and 1 equally often makes the output a fair coin, which reaches that bit.</p>
+<p><a href="#fig-bsc" class="quarto-xref">Figure&nbsp;<span>5.3</span></a> shows what the choice of input costs. On the left, each curve is the mutual information as a function of how often you send a 1. Every curve peaks at one half, and away from the peak you lose a lot. Take a flip probability of 0.11. If you send a 1 only 20% of the time, the channel carries 0.3358 bits. With the uniform input it carries 0.5001 bits.</p>
+<div id="fig-bsc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bsc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/information_theory_bsc.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bsc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.3: Left: mutual information of a binary symmetric channel as a function of the input prior, for several flip probabilities; every curve peaks at <span class="math inline">\(q = \frac12\)</span>. Right: the capacity <span class="math inline">\(1 - h(p)\)</span> against <span class="math inline">\(p\)</span>, with the min-capacity of <a href="#sec-info-min" class="quarto-xref"><span>Section 5.5</span></a> for comparison.
+</figcaption>
+</figure>
+</div>
+<p>The right panel shows the capacity against the flip probability. It is zero at one half, where the output is a fair coin flip whatever the input. It is symmetric around one half, because a channel that almost always flips is as good as one that never flips. The receiver can simply flip every output back.</p>
+<p>Here is what this means in practice. A cheap storage medium flips each stored bit independently with probability 0.11. Its capacity is 0.5001 bits per stored bit. So with good error-correcting codes you can store about one bit of data in two raw bits, with an error rate as small as you like. No code can do better. At a flip probability of 0.25, the capacity drops to 0.1887 bits, and each data bit needs about five raw bits.</p>
+<p>Most channels lack this symmetry, and their capacity has no closed form. The <strong>Blahut–Arimoto</strong> algorithm computes it numerically. It alternately improves the input distribution and the receiver’s best reading of the output, until neither changes. The full edition’s script uses it to confirm <a href="#eq-bsc-capacity" class="quarto-xref">Equation&nbsp;<span>5.5</span></a>.</p>
+</section>
+<section id="sec-info-min" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="sec-info-min"><span class="header-section-number">5.5</span> Min-entropy and one-guess leakage</h2>
+<p>Shannon entropy counts the bits needed to describe a value on average. A guesser who gets one try asks something else: how likely is the best single guess to be right? The answer is the probability of the most likely value, because no other guess does better. Write <span class="math inline">\(V(X)\)</span> for that probability, the <strong>vulnerability</strong> of <span class="math inline">\(X\)</span>. Its negative logarithm puts it on the same bit scale as entropy, and is the <strong>min-entropy</strong>: <span id="eq-auto-05informationtheory-3"><span class="math display">\[V(X) = \max_x p(x), \qquad H_\infty(X) = -\log V(X). \tag{5.6}\]</span></span></p>
+<p>Min-entropy is never larger than Shannon entropy. Shannon entropy averages the surprisals of all outcomes. Min-entropy uses only the surprisal of the most likely outcome, which is the smallest one, and an average is never below its smallest term. The two are equal only when every possible value is equally likely. Min-entropy also has a direct reading. A value with a min-entropy of <span class="math inline">\(k\)</span> bits is as hard to guess in one try as a uniform string of <span class="math inline">\(k\)</span> bits, however large its Shannon entropy is.</p>
+<p>Both measures belong to one family, the <strong>Rényi entropies</strong>, indexed by an order. As the order grows, the largest probability dominates more and more, and the limit is the min-entropy. As the order approaches 1, the limit is Shannon entropy. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> has the matching family of divergences.</p>
+<p>A PIN shows how far apart the two can be. A uniform 4-digit PIN has 13.2877 bits of both entropies. Now suppose that 10% of people choose 1234. The rest choose uniformly among the other 9,999 PINs. The Shannon entropy barely moves, to 12.4278 bits. The chain rule says why. Revealing whether the PIN is 1234 costs only <span class="math inline">\(h(0.1) = 0.4690\)</span> bits. In the 90% of cases where it is not, revealing which of the other PINs it is costs as much as before. The min-entropy, by contrast, falls to 3.3219 bits, because the guess “1234” succeeds one time in ten. If the guesser gets one try, only the second number matters.</p>
+<p>Now let the guesser see an observation <span class="math inline">\(Y\)</span> before guessing the hidden value <span class="math inline">\(X\)</span>, which this section calls the secret. The observation comes through a channel <span class="math inline">\(C\)</span>. Its entry <span class="math inline">\(C[x, y]\)</span> is the probability of seeing <span class="math inline">\(y\)</span> when the secret is <span class="math inline">\(x\)</span>. How likely each secret is to begin with is the <strong>prior</strong> <span class="math inline">\(\pi\)</span>. The joint table then has entries <span class="math inline">\(\pi(x)C[x, y]\)</span>.</p>
+<p>The best strategy guesses, for each observation, the secret that is most likely given that observation. This is the maximum a posteriori (MAP) guess. Its success probability is the <strong>posterior vulnerability</strong>. In the joint table, it is the sum of the largest entry in each column: <span id="eq-posterior-vulnerability"><span class="math display">\[V(X \mid Y) = \sum_y\max_x \pi(x)C[x, y]. \tag{5.7}\]</span></span> The formula holds because a guess for one observation does not affect the guesser’s success on any other. So the guesser can pick the best cell in each column separately, and its success is the sum of the cells it picked.</p>
+<p>The <strong>min-entropy leakage</strong>, written <span class="math inline">\(\mathcal L\)</span>, compares the two vulnerabilities. It is the logarithm of the factor by which the observation multiplies the chance of a correct first guess: <span id="eq-auto-05informationtheory-4"><span class="math display">\[\mathcal L = \log\frac{V(X \mid Y)}{V(X)}. \tag{5.8}\]</span></span> A leakage of 1 bit means the observation doubles the chance of a correct guess, and 2 bits means it quadruples it. An engineer can act on a statement like that. This is why min-entropy is the usual measure in quantitative information flow, the field that studies how much a program’s outputs reveal about its secret inputs.</p>
+<p>A small example shows each step. A secret takes four values. The first has prior probability 0.4, and each next value is 0.1 less likely. An observation takes three values, through the channel in <a href="#tbl-guess-channel" class="quarto-xref">Table&nbsp;<span>5.2</span></a>. Multiplying each row by its prior gives the joint table drawn in <a href="#fig-guessing" class="quarto-xref">Figure&nbsp;<span>5.4</span></a>.</p>
+<div id="tbl-guess-channel" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-guess-channel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.2: The channel of the guessing example. Rows are secret values, columns are observations.
+</figcaption>
+<div aria-describedby="tbl-guess-channel-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(C[x, y]\)</span></th>
+<th><span class="math inline">\(y_1\)</span></th>
+<th><span class="math inline">\(y_2\)</span></th>
+<th><span class="math inline">\(y_3\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(x_1\)</span></td>
+<td>0.8</td>
+<td>0.2</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(x_2\)</span></td>
+<td>0.1</td>
+<td>0.8</td>
+<td>0.1</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(x_3\)</span></td>
+<td>0</td>
+<td>0.5</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(x_4\)</span></td>
+<td>0</td>
+<td>0.2</td>
+<td>0.8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 <div id="fig-guessing" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-guessing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/information_theory_guessing.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-guessing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.2: The joint distribution <span class="math inline">\(p(x, y) = \pi(x)C[x, y]\)</span> of four secret values and three observations. The MAP guesser picks the boxed cell in each column, and its success probability is their sum <span class="math inline">\(V(X \mid Y) = 0.66\)</span>.
+Figure&nbsp;5.4: The joint distribution <span class="math inline">\(p(x, y) = \pi(x)C[x, y]\)</span> of four secret values and three observations. The MAP guesser picks the boxed cell in each column, and its success probability is their sum <span class="math inline">\(V(X \mid Y) = 0.66\)</span>.
 </figcaption>
 </figure>
 </div>
-<p>Because the formula is a success probability, two shortcuts are wrong. The guesser compares joint probabilities, not channel entries <span class="math inline">\(C[x, y] = p(y \mid x)\)</span>: on <span class="math inline">\(y_3\)</span> it picks <span class="math inline">\(x_3\)</span> over <span class="math inline">\(x_4\)</span>, which produces <span class="math inline">\(y_3\)</span> more often, because <span class="math inline">\(x_3\)</span> is twice as likely to begin with. And the log comes after averaging: averaging per-observation min-entropies gives 0.6548 bits instead of 0.5995, a number that is no guesser’s success rate. When you do not know the prior, use the worst case over priors, the <strong>min-capacity</strong> <span class="math inline">\(\log\sum_y\max_x C[x, y]\)</span>, which needs only the channel: 1.2630 bits here.</p>
+<p>Without the observation, the best guess is the first value, right with probability 0.4. With it, the guesser picks the boxed cell in each column, and wins with probability 0.66. In a million simulated rounds it wins 0.6594 of the time. The leakage is 0.7225 bits, so the observation multiplies the chance of success by 1.65. The Shannon leakage of the same table, its mutual information, is 0.6865 bits.</p>
+<p>Because the formula is a success probability, two shortcuts give wrong answers. The first compares channel entries instead of joint probabilities. On the third observation, the guesser picks the third secret, although the fourth secret produces that observation more often. The third secret is twice as likely to begin with, and that more than makes up the difference.</p>
+<p>The second shortcut takes the logarithm too early. It computes the min-entropy after each observation and averages those values. That gives 0.6548 bits here, against 0.5995 bits for the correct conditional min-entropy. The correct version averages the success probabilities first and takes the logarithm last. The early version is never smaller, because the logarithm bends. More importantly, it is not the logarithm of any guesser’s success rate.</p>
+<p>The leakage depends on the prior. A skewed prior already makes the blind guess good, so the observation adds less. Often you do not know the prior, and then you want the worst case over all priors. That worst case is the <strong>min-capacity</strong>, and it has a simple closed form: <span id="eq-min-capacity"><span class="math display">\[\mathcal{ML}(C) = \log\sum_y\max_x C[x, y]. \tag{5.9}\]</span></span> It is the logarithm of the sum of the column maxima of the channel itself, with no prior in it.</p>
+<p>The reason starts from the joint table. Each of its column maxima is at most the largest prior times the largest channel entry in that column. The largest prior is the blind vulnerability, so dividing by it bounds the leakage by the formula, for every prior. A uniform prior loses nothing in this step, because every prior probability is then the largest one. So the uniform prior attains the bound. For the example, the min-capacity is 1.2630 bits, against a Shannon capacity of 0.8269 bits for the same channel. For the binary symmetric channel with flip probability 0.11, the min-capacity is 0.8319 bits, the dashed curve in <a href="#fig-bsc" class="quarto-xref">Figure&nbsp;<span>5.3</span></a>.</p>
+<p>The min-capacity is never negative, since an observation never hurts the best guesser. It is at most the logarithm of the number of secrets, and also at most the logarithm of the number of observations. It needs one maximum per column, while the Shannon capacity needs an iterative algorithm.</p>
 </section>
-<section id="sec-info-shannon-vs-min" class="level2" data-number="5.5">
-<h2 data-number="5.5" class="anchored" data-anchor-id="sec-info-shannon-vs-min"><span class="header-section-number">5.5</span> Shannon against min-entropy leakage</h2>
-<p><strong>Shannon leakage</strong>, the mutual information, and min-entropy leakage agree when every outcome reveals the same amount: reveal the lowest <span class="math inline">\(m\)</span> bits of a uniform <span class="math inline">\(n\)</span>-bit secret and both say <span class="math inline">\(m\)</span>. They disagree when a channel reveals everything on a few outcomes and nothing on the rest. Suppose it reveals the whole secret when its lowest <span class="math inline">\(j\)</span> bits are zero, with probability <span class="math inline">\(2^{-j}\)</span>. Shannon averages the log, so that outcome’s <span class="math inline">\(n\)</span> bits count with weight <span class="math inline">\(2^{-j}\)</span>: about <span class="math inline">\(2^{-j}n\)</span> in all. The guesser, though, now wins whenever the reveal happens, so the success rate jumps from <span class="math inline">\(2^{-n}\)</span> to more than <span class="math inline">\(2^{-j}\)</span>, a min-entropy leakage close to <span class="math inline">\(n - j\)</span> (<a href="#fig-leakage" class="quarto-xref">Figure&nbsp;<span>5.3</span></a>).</p>
+<section id="sec-info-shannon-vs-min" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="sec-info-shannon-vs-min"><span class="header-section-number">5.6</span> Shannon against min-entropy leakage</h2>
+<p>The Shannon leakage, which is the mutual information, and the min-entropy leakage both measure how much an observation reveals about a secret. They agree when every outcome reveals the same amount. When they disagree, the disagreement is large and always of the same kind. Some channel reveals the secret completely on a few outcomes and nothing on the rest.</p>
+<p>Two families of channels make this concrete. Both act on a uniformly random secret, and write <span class="math inline">\(n\)</span> for its length in bits. Both are deterministic, so their output is a fixed function of the secret. The first family always reveals the lowest <span class="math inline">\(m\)</span> bits of the secret. For it, both leakages equal <span class="math inline">\(m\)</span> bits. The second family reveals the whole secret, but only when its lowest <span class="math inline">\(j\)</span> bits are all zero. That happens with probability <span class="math inline">\(2^{-j}\)</span>. Otherwise it outputs a fixed symbol that says nothing.</p>
+<p>For the second family the two leakages part ways, and the reason is where the logarithm sits. Shannon leakage averages the logarithm over outcomes. The revealing outcome carries <span class="math inline">\(n\)</span> bits but has weight <span class="math inline">\(2^{-j}\)</span>, so it contributes only about <span class="math inline">\(2^{-j}n\)</span> bits. Min-entropy leakage takes the logarithm of a success probability. The guesser wins whenever the reveal happens, so its success rises from <span class="math inline">\(2^{-n}\)</span> to just over <span class="math inline">\(2^{-j}\)</span>. The leakage is then close to <span class="math inline">\(n - j\)</span> bits (<a href="#fig-leakage" class="quarto-xref">Figure&nbsp;<span>5.5</span></a>).</p>
 <div id="fig-leakage" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-leakage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/information_theory_leakage.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-leakage-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;5.3: Shannon leakage against min-entropy leakage for two families of deterministic channels on a uniform 64-bit secret. Revealing the low <span class="math inline">\(m\)</span> bits gives equal leakages (diagonal). Revealing the whole secret with probability <span class="math inline">\(2^{-j}\)</span> gives a small Shannon leakage but a min-entropy leakage close to <span class="math inline">\(64 - j\)</span>.
+Figure&nbsp;5.5: Shannon leakage against min-entropy leakage for two families of deterministic channels on a uniform 64-bit secret. Revealing the low <span class="math inline">\(m\)</span> bits gives equal leakages (diagonal). Revealing the whole secret with probability <span class="math inline">\(2^{-j}\)</span> gives a small Shannon leakage but a min-entropy leakage close to <span class="math inline">\(64 - j\)</span>.
 </figcaption>
 </figure>
 </div>
-<p>In <a href="#tbl-two-channels" class="quarto-xref">Table&nbsp;<span>5.1</span></a>, Shannon calls the first channel less leaky, yet a one-shot guesser does better against it by a factor of more than <span class="math inline">\(10^{15}\)</span>. When the adversary gets one try, use min-entropy.</p>
+<p><a href="#tbl-two-channels" class="quarto-xref">Table&nbsp;<span>5.3</span></a> compares two such channels on a 64-bit secret. Shannon leakage says the second channel leaks more. A guesser with one try, though, does better against the first channel by a factor of more than <span class="math inline">\(10^{15}\)</span>. Smith (2009) used a pair of programs like these to argue that Shannon leakage is the wrong measure for one-try guessing. When the adversary gets one try, use min-entropy.</p>
 <div id="tbl-two-channels" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-two-channels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;5.1: Shannon and min-entropy leakage of two deterministic channels on a uniform 64-bit secret.
+Table&nbsp;5.3: Shannon and min-entropy leakage of two deterministic channels on a uniform 64-bit secret.
 </figcaption>
 <div aria-describedby="tbl-two-channels-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -671,17 +820,31 @@ Table&nbsp;5.1: Shannon and min-entropy leakage of two deterministic channels on
 </div>
 </figure>
 </div>
-<p>Both measures still average over the secret, so neither says how exposed one value is. Revealing a 32-bit secret only when it is all zeros leaks <span class="math inline">\(7.786\times10^{-9}\)</span> Shannon bits and 1 min-entropy bit, yet exposes that one value completely. Later parts build a worst-case measure.</p>
+<p>Min-entropy has its own blind spot, because it too averages over the secret. Take a channel that reveals a 4-bit secret only when it is all zeros. Its Shannon leakage is 0.3373 bits. Its min-entropy leakage is exactly 1 bit, because seeing the reveal doubles the guesser’s chance of success. For a 32-bit secret, the Shannon leakage falls to <span class="math inline">\(7.786\times10^{-9}\)</span> bits, and the min-entropy leakage stays at 1 bit. Both numbers are small. Yet for the one secret value made of zeros, the channel reveals everything. Any measure that averages over the secret can hide a value that is fully exposed, because that value carries only its small share of the average. Later parts build a measure for the worst case.</p>
 </section>
-<section id="sec-info-fano" class="level2" data-number="5.6">
-<h2 data-number="5.6" class="anchored" data-anchor-id="sec-info-fano"><span class="header-section-number">5.6</span> Fano’s inequality</h2>
-<p>Mutual information can also show that no estimator beats some error rate. Suppose a guess of <span class="math inline">\(X\)</span> from <span class="math inline">\(Y\)</span> is wrong with probability <span class="math inline">\(P_e\)</span>. The uncertainty left about <span class="math inline">\(X\)</span> is then at most the uncertainty about whether the guess is right, <span class="math inline">\(h(P_e)\)</span>, plus, when it is wrong, which of the other <span class="math inline">\(M - 1\)</span> values is true: <span id="eq-auto-05informationtheory-5"><span class="math display">\[H(X \mid Y) \le h(P_e) + P_e\log(M - 1), \qquad\text{so}\qquad P_e \ge \frac{H(X \mid Y) - 1}{\log M}. \tag{5.5}\]</span></span> Solve the left form numerically; the right form bounds <span class="math inline">\(h(P_e)\)</span> by 1 and is weaker. A label uniform over 8 classes (3 bits), with features carrying at most 1 bit, keeps at least 2 bits, so every classifier errs at least 0.3730 of the time (the weak form gives 0.3333).</p>
-<p>For estimation, take <span class="math inline">\(M\)</span> candidate parameters whose sample distributions are within KL divergence <span class="math inline">\(\kappa\)</span> bits of each other: <span class="math inline">\(n\)</span> samples carry at most <span class="math inline">\(n\kappa\)</span> bits about which is true, so <span class="math inline">\(P_e \ge 1 - (n\kappa + 1)/\log M\)</span>. With 1024 candidates and <span class="math inline">\(\kappa = 0.01\)</span>, 100 samples leave <span class="math inline">\(P_e \ge 0.8000\)</span> and 400 leave <span class="math inline">\(P_e \ge 0.5000\)</span>.</p>
-<p>The bound is tight only when a wrong guess leaves the truth spread evenly over the other values. If errors go to one neighbour, little uncertainty remains after a wrong guess and Fano underestimates: shifting each of 8 symbols to its neighbour with probability 0.2 gives a bound of 0.0954 against a true MAP error of 0.2000.</p>
+<section id="sec-info-fano" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="sec-info-fano"><span class="header-section-number">5.7</span> Fano’s inequality</h2>
+<p>Mutual information can also show that a problem is hard, which means that no estimator can beat some error rate. You need such a lower bound to know when to stop looking for a better method. Fano’s inequality is the basic tool. It says that if the secret is still uncertain after you have seen the observation, every guess must often be wrong. The reason is that a guesser who is usually right leaves little uncertainty about the secret.</p>
+<p>Let the secret take one of <span class="math inline">\(M\)</span> values. Let a guess computed from the observation be wrong with probability <span class="math inline">\(P_e\)</span>. Describing the secret given the guess then takes at most two pieces. The first says whether the guess was right, and is worth at most <span class="math inline">\(h(P_e)\)</span> bits. The second is needed only when the guess was wrong, and says which of the other values is true. It is worth at most the logarithm of their number. So <span id="eq-fano"><span class="math display">\[H(X \mid Y) \le h(P_e) + P_e\log(M - 1). \tag{5.10}\]</span></span> The guess sees only the observation, so by the data-processing inequality it knows no more about the secret than the observation does. That is why the bound can use the observation in place of the guess.</p>
+<p>The right side grows with the error probability, from a perfect guesser up to a blind one. So you can solve it numerically for the smallest error probability that satisfies it, by bisection. A weaker form replaces <span class="math inline">\(h(P_e)\)</span> by its largest value of 1 bit, and you can solve it by hand: <span id="eq-fano-weak"><span class="math display">\[P_e \ge \frac{H(X \mid Y) - 1}{\log M}. \tag{5.11}\]</span></span></p>
+<p>Here is how the bound is used. A label is uniform over 8 classes, so it has 3 bits of entropy. Suppose you know the features carry at most 1 bit about it. Then at least 2 bits of uncertainty remain. By Fano’s inequality, every classifier, however it is trained, errs at least 0.3730 of the time. The weak form gives 0.3333.</p>
+<p>The same idea shows that estimating a parameter needs many samples. Pick <span class="math inline">\(M\)</span> candidate values for the parameter that are far apart, so that a good estimate would identify the right candidate. If the samples carry little information about which candidate is true, no estimator can identify it. Write <span class="math inline">\(\kappa\)</span> for the largest KL divergence between the sample distributions of two candidates. Each independent sample then carries at most <span class="math inline">\(\kappa\)</span> bits about the candidate, so <span class="math inline">\(n\)</span> samples carry at most <span class="math inline">\(n\kappa\)</span> bits. Putting this into the weak form gives <span id="eq-auto-05informationtheory-5"><span class="math display">\[P_e \ge 1 - \frac{n\kappa + 1}{\log M}. \tag{5.12}\]</span></span> Take 1,024 candidates whose sample distributions are within 0.01 bits of each other. Then 100 samples still leave an error probability of at least 0.8000. Even 400 samples leave at least 0.5000. The art of this method lies in choosing candidates that are many and far apart, yet hard to tell apart from samples.</p>
+<p>Fano’s bound is tight only when a wrong guess leaves the truth spread evenly over the other values. On a symmetric channel, which replaces its input with any other symbol equally often, that is exactly what happens. Take 8 symbols and a noise level of 0.2. The bound is then 0.2000, exactly the error of the best guesser (<a href="#fig-fano" class="quarto-xref">Figure&nbsp;<span>5.6</span></a>, left).</p>
+<p>When errors go to one neighbour instead, little uncertainty remains after a wrong guess, and the bound becomes loose. Take a channel that shifts each of 8 symbols to the next one with probability 0.2. The best guesser still errs 0.2000 of the time, but Fano’s bound is only 0.0954 (<a href="#fig-fano" class="quarto-xref">Figure&nbsp;<span>5.6</span></a>, right). The weak form is worse, because it pays a full bit for <span class="math inline">\(h(P_e)\)</span>. It gives 0.0945 for the symmetric channel. For the shift channel, it gives a negative number, which says nothing. The weak form is useless whenever at most 1 bit of uncertainty remains.</p>
+<div id="fig-fano" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-fano-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/information_theory_fano.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-fano-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.6: MAP error against Fano’s lower bound, for <span class="math inline">\(M = 8\)</span> and a uniform <span class="math inline">\(X\)</span>, as the noise level <span class="math inline">\(\varepsilon\)</span> grows. Left: on the symmetric channel the bound is exact. Right: on the shift channel, where errors go to a single wrong value, the bound is loose and the weak form is zero.
+</figcaption>
+</figure>
+</div>
 </section>
-<section id="sec-info-code" class="level2" data-number="5.7">
-<h2 data-number="5.7" class="anchored" data-anchor-id="sec-info-code"><span class="header-section-number">5.7</span> Code</h2>
-<p>Everything in <a href="#sec-info-min" class="quarto-xref"><span>Section 5.4</span></a> comes from the joint table. This computes the guessing example:</p>
+<section id="sec-info-code" class="level2" data-number="5.8">
+<h2 data-number="5.8" class="anchored" data-anchor-id="sec-info-code"><span class="header-section-number">5.8</span> Code</h2>
+<p>Everything about guessing comes from the joint table. This snippet computes the guessing example of <a href="#sec-info-min" class="quarto-xref"><span>Section 5.5</span></a>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> log2</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>prior <span class="op">=</span> [<span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>]</span>
@@ -721,15 +884,15 @@ Table&nbsp;5.1: Shannon and min-entropy leakage of two deterministic channels on
 <span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>log2(v_post <span class="op">/</span> v_prior)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.7225</span></span>
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>mutual_information(p)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.6865</span></span>
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>log2(<span class="bu">sum</span>(<span class="bu">max</span>(col) <span class="cf">for</span> col <span class="kw">in</span> <span class="bu">zip</span>(<span class="op">*</span>channel)))<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 1.2630</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>It prints the two vulnerabilities, the min-entropy leakage, the Shannon leakage and the min-capacity. The full edition’s script, <a href="../../../code/part01-prerequisites/information_theory.py">information_theory.py</a>, computes every number in this chapter:</p>
+<p>It prints the two vulnerabilities, the min-entropy leakage, the Shannon leakage and the min-capacity. The full edition’s script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/information_theory.py">information_theory.py</a> computes every number in this chapter. Run it from the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/information_theory.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="cheat-sheet" class="level2" data-number="5.8">
-<h2 data-number="5.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">5.8</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="5.9">
+<h2 data-number="5.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">5.9</span> Cheat sheet</h2>
 <div id="tbl-info-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-info-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;5.2: The quantities of this chapter.
+Table&nbsp;5.4: The quantities of this chapter.
 </figcaption>
 <div aria-describedby="tbl-info-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -749,31 +912,41 @@ Table&nbsp;5.2: The quantities of this chapter.
 <tr class="odd">
 <td>Entropy</td>
 <td><span class="math inline">\(H(X) = -\sum_x p(x)\log p(x)\)</span></td>
-<td><span class="math inline">\(0 \le H \le \log\lvert\mathcal X\rvert\)</span></td>
+<td><span class="math inline">\(0 \le H \le \log\lvert\mathcal X\rvert\)</span>; uniform attains the maximum</td>
 </tr>
 <tr class="even">
 <td>Conditional entropy</td>
 <td><span class="math inline">\(H(X \mid Y) = \sum_y p(y)H(X \mid Y = y)\)</span></td>
-<td><span class="math inline">\(\le H(X)\)</span> on average only</td>
+<td><span class="math inline">\(\le H(X)\)</span> on average; one observation can raise it</td>
 </tr>
 <tr class="odd">
-<td>Mutual information</td>
-<td><span class="math inline">\(I(X; Y) = H(X) - H(X \mid Y) = D(P_{XY}\,\Vert\,P_XP_Y)\)</span></td>
-<td>Symmetric; zero iff independent</td>
+<td>Chain rule</td>
+<td><span class="math inline">\(H(X, Y) = H(Y) + H(X \mid Y)\)</span></td>
+<td>Extends to any number of variables</td>
 </tr>
 <tr class="even">
+<td>Mutual information</td>
+<td><span class="math inline">\(I(X; Y) = H(X) - H(X \mid Y) = D(P_{XY}\,\Vert\,P_XP_Y)\)</span></td>
+<td>Symmetric, <span class="math inline">\(\ge 0\)</span>, zero iff independent</td>
+</tr>
+<tr class="odd">
 <td>Data processing</td>
-<td><span class="math inline">\(Z\)</span> computed from <span class="math inline">\(Y\)</span>: <span class="math inline">\(I(X; Z) \le I(X; Y)\)</span></td>
+<td><span class="math inline">\(X \to Y \to Z\)</span>: <span class="math inline">\(I(X; Z) \le I(X; Y)\)</span></td>
 <td>Bound the raw observation</td>
+</tr>
+<tr class="even">
+<td>Capacity</td>
+<td><span class="math inline">\(\max\)</span> of <span class="math inline">\(I(X; Y)\)</span> over input distributions</td>
+<td>BSC: <span class="math inline">\(1 - h(p)\)</span>, at the uniform input</td>
 </tr>
 <tr class="odd">
 <td>Vulnerability, min-entropy</td>
 <td><span class="math inline">\(V(X) = \max_x p(x)\)</span>, <span class="math inline">\(H_\infty = -\log V\)</span></td>
-<td><span class="math inline">\(H_\infty \le H\)</span></td>
+<td><span class="math inline">\(H_\infty \le H\)</span>; one-guess success</td>
 </tr>
 <tr class="even">
 <td>Posterior vulnerability</td>
-<td><span class="math inline">\(V(X \mid Y) = \sum_y\max_x p(x, y)\)</span></td>
+<td><span class="math inline">\(V(X \mid Y) = \sum_y\max_x \pi(x)C[x, y]\)</span></td>
 <td>Success of the MAP guesser</td>
 </tr>
 <tr class="odd">
@@ -784,12 +957,12 @@ Table&nbsp;5.2: The quantities of this chapter.
 <tr class="even">
 <td>Min-capacity</td>
 <td><span class="math inline">\(\log\sum_y\max_x C[x, y]\)</span></td>
-<td>Worst case over priors</td>
+<td>Worst case over priors, at the uniform prior</td>
 </tr>
 <tr class="odd">
 <td>Fano</td>
 <td><span class="math inline">\(H(X \mid Y) \le h(P_e) + P_e\log(M - 1)\)</span></td>
-<td>Lower bound on any estimator’s error</td>
+<td>Lower bound on any estimator’s error; tight when errors spread evenly</td>
 </tr>
 </tbody>
 </table>
@@ -798,20 +971,21 @@ Table&nbsp;5.2: The quantities of this chapter.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Shannon quantities average logs; min-entropy quantities take the log of a best-case probability. Use the one that matches how many tries the adversary gets.</li>
-<li>Both are averages over the secret; neither says how exposed a single value is.</li>
-<li>Bound the raw observation: processing never adds information.</li>
+<li>Shannon quantities average logarithms. Min-entropy quantities take the logarithm of a best-case probability. Use the one that matches how many tries the adversary gets.</li>
+<li>Both are averages over the secret. Neither says how exposed a single secret value is.</li>
+<li>Processing never adds information. Bound what the raw observation reveals, and the bound covers everything computed from it.</li>
+<li>To show that every estimator must fail, bound the mutual information between the unknown and the data, then apply Fano.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="5.9">
-<h2 data-number="5.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">5.9</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="5.10">
+<h2 data-number="5.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">5.10</span> Further reading</h2>
 <ul>
-<li>Cover &amp; Thomas, <em>Elements of Information Theory</em> (2nd ed., 2006), ch.&nbsp;2: the standard reference for every Shannon result here.</li>
-<li>MacKay, <em>Information Theory, Inference, and Learning Algorithms</em> (2003): the same with a machine-learning slant, free online.</li>
+<li>Cover &amp; Thomas, <em>Elements of Information Theory</em> (2nd ed., 2006), ch.&nbsp;2 and 7: the standard reference for every Shannon result here, including channel capacity and the channel coding theorem.</li>
+<li>MacKay, <em>Information Theory, Inference, and Learning Algorithms</em> (2003): the same material with a machine-learning slant, free online.</li>
 <li>Smith, “On the Foundations of Quantitative Information Flow” (FoSSaCS 2009): vulnerability, and why Shannon leakage is the wrong measure for one-try guessing.</li>
 <li>Alvim et al., <em>The Science of Quantitative Information Flow</em> (2020): the full theory of leakage and capacity.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part01-prerequisites/05-information-theory.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result in this chapter except Shannon’s channel coding theorem, which it cites, is derived step by step in <a href="../../book-full/part01-prerequisites/05-information-theory.html">the full edition’s chapter</a>.</p>
 
 
 </section>

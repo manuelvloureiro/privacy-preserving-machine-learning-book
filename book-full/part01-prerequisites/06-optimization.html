@@ -1474,7 +1474,7 @@ Figure&nbsp;6.8: A double-well empirical risk on 11 examples before (<span class
 </section>
 <section id="code-check-every-bound-by-simulation" class="level2" data-number="6.10">
 <h2 data-number="6.10" class="anchored" data-anchor-id="code-check-every-bound-by-simulation"><span class="header-section-number">6.10</span> Code: check every bound by simulation</h2>
-<p>The script <a href="../../../code/part01-prerequisites/optimization.py">code/optimization.py</a> draws every figure in this chapter and computes every number quoted in it. Each loss, gradient, bound and simulation is a small typed function; the script calls them once for the table and loops them over parameters for the figures. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/optimization.py">code/optimization.py</a> draws every figure in this chapter and computes every number quoted in it. Each loss, gradient, bound and simulation is a small typed function; the script calls them once for the table and loops them over parameters for the figures. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/optimization.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Output</strong> (seed 0):</p>
 <div id="tbl-opt-code" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1536,7 +1536,7 @@ Table&nbsp;6.9: Summary of the script’s output at seed 0.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_optimization.py">tests/test_optimization.py</a> checks that the output still matches <a href="#tbl-opt-code" class="quarto-xref">Table&nbsp;<span>6.9</span></a> and the tables above.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_optimization.py">tests/test_optimization.py</a> checks that the output still matches <a href="#tbl-opt-code" class="quarto-xref">Table&nbsp;<span>6.9</span></a> and the tables above.</p>
 <p><strong>What to take from it</strong></p>
 <p>The bounds hold, with room to spare. Every worst-case constant (<span class="math inline">\(R\)</span>, <span class="math inline">\(L\)</span>, <span class="math inline">\(G\)</span>, <span class="math inline">\(\Delta\)</span>, <span class="math inline">\(\sigma^2\)</span>) is an upper bound that the actual run does not reach, so the guarantees are loose by factors of about 10 to 130. Their <em>shape</em>, the way they depend on <span class="math inline">\(T\)</span>, <span class="math inline">\(n\)</span>, <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\sigma\)</span>, is what to trust.</p>
 <p>The looseness has a common cause: real problems have more curvature than the assumptions grant. Unregularized logistic regression converged like <span class="math inline">\(1/T\)</span> rather than <span class="math inline">\(1/\sqrt T\)</span>, and its regularized minimizer moved less than the <span class="math inline">\(\lambda\)</span>-only bound predicts, both because the data themselves curve the risk.</p>

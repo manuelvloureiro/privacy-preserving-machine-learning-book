@@ -542,13 +542,16 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">6.1</span> Why this matters</a></li>
-  <li><a href="#sec-opt-definitions" id="toc-sec-opt-definitions" class="nav-link" data-scroll-target="#sec-opt-definitions"><span class="header-section-number">6.2</span> Lipschitz, smooth and strongly convex losses</a></li>
-  <li><a href="#sec-opt-sgd" id="toc-sec-opt-sgd" class="nav-link" data-scroll-target="#sec-opt-sgd"><span class="header-section-number">6.3</span> SGD convergence</a></li>
-  <li><a href="#sec-opt-noise" id="toc-sec-opt-noise" class="nav-link" data-scroll-target="#sec-opt-noise"><span class="header-section-number">6.4</span> Gradient noise and minibatches</a></li>
-  <li><a href="#sec-opt-erm" id="toc-sec-opt-erm" class="nav-link" data-scroll-target="#sec-opt-erm"><span class="header-section-number">6.5</span> Sensitivity of regularized ERM</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">6.6</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">6.7</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">6.8</span> Further reading</a></li>
+  <li><a href="#sec-opt-definitions" id="toc-sec-opt-definitions" class="nav-link" data-scroll-target="#sec-opt-definitions"><span class="header-section-number">6.2</span> Convexity, Lipschitz continuity and smoothness</a></li>
+  <li><a href="#sec-opt-gd" id="toc-sec-opt-gd" class="nav-link" data-scroll-target="#sec-opt-gd"><span class="header-section-number">6.3</span> Gradient descent and SGD</a></li>
+  <li><a href="#sec-opt-sgd" id="toc-sec-opt-sgd" class="nav-link" data-scroll-target="#sec-opt-sgd"><span class="header-section-number">6.4</span> SGD for convex Lipschitz objectives</a></li>
+  <li><a href="#sec-opt-strong" id="toc-sec-opt-strong" class="nav-link" data-scroll-target="#sec-opt-strong"><span class="header-section-number">6.5</span> Strongly convex objectives</a></li>
+  <li><a href="#sec-opt-noise" id="toc-sec-opt-noise" class="nav-link" data-scroll-target="#sec-opt-noise"><span class="header-section-number">6.6</span> Gradient noise and minibatches</a></li>
+  <li><a href="#sec-opt-nonconvex" id="toc-sec-opt-nonconvex" class="nav-link" data-scroll-target="#sec-opt-nonconvex"><span class="header-section-number">6.7</span> Non-convex objectives: convergence to stationary points</a></li>
+  <li><a href="#sec-opt-erm" id="toc-sec-opt-erm" class="nav-link" data-scroll-target="#sec-opt-erm"><span class="header-section-number">6.8</span> Sensitivity of regularized ERM</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">6.9</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">6.10</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">6.11</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
@@ -576,24 +579,122 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">6.1</span> Why this matters</h2>
-<p>Training a model minimizes the average loss over the training set, <span class="math inline">\(F(w) = \frac1n\sum_i\ell(w, z_i)\)</span>, over parameters <span class="math inline">\(w\)</span>, almost always with stochastic gradient descent (SGD). Two questions come up every time. How fast does SGD get there, and how should you set its step size when its gradients are noisy? And how much does the answer depend on any single training example: if you replace one and retrain, does the minimizer barely move, or can it jump?</p>
-<p>Both answers come from a few constants of the loss: how steep it can be, how fast its slope can change, how strongly it curves upward, and how much the random gradients scatter. Every result here is a statement about them, so know which ones a result assumes, and whether your loss has them.</p>
+<p>Training a model means finding the parameters that make its average loss over the training set as small as possible. Two questions come up every time you do it. The first is how fast the optimizer gets there. Gradient descent (GD) and stochastic gradient descent (SGD) do almost all of this work in machine learning. You want to know how many steps they need, how to pick the step size, and what it costs you that SGD works with noisy gradients.</p>
+<p>The second question is how much the answer depends on any one training example. If you replace one example and train again, does the best model barely move, or can it jump somewhere else entirely? The first question is about the algorithm. The second is about the problem itself, and the next chapter uses its answer to explain when a model generalizes.</p>
+<p>Both questions have the same kind of answer, because a few constants decide everything. Three of them describe the loss. The first is how steep the loss can be anywhere. The second is how fast its slope can change, which bounds its curvature from above. The third is how much the loss curves upward at least, which bounds its curvature from below. The fourth constant belongs to the optimizer. It measures how far the random gradients of SGD scatter around the true gradient. Every rate and every bound in this chapter combines these four constants. Once you know which ones a result uses, you can tell whether it applies to your model.</p>
 </section>
 <section id="sec-opt-definitions" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="sec-opt-definitions"><span class="header-section-number">6.2</span> Lipschitz, smooth and strongly convex losses</h2>
-<p>Four properties of the loss matter. A loss is <strong><span class="math inline">\(L\)</span>-Lipschitz</strong> when its gradient norm never exceeds <span class="math inline">\(L\)</span>, so moving the parameters by <span class="math inline">\(d\)</span> changes the loss by at most <span class="math inline">\(Ld\)</span>. It is <strong><span class="math inline">\(\beta\)</span>-smooth</strong> when its gradient changes by at most <span class="math inline">\(\beta\)</span> per unit of distance; then the tangent is a trustworthy guide for a step of about <span class="math inline">\(1/\beta\)</span>, and that is the largest safe step size. It is convex when its curvature is never negative, and <strong><span class="math inline">\(\lambda\)</span>-strongly convex</strong> when the curvature is at least <span class="math inline">\(\lambda\)</span> in every direction; adding <span class="math inline">\(\frac\lambda2\|w\|^2\)</span> to a convex loss makes it so.</p>
-<p>The logistic loss <span class="math inline">\(\ln(1 + e^{-y\langle w, x\rangle})\)</span>, with features scaled to <span class="math inline">\(\|x\| \le 1\)</span>, is the standard example. Its slope is a probability times <span class="math inline">\(x\)</span>, so it is 1-Lipschitz; its curvature is <span class="math inline">\(p(1 - p) \le \frac14\)</span>, so it is <span class="math inline">\(\frac14\)</span>-smooth. It is convex but not strongly convex, because far from the data it flattens out. A ridge term makes it <span class="math inline">\(\lambda\)</span>-strongly convex and <span class="math inline">\((\frac14 + \lambda)\)</span>-smooth.</p>
-<p>Lipschitz and smooth bound different derivatives, so neither implies the other: <span class="math inline">\(|w|\)</span> is 1-Lipschitz but its slope jumps at zero, and <span class="math inline">\(w^2/2\)</span> is 1-smooth but its slope is unbounded. The parabola is the general case: a strongly convex function curves upward everywhere, so its slope grows at least in proportion to the distance from the minimizer, and it cannot be Lipschitz on all of <span class="math inline">\(\mathbb R^d\)</span>. The ridge-regularized logistic loss is therefore Lipschitz only on a ball <span class="math inline">\(\|w\| \le R\)</span>, with gradient at most <span class="math inline">\(1 + \lambda R\)</span> there. Algorithms keep the iterates in the ball by <strong>projection</strong>, <span class="math inline">\(\Pi(u) = u\min(1, R/\|u\|)\)</span>, which never moves a point farther from anything inside the ball.</p>
+<h2 data-number="6.2" class="anchored" data-anchor-id="sec-opt-definitions"><span class="header-section-number">6.2</span> Convexity, Lipschitz continuity and smoothness</h2>
+<p>Throughout the chapter, the training set has <span class="math inline">\(n\)</span> examples, and the model is a vector of parameters <span class="math inline">\(w\)</span>. Write <span class="math inline">\(\ell(w, z)\)</span> for the loss of the model on an example <span class="math inline">\(z\)</span>. The <strong>empirical risk</strong> <span class="math inline">\(F(w)\)</span> is the average of these losses over the training set, and it is what training minimizes. A <strong>minimizer</strong> is a point where the empirical risk is smallest. This chapter writes it <span class="math inline">\(w^*\)</span>, and writes <span class="math inline">\(F^*\)</span> for the smallest value.</p>
+<p>The gradient of the risk at a point, written <span class="math inline">\(\nabla F(w)\)</span>, points in the direction in which the risk increases fastest. Its length says how steep the risk is there. To say how fast an optimizer that follows the gradient reaches the minimizer, you need assumptions on the loss. Four properties are enough for the whole chapter. Two of them bound a derivative from above, and two bound the curvature from below. Mixing them up is the most common mistake in reading optimization results.</p>
+<p>A function is <strong>convex</strong> when it curves upward everywhere, with no dents. The tangent at a point predicts the value elsewhere by following the slope in a straight line. Convexity says that this prediction never overshoots, so the graph lies above every one of its tangents. For example, the tangent of <span class="math inline">\(w^2\)</span> at the point 1 has slope 2. At the point 3 it predicts the value 5, and the function is 9, above it.</p>
+<p>This picture is what makes convex problems easy to optimize. A gradient is something you can compute, and convexity turns it into a guarantee about the minimizer. Apply the tangent picture at your current point and look at the minimizer. The gradient then points away from the minimizer, and its component along that direction is at least your current error, the gap between the risk and its smallest value. So a step against the gradient makes progress in proportion to how far from optimal you are.</p>
+<p>A function is <strong><span class="math inline">\(L\)</span>-Lipschitz</strong>, for a constant <span class="math inline">\(L\)</span>, when it never changes faster than <span class="math inline">\(L\)</span> per unit of distance. For a differentiable function this is the same as saying that the gradient never has length more than <span class="math inline">\(L\)</span>. The constant bounds how steep the function can be.</p>
+<p>A function is <strong><span class="math inline">\(\beta\)</span>-smooth</strong>, for a constant <span class="math inline">\(\beta\)</span>, when its gradient changes by at most <span class="math inline">\(\beta\)</span> per unit of distance. Because the slope cannot change quickly, the tangent stays a good prediction nearby. Its error grows at most like a parabola with curvature <span class="math inline">\(\beta\)</span>. This is the <strong>descent lemma</strong>: <span id="eq-opt-descent-lemma"><span class="math display">\[f(w') \le f(w) + \langle\nabla f(w), w' - w\rangle + \frac\beta2\|w' - w\|^2. \tag{6.1}\]</span></span> Here <span class="math inline">\(f\)</span> is the function, <span class="math inline">\(w\)</span> is the point where you take the tangent, and <span class="math inline">\(w'\)</span> is another point. The first two terms on the right are the tangent’s prediction. The last term is the parabola that bounds its error. Convexity says the tangent is a lower bound on the function, and smoothness says the tangent plus this parabola is an upper bound.</p>
+<p>A function is <strong><span class="math inline">\(\lambda\)</span>-strongly convex</strong>, for a constant <span class="math inline">\(\lambda &gt; 0\)</span>, when it lies above each tangent by at least a bowl of curvature <span class="math inline">\(\lambda\)</span>. This is convexity with a margin that grows with the distance from the tangent point. An equivalent form says that the slope grows by at least <span class="math inline">\(\lambda\)</span> per unit of distance as you move away from any point. Two consequences matter later. First, at the minimizer the gradient is zero, and it grows at least in proportion to the distance from there. So a point where the gradient is small must be close to the minimizer, within the gradient’s length divided by <span class="math inline">\(\lambda\)</span>. In particular, a strongly convex function has only one minimizer.</p>
+<p>The second consequence is how strong convexity arises in practice. Adding the <strong>ridge</strong> term <span class="math inline">\(\frac\lambda2\|w\|^2\)</span> to a convex function makes it <span class="math inline">\(\lambda\)</span>-strongly convex. The ridge term is a bowl of curvature exactly <span class="math inline">\(\lambda\)</span> in every direction. Adding it to a function that already curves upward adds that curvature everywhere.</p>
+<p>For a function with second derivatives, all four properties can be read off the matrix of second derivatives, the Hessian. Its eigenvalues are the curvatures of the function along its principal directions. Convex means that no eigenvalue is negative, so no direction curves down. Strongly convex means that every eigenvalue is at least <span class="math inline">\(\lambda\)</span>. Smooth means that every eigenvalue lies between <span class="math inline">\(-\beta\)</span> and <span class="math inline">\(\beta\)</span>. The ratio of the largest to the smallest curvature is the <strong>condition number</strong> <span class="math inline">\(\kappa = \beta/\lambda\)</span>. It measures how much more steeply the function rises in its steepest direction than in its flattest one.</p>
+<p>Lipschitz and smooth bound different derivatives, so neither implies the other (<a href="#fig-opt-lipschitz-smooth" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>). The absolute value <span class="math inline">\(|w|\)</span> is 1-Lipschitz, because its slope is always <span class="math inline">\(-1\)</span> or <span class="math inline">\(+1\)</span>. But it is not smooth for any <span class="math inline">\(\beta\)</span>, because the slope jumps from <span class="math inline">\(-1\)</span> to <span class="math inline">\(+1\)</span> at zero. The parabola <span class="math inline">\(w^2/2\)</span> is the opposite. Its slope is <span class="math inline">\(w\)</span> itself, which changes at rate 1, so it is 1-smooth. But its slope grows without bound, so it is not Lipschitz.</p>
+<p>The parabola is a special case of a general fact. A strongly convex function is never Lipschitz on the whole space, because its slope grows at least in proportion to the distance from the minimizer. That is why every result for strongly convex losses below works on a bounded set, such as a ball, where the slope stays bounded.</p>
+<p>The two constants also do different jobs. The Lipschitz constant <span class="math inline">\(L\)</span> bounds how large the gradient of one step can be. It governs SGD on losses that are not smooth, and how far one example can move the minimizer. The smoothness constant <span class="math inline">\(\beta\)</span> bounds how far you can trust the tangent. It sets the largest safe step size, <span class="math inline">\(1/\beta\)</span>, and it carries the analysis of non-convex losses.</p>
+<div id="fig-opt-lipschitz-smooth" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-opt-lipschitz-smooth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/optimization_lipschitz_smooth.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opt-lipschitz-smooth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: Left: the slopes of <span class="math inline">\(|w|\)</span> (bounded, but jumps), <span class="math inline">\(w^2/2\)</span> (continuous, unbounded) and the logistic loss <span class="math inline">\(\ln(1+e^{-w})\)</span> (bounded and continuous). Right: the curvature of the logistic loss never exceeds <span class="math inline">\(1/4\)</span>, and that of the non-convex sigmoid loss never exceeds <span class="math inline">\(1/(6\sqrt3)\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>Logistic regression has both properties, and checking them shows how the constants are found in practice. You compute the gradient and bound its length, then compute the Hessian and bound its eigenvalues. Take a label <span class="math inline">\(y\)</span> that is <span class="math inline">\(-1\)</span> or <span class="math inline">\(+1\)</span>, and features <span class="math inline">\(x\)</span> scaled so that <span class="math inline">\(\|x\| \le 1\)</span>. The <strong>margin</strong> <span class="math inline">\(m = y\langle w, x\rangle\)</span> is positive when the model classifies the example correctly, and large when it does so confidently. The logistic loss is <span class="math inline">\(\ln(1 + e^{-m})\)</span>. It is close to 0 for a large positive margin and grows linearly for a large negative one.</p>
+<p>The gradient of the logistic loss is the feature vector times a probability, the sigmoid of the negative margin. A probability is below 1 and the features have length at most 1, so the loss is 1-Lipschitz. The Hessian is the matrix <span class="math inline">\(xx^\top\)</span> times a factor <span class="math inline">\(p(1-p)\)</span>, where <span class="math inline">\(p\)</span> is the sigmoid of the margin. That factor is at most <span class="math inline">\(\frac14\)</span>, and the matrix has eigenvalue <span class="math inline">\(\|x\|^2 \le 1\)</span> along the features and zero across them. So the loss is convex and <span class="math inline">\(\frac14\)</span>-smooth.</p>
+<p>The logistic loss is not strongly convex. It has no curvature at all in directions across the features. Even along them, the factor <span class="math inline">\(p(1-p)\)</span> vanishes for a confidently classified example. For the example <span class="math inline">\(x = (0.6, 0.8)\)</span> with label <span class="math inline">\(+1\)</span>, at the parameters zero the margin is 0. There the loss is <span class="math inline">\(0.6931\)</span> and the gradient has length <span class="math inline">\(0.5000\)</span>. The curvature takes its largest value, <span class="math inline">\(0.2500\)</span>. At the parameters <span class="math inline">\((3, 4)\)</span> the margin is 5, and the loss, gradient length and curvature are all tiny, at <span class="math inline">\(0.0067\)</span>, <span class="math inline">\(0.0067\)</span> and <span class="math inline">\(0.0066\)</span>.</p>
+<p>So confidently classified examples contribute almost no curvature. At a good solution, where most examples are classified confidently, the empirical risk is only weakly curved. On the logistic dataset this chapter uses in its experiments, with 1,000 examples in 5 dimensions, the smallest curvature at the minimizer is <span class="math inline">\(0.0233\)</span>. Adding a ridge term makes the loss <span class="math inline">\(\lambda\)</span>-strongly convex and <span class="math inline">\((\frac14 + \lambda)\)</span>-smooth. But its gradient now grows with the parameters, so it is Lipschitz only on a ball. On the ball of radius <span class="math inline">\(R\)</span> its gradient is at most <span class="math inline">\(1 + \lambda R\)</span>.</p>
+<p>The squared loss of least squares, <span class="math inline">\(\frac12(\langle w, x\rangle - y)^2\)</span>, behaves differently. Its gradient is the prediction error times the features, and its Hessian is again <span class="math inline">\(xx^\top\)</span>. So it is convex and <span class="math inline">\(\|x\|^2\)</span>-smooth. It is not Lipschitz, because the prediction error grows linearly in the parameters. On a ball of radius <span class="math inline">\(R\)</span>, with features of length at most 1 and labels at most <span class="math inline">\(Y\)</span> in size, it is <span class="math inline">\((R + Y)\)</span>-Lipschitz.</p>
+<p>For least squares, the empirical risk has the same Hessian everywhere, the average of the matrices <span class="math inline">\(x_ix_i^\top\)</span> over the training set. The risk is strongly convex exactly when this matrix is invertible, with <span class="math inline">\(\lambda\)</span> its smallest eigenvalue. When there are more features than examples, the examples cannot span every direction. The risk is then flat along the missing directions, and it has a whole space of minimizers. Ridge regression adds the curvature <span class="math inline">\(\lambda\)</span> in every direction. The risk is then strongly convex for any data, with a unique minimizer, <span class="math inline">\(w^* = (X^\top X + n\lambda I)^{-1}X^\top y\)</span>. Here the matrix <span class="math inline">\(X\)</span> holds the feature vectors as its rows, and the vector <span class="math inline">\(y\)</span> holds the labels.</p>
 </section>
-<section id="sec-opt-sgd" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="sec-opt-sgd"><span class="header-section-number">6.3</span> SGD convergence</h2>
-<p>SGD steps against the gradient of one random example, or of a small random batch: cheap, right on average, but noisy. Even at the minimizer the individual gradients are not zero, so with a fixed step the iterates keep jumping around it. Averaging the iterates cancels the jumps; shrinking the step makes them smaller.</p>
-<p>For a convex loss, the error of the averaged iterate after <span class="math inline">\(T\)</span> steps of size <span class="math inline">\(\eta\)</span>, starting within <span class="math inline">\(R\)</span> of the minimizer, with random gradients of mean squared size at most <span class="math inline">\(G^2\)</span>, is <span id="eq-auto-06optimization-1"><span class="math display">\[\mathbb E[F(\bar w_T)] - F^* \le \frac{R^2}{2\eta T} + \frac{\eta G^2}{2}. \tag{6.1}\]</span></span> The two terms are a trade-off. The first is the cost of travelling the distance <span class="math inline">\(R\)</span> with steps of size <span class="math inline">\(\eta\)</span>: small steps take long. The second is the jitter each step adds: large steps overshoot. Balancing them gives the best step <span class="math inline">\(\eta = R/(G\sqrt T)\)</span> and an error of <span class="math inline">\(RG/\sqrt T\)</span>, with <span class="math inline">\(G = L\)</span> for an <span class="math inline">\(L\)</span>-Lipschitz loss. The bound holds for the average of the iterates, not the last one, so average.</p>
-<p><a href="#tbl-opt-sgd-convex" class="quarto-xref">Table&nbsp;<span>6.1</span></a> tests the bound on logistic regression with <span class="math inline">\(n = 1{,}000\)</span>, <span class="math inline">\(d = 5\)</span>, <span class="math inline">\(R = 5\)</span> and <span class="math inline">\(L = 1\)</span>.</p>
+<section id="sec-opt-gd" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="sec-opt-gd"><span class="header-section-number">6.3</span> Gradient descent and SGD</h2>
+<p><strong>Gradient descent</strong> takes a step against the full gradient of the risk, <span class="math inline">\(w_{t+1} = w_t - \eta\nabla F(w_t)\)</span>. Here <span class="math inline">\(w_t\)</span> is the parameter vector after <span class="math inline">\(t\)</span> steps, and the step size <span class="math inline">\(\eta\)</span> is a positive number you choose. On a training set of a million examples, one step costs a million gradient evaluations.</p>
+<p>SGD replaces the full gradient with the gradient of one example chosen uniformly at random. Each step is then cheap. With a <strong>minibatch</strong>, it uses the average gradient over a small random batch of examples instead. Either way, the random gradient is <strong>unbiased</strong>, meaning that averaged over the random choice it equals the true gradient. Uniform sampling is what makes this hold. A sampling scheme that favoured some examples would give them more weight, and SGD would then minimize a reweighted risk instead.</p>
+<p>Being right on average does not make the random gradient as good as the true one. The average squared length of the random gradient is the squared length of the true gradient plus a <strong>variance</strong>, the average squared error of the estimate. This is the <strong>bias–variance split</strong>. It holds because the error of the estimate averages to zero, so its cross term with the true gradient averages to zero too. Only the two squared terms remain.</p>
+<p>A small example makes the split concrete. Take three one-dimensional examples, 1, 2 and 6, and the loss <span class="math inline">\(\frac12(w - z)^2\)</span>, where <span class="math inline">\(z\)</span> is the example. The risk is the average of the three losses. Its gradient is <span class="math inline">\(w - 3\)</span>, because the mean of the data is 3. At the point <span class="math inline">\(w = 4\)</span> the true gradient is 1. SGD picks one example at random and uses its gradient <span class="math inline">\(w - z\)</span>, which takes the three values in <a href="#tbl-opt-toy" class="quarto-xref">Table&nbsp;<span>6.1</span></a>.</p>
+<div id="tbl-opt-toy" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-opt-toy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.1: SGD gradients for the risk <span class="math inline">\(\frac13\sum_i\frac12(w - z_i)^2\)</span> at <span class="math inline">\(w = 4\)</span>, where the true gradient is 1.
+</figcaption>
+<div aria-describedby="tbl-opt-toy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Example picked</th>
+<th><span class="math inline">\(z_1 = 1\)</span></th>
+<th><span class="math inline">\(z_2 = 2\)</span></th>
+<th><span class="math inline">\(z_3 = 6\)</span></th>
+<th>Average</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gradient <span class="math inline">\(g = w - z_i\)</span></td>
+<td>3</td>
+<td>2</td>
+<td>−2</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(g^2\)</span></td>
+<td>9</td>
+<td>4</td>
+<td>4</td>
+<td>17/3</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\((g - \nabla F)^2\)</span></td>
+<td>4</td>
+<td>1</td>
+<td>9</td>
+<td>14/3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The random gradient is right on average, since the three values average to 1. Its average square is <span class="math inline">\(17/3\)</span>, which splits into the squared true gradient, 1, plus the variance, <span class="math inline">\(14/3\)</span>. Averaging removed the error from the gradient itself but not from its square. Every SGD rate in this chapter pays for that variance.</p>
+<p>Before adding noise, look at what a fast rate looks like without it. Take a quadratic risk whose curvatures all lie between <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(\beta\)</span>. On a quadratic, the gradient is a linear function of the error, the distance from the minimizer. So each GD step multiplies the error by a fixed matrix. With the step <span class="math inline">\(1/\beta\)</span>, the error along a direction of curvature <span class="math inline">\(h\)</span> shrinks by the factor <span class="math inline">\(1 - h/\beta\)</span> at each step. The steepest direction is fixed in one step. The flattest direction shrinks slowest, by the factor <span class="math inline">\(1 - 1/\kappa\)</span>, where <span class="math inline">\(\kappa\)</span> is the condition number. So the distance to the minimizer shrinks at least geometrically: <span id="eq-opt-gd-linear"><span class="math display">\[\|w_t - w^*\| \le \left(1 - \frac1\kappa\right)^t\|w_0 - w^*\|. \tag{6.2}\]</span></span></p>
+<p>This is called <strong>linear convergence</strong>, because the error shrinks by a constant factor per step. Reaching an accuracy <span class="math inline">\(\epsilon\)</span> takes about <span class="math inline">\(\kappa\ln(1/\epsilon)\)</span> steps. So a large condition number is what makes GD slow. The step must be small enough for the steepest direction, or GD overshoots there and diverges. With that small step, the flattest direction moves only a fraction <span class="math inline">\(1/\kappa\)</span> of the way at each step.</p>
+<p>The full edition’s script tests this on a two-dimensional least-squares problem with 200 examples. One feature varies much less than the other, so the condition number is <span class="math inline">\(9.58\)</span>. The bound <a href="#eq-opt-gd-linear" class="quarto-xref">Equation&nbsp;<span>6.2</span></a> says that GD needs at most 126 steps to shrink the error by a factor of a million. GD actually takes 122 steps. The bound is nearly exact here, because the starting error lies largely along the flat direction. That part of the error shrinks at exactly the worst-case rate.</p>
+<p><a href="#fig-opt-gd-sgd-paths" class="quarto-xref">Figure&nbsp;<span>6.2</span></a> shows the two algorithms on such a problem. GD first removes the error along the steep direction, then crawls along the flat valley. SGD with a constant step follows roughly the same route but keeps jittering around the minimizer.</p>
+<div id="fig-opt-gd-sgd-paths" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-opt-gd-sgd-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/optimization_gd_sgd_paths.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opt-gd-sgd-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.2: Gradient descent (step <span class="math inline">\(1/\beta\)</span>) and single-example SGD (constant step 0.1) on a two-dimensional least-squares risk with condition number about 10. The grey curves are contours of the risk.
+</figcaption>
+</figure>
+</div>
+<p>A weaker statement holds for every <span class="math inline">\(\beta\)</span>-smooth risk, convex or not, and the non-convex analysis below starts from it. Each GD step with the step size <span class="math inline">\(1/\beta\)</span> lowers the risk by at least <span class="math inline">\(\|\nabla F\|^2/(2\beta)\)</span>. The reason is the descent lemma <a href="#eq-opt-descent-lemma" class="quarto-xref">Equation&nbsp;<span>6.1</span></a>. The tangent term of the step promises a decrease of <span class="math inline">\(\|\nabla F\|^2/\beta\)</span>. The parabola term charges for overshooting, and it takes back half of that. Half the progress is left.</p>
+<p>SGD cannot converge like this with a constant step. Near the minimizer the true gradient vanishes, but the gradients of single examples do not. In <a href="#tbl-opt-toy" class="quarto-xref">Table&nbsp;<span>6.1</span></a>, even at the minimizer 3, the three examples give the gradients 2, 1 and −3. So the iterates keep jumping around the minimizer, at a distance set by the step size and the variance. Two things make SGD converge anyway. Averaging the iterates cancels the jumps, and shrinking the step over time makes them smaller. Both give slower rates than GD’s, and the next sections give them.</p>
+</section>
+<section id="sec-opt-sgd" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="sec-opt-sgd"><span class="header-section-number">6.4</span> SGD for convex Lipschitz objectives</h2>
+<p>The cleanest guarantee for SGD needs only convexity and bounded gradients, with no smoothness. It therefore covers losses with kinks, such as the hinge loss and the absolute loss, as well as the logistic loss. At a kink, SGD uses a <strong>subgradient</strong>, any slope whose straight line stays below the graph. At the kink of <span class="math inline">\(|w|\)</span>, any slope between <span class="math inline">\(-1\)</span> and <span class="math inline">\(+1\)</span> qualifies.</p>
+<p>The guarantee runs <strong>projected SGD</strong>. It keeps the parameters inside a set, such as a ball, and pulls any step that leaves the set back to the nearest point of it. This pull-back is called a projection. For the ball of radius <span class="math inline">\(R\)</span>, it shrinks a point that left the ball back onto its surface. Projection never moves a point farther from anything inside the set. That needs the set to be convex, so that the segment between two of its points stays inside. Projection therefore never undoes progress towards a minimizer that lies in the set. If the minimizer lies outside the set, this argument fails, because pulling back can move you away from it.</p>
+<p>The guarantee also returns the <strong>averaged iterate</strong>, the average of the parameter vectors over the whole run, rather than the last one. Here is the setting. The risk is convex, and the set contains the minimizer. The start is within a distance <span class="math inline">\(R\)</span> of the minimizer. The random gradients have an average squared length of at most <span class="math inline">\(G^2\)</span>, so <span class="math inline">\(G\)</span> is the typical size of a gradient used. After <span class="math inline">\(T\)</span> steps with a constant step size <span class="math inline">\(\eta\)</span>, the averaged iterate <span class="math inline">\(\bar w_T\)</span> satisfies <span id="eq-opt-sgd-convex"><span class="math display">\[\mathbb E[F(\bar w_T)] - F^* \le \frac{R^2}{2\eta T} + \frac{\eta G^2}{2}. \tag{6.3}\]</span></span> The left side is the expected error, the gap between the risk of the averaged iterate and its smallest value.</p>
+<p>The two terms pull the step size in opposite directions. The first is the cost of travel. You start a distance <span class="math inline">\(R\)</span> from the minimizer, and small steps take a long time to get there. The second is the cost of noise. Each step overshoots by an amount that grows with the step size and with the size of the random gradients. The step <span class="math inline">\(\eta = R/(G\sqrt T)\)</span> balances the two, and the bound then becomes <span class="math inline">\(RG/\sqrt T\)</span>. A longer run makes travel cheaper, so it allows smaller steps and less jitter. That is why the best step shrinks like <span class="math inline">\(1/\sqrt T\)</span>. For an <span class="math inline">\(L\)</span>-Lipschitz loss, every single-example gradient has length at most <span class="math inline">\(L\)</span>, so <span class="math inline">\(G = L\)</span> and the bound is <span class="math inline">\(RL/\sqrt T\)</span>.</p>
+<p>The reason the bound holds is easiest to follow through the squared distance to the minimizer. One step changes that distance by two terms. The first is a cross term between the step and the direction to the minimizer, and it shrinks the distance. Because the random gradient is unbiased, this term behaves on average as if the step used the true gradient. Convexity then says it is at least the current error, as the tangent picture showed. The second is the squared length of the step, which grows the distance. It is at most <span class="math inline">\(\eta^2G^2\)</span> on average.</p>
+<p>So each step’s error is at most the decrease in squared distance plus a noise term. Summed over the run, the decreases cancel in a chain, and their total is at most the starting squared distance <span class="math inline">\(R^2\)</span>. That bounds the average error over the run. The average error is not the error of any model you could hand to someone. Convexity fixes this too. The value of a convex function at an average of points is at most the average of its values there (<strong>Jensen’s inequality</strong>). So the averaged iterate’s error is at most the average error.</p>
+<p>Both uses of convexity matter, and so does the choice of output. The bound holds for the averaged iterate, not for the last one. If you return the last iterate, the bound no longer applies, so average the iterates. The rate <span class="math inline">\(1/\sqrt T\)</span> also cannot be improved for this class of losses. There are convex Lipschitz functions on which every method that only queries gradients has error of order <span class="math inline">\(RL/\sqrt T\)</span> after <span class="math inline">\(T\)</span> queries (Bubeck 2015). Smoothness alone does not help SGD either. It reduces the overshoot of the true gradient, but not the noise term, which comes from the randomness of the gradient.</p>
+<p>The bound is a worst case. Real losses often have curvature near the minimizer, which the bound does not use. The full edition’s script tests it on logistic regression with 1,000 examples in 5 dimensions. Projected SGD runs on the ball of radius 5 from the starting point zero, and the minimizer has length <span class="math inline">\(3.152\)</span>. So the minimizer is inside the ball and the start is within <span class="math inline">\(R = 5\)</span> of it. The loss is 1-Lipschitz, and the step is <span class="math inline">\(R/\sqrt T\)</span>, which is <span class="math inline">\(0.5\)</span> at <span class="math inline">\(T = 100\)</span>. <a href="#tbl-opt-sgd-convex" class="quarto-xref">Table&nbsp;<span>6.2</span></a> shows the results, averaged over 20 runs.</p>
 <div id="tbl-opt-sgd-convex" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-opt-sgd-convex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;6.1: Projected SGD on logistic regression against the convex Lipschitz bound, averaged over 20 runs.
+Table&nbsp;6.2: Projected SGD on logistic regression against the convex Lipschitz bound <a href="#eq-opt-sgd-convex" class="quarto-xref">Equation&nbsp;<span>6.3</span></a>, averaged over 20 runs.
 </figcaption>
 <div aria-describedby="tbl-opt-sgd-convex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -635,31 +736,69 @@ Table&nbsp;6.1: Projected SGD on logistic regression against the convex Lipschit
 </div>
 </figure>
 </div>
-<p>The bound holds, loose by a factor of 11 at <span class="math inline">\(T = 100\)</span> and 65 at <span class="math inline">\(T = 10{,}000\)</span>. The gap grows because the observed error falls much faster than <span class="math inline">\(1/\sqrt T\)</span>, closer to <span class="math inline">\(1/T\)</span>: the data curve the loss near the minimizer, and the convex bound does not know it. Every constant in a bound is a worst case the run does not reach, so trust how a bound scales, not its size.</p>
-<p>Curvature is what speeds SGD up. On a <span class="math inline">\(\lambda\)</span>-strongly convex loss, the farther the iterate is from the minimizer, the harder the gradient pulls it back, and with steps <span class="math inline">\(\eta_t = 2/(\lambda(t + 1))\)</span> and an average that weights later iterates more, the error falls to <span class="math inline">\(2G^2/(\lambda(T + 1))\)</span>. The price is the <span class="math inline">\(1/\lambda\)</span>: a weak regularizer gives a fast rate only after many steps.</p>
-<p>On a non-convex loss, such as a neural network’s, no gradient method can promise the global minimum. What smoothness guarantees is a point where the gradient is small: for a <span class="math inline">\(\beta\)</span>-smooth loss that can fall at most <span class="math inline">\(\Delta\)</span> from the start, with gradient variance <span class="math inline">\(\sigma^2\)</span> and <span class="math inline">\(\eta \le 1/\beta\)</span>, <span id="eq-auto-06optimization-2"><span class="math display">\[\frac1T\sum_{t=1}^T\mathbb E\|\nabla F(w_t)\|^2 \le \frac{2\Delta}{\eta T} + \beta\eta\sigma^2. \tag{6.2}\]</span></span> It is the same trade-off, progress against noise, and a small gradient is all you get: the point may be a saddle or a poor local minimum.</p>
+<p>The bound holds in every row. It is loose by a factor of 11 at 100 steps, and by a factor of 65 at 10,000 steps. The gap grows because the observed error falls faster than <span class="math inline">\(1/\sqrt T\)</span>. Over a hundredfold increase in the number of steps, the error falls by a factor of <span class="math inline">\(57.6\)</span>. That is much closer to the factor 100 of a <span class="math inline">\(1/T\)</span> rate than to the factor 10 of a <span class="math inline">\(1/\sqrt T\)</span> rate. The reason is that this risk is strongly convex near its minimizer, with smallest curvature <span class="math inline">\(0.0233\)</span> there, and the bound does not know it. The left panel of <a href="#fig-opt-sgd-convex" class="quarto-xref">Figure&nbsp;<span>6.3</span></a> shows the same comparison over a range of run lengths.</p>
+<div id="fig-opt-sgd-convex" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-opt-sgd-convex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/optimization_sgd_convex.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opt-sgd-convex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.3: Left: projected SGD on unregularized logistic regression, averaged iterate, against <span class="math inline">\(RL/\sqrt T\)</span>. Right: the same data with a ridge term <span class="math inline">\(\lambda = 0.1\)</span>: the uniformly averaged iterate with steps <span class="math inline">\(1/(\lambda t)\)</span>, the <span class="math inline">\(t\)</span>-weighted average with steps <span class="math inline">\(2/(\lambda(t+1))\)</span>, and its last iterate, against the two strongly convex bounds.
+</figcaption>
+</figure>
+</div>
 </section>
-<section id="sec-opt-noise" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="sec-opt-noise"><span class="header-section-number">6.4</span> Gradient noise and minibatches</h2>
-<p>Every bound above pays for the mean squared size of the random gradients, which is the squared true gradient plus the variance of the estimate. Averaging a batch of <span class="math inline">\(B\)</span> independent gradients divides the variance by <span class="math inline">\(B\)</span>, from <span class="math inline">\(\sigma_1^2\)</span> to <span class="math inline">\(\sigma_1^2/B\)</span>, a little less when drawn without replacement. Noise of mean zero added to each gradient adds its mean squared size <span class="math inline">\(\sigma^2\)</span>: independent of the gradient and zero on average, it neither reinforces nor cancels it. So the convex bound holds with <span class="math inline">\(G^2 = L^2 + \sigma^2\)</span>: <span id="eq-auto-06optimization-3"><span class="math display">\[\eta^* = \frac{R}{\sqrt{(L^2 + \sigma^2)T}}, \qquad \frac{R\sqrt{L^2 + \sigma^2}}{\sqrt T}. \tag{6.3}\]</span></span> To reach a fixed error, <span class="math inline">\(T\)</span> must grow in proportion to <span class="math inline">\(L^2 + \sigma^2\)</span>, so noise multiplies the steps needed by <span class="math inline">\(1 + \sigma^2/L^2\)</span>. Noise of size <span class="math inline">\(\sigma = 3L\)</span> makes that ten times as many.</p>
+<section id="sec-opt-strong" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="sec-opt-strong"><span class="header-section-number">6.5</span> Strongly convex objectives</h2>
+<p>Regularized models are strongly convex, and strong convexity pulls the iterates towards the minimizer at every step. The farther you are from it, the larger the gradient pointing back. That turns the <span class="math inline">\(1/\sqrt T\)</span> rate into a <span class="math inline">\(1/T\)</span> rate, provided that the step sizes and the average match the curvature. Two schemes work. Both let the step size shrink like <span class="math inline">\(1/(\lambda t)\)</span> at step <span class="math inline">\(t\)</span>, which is the right size once strong convexity pulls the iterates in. They differ in how they average the run.</p>
+<p>The setting is the same as before, except that the risk is now <span class="math inline">\(\lambda\)</span>-strongly convex on the set. The first scheme uses the steps <span class="math inline">\(1/(\lambda t)\)</span> and the uniform average of the iterates. After <span class="math inline">\(T\)</span> steps its expected error is at most <span id="eq-auto-06optimization-1"><span class="math display">\[\frac{G^2(1 + \ln T)}{2\lambda T}. \tag{6.4}\]</span></span> The second scheme uses the steps <span class="math inline">\(2/(\lambda(t + 1))\)</span> and an average in which iterate <span class="math inline">\(t\)</span> has a weight proportional to <span class="math inline">\(t\)</span>. This weighted average removes the <span class="math inline">\(\ln T\)</span>. Its expected error is at most <span id="eq-opt-sgd-strong"><span class="math display">\[\frac{2G^2}{\lambda(T + 1)}. \tag{6.5}\]</span></span></p>
+<p>The reason is the convex argument with one improvement. Strong convexity adds a distance term to the progress each step makes, since the risk lies above its tangent by a bowl. With steps of size <span class="math inline">\(1/(\lambda t)\)</span>, this extra term cancels the distance terms in the chain completely. The starting distance ends up multiplied by zero, so the <span class="math inline">\(R^2\)</span> of the convex bound disappears. What is left is the noise. Step <span class="math inline">\(t\)</span> adds a noise term of size <span class="math inline">\(G^2/(2\lambda t)\)</span>. Summed over the run, these terms give a harmonic sum, which is at most <span class="math inline">\(1 + \ln T\)</span>.</p>
+<p>The harmonic sum is where the <span class="math inline">\(\ln T\)</span> comes from. The early iterates are taken with huge steps, so they are bad, and the uniform average gives them full weight. The weighted average gives later, better iterates more weight. With the matching step sizes, its noise term is the same at every step, so no harmonic sum appears. Averaging only the last half of the iterates gives the same <span class="math inline">\(1/(\lambda T)\)</span> rate, by dropping the bad early ones in another way. The weighted scheme is due to Lacoste-Julien, Schmidt and Bach (2012), and the last-half average to Rakhlin, Shamir and Sridharan (2012).</p>
+<p>The rate is now <span class="math inline">\(1/T\)</span> instead of <span class="math inline">\(1/\sqrt T\)</span>. To halve the error you need twice the steps, not four times. Strong convexity buys this, and it costs a factor <span class="math inline">\(1/\lambda\)</span> in the bound. So a weak regularizer gives a fast rate only after many steps.</p>
+<p>The schedule also depends on knowing <span class="math inline">\(\lambda\)</span>. If you set the steps with a <span class="math inline">\(\lambda\)</span> larger than the true strong convexity, the argument claims more pull towards the minimizer than there is. The steps then shrink too fast, and the iterates can stall far from the minimizer.</p>
+<p>The constant <span class="math inline">\(G\)</span> depends on the set. A strongly convex function has no bound on its gradient over the whole space, as the previous section showed. So the guarantee needs a bounded set, and that is the reason for the projection. For a loss that is <span class="math inline">\(L\)</span>-Lipschitz plus a ridge term, the gradient on the ball of radius <span class="math inline">\(R\)</span> has length at most <span class="math inline">\(L + \lambda R\)</span>.</p>
+<p>On the logistic data with a ridge term of <span class="math inline">\(\lambda = 0.1\)</span>, the minimizer has length <span class="math inline">\(0.839\)</span>, inside the ball of radius 5. The gradient bound is <span class="math inline">\(G = 1 + 0.1 \times 5 = 1.5\)</span>. After 10,000 steps, averaged over 20 runs, the uniform average has error <span class="math inline">\(9.09\times10^{-5}\)</span>, against its bound of <span class="math inline">\(1.15\times10^{-2}\)</span>. The weighted average has error <span class="math inline">\(7.85\times10^{-5}\)</span>, against its bound of <span class="math inline">\(4.50\times10^{-3}\)</span>. The bounds hold but are loose, by factors of about 130 and 60. The main reason is that <span class="math inline">\(G = 1.5\)</span> is the worst case over the whole ball, while the actual gradients near the minimizer are much smaller. In the right panel of <a href="#fig-opt-sgd-convex" class="quarto-xref">Figure&nbsp;<span>6.3</span></a>, the uniform average, the weighted average and the last iterate all fall like <span class="math inline">\(1/T\)</span>. The weighted average is slightly ahead.</p>
+</section>
+<section id="sec-opt-noise" class="level2" data-number="6.6">
+<h2 data-number="6.6" class="anchored" data-anchor-id="sec-opt-noise"><span class="header-section-number">6.6</span> Gradient noise and minibatches</h2>
+<p>Every SGD bound so far pays for the average squared length of the random gradients. By the bias–variance split, that is the squared true gradient plus the variance of the estimate. Variance comes from sampling examples. It also comes from computing gradients in low precision, or from compressing them to send between machines. In later parts, noise is sometimes added to gradients on purpose. This section answers two practical questions. How does the batch size change the variance, and how should the step size change when the gradients get noisier?</p>
+<p>Write <span class="math inline">\(\sigma_1^2\)</span> for the variance of a single-example gradient at a point. It is the average squared distance of the <span class="math inline">\(n\)</span> per-example gradients from their mean, the true gradient. Averaging <span class="math inline">\(B\)</span> independent random gradients divides their variance by <span class="math inline">\(B\)</span>, as for any sample mean. The variances of independent draws add up, so the sum of <span class="math inline">\(B\)</span> gradients has variance <span class="math inline">\(B\sigma_1^2\)</span>. Dividing the sum by <span class="math inline">\(B\)</span> divides its variance by <span class="math inline">\(B^2\)</span>.</p>
+<p>Drawing the batch without replacement does a little better still. The deviations of the per-example gradients from their mean sum to zero. So once you have drawn an example that deviates one way, the examples left over deviate, on average, slightly the other way. The draws partly cancel. The variance of the batch average is <span id="eq-opt-minibatch"><span class="math display">\[\mathbb E\|g_B - \nabla F(w)\|^2 = \begin{cases}\dfrac{\sigma_1^2}{B} &amp; \text{with replacement,}\\[2ex] \dfrac{\sigma_1^2}{B}\cdot\dfrac{n - B}{n - 1} &amp; \text{without replacement,}\end{cases} \tag{6.6}\]</span></span> where <span class="math inline">\(g_B\)</span> is the average gradient over the batch. The extra factor is 1 for a batch of one example. It is 0 for a batch of the whole dataset, whose gradient is exact.</p>
+<p>The three examples of <a href="#tbl-opt-toy" class="quarto-xref">Table&nbsp;<span>6.1</span></a> show the gain. Their single-example variance is <span class="math inline">\(14/3\)</span>. There are three batches of two different examples, and the variance of their average gradients is <span class="math inline">\(7/6\)</span>. With replacement it would be <span class="math inline">\(7/3\)</span>, twice as large. On the logistic data, with 1,000 examples, the single-example variance at the minimizer is <span class="math inline">\(0.1722\)</span>. The formula matches 4,000 random batches of each size to within the simulation error. At a batch of 500, half the dataset, the extra factor is about one half. So sampling without replacement halves the variance there (<a href="#fig-opt-minibatch-variance" class="quarto-xref">Figure&nbsp;<span>6.4</span></a>).</p>
+<div id="fig-opt-minibatch-variance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-opt-minibatch-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/optimization_minibatch_variance.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opt-minibatch-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.4: Minibatch gradient variance at the logistic minimizer against batch size, measured and from <a href="#eq-opt-minibatch" class="quarto-xref">Equation&nbsp;<span>6.6</span></a>. Without replacement, the variance drops below <span class="math inline">\(\sigma_1^2/B\)</span> as <span class="math inline">\(B\)</span> approaches <span class="math inline">\(n = 1000\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>Larger batches are not free. A batch of <span class="math inline">\(B\)</span> examples costs <span class="math inline">\(B\)</span> gradient evaluations and divides the variance by <span class="math inline">\(B\)</span>. Per gradient evaluation, the reduction in variance is exactly cancelled by the cost. Batches help mainly because the <span class="math inline">\(B\)</span> evaluations can run in parallel.</p>
+<p>Now suppose that each random gradient gets extra noise of mean zero, independent of everything else. Write <span class="math inline">\(\sigma^2\)</span> for the average squared length of that noise. Because the noise is independent and averages to zero, its cross term with the gradient averages to zero. So the noise adds <span class="math inline">\(\sigma^2\)</span> to the average squared length of the gradient, and changes nothing else. The convex Lipschitz bound <a href="#eq-opt-sgd-convex" class="quarto-xref">Equation&nbsp;<span>6.3</span></a> then holds with <span class="math inline">\(G^2 = L^2 + \sigma^2\)</span>. Its best step size and its value at that step follow as before: <span id="eq-auto-06optimization-2"><span class="math display">\[\eta^* = \frac{R}{\sqrt{(L^2 + \sigma^2)T}}, \qquad \mathbb E[F(\bar w_T)] - F^* \le \frac{R\sqrt{L^2 + \sigma^2}}{\sqrt T}. \tag{6.7}\]</span></span></p>
+<p>Noise shrinks the best step, so noisier gradients call for smaller steps and longer runs. To reach a fixed accuracy, the number of steps must grow in proportion to <span class="math inline">\(L^2 + \sigma^2\)</span>. Noise therefore multiplies the number of steps needed by <span class="math inline">\(1 + \sigma^2/L^2\)</span>. Noise of size <span class="math inline">\(\sigma = 3L\)</span> multiplies it by 10.</p>
+<p>The full edition’s script tests this on the logistic problem. It adds normal noise to every single-example gradient and runs projected SGD for 10,000 steps, with 10 runs per setting. It sweeps the step size over 17 values from <span class="math inline">\(10^{-3}\)</span> to 10. With <span class="math inline">\(R = 5\)</span> and <span class="math inline">\(L = 1\)</span>, the bound’s step is <span class="math inline">\(0.05\)</span> without noise. <a href="#tbl-opt-noise" class="quarto-xref">Table&nbsp;<span>6.3</span></a> compares that step with the best one on the grid.</p>
 <div id="tbl-opt-noise" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-opt-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;6.2: Projected SGD with added gradient noise, <span class="math inline">\(T = 10{,}000\)</span>: error of the averaged iterate at the bound’s step and at the best step on the grid, 10 runs per setting.
+Table&nbsp;6.3: Projected SGD with added gradient noise, <span class="math inline">\(T = 10{,}000\)</span>: error of the averaged iterate at the step size the bound recommends and at the best step size on the grid.
 </figcaption>
 <div aria-describedby="tbl-opt-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Noise <span class="math inline">\(\sigma\)</span></th>
 <th><span class="math inline">\(\eta^*\)</span> from the bound</th>
+<th>Bound at <span class="math inline">\(\eta^*\)</span></th>
 <th>Observed at <span class="math inline">\(\eta^*\)</span></th>
 <th>Best <span class="math inline">\(\eta\)</span> on the grid</th>
 <th>Observed there</th>
@@ -669,6 +808,7 @@ Table&nbsp;6.2: Projected SGD with added gradient noise, <span class="math inlin
 <tr class="odd">
 <td>0</td>
 <td>0.0500</td>
+<td>0.050</td>
 <td><span class="math inline">\(4.99\times10^{-4}\)</span></td>
 <td>0.178</td>
 <td><span class="math inline">\(1.85\times10^{-4}\)</span></td>
@@ -676,6 +816,7 @@ Table&nbsp;6.2: Projected SGD with added gradient noise, <span class="math inlin
 <tr class="even">
 <td>1</td>
 <td>0.0354</td>
+<td>0.071</td>
 <td><span class="math inline">\(1.58\times10^{-3}\)</span></td>
 <td>0.056</td>
 <td><span class="math inline">\(1.38\times10^{-3}\)</span></td>
@@ -683,6 +824,7 @@ Table&nbsp;6.2: Projected SGD with added gradient noise, <span class="math inlin
 <tr class="odd">
 <td>3</td>
 <td>0.0158</td>
+<td>0.158</td>
 <td><span class="math inline">\(9.58\times10^{-3}\)</span></td>
 <td>0.056</td>
 <td><span class="math inline">\(5.10\times10^{-3}\)</span></td>
@@ -692,36 +834,195 @@ Table&nbsp;6.2: Projected SGD with added gradient noise, <span class="math inlin
 </div>
 </figure>
 </div>
-<p><a href="#tbl-opt-noise" class="quarto-xref">Table&nbsp;<span>6.2</span></a> shows both effects on the logistic problem. Noise pushed the best step down from 0.178 to 0.056, so retune the step size whenever the gradient noise changes. And the bound’s <span class="math inline">\(\eta^*\)</span> is conservative, by a factor of 3.6 without noise, for the same reason the bound is loose: the real gradients and starting distance are smaller than <span class="math inline">\(L\)</span> and <span class="math inline">\(R\)</span>. Larger batches are not free either: a batch of <span class="math inline">\(B\)</span> costs <span class="math inline">\(B\)</span> gradient evaluations and divides the variance by <span class="math inline">\(B\)</span>, so per evaluation the gain cancels, and batches pay mainly through parallelism.</p>
+<p><a href="#tbl-opt-noise" class="quarto-xref">Table&nbsp;<span>6.3</span></a> and <a href="#fig-opt-noise-step-size" class="quarto-xref">Figure&nbsp;<span>6.5</span></a> show three things. First, noise costs accuracy. At the bound’s step, the error grows about 20-fold from no noise to noise of size 3. Second, noise pushes the best step down, from <span class="math inline">\(0.178\)</span> to <span class="math inline">\(0.056\)</span> on the grid. So retune the step size whenever the gradient noise changes. Third, the bound’s step is conservative. It assumes that the gradient is as large as <span class="math inline">\(L\)</span> and the distance as large as <span class="math inline">\(R\)</span> throughout. The actual run has smaller gradients and starts closer, so the best observed step is larger, by a factor of <span class="math inline">\(3.6\)</span> without noise.</p>
+<div id="fig-opt-noise-step-size" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-opt-noise-step-size-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/optimization_noise_step_size.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opt-noise-step-size-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.5: Suboptimality of the averaged iterate after <span class="math inline">\(T = 10{,}000\)</span> steps of projected SGD on logistic regression, as a function of the step size, for three levels of added gradient noise. Dashed curves are the bound <span class="math inline">\(R^2/(2\eta T) + \eta(L^2 + \sigma^2)/2\)</span>; dotted vertical lines mark its minimizer <span class="math inline">\(\eta^*\)</span>.
+</figcaption>
+</figure>
+</div>
 </section>
-<section id="sec-opt-erm" class="level2" data-number="6.5">
-<h2 data-number="6.5" class="anchored" data-anchor-id="sec-opt-erm"><span class="header-section-number">6.5</span> Sensitivity of regularized ERM</h2>
-<p>The last question is about the problem, not the optimizer. Regularized <strong>empirical risk minimization (ERM)</strong> returns the minimizer of <span class="math inline">\(J(w; D) = \frac1n\sum_i\ell(w, z_i) + \frac\lambda2\|w\|^2\)</span>. Replace one example: how far can the minimizer move?</p>
-<p>The argument has two steps. Each example carries weight <span class="math inline">\(1/n\)</span>, and its gradient is at most <span class="math inline">\(L\)</span> long, so swapping it changes the gradient of <span class="math inline">\(J\)</span> at any point by at most <span class="math inline">\(2L/n\)</span>, the old one’s <span class="math inline">\(L/n\)</span> out and the new one’s <span class="math inline">\(L/n\)</span> in. At the old minimizer the new objective’s gradient is therefore at most <span class="math inline">\(2L/n\)</span>. Strong convexity says the gradient grows by at least <span class="math inline">\(\lambda\)</span> per unit of distance from the minimizer, so a point where it is that small lies within <span class="math inline">\((2L/n)/\lambda\)</span> of the new minimizer: <span id="eq-auto-06optimization-4"><span class="math display">\[\|w^*(D) - w^*(D')\| \le \frac{2L}{\lambda n}. \tag{6.4}\]</span></span> The loss at any point then changes by at most <span class="math inline">\(L\)</span> times that, <span class="math inline">\(2L^2/(\lambda n)\)</span>. Later parts call this movement a <strong>sensitivity</strong>.</p>
-<p>With <span class="math inline">\(n = 1{,}000\)</span> and <span class="math inline">\(\lambda = 0.1\)</span> the bound is <span class="math inline">\(2/(0.1 \times 1{,}000) = 0.02\)</span>, and over 20 replacements in regularized logistic regression the largest observed move is <span class="math inline">\(6.66\times10^{-3}\)</span>: smaller, because real data add curvature of their own and two gradients rarely point in opposite directions at full length. Because one example weighs <span class="math inline">\(1/n\)</span>, ten times the data gives a tenth of the movement (<a href="#fig-opt-erm-sensitivity" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>).</p>
+<section id="sec-opt-nonconvex" class="level2" data-number="6.7">
+<h2 data-number="6.7" class="anchored" data-anchor-id="sec-opt-nonconvex"><span class="header-section-number">6.7</span> Non-convex objectives: convergence to stationary points</h2>
+<p>The losses of neural networks are not convex. They can have many local minima and saddle points, and no method that only uses gradients can promise to find the global minimum. What you can still guarantee is that SGD finds a point where the gradient is small, an <strong>approximate stationary point</strong>. The argument replaces convexity with smoothness.</p>
+<p>The idea is that each step lowers the risk in proportion to the squared gradient, minus a penalty for the noise. This is the descent lemma again, as for GD. The risk cannot fall forever, because it is bounded below. So the total of the squared gradients over the run is bounded, and they must be small on average.</p>
+<p>Each piece of this argument is a condition of the result. The risk must be <span class="math inline">\(\beta\)</span>-smooth, or the descent lemma does not hold and a step can raise the risk. The risk must be bounded below, or it could fall forever with large gradients. Write <span class="math inline">\(\Delta\)</span> for the most it can fall from the starting point. The random gradients must be unbiased, with variance at most <span class="math inline">\(\sigma^2\)</span>. And the step size must be at most <span class="math inline">\(1/\beta\)</span>. A larger step overshoots by more than the progress it makes, and then the step can raise the risk.</p>
+<p>Under these conditions, SGD with a constant step size <span class="math inline">\(\eta\)</span> and no projection satisfies <span id="eq-opt-nonconvex"><span class="math display">\[\frac1T\sum_{t=1}^T\mathbb E\|\nabla F(w_t)\|^2 \le \frac{2\Delta}{\eta T} + \beta\eta\sigma^2. \tag{6.8}\]</span></span> The left side is the average squared gradient over the run. The smallest squared gradient is at most this average. Ghadimi and Lan (2013), who proved this bound, return an iterate chosen at random from the run, so that its expected squared gradient equals the average.</p>
+<p>As in the convex case, the first term is the cost of travel and the second the cost of noise. The step <span class="math inline">\(\sqrt{2\Delta/(\beta\sigma^2T)}\)</span> balances them, unless it would exceed <span class="math inline">\(1/\beta\)</span>. With the smaller of the two steps, the bound is at most <span class="math inline">\(4\beta\Delta/T + 2\sqrt{2\beta\Delta\sigma^2/T}\)</span>.</p>
+<p>There are two regimes. Without noise the second term vanishes, the step is <span class="math inline">\(1/\beta\)</span>, and the rate is of order <span class="math inline">\(1/T\)</span>, as for GD. With noise, the square-root term dominates for long runs. The squared gradient then falls like <span class="math inline">\(1/\sqrt T\)</span>, so the gradient’s length falls only like <span class="math inline">\(T^{-1/4}\)</span>. With batches of <span class="math inline">\(B\)</span> examples, replace the variance by <span class="math inline">\(\sigma^2/B\)</span>, as <a href="#eq-opt-minibatch" class="quarto-xref">Equation&nbsp;<span>6.6</span></a> says.</p>
+<p>A small gradient is all you get. A stationary point can be a local minimum, a saddle point, or a flat region far from anything good. The guarantee says nothing about how far the risk is from its smallest value. The convex bounds could say that, because convexity links the gradient to the error. Without convexity, that link is gone.</p>
+<p>The full edition tests the bound on the <strong>sigmoid loss</strong>, the sigmoid of the negative margin. It is a smooth stand-in for counting mistakes, close to 1 for a badly misclassified example and close to 0 for a confidently correct one. It is not convex, because the sigmoid curves up on one side of zero and down on the other. To apply the bound you need its constants, and each one comes from bounding a derivative. Its curvature is at most <span class="math inline">\(1/(6\sqrt3) = 0.0962\)</span>, which is its smoothness constant <span class="math inline">\(\beta\)</span> (<a href="#fig-opt-lipschitz-smooth" class="quarto-xref">Figure&nbsp;<span>6.1</span></a>, right).</p>
+<p>The loss lies between 0 and 1. At the starting point zero, every margin is zero and the risk is <span class="math inline">\(\frac12\)</span>, so the risk can fall by at most <span class="math inline">\(\frac12\)</span>. The gradient has length at most <span class="math inline">\(\frac14\)</span>, so its variance is at most <span class="math inline">\(\frac1{16}\)</span>. At 100 steps the balancing step is <span class="math inline">\(1.289\)</span>, well below <span class="math inline">\(1/\beta = 10.4\)</span>. <a href="#tbl-opt-nonconvex" class="quarto-xref">Table&nbsp;<span>6.4</span></a> shows the results, averaged over 5 runs.</p>
+<div id="tbl-opt-nonconvex" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-opt-nonconvex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.4: SGD on the non-convex sigmoid loss against the stationarity bound.
+</figcaption>
+<div aria-describedby="tbl-opt-nonconvex-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Steps <span class="math inline">\(T\)</span></th>
+<th>Step <span class="math inline">\(\eta\)</span></th>
+<th>Observed <span class="math inline">\(\frac1T\sum_t\Vert \nabla F(w_t)\Vert ^2\)</span></th>
+<th>Bound <a href="#eq-opt-nonconvex" class="quarto-xref">Equation&nbsp;<span>6.8</span></a></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>100</td>
+<td>1.289</td>
+<td><span class="math inline">\(1.64\times10^{-3}\)</span></td>
+<td><span class="math inline">\(1.55\times10^{-2}\)</span></td>
+</tr>
+<tr class="even">
+<td>1,000</td>
+<td>0.408</td>
+<td><span class="math inline">\(5.22\times10^{-4}\)</span></td>
+<td><span class="math inline">\(4.90\times10^{-3}\)</span></td>
+</tr>
+<tr class="odd">
+<td>10,000</td>
+<td>0.129</td>
+<td><span class="math inline">\(1.87\times10^{-4}\)</span></td>
+<td><span class="math inline">\(1.55\times10^{-3}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The bound is loose by a factor of 8 to 10, but it has the right slope. Each tenfold increase in the number of steps divides it by <span class="math inline">\(\sqrt{10} = 3.16\)</span>. The slack comes from the worst-case constants. The possible fall, the variance and the smoothness constant are all upper bounds that the actual run does not reach. <a href="#fig-opt-nonconvex-sgd" class="quarto-xref">Figure&nbsp;<span>6.6</span></a> shows the comparison over more run lengths.</p>
+<div id="fig-opt-nonconvex-sgd" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-opt-nonconvex-sgd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/optimization_nonconvex_sgd.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opt-nonconvex-sgd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.6: Average squared gradient norm along SGD on the sigmoid loss, against the bound <span class="math inline">\(2\Delta/(\eta T) + \beta\eta\sigma^2\)</span> with the step chosen for each horizon <span class="math inline">\(T\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-opt-erm" class="level2" data-number="6.8">
+<h2 data-number="6.8" class="anchored" data-anchor-id="sec-opt-erm"><span class="header-section-number">6.8</span> Sensitivity of regularized ERM</h2>
+<p>The previous sections asked how fast an optimizer reaches the minimizer. This one asks how much the minimizer itself depends on the data. Regularized <strong>empirical risk minimization (ERM)</strong> picks the parameters that minimize the average training loss plus a ridge term: <span id="eq-auto-06optimization-3"><span class="math display">\[J(w; D) = \frac1n\sum_{i=1}^n\ell(w, z_i) + \frac\lambda2\|w\|^2. \tag{6.9}\]</span></span> Here <span class="math inline">\(D\)</span> is the training set, and the minimizer is written <span class="math inline">\(w^*(D)\)</span>. Suppose you replace one training example and retrain. How far can the minimizer move? This is a question about the problem, not the optimizer. It asks how much a single example can influence the exact solution.</p>
+<p>The answer has two steps. Changing one example changes only one of the <span class="math inline">\(n\)</span> terms of the average. That example’s loss leaves and another enters, each with weight <span class="math inline">\(1/n\)</span> and a gradient of length at most <span class="math inline">\(L\)</span>. So the gradient of the objective moves by at most <span class="math inline">\(2L/n\)</span> at every point. In particular, at the new minimizer the old objective has a gradient of length at most <span class="math inline">\(2L/n\)</span>. The second step is strong convexity. A point where the gradient is that small lies within the gradient’s length divided by <span class="math inline">\(\lambda\)</span> of the minimizer. So for two training sets that differ in one example, <span id="eq-opt-erm-sensitivity"><span class="math display">\[\|w^*(D) - w^*(D')\| \le \frac{2L}{\lambda n}. \tag{6.10}\]</span></span></p>
+<p>The conditions are that each loss is convex and <span class="math inline">\(L\)</span>-Lipschitz, and that the ridge term is there. The Lipschitz constant caps how much one example can tilt the gradient. Convexity of the losses and the ridge term together make the objective <span class="math inline">\(\lambda\)</span>-strongly convex. That is what converts a small tilt into a small move. With subgradients in place of gradients, the same argument works for losses with kinks, such as the hinge loss.</p>
+<p>The bound is tight. A loss with no curvature of its own shows this, because then the ridge term is the only curvature. Take one-dimensional parameters, labels <span class="math inline">\(z\)</span> that are <span class="math inline">\(-1\)</span> or <span class="math inline">\(+1\)</span>, and the linear loss <span class="math inline">\(zw\)</span>, which is convex and 1-Lipschitz. The minimizer is the negative mean label divided by <span class="math inline">\(\lambda\)</span>. Changing one label from <span class="math inline">\(+1\)</span> to <span class="math inline">\(-1\)</span> lowers the mean label by <span class="math inline">\(2/n\)</span>. So the minimizer moves by exactly <span class="math inline">\(2/(\lambda n)\)</span>, which is <span class="math inline">\(0.02\)</span> for 1,000 examples and <span class="math inline">\(\lambda = 0.1\)</span>.</p>
+<p>The influence of one example shrinks like <span class="math inline">\(1/n\)</span>, because one example among <span class="math inline">\(n\)</span> carries weight <span class="math inline">\(1/n\)</span> in the objective. Regularization buys stability, since halving <span class="math inline">\(\lambda\)</span> can double the movement. The bound also controls the loss. The loss is <span class="math inline">\(L\)</span>-Lipschitz, so moving the parameters by at most <span class="math inline">\(2L/(\lambda n)\)</span> changes the loss on any example by at most <span class="math inline">\(2L^2/(\lambda n)\)</span>. A bound on how much replacing one training example can change the loss at any point is called <strong>uniform stability</strong>. It is the input to the generalization bound in <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>. The same per-example influence returns in later parts under the name sensitivity.</p>
+<p>The bound is loose in two places. It uses only the curvature of the ridge term, while real data add curvature of their own. If the data make the objective strongly convex with a larger curvature, the same argument gives the bound with that curvature in place of <span class="math inline">\(\lambda\)</span>. The bound also assumes the worst case for the change in gradient. Two actual examples rarely have gradients that point in opposite directions at full length.</p>
+<p>The full edition’s script measures both effects on regularized logistic regression. It solves the problem exactly and replaces one random example with a fresh one. It then solves the problem again and records the largest movement over 20 replacements. The logistic loss is 1-Lipschitz, so the bound is <span class="math inline">\(2/(\lambda n)\)</span>. <a href="#tbl-opt-erm" class="quarto-xref">Table&nbsp;<span>6.5</span></a> compares the two.</p>
+<div id="tbl-opt-erm" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-opt-erm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.5: Largest movement of the regularized logistic minimizer over 20 single-example replacements, against <span class="math inline">\(2L/(\lambda n)\)</span> with <span class="math inline">\(L = 1\)</span>.
+</figcaption>
+<div aria-describedby="tbl-opt-erm-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th><span class="math inline">\(\lambda = 0.01\)</span>: observed / bound</th>
+<th><span class="math inline">\(\lambda = 0.1\)</span>: observed / bound</th>
+<th><span class="math inline">\(\lambda = 1\)</span>: observed / bound</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>100</td>
+<td><span class="math inline">\(2.52\times10^{-1}\)</span> / 2.00</td>
+<td><span class="math inline">\(5.98\times10^{-2}\)</span> / 0.200</td>
+<td><span class="math inline">\(8.55\times10^{-3}\)</span> / 0.0200</td>
+</tr>
+<tr class="even">
+<td>1,000</td>
+<td><span class="math inline">\(2.13\times10^{-2}\)</span> / 0.200</td>
+<td><span class="math inline">\(6.66\times10^{-3}\)</span> / 0.0200</td>
+<td><span class="math inline">\(8.54\times10^{-4}\)</span> / 0.00200</td>
+</tr>
+<tr class="odd">
+<td>10,000</td>
+<td><span class="math inline">\(2.06\times10^{-3}\)</span> / 0.0200</td>
+<td><span class="math inline">\(6.35\times10^{-4}\)</span> / 0.00200</td>
+<td><span class="math inline">\(7.80\times10^{-5}\)</span> / 0.000200</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Read <a href="#tbl-opt-erm" class="quarto-xref">Table&nbsp;<span>6.5</span></a> in both directions. Down a column, the number of examples grows tenfold and the movement shrinks tenfold, as the <span class="math inline">\(1/n\)</span> predicts. Across a row, the ratio of observed movement to bound changes with <span class="math inline">\(\lambda\)</span>. It is about 0.4 at <span class="math inline">\(\lambda = 1\)</span>, about 0.3 at <span class="math inline">\(\lambda = 0.1\)</span>, and about 0.1 at <span class="math inline">\(\lambda = 0.01\)</span>. At <span class="math inline">\(\lambda = 1\)</span> the ridge term supplies nearly all the curvature, and the remaining factor of about 2 is the slack in the gradient change. At <span class="math inline">\(\lambda = 0.01\)</span> the data supply more curvature than the ridge term, so the bound overestimates the movement tenfold. <a href="#fig-opt-erm-sensitivity" class="quarto-xref">Figure&nbsp;<span>6.7</span></a> shows both trends. As <span class="math inline">\(\lambda\)</span> goes to zero, the bound blows up, while the observed movement levels off at the value the data’s own curvature sets.</p>
 <div id="fig-opt-erm-sensitivity" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-opt-erm-sensitivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/optimization_erm_sensitivity.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opt-erm-sensitivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;6.1: Left: largest observed movement of the regularized logistic minimizer when one of <span class="math inline">\(n\)</span> examples is replaced (solid), against <span class="math inline">\(2L/(\lambda n)\)</span> (dashed), for three values of <span class="math inline">\(\lambda\)</span>. Right: the same at <span class="math inline">\(n = 1000\)</span> as a function of <span class="math inline">\(\lambda\)</span>: the bound blows up as <span class="math inline">\(\lambda \to 0\)</span>, while the observed movement levels off.
+Figure&nbsp;6.7: Left: largest observed movement of the regularized logistic minimizer when one of <span class="math inline">\(n\)</span> examples is replaced (solid), against <span class="math inline">\(2L/(\lambda n)\)</span> (dashed), for three values of <span class="math inline">\(\lambda\)</span>. Right: the same at <span class="math inline">\(n = 1000\)</span> as a function of <span class="math inline">\(\lambda\)</span>.
 </figcaption>
 </figure>
 </div>
-<p>The argument shows what the bound needs. It is about the exact minimizer, so an optimizer stopped early adds its own error. And it needs the curvature: without a regularizer, the absolute loss gives the median, and on data made of 0s and 1s one replaced value can move it by 1 whatever <span class="math inline">\(n\)</span> is. On a non-convex loss with two valleys, one label can flip which valley is deeper, and the minimizer of a double-well loss jumps by 2.0854 at <span class="math inline">\(n = 11\)</span> and still by 2.0010 at <span class="math inline">\(n = 1{,}001\)</span>. For non-convex models, bound one example’s influence on the <em>algorithm</em> instead, such as a fixed number of SGD steps (<a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>).</p>
+<p>Strong convexity is needed, and convexity alone is not enough. A convex function can be flat, and on a flat stretch a tiny change in the data can move the minimizer a long way. The absolute loss is convex and 1-Lipschitz, and the minimizer of its average is the median of the data. Take an odd number of values, with one more 0 than 1, so the median is 0. Replace one 0 by a 1, and the majority switches, so the median becomes 1. The minimizer moves by 1 however many examples there are, with no <span class="math inline">\(1/n\)</span> at all. With a ridge term added, <a href="#eq-opt-erm-sensitivity" class="quarto-xref">Equation&nbsp;<span>6.10</span></a> caps the move at <span class="math inline">\(2/(\lambda n)\)</span>.</p>
+<p>For a non-convex loss, even strong curvature in places is not enough. The risk can have two separate valleys of nearly equal depth, and one example can decide which one is deeper. The full edition uses a double-well loss whose risk has two wells near <span class="math inline">\(-1\)</span> and <span class="math inline">\(+1\)</span>. The mean label tilts the risk towards one of them. With 11 examples, six labelled <span class="math inline">\(+1\)</span>, the minimizer is at <span class="math inline">\(1.0427\)</span>. Changing one label flips the tilt, and the minimizer jumps to <span class="math inline">\(-1.0427\)</span>, a move of <span class="math inline">\(2.0854\)</span> (<a href="#fig-opt-nonconvex-jump" class="quarto-xref">Figure&nbsp;<span>6.8</span></a>). With 1,001 examples the move is still <span class="math inline">\(2.0010\)</span>.</p>
+<div id="fig-opt-nonconvex-jump" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-opt-nonconvex-jump-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/optimization_nonconvex_jump.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-opt-nonconvex-jump-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.8: A double-well empirical risk on 11 examples before (<span class="math inline">\(D\)</span>, six labels <span class="math inline">\(+1\)</span>) and after (<span class="math inline">\(D'\)</span>, five labels <span class="math inline">\(+1\)</span>) one label changes. The dots mark the global minimizers, which jump from one well to the other.
+</figcaption>
+</figure>
+</div>
+<p>A ridge term does not fix this unless it is strong enough to make the whole objective convex. With <span class="math inline">\(\lambda = 0.5\)</span> and no tilt, the wells sit at about <span class="math inline">\(\pm0.71\)</span>, and a tilt still sends the minimizer across a gap of about 1.4. Without strong convexity, the minimizer can jump when the data change slightly, or fail to be unique. No bound on its movement can then hold. So for non-convex models, statements about the influence of one example must be about the algorithm, not the exact minimizer. An example is a fixed number of SGD steps from a fixed start, which <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a> analyses.</p>
 </section>
-<section id="code" class="level2" data-number="6.6">
-<h2 data-number="6.6" class="anchored" data-anchor-id="code"><span class="header-section-number">6.6</span> Code</h2>
-<p>The formulas are one line each, so there is no snippet. The full edition’s script, <a href="../../../code/part01-prerequisites/optimization.py">optimization.py</a>, runs every experiment above:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/optimization.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="code" class="level2" data-number="6.9">
+<h2 data-number="6.9" class="anchored" data-anchor-id="code"><span class="header-section-number">6.9</span> Code</h2>
+<p>The bias–variance split and the minibatch formula are easy to check by hand on the three examples of <a href="#tbl-opt-toy" class="quarto-xref">Table&nbsp;<span>6.1</span></a>. This snippet does it with exact fractions.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> fractions <span class="im">import</span> Fraction</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> itertools <span class="im">import</span> combinations</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [Fraction(<span class="dv">1</span>), Fraction(<span class="dv">2</span>), Fraction(<span class="dv">6</span>)]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> Fraction(<span class="dv">4</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>grads <span class="op">=</span> [w <span class="op">-</span> z <span class="cf">for</span> z <span class="kw">in</span> data]  <span class="co"># gradient of (w - z)^2 / 2 for each example</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>true_grad <span class="op">=</span> <span class="bu">sum</span>(grads) <span class="op">/</span> <span class="bu">len</span>(grads)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>second_moment <span class="op">=</span> <span class="bu">sum</span>(g <span class="op">*</span> g <span class="cf">for</span> g <span class="kw">in</span> grads) <span class="op">/</span> <span class="bu">len</span>(grads)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>variance <span class="op">=</span> <span class="bu">sum</span>((g <span class="op">-</span> true_grad) <span class="op">**</span> <span class="dv">2</span> <span class="cf">for</span> g <span class="kw">in</span> grads) <span class="op">/</span> <span class="bu">len</span>(grads)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(true_grad)  <span class="co"># 1</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(second_moment, <span class="st">"="</span>, true_grad<span class="op">**</span><span class="dv">2</span>, <span class="st">"+"</span>, variance)  <span class="co"># 17/3 = 1 + 14/3</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Batches of two different examples, drawn without replacement.</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>pairs <span class="op">=</span> <span class="bu">list</span>(combinations(grads, <span class="dv">2</span>))</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>batch_var <span class="op">=</span> <span class="bu">sum</span>(((a <span class="op">+</span> b) <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> true_grad) <span class="op">**</span> <span class="dv">2</span> <span class="cf">for</span> a, b <span class="kw">in</span> pairs) <span class="op">/</span> <span class="bu">len</span>(pairs)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>n, b <span class="op">=</span> <span class="bu">len</span>(grads), <span class="dv">2</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(batch_var, variance <span class="op">/</span> b <span class="op">*</span> (n <span class="op">-</span> b) <span class="op">/</span> (n <span class="op">-</span> <span class="dv">1</span>))  <span class="co"># 7/6 7/6</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(variance <span class="op">/</span> b)  <span class="co"># 7/3</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The full edition’s script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/optimization.py">optimization.py</a>, runs every experiment in this chapter and draws every figure:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/optimization.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="cheat-sheet" class="level2" data-number="6.7">
-<h2 data-number="6.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">6.7</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="6.10">
+<h2 data-number="6.10" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">6.10</span> Cheat sheet</h2>
 <div id="tbl-opt-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-opt-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;6.3: The results of this chapter.
+Table&nbsp;6.6: The results of this chapter.
 </figcaption>
 <div aria-describedby="tbl-opt-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -739,6 +1040,16 @@ Table&nbsp;6.3: The results of this chapter.
 </thead>
 <tbody>
 <tr class="odd">
+<td>Descent lemma</td>
+<td><span class="math inline">\(\beta\)</span>-smooth</td>
+<td><span class="math inline">\(f(w') \le f(w) + \langle\nabla f(w), w' - w\rangle + \frac\beta2\lVert w' - w\rVert^2\)</span></td>
+</tr>
+<tr class="even">
+<td>Small gradient, close to minimizer</td>
+<td><span class="math inline">\(\lambda\)</span>-strongly convex</td>
+<td><span class="math inline">\(\lVert w - w^*\rVert \le \lVert\nabla f(w)\rVert/\lambda\)</span></td>
+</tr>
+<tr class="odd">
 <td>Logistic loss</td>
 <td><span class="math inline">\(\lVert x\rVert \le 1\)</span></td>
 <td>1-Lipschitz, <span class="math inline">\(\frac14\)</span>-smooth, convex, not strongly convex</td>
@@ -749,9 +1060,19 @@ Table&nbsp;6.3: The results of this chapter.
 <td><span class="math inline">\(\lambda\)</span>-strongly convex; Lipschitz only on a ball</td>
 </tr>
 <tr class="odd">
+<td>GD, quadratic</td>
+<td>Curvatures in <span class="math inline">\([\lambda, \beta]\)</span>, step <span class="math inline">\(1/\beta\)</span></td>
+<td><span class="math inline">\(\lVert w_t - w^*\rVert \le (1 - 1/\kappa)^t\lVert w_0 - w^*\rVert\)</span></td>
+</tr>
+<tr class="even">
 <td>SGD, convex</td>
 <td><span class="math inline">\(\mathbb E\lVert g\rVert^2 \le G^2\)</span>, start within <span class="math inline">\(R\)</span>, <span class="math inline">\(\eta = R/(G\sqrt T)\)</span></td>
 <td><span class="math inline">\(RG/\sqrt T\)</span>, averaged iterate</td>
+</tr>
+<tr class="odd">
+<td>SGD, strongly convex</td>
+<td><span class="math inline">\(\eta_t = 1/(\lambda t)\)</span>, uniform average</td>
+<td><span class="math inline">\(G^2(1 + \ln T)/(2\lambda T)\)</span></td>
 </tr>
 <tr class="even">
 <td>SGD, strongly convex</td>
@@ -759,19 +1080,19 @@ Table&nbsp;6.3: The results of this chapter.
 <td><span class="math inline">\(2G^2/(\lambda(T + 1))\)</span></td>
 </tr>
 <tr class="odd">
-<td>SGD, non-convex</td>
-<td><span class="math inline">\(\beta\)</span>-smooth, variance <span class="math inline">\(\sigma^2\)</span>, <span class="math inline">\(\eta \le 1/\beta\)</span></td>
-<td><span class="math inline">\(\frac1T\sum_t\mathbb E\lVert\nabla F(w_t)\rVert^2 \le \frac{2\Delta}{\eta T} + \beta\eta\sigma^2\)</span></td>
-</tr>
-<tr class="even">
 <td>Minibatch variance</td>
-<td><span class="math inline">\(B\)</span> of <span class="math inline">\(n\)</span></td>
+<td><span class="math inline">\(B\)</span> of <span class="math inline">\(n\)</span>, uniform</td>
 <td><span class="math inline">\(\sigma_1^2/B\)</span>; times <span class="math inline">\(\frac{n - B}{n - 1}\)</span> without replacement</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Added gradient noise</td>
 <td>Mean zero, <span class="math inline">\(\mathbb E\lVert\xi\rVert^2 = \sigma^2\)</span></td>
 <td><span class="math inline">\(G^2 = L^2 + \sigma^2\)</span>; <span class="math inline">\(\eta^* = R/\sqrt{(L^2 + \sigma^2)T}\)</span></td>
+</tr>
+<tr class="odd">
+<td>SGD, non-convex</td>
+<td><span class="math inline">\(\beta\)</span>-smooth, variance <span class="math inline">\(\sigma^2\)</span>, <span class="math inline">\(\eta \le 1/\beta\)</span></td>
+<td><span class="math inline">\(\frac1T\sum_t\mathbb E\lVert\nabla F(w_t)\rVert^2 \le \frac{2\Delta}{\eta T} + \beta\eta\sigma^2\)</span></td>
 </tr>
 <tr class="even">
 <td>Regularized ERM</td>
@@ -785,19 +1106,21 @@ Table&nbsp;6.3: The results of this chapter.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Without curvature SGD’s error falls like <span class="math inline">\(1/\sqrt T\)</span>, with it like <span class="math inline">\(1/(\lambda T)\)</span>. Average the iterates either way.</li>
-<li>Noise multiplies the steps needed by <span class="math inline">\(1 + \sigma^2/L^2\)</span>; lower the step size when gradients get noisier.</li>
+<li>Lipschitz bounds the gradient, and smooth bounds how fast the gradient changes. Convex SGD on losses with kinks needs the first. Step sizes and non-convex analysis need the second.</li>
+<li>Without curvature, SGD’s error falls like <span class="math inline">\(1/\sqrt T\)</span>. With <span class="math inline">\(\lambda\)</span>-strong convexity it falls like <span class="math inline">\(1/(\lambda T)\)</span>. Average the iterates either way.</li>
+<li>Noise multiplies the steps needed by <span class="math inline">\(1 + \sigma^2/L^2\)</span> in the convex bound. Lower the step size when the gradients get noisier.</li>
 <li>One example moves a <span class="math inline">\(\lambda\)</span>-regularized minimizer by at most <span class="math inline">\(2L/(\lambda n)\)</span>. Without strong convexity there is no such bound.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="6.8">
-<h2 data-number="6.8" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">6.8</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="6.11">
+<h2 data-number="6.11" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">6.11</span> Further reading</h2>
 <ul>
 <li>Shalev-Shwartz &amp; Ben-David, <em>Understanding Machine Learning</em> (2014), ch.&nbsp;12–14: convexity, regularization and stability, and SGD, at the level of this chapter.</li>
+<li>Bubeck, “Convex Optimization: Algorithms and Complexity” (2015), ch.&nbsp;3 and §6.1: the rates for each combination of assumptions, with lower bounds.</li>
 <li>Bottou, Curtis &amp; Nocedal, “Optimization Methods for Large-Scale Machine Learning” (SIAM Review 2018): noise, step sizes and batch sizes in practice.</li>
-<li>Bubeck, “Convex Optimization: Algorithms and Complexity” (2015): the rates for each combination of assumptions, with lower bounds.</li>
+<li>Ghadimi &amp; Lan, “Stochastic First- and Zeroth-Order Methods for Nonconvex Stochastic Programming” (SIAM J. Optim. 2013): the non-convex SGD rate.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part01-prerequisites/06-optimization.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part01-prerequisites/06-optimization.html">the full edition’s chapter</a>, except the lower bound on SGD’s rate, which it cites from Bubeck (2015).</p>
 
 
 </section>

@@ -1354,7 +1354,7 @@ Table&nbsp;43.7: Mitigations at <span class="math inline">\(\varepsilon = 4\)</s
 </section>
 <section id="code-check-every-number-by-computation" class="level2" data-number="43.8">
 <h2 data-number="43.8" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">43.8</span> Code: check every number by computation</h2>
-<p>The script <a href="../../../code/part05-dp-ml/disparate_impact.py">code/disparate_impact.py</a> builds the running example with a minority group, trains it with the model, clipping and accountant of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> through a training loop that samples each group at its own rate and logs per-group gradient statistics, and computes the two-dimensional example, the quadratic model and the Clopper–Pearson intervals. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/disparate_impact.py">code/disparate_impact.py</a> builds the running example with a minority group, trains it with the model, clipping and accountant of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> through a training loop that samples each group at its own rate and logs per-group gradient statistics, and computes the two-dimensional example, the quadratic model and the Clopper–Pearson intervals. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/disparate_impact.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-fair-code" class="quarto-xref">Table&nbsp;<span>43.8</span></a>:</p>
 <div id="tbl-fair-code" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1408,7 +1408,7 @@ Table&nbsp;43.8: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_disparate_impact.py">tests/test_disparate_impact.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_disparate_impact.py">tests/test_disparate_impact.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> The disparate impact of DP-SGD needs no special data to appear: a 5% group that lives in another region of input space and follows its own rule is enough. Its two causes can be separated by switching the noise off, and each follows the arithmetic of this chapter: clipping lowers the group’s effective share while the majority is learned, and the noise penalizes a small share roughly in proportion to one over the share. Neither knob of DP-SGD removes the effect at a fixed budget; it only moves it between the groups and between the two mechanisms.</p>
 </section>
 <section id="references" class="level2" data-number="43.9">

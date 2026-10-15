@@ -1161,7 +1161,7 @@ Figure&nbsp;25.6: The actual <span class="math inline">\(\varepsilon\)</span> at
 </section>
 <section id="sec-trust-code" class="level2" data-number="25.8">
 <h2 data-number="25.8" class="anchored" data-anchor-id="sec-trust-code"><span class="header-section-number">25.8</span> Code: frequency estimation in four trust models</h2>
-<p>The script <a href="../../../code/part03-dp-foundations/trust_models.py">code/trust_models.py</a> computes every number in this chapter and draws its figures. Each estimator, bound and accountant is a small typed function. The central comparison estimates a histogram over <span class="math inline">\(k = 8\)</span> values with Zipf frequencies (<span class="math inline">\(f_v \propto 1/(v + 1)\)</span>) at the same central guarantee <span class="math inline">\((\varepsilon, \delta) = (1, 10^{-6})\)</span> under replace in all four models. The four set-ups are:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part03-dp-foundations/trust_models.py">code/trust_models.py</a> computes every number in this chapter and draws its figures. Each estimator, bound and accountant is a small typed function. The central comparison estimates a histogram over <span class="math inline">\(k = 8\)</span> values with Zipf frequencies (<span class="math inline">\(f_v \propto 1/(v + 1)\)</span>) at the same central guarantee <span class="math inline">\((\varepsilon, \delta) = (1, 10^{-6})\)</span> under replace in all four models. The four set-ups are:</p>
 <ul>
 <li><strong>Central:</strong> the Laplace mechanism on the counts, <span class="math inline">\(\mathrm{Lap}(2/\varepsilon)\)</span> per count (the histogram has <span class="math inline">\(\ell_1\)</span> sensitivity 2 under replace, since one count goes down by 1 and another up by 1). It is pure <span class="math inline">\(\varepsilon\)</span>-DP, which is stronger than required.</li>
 <li><strong>Distributed:</strong> one-hot vectors plus Skellam shares through secure aggregation, with total variance from the Gaussian calibration at <span class="math inline">\(\Delta_2 = \sqrt2\)</span>. The simulation draws the aggregated Skellam noise directly, which Poisson additivity makes exact.</li>
@@ -1234,7 +1234,7 @@ Table&nbsp;25.5: Output of the chapter’s script (seed 0). The matched rows giv
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_trust_models.py">tests/test_trust_models.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_trust_models.py">tests/test_trust_models.py</a> checks that the output still matches.</p>
 <div id="fig-trust-matched-error" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-trust-matched-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">

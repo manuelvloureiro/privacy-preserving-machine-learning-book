@@ -1257,7 +1257,7 @@ Figure&nbsp;45.4: Per-step audits of three implementations: the projections of 1
 </section>
 <section id="code-run-every-audit" class="level2" data-number="45.9">
 <h2 data-number="45.9" class="anchored" data-anchor-id="code-run-every-audit"><span class="header-section-number">45.9</span> Code: run every audit</h2>
-<p>The script <a href="../../../code/part05-dp-ml/auditing.py">code/auditing.py</a> implements the Clopper–Pearson bounds from the incomplete beta function, the bound of <a href="#eq-audit-eps-lo" class="quarto-xref">Equation&nbsp;<span>45.4</span></a> with thresholds chosen on half the trials, the white-box simulation of <a href="#eq-audit-step" class="quarto-xref">Equation&nbsp;<span>45.3</span></a> with both statistics, the one-run bound of <a href="#eq-audit-onerun-delta" class="quarto-xref">Equation&nbsp;<span>45.11</span></a>, the black-box audit of the running example’s network (importing the model and DP-SGD from <a href="../../../code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a>) and the per-step audits. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/auditing.py">code/auditing.py</a> implements the Clopper–Pearson bounds from the incomplete beta function, the bound of <a href="#eq-audit-eps-lo" class="quarto-xref">Equation&nbsp;<span>45.4</span></a> with thresholds chosen on half the trials, the white-box simulation of <a href="#eq-audit-step" class="quarto-xref">Equation&nbsp;<span>45.3</span></a> with both statistics, the one-run bound of <a href="#eq-audit-onerun-delta" class="quarto-xref">Equation&nbsp;<span>45.11</span></a>, the black-box audit of the running example’s network (importing the model and DP-SGD from <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a>) and the per-step audits. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/auditing.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>It takes a few minutes, most of it simulating 100,000 white-box trials of 10,000 steps each and training three networks.</p>
 <p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-audit-code" class="quarto-xref">Table&nbsp;<span>45.7</span></a>:</p>
@@ -1316,7 +1316,7 @@ Table&nbsp;45.7: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_auditing.py">tests/test_auditing.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_auditing.py">tests/test_auditing.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> The bounds are valid but conservative, and they grow only like the logarithm of the effort. An audit is most useful as a test: the strongest attack you can mount, white-box with a gradient canary, aimed at the claim you want to check. A correct implementation passes it with room to spare, and the two noise bugs fail it with margins no amount of bad luck explains.</p>
 </section>
 <section id="references" class="level2" data-number="45.10">

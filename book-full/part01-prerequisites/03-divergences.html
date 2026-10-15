@@ -1959,7 +1959,7 @@ Table&nbsp;3.14: Exact total variation between <span class="math inline">\(n\)</
 </section>
 <section id="code-check-every-divergence-by-computation-and-simulation" class="level2" data-number="3.12">
 <h2 data-number="3.12" class="anchored" data-anchor-id="code-check-every-divergence-by-computation-and-simulation"><span class="header-section-number">3.12</span> Code: check every divergence by computation and simulation</h2>
-<p>The script <a href="../../../code/part01-prerequisites/divergences.py">code/divergences.py</a> computes every number in this chapter and draws every figure. Each divergence is a small typed function. The closed forms for Gaussian and Laplace pairs are checked against Monte Carlo averages and against each other, and the figures loop the same functions over parameters. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/divergences.py">code/divergences.py</a> computes every number in this chapter and draws every figure. Each divergence is a small typed function. The closed forms for Gaussian and Laplace pairs are checked against Monte Carlo averages and against each other, and the figures loop the same functions over parameters. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/divergences.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-div-code" class="quarto-xref">Table&nbsp;<span>3.15</span></a>:</p>
 <div id="tbl-div-code" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -2029,7 +2029,7 @@ Table&nbsp;3.15: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_divergences.py">tests/test_divergences.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_divergences.py">tests/test_divergences.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> First, the closed forms are right. Every Monte Carlo average agrees with its formula to within 0.0015, about the sampling error of a million draws, and KL rebuilt from the hockey-stick curves matches KL computed directly. Second, Rényi divergences really are means of one ratio: on the die, the harmonic, geometric and arithmetic means and the maximum of <span class="math inline">\(r\)</span> give <span class="math inline">\(D_0\)</span>, KL, <span class="math inline">\(D_2\)</span> and <span class="math inline">\(D_\infty\)</span>.</p>
 <p>Third, processing only loses. Parity throws away more than 70% of the KL of the die, while the sufficient bit “is it a six?” keeps all of it. Fourth, the bulk and the worst case can disagree. The Laplace pair is further apart than the Gaussian pair at low orders and closer at high orders, so which pair is “more different” depends on the divergence you ask. Finally, direction matters: forward and reverse KL give opposite fits to the same data.</p>
 </section>

@@ -1214,7 +1214,7 @@ Figure&nbsp;9.4: Best membership advantage on the noisy count against the number
 </section>
 <section id="code-check-every-number-by-computation-and-simulation" class="level2" data-number="9.7">
 <h2 data-number="9.7" class="anchored" data-anchor-id="code-check-every-number-by-computation-and-simulation"><span class="header-section-number">9.7</span> Code: check every number by computation and simulation</h2>
-<p>The script <a href="../../../code/part02-attacks/threat_models.py">code/threat_models.py</a> computes every number in this chapter and draws every figure. Exact values come from closed forms (normal tails via <code>math.erfc</code>, binomial weights) and are checked against games played by simulation. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/threat_models.py">code/threat_models.py</a> computes every number in this chapter and draws every figure. Exact values come from closed forms (normal tails via <code>math.erfc</code>, binomial weights) and are checked against games played by simulation. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/threat_models.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-threat-code" class="quarto-xref">Table&nbsp;<span>9.7</span></a>:</p>
 <div id="tbl-threat-code" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1276,7 +1276,7 @@ Table&nbsp;9.7: The script’s output with the default seed.
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_threat_models.py">tests/test_threat_models.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_threat_models.py">tests/test_threat_models.py</a> checks that the output still matches.</p>
 <p>Four things stand out. First, the ceilings are reached: every simulated likelihood-ratio membership attack lands within 0.003 of its TV ceiling, within two standard errors for 200,000 games per world, and the small differences in either direction are sampling error. Second, access is not the only lever: in the centroid example the biggest gap is between two attacks on the same black-box view, not between access levels. Third, knowledge changes everything: the same noisy count has advantage 0.38 against an adversary who knows the other records and 0.08 against one who does not, and the exact count goes from 1 to 0.08. Fourth, one number is not enough: advantage, TPR at a low FPR, precision and accuracy against a baseline each answer a different question, and they can disagree by orders of magnitude.</p>
 </section>
 <section id="references" class="level2" data-number="9.8">

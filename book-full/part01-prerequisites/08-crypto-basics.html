@@ -1483,7 +1483,7 @@ Figure&nbsp;8.5: Decryption failure rate of a sum of <span class="math inline">\
 </section>
 <section id="code-check-the-numbers-by-simulation" class="level2" data-number="8.10">
 <h2 data-number="8.10" class="anchored" data-anchor-id="code-check-the-numbers-by-simulation"><span class="header-section-number">8.10</span> Code: check the numbers by simulation</h2>
-<p>The script <a href="../../../code/part01-prerequisites/crypto_basics.py">code/crypto_basics.py</a> computes every number quoted in this chapter and draws its figures. Each bound, probability and toy scheme is a small typed function; the script calls them once for the table and loops them over parameters for the figures. From the repository root:</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/crypto_basics.py">code/crypto_basics.py</a> computes every number quoted in this chapter and draws its figures. Each bound, probability and toy scheme is a small typed function; the script calls them once for the table and loops them over parameters for the figures. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/crypto_basics.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p><a href="#tbl-crypto-output" class="quarto-xref">Table&nbsp;<span>8.9</span></a> summarizes the output (seed 0).</p>
 <div id="tbl-crypto-output" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -1545,7 +1545,7 @@ Table&nbsp;8.9: Output of the chapter’s script (seed 0).
 </div>
 </figure>
 </div>
-<p><a href="../../../tests/test_crypto_basics.py">tests/test_crypto_basics.py</a> checks that the output still matches.</p>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_crypto_basics.py">tests/test_crypto_basics.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> Asymptotic statements need concrete numbers, because a negligible function can be large at the parameter you use: at <span class="math inline">\(\lambda = 128\)</span>, <span class="math inline">\(2^{-\sqrt\lambda}\)</span> is still <span class="math inline">\(3.9\times10^{-4}\)</span>. The birthday bound is the right order and nearly tight: while it is below 1, the union bound overestimates the collision probability by at most a factor of about 1.6 (that is <span class="math inline">\(1/(1 - 1/e)\)</span>, from the chord argument), and the switching lemma’s best adversary attains the exact collision probability. Hybrid bounds are safe but can be loose: for the biased coin they overstate the advantage by a factor up to <span class="math inline">\(\sqrt m\)</span>, because the hybrid argument pays <span class="math inline">\(\delta\)</span> per flip while the true advantage grows like <span class="math inline">\(\delta\sqrt m\)</span>. Determinism is fatal, and short nonces leak exactly as the proof predicts. Finally, noise is what makes LWE hard and what limits computing on its ciphertexts. Without it, elimination solves the problem; with it, every addition spends part of a finite budget.</p>
 </section>
 <section id="references" class="level2" data-number="8.11">

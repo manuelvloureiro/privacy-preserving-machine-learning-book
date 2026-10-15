@@ -542,13 +542,16 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">7.1</span> Why this matters</a></li>
-  <li><a href="#sec-stability-gap" id="toc-sec-stability-gap" class="nav-link" data-scroll-target="#sec-stability-gap"><span class="header-section-number">7.2</span> The gap and uniform stability</a></li>
-  <li><a href="#sec-stability-erm" id="toc-sec-stability-erm" class="nav-link" data-scroll-target="#sec-stability-erm"><span class="header-section-number">7.3</span> Regularized ERM is stable</a></li>
-  <li><a href="#sec-stability-sgd" id="toc-sec-stability-sgd" class="nav-link" data-scroll-target="#sec-stability-sgd"><span class="header-section-number">7.4</span> SGD is stable if you stop early</a></li>
-  <li><a href="#sec-stability-memorization" id="toc-sec-stability-memorization" class="nav-link" data-scroll-target="#sec-stability-memorization"><span class="header-section-number">7.5</span> Memorization and self-influence</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">7.6</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">7.7</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">7.8</span> Further reading</a></li>
+  <li><a href="#sec-stability-risk" id="toc-sec-stability-risk" class="nav-link" data-scroll-target="#sec-stability-risk"><span class="header-section-number">7.2</span> Training loss, test loss and the gap</a></li>
+  <li><a href="#sec-stability-gap" id="toc-sec-stability-gap" class="nav-link" data-scroll-target="#sec-stability-gap"><span class="header-section-number">7.3</span> The gap and uniform stability</a></li>
+  <li><a href="#sec-stability-high-probability" id="toc-sec-stability-high-probability" class="nav-link" data-scroll-target="#sec-stability-high-probability"><span class="header-section-number">7.4</span> High probability: the Bousquet–Elisseeff bound</a></li>
+  <li><a href="#sec-stability-erm" id="toc-sec-stability-erm" class="nav-link" data-scroll-target="#sec-stability-erm"><span class="header-section-number">7.5</span> Regularized ERM is stable</a></li>
+  <li><a href="#sec-stability-sgd" id="toc-sec-stability-sgd" class="nav-link" data-scroll-target="#sec-stability-sgd"><span class="header-section-number">7.6</span> SGD is stable if you stop early</a></li>
+  <li><a href="#sec-stability-nn" id="toc-sec-stability-nn" class="nav-link" data-scroll-target="#sec-stability-nn"><span class="header-section-number">7.7</span> An unstable algorithm: 1-nearest neighbour</a></li>
+  <li><a href="#sec-stability-memorization" id="toc-sec-stability-memorization" class="nav-link" data-scroll-target="#sec-stability-memorization"><span class="header-section-number">7.8</span> Overfitting is memorization of individual examples</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">7.9</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">7.10</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">7.11</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
@@ -576,27 +579,408 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="7.1">
 <h2 data-number="7.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">7.1</span> Why this matters</h2>
-<p>Your model’s training loss is low. Will its loss on new data be low too, and which training examples does it depend on? For a model fixed before you saw the data, the training loss is an unbiased estimate of the test loss. For a model fitted to the data it is biased downward, because training picked the model that looks good on exactly these examples. That bias, test loss minus training loss, is the <strong>generalization gap</strong>.</p>
-<p>Instead of counting how rich the model class is, this chapter looks at the training algorithm, and its one idea is that <strong>a model generalizes when it does not depend much on any single training example.</strong> The gap is exactly the average effect of swapping one example out, and two knobs you already turn control that effect: regularization strength, and how long you train with stochastic gradient descent (SGD). Later parts reuse these quantities.</p>
-<p><strong>Notation.</strong> The training set is <span class="math inline">\(S = (z_1, \dots, z_n)\)</span>, drawn independently from a distribution <span class="math inline">\(\mathcal D\)</span>, and <span class="math inline">\(S^{(i)}\)</span> is <span class="math inline">\(S\)</span> with example <span class="math inline">\(i\)</span> replaced by a fresh draw <span class="math inline">\(z_i'\)</span>. The algorithm <span class="math inline">\(A\)</span> returns the model <span class="math inline">\(A(S)\)</span>, with test loss <span class="math inline">\(R(A(S))\)</span> and training loss <span class="math inline">\(\hat R_S(A(S))\)</span>.</p>
+<p>You train a model and its training loss is low. The question that matters is whether its loss on new data will be low too. The difference between the two losses is the <strong>generalization gap</strong>. A model with a large gap looks better on its training data than it really is.</p>
+<p>The classical way to bound the gap measures how rich the set of models is that the training algorithm could output. A set that is not too rich cannot fit noise. For a large model that set is enormous, and the bound is useless. This chapter takes a different route. It looks at the training algorithm itself, and its one idea is that <strong>a model generalizes when it does not depend much on any single training example.</strong></p>
+<p>That idea gives three results. The first says that the expected gap is exactly the average effect of swapping one training example for a fresh one. The second says that if no single example can move the trained model much, the gap is small, both on average and for the one model you actually trained. The third shows that two knobs you already turn control this per-example effect. One is the strength of the regularizer, and the other is how long you train with stochastic gradient descent (SGD). Later parts of this book return to how much a trained model depends on a single example, and they reuse the quantities defined here.</p>
 </section>
-<section id="sec-stability-gap" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="sec-stability-gap"><span class="header-section-number">7.2</span> The gap and uniform stability</h2>
-<p>The test loss of <span class="math inline">\(A(S)\)</span> can be measured on the fresh point <span class="math inline">\(z_i'\)</span>, which the model never saw. Swap the names of <span class="math inline">\(z_i\)</span> and <span class="math inline">\(z_i'\)</span>. They have the same distribution, so nothing changes on average, but the same number now reads as the loss on <span class="math inline">\(z_i\)</span> of a model trained on <span class="math inline">\(S^{(i)}\)</span>, which did not see <span class="math inline">\(z_i\)</span>. The training loss is the loss on <span class="math inline">\(z_i\)</span> of the model that did. So for any algorithm, <span id="eq-auto-07stabilitygeneralization-1"><span class="math display">\[\mathbb E[\mathrm{gap}] = \frac1n\sum_{i=1}^n\mathbb E\Big[\ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big)\Big]: \tag{7.1}\]</span></span> the expected gap is how much worse each example does when it is left out, averaged over examples.</p>
-<p>To bound the gap, bound each bracket. <span class="math inline">\(A\)</span> is <strong><span class="math inline">\(\beta\)</span>-uniformly stable</strong> if replacing any one example moves the loss of the trained model by at most <span class="math inline">\(\beta\)</span> at every test point, for every training set and replacement (in expectation over <span class="math inline">\(A\)</span>’s own randomness, for SGD). Then every bracket is at most <span class="math inline">\(\beta\)</span>, and so is the expected gap. No model class appears, so the bound holds for large models too.</p>
-<p>You train once, though, so you want the gap of your model, not its average over training sets. The gap is a function of <span class="math inline">\(n\)</span> independent examples, none of which can move it by much, and that is the situation of McDiarmid’s inequality (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>). With losses in <span class="math inline">\([0, M]\)</span>, with probability at least <span class="math inline">\(1 - \delta\)</span>, <span id="eq-auto-07stabilitygeneralization-2"><span class="math display">\[R(A(S)) \le \hat R_S(A(S)) + \beta + (2n\beta + M)\sqrt{\frac{\ln(1/\delta)}{2n}}. \tag{7.2}\]</span></span> The <span class="math inline">\(M\)</span> part is the usual <span class="math inline">\(1/\sqrt n\)</span> fluctuation you would pay even for a fixed model. The <span class="math inline">\(2n\beta\)</span> part is the price of learning, and it vanishes only if <span class="math inline">\(\beta\)</span> falls faster than <span class="math inline">\(1/\sqrt n\)</span>. It is loose, because it charges every example the full <span class="math inline">\(2\beta\)</span> although their effects largely cancel; sharper bounds (Feldman &amp; Vondrák 2018) are meaningful whenever <span class="math inline">\(\beta \to 0\)</span>, at any rate.</p>
-<p>The running example is logistic regression on 10-dimensional features uniform on the unit sphere, regularized with <span class="math inline">\(\lambda = 0.01\)</span>. With <span class="math inline">\(n = 50\)</span> the training loss is 0.4603 and the test loss 0.5781, a gap of about 0.119; with <span class="math inline">\(n = 1000\)</span> the gap is about 0.006. At <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(\delta = 0.05\)</span>, the high-probability bound adds 0.065 to the training loss at <span class="math inline">\(\lambda = 1\)</span> but 0.614 at <span class="math inline">\(\lambda = 0.1\)</span>, mostly through the <span class="math inline">\(2n\beta\)</span> term.</p>
+<section id="sec-stability-risk" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="sec-stability-risk"><span class="header-section-number">7.2</span> Training loss, test loss and the gap</h2>
+<p>Training lowers the loss on the data you have, but you care about the loss on data you will see later. The training set <span class="math inline">\(S\)</span> is a list of <span class="math inline">\(n\)</span> examples. The <span class="math inline">\(i\)</span>-th example is written <span class="math inline">\(z_i\)</span>. Each example is drawn independently from the same distribution <span class="math inline">\(\mathcal D\)</span>, which is the source of all data, past and future. A learning algorithm <span class="math inline">\(A\)</span> takes the training set and returns a model <span class="math inline">\(A(S)\)</span>. A loss <span class="math inline">\(\ell(w, z)\)</span>, which is never negative, measures how badly a model <span class="math inline">\(w\)</span> does on an example <span class="math inline">\(z\)</span>.</p>
+<p>The quantity you care about is the average loss on a new example from <span class="math inline">\(\mathcal D\)</span>. It is called the <strong>test loss</strong>, or population risk, and written <span class="math inline">\(R(w)\)</span>. You cannot compute it, because you do not know <span class="math inline">\(\mathcal D\)</span>. What you can compute is the average loss over the training set, the <strong>training loss</strong> or empirical risk, written <span class="math inline">\(\hat R_S(w)\)</span>. The generalization gap of the trained model is its test loss minus its training loss. It is positive when the model looks better on its training data than it is.</p>
+<p>For a model fixed before the data were drawn, the training loss is right on average. Each training example is then a typical draw from <span class="math inline">\(\mathcal D\)</span>, as far as that model is concerned. So its average loss is the test loss, and the average over <span class="math inline">\(n\)</span> examples is too. This needs the training examples to come from the same distribution as the future data. If they came from a different source, the training loss would estimate the loss on that other source instead.</p>
+<p>For a model fitted to the data, the argument breaks. The algorithm picked the model that does well on these particular examples. So from the model’s point of view, the training examples are no longer typical draws, and its training loss is biased downward. The gap is this bias. It is not noise that averages out, but a systematic error that comes from using the same data to choose a model and to judge it.</p>
+<p>The running example of this chapter shows the size of the effect. The features are uniform on the unit sphere in 10 dimensions. The label is <span class="math inline">\(+1\)</span> or <span class="math inline">\(-1\)</span> and tends to follow the sign of the first feature, but is noisy when that feature is near zero. The model is logistic regression with a penalty on the size of its weights. The strength of the penalty, written <span class="math inline">\(\lambda\)</span>, is 0.01. Averaged over 100 training sets of 50 examples, the training loss is 0.4603. The test loss is 0.5781, and the expected gap is about 0.119. With 1,000 examples it shrinks to about 0.006.</p>
+<p>The tool for studying the gap is a training set that differs from <span class="math inline">\(S\)</span> in one example. Write <span class="math inline">\(z_i'\)</span> for a fresh draw from <span class="math inline">\(\mathcal D\)</span>, independent of <span class="math inline">\(S\)</span>. The <strong>replace-one neighbour</strong> <span class="math inline">\(S^{(i)}\)</span> is the training set with example <span class="math inline">\(i\)</span> replaced by <span class="math inline">\(z_i'\)</span>.</p>
 </section>
-<section id="sec-stability-erm" class="level2" data-number="7.3">
-<h2 data-number="7.3" class="anchored" data-anchor-id="sec-stability-erm"><span class="header-section-number">7.3</span> Regularized ERM is stable</h2>
-<p>Regularized <strong>empirical risk minimization (ERM)</strong> minimizes the training loss plus <span class="math inline">\(\frac\lambda2\|w\|^2\)</span>. The penalty makes the objective a bowl with curvature at least <span class="math inline">\(\lambda\)</span>, and one example, carrying weight <span class="math inline">\(1/n\)</span>, can only tilt such a bowl so far. <a href="../part01-prerequisites/06-optimization.html">Optimization</a> turns that into a number: with a convex, <span class="math inline">\(L\)</span>-Lipschitz loss, replacing one example moves the minimizer by at most <span class="math inline">\(2L/(\lambda n)\)</span>, so the loss at any point moves by at most <span class="math inline">\(L\)</span> times that, <span id="eq-auto-07stabilitygeneralization-3"><span class="math display">\[\beta = \frac{2L^2}{\lambda n}. \tag{7.3}\]</span></span> Doubling <span class="math inline">\(\lambda\)</span> halves <span class="math inline">\(\beta\)</span>, and <span class="math inline">\(\beta\)</span> falls like <span class="math inline">\(1/n\)</span>, faster than <span class="math inline">\(1/\sqrt n\)</span>, so both bounds above go to zero as the data grow.</p>
-<p><a href="#tbl-stability-replace-one" class="quarto-xref">Table&nbsp;<span>7.1</span></a> flips one label in logistic regression with unit-norm features (<span class="math inline">\(L = 1\)</span>), keeping <span class="math inline">\(\lambda n\)</span> fixed so the bound stays at 0.02.</p>
+<section id="sec-stability-gap" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="sec-stability-gap"><span class="header-section-number">7.3</span> The gap and uniform stability</h2>
+<p>The first result says the expected gap is exactly an average per-example effect. To see why, measure the test loss in an unusual way.</p>
+<p>The test loss of the model <span class="math inline">\(A(S)\)</span> is its average loss on a point it has not seen. The fresh point <span class="math inline">\(z_i'\)</span> is such a point, so the loss of <span class="math inline">\(A(S)\)</span> on <span class="math inline">\(z_i'\)</span> is, on average, the test loss. Now swap the names of <span class="math inline">\(z_i\)</span> and <span class="math inline">\(z_i'\)</span>. Both are independent draws from the same distribution, so swapping them changes no average. But after the swap, the same number reads differently. It is now the loss on <span class="math inline">\(z_i\)</span> of a model trained on <span class="math inline">\(S^{(i)}\)</span>, a model that never saw <span class="math inline">\(z_i\)</span>.</p>
+<p>So the expected test loss is the average loss of each example under a model trained without it. The training loss is the average loss of each example under a model trained with it. Their difference is the expected gap. For any algorithm, <span id="eq-stability-identity"><span class="math display">\[\mathbb E[\mathrm{gap}] = \frac1n\sum_{i=1}^n\mathbb E\Big[\ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big)\Big]. \tag{7.1}\]</span></span> Each term in the brackets says how much worse example <span class="math inline">\(i\)</span> does when the model is trained without it. The identity says that this effect, averaged over examples, is the expected gap. Overfitting is dependence on individual examples.</p>
+<p>The swap is the step readers find hardest, so here it is on the smallest possible case. Take a single example <span class="math inline">\(z_1\)</span> that is 1 with probability 0.3 and 0 otherwise, and a fresh copy <span class="math inline">\(z_1'\)</span>. The algorithm returns half the example, and the loss is the squared error. <a href="#tbl-stability-renaming" class="quarto-xref">Table&nbsp;<span>7.1</span></a> lists the four possible outcomes.</p>
+<div id="tbl-stability-renaming" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-renaming-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.1: Every outcome of the one-example case. The training loss is the model’s loss on <span class="math inline">\(z_1\)</span>, the test loss its loss on <span class="math inline">\(z_1'\)</span>, and the renamed column the loss on <span class="math inline">\(z_1\)</span> of the model trained on <span class="math inline">\(z_1'\)</span>.
+</figcaption>
+<div aria-describedby="tbl-stability-renaming-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\((z_1, z_1')\)</span></th>
+<th>Probability</th>
+<th>Training loss</th>
+<th>Test loss</th>
+<th>Renamed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\((0, 0)\)</span></td>
+<td><span class="math inline">\(0.49\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\((0, 1)\)</span></td>
+<td><span class="math inline">\(0.21\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\(1\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\((1, 0)\)</span></td>
+<td><span class="math inline">\(0.21\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+<td><span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\((1, 1)\)</span></td>
+<td><span class="math inline">\(0.09\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>Average</strong></td>
+<td></td>
+<td><span class="math inline">\(0.075\)</span></td>
+<td><span class="math inline">\(0.285\)</span></td>
+<td><span class="math inline">\(0.285\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Row by row, the test column and the renamed column differ. But the renamed column holds the same values as the test column, attached to the mirror-image outcome. The two mirror-image outcomes have the same probability, so the averages agree.</p>
+<p>The swap needs one condition. The two points must be interchangeable, which holds when they are drawn independently from the same distribution. If <span class="math inline">\(z_1'\)</span> came from a different distribution, the two mirror-image rows would have different probabilities. The averages would then differ, and the identity would fail.</p>
+<p>To bound the gap, bound each term of <a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.1</span></a>. An algorithm is <strong><span class="math inline">\(\beta\)</span>-uniformly stable</strong> if replacing any one training example by any other moves the loss of the trained model by at most <span class="math inline">\(\beta\)</span>, at every test point. The bound must hold in the worst case, for every training set, every replacement and every test point. It usually shrinks as <span class="math inline">\(n\)</span> grows, since each example then carries less weight. For a randomized algorithm such as SGD, it applies to the loss averaged over the algorithm’s own randomness. <a href="#fig-stability-neighbours" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> shows the definition at work. One label is flipped, and the fitted model moves a lot under weak regularization and barely under strong regularization.</p>
+<div id="fig-stability-neighbours" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-neighbours-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_neighbours.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-neighbours-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.1: One-dimensional logistic regression trained on 30 points, on <span class="math inline">\(S\)</span> and on <span class="math inline">\(S^{(i)}\)</span>, where the most typical positive example is replaced by the same point with its label flipped. Left: <span class="math inline">\(\lambda = 0.01\)</span>. Right: <span class="math inline">\(\lambda = 1\)</span>. The titles compare the change in the weight with the bound <span class="math inline">\(2L/(\lambda n)\)</span> of <a href="#sec-stability-erm" class="quarto-xref"><span>Section 7.5</span></a>.
+</figcaption>
+</figure>
+</div>
+<p>If the algorithm is <span class="math inline">\(\beta\)</span>-uniformly stable, every term in the brackets lies between <span class="math inline">\(-\beta\)</span> and <span class="math inline">\(\beta\)</span>, and so does their average. So the expected gap is at most <span class="math inline">\(\beta\)</span> in size: <span id="eq-stability-expected"><span class="math display">\[\big|\mathbb E[\mathrm{gap}]\big| \le \beta. \tag{7.2}\]</span></span> What makes this bound useful is what it leaves out. No set of models appears in it, so it holds for any algorithm, however many models it could output. This is why stability gives guarantees for SGD on large models, where counting models gives nothing useful.</p>
+<p>The price is that uniform stability is a worst case. The identity needs only the average over examples and data, while <span class="math inline">\(\beta\)</span> takes the worst training set, the worst replacement and the worst test point. So <span class="math inline">\(\beta\)</span> can be far above the true gap. Weaker notions of stability that use averages also exist (Bousquet &amp; Elisseeff 2002).</p>
+<p>A memorizing lookup table shows the other extreme. It stores the training set and predicts the stored label at a training point and <span class="math inline">\(+1\)</span> everywhere else. Score it with the <strong>0-1 loss</strong>, which is 1 for a wrong prediction and 0 for a right one. A fresh point almost surely misses the table, so in the running example the test error is one half and the training error is 0, for every <span class="math inline">\(n\)</span>. Replacing a training example labelled <span class="math inline">\(-1\)</span> makes the loss at its point jump from 0 to 1, so <span class="math inline">\(\beta = 1\)</span>. The gap of one half obeys the bound but never shrinks.</p>
+</section>
+<section id="sec-stability-high-probability" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="sec-stability-high-probability"><span class="header-section-number">7.4</span> High probability: the Bousquet–Elisseeff bound</h2>
+<p><a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.2</span></a> controls the gap on average over training sets. But you train once, on one training set, so you need the gap of your model to be small with high probability. The tool for that is McDiarmid’s inequality from <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>. It says that a function of many independent inputs, none of which can move it by much, stays close to its average. The chance of a large deviation falls exponentially.</p>
+<p>The gap is such a function. It depends on <span class="math inline">\(n\)</span> independent examples, and uniform stability limits how much one example can move it. Replacing an example moves the test loss by at most <span class="math inline">\(\beta\)</span>, because it moves the loss at every point by at most <span class="math inline">\(\beta\)</span>. It also moves the training loss, and this is where a second condition enters. The replaced example’s own term in the training loss is evaluated at two different points, <span class="math inline">\(z_i\)</span> and <span class="math inline">\(z_i'\)</span>. Stability compares two models at the same point, so it says nothing about this term. Only a bound on the loss itself limits it. So the result assumes that every loss lies between 0 and a maximum <span class="math inline">\(M\)</span>. Without such a bound, one example could move the training loss by any amount, and McDiarmid’s inequality would not apply.</p>
+<p>Write <span class="math inline">\(\delta\)</span> for the failure probability, the chance that the guarantee does not hold. Suppose the algorithm is <span class="math inline">\(\beta\)</span>-uniformly stable and the loss lies between 0 and <span class="math inline">\(M\)</span>. Then with probability at least <span class="math inline">\(1 - \delta\)</span> over the training set, <span id="eq-stability-be"><span class="math display">\[R(A(S)) \le \hat R_S(A(S)) + \beta + (2n\beta + M)\sqrt{\frac{\ln(1/\delta)}{2n}}. \tag{7.3}\]</span></span> This is the bound of Bousquet &amp; Elisseeff (2002), written for replace-one stability. The same argument applied to the gap with its sign reversed gives a matching lower bound.</p>
+<p>The bound has three parts. The first is the training loss you observe. The second is <span class="math inline">\(\beta\)</span>, the bound on the expected gap. The third is a deviation term, which says how far one training set can stray from the average. Inside it, the part with <span class="math inline">\(M\)</span> is what Hoeffding’s inequality gives for a single fixed model. You pay it even without any learning.</p>
+<p>The part with <span class="math inline">\(2n\beta\)</span> is the price of learning. Multiplied out, it equals <span class="math inline">\(\beta\sqrt{2n\ln(1/\delta)}\)</span>. It goes to zero only if <span class="math inline">\(\beta\)</span> shrinks faster than <span class="math inline">\(1/\sqrt n\)</span> as the training set grows. <a href="#fig-stability-high-probability" class="quarto-xref">Figure&nbsp;<span>7.2</span></a> shows three cases. If <span class="math inline">\(\beta\)</span> falls like <span class="math inline">\(1/n\)</span>, as for regularized empirical risk minimization (ERM) below, the width falls like <span class="math inline">\(1/\sqrt n\)</span>. That is only a constant factor above the fixed-model rate. If <span class="math inline">\(\beta\)</span> falls like <span class="math inline">\(n^{-3/4}\)</span>, the width still falls, but only like <span class="math inline">\(n^{-1/4}\)</span>. If <span class="math inline">\(\beta\)</span> falls like <span class="math inline">\(1/\sqrt n\)</span>, the width does not fall at all. The bound is then useless, although <a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.2</span></a> still says the expected gap is at most <span class="math inline">\(\beta\)</span>.</p>
+<div id="fig-stability-high-probability" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-high-probability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_high_probability.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-high-probability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.2: Width of the high-probability bound, <a href="#eq-stability-be" class="quarto-xref">Equation&nbsp;<span>7.3</span></a>, with <span class="math inline">\(M = 1\)</span> and <span class="math inline">\(\delta = 0.05\)</span>, for stability <span class="math inline">\(\beta = 1/n\)</span>, <span class="math inline">\(n^{-3/4}\)</span> and <span class="math inline">\(n^{-1/2}\)</span>, against the Hoeffding width for a single fixed model.
+</figcaption>
+</figure>
+</div>
+<p>The bound is loose because McDiarmid’s inequality charges every example the full worst case, while in reality the effects of different examples largely cancel. Later work removed most of this slack. Feldman &amp; Vondrák (2018) proved a bound that is useful whenever <span class="math inline">\(\beta\)</span> goes to zero, at any rate. Two later papers went further for losses between 0 and 1 (Feldman &amp; Vondrák 2019; Bousquet, Klochkov &amp; Zhivotovskiy 2020). Their bound is within logarithmic factors of the expected-gap bound plus the fixed-model rate. With it, <span class="math inline">\(\beta\)</span> of order <span class="math inline">\(1/\sqrt n\)</span> also gives a gap of order <span class="math inline">\(1/\sqrt n\)</span>, up to logarithmic factors.</p>
+<p>For a sense of scale, apply <a href="#eq-stability-be" class="quarto-xref">Equation&nbsp;<span>7.3</span></a> to regularized logistic regression with 10,000 examples and <span class="math inline">\(\delta = 0.05\)</span>. The next section shows that its <span class="math inline">\(\beta\)</span> is <span class="math inline">\(2/(\lambda n)\)</span> here. Its largest loss <span class="math inline">\(M\)</span> depends on <span class="math inline">\(\lambda\)</span> too, because the penalty limits the size of the weights. With <span class="math inline">\(\lambda = 1\)</span>, the bound adds 0.065 to the training loss. With <span class="math inline">\(\lambda = 0.1\)</span>, it adds 0.614. In both cases the stability term <span class="math inline">\(2n\beta\)</span> makes up three quarters or more of the width. The expected gap itself is far smaller. At <span class="math inline">\(\lambda = 1\)</span> it is already <span class="math inline">\(2.53\times10^{-4}\)</span> with 1,000 examples, and it falls like <span class="math inline">\(1/n\)</span>.</p>
+</section>
+<section id="sec-stability-erm" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="sec-stability-erm"><span class="header-section-number">7.5</span> Regularized ERM is stable</h2>
+<p>The bounds above need an algorithm with small <span class="math inline">\(\beta\)</span>. The first such algorithm is regularized ERM, which covers ridge regression, regularized logistic regression and support vector machines. It picks the weights <span class="math inline">\(w_S\)</span> that minimize the training loss plus a penalty <span class="math inline">\(\frac\lambda2\|w\|^2\)</span> on the size of the weights.</p>
+<p>Stability gives a new reading of the regularizer. The penalty makes the objective a bowl whose curvature is at least <span class="math inline">\(\lambda\)</span> everywhere. Replacing one example changes only one term of the objective, and that term carries weight <span class="math inline">\(1/n\)</span>. A small change can only tilt a steep bowl a little, so the bottom of the bowl moves only a little.</p>
+<p>Two properties of the loss turn this picture into a number, and <a href="../part01-prerequisites/06-optimization.html">Optimization</a> defines both. A loss is <strong><span class="math inline">\(L\)</span>-Lipschitz</strong> when its gradient never exceeds <span class="math inline">\(L\)</span> in size. Then moving the weights by some distance changes the loss by at most <span class="math inline">\(L\)</span> times that distance. A loss is convex when its curvature is never negative. If the loss is convex and <span class="math inline">\(L\)</span>-Lipschitz for every example, then replacing one example moves the minimizer by at most <span class="math inline">\(2L/(\lambda n)\)</span>. The loss at every test point then moves by at most <span class="math inline">\(L\)</span> times that, which gives <span id="eq-stability-erm"><span class="math display">\[\beta = \frac{2L^2}{\lambda n}. \tag{7.4}\]</span></span></p>
+<p>Each condition has a job. The Lipschitz bound limits how hard the one changed term can tilt the bowl, since its gradient changes by at most <span class="math inline">\(2L/n\)</span>. It also turns a movement of the weights into a change of the loss. Convexity of the loss keeps the whole objective a bowl with curvature at least <span class="math inline">\(\lambda\)</span>. Without it, the data term can cancel the curvature of the penalty. <a href="../part01-prerequisites/06-optimization.html">Optimization</a> shows a non-convex loss with two valleys where flipping one label makes the minimizer jump from one valley to the other, however large <span class="math inline">\(n\)</span> is. Squared loss is convex but not Lipschitz everywhere. You can still use the result for ridge regression, because the minimizer lies in a bounded region, and the squared loss is Lipschitz there.</p>
+<p>The size of the weights is bounded in the same way. At the minimizer, <span class="math inline">\(\lambda w_S\)</span> equals minus the average gradient of the losses. That average has size at most <span class="math inline">\(L\)</span>, so <span class="math inline">\(\|w_S\|\)</span> is at most <span class="math inline">\(L/\lambda\)</span>. This is how the previous section bounded the largest loss <span class="math inline">\(M\)</span> of regularized logistic regression.</p>
+<p>Because <span class="math inline">\(\beta\)</span> falls like <span class="math inline">\(1/n\)</span>, faster than <span class="math inline">\(1/\sqrt n\)</span>, both the expected-gap and the high-probability bounds go to zero as the training set grows. Regularization buys stability linearly, since doubling <span class="math inline">\(\lambda\)</span> halves <span class="math inline">\(\beta\)</span>. But it is not free. A larger <span class="math inline">\(\lambda\)</span> also pulls the weights towards zero and away from the best fit. So the test loss is U-shaped in <span class="math inline">\(\lambda\)</span>. Too little regularization overfits, and too much underfits.</p>
+<p>The running example tests the bound. Its features have size 1, so the logistic loss is 1-Lipschitz and <span class="math inline">\(\beta = 2/(\lambda n)\)</span>. The script fits the model on <span class="math inline">\(S\)</span> and then on <span class="math inline">\(S^{(i)}\)</span> for 10 random examples, each replaced by the same point with its label flipped. It records the largest change in the weights and in the loss.</p>
 <div id="tbl-stability-replace-one" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-replace-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;7.1: Replace-one loss changes of regularized logistic regression against the stability bound.
+Table&nbsp;7.2: Replace-one changes of regularized logistic regression against the bounds in <a href="#eq-stability-erm" class="quarto-xref">Equation&nbsp;<span>7.4</span></a>, for selected settings. Ratio is the largest loss change divided by the loss bound.
 </figcaption>
 <div aria-describedby="tbl-stability-replace-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th><span class="math inline">\(\lambda\)</span></th>
+<th>Weight bound <span class="math inline">\(2L/(\lambda n)\)</span></th>
+<th>Largest weight change</th>
+<th>Loss bound <span class="math inline">\(2L^2/(\lambda n)\)</span></th>
+<th>Largest loss change</th>
+<th>Ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>100</td>
+<td>0.01</td>
+<td>2.0</td>
+<td>0.406</td>
+<td>2.0</td>
+<td>0.340</td>
+<td>0.17</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td>1</td>
+<td>0.02</td>
+<td>0.00976</td>
+<td>0.02</td>
+<td>0.00505</td>
+<td>0.25</td>
+</tr>
+<tr class="odd">
+<td>1,000</td>
+<td>0.1</td>
+<td>0.02</td>
+<td>0.00809</td>
+<td>0.02</td>
+<td>0.00499</td>
+<td>0.25</td>
+</tr>
+<tr class="even">
+<td>10,000</td>
+<td>0.01</td>
+<td>0.02</td>
+<td>0.00336</td>
+<td>0.02</td>
+<td>0.00285</td>
+<td>0.14</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="#tbl-stability-replace-one" class="quarto-xref">Table&nbsp;<span>7.2</span></a> shows the predicted <span class="math inline">\(1/(\lambda n)\)</span> scaling. Two rows share <span class="math inline">\(\lambda n = 100\)</span> with <span class="math inline">\(\lambda\)</span> at least 0.1. They have nearly the same loss change, 0.00505 and 0.00499. The measured changes sit well below the bound, and the reasons can be read off.</p>
+<p>With <span class="math inline">\(\lambda = 1\)</span> the ratio is a quarter, which is two factors of 2. The first comes from the gradients. The bound assumes that the two examples’ gradients point in opposite directions at full length <span class="math inline">\(L\)</span>. For a flipped label, their difference has length 1, not 2, so the weights move about half the bound. The second comes from the test point. With strong regularization the weights are small, and there the logistic loss has slope one half rather than <span class="math inline">\(L = 1\)</span>. So the loss moves about half as much as the weights.</p>
+<p>With <span class="math inline">\(\lambda = 0.01\)</span> the ratio drops to about 0.15. The bound uses only the curvature of the penalty. The data term adds curvature of its own, which also resists movement, and this matters most when the penalty is weak.</p>
+<p>The expected gap is smaller still. The script averages it over 100 training sets for each setting, with the test loss computed exactly.</p>
+<div id="tbl-stability-gap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.3: Expected generalization gap of regularized logistic regression, averaged over 100 training sets, against the stability bound, for selected settings.
+</figcaption>
+<div aria-describedby="tbl-stability-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\lambda\)</span></th>
+<th><span class="math inline">\(n\)</span></th>
+<th>Train loss</th>
+<th>Test loss</th>
+<th>Expected gap</th>
+<th>Bound <span class="math inline">\(2/(\lambda n)\)</span></th>
+<th>Gap / bound</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.01</td>
+<td>50</td>
+<td>0.4603</td>
+<td>0.5781</td>
+<td>0.119</td>
+<td>4.0</td>
+<td>0.030</td>
+</tr>
+<tr class="even">
+<td>0.01</td>
+<td>1,000</td>
+<td>0.5311</td>
+<td>0.5381</td>
+<td>0.00596</td>
+<td>0.2</td>
+<td>0.030</td>
+</tr>
+<tr class="odd">
+<td>0.1</td>
+<td>1,000</td>
+<td>0.6346</td>
+<td>0.6365</td>
+<td>0.00178</td>
+<td>0.02</td>
+<td>0.089</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>50</td>
+<td>0.6806</td>
+<td>0.6854</td>
+<td>0.00459</td>
+<td>0.04</td>
+<td>0.115</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>1,000</td>
+<td>0.6852</td>
+<td>0.6855</td>
+<td>0.000253</td>
+<td>0.002</td>
+<td>0.127</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The gap falls like <span class="math inline">\(1/n\)</span>, as the bound predicts, and stays a fixed fraction of the bound for each <span class="math inline">\(\lambda\)</span>. The fraction is about 3% for <span class="math inline">\(\lambda = 0.01\)</span> and 11% to 13% for <span class="math inline">\(\lambda = 1\)</span> (<a href="#tbl-stability-gap" class="quarto-xref">Table&nbsp;<span>7.3</span></a>). Part of the slack is the factor of about 4 already seen in <a href="#tbl-stability-replace-one" class="quarto-xref">Table&nbsp;<span>7.2</span></a>. The rest comes from averaging. The gap averages over test points and replacements, while the bound takes the worst of both. <a href="#fig-stability-gap" class="quarto-xref">Figure&nbsp;<span>7.3</span></a> also shows the U-shape in <span class="math inline">\(\lambda\)</span>.</p>
+<div id="fig-stability-gap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_gap.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.3: Left: expected generalization gap of regularized logistic regression against <span class="math inline">\(n\)</span> (solid), with the stability bound <span class="math inline">\(2/(\lambda n)\)</span> (dashed). Right: train and test loss against <span class="math inline">\(\lambda\)</span> at <span class="math inline">\(n = 50\)</span>. Stronger regularization closes the gap, but too much of it raises the test loss.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-stability-sgd" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="sec-stability-sgd"><span class="header-section-number">7.6</span> SGD is stable if you stop early</h2>
+<p>Large models are not trained to an exact minimizer. They are trained by SGD for a number of steps. At each step, SGD picks one training example at random and moves the weights against the gradient of its loss, scaled by a step size <span class="math inline">\(\eta_t\)</span>. Hardt, Recht &amp; Singer (2016) showed that SGD itself is stable, with a <span class="math inline">\(\beta\)</span> that grows with the total step size. This turns “train for fewer epochs” into a guarantee.</p>
+<p>The idea is to run SGD twice, once on <span class="math inline">\(S\)</span> and once on <span class="math inline">\(S^{(i)}\)</span>, with the same starting point and the same sequence of random picks. Sharing the picks is allowed, because stability compares the average loss of each run, and sharing does not change either average. The two runs can then drift apart only on the steps that pick example <span class="math inline">\(i\)</span>, because only there do they step on different examples.</p>
+<p>The other steps must not push the runs apart, and this needs three conditions. The loss must be convex. It must also be <strong><span class="math inline">\(\rho\)</span>-smooth</strong>, meaning that its gradient changes by at most a constant <span class="math inline">\(\rho\)</span> per unit of distance. (<a href="../part01-prerequisites/06-optimization.html">Optimization</a> writes this constant as <span class="math inline">\(\beta\)</span>, but here <span class="math inline">\(\beta\)</span> is the stability.) And every step size must be at most <span class="math inline">\(2/\rho\)</span>. Under these conditions, a gradient step on the same loss never moves two points farther apart than they were.</p>
+<p>A one-dimensional loss shows why the step size matters. For the parabola <span class="math inline">\(\frac\rho2w^2\)</span>, a gradient step multiplies every distance by <span class="math inline">\(|1 - \eta\rho|\)</span>. That factor is at most 1 exactly when <span class="math inline">\(\eta\)</span> is at most <span class="math inline">\(2/\rho\)</span>. A larger step overshoots the minimum and blows differences up.</p>
+<p>A step that picks example <span class="math inline">\(i\)</span> moves each run by at most <span class="math inline">\(\eta_t\)</span> times its gradient, and the gradient has size at most <span class="math inline">\(L\)</span>. So that step pushes the runs apart by at most <span class="math inline">\(2L\eta_t\)</span>. It happens with probability <span class="math inline">\(1/n\)</span>, so on average the distance grows by at most <span class="math inline">\(2L\eta_t/n\)</span> per step. Adding up the steps and multiplying by <span class="math inline">\(L\)</span> to turn distance into loss gives <span id="eq-stability-hrs"><span class="math display">\[\beta \le \frac{2L^2}{n}\sum_{t=1}^T\eta_t, \tag{7.5}\]</span></span> where <span class="math inline">\(T\)</span> is the number of steps. The bound holds on average over the random picks.</p>
+<p><a href="#fig-stability-sgd-divergence" class="quarto-xref">Figure&nbsp;<span>7.4</span></a> shows this as a staircase. A single run jumps when example <span class="math inline">\(i\)</span> is picked, which happens about once per epoch, and otherwise does not grow. In practice, a gradient step on a curved loss usually brings two points closer together, so single runs also shrink between jumps.</p>
+<div id="fig-stability-sgd-divergence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-sgd-divergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_sgd_divergence.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-sgd-divergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.4: Distance between coupled SGD runs on <span class="math inline">\(S\)</span> and <span class="math inline">\(S^{(1)}\)</span> (<span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\eta = 0.25\)</span>), for three single runs and the average over 200 runs, against the bound <span class="math inline">\((2L/n)\sum_t\eta_t\)</span>. Single runs jump when example 1 is drawn and contract otherwise. Dotted lines mark epochs.
+</figcaption>
+</figure>
+</div>
+<p>Stability therefore degrades with training time. Take a constant step <span class="math inline">\(\eta\)</span>, and train for a number of epochs <span class="math inline">\(E\)</span>, which is <span class="math inline">\(En\)</span> steps. The sum of the step sizes is <span class="math inline">\(\eta En\)</span>, and <a href="#eq-stability-hrs" class="quarto-xref">Equation&nbsp;<span>7.5</span></a> becomes <span class="math inline">\(\beta \le 2L^2\eta E\)</span>. The <span class="math inline">\(n\)</span> cancels, so for a fixed number of epochs, more data does not improve the bound. One pass over the data gives <span class="math inline">\(\beta \le 2L^2\eta\)</span>.</p>
+<p>This makes early stopping a trade-off rather than a trick. Training longer lowers the optimization error, the excess of your training loss over the best achievable one. But it raises <span class="math inline">\(\beta\)</span>, and the excess test loss pays for both. For convex Lipschitz losses, the optimization error of averaged SGD falls like <span class="math inline">\(1/(\eta T)\)</span>, while the stability bound grows like <span class="math inline">\(\eta T/n\)</span>. The best balance comes at a total step size <span class="math inline">\(\eta T\)</span> of order <span class="math inline">\(\sqrt n\)</span>. There the excess test loss falls like <span class="math inline">\(1/\sqrt n\)</span>, apart from a term proportional to the step size. Training much longer buys optimization accuracy that the growing stability term gives back.</p>
+<p>The running example shows the trade-off without regularization. It uses 100 examples and a constant step <span class="math inline">\(\eta = 0.25\)</span>. The logistic loss with features of size 1 is <span class="math inline">\(\frac14\)</span>-smooth, so the condition <span class="math inline">\(\eta \le 8\)</span> holds. With <span class="math inline">\(L = 1\)</span>, the loss bound is <span class="math inline">\(0.5E\)</span>. The script averages over 100 pairs of runs, with the first example replaced by a fresh draw.</p>
+<div id="tbl-stability-sgd" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-sgd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.4: SGD on unregularized logistic regression, <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\eta = 0.25\)</span>, averaged over 100 runs, for selected epochs. With <span class="math inline">\(L = 1\)</span> the two bounds coincide.
+</figcaption>
+<div aria-describedby="tbl-stability-sgd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Epochs</th>
+<th>Train loss</th>
+<th>Test loss</th>
+<th>Gap</th>
+<th>Bound <span class="math inline">\(2L^2\eta E\)</span></th>
+<th>Mean <span class="math inline">\(\lVert w_T - w_T'\rVert\)</span></th>
+<th>Bound <span class="math inline">\(2L\eta E\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0.559</td>
+<td>0.596</td>
+<td>0.036</td>
+<td>0.5</td>
+<td>0.130</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0.478</td>
+<td>0.557</td>
+<td>0.079</td>
+<td>2.5</td>
+<td>0.277</td>
+<td>2.5</td>
+</tr>
+<tr class="odd">
+<td>20</td>
+<td>0.467</td>
+<td>0.582</td>
+<td>0.115</td>
+<td>10.0</td>
+<td>0.355</td>
+<td>10.0</td>
+</tr>
+<tr class="even">
+<td>40</td>
+<td>0.467</td>
+<td>0.588</td>
+<td>0.121</td>
+<td>20.0</td>
+<td>0.395</td>
+<td>20.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The direction of the prediction holds (<a href="#tbl-stability-sgd" class="quarto-xref">Table&nbsp;<span>7.4</span></a>, <a href="#fig-stability-sgd-epochs" class="quarto-xref">Figure&nbsp;<span>7.5</span></a>). The gap grows with the number of epochs. The test loss is lowest after about 5 epochs and rises afterwards, while the training loss keeps falling.</p>
+<div id="fig-stability-sgd-epochs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_sgd_epochs.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.5: Left: train and test loss of SGD on logistic regression (<span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\eta = 0.25\)</span>) against the number of epochs. Right: the measured gap against the stability bound <span class="math inline">\(2L^2\eta T/n\)</span>, on a log scale. Both grow with training time; the bound grows faster.
+</figcaption>
+</figure>
+</div>
+<p>The size of the prediction is far off. The bound is loose by a factor of 14 after one epoch and of 165 after 40. The reason is that the argument uses only the fact that a step does not push points apart. The distance between the runs actually levels off near 0.4, while the bound grows linearly.</p>
+<p>Convexity is the condition that matters most here. On a non-convex loss, such as a neural network’s, a gradient step can push two points apart. Hardt, Recht &amp; Singer still get a bound in that case, but it grows polynomially in the number of steps rather than linearly in the total step size.</p>
+</section>
+<section id="sec-stability-nn" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="sec-stability-nn"><span class="header-section-number">7.7</span> An unstable algorithm: 1-nearest neighbour</h2>
+<p>Seeing an algorithm without stability makes clear what stability rules out. The nearest neighbour (NN) rule with one neighbour, 1-NN, predicts the label of the closest training point. It fits every training example using that example itself, which is exactly the dependence that stability forbids.</p>
+<p>Its training error is 0, since each training point is its own nearest neighbour. Its <span class="math inline">\(\beta\)</span> under the 0-1 loss is 1, the largest possible value. To see this, replace a training example by the same point with the opposite label. The prediction at that point flips, and the loss there changes from 0 to 1.</p>
+<p>Its gap does not close when the labels are noisy. Write <span class="math inline">\(p(x)\)</span> for the probability that the label at the point <span class="math inline">\(x\)</span> is <span class="math inline">\(+1\)</span>. As the training set grows, the nearest neighbour of a test point lies almost on top of it. Its label is then an independent draw with the same probability <span class="math inline">\(p(x)\)</span>. The two labels disagree with probability <span class="math inline">\(2p(x)(1 - p(x))\)</span>, and the average of this over <span class="math inline">\(x\)</span> is the limit of the test error (Cover &amp; Hart 1967). Since the training error is 0, this limit is also the limit of the gap.</p>
+<p>1-NN is still a reasonable classifier. The best possible classifier, the Bayes classifier, predicts the more likely label at each point, and the limiting error of 1-NN is at most twice its error. But the training error of 1-NN says nothing about how close it gets. With a majority vote over more neighbours, a prediction rarely changes when one example is replaced. Its worst case is still <span class="math inline">\(\beta = 1\)</span>, though, so average-case notions of stability are needed to explain it (Devroye &amp; Wagner 1979).</p>
+<p>In the running example the best possible error is 0.250, and the 1-NN limit is 0.338. <a href="#tbl-stability-nn" class="quarto-xref">Table&nbsp;<span>7.5</span></a> compares 1-NN with the regularized logistic regression, averaging over 10 training sets and measuring the 0-1 error on 2,000 test points.</p>
+<div id="tbl-stability-nn" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-nn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.5: 0-1 error of 1-nearest neighbour and of regularized logistic regression.
+</figcaption>
+<div aria-describedby="tbl-stability-nn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 20%">
@@ -608,86 +992,89 @@ Table&nbsp;7.1: Replace-one loss changes of regularized logistic regression agai
 <thead>
 <tr class="header">
 <th><span class="math inline">\(n\)</span></th>
-<th><span class="math inline">\(\lambda\)</span></th>
-<th>Bound <span class="math inline">\(2L^2/(\lambda n)\)</span></th>
-<th>Largest loss change</th>
-<th>Ratio</th>
+<th>1-NN train</th>
+<th>1-NN test</th>
+<th>Logistic (<span class="math inline">\(\lambda = 0.01\)</span>) train</th>
+<th>Logistic test</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>100</td>
-<td>1</td>
-<td>0.02</td>
-<td>0.00505</td>
-<td>0.25</td>
+<td>50</td>
+<td>0.000</td>
+<td>0.404</td>
+<td>0.170</td>
+<td>0.301</td>
 </tr>
 <tr class="even">
-<td>1,000</td>
-<td>0.1</td>
-<td>0.02</td>
-<td>0.00499</td>
-<td>0.25</td>
+<td>200</td>
+<td>0.000</td>
+<td>0.380</td>
+<td>0.232</td>
+<td>0.274</td>
 </tr>
 <tr class="odd">
-<td>10,000</td>
-<td>0.01</td>
-<td>0.02</td>
-<td>0.00285</td>
-<td>0.14</td>
+<td>1,000</td>
+<td>0.000</td>
+<td>0.367</td>
+<td>0.244</td>
+<td>0.266</td>
+</tr>
+<tr class="even">
+<td>4,000</td>
+<td>0.000</td>
+<td>0.352</td>
+<td>0.249</td>
+<td>0.259</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>The slack comes from the worst cases in the argument: two examples’ gradients rarely point in opposite directions at full length, and the data add curvature of their own, which the bound ignores. That second slack grows when the regularizer is weak, which is why the ratio drops to 0.14 at <span class="math inline">\(\lambda = 0.01\)</span>. The measured expected gap is smaller still: about 3% of the bound at <span class="math inline">\(\lambda = 0.01\)</span>, 11% to 13% at <span class="math inline">\(\lambda = 1\)</span>.</p>
-<p>The argument needs a Lipschitz loss, so squared loss qualifies only on a bounded set of weights and labels. And stability is not accuracy: a large <span class="math inline">\(\lambda\)</span> closes the gap by pulling the weights towards zero and underfitting, so the test loss is U-shaped in <span class="math inline">\(\lambda\)</span>.</p>
-</section>
-<section id="sec-stability-sgd" class="level2" data-number="7.4">
-<h2 data-number="7.4" class="anchored" data-anchor-id="sec-stability-sgd"><span class="header-section-number">7.4</span> SGD is stable if you stop early</h2>
-<p>Large models are trained by SGD for a number of steps, not to a minimizer. Run SGD on <span class="math inline">\(S\)</span> and on <span class="math inline">\(S^{(i)}\)</span> with the same random order. On steps that pick a shared example, both runs take a gradient step on the same convex, <span class="math inline">\(\rho\)</span>-smooth loss, and such a step does not push two points apart as long as <span class="math inline">\(\eta \le 2/\rho\)</span>. Only the steps that pick example <span class="math inline">\(i\)</span> can separate them, by at most <span class="math inline">\(2L\eta_t\)</span>, and those come about once per epoch. Adding up the jumps gives (Hardt, Recht &amp; Singer 2016) <span id="eq-auto-07stabilitygeneralization-4"><span class="math display">\[\beta \le \frac{2L^2}{n}\sum_{t=1}^T\eta_t. \tag{7.4}\]</span></span> With a constant step <span class="math inline">\(\eta\)</span> for <span class="math inline">\(E\)</span> epochs this is <span class="math inline">\(2L^2\eta E\)</span>. Stability degrades with training time, and the <span class="math inline">\(n\)</span> cancels: for a fixed number of epochs, more data does not help the bound.</p>
-<p>So early stopping is a trade-off, not a trick: training longer lowers the optimization error but raises <span class="math inline">\(\beta\)</span>. With unregularized logistic regression, <span class="math inline">\(n = 100\)</span> and <span class="math inline">\(\eta = 0.25\)</span>, the measured gap grows from 0.036 after 1 epoch to 0.121 after 40, and the test loss is lowest after about 5 epochs while the training loss keeps falling (<a href="#fig-stability-sgd-epochs" class="quarto-xref">Figure&nbsp;<span>7.1</span></a>).</p>
-<div id="fig-stability-sgd-epochs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<p>The gap of 1-NN is its test error, which falls towards 0.338 and no further. The gap of the stable logistic regression falls from 0.131 with 50 examples to 0.010 with 4,000 (<a href="#fig-stability-nearest-neighbour" class="quarto-xref">Figure&nbsp;<span>7.6</span></a>). A training error of 0 is a warning, not a result.</p>
+<div id="fig-stability-nearest-neighbour" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-stability-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/stability_sgd_epochs.svg" class="img-fluid figure-img">
+<div aria-describedby="fig-stability-nearest-neighbour-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_nearest_neighbour.svg" class="img-fluid figure-img">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7.1: Left: train and test loss of SGD on logistic regression (<span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\eta = 0.25\)</span>) against the number of epochs. Right: the measured gap against the stability bound <span class="math inline">\(2L^2\eta T/n\)</span>, on a log scale. Both grow with training time; the bound grows faster.
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-nearest-neighbour-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.6: Train (dashed) and test (solid) 0-1 error of 1-nearest neighbour and of regularized logistic regression against <span class="math inline">\(n\)</span>, with the Bayes error and the 1-NN limit <span class="math inline">\(\mathbb E[2p(1-p)]\)</span>.
 </figcaption>
 </figure>
 </div>
-<p>The bound, <span class="math inline">\(0.5E\)</span> here, is loose by a factor of 14 after one epoch and 165 after 40, because the argument only uses that a step does not expand distances; on a curved loss it usually contracts them, so the runs drift apart much more slowly. On a non-convex loss a gradient step can push points apart, and the bound grows much faster with <span class="math inline">\(T\)</span>.</p>
 </section>
-<section id="sec-stability-memorization" class="level2" data-number="7.5">
-<h2 data-number="7.5" class="anchored" data-anchor-id="sec-stability-memorization"><span class="header-section-number">7.5</span> Memorization and self-influence</h2>
-<p>The bracket in the gap identity can be measured example by example, by retraining without each one: the <strong>self-influence</strong>, or <strong>memorization score</strong>, of example <span class="math inline">\(i\)</span>, <span id="eq-auto-07stabilitygeneralization-5"><span class="math display">\[\mathrm{mem}_i(S) = \ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big), \tag{7.5}\]</span></span> and by the identity its average is the expected gap. With <span class="math inline">\(n = 40\)</span> and <span class="math inline">\(\lambda = 0.01\)</span>, the measured gap is <span class="math inline">\(0.1482 \pm 0.0073\)</span> and the average self-influence <span class="math inline">\(0.1422 \pm 0.0025\)</span>, equal within error.</p>
-<p>The scores are uneven, and the reason is redundancy. A typical example is fitted whether or not it is present, because its neighbours carry the same information. An atypical or mislabelled one is fitted only if it is there itself. So examples whose label goes against the trend have average self-influence 0.284, against 0.097 for the rest (<a href="#fig-stability-self-influence" class="quarto-xref">Figure&nbsp;<span>7.2</span></a>).</p>
+<section id="sec-stability-memorization" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="sec-stability-memorization"><span class="header-section-number">7.8</span> Overfitting is memorization of individual examples</h2>
+<p>The identity of <a href="#sec-stability-gap" class="quarto-xref"><span>Section 7.3</span></a> says which examples carry the gap. Each term of <a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.1</span></a> is the <strong>self-influence</strong>, or <strong>memorization score</strong>, of one example. It is the example’s loss under the model trained without it, minus its loss under the model trained with it: <span id="eq-auto-07stabilitygeneralization-1"><span class="math display">\[\mathrm{mem}_i(S) = \ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big). \tag{7.6}\]</span></span> The expected gap is the average of these scores. Each score can be measured directly, by retraining with the example replaced. Feldman (2020) uses the same idea with accuracy in place of loss and with the example removed rather than replaced.</p>
+<p>The script checks the identity on training sets of 40 examples. It fits the model, then for each example replaces it by a fresh draw, refits, and records the score. Over 100 training sets, at <span class="math inline">\(\lambda = 0.01\)</span>, the measured gap is <span class="math inline">\(0.1482 \pm 0.0073\)</span> and the average self-influence is <span class="math inline">\(0.1422 \pm 0.0025\)</span>. At <span class="math inline">\(\lambda = 0.1\)</span> the two are <span class="math inline">\(0.0420 \pm 0.0017\)</span> and <span class="math inline">\(0.0416 \pm 0.0003\)</span>. They agree within their errors, as the identity requires.</p>
+<p>The scores are uneven, and the reason is redundancy. A typical example is fitted well whether or not it is in the training set, because its neighbours carry the same information. An atypical example, such as a mislabelled point or a member of a rare subgroup, is fitted only if it is there itself. So the atypical examples carry most of the gap.</p>
+<p>The running example makes this visible. About a quarter of the examples have a label that goes against the trend. At <span class="math inline">\(\lambda = 0.01\)</span>, their average self-influence is 0.284, against 0.097 for the others, three times larger. At <span class="math inline">\(\lambda = 0.1\)</span> the two are 0.055 and 0.037. Regularization flattens the profile, because it limits how far any one example can pull the weights, and atypical examples pull hardest (<a href="#fig-stability-self-influence" class="quarto-xref">Figure&nbsp;<span>7.7</span></a>).</p>
 <div id="fig-stability-self-influence" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-stability-self-influence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/stability_self_influence.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-self-influence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;7.2: Self-influence of each training example against <span class="math inline">\(y_ix_{i1}\)</span>, which measures how typical its label is, for <span class="math inline">\(n = 40\)</span> and two values of <span class="math inline">\(\lambda\)</span>. Examples whose label goes against the trend have the largest self-influence; regularization flattens the profile. The dashed line is the average, which equals the expected gap.
+Figure&nbsp;7.7: Self-influence <span class="math inline">\(\ell(w(S^{(i)}), z_i) - \ell(w(S), z_i)\)</span> of each training example against <span class="math inline">\(y_ix_{i1}\)</span>, which measures how typical its label is, for <span class="math inline">\(n = 40\)</span> and two values of <span class="math inline">\(\lambda\)</span>. Examples whose label goes against the trend have the largest self-influence. The dashed line is the average, which equals the expected gap.
 </figcaption>
 </figure>
 </div>
-<p>The extreme case is the 1-nearest-neighbour classifier, which predicts the label of the closest training point. It fits every training example using that example itself, so its training error is 0 and its <span class="math inline">\(\beta\)</span> is 1, the largest possible for the 0-1 loss. Its test error falls only to 0.352 at <span class="math inline">\(n = 4{,}000\)</span>, towards a limit of 0.338, while the stable logistic regression reaches 0.259 on the same data. Zero training error is a warning, not a result.</p>
-<p>A small average gap still allows a few heavily memorized examples; only uniform stability caps each. And memorization is not always a defect: Feldman (2020) shows that on data with a long tail of rare subpopulations, fitting the singletons is needed for accuracy. So expect the rarest examples to be the most memorized, and measure them rather than the average.</p>
+<p>A small average leaves room for a few heavily memorized examples. The expected gap needs only the average score to be small. Uniform stability is a stronger requirement, because it caps every score at <span class="math inline">\(\beta\)</span>.</p>
+<p>Memorization is not always a defect. Feldman (2020) shows that some data have a long tail of rare subpopulations, each seen about once. On such data, an algorithm that does not memorize those rare examples loses accuracy on the tail. So a large gap can come with good test accuracy. The empirical evidence points the same way. Zhang et al.&nbsp;(2017) found that deep networks fit even randomly relabelled training data perfectly. Feldman &amp; Zhang (2020) measured memorization scores on image benchmarks and found the highest scores on atypical and mislabelled examples. In practice, expect the rarest examples to be the most memorized, and measure them rather than only the average.</p>
 </section>
-<section id="code" class="level2" data-number="7.6">
-<h2 data-number="7.6" class="anchored" data-anchor-id="code"><span class="header-section-number">7.6</span> Code</h2>
-<p>There is no snippet: every number here comes from retraining models. The full edition’s script, <a href="../../../code/part01-prerequisites/stability.py">stability.py</a>, runs all the experiments:</p>
+<section id="code" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="code"><span class="header-section-number">7.9</span> Code</h2>
+<p>There is no snippet, because every number here comes from retraining models. The full edition’s script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part01-prerequisites/stability.py">stability.py</a> runs every experiment and draws every figure in this chapter. Run it from the repository root.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/stability.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Its results support four lessons. The <span class="math inline">\(1/(\lambda n)\)</span> scaling of regularized ERM holds, but the measured changes and gaps sit between 4 and 36 times below the bound. The gap identity, unlike the bounds, is exact. The SGD bound gets the direction right and the size wrong. And 1-NN has training error 0 and test error 0.35, while the training and test errors of regularized logistic regression meet.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="7.7">
-<h2 data-number="7.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">7.7</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">7.10</span> Cheat sheet</h2>
 <div id="tbl-stability-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;7.2: The results of this chapter.
+Table&nbsp;7.6: The results of this chapter.
 </figcaption>
 <div aria-describedby="tbl-stability-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -706,7 +1093,7 @@ Table&nbsp;7.2: The results of this chapter.
 <tbody>
 <tr class="odd">
 <td>Gap identity</td>
-<td>None</td>
+<td>Examples drawn independently from one distribution</td>
 <td><span class="math inline">\(\mathbb E[\mathrm{gap}] = \frac1n\sum_i\mathbb E[\mathrm{mem}_i]\)</span></td>
 </tr>
 <tr class="even">
@@ -715,22 +1102,22 @@ Table&nbsp;7.2: The results of this chapter.
 <td><span class="math inline">\(\lvert\mathbb E[\mathrm{gap}]\rvert \le \beta\)</span></td>
 </tr>
 <tr class="odd">
-<td>High probability</td>
+<td>High probability (Bousquet–Elisseeff)</td>
 <td>Also <span class="math inline">\(0 \le \ell \le M\)</span></td>
-<td><span class="math inline">\(\mathrm{gap} \le \beta + (2n\beta + M)\sqrt{\ln(1/\delta)/(2n)}\)</span></td>
+<td><span class="math inline">\(\mathrm{gap} \le \beta + (2n\beta + M)\sqrt{\ln(1/\delta)/(2n)}\)</span> with probability <span class="math inline">\(1 - \delta\)</span></td>
 </tr>
 <tr class="even">
 <td>Regularized ERM</td>
-<td>Convex, <span class="math inline">\(L\)</span>-Lipschitz loss, <span class="math inline">\(\frac\lambda2\lVert w\rVert^2\)</span></td>
-<td><span class="math inline">\(\beta = 2L^2/(\lambda n)\)</span></td>
+<td>Convex, <span class="math inline">\(L\)</span>-Lipschitz loss, penalty <span class="math inline">\(\frac\lambda2\lVert w\rVert^2\)</span></td>
+<td>Weights move <span class="math inline">\(\le 2L/(\lambda n)\)</span>; <span class="math inline">\(\beta = 2L^2/(\lambda n)\)</span></td>
 </tr>
 <tr class="odd">
-<td>SGD</td>
+<td>SGD (Hardt–Recht–Singer)</td>
 <td>Convex, <span class="math inline">\(\rho\)</span>-smooth, <span class="math inline">\(L\)</span>-Lipschitz, <span class="math inline">\(\eta_t \le 2/\rho\)</span></td>
-<td><span class="math inline">\(\beta \le (2L^2/n)\sum_t\eta_t\)</span></td>
+<td><span class="math inline">\(\beta \le (2L^2/n)\sum_t\eta_t\)</span>; <span class="math inline">\(2L^2\eta E\)</span> for <span class="math inline">\(E\)</span> epochs</td>
 </tr>
 <tr class="even">
-<td>Lookup table, 1-nearest neighbour</td>
+<td>Lookup table, 1-NN</td>
 <td>0-1 loss</td>
 <td><span class="math inline">\(\beta = 1\)</span>; training error 0</td>
 </tr>
@@ -741,20 +1128,21 @@ Table&nbsp;7.2: The results of this chapter.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Regularization strength and training time are the two stability knobs: <span class="math inline">\(\beta \propto 1/\lambda\)</span> for ERM, <span class="math inline">\(\beta \propto \eta T\)</span> for SGD.</li>
-<li>A useful high-probability bound needs <span class="math inline">\(\beta\)</span> to fall faster than <span class="math inline">\(1/\sqrt n\)</span>.</li>
+<li>A gap bound from stability needs <span class="math inline">\(\beta\)</span> to go to zero. The Bousquet–Elisseeff bound needs <span class="math inline">\(\beta\)</span> to fall faster than <span class="math inline">\(1/\sqrt n\)</span>.</li>
+<li>Regularization strength and training time are the two stability knobs. For ERM, <span class="math inline">\(\beta\)</span> is proportional to <span class="math inline">\(1/\lambda\)</span>, and for SGD to <span class="math inline">\(\eta T\)</span>.</li>
+<li>A training error of 0 is a warning, not a result. The model may depend entirely on individual examples.</li>
 <li>The examples a model memorizes most are the atypical ones.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="7.8">
-<h2 data-number="7.8" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">7.8</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="7.11">
+<h2 data-number="7.11" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">7.11</span> Further reading</h2>
 <ul>
-<li>Bousquet &amp; Elisseeff, “Stability and Generalization” (JMLR 2002): uniform stability and the high-probability bound.</li>
-<li>Shalev-Shwartz &amp; Ben-David, <em>Understanding Machine Learning</em> (2014), ch.&nbsp;13: the gap identity and the stability of regularized ERM.</li>
+<li>Bousquet &amp; Elisseeff, “Stability and Generalization” (JMLR 2002): uniform stability, weaker notions, and the high-probability bound.</li>
+<li>Shalev-Shwartz &amp; Ben-David, <em>Understanding Machine Learning</em> (2014), ch.&nbsp;13: the clearest textbook treatment of the gap identity and the stability of regularized ERM.</li>
 <li>Hardt, Recht &amp; Singer, “Train Faster, Generalize Better: Stability of Stochastic Gradient Descent” (ICML 2016): SGD stability and early stopping.</li>
 <li>Feldman &amp; Zhang, “What Neural Networks Memorize and Why” (NeurIPS 2020): memorization scores measured on image benchmarks.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part01-prerequisites/07-stability-generalization.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part01-prerequisites/07-stability-generalization.html">the full edition’s chapter</a>, except the sharper high-probability bounds of Feldman &amp; Vondrák and of Bousquet, Klochkov &amp; Zhivotovskiy and Feldman’s result on long-tailed data, which it cites.</p>
 
 
 </section>
