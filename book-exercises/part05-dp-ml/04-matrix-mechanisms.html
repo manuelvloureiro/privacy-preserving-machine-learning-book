@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>39&nbsp; Exercises: DP-FTRL and matrix factorization – Privacy-Preserving Machine Learning: Exercises</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part05-dp-ml/05-private-prediction.html" rel="next">
+<link href="../part05-dp-ml/03-hyperparameter-tuning.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/04-matrix-mechanisms.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning: Exercises</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Exercises: Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exercises: Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Exercises: Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Exercises: Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Exercises: Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Exercises: Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Exercises: Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Exercises: Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exercises: Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Exercises: Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Exercises: Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Exercises: Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Exercises: Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Exercises: Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Exercises: Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Exercises: Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Exercises: Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exercises: The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Exercises: Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Exercises: The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Exercises: Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Exercises: Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-sol-mfac-1" id="toc-sec-sol-mfac-1" class="nav-link active" data-scroll-target="#sec-sol-mfac-1"><span class="header-section-number">39.1</span> When does the tree beat independent noise?</a></li>
+  <li><a href="#sec-sol-mfac-2" id="toc-sec-sol-mfac-2" class="nav-link" data-scroll-target="#sec-sol-mfac-2"><span class="header-section-number">39.2</span> The square root at T = 4</a></li>
+  <li><a href="#sec-sol-mfac-3" id="toc-sec-sol-mfac-3" class="nav-link" data-scroll-target="#sec-sol-mfac-3"><span class="header-section-number">39.3</span> The optimal factorization for two steps</a></li>
+  <li><a href="#sec-sol-mfac-4" id="toc-sec-sol-mfac-4" class="nav-link" data-scroll-target="#sec-sol-mfac-4"><span class="header-section-number">39.4</span> How close is the square root to the lower bound?</a></li>
+  <li><a href="#sec-sol-mfac-5" id="toc-sec-sol-mfac-5" class="nav-link" data-scroll-target="#sec-sol-mfac-5"><span class="header-section-number">39.5</span> Two participations under the square root</a></li>
+  <li><a href="#sec-sol-mfac-6" id="toc-sec-sol-mfac-6" class="nav-link" data-scroll-target="#sec-sol-mfac-6"><span class="header-section-number">39.6</span> How much amplification would DP-SGD need?</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/04-matrix-mechanisms.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Exercises for <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html">the chapter on matrix factorization mechanisms</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part05-dp-ml/solutions_matrix_mechanisms.py</code> computes every number quoted here; run it with <code>uv run python code/part05-dp-ml/solutions_matrix_mechanisms.py</code>.</p>
+<p>The solutions use the chapter’s notation. To train with differential privacy (DP) without sampling, a run releases the prefix sums <span class="math inline">\(S_t = x_1 + \dots + x_t\)</span> of the clipped gradient sums, the workload <span class="math inline">\(Ax\)</span> with <span class="math inline">\(A\)</span> the <span class="math inline">\(T \times T\)</span> lower-triangular matrix of ones. A matrix mechanism factors <span class="math inline">\(A = LR\)</span> and releases <span class="math inline">\(L(Rx + z)\)</span>; its sensitivity <span class="math inline">\(\operatorname{sens}(R)\)</span> is the largest column length of the encoder <span class="math inline">\(R\)</span> for one participation, and its error per unit of privacy at step <span class="math inline">\(t\)</span> is <span class="math inline">\(e_t = \operatorname{sens}(R)\|\ell_t\|\)</span>, with <span class="math inline">\(\ell_t\)</span> the <span class="math inline">\(t\)</span>-th row of the decoder <span class="math inline">\(L\)</span> (<a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#eq-mfac-error">Equation&nbsp;39.7</a>). The follow the regularized leader (FTRL) algorithm run on prefix sums released by a binary tree is DP-FTRL. Stochastic gradient descent (SGD) with per-example clipping, Gaussian noise and Poisson sampling is DP-SGD, and its accountant works with Rényi differential privacy (RDP).</p>
+<section id="sec-sol-mfac-1" class="level2" data-number="39.1">
+<h2 data-number="39.1" class="anchored" data-anchor-id="sec-sol-mfac-1"><span class="header-section-number">39.1</span> When does the tree beat independent noise?</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 1.</strong> <strong>When does the tree beat independent noise?</strong> Compute the root-mean-square error per unit of privacy, <span class="math inline">\(\big(\frac1T\sum_te_t^2\big)^{1/2}\)</span>, of the binary tree and of independent noise on each step, for <span class="math inline">\(T = 8\)</span> by hand. Then find the smallest <span class="math inline">\(T\)</span> for which the tree is better. <em>Check: 2.550 against 2.121 at <span class="math inline">\(T = 8\)</span>; the tree first wins at <span class="math inline">\(T = 28\)</span>.</em> <em>(Comparing factorizations by their error)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Independent noise.</strong> <span class="math inline">\(R = I\)</span>, so <span class="math inline">\(\operatorname{sens}(R) = 1\)</span>, and row <span class="math inline">\(t\)</span> of <span class="math inline">\(L = A\)</span> has <span class="math inline">\(t\)</span> ones, so <span class="math inline">\(e_t = \sqrt t\)</span>. The mean of <span class="math inline">\(e_t^2\)</span> over <span class="math inline">\(t = 1, \dots, 8\)</span> is <span class="math inline">\((1 + 2 + \dots + 8)/8 = 36/8 = 4.5\)</span>, and the root-mean-square error is <span class="math inline">\(\sqrt{4.5} = 2.121\)</span>.</li>
+<li><strong>The tree.</strong> With <span class="math inline">\(T = 8\)</span> there are <span class="math inline">\(\lceil\log_28\rceil + 1 = 4\)</span> levels, so each step is in 4 nodes and <span class="math inline">\(\operatorname{sens}(R) = 2\)</span> (<a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#eq-mfac-tree">Equation&nbsp;39.9</a>). Prefix <span class="math inline">\(t\)</span> uses one node per 1 in its binary expansion: the popcounts of <span class="math inline">\(1, \dots, 8\)</span> are <span class="math inline">\(1, 1, 2, 1, 2, 2, 3, 1\)</span>, with mean <span class="math inline">\(13/8\)</span>. So <span class="math inline">\(e_t^2 = 4\operatorname{popcount}(t)\)</span> has mean <span class="math inline">\(6.5\)</span>, and the root-mean-square error is <span class="math inline">\(\sqrt{6.5} = 2.550\)</span>.</li>
+<li><strong>Why the tree loses.</strong> Every step pays for being in 4 nodes, a factor of 2 in noise, while the prefix sums are too short for the saving in the number of noise terms to make up for it.</li>
+<li><strong>The crossover.</strong> Computing both errors for each <span class="math inline">\(T\)</span>, the tree is first better at <span class="math inline">\(T = 28\)</span>: 3.789 against 3.808. From there on independent noise grows like <span class="math inline">\(\sqrt{T/2}\)</span> and the tree like <span class="math inline">\(\log_2T\)</span>, and the gap widens quickly, to 70.71 against 9.84 at <span class="math inline">\(T = 10{,}000\)</span> (<a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#tbl-mfac-single">Table&nbsp;39.2</a>).</li>
+</ol>
+<p><em>The tree is a long-run device. For a few dozen steps, plain independent noise is as good; the square-root factorization beats both at every length.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-mfac-2" class="level2" data-number="39.2">
+<h2 data-number="39.2" class="anchored" data-anchor-id="sec-sol-mfac-2"><span class="header-section-number">39.2</span> The square root at T = 4</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 2.</strong> <strong>The square root at T = 4.</strong> Write down the <span class="math inline">\(4 \times 4\)</span> square-root encoder <span class="math inline">\(R\)</span> of <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#eq-mfac-sqrt">Equation&nbsp;39.10</a>, check that <span class="math inline">\(R^2 = A\)</span>, and compute <span class="math inline">\(\operatorname{sens}(R)\)</span> and the error of the last prefix sum per unit of privacy. Then write the noise added to step 4’s gradient, <span class="math inline">\((R^{-1}z)_4\)</span>, in terms of <span class="math inline">\(z_1, \dots, z_4\)</span>, and compute its standard deviation relative to the noise scale. <em>Check: <span class="math inline">\(\sum_{k&lt;4}r_k^2 = 1.4883\)</span>, <span class="math inline">\(\operatorname{sens}(R) = 1.2200\)</span>; the step-4 noise has standard deviation 1.1267 times the noise scale.</em> <em>(Power series and Toeplitz matrices)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The coefficients.</strong> <span class="math inline">\(r_0 = 1\)</span> and <span class="math inline">\(r_k = r_{k-1}\frac{2k-1}{2k}\)</span> give <span class="math inline">\(1, \frac12, \frac38, \frac5{16}\)</span>, and <span class="math inline">\(R\)</span> is the lower-triangular Toeplitz matrix with first column <span class="math inline">\((1, \frac12, \frac38, \frac5{16})\)</span>.</li>
+<li><strong><span class="math inline">\(R^2 = A\)</span>.</strong> By the correspondence with power series, entry <span class="math inline">\((i, j)\)</span> of <span class="math inline">\(R^2\)</span> is the coefficient of <span class="math inline">\(x^{i-j}\)</span> in <span class="math inline">\(r(x)^2\)</span>: <span class="math inline">\(1\)</span>; <span class="math inline">\(\frac12 + \frac12 = 1\)</span>; <span class="math inline">\(\frac38 + \frac14 + \frac38 = 1\)</span>; <span class="math inline">\(\frac5{16} + \frac3{16} + \frac3{16} + \frac5{16} = 1\)</span>. All entries on and below the diagonal are 1, which is <span class="math inline">\(A\)</span>; the script finds <span class="math inline">\(R^2 - A = 0\)</span> exactly.</li>
+<li><strong>Sensitivity.</strong> The first column is the longest: <span class="math inline">\(1 + \frac14 + \frac9{64} + \frac{25}{256} = \frac{381}{256} = 1.4883\)</span>, so <span class="math inline">\(\operatorname{sens}(R) = 1.2200\)</span>.</li>
+<li><strong>Last error.</strong> <span class="math inline">\(L = R\)</span>, and its last row holds the same four numbers in reverse order, so <span class="math inline">\(\|\ell_4\| = 1.2200\)</span> and <span class="math inline">\(e_4 = 1.2200^2 = 1.4883\)</span>, against <span class="math inline">\(\sqrt4 = 2\)</span> for independent noise.</li>
+<li><strong>The step noise.</strong> <span class="math inline">\(R^{-1}\)</span> is the Toeplitz matrix of <span class="math inline">\((1 - x)^{1/2}\)</span>, with coefficients <span class="math inline">\(1, -\frac12, -\frac18, -\frac1{16}\)</span>. So <span class="math inline">\((R^{-1}z)_4 = z_4 - \frac12z_3 - \frac18z_2 - \frac1{16}z_1\)</span>.</li>
+<li><strong>Its spread.</strong> The <span class="math inline">\(z\)</span>’s are independent, so by <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#eq-mfac-linear">Equation&nbsp;39.2</a> the variance is the noise scale squared times <span class="math inline">\(1 + \frac14 + \frac1{64} + \frac1{256} = \frac{325}{256} = 1.2695\)</span>, a standard deviation of 1.1267 times the noise scale.</li>
+</ol>
+<p><em>Each step’s noise is only 13% larger than independent noise of the same scale, yet the prefix sums are much more accurate, because the step noises are negatively correlated and partly cancel when summed.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-mfac-3" class="level2" data-number="39.3">
+<h2 data-number="39.3" class="anchored" data-anchor-id="sec-sol-mfac-3"><span class="header-section-number">39.3</span> The optimal factorization for two steps</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 3.</strong> <strong>The optimal factorization for two steps.</strong> For <span class="math inline">\(T = 2\)</span>, every encoder with columns of length 1 has <span class="math inline">\(X = R^\top R = \begin{pmatrix}1 &amp; \rho\\ \rho &amp; 1\end{pmatrix}\)</span> for some <span class="math inline">\(\rho \in (-1, 1)\)</span>, and the best decoder gives <span class="math inline">\(\|L\|_F^2 = \operatorname{tr}(A^\top AX^{-1})\)</span>. Find the <span class="math inline">\(\rho\)</span> that minimizes it, and compare the minimum with independent noise, the square root and the lower bound <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#eq-mfac-lower">Equation&nbsp;39.8</a> (in squared form, <span class="math inline">\(\operatorname{sens}(R)^2\|L\|_F^2 \ge \|A\|_*^2/T\)</span>). <em>Check: <span class="math inline">\(\rho = 0.3820\)</span>, minimum <span class="math inline">\(2.6180 = (3 + \sqrt5)/2\)</span>; independent noise 3, square root 2.8125, bound 2.5.</em> <em>(Optimizing a factorization)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The objective.</strong> <span class="math inline">\(A^\top A = \begin{pmatrix}2 &amp; 1\\ 1 &amp; 1\end{pmatrix}\)</span> and <span class="math inline">\(X^{-1} = \frac1{1 - \rho^2}\begin{pmatrix}1 &amp; -\rho\\ -\rho &amp; 1\end{pmatrix}\)</span>, so <span class="math inline">\(\operatorname{tr}(A^\top AX^{-1}) = \frac{2 - \rho - \rho + 1}{1 - \rho^2} = \frac{3 - 2\rho}{1 - \rho^2}\)</span>.</li>
+<li><strong>Minimize.</strong> The derivative vanishes when <span class="math inline">\(-2(1 - \rho^2) + 2\rho(3 - 2\rho) = 0\)</span>, that is <span class="math inline">\(\rho^2 - 3\rho + 1 = 0\)</span>, whose root in <span class="math inline">\((-1, 1)\)</span> is <span class="math inline">\(\rho = (3 - \sqrt5)/2 = 0.3820\)</span>.</li>
+<li><strong>The minimum.</strong> Substituting, <span class="math inline">\(\frac{3 - 2\rho}{1 - \rho^2} = 2.6180 = (3 + \sqrt5)/2\)</span>. The fixed-point iteration of the chapter finds the same <span class="math inline">\(X_{12} = 0.3820\)</span> and <span class="math inline">\(\|L\|_F^2 = 2.6180\)</span>.</li>
+<li><strong>Independent noise.</strong> <span class="math inline">\(\rho = 0\)</span> gives <span class="math inline">\(3 = \|A\|_F^2\)</span>.</li>
+<li><strong>The square root.</strong> <span class="math inline">\(R = L = \begin{pmatrix}1 &amp; 0\\ \frac12 &amp; 1\end{pmatrix}\)</span>: <span class="math inline">\(\operatorname{sens}(R)^2 = 1 + \frac14 = 1.25\)</span> and <span class="math inline">\(\|L\|_F^2 = 2.25\)</span>, product 2.8125. Its columns have unequal lengths, 1.25 and 1 squared, which wastes privacy on the short one.</li>
+<li><strong>The bound.</strong> The singular values of <span class="math inline">\(A\)</span> are <span class="math inline">\(1.6180\)</span> and <span class="math inline">\(0.6180\)</span> (the golden ratio and its reciprocal), so <span class="math inline">\(\|A\|_* = \sqrt5\)</span> and <span class="math inline">\(\|A\|_*^2/T = 2.5\)</span>.</li>
+</ol>
+<p><em>So <span class="math inline">\(2.5 \le 2.6180 \le 2.8125 \le 3\)</span>: even at two steps the optimum is close to the bound, and the square root sits between it and independent noise. The optimal encoder’s columns are positively correlated, <span class="math inline">\(\rho &gt; 0\)</span>: noise put into the first step’s quantity is partly reused for the second prefix sum.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-mfac-4" class="level2" data-number="39.4">
+<h2 data-number="39.4" class="anchored" data-anchor-id="sec-sol-mfac-4"><span class="header-section-number">39.4</span> How close is the square root to the lower bound?</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 4.</strong> <strong>How close is the square root to the lower bound?</strong> Compute the trace-norm lower bound <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#eq-mfac-lower">Equation&nbsp;39.8</a> and the square root’s root-mean-square error per unit of privacy for <span class="math inline">\(T = 100\)</span>, 1,000 and 10,000. By how much does each grow per tenfold increase of <span class="math inline">\(T\)</span>? <em>Check: bound 2.178, 2.902, 3.634; square root 2.371, 3.102, 3.836; ratio 1.089, 1.069, 1.056.</em> <em>(Lower bounds from singular values)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The bound.</strong> The singular values of <span class="math inline">\(A\)</span> are <span class="math inline">\(1/(2\sin\frac{(2k-1)\pi}{4T + 2})\)</span>; summing them and dividing by <span class="math inline">\(T\)</span> gives 2.178, 2.902 and 3.634.</li>
+<li><strong>The square root.</strong> Its error per unit of privacy at step <span class="math inline">\(t\)</span> is <span class="math inline">\(\operatorname{sens}(R)\|\ell_t\| = \big(\sum_{k&lt;T}r_k^2\big)^{1/2}\big(\sum_{k&lt;t}r_k^2\big)^{1/2}\)</span>; the root mean square over <span class="math inline">\(t\)</span> is 2.371, 3.102 and 3.836.</li>
+<li><strong>The ratios.</strong> 1.089, 1.069 and 1.056: the square root’s excess over the bound shrinks, in relative terms, as <span class="math inline">\(T\)</span> grows.</li>
+<li><strong>Growth per decade.</strong> The bound grows by 0.724 and 0.732 per decade, the square root by 0.731 and 0.734. Both approach <span class="math inline">\(\ln(10)/\pi = 0.733\)</span> per decade, the growth of <span class="math inline">\(\frac1\pi\ln T\)</span>: for small <span class="math inline">\(k\)</span>, <span class="math inline">\(\sin\frac{(2k-1)\pi}{4T+2} \approx \frac{(2k-1)\pi}{4T}\)</span>, so <span class="math inline">\(\sigma_k \approx \frac{2T}{\pi(2k-1)}\)</span>, and the sum of <span class="math inline">\(\frac{2}{\pi(2k - 1)}\)</span> over <span class="math inline">\(k\)</span> up to about <span class="math inline">\(T\)</span> grows like <span class="math inline">\(\frac1\pi\ln T\)</span>.</li>
+</ol>
+<p><em>No factorization can make the error stop growing: the lower bound itself grows like <span class="math inline">\(\ln(T)/\pi\)</span>, and the square root matches that rate with a constant overhead of about 0.2.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-mfac-5" class="level2" data-number="39.5">
+<h2 data-number="39.5" class="anchored" data-anchor-id="sec-sol-mfac-5"><span class="header-section-number">39.5</span> Two participations under the square root</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 5.</strong> <strong>Two participations under the square root.</strong> With <span class="math inline">\(T = 200\)</span> and a record in steps 1 and 101 (separation 100), use <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#eq-mfac-multi">Equation&nbsp;39.13</a> to compute the square-root encoder’s sensitivity from the two columns’ lengths and their inner product. Compare with the banded encoder that keeps the first 100 coefficients. <em>Check: <span class="math inline">\(\|r_1\|^2 = 2.7524\)</span>, <span class="math inline">\(\|r_{101}\|^2 = 2.5314\)</span>, cross term 1.1211, sensitivity 2.5308; banded 2.2500.</em> <em>(Sensitivity under several participations)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The two columns.</strong> Column 1 of the <span class="math inline">\(200 \times 200\)</span> square-root encoder holds <span class="math inline">\(r_0, \dots, r_{199}\)</span>, with squared length 2.7524. Column 101 holds <span class="math inline">\(r_0, \dots, r_{99}\)</span> starting in row 101, with squared length 2.5314.</li>
+<li><strong>Their inner product.</strong> In rows 101 to 200 the first column holds <span class="math inline">\(r_{100}, \dots, r_{199}\)</span> and the second <span class="math inline">\(r_0, \dots, r_{99}\)</span>, so twice the inner product is <span class="math inline">\(2\sum_{k&lt;100}r_kr_{k+100} = 1.1211\)</span>.</li>
+<li><strong>Sensitivity.</strong> The entries are nonnegative, so the worst case aligns the two gradients, and <span class="math inline">\(\operatorname{sens}(R)^2 = 2.7524 + 2.5314 + 1.1211 = 6.4048\)</span>, a sensitivity of 2.5308. Starting the record at step 1 is the worst offset; the script’s maximum over offsets agrees.</li>
+<li><strong>Banded.</strong> Cutting the encoder to its first 100 diagonals leaves column 1 with <span class="math inline">\(r_0, \dots, r_{99}\)</span> in rows 1 to 100 and column 101 with the same in rows 101 to 200: no overlap, no cross term, so <span class="math inline">\(\operatorname{sens}(R)^2 = 2 \times 2.5314\)</span> and the sensitivity is <span class="math inline">\(2.2500 = \sqrt2 \times 1.591\)</span>.</li>
+<li><strong>Reading it.</strong> The cross term adds 21% to the squared sensitivity of the full square root (1.1211 out of 5.2838). With more participations the cross terms multiply: at 20 epochs the full square root’s sensitivity is 17.191 against the banded 7.115 (<a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#tbl-mfac-epochs">Table&nbsp;39.3</a>).</li>
+</ol>
+<p><em>Correlated noise makes a record’s repeated contributions pile up in the same noisy quantities. Banding with a band no wider than the separation keeps them apart, so participations compose as in independent noise.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-mfac-6" class="level2" data-number="39.6">
+<h2 data-number="39.6" class="anchored" data-anchor-id="sec-sol-mfac-6"><span class="header-section-number">39.6</span> How much amplification would DP-SGD need?</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 6.</strong> <strong>How much amplification would DP-SGD need?</strong> For one epoch of the running example (<span class="math inline">\(T = 100\)</span>, batch 100) at <span class="math inline">\(\varepsilon = 2\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>, the chapter reports the standard deviation of the noise in the final prefix sum: 8.27 for DP-SGD with Poisson sampling, 19.94 for fixed-order independent noise and 5.05 for the square root, in units of <span class="math inline">\(C\)</span>. Derive the first two from the noise multipliers. Then find the noise multiplier DP-SGD would need to match the square root’s final noise, and the <span class="math inline">\(\varepsilon\)</span> it would then have. <em>Check: <span class="math inline">\(\sigma = 0.505\)</span>, <span class="math inline">\(\varepsilon = 7.82\)</span>.</em> <em>(Comparing mechanisms at equal privacy)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>DP-SGD.</strong> The RDP accountant gives <span class="math inline">\(\sigma = 0.827\)</span> for <span class="math inline">\(q = 0.01\)</span>, 100 steps and <span class="math inline">\(\varepsilon = 2\)</span>. The final prefix sum carries 100 independent noises of standard deviation <span class="math inline">\(\sigma\)</span>, so <span class="math inline">\(0.827\sqrt{100} = 8.27\)</span>.</li>
+<li><strong>Independent noise without sampling.</strong> One participation, sensitivity 1, <span class="math inline">\(\mu(2, 10^{-5}) = 0.502\)</span>, so the noise scale is <span class="math inline">\(1/0.502 = 1.994\)</span> and the final prefix noise is <span class="math inline">\(1.994 \times 10 = 19.94\)</span>.</li>
+<li><strong>The square root.</strong> Its sensitivity is 1.591, so its noise scale is <span class="math inline">\(1.591/0.502 = 3.172\)</span>, and its last decoder row has length 1.591, giving <span class="math inline">\(3.172 \times 1.591 = 5.05\)</span>.</li>
+<li><strong>Matching it with DP-SGD.</strong> DP-SGD’s final noise is <span class="math inline">\(\sigma\sqrt{100}\)</span>, so it would need <span class="math inline">\(\sigma = 5.05/10 = 0.505\)</span>. At that noise multiplier the accountant reports <span class="math inline">\(\varepsilon = 7.82\)</span> for 100 steps at <span class="math inline">\(q = 0.01\)</span>.</li>
+</ol>
+<p><em>To carry as little noise in its final model as the square root does at <span class="math inline">\(\varepsilon = 2\)</span>, DP-SGD would have to spend nearly four times the budget, even with amplification. For a single short pass, correlated noise beats sampling; over many epochs at small <span class="math inline">\(\varepsilon\)</span> the comparison turns, as <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html#tbl-mfac-noise">Table&nbsp;39.4</a> shows.</em></p>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="pagination-link" aria-label="Exercises: Hyperparameter tuning and private selection">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part05-dp-ml/05-private-prediction.html" class="pagination-link" aria-label="Exercises: Private prediction">
+        <span class="nav-page-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

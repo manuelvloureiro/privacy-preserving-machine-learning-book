@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>26&nbsp; Exercises: Lower bounds: what privacy costs – Privacy-Preserving Machine Learning: Exercises</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part04-privacy-accounting/01-renyi-dp.html" rel="next">
+<link href="../part03-dp-foundations/08-trust-models.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/01-definition.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/09-lower-bounds.html"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning: Exercises</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Exercises: Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exercises: Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Exercises: Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Exercises: Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Exercises: Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Exercises: Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Exercises: Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Exercises: Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exercises: Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Exercises: Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Exercises: Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Exercises: Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Exercises: Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Exercises: Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Exercises: Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Exercises: Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Exercises: Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exercises: The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Exercises: Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Exercises: The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Exercises: Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Exercises: Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-sol-lower-1" id="toc-sec-sol-lower-1" class="nav-link active" data-scroll-target="#sec-sol-lower-1"><span class="header-section-number">26.1</span> Histograms under replace neighbours</a></li>
+  <li><a href="#sec-sol-lower-2" id="toc-sec-sol-lower-2" class="nav-link" data-scroll-target="#sec-sol-lower-2"><span class="header-section-number">26.2</span> What packing can force under approximate DP</a></li>
+  <li><a href="#sec-sol-lower-3" id="toc-sec-sol-lower-3" class="nav-link" data-scroll-target="#sec-sol-lower-3"><span class="header-section-number">26.3</span> The lemma for a shrunk mean</a></li>
+  <li><a href="#sec-sol-lower-4" id="toc-sec-sol-lower-4" class="nav-link" data-scroll-target="#sec-sol-lower-4"><span class="header-section-number">26.4</span> Padding recovers <span class="math inline">\(1/\alpha\)</span></a></li>
+  <li><a href="#sec-sol-lower-5" id="toc-sec-sol-lower-5" class="nav-link" data-scroll-target="#sec-sol-lower-5"><span class="header-section-number">26.5</span> How many attributes does tracing need?</a></li>
+  <li><a href="#sec-sol-lower-6" id="toc-sec-sol-lower-6" class="nav-link" data-scroll-target="#sec-sol-lower-6"><span class="header-section-number">26.6</span> Tracing with a reference sample</a></li>
+  <li><a href="#sec-sol-lower-7" id="toc-sec-sol-lower-7" class="nav-link" data-scroll-target="#sec-sol-lower-7"><span class="header-section-number">26.7</span> Reconstruction implies <span class="math inline">\(\varepsilon\)</span></a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/01-definition.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/09-lower-bounds.html"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Exercises for <a href="../../book-full/part03-dp-foundations/09-lower-bounds.html">Lower bounds: what privacy costs</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part03-dp-foundations/solutions_lower_bounds.py</code> computes every number quoted here; run it with <code>uv run python code/part03-dp-foundations/solutions_lower_bounds.py</code>.</p>
+<p>The solutions use the chapter’s notation. <span class="math inline">\(M\)</span> is a differential privacy (DP) mechanism, <span class="math inline">\(\alpha\)</span> an error and <span class="math inline">\(\beta\)</span> a failure probability, and the random dataset of the fingerprinting section has attribute means <span class="math inline">\(p_j\)</span> uniform on <span class="math inline">\([-1, 1]\)</span> and records <span class="math inline">\(x_i \in \{\pm1\}^d\)</span> with <span class="math inline">\(\mathbb E[x_{ij} \mid p] = p_j\)</span>. The examples use <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\beta = 0.05\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>.</p>
+<section id="sec-sol-lower-1" class="level2" data-number="26.1">
+<h2 data-number="26.1" class="anchored" data-anchor-id="sec-sol-lower-1"><span class="header-section-number">26.1</span> Histograms under replace neighbours</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 1.</strong> <strong>Histograms under replace neighbours.</strong> Redo the histogram lower bound with datasets of a fixed size <span class="math inline">\(n\)</span>: <span class="math inline">\(D_0\)</span> is <span class="math inline">\(n\)</span> copies of an element <span class="math inline">\(x_0\)</span>, and <span class="math inline">\(D_x\)</span> replaces <span class="math inline">\(k\)</span> of them by <span class="math inline">\(x \ne x_0\)</span>. Show <span class="math inline">\(\alpha \ge \frac12\big(\ln((N - 1)(1 - \beta))/\varepsilon - 1\big)\)</span>, and show that the Laplace mechanism’s error doubles. <em>Check: at <span class="math inline">\(N = 10^6\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\beta = 0.05\)</span>, the lower bound is still 6.38 and the Laplace error becomes 33.57.</em> <em>(Packing)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The candidates.</strong> For each <span class="math inline">\(x \ne x_0\)</span> there is one dataset <span class="math inline">\(D_x\)</span>, so <span class="math inline">\(m = N - 1\)</span>. Each is <span class="math inline">\(k\)</span> replacements away from <span class="math inline">\(D_0\)</span>.</li>
+<li><strong>Their histograms.</strong> <span class="math inline">\(h(D_x) = (n - k)e_{x_0} + k\,e_x\)</span>. For <span class="math inline">\(x \ne y\)</span>, the two histograms agree in bin <span class="math inline">\(x_0\)</span> and differ by <span class="math inline">\(k\)</span> in bins <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>, so <span class="math inline">\(\|h(D_x) - h(D_y)\|_\infty = k\)</span>.</li>
+<li><strong>Disjoint regions.</strong> As in the chapter, the <span class="math inline">\(\ell_\infty\)</span> balls of radius <span class="math inline">\(\alpha\)</span> around them are disjoint when <span class="math inline">\(k &gt; 2\alpha\)</span>. Take <span class="math inline">\(k = \lfloor2\alpha\rfloor + 1 \le 2\alpha + 1\)</span>.</li>
+<li><strong>Packing lemma</strong> with <span class="math inline">\(m = N - 1\)</span>: <span class="math inline">\(2\alpha + 1 \ge \ln((N - 1)(1 - \beta))/\varepsilon\)</span>, which rearranges to the claim.</li>
+<li><strong>The number.</strong> <span class="math inline">\(\ln(N - 1)\)</span> and <span class="math inline">\(\ln N\)</span> differ by about <span class="math inline">\(1/N = 10^{-6}\)</span>, so the bound is 6.3821 under both relations.</li>
+<li><strong>The upper bound doubles.</strong> Replacing a record lowers one count by 1 and raises another by 1, so the <span class="math inline">\(\ell_1\)</span> sensitivity is 2 and the Laplace scale is <span class="math inline">\(2/\varepsilon\)</span>. Every quantile of <span class="math inline">\(\max_j|\eta_j|\)</span> scales with it: <span class="math inline">\(2\times16.79 = 33.57\)</span> (the script computes <span class="math inline">\(2 \times 16.785\ldots\)</span> before rounding).</li>
+</ol>
+<p><em>The lower bound does not care about the neighbouring relation, because both relations put the packing datasets <span class="math inline">\(k\)</span> steps from <span class="math inline">\(D_0\)</span>. The upper bound does, because sensitivity depends on it. So under replace neighbours the gap between Laplace and the lower bound is about twice as large.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-lower-2" class="level2" data-number="26.2">
+<h2 data-number="26.2" class="anchored" data-anchor-id="sec-sol-lower-2"><span class="header-section-number">26.2</span> What packing can force under approximate DP</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 2.</strong> <strong>What packing can force under approximate DP.</strong> Starting from <a href="../../book-full/part03-dp-foundations/09-lower-bounds.html#eq-lower-group">Equation&nbsp;26.2</a>, show that <span class="math inline">\(m\)</span> disjoint regions force <span class="math inline">\(m\big(e^{-k\varepsilon}(1 - \beta) - k\,e^{-\varepsilon}\delta\big) \le 1\)</span>, and that as <span class="math inline">\(m \to \infty\)</span> this forces only <span class="math inline">\(e^{-k\varepsilon}(1 - \beta) \le k\,e^{-\varepsilon}\delta\)</span>. <em>Check: at <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-6}\)</span>, <span class="math inline">\(\beta = 0.05\)</span> the limit is <span class="math inline">\(k = 12.26\)</span>, so the forced integer group distance is 13 for <span class="math inline">\(m = 2^{20}\)</span> and for <span class="math inline">\(m = 2^{1000}\)</span> alike, against <span class="math inline">\(\ln(1/\delta)/\varepsilon = 13.82\)</span>.</em> <em>(Group privacy, packing)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Group privacy for each region.</strong> <a href="../../book-full/part03-dp-foundations/09-lower-bounds.html#eq-lower-group">Equation&nbsp;26.2</a> with <span class="math inline">\(D = D_i\)</span>, <span class="math inline">\(D'' = D_0\)</span> and <span class="math inline">\(S = G_i\)</span>: <span class="math inline">\(1 - \beta \le e^{k\varepsilon}\Pr[M(D_0) \in G_i] + \delta_k\)</span>.</li>
+<li><strong>Solve for the share of <span class="math inline">\(D_0\)</span>:</strong> <span class="math inline">\(\Pr[M(D_0) \in G_i] \ge e^{-k\varepsilon}(1 - \beta) - e^{-k\varepsilon}\delta_k\)</span>.</li>
+<li><strong>Bound the <span class="math inline">\(\delta\)</span> term.</strong> <span class="math inline">\(e^{-k\varepsilon}\delta_k = \delta\sum_{j=0}^{k-1}e^{(j - k)\varepsilon}\)</span>. Each of the <span class="math inline">\(k\)</span> terms is at most the largest, <span class="math inline">\(e^{-\varepsilon}\)</span> (at <span class="math inline">\(j = k - 1\)</span>), so <span class="math inline">\(e^{-k\varepsilon}\delta_k \le k\,e^{-\varepsilon}\delta\)</span>.</li>
+<li><strong>Sum over the disjoint regions:</strong> <span class="math inline">\(1 \ge \sum_i\Pr[M(D_0) \in G_i] \ge m\big(e^{-k\varepsilon}(1 - \beta) - k\,e^{-\varepsilon}\delta\big)\)</span>.</li>
+<li><strong>The limit.</strong> Call the bracket the floor. If it is positive, step 4 fails for large enough <span class="math inline">\(m\)</span>, so an accurate mechanism must have a <span class="math inline">\(k\)</span> where the floor is <span class="math inline">\(\le 0\)</span>. As <span class="math inline">\(m \to \infty\)</span>, that is all step 4 says: <span class="math inline">\(e^{-k\varepsilon}(1 - \beta) \le k\,e^{-\varepsilon}\delta\)</span>.</li>
+<li><strong>The numbers.</strong> Bisection finds the floor’s zero at <span class="math inline">\(k = 12.26\)</span>. At <span class="math inline">\(k = 12\)</span> the floor is <span class="math inline">\(0.95e^{-12} - 12e^{-1}\times10^{-6} = 5.83\times10^{-6} - 4.41\times10^{-6} = 1.42\times10^{-6}\)</span>, and <span class="math inline">\(m = 2^{20} \approx 1.05\times10^6\)</span> makes <span class="math inline">\(m\)</span> times it 1.49, more than 1. So <span class="math inline">\(k \le 12\)</span> is impossible and <span class="math inline">\(k \ge 13\)</span> is forced. At <span class="math inline">\(k = 13\)</span> the floor is already negative, so no larger <span class="math inline">\(m\)</span>, not even <span class="math inline">\(2^{1000}\)</span>, forces more.</li>
+</ol>
+<p><em>Under approximate DP, packing hits a ceiling near <span class="math inline">\(\ln(1/\delta)/\varepsilon\)</span> that no number of candidates can lift. The ceiling is 12.26 rather than 13.82 because the <span class="math inline">\(\delta\)</span> term carries the factor <span class="math inline">\(k\)</span>, which costs a further <span class="math inline">\(\ln k/\varepsilon\)</span>.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-lower-3" class="level2" data-number="26.3">
+<h2 data-number="26.3" class="anchored" data-anchor-id="sec-sol-lower-3"><span class="header-section-number">26.3</span> The lemma for a shrunk mean</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 3.</strong> <strong>The lemma for a shrunk mean.</strong> For <span class="math inline">\(f = c\,\bar x\)</span> with <span class="math inline">\(0 \le c \le 1\)</span>, show that <span class="math inline">\(\mathbb E[f\sum_i(x_i - p)] = 2c/3\)</span> exactly, and that the bound in <a href="../../book-full/part03-dp-foundations/09-lower-bounds.html#eq-lower-fp-lemma">Equation&nbsp;26.12</a> is <span class="math inline">\(\frac23 - 2(1 - c)\mathbb E|\bar x|\)</span>. Compute <span class="math inline">\(\mathbb E|\bar x|\)</span> for <span class="math inline">\(n = 1\)</span> and its limit as <span class="math inline">\(n \to \infty\)</span>. <em>Check: for <span class="math inline">\(n = 5\)</span>, <span class="math inline">\(\mathbb E|\bar x| = 0.6\)</span>, so <span class="math inline">\(c = 0.75\)</span> gives correlation 0.5000 against the bound 0.3667.</em> <em>(Fingerprinting lemma)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The correlation.</strong> By the equality in <a href="../../book-full/part03-dp-foundations/09-lower-bounds.html#eq-lower-fp-lemma">Equation&nbsp;26.12</a>, <span class="math inline">\(\mathbb E[f\sum_i(x_i - p)] = 2\mathbb E[p\,f] = 2c\,\mathbb E[p\,\bar x]\)</span>. Given <span class="math inline">\(p\)</span>, <span class="math inline">\(\mathbb E[\bar x \mid p] = p\)</span>, so <span class="math inline">\(\mathbb E[p\,\bar x] = \mathbb E[p^2] = \int_{-1}^1\frac{p^2}2\,dp = \frac13\)</span>. The correlation is <span class="math inline">\(2c/3\)</span>.</li>
+<li><strong>The bound.</strong> <span class="math inline">\(|f - \bar x| = |c\bar x - \bar x| = (1 - c)|\bar x|\)</span>, so <span class="math inline">\(\frac23 - 2\mathbb E|f - \bar x| = \frac23 - 2(1 - c)\mathbb E|\bar x|\)</span>.</li>
+<li><strong><span class="math inline">\(n = 1\)</span>.</strong> <span class="math inline">\(\bar x = x_1 \in \{\pm1\}\)</span>, so <span class="math inline">\(\mathbb E|\bar x| = 1\)</span>.</li>
+<li><strong><span class="math inline">\(n \to \infty\)</span>.</strong> <span class="math inline">\(\bar x \to p\)</span> by the law of large numbers, and <span class="math inline">\(|\bar x| \le 1\)</span>, so <span class="math inline">\(\mathbb E|\bar x| \to \mathbb E|p| = \int_{-1}^1\frac{|p|}2\,dp = \frac12\)</span>. The script gives 0.5050 at <span class="math inline">\(n = 100\)</span>.</li>
+<li><strong><span class="math inline">\(n = 5\)</span>.</strong> Summing over the six possible counts of <span class="math inline">\(+1\)</span> and integrating over <span class="math inline">\(p\)</span> gives <span class="math inline">\(\mathbb E|\bar x| = 0.6000\)</span>. <a href="#tbl-sol-lower-shrunk" class="quarto-xref">Table&nbsp;<span>26.1</span></a> compares the two sides.</li>
+</ol>
+<div id="tbl-sol-lower-shrunk" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-lower-shrunk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;26.1: The fingerprinting lemma for the shrunk mean <span class="math inline">\(c\,\bar x\)</span> with <span class="math inline">\(n = 5\)</span> records, computed exactly.
+</figcaption>
+<div aria-describedby="tbl-sol-lower-shrunk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(c\)</span></th>
+<th>Correlation <span class="math inline">\(2c/3\)</span></th>
+<th><span class="math inline">\(\mathbb E\lvert f - \bar x\rvert = 0.6(1 - c)\)</span></th>
+<th>Bound <span class="math inline">\(\frac23 - 2\,\mathbb E\lvert f - \bar x\rvert\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.25</td>
+<td>0.1667</td>
+<td>0.4500</td>
+<td>−0.2333</td>
+</tr>
+<tr class="even">
+<td>0.5</td>
+<td>0.3333</td>
+<td>0.3000</td>
+<td>0.0667</td>
+</tr>
+<tr class="odd">
+<td>0.75</td>
+<td>0.5000</td>
+<td>0.1500</td>
+<td>0.3667</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.6667</td>
+<td>0</td>
+<td>0.6667</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><em>The bound always holds and is tight only at <span class="math inline">\(c = 1\)</span>. Its slack is <span class="math inline">\(\frac{2c}3 - \big(\frac23 - 1.2(1 - c)\big) = (1.2 - \frac23)(1 - c) = 0.5333(1 - c)\)</span>: the lemma charges an estimate twice its error, <span class="math inline">\(1.2(1 - c)\)</span>, while shrinking costs only <span class="math inline">\(\frac23(1 - c)\)</span> in correlation.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-lower-4" class="level2" data-number="26.4">
+<h2 data-number="26.4" class="anchored" data-anchor-id="sec-sol-lower-4"><span class="header-section-number">26.4</span> Padding recovers <span class="math inline">\(1/\alpha\)</span></h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 4.</strong> <strong>Padding recovers <span class="math inline">\(1/\alpha\)</span>.</strong> Let <span class="math inline">\(M\)</span> release the means of <span class="math inline">\(n\)</span> records with <span class="math inline">\(\ell_\infty\)</span> error <span class="math inline">\(\alpha\)</span>. Pad a dataset of <span class="math inline">\(n_0\)</span> records with <span class="math inline">\(n - n_0\)</span> records, half all <span class="math inline">\(+1\)</span> and half all <span class="math inline">\(-1\)</span>, run <span class="math inline">\(M\)</span>, and rescale. Show that this gives an equally private mechanism for <span class="math inline">\(n_0\)</span> records with error <span class="math inline">\(\alpha n/n_0\)</span>, choose <span class="math inline">\(n_0\)</span> so that this error is <span class="math inline">\(\alpha_0\)</span>, and conclude <span class="math inline">\(n \ge \frac{\alpha_0}{\alpha}\cdot\frac{(2/3 - 2\alpha_0 - 4\beta)d}{(e^\varepsilon - 1)\sqrt d + 4\delta d}\)</span> (up to rounding). Find the best <span class="math inline">\(\alpha_0\)</span>. <em>Check: <span class="math inline">\(\alpha_0 = \frac16 - \beta\)</span>, and the constant <span class="math inline">\(\alpha_0(\frac23 - 2\alpha_0 - 4\beta) = (\frac23 - 4\beta)^2/8 = 0.0272\)</span> at <span class="math inline">\(\beta = 0.05\)</span>; at <span class="math inline">\(d = 10^4\)</span> the bound is 15.8 records for <span class="math inline">\(\alpha = 0.1\)</span> and 158.4 for <span class="math inline">\(\alpha = 0.01\)</span>.</em> <em>(Fingerprinting, reductions)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The padded dataset.</strong> Given a small dataset <span class="math inline">\(S\)</span> of <span class="math inline">\(n_0\)</span> records, form <span class="math inline">\(\tilde D = S \cup P\)</span>, where <span class="math inline">\(P\)</span> has <span class="math inline">\((n - n_0)/2\)</span> copies of <span class="math inline">\((+1, \dots, +1)\)</span> and as many of <span class="math inline">\((-1, \dots, -1)\)</span>. The padding sums to 0 in every coordinate, so the mean of <span class="math inline">\(\tilde D\)</span> is <span class="math inline">\(\frac{n_0}{n}\bar x_S\)</span>.</li>
+<li><strong>The new mechanism.</strong> <span class="math inline">\(M'(S) = \operatorname{clip}\big(\frac{n}{n_0}M(\tilde D)\big)\)</span>. When <span class="math inline">\(M\)</span> is within <span class="math inline">\(\alpha\)</span> of the mean of <span class="math inline">\(\tilde D\)</span> in every coordinate, <span class="math inline">\(\frac n{n_0}M(\tilde D)\)</span> is within <span class="math inline">\(\frac n{n_0}\alpha\)</span> of <span class="math inline">\(\bar x_S\)</span>, and clipping to <span class="math inline">\([-1, 1]\)</span> cannot move it further away. So <span class="math inline">\(M'\)</span> has error <span class="math inline">\(\alpha n/n_0\)</span> with the same failure probability <span class="math inline">\(\beta\)</span>.</li>
+<li><strong>The same privacy.</strong> Replacing one record of <span class="math inline">\(S\)</span> replaces one record of <span class="math inline">\(\tilde D\)</span>, and the padding does not depend on <span class="math inline">\(S\)</span>. So <span class="math inline">\(M'\)</span> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP whenever <span class="math inline">\(M\)</span> is; rescaling and clipping are post-processing.</li>
+<li><strong>Choose <span class="math inline">\(n_0\)</span>.</strong> Take <span class="math inline">\(n_0 = \lceil\alpha n/\alpha_0\rceil\)</span>, so that the error <span class="math inline">\(\alpha n/n_0\)</span> is at most <span class="math inline">\(\alpha_0\)</span>. This needs <span class="math inline">\(\alpha_0 \ge \alpha\)</span>, since padding can only add records.</li>
+<li><strong>Apply <a href="../../book-full/part03-dp-foundations/09-lower-bounds.html#eq-lower-fp">Equation&nbsp;26.13</a> to <span class="math inline">\(M'\)</span></strong> with <span class="math inline">\(\alpha' = \alpha_0 + 2\beta\)</span>: <span class="math inline">\(n_0 \ge (\frac23 - 2\alpha_0 - 4\beta)d/R\)</span> with <span class="math inline">\(R = (e^\varepsilon - 1)\sqrt d + 4\delta d\)</span>. Since <span class="math inline">\(n_0 \le \alpha n/\alpha_0 + 1\)</span>, ignoring the <span class="math inline">\(+1\)</span> gives <span class="math inline">\(n \ge \frac{\alpha_0}\alpha(\frac23 - 2\alpha_0 - 4\beta)\frac dR\)</span>.</li>
+<li><strong>The best <span class="math inline">\(\alpha_0\)</span>.</strong> <span class="math inline">\(\phi(\alpha_0) = \alpha_0(\frac23 - 4\beta - 2\alpha_0)\)</span> is a downward parabola with <span class="math inline">\(\phi'(\alpha_0) = \frac23 - 4\beta - 4\alpha_0 = 0\)</span> at <span class="math inline">\(\alpha_0 = \frac16 - \beta\)</span>. There <span class="math inline">\(\frac23 - 4\beta - 2\alpha_0 = \frac13 - 2\beta = 2\alpha_0\)</span>, so <span class="math inline">\(\phi = 2(\frac16 - \beta)^2 = (\frac23 - 4\beta)^2/8\)</span>. At <span class="math inline">\(\beta = 0.05\)</span>: <span class="math inline">\(\alpha_0 = 0.1167\)</span> and <span class="math inline">\(\phi = 0.0272\)</span>.</li>
+<li><strong>The numbers.</strong> At <span class="math inline">\(d = 10^4\)</span>, <span class="math inline">\(R = 1.7183\times100 + 0.04 = 171.87\)</span>. For <span class="math inline">\(\alpha = 0.1\)</span>: <span class="math inline">\(n \ge 0.0272\times10^4/(0.1\times171.87) = 15.8\)</span>. For <span class="math inline">\(\alpha = 0.01\)</span>: ten times more, 158.4.</li>
+</ol>
+<p><em>Padding is a general trick: a lower bound for constant accuracy becomes one for accuracy <span class="math inline">\(\alpha\)</span> at a cost of a factor <span class="math inline">\(1/\alpha\)</span> in <span class="math inline">\(n\)</span>. With it the fingerprinting bound has the shape <span class="math inline">\(\sqrt d/(\alpha\varepsilon)\)</span> of the Gaussian mechanism’s upper bound.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-lower-5" class="level2" data-number="26.5">
+<h2 data-number="26.5" class="anchored" data-anchor-id="sec-sol-lower-5"><span class="header-section-number">26.5</span> How many attributes does tracing need?</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 5.</strong> <strong>How many attributes does tracing need?</strong> Using <a href="../../book-full/part03-dp-foundations/09-lower-bounds.html#eq-lower-tracing">Equation&nbsp;26.18</a> with <span class="math inline">\(\sigma = 0\)</span>, find the number of attributes <span class="math inline">\(d\)</span> at which the tracing attack has advantage 0.5 for <span class="math inline">\(n = 100\)</span> and for <span class="math inline">\(n = 200\)</span>. <em>Check: <span class="math inline">\(d = 5678\)</span> and <span class="math inline">\(d = 22{,}274\)</span>; the ratio <span class="math inline">\(d/n^2\)</span> is about 0.56 in both cases.</em> <em>(Tracing, normal approximation)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The advantage.</strong> With <span class="math inline">\(m = 2d/(3n)\)</span> and <span class="math inline">\(s = \sqrt{d(2/15 + 8/(15n))}\)</span>, the advantage is <span class="math inline">\(2\Phi(m/(2s)) - 1\)</span>. Setting it to 0.5 gives <span class="math inline">\(\Phi(m/(2s)) = 0.75\)</span>, so <span class="math inline">\(m/(2s) = \Phi^{-1}(0.75) = 0.6745\)</span>.</li>
+<li><strong>Solve for <span class="math inline">\(d\)</span>.</strong> <span class="math inline">\(m/s = \frac{2\sqrt d}{3n\sqrt{2/15 + 8/(15n)}}\)</span>, so <span class="math inline">\(\sqrt d = 1.349\times\frac{3n}2\sqrt{2/15 + 8/(15n)}\)</span>.</li>
+<li><strong><span class="math inline">\(n = 100\)</span>:</strong> <span class="math inline">\(\sqrt{0.13333 + 0.00533} = 0.3724\)</span>, so <span class="math inline">\(\sqrt d = 1.349\times150\times0.3724 = 75.35\)</span> and <span class="math inline">\(d = 5678\)</span>.</li>
+<li><strong><span class="math inline">\(n = 200\)</span>:</strong> <span class="math inline">\(\sqrt{0.13333 + 0.00267} = 0.3688\)</span>, so <span class="math inline">\(\sqrt d = 1.349\times300\times0.3688 = 149.2\)</span> and <span class="math inline">\(d = 22{,}274\)</span>.</li>
+<li><strong>The ratio.</strong> <span class="math inline">\(d/n^2 = 0.5678\)</span> and <span class="math inline">\(0.5568\)</span>. Apart from the small <span class="math inline">\(8/(15n)\)</span> term, <span class="math inline">\(d\)</span> is proportional to <span class="math inline">\(n^2\)</span>.</li>
+</ol>
+<p><em>Doubling the number of people quadruples the number of attributes the attacker needs. That is the <span class="math inline">\(n \approx \sqrt d\)</span> of the fingerprinting bound, read from the attacker’s side.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-lower-6" class="level2" data-number="26.6">
+<h2 data-number="26.6" class="anchored" data-anchor-id="sec-sol-lower-6"><span class="header-section-number">26.6</span> Tracing with a reference sample</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 6.</strong> <strong>Tracing with a reference sample.</strong> The attacker does not know <span class="math inline">\(p\)</span> but has <span class="math inline">\(m\)</span> fresh records from the population, with mean <span class="math inline">\(\hat p\)</span>. Show that the score <span class="math inline">\(\langle\bar x, y - \hat p\rangle\)</span> has the same mean gap <span class="math inline">\(2d/(3n)\)</span> and a variance larger by the factor <span class="math inline">\(1 + 1/m\)</span> (ignoring terms of order <span class="math inline">\(1/(nm)\)</span>). <em>Check: at <span class="math inline">\(n = 50\)</span>, <span class="math inline">\(d = 2000\)</span>, <span class="math inline">\(m = 50\)</span>, the predicted advantage is 0.563, and the simulation gives 0.563.</em> <em>(Tracing, robust traceability)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Work with one coordinate and drop the index <span class="math inline">\(j\)</span>. Given <span class="math inline">\(p\)</span>, the dataset, the reference sample and a fresh target are independent.</p>
+<ol type="1">
+<li><strong>Non-member mean.</strong> <span class="math inline">\(y\)</span> and <span class="math inline">\(\hat p\)</span> both have mean <span class="math inline">\(p\)</span> and are independent of <span class="math inline">\(\bar x\)</span>, so <span class="math inline">\(\mathbb E[\bar x(y - \hat p)] = \mathbb E[\bar x]\cdot0 = 0\)</span>.</li>
+<li><strong>Member mean.</strong> For <span class="math inline">\(y = x_i\)</span>: <span class="math inline">\(\mathbb E[\bar x\,x_i] - \mathbb E[\bar x]\,\mathbb E[\hat p]\)</span>. The first term is <span class="math inline">\(\frac1n\mathbb E[x_i^2] + \frac{n - 1}np^2 = \frac1n + \frac{n-1}np^2\)</span>; the second is <span class="math inline">\(p^2\)</span>. The difference is <span class="math inline">\(\frac{1 - p^2}n\)</span>, as with a known <span class="math inline">\(p\)</span>. Averaging and summing over coordinates gives the same gap <span class="math inline">\(2d/(3n)\)</span>.</li>
+<li><strong>Non-member variance.</strong> <span class="math inline">\(y - \hat p\)</span> has mean 0 and variance <span class="math inline">\((1 - p^2) + (1 - p^2)/m = (1 - p^2)(1 + \frac1m)\)</span>, and it is independent of <span class="math inline">\(\bar x\)</span>. The coordinates are independent, so cross terms vanish, and <span class="math inline">\(\operatorname{Var} = (1 + \frac1m)\sum_j\mathbb E\big[\bar x_j^2(1 - p_j^2)\big] = (1 + \frac1m)\,d\big(\frac2{15} + \frac8{15n}\big)\)</span>, the known-<span class="math inline">\(p\)</span> variance times <span class="math inline">\(1 + \frac1m\)</span>. (The member’s variance differs from this by terms of order <span class="math inline">\(d/n\)</span> and smaller, which the normal approximation ignores.)</li>
+<li><strong>The numbers.</strong> At <span class="math inline">\(n = 50\)</span>, <span class="math inline">\(d = 2000\)</span>: gap 26.67, standard deviation <span class="math inline">\(16.97\times\sqrt{1.02} = 17.14\)</span>, so the predicted advantage is <span class="math inline">\(2\Phi(26.67/(2\times17.14)) - 1 = 0.563\)</span>. The simulation over 200 datasets gives a member mean of 26.15, a non-member standard deviation of 17.11 and an advantage of 0.563.</li>
+</ol>
+<p><em>An estimated population costs the attacker almost nothing: with as many reference records as there are members, the advantage drops only from 0.568 (known <span class="math inline">\(p\)</span>) to 0.563. This is the robustness that made genomic tracing practical, since public reference panels supply <span class="math inline">\(\hat p\)</span>.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-lower-7" class="level2" data-number="26.7">
+<h2 data-number="26.7" class="anchored" data-anchor-id="sec-sol-lower-7"><span class="header-section-number">26.7</span> Reconstruction implies <span class="math inline">\(\varepsilon\)</span></h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 7.</strong> <strong>Reconstruction implies <span class="math inline">\(\varepsilon\)</span>.</strong> A reconstruction attack recovers 90% of a database of uniform bits from a release claimed to be <span class="math inline">\((\varepsilon, 10^{-6})\)</span>-DP. What is the smallest <span class="math inline">\(\varepsilon\)</span> the claim can have? <em>Check: <span class="math inline">\(\varepsilon \ge \ln\big((0.9 - 10^{-6})/0.1\big) = 2.1972\)</span>; at 99% it is 4.5951.</em> <em>(Fact 3)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The bound on recovery.</strong> By <a href="../../book-full/part03-dp-foundations/09-lower-bounds.html#eq-lower-dn">Equation&nbsp;26.19</a>, an <span class="math inline">\((\varepsilon, \delta)\)</span>-DP release lets any reconstruction recover a fraction of at most <span class="math inline">\((e^\varepsilon + \delta)/(e^\varepsilon + 1)\)</span> of uniform bits, in expectation.</li>
+<li><strong>Solve for <span class="math inline">\(\varepsilon\)</span>.</strong> <span class="math inline">\(r(e^\varepsilon + 1) \le e^\varepsilon + \delta\)</span> rearranges to <span class="math inline">\(e^\varepsilon(1 - r) \ge r - \delta\)</span>, so <span class="math inline">\(\varepsilon \ge \ln\frac{r - \delta}{1 - r}\)</span>.</li>
+<li><strong><span class="math inline">\(r = 0.9\)</span>:</strong> <span class="math inline">\(\ln(0.899999/0.1) = \ln 9.0000 = 2.1972\)</span>.</li>
+<li><strong><span class="math inline">\(r = 0.99\)</span>:</strong> <span class="math inline">\(\ln(0.989999/0.01) = \ln 99.0 = 4.5951\)</span>.</li>
+<li><strong>Conversely,</strong> at <span class="math inline">\(\varepsilon = 1\)</span> no attack can recover more than <span class="math inline">\((e + 10^{-6})/(e + 1) = 0.7311\)</span> of the bits.</li>
+</ol>
+<p><em>Each extra “nine” in the recovery rate adds about <span class="math inline">\(\ln 10 = 2.3\)</span> to the <span class="math inline">\(\varepsilon\)</span> the attack proves. The <span class="math inline">\(10^{-6}\)</span> barely matters here; <span class="math inline">\(\delta\)</span> would need to be comparable to <span class="math inline">\(1 - r\)</span> to change the answer.</em></p>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part03-dp-foundations/08-trust-models.html" class="pagination-link" aria-label="Exercises: Local, shuffle and distributed trust models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part04-privacy-accounting/01-renyi-dp.html" class="pagination-link" aria-label="Exercises: Rényi differential privacy">
+        <span class="nav-page-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

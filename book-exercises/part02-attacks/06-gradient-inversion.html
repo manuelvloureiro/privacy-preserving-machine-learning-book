@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>14&nbsp; Exercises: Gradient inversion – Privacy-Preserving Machine Learning: Exercises</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-attacks/07-linkage-reidentification.html" rel="next">
+<link href="../part02-attacks/05-memorization-extraction.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/01-threat-models.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/06-gradient-inversion.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Exercises: Gradient inversion</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning: Exercises</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Exercises: Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exercises: Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Exercises: Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Exercises: Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Exercises: Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Exercises: Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Exercises: Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Exercises: Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exercises: Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Exercises: Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Exercises: Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Exercises: Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Exercises: Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Exercises: Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Exercises: Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Exercises: Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Exercises: Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exercises: The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Exercises: Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Exercises: The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Exercises: Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Exercises: Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-sol-gradinv-1" id="toc-sec-sol-gradinv-1" class="nav-link active" data-scroll-target="#sec-sol-gradinv-1"><span class="header-section-number">14.1</span> Logistic regression leaks its input</a></li>
+  <li><a href="#sec-sol-gradinv-2" id="toc-sec-sol-gradinv-2" class="nav-link" data-scroll-target="#sec-sol-gradinv-2"><span class="header-section-number">14.2</span> No bias in the first layer</a></li>
+  <li><a href="#sec-sol-gradinv-3" id="toc-sec-sol-gradinv-3" class="nav-link" data-scroll-target="#sec-sol-gradinv-3"><span class="header-section-number">14.3</span> Labels with tanh</a></li>
+  <li><a href="#sec-sol-gradinv-4" id="toc-sec-sol-gradinv-4" class="nav-link" data-scroll-target="#sec-sol-gradinv-4"><span class="header-section-number">14.4</span> Label counts in a batch</a></li>
+  <li><a href="#sec-sol-gradinv-5" id="toc-sec-sol-gradinv-5" class="nav-link" data-scroll-target="#sec-sol-gradinv-5"><span class="header-section-number">14.5</span> Isolation when inputs are correlated</a></li>
+  <li><a href="#sec-sol-gradinv-6" id="toc-sec-sol-gradinv-6" class="nav-link" data-scroll-target="#sec-sol-gradinv-6"><span class="header-section-number">14.6</span> Several local steps</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/01-threat-models.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/06-gradient-inversion.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Exercises: Gradient inversion</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Exercises: Gradient inversion</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Exercises for <a href="../../book-full/part02-attacks/06-gradient-inversion.html">Gradient inversion</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part02-attacks/solutions_gradient_inversion.py</code> computes every number quoted here; run it with <code>uv run python code/part02-attacks/solutions_gradient_inversion.py</code>.</p>
+<p>The solutions use the chapter’s notation: the network <span class="math inline">\(a = W_1x + b_1\)</span>, <span class="math inline">\(h = \sigma(a)\)</span>, <span class="math inline">\(z = W_2h + b_2\)</span>, <span class="math inline">\(p = \mathrm{softmax}(z)\)</span>, <span class="math inline">\(\ell = -\ln p_y\)</span>, with backward signals <span class="math inline">\(\delta_2 = p - e_y\)</span> and <span class="math inline">\(\delta_1 = (W_2^\top\delta_2)\odot\sigma'(a)\)</span>, and the three Toolkit facts: the outer-product form of a fully connected layer’s gradient (Fact 1), the softmax gradient <span class="math inline">\(p - e_y\)</span> (Fact 2), and backpropagation and averaging (Fact 3). The numerical checks use the chapter’s <span class="math inline">\(8\times8\)</span> images of four shapes and random networks with 32 hidden units.</p>
+<section id="sec-sol-gradinv-1" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="sec-sol-gradinv-1"><span class="header-section-number">14.1</span> Logistic regression leaks its input</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 1.</strong> <strong>Logistic regression leaks its input.</strong> For logistic regression with a bias, loss <span class="math inline">\(\ln(1 + e^{-y(w^\top x + b)})\)</span> with <span class="math inline">\(y \in \{-1, +1\}\)</span>, show that <span class="math inline">\(\nabla_w\ell = (\nabla_b\ell)\,x\)</span>, so that <span class="math inline">\(x = \nabla_w\ell/\nabla_b\ell\)</span> whenever <span class="math inline">\(\nabla_b\ell \ne 0\)</span>. When is <span class="math inline">\(\nabla_b\ell = 0\)</span>? <em>Check: with <span class="math inline">\(w = (1, -1)\)</span>, <span class="math inline">\(b = 0\)</span>, <span class="math inline">\(x = (2, 1)\)</span> and <span class="math inline">\(y = +1\)</span>, <span class="math inline">\(\nabla_b\ell = -0.2689\)</span>, <span class="math inline">\(\nabla_w\ell = (-0.5379, -0.2689)\)</span>, and the ratio is <span class="math inline">\((2, 1)\)</span>.</em> <em>(Chain rule, Fact 1)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>One scalar carries the loss.</strong> Write <span class="math inline">\(a = w^\top x + b\)</span>, a fully connected layer with one output unit. The loss is <span class="math inline">\(\ell = \ln(1 + e^{-ya})\)</span>.</li>
+<li><strong>Its backward signal.</strong> <span class="math inline">\(\delta = \frac{\partial\ell}{\partial a} = \frac{-ye^{-ya}}{1 + e^{-ya}} = -y\,\sigma(-ya)\)</span>, where <span class="math inline">\(\sigma\)</span> is the sigmoid.</li>
+<li><strong>Fact 1 with <span class="math inline">\(m = 1\)</span>.</strong> <span class="math inline">\(\nabla_w\ell = \delta x\)</span> and <span class="math inline">\(\nabla_b\ell = \delta\)</span>. So <span class="math inline">\(\nabla_w\ell = (\nabla_b\ell)x\)</span>, and dividing by <span class="math inline">\(\nabla_b\ell\)</span> gives <span class="math inline">\(x\)</span>.</li>
+<li><strong>When the ratio fails.</strong> <span class="math inline">\(\delta = -y\sigma(-ya)\)</span> is never exactly zero, because the sigmoid is strictly positive. It is tiny when the example is classified correctly with a large margin (<span class="math inline">\(ya \gg 0\)</span>), and then in floating point it can underflow to 0. So the attack is exact in exact arithmetic for every example, and fails in practice only for examples the model already fits very confidently.</li>
+<li><strong>Check.</strong> <span class="math inline">\(a = 1\cdot2 - 1\cdot1 + 0 = 1\)</span> and <span class="math inline">\(y = +1\)</span>, so <span class="math inline">\(\delta = -\sigma(-1) = -1/(1 + e) = -0.2689\)</span>. Then <span class="math inline">\(\nabla_w\ell = -0.2689\cdot(2, 1) = (-0.5379, -0.2689)\)</span>, and the ratio is <span class="math inline">\((-0.5379, -0.2689)/(-0.2689) = (2, 1)\)</span>.</li>
+</ol>
+<p><em>A linear model with a bias is the one-unit case of <a href="../../book-full/part02-attacks/06-gradient-inversion.html#eq-gradinv-ratio">Equation&nbsp;14.7</a>: its gradient is the input, scaled by how wrong the model is.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-gradinv-2" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="sec-sol-gradinv-2"><span class="header-section-number">14.2</span> No bias in the first layer</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 2.</strong> <strong>No bias in the first layer.</strong> Remove <span class="math inline">\(b_1\)</span> from the network. Show that <span class="math inline">\(\nabla_{W_1}\ell\)</span> still has rank one and that its top right singular vector <span class="math inline">\(u\)</span> is <span class="math inline">\(\pm x/\lVert x\rVert\)</span>. The attacker then knows <span class="math inline">\(x = cu\)</span> for an unknown scalar <span class="math inline">\(c\)</span>; describe a one-dimensional search for <span class="math inline">\(c\)</span>, and explain why the positive homogeneity of ReLU (<span class="math inline">\(\max(ca, 0) = c\max(a, 0)\)</span> for <span class="math inline">\(c &gt; 0\)</span>) does not make <span class="math inline">\(c\)</span> unidentifiable. <em>Check: on an image, the script finds <span class="math inline">\(|\cos(u, x)| = 1.000000\)</span>, and the search recovers <span class="math inline">\(x\)</span> to a relative error of <span class="math inline">\(4.0\times10^{-16}\)</span>.</em> <em>(Rank one, Fact 1)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Rank one.</strong> Fact 1 does not need a bias: <span class="math inline">\(\nabla_{W_1}\ell = \delta_1x^\top\)</span> still. If <span class="math inline">\(\delta_1 \ne 0\)</span>, every row is a multiple of <span class="math inline">\(x^\top\)</span>, so the rank is one.</li>
+<li><strong>The singular vector.</strong> A rank-one matrix <span class="math inline">\(\delta_1x^\top\)</span> has the singular value decomposition <span class="math inline">\(\lVert\delta_1\rVert\lVert x\rVert\cdot\frac{\delta_1}{\lVert\delta_1\rVert}\big(\frac{x}{\lVert x\rVert}\big)^\top\)</span>, so its only right singular vector with a nonzero singular value is <span class="math inline">\(u = \pm x/\lVert x\rVert\)</span> (the sign is arbitrary in any decomposition). Hence <span class="math inline">\(x = cu\)</span> with <span class="math inline">\(c = \pm\lVert x\rVert\)</span>.</li>
+<li><strong>The search.</strong> For each candidate <span class="math inline">\(c\)</span>, compute the gradient that the input <span class="math inline">\(cu\)</span> would produce, <span class="math inline">\(G(cu)\)</span>, and its mismatch <span class="math inline">\(R(c) = \lVert G(cu) - g\rVert^2\)</span>. The true <span class="math inline">\(c\)</span> gives <span class="math inline">\(R = 0\)</span>. The script evaluates <span class="math inline">\(R\)</span> on a grid of 6,001 values of <span class="math inline">\(c\)</span> in <span class="math inline">\([-30, 30]\)</span> and refines the best one by golden-section search.</li>
+<li><strong>Why the scale is identifiable.</strong> Positive homogeneity says <span class="math inline">\(h(cu) = c\,h(u)\)</span> for <span class="math inline">\(c &gt; 0\)</span> when <span class="math inline">\(b_1 = 0\)</span>. It does not make the gradient independent of <span class="math inline">\(c\)</span>. The logits become <span class="math inline">\(z = cW_2h(u) + b_2\)</span>, so the probabilities <span class="math inline">\(p\)</span>, and with them <span class="math inline">\(\delta_2 = p - e_y\)</span> and <span class="math inline">\(\delta_1\)</span>, change with <span class="math inline">\(c\)</span>; and <span class="math inline">\(\nabla_{W_1}\ell = \delta_1(cu)^\top\)</span> carries an explicit factor <span class="math inline">\(c\)</span> as well. So different <span class="math inline">\(c\)</span> give different gradients, and only the true one matches. A negative <span class="math inline">\(c\)</span> switches on a different set of units, so it gives a different gradient too: the sign is identifiable.</li>
+<li><strong>Check.</strong> On an image, <span class="math inline">\(|\cos(u, x)| = 1.000000\)</span>. The search returns <span class="math inline">\(c = -3.3719\)</span>; the singular vector happened to come out as <span class="math inline">\(-x/\lVert x\rVert\)</span>, and <span class="math inline">\(\lVert x\rVert = 3.3719\)</span>. The reconstruction <span class="math inline">\(cu\)</span> has relative error <span class="math inline">\(4.0\times10^{-16}\)</span>. At <span class="math inline">\(-c\)</span> the mismatch is <span class="math inline">\(R = 10.8\)</span>, far from 0.</li>
+</ol>
+<p><em>Removing the bias removes the one-line division, not the leak: the gradient still contains the input’s direction exactly, and one scalar is easy to search for.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-gradinv-3" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="sec-sol-gradinv-3"><span class="header-section-number">14.3</span> Labels with tanh</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 3.</strong> <strong>Labels with tanh.</strong> With <span class="math inline">\(h = \tanh(a)\)</span> the hidden activations can be negative. Show that the rule “the label is the row of <span class="math inline">\(\nabla_{W_2}\ell\)</span> with the most negative sum” can fail, and that the rule “the label is the row whose sum has the opposite sign to all the others” is correct whenever <span class="math inline">\(K \ge 3\)</span> and <span class="math inline">\(\sum_jh_j \ne 0\)</span>. <em>Check: on 1,000 random images and networks with <span class="math inline">\(K = 4\)</span>, the first rule is right 0.488 of the time and the second 1.000.</em> <em>(Fact 2)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Row sums.</strong> By Fact 1 at the last layer, row <span class="math inline">\(k\)</span> of <span class="math inline">\(\nabla_{W_2}\ell\)</span> is <span class="math inline">\(\delta_{2,k}h^\top\)</span>, so its sum is <span class="math inline">\(\delta_{2,k}S\)</span> with <span class="math inline">\(S = \sum_jh_j\)</span>.</li>
+<li><strong>Signs of <span class="math inline">\(\delta_2\)</span>.</strong> By Fact 2, <span class="math inline">\(\delta_{2,y} = p_y - 1 &lt; 0\)</span> and <span class="math inline">\(\delta_{2,k} = p_k &gt; 0\)</span> for <span class="math inline">\(k \ne y\)</span>.</li>
+<li><strong>The first rule fails when <span class="math inline">\(S &lt; 0\)</span>.</strong> Then row <span class="math inline">\(y\)</span> has sum <span class="math inline">\((p_y - 1)S &gt; 0\)</span> and every other row has sum <span class="math inline">\(p_kS &lt; 0\)</span>. The most negative sum belongs to the class with the largest <span class="math inline">\(p_k\)</span> among the wrong ones, never to <span class="math inline">\(y\)</span>. With tanh and random weights, <span class="math inline">\(S\)</span> is negative about half the time, so the rule is right about half the time.</li>
+<li><strong>The second rule.</strong> Whatever the sign of <span class="math inline">\(S \ne 0\)</span>, row <span class="math inline">\(y\)</span>’s sum has the sign of <span class="math inline">\(-S\)</span> and all <span class="math inline">\(K - 1\)</span> others have the sign of <span class="math inline">\(S\)</span>. With <span class="math inline">\(K \ge 3\)</span> there are at least two others, so the majority sign is that of <span class="math inline">\(S\)</span> and the odd one out is <span class="math inline">\(y\)</span>. With <span class="math inline">\(K = 2\)</span> there is one row of each sign, and without knowing the sign of <span class="math inline">\(S\)</span> the attacker cannot tell which is which.</li>
+<li><strong>Check.</strong> On 1,000 random images and networks with <span class="math inline">\(K = 4\)</span>, the most-negative rule is right 0.488 of the time, close to the <span class="math inline">\(\frac12\)</span> of step 3, and the odd-one-out rule 1.000 of the time.</li>
+</ol>
+<p><em>What leaks is not “negative means label” but “the label’s row has the opposite sign”: a property of <span class="math inline">\(p - e_y\)</span> that no activation function can hide.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-gradinv-4" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="sec-sol-gradinv-4"><span class="header-section-number">14.4</span> Label counts in a batch</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 4.</strong> <strong>Label counts in a batch.</strong> Derive <a href="../../book-full/part02-attacks/06-gradient-inversion.html#eq-gradinv-counts">Equation&nbsp;14.10</a>, and show that the attacker’s rounded estimate <span class="math inline">\(\mathrm{round}\big(B(\bar p_k - (\nabla_{b_2}\ell)_k)\big)\)</span> equals <span class="math inline">\(n_k\)</span> for every class if and only if <span class="math inline">\(\big|\sum_i(p_{ik} - \bar p_k)\big| &lt; \frac12\)</span> for every <span class="math inline">\(k\)</span> (ignoring ties at exactly <span class="math inline">\(\frac12\)</span>). <em>Check: for <span class="math inline">\(B = 16\)</span> over 200 batches, the largest count error has median 1.102 with <span class="math inline">\(\bar p = 1/K\)</span> and 0.233 with <span class="math inline">\(\bar p\)</span> averaged over 200 of the attacker’s images.</em> <em>(Fact 3)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Average the bias gradients.</strong> By Fact 3 and Fact 2, <span class="math inline">\(\nabla_{b_2}\ell = \frac1B\sum_i(p_i - e_{y_i})\)</span>.</li>
+<li><strong>Count.</strong> The <span class="math inline">\(k\)</span>-th entry of <span class="math inline">\(\sum_ie_{y_i}\)</span> is the number of <span class="math inline">\(i\)</span> with <span class="math inline">\(y_i = k\)</span>, that is <span class="math inline">\(n_k\)</span>. So <span class="math inline">\(B(\nabla_{b_2}\ell)_k = \sum_ip_{ik} - n_k\)</span>, which rearranges to <a href="../../book-full/part02-attacks/06-gradient-inversion.html#eq-gradinv-counts">Equation&nbsp;14.10</a>.</li>
+<li><strong>The attacker’s estimate.</strong> Replacing <span class="math inline">\(\sum_ip_{ik}\)</span> by <span class="math inline">\(B\bar p_k\)</span> gives <span class="math inline">\(\hat n_k = B\bar p_k - B(\nabla_{b_2}\ell)_k = n_k - \sum_i(p_{ik} - \bar p_k)\)</span>. Its error is <span class="math inline">\(e_k = -\sum_i(p_{ik} - \bar p_k)\)</span>.</li>
+<li><strong>Rounding.</strong> <span class="math inline">\(n_k\)</span> is an integer, so <span class="math inline">\(\mathrm{round}(n_k + e_k) = n_k\)</span> exactly when <span class="math inline">\(|e_k| &lt; \frac12\)</span> (at <span class="math inline">\(|e_k| = \frac12\)</span> it depends on the tie rule). All counts are right exactly when this holds for every <span class="math inline">\(k\)</span>.</li>
+<li><strong>Why it degrades with <span class="math inline">\(B\)</span>.</strong> <span class="math inline">\(e_k\)</span> is a sum of <span class="math inline">\(B\)</span> deviations of individual predictions from the guess. If the guess is the right mean and the deviations are roughly independent with standard deviation <span class="math inline">\(s\)</span>, the sum has standard deviation about <span class="math inline">\(s\sqrt B\)</span> and eventually exceeds <span class="math inline">\(\frac12\)</span>. A wrong guess adds a bias <span class="math inline">\(B(\mathbb E p_k - \bar p_k)\)</span> that grows linearly in <span class="math inline">\(B\)</span>, which is why the uniform guess fails much sooner.</li>
+<li><strong>Check.</strong> Over 200 batches of 16, the median of <span class="math inline">\(\max_k|e_k|\)</span> is 1.102 with <span class="math inline">\(\bar p = 1/K\)</span> and 0.233 with <span class="math inline">\(\bar p\)</span> averaged over 200 of the attacker’s own images. All errors are below <span class="math inline">\(\frac12\)</span> in 0.105 and 0.950 of the batches. (These are fresh random batches, so the rates differ slightly from the 0.095 and 0.975 of the chapter.)</li>
+</ol>
+<p><em>The bias gradient of a batch is its label histogram, minus a term the attacker can predict by running the model on data of its own.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-gradinv-5" class="level2" data-number="14.5">
+<h2 data-number="14.5" class="anchored" data-anchor-id="sec-sol-gradinv-5"><span class="header-section-number">14.5</span> Isolation when inputs are correlated</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 5.</strong> <strong>Isolation when inputs are correlated.</strong> Suppose each unit fires on a fraction <span class="math inline">\(q\)</span> of the population, with <span class="math inline">\(q\)</span> uniform on <span class="math inline">\([0, 1]\)</span> across units, and given <span class="math inline">\(q\)</span> the examples of a batch switch the unit on independently with probability <span class="math inline">\(q\)</span>. Show that a unit isolates a given example with probability <span class="math inline">\(\int_0^1q(1 - q)^{B-1}\,dq = \frac{1}{B(B + 1)}\)</span>, and compare with <span class="math inline">\(2^{-B}\)</span>. How many units does an even chance of isolating a given example take at <span class="math inline">\(B = 10\)</span>? <em>Check: 76 units, against 710 under independence.</em> <em>Hint: the integral is a Beta function, <span class="math inline">\(\int_0^1q^{a-1}(1-q)^{b-1}dq = \frac{(a-1)!(b-1)!}{(a+b-1)!}\)</span>.</em> <em>(Isolation, Fact 3)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Condition on <span class="math inline">\(q\)</span>.</strong> Given <span class="math inline">\(q\)</span>, the unit is on for example <span class="math inline">\(i\)</span> with probability <span class="math inline">\(q\)</span> and off for each of the other <span class="math inline">\(B - 1\)</span> with probability <span class="math inline">\(1 - q\)</span>, independently: <span class="math inline">\(q(1 - q)^{B-1}\)</span>.</li>
+<li><strong>Average over <span class="math inline">\(q\)</span>.</strong> <span class="math inline">\(q\)</span> is uniform on <span class="math inline">\([0, 1]\)</span>, so the unconditional probability is <span class="math inline">\(\int_0^1q(1 - q)^{B-1}dq\)</span>.</li>
+<li><strong>Evaluate.</strong> This is the Beta integral with <span class="math inline">\(a = 2\)</span>, <span class="math inline">\(b = B\)</span>: <span class="math inline">\(\frac{1!\,(B - 1)!}{(B + 1)!} = \frac{1}{B(B + 1)}\)</span>.</li>
+<li><strong>Compare.</strong> <span class="math inline">\(2^{-B}\)</span> falls exponentially and <span class="math inline">\(1/(B(B + 1))\)</span> only like <span class="math inline">\(1/B^2\)</span>. At <span class="math inline">\(B = 4\)</span> they are close (<span class="math inline">\(6.25\times10^{-2}\)</span> against <span class="math inline">\(5.00\times10^{-2}\)</span>); at <span class="math inline">\(B = 10\)</span> the second is 9 times larger (<span class="math inline">\(9.09\times10^{-3}\)</span> against <span class="math inline">\(9.77\times10^{-4}\)</span>); at <span class="math inline">\(B = 16\)</span> it is 240 times larger (<span class="math inline">\(3.68\times10^{-3}\)</span> against <span class="math inline">\(1.53\times10^{-5}\)</span>). The reason: a unit with small <span class="math inline">\(q\)</span> fires on almost nothing, and when it does fire on a batch it is likely to fire on one example only.</li>
+<li><strong>Width for an even chance.</strong> With <span class="math inline">\(m\)</span> units, each isolating example <span class="math inline">\(i\)</span> independently with probability <span class="math inline">\(r\)</span>, the chance that some unit isolates it is <span class="math inline">\(1 - (1 - r)^m\)</span>. Setting it to <span class="math inline">\(\frac12\)</span> gives <span class="math inline">\(m = \ln2/(-\ln(1 - r))\)</span>, rounded up. For <span class="math inline">\(r = 2^{-10}\)</span> that is 710; for <span class="math inline">\(r = 1/110\)</span> it is 76.</li>
+<li><strong>Check against the images.</strong> On the images, with 1,024-unit networks, the measured fraction of (unit, example) pairs where the unit fires on that example only is <span class="math inline">\(5.27\times10^{-2}\)</span> at <span class="math inline">\(B = 4\)</span>, <span class="math inline">\(8.09\times10^{-3}\)</span> at <span class="math inline">\(B = 10\)</span> and <span class="math inline">\(2.52\times10^{-3}\)</span> at <span class="math inline">\(B = 16\)</span>. These are close to the uniform-fraction model and orders of magnitude above <span class="math inline">\(2^{-B}\)</span> at the larger batch sizes. This is why the open squares of <a href="../../book-full/part02-attacks/06-gradient-inversion.html#fig-gradinv-isolation">Figure&nbsp;14.4</a> decay so slowly.</li>
+</ol>
+<p><em>Independence is the best case for the client. Real data make units fire on many or on few examples, and the “few” case isolates examples polynomially rather than exponentially often.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-gradinv-6" class="level2" data-number="14.6">
+<h2 data-number="14.6" class="anchored" data-anchor-id="sec-sol-gradinv-6"><span class="header-section-number">14.6</span> Several local steps</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 6.</strong> <strong>Several local steps.</strong> A client holding one example runs <span class="math inline">\(T\)</span> steps of gradient descent with step size <span class="math inline">\(\eta\)</span> on it, starting from <span class="math inline">\(\theta_0\)</span>, and sends <span class="math inline">\(\theta_0 - \theta_T\)</span>. Show that the first-layer part of the update is still rank one and that <span class="math inline">\(x = (\Delta W_1)_{j,:}/(\Delta b_1)_j\)</span> for every unit with <span class="math inline">\((\Delta b_1)_j \ne 0\)</span>. What changes with a batch of two? <em>Check: with <span class="math inline">\(T = 5\)</span> and <span class="math inline">\(\eta = 0.5\)</span>, the ratio recovers <span class="math inline">\(x\)</span> to a relative error of <span class="math inline">\(1.4\times10^{-16}\)</span>.</em> <em>(Fact 1, Fact 3)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>One step.</strong> At step <span class="math inline">\(t\)</span>, with parameters <span class="math inline">\(\theta_t\)</span>, Fact 1 gives <span class="math inline">\(\nabla_{W_1}\ell(\theta_t) = \delta_1^{(t)}x^\top\)</span> and <span class="math inline">\(\nabla_{b_1}\ell(\theta_t) = \delta_1^{(t)}\)</span>, where <span class="math inline">\(\delta_1^{(t)}\)</span> is the backward signal under <span class="math inline">\(\theta_t\)</span>. The input <span class="math inline">\(x\)</span> is the same at every step; only <span class="math inline">\(\delta_1^{(t)}\)</span> changes.</li>
+<li><strong>Sum the steps.</strong> <span class="math inline">\(\Delta W_1 = W_1^{(0)} - W_1^{(T)} = \eta\sum_{t=0}^{T-1}\delta_1^{(t)}x^\top = \eta\,\bar\delta_1\,x^\top\)</span> with <span class="math inline">\(\bar\delta_1 = \sum_t\delta_1^{(t)}\)</span>, the first-layer backward signal summed over the steps, and likewise <span class="math inline">\(\Delta b_1 = \eta\,\bar\delta_1\)</span>.</li>
+<li><strong>Rank one and the ratio.</strong> <span class="math inline">\(\Delta W_1\)</span> is an outer product, so it has rank one, and for <span class="math inline">\(\bar\delta_{1,j} \ne 0\)</span> the ratio of row <span class="math inline">\(j\)</span> to <span class="math inline">\((\Delta b_1)_j\)</span> is <span class="math inline">\(x^\top\)</span>. Multiple local steps change <span class="math inline">\(\bar\delta_1\)</span>, not the factor <span class="math inline">\(x\)</span>.</li>
+<li><strong>A batch of two.</strong> Write <span class="math inline">\(\delta_1^{(t)}(x_i)\)</span> for the first-layer backward signal of example <span class="math inline">\(i\)</span> at step <span class="math inline">\(t\)</span>. Each step’s gradient is <span class="math inline">\(\frac12\big(\delta_1^{(t)}(x_1)x_1^\top + \delta_1^{(t)}(x_2)x_2^\top\big)\)</span>, and the sum over steps is <span class="math inline">\(u_1x_1^\top + u_2x_2^\top\)</span> (up to the factors <span class="math inline">\(\frac\eta2\)</span>), where <span class="math inline">\(u_i = \sum_t\delta_1^{(t)}(x_i)\)</span> is example <span class="math inline">\(i\)</span>’s signal summed over the steps. Unit <span class="math inline">\(j\)</span> still isolates example 1 if <span class="math inline">\(u_{2,j} = 0\)</span>, which for ReLU requires the unit to stay off on <span class="math inline">\(x_2\)</span> at every step. As the weights move, a unit can switch on or off part-way, so isolation over <span class="math inline">\(T\)</span> steps is a little rarer than for one step.</li>
+<li><strong>Check.</strong> With <span class="math inline">\(T = 5\)</span> and <span class="math inline">\(\eta = 0.5\)</span> on one image, the ratio recovers <span class="math inline">\(x\)</span> to a relative error of <span class="math inline">\(1.4\times10^{-16}\)</span>, and the update’s second singular value is <span class="math inline">\(1.4\times10^{-16}\)</span> times its first. Over 200 batches of two, unit ratios of the update recover 0.963 of the examples exactly after one step and 0.917 after five.</li>
+</ol>
+<p><em>Local steps change the backward signals, not the inputs they multiply, so a client that trains on its data before sending an update has hidden nothing about a single example and little about a small batch.</em></p>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-attacks/05-memorization-extraction.html" class="pagination-link" aria-label="Exercises: Memorization and training-data extraction">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Exercises: Memorization and training-data extraction</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-attacks/07-linkage-reidentification.html" class="pagination-link" aria-label="Exercises: Linkage and re-identification">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Exercises: Linkage and re-identification</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

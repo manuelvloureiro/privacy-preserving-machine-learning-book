@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>42&nbsp; User-level differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part05-dp-ml/08-disparate-impact.html" rel="next">
+<link href="../part05-dp-ml/06-public-data.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning for Practitioners</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">42.1</span> Why this matters</a></li>
+  <li><a href="#sec-ulvl-unit" id="toc-sec-ulvl-unit" class="nav-link" data-scroll-target="#sec-ulvl-unit"><span class="header-section-number">42.2</span> The privacy unit</a></li>
+  <li><a href="#sec-ulvl-group-sgd" id="toc-sec-ulvl-group-sgd" class="nav-link" data-scroll-target="#sec-ulvl-group-sgd"><span class="header-section-number">42.3</span> What a record-level model gives a heavy user</a></li>
+  <li><a href="#sec-ulvl-dpsgd" id="toc-sec-ulvl-dpsgd" class="nav-link" data-scroll-target="#sec-ulvl-dpsgd"><span class="header-section-number">42.4</span> User-level DP-SGD</a></li>
+  <li><a href="#sec-ulvl-bounding" id="toc-sec-ulvl-bounding" class="nav-link" data-scroll-target="#sec-ulvl-bounding"><span class="header-section-number">42.5</span> Contribution bounding</a></li>
+  <li><a href="#sec-ulvl-hetero" id="toc-sec-ulvl-hetero" class="nav-link" data-scroll-target="#sec-ulvl-hetero"><span class="header-section-number">42.6</span> Heavy users and the objective</a></li>
+  <li><a href="#sec-ulvl-run" id="toc-sec-ulvl-run" class="nav-link" data-scroll-target="#sec-ulvl-run"><span class="header-section-number">42.7</span> Choosing a strategy</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">42.8</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">42.9</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">42.10</span> Further reading</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="42.1">
+<h2 data-number="42.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">42.1</span> Why this matters</h2>
+<p>Every differential privacy (DP) guarantee in this part so far protects one record. Stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, reports <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> for the part’s running example, and that number says an adversary who sees the model learns little about whether any single training example was used. But people do not contribute one record each. A user of a messaging app writes hundreds of messages, a patient has dozens of visits, a photographer uploads thousands of photos. Each record is protected; the person behind all of them is not, because what an adversary learns from all of a person’s records together can be far more than what they learn from one.</p>
+<p>The one idea: <strong>the neighbouring relation is the privacy unit.</strong> DP compares outputs on two datasets that differ in one unit, and whatever differs between them is what is protected. If neighbours differ in one record, records are protected; if they differ in all of one person’s records, people are. Nothing else in the definition changes. So there are two ways to protect a person. You can keep the record as the unit and pay for the person afterwards, which is cheap to build and expensive in privacy. Or you can make the person the unit from the start: sample people, bound each person’s total contribution, and run the usual accountant with people in place of records. On the running example the first route gives a useless model at any reasonable budget, and the second a model within a few points of the non-private one.</p>
+</section>
+<section id="sec-ulvl-unit" class="level2" data-number="42.2">
+<h2 data-number="42.2" class="anchored" data-anchor-id="sec-ulvl-unit"><span class="header-section-number">42.2</span> The privacy unit</h2>
+<p>A mechanism is <strong>user-level</strong> <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if the definition of DP holds for every pair of datasets that differ by adding or removing all the records of one user; it is <strong>example-level</strong> DP if it holds for datasets that differ in one record. User-level DP is not a new privacy notion, only a coarser neighbouring relation, so post-processing, composition and every accountant of <a href="../part04-privacy-accounting/00-introduction.html">Part 4</a> hold for it unchanged. What changes is the sensitivity: how far one unit can move the computation. Records, users, households, devices and organizations are all possible units, and the right one answers the question “whose participation do I want to hide?” A guarantee that does not name its unit leaves that question open.</p>
+<p>What does an example-level guarantee promise a person with <span class="math inline">\(k\)</span> records? Adding that person’s records one at a time walks from one dataset to the other in <span class="math inline">\(k\)</span> example-level steps. <strong>Group privacy</strong> applies the one-record guarantee at each step (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>): each step multiplies the probability bound by <span class="math inline">\(e^\varepsilon\)</span>, so the person gets <span class="math inline">\(k\varepsilon\)</span>, and each step’s slack <span class="math inline">\(\delta\)</span> is multiplied by the <span class="math inline">\(e^\varepsilon\)</span> of every later step, <span id="eq-auto-07userlevel-1"><span class="math display">\[\delta_k = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1}. \tag{42.1}\]</span></span> Some mechanisms attain this bound, so nothing better holds for a mechanism known only to be <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. The <span class="math inline">\(\varepsilon\)</span> part is linear in <span class="math inline">\(k\)</span>, already weak: at <span class="math inline">\(\varepsilon = 1\)</span> per record, a person with 10 records gets <span class="math inline">\(\varepsilon = 10\)</span>. The <span class="math inline">\(\delta\)</span> part is worse, because it grows exponentially in <span class="math inline">\(k\varepsilon\)</span>.</p>
+<p>Read naively, the running example’s <span class="math inline">\((6.71, 10^{-5})\)</span> gives a user with two records <span class="math inline">\(\varepsilon = 13.42\)</span> and <span class="math inline">\(\delta_2 = 10^{-5}(1 + e^{6.71}) = 0.0082\)</span>: a chance of almost one in a hundred that the guarantee fails outright, which is no guarantee. You can do better for DP-SGD, because its accountant converts to <span class="math inline">\((\varepsilon, \delta)\)</span> at any <span class="math inline">\(\delta\)</span>: pick the per-record <span class="math inline">\(\delta\)</span> that makes <span class="math inline">\(\delta_2 = 10^{-5}\)</span> exactly. That gives a per-record <span class="math inline">\(\varepsilon\)</span> of 9.30 and a user-level <span class="math inline">\((18.61, 10^{-5})\)</span>. For five records the same procedure gives a user-level <span class="math inline">\(\varepsilon\)</span> of 118.12. For ten it gives nothing at all. Shrinking the per-record <span class="math inline">\(\delta\)</span> raises the per-record <span class="math inline">\(\varepsilon\)</span>, and <span class="math inline">\(\delta_k\)</span> is a race between a falling <span class="math inline">\(\delta\)</span> and a rising <span class="math inline">\(e^{(k-1)\varepsilon}\)</span>; beyond a few records the rising term wins at every <span class="math inline">\(\delta\)</span>, and no choice brings <span class="math inline">\(\delta_{10}\)</span> down to <span class="math inline">\(10^{-5}\)</span>. In the running example’s population of 1,000 users, 244 have at least ten records.</p>
+</section>
+<section id="sec-ulvl-group-sgd" class="level2" data-number="42.3">
+<h2 data-number="42.3" class="anchored" data-anchor-id="sec-ulvl-group-sgd"><span class="header-section-number">42.3</span> What a record-level model gives a heavy user</h2>
+<p>Group privacy treats DP-SGD as a black box, and it is not one: you know exactly how a user’s records enter each step. Recall that DP-SGD draws each record into the batch independently with probability <span class="math inline">\(q\)</span> (Poisson sampling), clips each record’s gradient to norm <span class="math inline">\(C\)</span>, sums them and adds Gaussian noise of standard deviation <span class="math inline">\(\sigma C\)</span>, where <span class="math inline">\(\sigma\)</span> is the noise multiplier. A user with <span class="math inline">\(k\)</span> records therefore has a random number of them in each batch, between 0 and <span class="math inline">\(k\)</span>, binomially distributed, and the worst case is that all the drawn ones push the sum by the full <span class="math inline">\(C\)</span> in the same direction. So, in units of <span class="math inline">\(C\)</span>, one step compares the noise alone, <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span>, with a mixture of Gaussians shifted by <span class="math inline">\(m = 0, 1, \dots, k\)</span>, each weighted by the probability that <span class="math inline">\(m\)</span> of the user’s records were drawn. Charles et al.&nbsp;(2024, Theorem 3) prove that this pair, composed over the steps, bounds the user’s privacy loss, and that some loss function, one that aligns the user’s gradients, attains it. An accountant built on the pair computes the user’s guarantee directly, the same way the <a href="../part04-privacy-accounting/05-subsampling.html">subsampling</a> accountant does for one record.</p>
+<p>The result has a simple reading while <span class="math inline">\(kq\)</span> is small: <strong>a user with <span class="math inline">\(k\)</span> records looks like one record sampled at rate <span class="math inline">\(kq\)</span>.</strong> Amplification by subsampling works because the unit is usually absent from the batch, and what matters is the probability that some record of the user is present, about <span class="math inline">\(kq\)</span>. Halving the sampling rate exactly compensates doubling the user’s records. So the quick estimate is to rerun the record-level accountant with <span class="math inline">\(q\)</span> replaced by <span class="math inline">\(kq\)</span>. It errs on the low side, because it drops the steps in which several of the user’s records are drawn together, and those steps shift the sum by several clipping norms at once, a mechanism with noise multiplier <span class="math inline">\(\sigma/m\)</span> whose tail no amount of rarity can hide at high orders.</p>
+<p><a href="#tbl-ulvl-k" class="quarto-xref">Table&nbsp;<span>42.1</span></a> applies the accountant to the running example’s DP-SGD run, <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps, <span class="math inline">\(\delta = 10^{-5}\)</span>.</p>
+<div id="tbl-ulvl-k" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;42.1: The user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example’s example-level DP-SGD, for a user with <span class="math inline">\(k\)</span> records. “None” means group privacy gives no <span class="math inline">\((\varepsilon, 10^{-5})\)</span> guarantee.
+</figcaption>
+<div aria-describedby="tbl-ulvl-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Records of the user <span class="math inline">\(k\)</span></th>
+<th>1</th>
+<th>2</th>
+<th>5</th>
+<th>10</th>
+<th>50</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>User accountant</td>
+<td>6.72</td>
+<td>15.54</td>
+<td>52.36</td>
+<td>146.20</td>
+<td>2161.43</td>
+</tr>
+<tr class="even">
+<td>Group privacy</td>
+<td>6.71</td>
+<td>18.61</td>
+<td>118.12</td>
+<td>none</td>
+<td>none</td>
+</tr>
+<tr class="odd">
+<td>One record at rate <span class="math inline">\(kq\)</span></td>
+<td>6.71</td>
+<td>15.32</td>
+<td>50.11</td>
+<td>134.50</td>
+<td>1673.08</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Already at two records the person is protected at <span class="math inline">\(\varepsilon = 15.54\)</span>, more than twice the record’s 6.71; at ten, 146.20 means no protection at all. The direct accountant beats group privacy for every user with more than one record and stays finite where group privacy gives up (<a href="#fig-ulvl-user-eps" class="quarto-xref">Figure&nbsp;<span>42.1</span></a>). The rate-<span class="math inline">\(kq\)</span> estimate is within 1.5% at two records and 8% at ten, and below the accountant in every row. One more point matters for an auditor: the accountant is a worst case over gradients, not a pessimistic estimate. Real users’ gradients are partly aligned, which is exactly why their records are correlated, and the theorem says some loss attains the bound, so treat it as the guarantee.</p>
+<div id="fig-ulvl-user-eps" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ulvl-user-eps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/ulvl_user_epsilon.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ulvl-user-eps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;42.1: The user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example’s DP-SGD (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps; <span class="math inline">\(\varepsilon = 6.71\)</span> per record) for a user with <span class="math inline">\(k\)</span> records. The direct accountant (black) is close to a single record sampled at rate <span class="math inline">\(kq\)</span> (blue, dotted) and grows faster than linearly (grey). Group privacy from the record-level guarantee (red, dashed) is larger, and gives no guarantee at all for <span class="math inline">\(k = 10\)</span> and above.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-ulvl-dpsgd" class="level2" data-number="42.4">
+<h2 data-number="42.4" class="anchored" data-anchor-id="sec-ulvl-dpsgd"><span class="header-section-number">42.4</span> User-level DP-SGD</h2>
+<p>Accounting for users after the fact charges a heavy user for every one of their records. The alternative, due to McMahan, Ramage, Talwar &amp; Zhang (2018), who used it for federated learning of a language model, changes what DP-SGD samples and clips. At each step, put each <em>user</em> in the batch independently with probability <span class="math inline">\(q\)</span>. For each sampled user, compute one vector from that user’s records alone, for example their average gradient, or the change in weights after a few local SGD steps on their data. Clip that vector to norm <span class="math inline">\(C\)</span>, sum over the sampled users, add Gaussian noise of standard deviation <span class="math inline">\(\sigma C\)</span>, and divide by the expected number of sampled users, <span class="math inline">\(qU\)</span> for <span class="math inline">\(U\)</span> users.</p>
+<p>The guarantee follows because each property the DP-SGD proof used still holds with users in place of records. Adding a user adds one clipped vector to the sum and changes no other, so one user moves the sum by at most <span class="math inline">\(C\)</span> however many records they have. The user is in the batch with probability <span class="math inline">\(q\)</span>, independently of the others, so each step is the same subsampled Gaussian mechanism as before. The result is user-level DP with exactly the accountant of example-level DP-SGD, with <span class="math inline">\(q\)</span> now the user sampling rate.</p>
+<p>Two consequences follow, one bad and one good. The bad one: <strong>you pay for the number of units.</strong> There are fewer people than records, so to keep the same expected batch you must sample at a higher rate, and amplification is weaker. On the running example, with 1,000 steps and an expected batch of 100 units, a record-level <span class="math inline">\(\varepsilon = 4\)</span> needs <span class="math inline">\(\sigma = 0.778\)</span> at <span class="math inline">\(q = 0.01\)</span>, while a user-level <span class="math inline">\(\varepsilon = 4\)</span> needs <span class="math inline">\(\sigma = 3.78\)</span> at <span class="math inline">\(q = 0.1\)</span>. The noise on the averaged update is about five times larger, 0.0189 against 0.00389. That is the honest price of protecting people: there are ten times fewer of them than records, and DP’s cost per unit is fixed. The good one: <strong>records inside a user are free.</strong> The guarantee does not depend on how many records a user has, so they can be averaged, used for several local steps or subsampled without changing <span class="math inline">\(\varepsilon\)</span>. More records make each user’s vector a better estimate of their gradient, so the signal improves while the noise stays put.</p>
+<p>A common variant keeps per-record clipping: keep at most <span class="math inline">\(k\)</span> records per user, clip each to <span class="math inline">\(C\)</span>, and sum them, with users still sampled whole. One user then moves the sum by up to <span class="math inline">\(kC\)</span>, and the guarantee is that of noise multiplier <span class="math inline">\(\sigma/k\)</span>, a factor <span class="math inline">\(k\)</span> in noise that averaging before clipping avoids. Summing all of a user’s records and then clipping the sum is also valid, with sensitivity <span class="math inline">\(C\)</span>.</p>
+<p>The proof assumes two things that implementations can break. Each user’s vector must be computed from that user’s data alone, which rules out normalizing across users and requires that one person is not spread over several “users”; if one person has several accounts, the unit is the account and the person is again a group. And users must be Poisson-sampled; iterating over users in a fixed shuffled order is a different mechanism, exactly as for records.</p>
+</section>
+<section id="sec-ulvl-bounding" class="level2" data-number="42.5">
+<h2 data-number="42.5" class="anchored" data-anchor-id="sec-ulvl-bounding"><span class="header-section-number">42.5</span> Contribution bounding</h2>
+<p>User-level DP-SGD needs a pipeline that groups records by user and computes one vector per user. Many pipelines are built around records instead: shuffled files of examples, per-example gradient code, fixed-length batches. You can keep such a pipeline and still protect users with <strong>contribution bounding</strong>: keep at most <span class="math inline">\(k\)</span> records of each user, chosen without looking at other users’ data (for example at random), discard the rest, and run example-level DP-SGD on what remains. Adding a user then adds at most <span class="math inline">\(k\)</span> records, all theirs, so the user accountant of <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 42.3</span></a> with <span class="math inline">\(k\)</span> records gives the user-level guarantee. The selection must look only at the user’s own records; a rule that kept, say, the records most similar to the rest of the dataset could change which records other users keep when one user is added.</p>
+<p>The cap is a bias–variance trade-off (Amin, Kulesza, Muñoz Medina &amp; Vassilvitskii 2019). A larger cap keeps more data but, since the user looks like a record sampled at rate <span class="math inline">\(kq\)</span>, it needs noise growing roughly in proportion to <span class="math inline">\(k\)</span> at a fixed sampling rate. A smaller cap needs less noise but throws away data, all of it from heavy users, so what remains is both smaller and reweighted toward light users. <a href="#tbl-ulvl-cap" class="quarto-xref">Table&nbsp;<span>42.2</span></a> shows the trade-off at a user-level <span class="math inline">\(\varepsilon = 4\)</span> on the running example, with 1,000 steps and an expected batch of 100 records.</p>
+<div id="tbl-ulvl-cap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-cap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;42.2: Contribution bounding at user-level <span class="math inline">\(\varepsilon = 4\)</span>: example-level DP-SGD on at most <span class="math inline">\(k\)</span> records per user, accounted for <span class="math inline">\(k\)</span> records, one run each.
+</figcaption>
+<div aria-describedby="tbl-ulvl-cap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Cap <span class="math inline">\(k\)</span></th>
+<th>Records kept</th>
+<th>Noise multiplier <span class="math inline">\(\sigma\)</span></th>
+<th>Test accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1,000 (10.0%)</td>
+<td>3.78</td>
+<td>0.8917</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1,807 (18.1%)</td>
+<td>4.18</td>
+<td>0.8920</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>3,506 (35.1%)</td>
+<td>5.34</td>
+<td>0.8790</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>5,063 (50.6%)</td>
+<td>7.34</td>
+<td>0.8276</td>
+</tr>
+<tr class="odd">
+<td>20</td>
+<td>6,631 (66.3%)</td>
+<td>11.2</td>
+<td>0.7562</td>
+</tr>
+<tr class="even">
+<td>50</td>
+<td>8,437 (84.4%)</td>
+<td>21.8</td>
+<td>0.6401</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Raising the cap from 1 to 50 multiplies the data by 8.4 and the noise multiplier by 5.8, and accuracy falls from 0.8917 to 0.6401. On this task the noise dominates: one record per user already holds most of what the network can learn privately at this budget, and every extra record costs more in noise than it adds in signal. Caps 1 and 2 are tied. Two cautions follow. The best cap depends on the distribution of user sizes, so it should come from public knowledge of the population or be chosen privately; trying several caps and keeping the best test accuracy, as this table does to show the trade-off, spends privacy that the accountant does not see (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>). And the two techniques combine: cap records to bound compute, then compute one clipped vector per user, so the cap costs data but no longer noise.</p>
+</section>
+<section id="sec-ulvl-hetero" class="level2" data-number="42.6">
+<h2 data-number="42.6" class="anchored" data-anchor-id="sec-ulvl-hetero"><span class="header-section-number">42.6</span> Heavy users and the objective</h2>
+<p>User sizes are rarely equal. In the running example’s population the mean user has 10 records, the median 4, and the largest 348; the 30 users with at least 50 records hold 30.6% of all records (<a href="#fig-ulvl-population" class="quarto-xref">Figure&nbsp;<span>42.2</span></a>).</p>
+<div id="fig-ulvl-population" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ulvl-population-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/ulvl_population.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ulvl-population-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;42.2: Left: the number of records per user in the running example’s population of 1,000 users, on log–log axes; 193 users have one record and the largest has 348. Right: the share of all records held by the largest users. The largest 10 users hold 17.9% of the records and the smallest half of the users 10.3%.
+</figcaption>
+</figure>
+</div>
+<p>Example-level training gives each user a weight proportional to their records, so those 30 users carry 30.6% of the expected update. User-level DP-SGD with averaged, clipped vectors gives each user at most <span class="math inline">\(1/U\)</span>, because each clipped vector is at most <span class="math inline">\(C\)</span> long and the sum is divided by the number of users; the same 30 users carry at most 3.0%. So user-level training changes the objective, not only the noise: it minimizes roughly the average over users of each user’s average loss, not the average over records. Whether that is what you want depends on the application. For a keyboard model, weighting people equally keeps a few very active users from defining everyone’s suggestions. For a model meant to fit the overall distribution of records, it under-weights heavy users’ content, which matters when heavy users differ from light ones in language, topic or device. Summing a user’s gradients before clipping sits in between: it weights records until a user’s sum reaches <span class="math inline">\(C\)</span>, and users beyond that.</p>
+<p>On the running example the reweighting costs nothing measurable. At user-level <span class="math inline">\(\varepsilon = 4\)</span>, user-level DP-SGD reaches 0.9361 on test points whose nearest training record belongs to a heavy user and 0.9319 on the others, against 0.9607 and 0.9622 for the non-private model. That is because one teacher network labels every record, so light users’ records teach the same function. On data where heavy users follow their own patterns, the same reweighting would cost accuracy on those patterns, and clipping adds to it: a heavy user whose data are unusual has a long average gradient, which is clipped to the same <span class="math inline">\(C\)</span> as everyone else’s, the user-level version of what clipping does to small groups in <a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a>.</p>
+</section>
+<section id="sec-ulvl-run" class="level2" data-number="42.7">
+<h2 data-number="42.7" class="anchored" data-anchor-id="sec-ulvl-run"><span class="header-section-number">42.7</span> Choosing a strategy</h2>
+<p>Three ways to train the running example with a user-level guarantee are now on the table: (a) example-level DP-SGD on all records, accounted for the heaviest user, <span class="math inline">\(k = 348\)</span>; (b) user-level DP-SGD; (c) a cap of two records per user, then example-level DP-SGD. <a href="#tbl-ulvl-run" class="quarto-xref">Table&nbsp;<span>42.3</span></a> gives each one’s noise multiplier and test accuracy at the same user-level budget, with 1,000 steps and an expected batch of 100 units, one run each.</p>
+<div id="tbl-ulvl-run" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;42.3: Noise multiplier and test accuracy of the three strategies at the same user-level budget, <span class="math inline">\(\delta = 10^{-5}\)</span>, one run each. The non-private model reaches 0.9612.
+</figcaption>
+<div aria-describedby="tbl-ulvl-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>User-level <span class="math inline">\(\varepsilon\)</span></th>
+<th>(a) All records: <span class="math inline">\(\sigma\)</span></th>
+<th>accuracy</th>
+<th>(b) User-level DP-SGD: <span class="math inline">\(\sigma\)</span></th>
+<th>accuracy</th>
+<th>(c) Cap of 2: <span class="math inline">\(\sigma\)</span></th>
+<th>accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>449</td>
+<td>0.5318</td>
+<td>12.9</td>
+<td>0.8065</td>
+<td>14.4</td>
+<td>0.7084</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>237</td>
+<td>0.5582</td>
+<td>6.89</td>
+<td>0.9028</td>
+<td>7.62</td>
+<td>0.8374</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>128</td>
+<td>0.5713</td>
+<td>3.78</td>
+<td>0.9347</td>
+<td>4.18</td>
+<td>0.8810</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>70.3</td>
+<td>0.5478</td>
+<td>2.18</td>
+<td>0.9442</td>
+<td>2.4</td>
+<td>0.9333</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Keeping the record as the unit fails: strategy (a) stays near chance at every budget up to <span class="math inline">\(\varepsilon = 8\)</span>. The heaviest user has on average <span class="math inline">\(348 \times 0.01 = 3.48\)</span> records in every batch, so subsampling hardly hides them, and the noise must cover a shift of several clipping norms in nearly every step, which takes <span class="math inline">\(\sigma\)</span> in the hundreds and drowns every gradient. Removing that user would not help much either, since the next-largest has 258 records.</p>
+<p>Changing the unit wins. User-level DP-SGD is the best strategy at every budget, 0.9347 at <span class="math inline">\(\varepsilon = 4\)</span> against 0.9612 non-private, with its largest advantage at small budgets: 9.8 points ahead of the cap at <span class="math inline">\(\varepsilon = 1\)</span>, 1.1 points at <span class="math inline">\(\varepsilon = 8\)</span>. It needs a little less noise than the cap and, unlike the cap, uses every record through the per-user average. Its cost is compute: each step processes all the records of about 100 users, about 1,000 records, ten times what the record-based strategies process. Bounding is the fallback when the pipeline must stay record-based; it comes close at <span class="math inline">\(\varepsilon = 8\)</span>, where the discarded data, not the noise, limits accuracy. Single runs vary by about a point at these budgets, so read the large gaps, not the small ones (<a href="#fig-ulvl-strategies" class="quarto-xref">Figure&nbsp;<span>42.3</span></a>).</p>
+<div id="fig-ulvl-strategies" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ulvl-strategies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/ulvl_strategies.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ulvl-strategies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;42.3: Test accuracy of the running example against the user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, for the three strategies (1,000 steps, expected batch 100, one run each; the runs differ from <a href="#tbl-ulvl-run" class="quarto-xref">Table&nbsp;<span>42.3</span></a> in their random seeds). User-level DP-SGD is best at every budget; example-level DP-SGD on all records, accounted for its heaviest user, stays near chance.
+</figcaption>
+</figure>
+</div>
+<p>Published comparisons on language models, with different data, models and accountants, point the same way. Chua et al.&nbsp;(2024) find that user-level DP-SGD with per-user averaging generally beats contribution bounding, especially at small budgets, though they account for the cap with generic group privacy, which costs them more noise than the direct accountant would. Charles et al.&nbsp;(2024) report that sampling users usually does better when each user’s data are varied and when strong privacy is required, and that sampling examples sometimes wins.</p>
+<p>At <span class="math inline">\(\varepsilon = 4\)</span> the user-level model is 2.7 points below the non-private one (0.9347 against 0.9612). The record-level model of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> at the same <span class="math inline">\(\varepsilon\)</span>, trained for 10,000 steps, reached 0.9548; the difference is the price of the unit, and the user-level model protects 1,000 people instead of 10,000 records, including the person with 348 records as well as the one with a single record.</p>
+</section>
+<section id="code" class="level2" data-number="42.8">
+<h2 data-number="42.8" class="anchored" data-anchor-id="code"><span class="header-section-number">42.8</span> Code</h2>
+<p>The full edition’s script builds the user population, implements the user accountant by numerical integration and checks it against exact formulas, compares it with group privacy, and trains the three strategies with the part’s network. It takes about a minute and a half:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/user_level.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="cheat-sheet" class="level2" data-number="42.9">
+<h2 data-number="42.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">42.9</span> Cheat sheet</h2>
+<div id="tbl-ulvl-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;42.4: The results of this chapter.
+</figcaption>
+<div aria-describedby="tbl-ulvl-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Formula or rule</th>
+<th>Conditions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Group privacy</td>
+<td><span class="math inline">\((k\varepsilon,\ \delta(e^{k\varepsilon} - 1)/(e^\varepsilon - 1))\)</span></td>
+<td>Any example-level <span class="math inline">\((\varepsilon, \delta)\)</span> mechanism; can give no guarantee for DP-SGD beyond a few records</td>
+</tr>
+<tr class="even">
+<td>User with <span class="math inline">\(k\)</span> records, example-level DP-SGD</td>
+<td>Noise alone against a mixture of shifts <span class="math inline">\(0, \dots, k\)</span> with binomial weights</td>
+<td>Tight (Charles et al.&nbsp;2024, Theorem 3)</td>
+</tr>
+<tr class="odd">
+<td>Quick estimate</td>
+<td>Record-level accountant at rate <span class="math inline">\(kq\)</span></td>
+<td>Small <span class="math inline">\(kq\)</span>; slightly optimistic</td>
+</tr>
+<tr class="even">
+<td>User-level DP-SGD</td>
+<td>DP-SGD’s accountant with users as units, <span class="math inline">\(q\)</span> the user sampling rate</td>
+<td>One clipped vector per user, from that user’s data alone; users Poisson-sampled</td>
+</tr>
+<tr class="odd">
+<td>Capped sum per user</td>
+<td>Noise multiplier <span class="math inline">\(\sigma/k\)</span></td>
+<td>Per-record clipping, at most <span class="math inline">\(k\)</span> records, users sampled whole</td>
+</tr>
+<tr class="even">
+<td>Contribution bounding</td>
+<td>User accountant for <span class="math inline">\(k\)</span> records</td>
+<td>Records kept per user without looking at other users; cap chosen from public knowledge</td>
+</tr>
+<tr class="odd">
+<td>Weight of a user</td>
+<td>At most <span class="math inline">\(1/U\)</span> (user-level), <span class="math inline">\(n_u/n\)</span> (example-level)</td>
+<td>Averaged, clipped per-user vectors</td>
+</tr>
+<tr class="even">
+<td>Running example</td>
+<td>6.71 per record; 15.54 for a user with 2 records, 146.20 with 10</td>
+<td><span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Name the privacy unit with every <span class="math inline">\(\varepsilon\)</span>; a record-level number says little about a person with many records. Prefer user-level DP-SGD with per-user averaging, which pays for the number of people rather than their records and uses all their data, and decide deliberately how heavy users should count.</p>
+</section>
+<section id="further-reading" class="level2" data-number="42.10">
+<h2 data-number="42.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">42.10</span> Further reading</h2>
+<ul>
+<li>McMahan, Ramage, Talwar &amp; Zhang, “Learning Differentially Private Recurrent Language Models” (ICLR 2018): user-level DP-SGD in federated learning, the algorithm of <a href="#sec-ulvl-dpsgd" class="quarto-xref"><span>Section 42.4</span></a>.</li>
+<li>Charles, Ganesh, McKenna, McMahan, Mitchell, Pillutla &amp; Rush, “Fine-Tuning Large Language Models with User-Level Differential Privacy” (arXiv 2407.07737, 2024): the tight accountant for a user under example-level sampling, and an empirical comparison of sampling examples against sampling users.</li>
+<li>Chua, Ghazi, Huang, Kamath, Kumar, Liu, Manurangsi, Sinha &amp; Zhang, “Mind the Privacy Unit! User-Level Differential Privacy for Language Model Fine-Tuning” (Conference on Language Modeling 2024): contribution bounding against user-wise DP-SGD, with rules for which records to keep.</li>
+<li>Amin, Kulesza, Muñoz Medina &amp; Vassilvitskii, “Bounding User Contributions: A Bias-Variance Trade-off in Differential Privacy” (ICML 2019): how to think about the cap, and how the best one depends on the distribution of user sizes.</li>
+</ul>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part05-dp-ml/07-user-level.html">the full edition’s chapter</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part05-dp-ml/06-public-data.html" class="pagination-link" aria-label="Public data and private fine-tuning">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part05-dp-ml/08-disparate-impact.html" class="pagination-link" aria-label="Disparate impact">
+        <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

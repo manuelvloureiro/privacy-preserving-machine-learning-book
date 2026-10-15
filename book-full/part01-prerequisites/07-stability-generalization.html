@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Algorithmic stability and generalization – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part01-prerequisites/08-crypto-basics.html" rel="next">
+<link href="../part01-prerequisites/06-optimization.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-prerequisites/00-introduction.html">Prerequisites</a></li><li class="breadcrumb-item"><a href="../part01-prerequisites/07-stability-generalization.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">7.1</span> Why this matters</a></li>
+  <li><a href="#toolkit-five-facts-every-derivation-uses" id="toc-toolkit-five-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-five-facts-every-derivation-uses"><span class="header-section-number">7.2</span> Toolkit: five facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-lipschitz-losses-turn-parameter-changes-into-loss-changes" id="toc-fact-1-lipschitz-losses-turn-parameter-changes-into-loss-changes" class="nav-link" data-scroll-target="#fact-1-lipschitz-losses-turn-parameter-changes-into-loss-changes"><span class="header-section-number">7.2.1</span> Fact 1 — Lipschitz losses turn parameter changes into loss changes</a></li>
+  <li><a href="#fact-2-swapping-two-i.i.d.-variables-does-not-change-their-joint-law" id="toc-fact-2-swapping-two-i.i.d.-variables-does-not-change-their-joint-law" class="nav-link" data-scroll-target="#fact-2-swapping-two-i.i.d.-variables-does-not-change-their-joint-law"><span class="header-section-number">7.2.2</span> Fact 2 — Swapping two i.i.d. variables does not change their joint law</a></li>
+  <li><a href="#fact-3-strong-convexity-makes-the-gradient-strongly-monotone" id="toc-fact-3-strong-convexity-makes-the-gradient-strongly-monotone" class="nav-link" data-scroll-target="#fact-3-strong-convexity-makes-the-gradient-strongly-monotone"><span class="header-section-number">7.2.3</span> Fact 3 — Strong convexity makes the gradient strongly monotone</a></li>
+  <li><a href="#fact-4-for-convex-smooth-functions-a-small-gradient-step-is-non-expansive" id="toc-fact-4-for-convex-smooth-functions-a-small-gradient-step-is-non-expansive" class="nav-link" data-scroll-target="#fact-4-for-convex-smooth-functions-a-small-gradient-step-is-non-expansive"><span class="header-section-number">7.2.4</span> Fact 4 — For convex smooth functions, a small gradient step is non-expansive</a></li>
+  <li><a href="#fact-5-mcdiarmids-inequality" id="toc-fact-5-mcdiarmids-inequality" class="nav-link" data-scroll-target="#fact-5-mcdiarmids-inequality"><span class="header-section-number">7.2.5</span> Fact 5 — McDiarmid’s inequality</a></li>
+  </ul></li>
+  <li><a href="#risk-empirical-risk-and-the-gap" id="toc-risk-empirical-risk-and-the-gap" class="nav-link" data-scroll-target="#risk-empirical-risk-and-the-gap"><span class="header-section-number">7.3</span> Risk, empirical risk and the gap</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">7.3.1</span> Context</a></li>
+  <li><a href="#definitions" id="toc-definitions" class="nav-link" data-scroll-target="#definitions"><span class="header-section-number">7.3.2</span> Definitions</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">7.3.3</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">7.3.4</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">7.3.5</span> Interpretation</a></li>
+  <li><a href="#example-an-overfit-logistic-regression" id="toc-example-an-overfit-logistic-regression" class="nav-link" data-scroll-target="#example-an-overfit-logistic-regression"><span class="header-section-number">7.3.6</span> Example: an overfit logistic regression</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">7.3.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#uniform-stability-and-the-expected-gap" id="toc-uniform-stability-and-the-expected-gap" class="nav-link" data-scroll-target="#uniform-stability-and-the-expected-gap"><span class="header-section-number">7.4</span> Uniform stability and the expected gap</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">7.4.1</span> Context</a></li>
+  <li><a href="#definition" id="toc-definition" class="nav-link" data-scroll-target="#definition"><span class="header-section-number">7.4.2</span> Definition</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">7.4.3</span> Statement</a></li>
+  <li><a href="#derivation-the-renaming-trick" id="toc-derivation-the-renaming-trick" class="nav-link" data-scroll-target="#derivation-the-renaming-trick"><span class="header-section-number">7.4.4</span> Derivation (the renaming trick)</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">7.4.5</span> Interpretation</a></li>
+  <li><a href="#example-a-memorizing-lookup-table" id="toc-example-a-memorizing-lookup-table" class="nav-link" data-scroll-target="#example-a-memorizing-lookup-table"><span class="header-section-number">7.4.6</span> Example: a memorizing lookup table</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">7.4.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#high-probability-the-bousquetelisseeff-bound" id="toc-high-probability-the-bousquetelisseeff-bound" class="nav-link" data-scroll-target="#high-probability-the-bousquetelisseeff-bound"><span class="header-section-number">7.5</span> High probability: the Bousquet–Elisseeff bound</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">7.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">7.5.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">7.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-beta-must-be-o1sqrt-n" id="toc-interpretation-beta-must-be-o1sqrt-n" class="nav-link" data-scroll-target="#interpretation-beta-must-be-o1sqrt-n"><span class="header-section-number">7.5.4</span> Interpretation: <span class="math inline">\(\beta\)</span> must be <span class="math inline">\(o(1/\sqrt n)\)</span></a></li>
+  <li><a href="#example-regularized-logistic-regression" id="toc-example-regularized-logistic-regression" class="nav-link" data-scroll-target="#example-regularized-logistic-regression"><span class="header-section-number">7.5.5</span> Example: regularized logistic regression</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">7.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#regularized-erm-is-stable" id="toc-regularized-erm-is-stable" class="nav-link" data-scroll-target="#regularized-erm-is-stable"><span class="header-section-number">7.6</span> Regularized ERM is stable</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">7.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">7.6.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">7.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">7.6.4</span> Interpretation</a></li>
+  <li><a href="#example-replace-one-change-in-logistic-regression" id="toc-example-replace-one-change-in-logistic-regression" class="nav-link" data-scroll-target="#example-replace-one-change-in-logistic-regression"><span class="header-section-number">7.6.5</span> Example: replace-one change in logistic regression</a></li>
+  <li><a href="#example-the-generalization-gap-against-the-bound" id="toc-example-the-generalization-gap-against-the-bound" class="nav-link" data-scroll-target="#example-the-generalization-gap-against-the-bound"><span class="header-section-number">7.6.6</span> Example: the generalization gap against the bound</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">7.6.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sgd-is-stable-if-you-stop-early" id="toc-sgd-is-stable-if-you-stop-early" class="nav-link" data-scroll-target="#sgd-is-stable-if-you-stop-early"><span class="header-section-number">7.7</span> SGD is stable if you stop early</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">7.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">7.7.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">7.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">7.7.4</span> Interpretation</a></li>
+  <li><a href="#example-unregularized-logistic-regression-with-sgd" id="toc-example-unregularized-logistic-regression-with-sgd" class="nav-link" data-scroll-target="#example-unregularized-logistic-regression-with-sgd"><span class="header-section-number">7.7.5</span> Example: unregularized logistic regression with SGD</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">7.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#an-unstable-algorithm-1-nearest-neighbour" id="toc-an-unstable-algorithm-1-nearest-neighbour" class="nav-link" data-scroll-target="#an-unstable-algorithm-1-nearest-neighbour"><span class="header-section-number">7.8</span> An unstable algorithm: 1-nearest neighbour</a>
+  <ul class="collapse">
+  <li><a href="#context-5" id="toc-context-5" class="nav-link" data-scroll-target="#context-5"><span class="header-section-number">7.8.1</span> Context</a></li>
+  <li><a href="#statement-5" id="toc-statement-5" class="nav-link" data-scroll-target="#statement-5"><span class="header-section-number">7.8.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">7.8.3</span> Derivation</a></li>
+  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">7.8.4</span> Interpretation</a></li>
+  <li><a href="#example-1-nn-against-regularized-logistic-regression" id="toc-example-1-nn-against-regularized-logistic-regression" class="nav-link" data-scroll-target="#example-1-nn-against-regularized-logistic-regression"><span class="header-section-number">7.8.5</span> Example: 1-NN against regularized logistic regression</a></li>
+  <li><a href="#check-yourself-5" id="toc-check-yourself-5" class="nav-link" data-scroll-target="#check-yourself-5"><span class="header-section-number">7.8.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#overfitting-is-memorization-of-individual-examples" id="toc-overfitting-is-memorization-of-individual-examples" class="nav-link" data-scroll-target="#overfitting-is-memorization-of-individual-examples"><span class="header-section-number">7.9</span> Overfitting is memorization of individual examples</a>
+  <ul class="collapse">
+  <li><a href="#context-6" id="toc-context-6" class="nav-link" data-scroll-target="#context-6"><span class="header-section-number">7.9.1</span> Context</a></li>
+  <li><a href="#statement-6" id="toc-statement-6" class="nav-link" data-scroll-target="#statement-6"><span class="header-section-number">7.9.2</span> Statement</a></li>
+  <li><a href="#derivation-5" id="toc-derivation-5" class="nav-link" data-scroll-target="#derivation-5"><span class="header-section-number">7.9.3</span> Derivation</a></li>
+  <li><a href="#interpretation-5" id="toc-interpretation-5" class="nav-link" data-scroll-target="#interpretation-5"><span class="header-section-number">7.9.4</span> Interpretation</a></li>
+  <li><a href="#example-self-influence-in-logistic-regression" id="toc-example-self-influence-in-logistic-regression" class="nav-link" data-scroll-target="#example-self-influence-in-logistic-regression"><span class="header-section-number">7.9.5</span> Example: self-influence in logistic regression</a></li>
+  <li><a href="#check-yourself-6" id="toc-check-yourself-6" class="nav-link" data-scroll-target="#check-yourself-6"><span class="header-section-number">7.9.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-stability-code" id="toc-sec-stability-code" class="nav-link" data-scroll-target="#sec-stability-code"><span class="header-section-number">7.10</span> Code: check every bound by simulation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">7.11</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">7.12</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-prerequisites/00-introduction.html">Prerequisites</a></li><li class="breadcrumb-item"><a href="../part01-prerequisites/07-stability-generalization.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">7.1</span> Why this matters</h2>
+<p>You train a model and its training loss is low. <strong>Will its loss on new data be low too?</strong> The difference between the loss on new data and the loss on the training data is the <strong>generalization gap</strong>, and controlling it is the central question of learning theory. The classical answer counts hypotheses: it measures how rich the class of models is that the algorithm could output, through the size of a finite class, a Vapnik–Chervonenkis dimension or a Rademacher complexity, and argues that a class that is not too rich cannot fit noise. This chapter takes a different route. It looks at the <em>algorithm</em> instead of the class of models it could output.</p>
+<p>The organizing idea fits in one sentence: <strong>a model generalizes when it does not depend much on any single training example.</strong> Making it precise gives three results, and each one leads to the next.</p>
+<p>The first is that <strong>the gap is exactly an average per-example effect.</strong> Take one training example out, put a fresh one from the same source in its place, retrain, and see how much worse the model now does on the example you took out. Average this over the examples. The result is the expected gap, with no inequality involved: overfitting <em>is</em> dependence on individual examples.</p>
+<p>Once the gap is written that way, the second result follows: <strong>a bounded per-example effect gives a bounded gap.</strong> Call <span class="math inline">\(\beta\)</span> the largest amount by which replacing one example can move the loss of the trained model, at any test point. Each term of the average is then at most <span class="math inline">\(\beta\)</span>, so the expected gap is at most <span class="math inline">\(\beta\)</span>. McDiarmid’s inequality, which says that a function of many independent inputs that no single input can move by much stays close to its mean, turns this average statement into one that holds with high probability for the one model you trained.</p>
+<p>The third result makes this useful: <strong>common algorithms have small <span class="math inline">\(\beta\)</span>.</strong> Regularized empirical risk minimization (ERM), which minimizes the training loss plus a penalty <span class="math inline">\(\frac\lambda2\|w\|^2\)</span> on the weights, has <span class="math inline">\(\beta = 2L^2/(\lambda n)\)</span>, where <span class="math inline">\(n\)</span> is the number of examples and <span class="math inline">\(L\)</span> bounds how fast the loss can change with the weights. Stochastic gradient descent (SGD) with step sizes <span class="math inline">\(\eta_t\)</span> has <span class="math inline">\(\beta \le (2L^2/n)\sum_t\eta_t\)</span>, which grows with training time and gives a reason to stop early. Memorizing algorithms such as 1-nearest neighbour have <span class="math inline">\(\beta = 1\)</span>, the largest value for a loss between 0 and 1, and when labels are noisy their gap never closes.</p>
+<p>Where each result is used (<a href="#tbl-stability-uses" class="quarto-xref">Table&nbsp;<span>7.1</span></a>):</p>
+<div id="tbl-stability-uses" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.1: Results of this chapter and where they are used.
+</figcaption>
+<div aria-describedby="tbl-stability-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Expected gap <span class="math inline">\(=\)</span> average replace-one effect</td>
+<td>Reading overfitting as memorization of individual examples</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\lvert\mathbb E[\text{gap}]\rvert \le \beta\)</span></td>
+<td>Generalization guarantees that need no complexity measure of the model class</td>
+</tr>
+<tr class="odd">
+<td>High-probability bound (McDiarmid)</td>
+<td>A guarantee for the one model you actually trained</td>
+</tr>
+<tr class="even">
+<td>Regularized ERM, <span class="math inline">\(\beta = 2L^2/(\lambda n)\)</span></td>
+<td>Choosing <span class="math inline">\(\lambda\)</span>; bounding how far one example moves a trained model</td>
+</tr>
+<tr class="odd">
+<td>SGD, <span class="math inline">\(\beta \le (2L^2/n)\sum_t\eta_t\)</span></td>
+<td>Step sizes, number of epochs, early stopping</td>
+</tr>
+<tr class="even">
+<td>Unstable algorithms (<span class="math inline">\(\beta = 1\)</span>)</td>
+<td>Recognizing models whose training error says nothing about test error</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Notation.</strong> This chapter departs from the part’s shared notation in one place. Following the learning-theory literature, it writes the training set as <span class="math inline">\(S = (z_1, \dots, z_n)\)</span> rather than <span class="math inline">\(D\)</span>, and uses <span class="math inline">\(\mathcal D\)</span> for the distribution the examples are drawn from.</p>
+<p>Later parts return to how much a trained model depends on a single example, and they reuse the quantities defined here. Every fact this chapter borrows is restated where it is used. The full derivation of McDiarmid’s inequality is in <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>, and more on the convexity facts behind the ERM bound is in <a href="../part01-prerequisites/06-optimization.html">Optimization</a>.</p>
+</section>
+<section id="toolkit-five-facts-every-derivation-uses" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="toolkit-five-facts-every-derivation-uses"><span class="header-section-number">7.2</span> Toolkit: five facts every derivation uses</h2>
+<p>Each section below follows the same arc: the question, the statement, a derivation, an interpretation, an example and a self-check. The derivations reuse five facts. The first turns a change in the weights into a change in the loss; the second is the symmetry behind the main identity; the third and fourth say when an optimizer cannot let two nearby weight vectors drift apart; the fifth turns an average statement into a high-probability one.</p>
+<section id="fact-1-lipschitz-losses-turn-parameter-changes-into-loss-changes" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="fact-1-lipschitz-losses-turn-parameter-changes-into-loss-changes"><span class="header-section-number">7.2.1</span> Fact 1 — Lipschitz losses turn parameter changes into loss changes</h3>
+<p>A loss is <strong><span class="math inline">\(L\)</span>-Lipschitz</strong> in the weights when moving the weights by a distance <span class="math inline">\(d\)</span> changes the loss by at most <span class="math inline">\(L d\)</span>, whatever the example. The constant <span class="math inline">\(L\)</span> is a speed limit: the loss cannot change faster than <span class="math inline">\(L\)</span> per unit of distance in weight space. Written out, if <span class="math inline">\(w \mapsto \ell(w, z)\)</span> is <span class="math inline">\(L\)</span>-Lipschitz for every example <span class="math inline">\(z\)</span>, then <span id="eq-auto-07stabilitygeneralization-1"><span class="math display">\[|\ell(w, z) - \ell(w', z)| \le L\,\|w - w'\| \quad\text{for all } z. \tag{7.1}\]</span></span></p>
+<p>This is how every derivation below finishes. They first bound how far the trained weights move when one example changes, and this fact turns that into a bound on how far the loss moves, at every test point at once. For a differentiable loss, <span class="math inline">\(L\)</span> can be taken as the largest norm of the gradient <span class="math inline">\(\nabla_w\ell(w, z)\)</span>, because the change along a straight path from <span class="math inline">\(w'\)</span> to <span class="math inline">\(w\)</span> is the integral of the gradient along it, and each bit of the path contributes at most (gradient norm) × (length).</p>
+<p>The logistic loss is the example used throughout. For features <span class="math inline">\(x\)</span> and a label <span class="math inline">\(y = \pm1\)</span>, it is <span class="math inline">\(\ell(w, (x, y)) = \ln(1 + e^{-y\langle w, x\rangle})\)</span>, which is small when the <strong>margin</strong> <span class="math inline">\(y\langle w, x\rangle\)</span> is large and positive. Its gradient is <span class="math inline">\(-y\,\sigma(-y\langle w, x\rangle)\,x\)</span>, where <span class="math inline">\(\sigma(t) = 1/(1 + e^{-t})\)</span> is the logistic function, which takes values between 0 and 1. Since <span class="math inline">\(0 &lt; \sigma &lt; 1\)</span> and <span class="math inline">\(|y| = 1\)</span>, the gradient norm is at most <span class="math inline">\(\|x\|\)</span>. With features scaled to <span class="math inline">\(\|x\| \le 1\)</span>, the logistic loss is <span class="math inline">\(1\)</span>-Lipschitz.</p>
+</section>
+<section id="fact-2-swapping-two-i.i.d.-variables-does-not-change-their-joint-law" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="fact-2-swapping-two-i.i.d.-variables-does-not-change-their-joint-law"><span class="header-section-number">7.2.2</span> Fact 2 — Swapping two i.i.d. variables does not change their joint law</h3>
+<p>If <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> are independent and identically distributed (i.i.d.), then nothing in their joint behaviour can tell which one is “first”. So the pair <span class="math inline">\((U, V)\)</span> and the swapped pair <span class="math inline">\((V, U)\)</span> have the same joint distribution, and as a consequence <span class="math inline">\(\mathbb E[f(U, V)] = \mathbb E[f(V, U)]\)</span> for every function <span class="math inline">\(f\)</span>.</p>
+<p>The reason is the joint density (or probability mass function). Independence makes it the product <span class="math inline">\(p(u)\,p(v)\)</span> of the two individual densities, and identical distribution makes those two the same function <span class="math inline">\(p\)</span>. The product <span class="math inline">\(p(u)\,p(v)\)</span> does not change when <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> are exchanged, so the two pairs have the same law, and expectations computed from that law agree.</p>
+<p>This is the “renaming trick” in the expected-gap theorem. The theorem section walks through it with a table of every outcome.</p>
+</section>
+<section id="fact-3-strong-convexity-makes-the-gradient-strongly-monotone" class="level3" data-number="7.2.3">
+<h3 data-number="7.2.3" class="anchored" data-anchor-id="fact-3-strong-convexity-makes-the-gradient-strongly-monotone"><span class="header-section-number">7.2.3</span> Fact 3 — Strong convexity makes the gradient strongly monotone</h3>
+<p>A function <span class="math inline">\(G\)</span> is <strong><span class="math inline">\(\lambda\)</span>-strongly convex</strong> when it lies above each of its tangent planes by at least a quadratic bowl of curvature <span class="math inline">\(\lambda\)</span>: for all <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span>, <span id="eq-auto-07stabilitygeneralization-2"><span class="math display">\[G(v) \ge G(u) + \langle\nabla G(u), v - u\rangle + \frac\lambda2\|v - u\|^2. \tag{7.2}\]</span></span> Adding <span class="math inline">\(\frac\lambda2\|w\|^2\)</span> to any convex function produces such a <span class="math inline">\(G\)</span>. The consequence used below is that the gradient changes at least as fast as the point does, in the direction of the change: if you move from <span class="math inline">\(v\)</span> to <span class="math inline">\(u\)</span>, the gradient moves by at least <span class="math inline">\(\lambda\|u - v\|\)</span> along that direction. In symbols, <span id="eq-auto-07stabilitygeneralization-3"><span class="math display">\[\langle\nabla G(u) - \nabla G(v),\, u - v\rangle \ge \lambda\|u - v\|^2. \tag{7.3}\]</span></span></p>
+<p>To see why, write the strong convexity inequality as given, and again with <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> exchanged: <span class="math inline">\(G(u) \ge G(v) + \langle\nabla G(v), u - v\rangle + \frac\lambda2\|u - v\|^2\)</span>. Add the two inequalities. The values <span class="math inline">\(G(u)\)</span> and <span class="math inline">\(G(v)\)</span> appear on both sides and cancel, and what is left is <span class="math inline">\(0 \ge -\langle\nabla G(u) - \nabla G(v), u - v\rangle + \lambda\|u - v\|^2\)</span>, which rearranges to the claim. The stability of regularized ERM rests on this fact: two different minimizers have gradients that must differ by a lot, so if the gradients differ by little, the minimizers are close.</p>
+</section>
+<section id="fact-4-for-convex-smooth-functions-a-small-gradient-step-is-non-expansive" class="level3" data-number="7.2.4">
+<h3 data-number="7.2.4" class="anchored" data-anchor-id="fact-4-for-convex-smooth-functions-a-small-gradient-step-is-non-expansive"><span class="header-section-number">7.2.4</span> Fact 4 — For convex smooth functions, a small gradient step is non-expansive</h3>
+<p>A function <span class="math inline">\(f\)</span> is <strong><span class="math inline">\(\rho\)</span>-smooth</strong> when its gradient <span class="math inline">\(\nabla f\)</span> is <span class="math inline">\(\rho\)</span>-Lipschitz: the gradient changes by at most <span class="math inline">\(\rho\)</span> per unit of distance, so the function curves no more sharply than <span class="math inline">\(\frac\rho2\|w\|^2\)</span>. For a function that is both convex and smooth, the gradient satisfies a property called <strong>co-coercivity</strong> (Nesterov 2004, Theorem 2.1.5). In words: when two gradients differ by a lot, the two points must be far apart along the direction in which the gradients differ. Precisely, <span id="eq-auto-07stabilitygeneralization-4"><span class="math display">\[\langle\nabla f(u) - \nabla f(v),\, u - v\rangle \ge \frac1\rho\|\nabla f(u) - \nabla f(v)\|^2. \tag{7.4}\]</span></span> The proof needs more than a few lines and is in Nesterov’s book.</p>
+<p>What this chapter uses is a consequence for gradient descent. Take two starting points <span class="math inline">\(u\)</span> and <span class="math inline">\(v\)</span> and apply the same gradient step to both, <span class="math inline">\(\psi(w) = w - \eta\nabla f(w)\)</span>. If the step size satisfies <span class="math inline">\(0 \le \eta \le 2/\rho\)</span>, the two points do not end up farther apart than they started: <span id="eq-auto-07stabilitygeneralization-5"><span class="math display">\[\|\psi(u) - \psi(v)\| \le \|u - v\|. \tag{7.5}\]</span></span></p>
+<p>The reason is that the step moves both points by an amount that depends on the gradient difference <span class="math inline">\(\Delta = \nabla f(u) - \nabla f(v)\)</span>, and co-coercivity says this difference points enough “towards closing the distance”. Expand the square of <span class="math inline">\(\psi(u) - \psi(v) = (u - v) - \eta\Delta\)</span>, then use co-coercivity to replace <span class="math inline">\(\langle\Delta, u - v\rangle\)</span> by the smaller quantity <span class="math inline">\(\|\Delta\|^2/\rho\)</span>: <span id="eq-auto-07stabilitygeneralization-6"><span class="math display">\[\|\psi(u) - \psi(v)\|^2 = \|u - v\|^2 - 2\eta\langle\Delta, u - v\rangle + \eta^2\|\Delta\|^2 \le \|u - v\|^2 - \eta\left(\frac2\rho - \eta\right)\|\Delta\|^2 \le \|u - v\|^2. \tag{7.6}\]</span></span> The last step holds because <span class="math inline">\(\eta \le 2/\rho\)</span> makes the subtracted term non-negative.</p>
+<p>A one-dimensional case shows why the condition on <span class="math inline">\(\eta\)</span> is needed. For <span class="math inline">\(f(w) = \frac\rho2 w^2\)</span>, the gradient is <span class="math inline">\(\rho w\)</span>, so the step is <span class="math inline">\(\psi(w) = w - \eta\rho w = (1 - \eta\rho)w\)</span>, and it multiplies every distance by <span class="math inline">\(|1 - \eta\rho|\)</span>. It is non-expansive exactly when <span class="math inline">\(|1 - \eta\rho| \le 1\)</span>, that is <span class="math inline">\(\eta \le 2/\rho\)</span>. Larger steps overshoot the minimum and blow differences up. The stability of SGD rests on this fact.</p>
+</section>
+<section id="fact-5-mcdiarmids-inequality" class="level3" data-number="7.2.5">
+<h3 data-number="7.2.5" class="anchored" data-anchor-id="fact-5-mcdiarmids-inequality"><span class="header-section-number">7.2.5</span> Fact 5 — McDiarmid’s inequality</h3>
+<p>A function of many independent inputs, none of which can move it by much, concentrates near its mean. If <span class="math inline">\(Z_1, \dots, Z_n\)</span> are independent and changing only <span class="math inline">\(Z_i\)</span>, with the others held fixed, changes <span class="math inline">\(\Phi(Z_1, \dots, Z_n)\)</span> by at most <span class="math inline">\(c_i\)</span>, then <span id="eq-auto-07stabilitygeneralization-7"><span class="math display">\[\Pr[\Phi - \mathbb E\Phi \ge t] \le \exp\Big(-\frac{2t^2}{\sum_i c_i^2}\Big). \tag{7.7}\]</span></span> The derivation, via the Doob martingale and Azuma’s inequality, is in <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>. Its idea is to reveal the inputs one at a time: each revealed input shifts the conditional mean of <span class="math inline">\(\Phi\)</span> by at most <span class="math inline">\(c_i\)</span>, and a sum of <span class="math inline">\(n\)</span> such bounded, mean-zero shifts concentrates in the same way as a sum of independent bounded variables does.</p>
+<p>To use it you set a failure probability <span class="math inline">\(\delta\)</span> and solve for the matching <span class="math inline">\(t\)</span>. Setting <span class="math inline">\(\exp(-2t^2/\sum_i c_i^2) = \delta\)</span> and taking logarithms gives <span class="math inline">\(t = \sqrt{\tfrac12\sum_i c_i^2\ln(1/\delta)}\)</span>. So with probability at least <span class="math inline">\(1 - \delta\)</span>, <span class="math inline">\(\Phi &lt; \mathbb E\Phi + \sqrt{\tfrac12\sum_i c_i^2\ln(1/\delta)}\)</span>.</p>
+<p>In this chapter <span class="math inline">\(\beta\)</span> always denotes a stability parameter, and <span class="math inline">\(\delta\)</span> the failure probability.</p>
+</section>
+</section>
+<section id="risk-empirical-risk-and-the-gap" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="risk-empirical-risk-and-the-gap"><span class="header-section-number">7.3</span> Risk, empirical risk and the gap</h2>
+<section id="context" class="level3" data-number="7.3.1">
+<h3 data-number="7.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">7.3.1</span> Context</h3>
+<p>Training minimizes the loss on the data you have. What you care about is the loss on data you will see later. For a model chosen <em>before</em> looking at the data, the training loss is an unbiased estimate of the test loss. For a model <em>fitted</em> to the data, it is biased downward, because the fitting process picked the model that looks good on exactly these examples. The size of that bias is the generalization gap.</p>
+</section>
+<section id="definitions" class="level3" data-number="7.3.2">
+<h3 data-number="7.3.2" class="anchored" data-anchor-id="definitions"><span class="header-section-number">7.3.2</span> Definitions</h3>
+<p>A training set <span class="math inline">\(S = (z_1, \dots, z_n)\)</span> is a list of <span class="math inline">\(n\)</span> examples drawn i.i.d. from a distribution <span class="math inline">\(\mathcal D\)</span>, the source of all data, past and future. A learning algorithm <span class="math inline">\(A\)</span> maps <span class="math inline">\(S\)</span> to a model <span class="math inline">\(A(S)\)</span>, and the loss <span class="math inline">\(\ell(w, z) \ge 0\)</span> measures how badly model <span class="math inline">\(w\)</span> does on example <span class="math inline">\(z\)</span>.</p>
+<p>The quantity you care about is the average loss on a new example from <span class="math inline">\(\mathcal D\)</span>. This is the <strong>population risk</strong>, or test loss, <span class="math inline">\(R(w) = \mathbb E_{z \sim \mathcal D}\,\ell(w, z)\)</span>. You cannot compute it, because you do not know <span class="math inline">\(\mathcal D\)</span>. What you can compute is the average loss over the training set, the <strong>empirical risk</strong> or training loss, <span class="math inline">\(\hat R_S(w) = \frac1n\sum_{i=1}^n\ell(w, z_i)\)</span>. The <strong>generalization gap</strong> of the trained model is the test loss minus the training loss, <span class="math inline">\(\mathrm{gap}(S) = R(A(S)) - \hat R_S(A(S))\)</span>; it is positive when the model looks better on its training data than it really is.</p>
+<p>The tool for studying the gap is a training set that differs from <span class="math inline">\(S\)</span> in one example. The <strong>replace-one neighbour</strong> <span class="math inline">\(S^{(i)} = (z_1, \dots, z_{i-1}, z_i', z_{i+1}, \dots, z_n)\)</span> is the training set with example <span class="math inline">\(i\)</span> replaced by <span class="math inline">\(z_i'\)</span>. In probability statements, <span class="math inline">\(z_1', \dots, z_n'\)</span> are fresh i.i.d. draws from <span class="math inline">\(\mathcal D\)</span>, independent of <span class="math inline">\(S\)</span>.</p>
+</section>
+<section id="statement" class="level3" data-number="7.3.3">
+<h3 data-number="7.3.3" class="anchored" data-anchor-id="statement"><span class="header-section-number">7.3.3</span> Statement</h3>
+<p>A model that was fixed before the data were drawn has a training loss that is right on average: averaging over training sets, its training loss equals its test loss. For a fixed model <span class="math inline">\(w\)</span> that does not depend on <span class="math inline">\(S\)</span>, <span id="eq-auto-07stabilitygeneralization-8"><span class="math display">\[\mathbb E_S\big[\hat R_S(w)\big] = R(w). \tag{7.8}\]</span></span> For <span class="math inline">\(w = A(S)\)</span> this fails in general, and <span class="math inline">\(\mathbb E[\hat R_S(A(S))]\)</span> is usually smaller than <span class="math inline">\(\mathbb E[R(A(S))]\)</span>.</p>
+</section>
+<section id="derivation" class="level3" data-number="7.3.4">
+<h3 data-number="7.3.4" class="anchored" data-anchor-id="derivation"><span class="header-section-number">7.3.4</span> Derivation</h3>
+<ol type="1">
+<li><strong>Split the average.</strong> The expectation of an average is the average of the expectations (linearity of expectation), so <span class="math inline">\(\mathbb E_S[\hat R_S(w)] = \frac1n\sum_i\mathbb E[\ell(w, z_i)]\)</span>.</li>
+<li><strong>Each term is the test loss.</strong> Each <span class="math inline">\(z_i\)</span> is a draw from <span class="math inline">\(\mathcal D\)</span> and <span class="math inline">\(w\)</span> is fixed, so <span class="math inline">\(\mathbb E[\ell(w, z_i)]\)</span> is the average loss of <span class="math inline">\(w\)</span> on a draw from <span class="math inline">\(\mathcal D\)</span>, which is <span class="math inline">\(R(w)\)</span> by definition. The average of <span class="math inline">\(n\)</span> copies of <span class="math inline">\(R(w)\)</span> is <span class="math inline">\(R(w)\)</span>.</li>
+<li><strong>Why it fails for a trained model.</strong> If <span class="math inline">\(w = A(S)\)</span>, step 2 breaks: <span class="math inline">\(z_i\)</span> and <span class="math inline">\(A(S)\)</span> are dependent, because <span class="math inline">\(z_i\)</span> was used to choose <span class="math inline">\(A(S)\)</span>. The algorithm picked the model that does well on these particular <span class="math inline">\(z_i\)</span>, so <span class="math inline">\(z_i\)</span> is no longer a typical draw from the model’s point of view.</li>
+</ol>
+</section>
+<section id="interpretation" class="level3" data-number="7.3.5">
+<h3 data-number="7.3.5" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">7.3.5</span> Interpretation</h3>
+<p>The gap is not noise that averages out. It is a systematic bias caused by reusing the same data to choose and to evaluate. Its sign is usually positive: models look better on the data they were fitted to. The rest of this chapter bounds it through one property of the algorithm, without counting the models it could output.</p>
+</section>
+<section id="example-an-overfit-logistic-regression" class="level3" data-number="7.3.6">
+<h3 data-number="7.3.6" class="anchored" data-anchor-id="example-an-overfit-logistic-regression"><span class="header-section-number">7.3.6</span> Example: an overfit logistic regression</h3>
+<p>Take the running example of this chapter. Features <span class="math inline">\(x\)</span> are uniform on the unit sphere in <span class="math inline">\(\mathbb R^{10}\)</span>. Labels are <span class="math inline">\(y = \pm1\)</span> with <span class="math inline">\(\Pr[y = 1 \mid x] = \sigma(5x_1)\)</span>, so the label tends to follow the sign of the first coordinate but is noisy near <span class="math inline">\(x_1 = 0\)</span>. The model is <span class="math inline">\(\lambda\)</span>-regularized logistic regression, which minimizes the average logistic loss plus <span class="math inline">\(\frac\lambda2\|w\|^2\)</span> (details in <a href="#sec-stability-code" class="quarto-xref"><span>Section 7.10</span></a>). With <span class="math inline">\(n = 50\)</span> and <span class="math inline">\(\lambda = 0.01\)</span>, averaged over 100 training sets, the training loss is 0.4603 and the test loss is 0.5781. The expected gap, estimated with the noise-reduction trick described in the regularized-ERM section, is about 0.119, close to the difference of the two averages. With <span class="math inline">\(n = 1000\)</span> it shrinks to about 0.006.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="7.3.7">
+<h3 data-number="7.3.7" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">7.3.7</span> Check yourself</h3>
+<ul>
+<li>You evaluate a fixed, pretrained model on a fresh sample. Is the sample loss biased? <em>(No.&nbsp;The model does not depend on the sample, so step 2 applies.)</em></li>
+<li>You pick the best of 100 pretrained models on a validation set. Is the validation loss of the winner biased? <em>(Yes, downward. The choice depends on the validation data, so the choice is itself a learning algorithm run on that data.)</em></li>
+</ul>
+</section>
+</section>
+<section id="uniform-stability-and-the-expected-gap" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="uniform-stability-and-the-expected-gap"><span class="header-section-number">7.4</span> Uniform stability and the expected gap</h2>
+<section id="context-1" class="level3" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">7.4.1</span> Context</h3>
+<p>To control the gap you need to say how much <span class="math inline">\(A(S)\)</span> depends on the training set. The simplest way to say it: replace one training example, retrain, and see how much the loss of the trained model changes, anywhere.</p>
+</section>
+<section id="definition" class="level3" data-number="7.4.2">
+<h3 data-number="7.4.2" class="anchored" data-anchor-id="definition"><span class="header-section-number">7.4.2</span> Definition</h3>
+<p>An algorithm is stable in this sense when replacing any one training example by any other moves the loss of the trained model by at most <span class="math inline">\(\beta\)</span>, at every possible test point. The bound must hold in the worst case: for every training set, every position, every replacement and every test point. Formally, <span class="math inline">\(A\)</span> is <strong><span class="math inline">\(\beta\)</span>-uniformly stable</strong> if for every training set <span class="math inline">\(S\)</span>, every index <span class="math inline">\(i\)</span>, every replacement <span class="math inline">\(z_i'\)</span> and every test point <span class="math inline">\(z\)</span>, <span id="eq-stability-uniform"><span class="math display">\[\big|\ell(A(S), z) - \ell(A(S^{(i)}), z)\big| \le \beta. \tag{7.9}\]</span></span> If <span class="math inline">\(A\)</span> is randomized (SGD is, through the order in which it visits examples), the condition is on the expectation over <span class="math inline">\(A\)</span>’s internal randomness: <span class="math inline">\(\big|\mathbb E_A[\ell(A(S), z) - \ell(A(S^{(i)}), z)]\big| \le \beta\)</span>.</p>
+<p>Usually <span class="math inline">\(\beta\)</span> depends on <span class="math inline">\(n\)</span>, because with more examples each one carries less weight, and the interesting question is how fast it goes to zero. <a href="#fig-stability-neighbours" class="quarto-xref">Figure&nbsp;<span>7.1</span></a> shows the definition at work on a one-dimensional logistic regression: one example’s label is flipped, and the fitted model moves a lot under weak regularization and barely under strong regularization.</p>
+<div id="fig-stability-neighbours" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-neighbours-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_neighbours.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-neighbours-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.1: One-dimensional logistic regression trained on 30 points, on <span class="math inline">\(S\)</span> and on <span class="math inline">\(S^{(i)}\)</span>, where the most typical positive example is replaced by the same point with its label flipped. Left: <span class="math inline">\(\lambda = 0.01\)</span>. Right: <span class="math inline">\(\lambda = 1\)</span>. The titles compare the change in the weight with the bound <span class="math inline">\(2L/(\lambda n)\)</span> derived later.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="statement-1" class="level3" data-number="7.4.3">
+<h3 data-number="7.4.3" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">7.4.3</span> Statement</h3>
+<p>The test loss of the trained model can be measured on a fresh point <span class="math inline">\(z_i'\)</span>. Swap the roles of <span class="math inline">\(z_i\)</span> and <span class="math inline">\(z_i'\)</span>, and the same number becomes the loss on <span class="math inline">\(z_i\)</span> of a model trained <em>without</em> <span class="math inline">\(z_i\)</span>. So the expected test loss is the average loss of each example under a model that never saw it, while the training loss is the average loss of each example under a model that did. Their difference is the expected gap. For any algorithm, the expected gap is exactly this average replace-one effect: <span id="eq-stability-identity"><span class="math display">\[\mathbb E_S\big[\mathrm{gap}(S)\big] = \frac1n\sum_{i=1}^n\mathbb E_{S, z_i'}\Big[\ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big)\Big]. \tag{7.10}\]</span></span> Each bracket is a replace-one change at a test point, which uniform stability caps at <span class="math inline">\(\beta\)</span>. Consequently, if <span class="math inline">\(A\)</span> is <span class="math inline">\(\beta\)</span>-uniformly stable, <span id="eq-stability-expected"><span class="math display">\[\big|\mathbb E_S[\mathrm{gap}(S)]\big| \le \beta. \tag{7.11}\]</span></span></p>
+</section>
+<section id="derivation-the-renaming-trick" class="level3" data-number="7.4.4">
+<h3 data-number="7.4.4" class="anchored" data-anchor-id="derivation-the-renaming-trick"><span class="header-section-number">7.4.4</span> Derivation (the renaming trick)</h3>
+<ol type="1">
+<li><strong>Write the test loss with a fresh point.</strong> The test loss <span class="math inline">\(R(A(S))\)</span> is the loss on a point the model has not seen. The point <span class="math inline">\(z_i'\)</span> is such a point: it is independent of <span class="math inline">\(S\)</span> and has distribution <span class="math inline">\(\mathcal D\)</span>. So, holding <span class="math inline">\(S\)</span> fixed, its average loss is the test loss, <span class="math inline">\(\mathbb E[\ell(A(S), z_i') \mid S] = R(A(S))\)</span>. Averaging over <span class="math inline">\(S\)</span> as well, <span class="math inline">\(\mathbb E[R(A(S))] = \mathbb E[\ell(A(S), z_i')]\)</span> for every <span class="math inline">\(i\)</span>.</li>
+<li><strong>Rename <span class="math inline">\(z_i \leftrightarrow z_i'\)</span>.</strong> The two points <span class="math inline">\(z_i\)</span> and <span class="math inline">\(z_i'\)</span> are i.i.d. and independent of the other examples. By Fact 2 (swapping two i.i.d. variables leaves their joint distribution unchanged), exchanging them does not change the joint distribution of <span class="math inline">\((z_1, \dots, z_n, z_i')\)</span>, so it does not change any expectation. The swap turns <span class="math inline">\(S\)</span> into <span class="math inline">\(S^{(i)}\)</span> and <span class="math inline">\(z_i'\)</span> into <span class="math inline">\(z_i\)</span>. Hence <span id="eq-auto-07stabilitygeneralization-9"><span class="math display">\[\mathbb E\big[\ell(A(S), z_i')\big] = \mathbb E\big[\ell(A(S^{(i)}), z_i)\big]. \tag{7.12}\]</span></span></li>
+<li><strong>Average over <span class="math inline">\(i\)</span>.</strong> Steps 1 and 2 hold for every <span class="math inline">\(i\)</span>, so their average does too: <span class="math inline">\(\mathbb E[R(A(S))] = \frac1n\sum_i\mathbb E[\ell(A(S^{(i)}), z_i)]\)</span>.</li>
+<li><strong>Training loss.</strong> By definition of the empirical risk, <span class="math inline">\(\mathbb E[\hat R_S(A(S))] = \frac1n\sum_i\mathbb E[\ell(A(S), z_i)]\)</span>.</li>
+<li><strong>Subtract</strong> step 4 from step 3. The two sums run over the same <span class="math inline">\(i\)</span>, so the difference is the average of the differences. This is <a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.10</span></a>.</li>
+<li><strong>Bound each term.</strong> By <a href="#eq-stability-uniform" class="quarto-xref">Equation&nbsp;<span>7.9</span></a>, applied at the test point <span class="math inline">\(z = z_i\)</span>, each difference <span class="math inline">\(\ell(A(S^{(i)}), z_i) - \ell(A(S), z_i)\)</span> lies in <span class="math inline">\([-\beta, \beta]\)</span> for every outcome. An average of numbers in <span class="math inline">\([-\beta, \beta]\)</span> also lies there, so the expectation does, and so does the average over <span class="math inline">\(i\)</span>. This is <a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.11</span></a>. For a randomized <span class="math inline">\(A\)</span>, take the expectation over <span class="math inline">\(A\)</span>’s randomness first and use the randomized definition.</li>
+</ol>
+<p><strong>Step 2 on a tiny case.</strong> Readers often stall on the renaming step, so here it is with every outcome listed. Take <span class="math inline">\(n = 1\)</span>: one example <span class="math inline">\(z_1 \in \{0, 1\}\)</span> with <span class="math inline">\(\Pr[z_1 = 1] = p = 0.3\)</span>, and a fresh copy <span class="math inline">\(z_1'\)</span>. The algorithm shrinks the data towards zero, <span class="math inline">\(A(S) = z_1/2\)</span>, and the loss is squared error <span class="math inline">\(\ell(w, z) = (w - z)^2\)</span>. So <span class="math inline">\(A(S^{(1)}) = z_1'/2\)</span>. <a href="#tbl-stability-renaming" class="quarto-xref">Table&nbsp;<span>7.2</span></a> lists all four outcomes, each with its probability (the product of the two independent probabilities) and the three losses that appear in the derivation.</p>
+<div id="tbl-stability-renaming" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-renaming-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.2: Every outcome of the one-example case. The renamed column is the test column with the rows <span class="math inline">\((0, 1)\)</span> and <span class="math inline">\((1, 0)\)</span> exchanged. Those rows have the same probability, so the averages agree.
+</figcaption>
+<div aria-describedby="tbl-stability-renaming-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\((z_1, z_1')\)</span></th>
+<th>Probability</th>
+<th>Train <span class="math inline">\(\ell(A(S), z_1)\)</span></th>
+<th>Test <span class="math inline">\(\ell(A(S), z_1')\)</span></th>
+<th>Renamed <span class="math inline">\(\ell(A(S^{(1)}), z_1)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\((0, 0)\)</span></td>
+<td><span class="math inline">\(0.7 \times 0.7 = 0.49\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\((0, 1)\)</span></td>
+<td><span class="math inline">\(0.7 \times 0.3 = 0.21\)</span></td>
+<td><span class="math inline">\(0\)</span></td>
+<td><span class="math inline">\((0 - 1)^2 = 1\)</span></td>
+<td><span class="math inline">\((\tfrac12 - 0)^2 = 0.25\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\((1, 0)\)</span></td>
+<td><span class="math inline">\(0.3 \times 0.7 = 0.21\)</span></td>
+<td><span class="math inline">\((\tfrac12 - 1)^2 = 0.25\)</span></td>
+<td><span class="math inline">\((\tfrac12 - 0)^2 = 0.25\)</span></td>
+<td><span class="math inline">\((0 - 1)^2 = 1\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\((1, 1)\)</span></td>
+<td><span class="math inline">\(0.3 \times 0.3 = 0.09\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+<td><span class="math inline">\(0.25\)</span></td>
+</tr>
+<tr class="odd">
+<td><strong>Average</strong></td>
+<td></td>
+<td><span class="math inline">\(0.075\)</span></td>
+<td><span class="math inline">\(0.285\)</span></td>
+<td><span class="math inline">\(0.285\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Row by row, the test and renamed columns differ. But the renamed column contains the same values as the test column, attached to the mirror-image outcome, and mirror-image outcomes have the same probability <span class="math inline">\(p(1-p) = 0.21\)</span>. That is all step 2 says: averaging over a table does not care how you label its rows.</p>
+<p>The averages are probability-weighted sums of each column. Train: <span class="math inline">\(0.21 \times 0.25 + 0.09 \times 0.25 = 0.075\)</span>. Test: <span class="math inline">\(0.21 \times 1 + 0.21 \times 0.25 + 0.09 \times 0.25 = 0.285\)</span>. So the expected gap is <span class="math inline">\(0.285 - 0.075 = 0.21\)</span>. The right side of <a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.10</span></a> is the renamed average minus the train average, <span class="math inline">\(0.285 - 0.075 = 0.21\)</span> too. The stability of this algorithm is <span class="math inline">\(\beta = 0.75\)</span>: changing <span class="math inline">\(z_1\)</span> from 0 to 1 moves the model from 0 to <span class="math inline">\(\frac12\)</span>, and at the test point <span class="math inline">\(z = 1\)</span> the loss drops from <span class="math inline">\((0 - 1)^2 = 1\)</span> to <span class="math inline">\((\frac12 - 1)^2 = 0.25\)</span>, a change of <span class="math inline">\(0.75\)</span>. The gap <span class="math inline">\(0.21\)</span> is below <span class="math inline">\(\beta = 0.75\)</span>, as <a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.11</span></a> requires.</p>
+</section>
+<section id="interpretation-1" class="level3" data-number="7.4.5">
+<h3 data-number="7.4.5" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">7.4.5</span> Interpretation</h3>
+<p><a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.10</span></a> is an identity, not a bound. It says the expected gap <em>is</em> the average <strong>replace-one self-influence</strong>: how much the loss on <span class="math inline">\(z_i\)</span> goes up when <span class="math inline">\(z_i\)</span> is taken out of the training set and replaced by a fresh point. A model that relies heavily on individual examples to fit them overfits, and conversely, a model that overfits must be relying on individual examples. The memorization section below measures this quantity directly.</p>
+<p>Uniform stability, by contrast, is a worst-case notion. It asks for a bound over all training sets, all replacements and all test points, while the identity only needs the average over <span class="math inline">\(i\)</span> and over the data. This is why the bound <span class="math inline">\(\beta\)</span> can be far from the true gap, and why weaker, average-case notions of stability exist (Bousquet &amp; Elisseeff 2002; Shalev-Shwartz et al.&nbsp;2010).</p>
+<p>What makes the bound useful is what it leaves out: no model class appears. The bound holds for any algorithm, however rich the set of models it could output. This is why stability gives guarantees for algorithms such as SGD on large models, where counting the models the algorithm could output gives nothing useful.</p>
+</section>
+<section id="example-a-memorizing-lookup-table" class="level3" data-number="7.4.6">
+<h3 data-number="7.4.6" class="anchored" data-anchor-id="example-a-memorizing-lookup-table"><span class="header-section-number">7.4.6</span> Example: a memorizing lookup table</h3>
+<p>Store the training set; predict the stored label at a training point and <span class="math inline">\(+1\)</span> everywhere else, and score with the <strong>0-1 loss</strong>, which is 1 for a wrong prediction and 0 for a right one. With continuous features, a fresh point almost surely misses the table, so it gets the prediction <span class="math inline">\(+1\)</span>. In the running example, where half the labels are <span class="math inline">\(-1\)</span>, that prediction is wrong half the time: the test error is <span class="math inline">\(\frac12\)</span> and the training error is 0, for every <span class="math inline">\(n\)</span>. Now replace <span class="math inline">\((x_i, y_i)\)</span> by a different point. The prediction at <span class="math inline">\(x_i\)</span> falls back to <span class="math inline">\(+1\)</span>; if <span class="math inline">\(y_i = -1\)</span>, the loss at <span class="math inline">\(z = (x_i, y_i)\)</span> jumps from 0 to 1. So <span class="math inline">\(\beta = 1\)</span>, and the gap <span class="math inline">\(\frac12 \le 1\)</span> is consistent with the theorem but never shrinks.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="7.4.7">
+<h3 data-number="7.4.7" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">7.4.7</span> Check yourself</h3>
+<ul>
+<li>In step 1, why is <span class="math inline">\(z_i'\)</span> needed at all; why not write the test loss as <span class="math inline">\(\mathbb E[\ell(A(S), z_i)]\)</span>? <em>(Because <span class="math inline">\(z_i\)</span> is part of <span class="math inline">\(S\)</span>, so <span class="math inline">\(A(S)\)</span> depends on it. Only a point independent of <span class="math inline">\(S\)</span> gives an unbiased estimate of <span class="math inline">\(R(A(S))\)</span>.)</em></li>
+<li>In <a href="#tbl-stability-renaming" class="quarto-xref">Table&nbsp;<span>7.2</span></a>, what would break if <span class="math inline">\(z_1\)</span> and <span class="math inline">\(z_1'\)</span> had different distributions? <em>(Rows <span class="math inline">\((0, 1)\)</span> and <span class="math inline">\((1, 0)\)</span> would have different probabilities, and the test and renamed averages would differ. Step 2 needs the two points to be exchangeable, that is, to have a joint distribution that does not change when they are swapped.)</em></li>
+</ul>
+</section>
+</section>
+<section id="high-probability-the-bousquetelisseeff-bound" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="high-probability-the-bousquetelisseeff-bound"><span class="header-section-number">7.5</span> High probability: the Bousquet–Elisseeff bound</h2>
+<section id="context-2" class="level3" data-number="7.5.1">
+<h3 data-number="7.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">7.5.1</span> Context</h3>
+<p><a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.11</span></a> controls the gap on average over training sets. You train once, on one <span class="math inline">\(S\)</span>, so you need the gap of <em>your</em> model to be small with high probability. The gap is a function of <span class="math inline">\(n\)</span> independent examples, and stability bounds how much one example can move it. That is exactly the situation of McDiarmid’s inequality (Fact 5): a function of independent inputs that no single input can move by much stays close to its mean, with an exponentially small chance of exceeding it.</p>
+</section>
+<section id="statement-2" class="level3" data-number="7.5.2">
+<h3 data-number="7.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">7.5.2</span> Statement</h3>
+<p>The bound has three parts: the training loss you observe, the expected gap <span class="math inline">\(\beta\)</span> from the previous section, and a deviation term from McDiarmid that says how far one training set can stray from the average. If <span class="math inline">\(A\)</span> is <span class="math inline">\(\beta\)</span>-uniformly stable and the loss lies between <span class="math inline">\(0\)</span> and <span class="math inline">\(M\)</span>, then with probability at least <span class="math inline">\(1 - \delta\)</span> over <span class="math inline">\(S\)</span>, <span id="eq-stability-be"><span class="math display">\[R(A(S)) \le \hat R_S(A(S)) + \beta + (2n\beta + M)\sqrt{\frac{\ln(1/\delta)}{2n}}. \tag{7.13}\]</span></span> This is Theorem 12 of Bousquet &amp; Elisseeff (2002), rewritten for replace-one stability. They define stability by <em>removing</em> an example instead of replacing it. Replacing can be done by removing <span class="math inline">\(z_i\)</span> and then adding <span class="math inline">\(z_i'\)</span>, two removals’ worth of change, so replace-one stability is at most twice removal stability (<a href="../../book-exercises/part01-prerequisites/07-stability-generalization.html#sec-sol-stability-generalization-1">Exercise 1</a>). Substituting <span class="math inline">\(\beta = 2\beta_{\text{remove}}\)</span> in <a href="#eq-stability-be" class="quarto-xref">Equation&nbsp;<span>7.13</span></a> gives their <span class="math inline">\(2\beta_{\text{remove}} + (4n\beta_{\text{remove}} + M)\sqrt{\ln(1/\delta)/(2n)}\)</span>.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="7.5.3">
+<h3 data-number="7.5.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">7.5.3</span> Derivation</h3>
+<p>The plan is to bound how much one example can move the gap, feed that to McDiarmid, and then use the expected-gap bound for the mean. Let <span class="math inline">\(\Phi(S) = R(A(S)) - \hat R_S(A(S))\)</span> be the gap as a function of the training set.</p>
+<ol type="1">
+<li><strong>Effect of one example on the test loss.</strong> Replacing <span class="math inline">\(z_i\)</span> moves <span class="math inline">\(\ell(A(S), z)\)</span> by at most <span class="math inline">\(\beta\)</span> at every <span class="math inline">\(z\)</span>, by uniform stability. The test loss is an average of these losses over <span class="math inline">\(z\)</span>, and an average of numbers that each move by at most <span class="math inline">\(\beta\)</span> moves by at most <span class="math inline">\(\beta\)</span>: <span class="math inline">\(|R(A(S)) - R(A(S^{(i)}))| \le \beta\)</span>.</li>
+<li><strong>Effect on the training loss.</strong> <span class="math inline">\(\hat R_S(A(S))\)</span> and <span class="math inline">\(\hat R_{S^{(i)}}(A(S^{(i)}))\)</span> share <span class="math inline">\(n - 1\)</span> terms, one for each example other than <span class="math inline">\(i\)</span>. Each shared term <span class="math inline">\(\frac1n\ell(\cdot, z_j)\)</span> is evaluated at the same point <span class="math inline">\(z_j\)</span> under two models, so by stability it moves by at most <span class="math inline">\(\beta/n\)</span>. The unshared terms are <span class="math inline">\(\frac1n\ell(A(S), z_i)\)</span> and <span class="math inline">\(\frac1n\ell(A(S^{(i)}), z_i')\)</span>, evaluated at two different points, so stability says nothing about them; but both lie in <span class="math inline">\([0, M/n]\)</span>, so they differ by at most <span class="math inline">\(M/n\)</span>. Total: at most <span class="math inline">\(\frac{n-1}{n}\beta + \frac Mn \le \beta + \frac Mn\)</span>.</li>
+<li><strong>Bounded differences.</strong> <span class="math inline">\(\Phi\)</span> is the test loss minus the training loss, and by the triangle inequality (<span class="math inline">\(|a - b| \le |a| + |b|\)</span>) its change is at most the sum of the two changes: replacing <span class="math inline">\(z_i\)</span> moves <span class="math inline">\(\Phi\)</span> by at most <span class="math inline">\(c_i = 2\beta + M/n\)</span>. Uniform stability holds for every training set and every replacement, so this holds for all values of the inputs, as McDiarmid requires.</li>
+<li><strong>McDiarmid</strong> (Fact 5). All <span class="math inline">\(n\)</span> constants are equal, so <span class="math inline">\(\sum_i c_i^2 = n(2\beta + M/n)^2\)</span>. Its square root is <span class="math inline">\(\sqrt n(2\beta + M/n)\)</span>, and <span class="math inline">\(\sqrt n(2\beta + M/n)/\sqrt2 = (2n\beta + M)/\sqrt{2n}\)</span> after multiplying inside and out by <span class="math inline">\(\sqrt n\)</span>. So with probability at least <span class="math inline">\(1 - \delta\)</span>, <span id="eq-auto-07stabilitygeneralization-10"><span class="math display">\[\Phi &lt; \mathbb E\Phi + \sqrt{n}\Big(2\beta + \frac Mn\Big)\sqrt{\frac{\ln(1/\delta)}2} = \mathbb E\Phi + (2n\beta + M)\sqrt{\frac{\ln(1/\delta)}{2n}}. \tag{7.14}\]</span></span></li>
+<li><strong>Expected gap.</strong> <span class="math inline">\(\mathbb E\Phi \le \beta\)</span> by <a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.11</span></a>. Substitute, and move the training loss to the right-hand side.</li>
+</ol>
+<p>Applying the same argument to <span class="math inline">\(-\Phi\)</span> gives the matching lower bound, so the gap is controlled from both sides.</p>
+</section>
+<section id="interpretation-beta-must-be-o1sqrt-n" class="level3" data-number="7.5.4">
+<h3 data-number="7.5.4" class="anchored" data-anchor-id="interpretation-beta-must-be-o1sqrt-n"><span class="header-section-number">7.5.4</span> Interpretation: <span class="math inline">\(\beta\)</span> must be <span class="math inline">\(o(1/\sqrt n)\)</span></h3>
+<p>The width of the bound beyond <span class="math inline">\(\beta\)</span> has two parts, and they behave differently. The part <span class="math inline">\(M\sqrt{\ln(1/\delta)/(2n)}\)</span> is what Hoeffding’s inequality gives for one fixed model: the average of <span class="math inline">\(n\)</span> independent losses in <span class="math inline">\([0, M]\)</span> exceeds its mean by more than this with probability at most <span class="math inline">\(\delta\)</span> (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>). It is a rate you cannot avoid even without any learning. The extra part comes from stability, <span class="math inline">\(2n\beta\sqrt{\ln(1/\delta)/(2n)} = \beta\sqrt{2n\ln(1/\delta)}\)</span>, and it goes to zero only if <span class="math inline">\(\beta\sqrt n \to 0\)</span>, which is what <span class="math inline">\(\beta = o(1/\sqrt n)\)</span> means. <a href="#fig-stability-high-probability" class="quarto-xref">Figure&nbsp;<span>7.2</span></a> shows three regimes, and the rate in each follows from putting the given <span class="math inline">\(\beta\)</span> into <span class="math inline">\(\beta\sqrt{2n\ln(1/\delta)}\)</span>:</p>
+<ul>
+<li><span class="math inline">\(\beta \sim 1/n\)</span> (regularized ERM): <span class="math inline">\(\beta\sqrt n \sim 1/\sqrt n\)</span>, so the width falls like <span class="math inline">\(1/\sqrt n\)</span>, a constant factor above the fixed-model rate.</li>
+<li><span class="math inline">\(\beta \sim n^{-3/4}\)</span>: <span class="math inline">\(\beta\sqrt n \sim n^{-3/4 + 1/2}\)</span>, so it still falls, but more slowly, like <span class="math inline">\(n^{-1/4}\)</span>.</li>
+<li><span class="math inline">\(\beta \sim 1/\sqrt n\)</span>: <span class="math inline">\(\beta\sqrt n\)</span> is a constant, so it does not fall at all. The bound is vacuous, even though <a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.11</span></a> still says the <em>expected</em> gap is at most <span class="math inline">\(1/\sqrt n\)</span>.</li>
+</ul>
+<div id="fig-stability-high-probability" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-high-probability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_high_probability.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-high-probability-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.2: Width of the high-probability bound, <a href="#eq-stability-be" class="quarto-xref">Equation&nbsp;<span>7.13</span></a>, with <span class="math inline">\(M = 1\)</span> and <span class="math inline">\(\delta = 0.05\)</span>, for stability <span class="math inline">\(\beta = 1/n\)</span>, <span class="math inline">\(n^{-3/4}\)</span> and <span class="math inline">\(n^{-1/2}\)</span>, against the Hoeffding width for a single fixed model.
+</figcaption>
+</figure>
+</div>
+<p>The loss in step 3 comes from charging every one of the <span class="math inline">\(n\)</span> examples the full <span class="math inline">\(2\beta\)</span> in McDiarmid, even though the effects of different examples largely average out. Later work removed most of this loss. Feldman &amp; Vondrák (2018) proved a bound of order <span class="math inline">\(\sqrt{(\beta + 1/n)\ln(1/\delta)}\)</span>, which is meaningful whenever <span class="math inline">\(\beta = o(1)\)</span>, that is whenever <span class="math inline">\(\beta\)</span> goes to zero at any rate. Feldman &amp; Vondrák (2019) and then Bousquet, Klochkov &amp; Zhivotovskiy (2020) reached, for <span class="math inline">\(M = 1\)</span> and up to constant factors (which is what <span class="math inline">\(\lesssim\)</span> means), <span id="eq-auto-07stabilitygeneralization-11"><span class="math display">\[\mathrm{gap} \lesssim \beta\log n\,\log(1/\delta) + \sqrt{\frac{\log(1/\delta)}{n}}, \tag{7.15}\]</span></span> which is within log factors of the expected-gap bound plus the fixed-model rate. With these, <span class="math inline">\(\beta \sim 1/\sqrt n\)</span> also gives a <span class="math inline">\(\tilde O(1/\sqrt n)\)</span> gap, where <span class="math inline">\(\tilde O\)</span> means “of this order up to log factors”.</p>
+</section>
+<section id="example-regularized-logistic-regression" class="level3" data-number="7.5.5">
+<h3 data-number="7.5.5" class="anchored" data-anchor-id="example-regularized-logistic-regression"><span class="header-section-number">7.5.5</span> Example: regularized logistic regression</h3>
+<p>The next section shows that regularized logistic regression with <span class="math inline">\(\|x\| \le 1\)</span> has <span class="math inline">\(\beta = 2/(\lambda n)\)</span> and weights of norm at most <span class="math inline">\(1/\lambda\)</span>. To use <a href="#eq-stability-be" class="quarto-xref">Equation&nbsp;<span>7.13</span></a> you also need <span class="math inline">\(M\)</span>, the largest loss. Its margin <span class="math inline">\(y\langle w, x\rangle\)</span> is at least <span class="math inline">\(-\|w\|\|x\| \ge -1/\lambda\)</span>, and the logistic loss is largest at the most negative margin, so every loss is at most <span class="math inline">\(M = \ln(1 + e^{1/\lambda})\)</span>. Take <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(\delta = 0.05\)</span>, so that <span class="math inline">\(\ln(1/\delta) = \ln 20\)</span> and the common factor is <span class="math inline">\(\sqrt{\ln 20/20{,}000} = 0.01224\)</span>. Then the width beyond the training loss is <span class="math inline">\(\beta + (2n\beta + M)\times 0.01224\)</span>, where <span class="math inline">\(2n\beta = 4/\lambda\)</span>:</p>
+<ul>
+<li><span class="math inline">\(\lambda = 1\)</span>: <span class="math inline">\(\beta = 2\times10^{-4}\)</span>, <span class="math inline">\(M = \ln(1 + e) = 1.313\)</span>, width <span class="math inline">\(2\times10^{-4} + (4 + 1.313)\times 0.01224 = 0.065\)</span>.</li>
+<li><span class="math inline">\(\lambda = 0.1\)</span>: <span class="math inline">\(\beta = 0.002\)</span>, <span class="math inline">\(M = \ln(1 + e^{10}) = 10.000\)</span>, width <span class="math inline">\(0.002 + (40 + 10)\times 0.01224 = 0.614\)</span>.</li>
+</ul>
+<p>In both cases the stability term <span class="math inline">\(2n\beta\)</span> is three quarters or more of the width (<span class="math inline">\(4\)</span> against <span class="math inline">\(M = 1.313\)</span>, and <span class="math inline">\(40\)</span> against <span class="math inline">\(M = 10.000\)</span>). The expected gap itself is far smaller: at <span class="math inline">\(\lambda = 1\)</span> it is already <span class="math inline">\(2.53\times10^{-4}\)</span> at <span class="math inline">\(n = 1{,}000\)</span> (<a href="#tbl-stability-gap" class="quarto-xref">Table&nbsp;<span>7.4</span></a>), and it falls like <span class="math inline">\(1/n\)</span>. The high-probability bound is valid but loose, mostly because McDiarmid charges every example the worst case <span class="math inline">\(2\beta\)</span>.</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="7.5.6">
+<h3 data-number="7.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">7.5.6</span> Check yourself</h3>
+<ul>
+<li>Why does step 2 pay <span class="math inline">\(M/n\)</span> for the replaced example, not <span class="math inline">\(\beta/n\)</span>? <em>(The replaced term is evaluated at two different points, <span class="math inline">\(z_i\)</span> and <span class="math inline">\(z_i'\)</span>. Stability compares two models at the same point, so it does not apply.)</em></li>
+<li>If <span class="math inline">\(\beta = 0\)</span> (a constant algorithm), what does <a href="#eq-stability-be" class="quarto-xref">Equation&nbsp;<span>7.13</span></a> reduce to? <em>(Hoeffding for a single fixed model: <span class="math inline">\(R \le \hat R + M\sqrt{\ln(1/\delta)/(2n)}\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="regularized-erm-is-stable" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="regularized-erm-is-stable"><span class="header-section-number">7.6</span> Regularized ERM is stable</h2>
+<section id="context-3" class="level3" data-number="7.6.1">
+<h3 data-number="7.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">7.6.1</span> Context</h3>
+<p>Regularized ERM is the workhorse of classical machine learning: ridge regression, regularized logistic regression, support vector machines. The regularizer is usually justified as a prior or as a way to control model complexity. Stability gives a third reading: it limits how far one example can pull the solution. The penalty <span class="math inline">\(\frac\lambda2\|w\|^2\)</span> makes the objective a bowl with curvature at least <span class="math inline">\(\lambda\)</span>, and one example, which carries weight <span class="math inline">\(1/n\)</span> in the objective, can only tilt such a bowl so far.</p>
+</section>
+<section id="statement-3" class="level3" data-number="7.6.2">
+<h3 data-number="7.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">7.6.2</span> Statement</h3>
+<p>The setting is a convex loss whose gradient never exceeds <span class="math inline">\(L\)</span> in norm. Let <span class="math inline">\(\ell(\cdot, z)\)</span> be convex, differentiable and <span class="math inline">\(L\)</span>-Lipschitz for every <span class="math inline">\(z\)</span>, and let <span class="math inline">\(w_S\)</span> be the minimizer of the regularized training loss <span class="math inline">\(J_S\)</span>: <span id="eq-auto-07stabilitygeneralization-12"><span class="math display">\[w_S = \arg\min_w\; J_S(w), \qquad J_S(w) = \frac1n\sum_{i=1}^n\ell(w, z_i) + \frac\lambda2\|w\|^2. \tag{7.16}\]</span></span> Replacing one example changes <span class="math inline">\(J_S\)</span> by a term of size about <span class="math inline">\(L/n\)</span> in gradient, and the curvature <span class="math inline">\(\lambda\)</span> converts that into a weight change of order <span class="math inline">\(L/(\lambda n)\)</span>; Fact 1 then multiplies by <span class="math inline">\(L\)</span> to get the loss change. Precisely, <span id="eq-stability-erm"><span class="math display">\[\|w_S - w_{S^{(i)}}\| \le \frac{2L}{\lambda n} \quad\text{and}\quad \big|\ell(w_S, z) - \ell(w_{S^{(i)}}, z)\big| \le \frac{2L^2}{\lambda n} \text{ for all } z. \tag{7.17}\]</span></span> The first bound is the sensitivity of ERM, that is how far the minimizer can move when one example changes, which <a href="../part01-prerequisites/06-optimization.html">Optimization</a> also derives. The second is uniform stability with <span class="math inline">\(\beta = 2L^2/(\lambda n)\)</span> (Shalev-Shwartz &amp; Ben-David 2014, Corollary 13.6; Bousquet &amp; Elisseeff 2002).</p>
+</section>
+<section id="derivation-2" class="level3" data-number="7.6.3">
+<h3 data-number="7.6.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">7.6.3</span> Derivation</h3>
+<p>Write <span class="math inline">\(w = w_S\)</span>, <span class="math inline">\(w' = w_{S^{(i)}}\)</span>, <span class="math inline">\(J = J_S\)</span>, <span class="math inline">\(J' = J_{S^{(i)}}\)</span>. The idea is to look at the gradient of <span class="math inline">\(J\)</span> at the <em>other</em> minimizer <span class="math inline">\(w'\)</span>: it is small, because <span class="math inline">\(J\)</span> and <span class="math inline">\(J'\)</span> differ in only one term, and strong convexity says a small gradient means you are close to the minimizer.</p>
+<ol type="1">
+<li><strong>Optimality.</strong> The gradient of a differentiable convex function is zero at its minimizer: <span class="math inline">\(\nabla J(w) = 0\)</span> and <span class="math inline">\(\nabla J'(w') = 0\)</span>.</li>
+<li><strong>The two objectives differ in one term.</strong> Only the <span class="math inline">\(i\)</span>-th loss differs, so <span class="math inline">\(J - J' = \frac1n\big(\ell(\cdot, z_i) - \ell(\cdot, z_i')\big)\)</span>. Since <span class="math inline">\(\nabla J'(w') = 0\)</span>, subtracting it changes nothing, and <span class="math inline">\(\nabla J(w') = \nabla J(w') - \nabla J'(w') = \frac1n\big(\nabla\ell(w', z_i) - \nabla\ell(w', z_i')\big)\)</span>. Each gradient has norm at most <span class="math inline">\(L\)</span> (Fact 1), so this has norm at most <span class="math inline">\(2L/n\)</span>.</li>
+<li><strong>Strong convexity.</strong> <span class="math inline">\(J\)</span> is a convex function plus <span class="math inline">\(\frac\lambda2\|w\|^2\)</span>, so it is <span class="math inline">\(\lambda\)</span>-strongly convex. Fact 3 says its gradient changes by at least <span class="math inline">\(\lambda\|w' - w\|\)</span> along the direction from <span class="math inline">\(w\)</span> to <span class="math inline">\(w'\)</span>. With <span class="math inline">\(\nabla J(w) = 0\)</span> from step 1, <span id="eq-auto-07stabilitygeneralization-13"><span class="math display">\[\lambda\|w' - w\|^2 \le \langle\nabla J(w') - \nabla J(w),\, w' - w\rangle = \langle\nabla J(w'),\, w' - w\rangle \le \frac{2L}n\|w' - w\|, \tag{7.18}\]</span></span> where the last step is the Cauchy–Schwarz inequality, <span class="math inline">\(\langle a, b\rangle \le \|a\|\,\|b\|\)</span>, with the norm from step 2. Divide by <span class="math inline">\(\lambda\|w' - w\|\)</span> to get <span class="math inline">\(\|w' - w\| \le 2L/(\lambda n)\)</span>.</li>
+<li><strong>From weights to losses.</strong> By Fact 1, a weight change of at most <span class="math inline">\(2L/(\lambda n)\)</span> changes every loss by at most <span class="math inline">\(L\)</span> times that, <span class="math inline">\(2L^2/(\lambda n)\)</span>.</li>
+</ol>
+<p>A by-product is used elsewhere in this chapter. Setting the gradient of <span class="math inline">\(J_S\)</span> to zero gives <span class="math inline">\(\lambda w_S = -\frac1n\sum_i\nabla\ell(w_S, z_i)\)</span>. The right side is an average of vectors of norm at most <span class="math inline">\(L\)</span>, so its norm is at most <span class="math inline">\(L\)</span>, and <span class="math inline">\(\|w_S\| \le L/\lambda\)</span>.</p>
+</section>
+<section id="interpretation-2" class="level3" data-number="7.6.4">
+<h3 data-number="7.6.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">7.6.4</span> Interpretation</h3>
+<p>Since <span class="math inline">\(\beta = 2L^2/(\lambda n)\)</span> falls like <span class="math inline">\(1/n\)</span>, which is <span class="math inline">\(o(1/\sqrt n)\)</span>, both the expected-gap and the high-probability bounds go to zero as the training set grows.</p>
+<p>Regularization buys stability linearly: doubling <span class="math inline">\(\lambda\)</span> halves <span class="math inline">\(\beta\)</span>. It is not free, though. A larger <span class="math inline">\(\lambda\)</span> also pulls the solution towards zero and away from the best fit, so the test loss as a function of <span class="math inline">\(\lambda\)</span> is U-shaped (<a href="#fig-stability-gap" class="quarto-xref">Figure&nbsp;<span>7.4</span></a>, right): too little regularization overfits, too much underfits.</p>
+<p>The bound is loose in three places, one per derivation step. Step 2 assumes the two gradients point in opposite directions with full norm <span class="math inline">\(L\)</span>. Step 3 uses only the curvature <span class="math inline">\(\lambda\)</span> of the regularizer and ignores the curvature of the data term, which also resists movement. Step 4 assumes the worst test point. In the experiment below, steps 2 and 4 each cost about a factor of 2, and step 3 costs more when <span class="math inline">\(\lambda\)</span> is small and the data curvature matters.</p>
+</section>
+<section id="example-replace-one-change-in-logistic-regression" class="level3" data-number="7.6.5">
+<h3 data-number="7.6.5" class="anchored" data-anchor-id="example-replace-one-change-in-logistic-regression"><span class="header-section-number">7.6.5</span> Example: replace-one change in logistic regression</h3>
+<p>The running example uses unit-norm features, so <span class="math inline">\(L = 1\)</span> by Fact 1 and <span class="math inline">\(\beta = 2/(\lambda n)\)</span>. The script fits the model on <span class="math inline">\(S\)</span>, then on <span class="math inline">\(S^{(i)}\)</span> for 10 random <span class="math inline">\(i\)</span>, where <span class="math inline">\(z_i\)</span> is replaced by the same point with its label flipped. It records the largest weight change and the largest loss change. To find the test point where the loss changes most, it checks 2,000 random test points and the four points <span class="math inline">\(\pm(w' - w)/\|w' - w\|\)</span> with either label, which lie in the direction the weights moved, where the loss change is largest.</p>
+<div id="tbl-stability-replace-one" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-replace-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.3: Replace-one changes of regularized logistic regression against the bounds in <a href="#eq-stability-erm" class="quarto-xref">Equation&nbsp;<span>7.17</span></a>. Ratio is the largest loss change divided by the loss bound.
+</figcaption>
+<div aria-describedby="tbl-stability-replace-one-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th><span class="math inline">\(\lambda\)</span></th>
+<th>Weight bound <span class="math inline">\(2L/(\lambda n)\)</span></th>
+<th>Largest weight change</th>
+<th>Loss bound <span class="math inline">\(2L^2/(\lambda n)\)</span></th>
+<th>Largest loss change</th>
+<th>Ratio</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>100</td>
+<td>0.01</td>
+<td>2.0</td>
+<td>0.406</td>
+<td>2.0</td>
+<td>0.340</td>
+<td>0.17</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td>0.1</td>
+<td>0.2</td>
+<td>0.0824</td>
+<td>0.2</td>
+<td>0.0474</td>
+<td>0.24</td>
+</tr>
+<tr class="odd">
+<td>100</td>
+<td>1</td>
+<td>0.02</td>
+<td>0.00976</td>
+<td>0.02</td>
+<td>0.00505</td>
+<td>0.25</td>
+</tr>
+<tr class="even">
+<td>1,000</td>
+<td>0.1</td>
+<td>0.02</td>
+<td>0.00809</td>
+<td>0.02</td>
+<td>0.00499</td>
+<td>0.25</td>
+</tr>
+<tr class="odd">
+<td>10,000</td>
+<td>0.01</td>
+<td>0.02</td>
+<td>0.00336</td>
+<td>0.02</td>
+<td>0.00285</td>
+<td>0.14</td>
+</tr>
+<tr class="even">
+<td>10,000</td>
+<td>1</td>
+<td><span class="math inline">\(2\times10^{-4}\)</span></td>
+<td><span class="math inline">\(9.76\times10^{-5}\)</span></td>
+<td><span class="math inline">\(2\times10^{-4}\)</span></td>
+<td><span class="math inline">\(5.00\times10^{-5}\)</span></td>
+<td>0.25</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="#tbl-stability-replace-one" class="quarto-xref">Table&nbsp;<span>7.3</span></a> and <a href="#fig-stability-erm-bound" class="quarto-xref">Figure&nbsp;<span>7.3</span></a> show the <span class="math inline">\(1/(\lambda n)\)</span> scaling closely where the penalty dominates the curvature, that is for <span class="math inline">\(\lambda \ge 0.1\)</span>: the rows with <span class="math inline">\(n = 100, \lambda = 1\)</span> and <span class="math inline">\(n = 1{,}000, \lambda = 0.1\)</span> share <span class="math inline">\(\lambda n = 100\)</span> and have nearly the same loss change (<span class="math inline">\(0.00505\)</span> and <span class="math inline">\(0.00499\)</span>). The third row with <span class="math inline">\(\lambda n = 100\)</span>, at <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(\lambda = 0.01\)</span>, moves less (<span class="math inline">\(0.00336\)</span> in the weights, against <span class="math inline">\(0.00976\)</span> and <span class="math inline">\(0.00809\)</span>), because there the data’s own curvature adds to <span class="math inline">\(\lambda\)</span>, as explained below. For <span class="math inline">\(\lambda = 1\)</span> the ratio is <span class="math inline">\(0.25\)</span>, and both factors of 2 can be read off.</p>
+<p>The first factor of 2 comes from step 2. With margin <span class="math inline">\(m = y\langle w, x\rangle\)</span>, the gradient for label <span class="math inline">\(y\)</span> is <span class="math inline">\(-y\,\sigma(-m)x\)</span>, and for the flipped label <span class="math inline">\(-y\)</span> the margin becomes <span class="math inline">\(-m\)</span> and the gradient is <span class="math inline">\(y\,\sigma(m)x\)</span>. Their difference is <span class="math inline">\(-y\,\sigma(-m)x - y\,\sigma(m)x = -yx\)</span>, because <span class="math inline">\(\sigma(-m) + \sigma(m) = 1\)</span>. Its norm is <span class="math inline">\(\|x\| = 1\)</span>, not the worst case <span class="math inline">\(2L = 2\)</span>. So the weights move by about <span class="math inline">\(1/(\lambda n)\)</span>, half the bound: <span class="math inline">\(0.00976\)</span> against <span class="math inline">\(0.02\)</span>.</p>
+<p>The second factor of 2 comes from step 4. With <span class="math inline">\(\lambda = 1\)</span> the weights are small, so test margins are near zero. There the slope of the logistic loss is <span class="math inline">\(\sigma(0) = \frac12\)</span>, not <span class="math inline">\(L = 1\)</span>, so the loss moves by about half the weight change: <span class="math inline">\(0.00505\)</span> against <span class="math inline">\(0.00976\)</span>.</p>
+<p>For <span class="math inline">\(\lambda = 0.01\)</span> the ratio drops to about <span class="math inline">\(0.15\)</span> (<span class="math inline">\(0.17\)</span> and <span class="math inline">\(0.14\)</span> in the table): with weak regularization the data term adds curvature beyond <span class="math inline">\(\lambda\)</span>, which step 3 ignored.</p>
+<div id="fig-stability-erm-bound" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-erm-bound-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_erm_bound.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-erm-bound-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.3: Largest replace-one loss change of regularized logistic regression as a function of <span class="math inline">\(n\)</span>, for three values of <span class="math inline">\(\lambda\)</span> (solid), against the bound <span class="math inline">\(2L^2/(\lambda n)\)</span> (dashed). Both fall like <span class="math inline">\(1/n\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-generalization-gap-against-the-bound" class="level3" data-number="7.6.6">
+<h3 data-number="7.6.6" class="anchored" data-anchor-id="example-the-generalization-gap-against-the-bound"><span class="header-section-number">7.6.6</span> Example: the generalization gap against the bound</h3>
+<p><a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.11</span></a> bounds the expected gap by the same <span class="math inline">\(\beta\)</span>, here <span class="math inline">\(2/(\lambda n)\)</span>. The script averages the gap over 100 training sets for each <span class="math inline">\((n, \lambda)\)</span>. It computes the test loss exactly by numerical integration. To cancel most of the noise from the random training sets, it also subtracts, on the same training set, the gap of a fixed reference model. A fixed model’s training loss is an unbiased estimate of its test loss (the first section of this chapter), so that gap has mean exactly zero and subtracting it leaves the expected value unchanged; but it rises and falls with the same lucky or unlucky training sets, so the subtraction removes much of the variation.</p>
+<div id="tbl-stability-gap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.4: Expected generalization gap of regularized logistic regression, averaged over 100 training sets, against the stability bound.
+</figcaption>
+<div aria-describedby="tbl-stability-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\lambda\)</span></th>
+<th><span class="math inline">\(n\)</span></th>
+<th>Train loss</th>
+<th>Test loss</th>
+<th>Expected gap</th>
+<th>Bound <span class="math inline">\(2/(\lambda n)\)</span></th>
+<th>Gap / bound</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.01</td>
+<td>50</td>
+<td>0.4603</td>
+<td>0.5781</td>
+<td>0.119</td>
+<td>4.0</td>
+<td>0.030</td>
+</tr>
+<tr class="even">
+<td>0.01</td>
+<td>1,000</td>
+<td>0.5311</td>
+<td>0.5381</td>
+<td>0.00596</td>
+<td>0.2</td>
+<td>0.030</td>
+</tr>
+<tr class="odd">
+<td>0.1</td>
+<td>50</td>
+<td>0.6073</td>
+<td>0.6401</td>
+<td>0.0319</td>
+<td>0.4</td>
+<td>0.080</td>
+</tr>
+<tr class="even">
+<td>0.1</td>
+<td>200</td>
+<td>0.6288</td>
+<td>0.6373</td>
+<td>0.00830</td>
+<td>0.1</td>
+<td>0.083</td>
+</tr>
+<tr class="odd">
+<td>0.1</td>
+<td>1,000</td>
+<td>0.6346</td>
+<td>0.6365</td>
+<td>0.00178</td>
+<td>0.02</td>
+<td>0.089</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>50</td>
+<td>0.6806</td>
+<td>0.6854</td>
+<td>0.00459</td>
+<td>0.04</td>
+<td>0.115</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>1,000</td>
+<td>0.6852</td>
+<td>0.6855</td>
+<td>0.000253</td>
+<td>0.002</td>
+<td>0.127</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The gap falls like <span class="math inline">\(1/n\)</span>, as the bound predicts, and stays a fixed fraction of it for each <span class="math inline">\(\lambda\)</span>: about 3% for <span class="math inline">\(\lambda = 0.01\)</span> and 11% to 13% for <span class="math inline">\(\lambda = 1\)</span> (<a href="#tbl-stability-gap" class="quarto-xref">Table&nbsp;<span>7.4</span></a>). Part of the slack is the factor of about 4 already seen in <a href="#tbl-stability-replace-one" class="quarto-xref">Table&nbsp;<span>7.3</span></a>, where the ratio was 0.25. The rest comes from averaging: the gap averages over test points and replacements, while the bound takes the worst of both.</p>
+<div id="fig-stability-gap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_gap.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-gap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.4: Left: expected generalization gap of regularized logistic regression against <span class="math inline">\(n\)</span> (solid), with the stability bound <span class="math inline">\(2/(\lambda n)\)</span> (dashed). Right: train and test loss against <span class="math inline">\(\lambda\)</span> at <span class="math inline">\(n = 50\)</span>. Stronger regularization closes the gap, but too much of it raises the test loss.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-3" class="level3" data-number="7.6.7">
+<h3 data-number="7.6.7" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">7.6.7</span> Check yourself</h3>
+<ul>
+<li>Where does the derivation use convexity of <span class="math inline">\(\ell\)</span>, and where Lipschitzness? <em>(Convexity makes <span class="math inline">\(J_S\)</span> <span class="math inline">\(\lambda\)</span>-strongly convex in step 3. Lipschitzness bounds the gradients in step 2 and turns weights into losses in step 4.)</em></li>
+<li>Squared loss on bounded data is not globally Lipschitz. How can you still apply the result to ridge regression? <em>(Use <span class="math inline">\(\|w_S\| \le\)</span> a bound derived from optimality, as in the by-product, and the Lipschitz constant of the squared loss on that bounded set.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sgd-is-stable-if-you-stop-early" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="sgd-is-stable-if-you-stop-early"><span class="header-section-number">7.7</span> SGD is stable if you stop early</h2>
+<section id="context-4" class="level3" data-number="7.7.1">
+<h3 data-number="7.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">7.7.1</span> Context</h3>
+<p>Large models are not trained to an exact minimizer. They are trained by SGD for some number of steps: at each step, pick one training example at random and move the weights a little against the gradient of its loss. Hardt, Recht &amp; Singer (2016) showed that SGD itself is stable, with a <span class="math inline">\(\beta\)</span> that grows with the total step size. This turns “train for fewer epochs” into a generalization guarantee.</p>
+</section>
+<section id="statement-4" class="level3" data-number="7.7.2">
+<h3 data-number="7.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">7.7.2</span> Statement</h3>
+<p>The idea is that two SGD runs, one on <span class="math inline">\(S\)</span> and one on <span class="math inline">\(S^{(i)}\)</span>, can only drift apart on the steps that happen to pick example <span class="math inline">\(i\)</span>. Each such step pushes them apart by at most <span class="math inline">\(2\eta_tL\)</span>, and it happens with probability <span class="math inline">\(1/n\)</span>; every other step, by Fact 4, does not push them apart. So the expected distance grows by at most <span class="math inline">\(2\eta_tL/n\)</span> per step.</p>
+<p>The assumptions are those of Fact 4 plus a gradient bound. Let <span class="math inline">\(\ell(\cdot, z)\)</span> be convex, <span class="math inline">\(\rho\)</span>-smooth (gradient changes by at most <span class="math inline">\(\rho\)</span> per unit distance) and <span class="math inline">\(L\)</span>-Lipschitz (gradient norm at most <span class="math inline">\(L\)</span>) for every <span class="math inline">\(z\)</span>. Run SGD for <span class="math inline">\(T\)</span> steps from a starting point <span class="math inline">\(w_0\)</span>: step <span class="math inline">\(t = 1, \dots, T\)</span> updates <span class="math inline">\(w_t = w_{t-1} - \eta_t\nabla\ell(w_{t-1}, z_{I_t})\)</span>, and the output is <span class="math inline">\(w_T\)</span>. Each index <span class="math inline">\(I_t\)</span> is drawn uniformly from <span class="math inline">\(\{1, \dots, n\}\)</span> and <span class="math inline">\(\eta_t \le 2/\rho\)</span>. Then SGD is uniformly stable (in expectation over the indices) with <span id="eq-stability-hrs"><span class="math display">\[\beta \le \frac{2L^2}{n}\sum_{t=1}^T\eta_t. \tag{7.19}\]</span></span> This is Theorem 3.8 of Hardt, Recht &amp; Singer (2016), who write <span class="math inline">\(\beta\)</span> for the smoothness and <span class="math inline">\(\epsilon_{\text{stab}}\)</span> for the stability.</p>
+</section>
+<section id="derivation-3" class="level3" data-number="7.7.3">
+<h3 data-number="7.7.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">7.7.3</span> Derivation</h3>
+<p>Run SGD on <span class="math inline">\(S\)</span> and on <span class="math inline">\(S^{(i)}\)</span> with the <strong>same</strong> index sequence <span class="math inline">\(I_1, I_2, \dots\)</span> and the same starting point. This pairing, called a <strong>coupling</strong>, is legitimate because the stability condition for a randomized algorithm compares the <em>average</em> loss of each run, and each run’s average depends only on its own distribution. Using the same random indices for both runs does not change either run’s distribution, and it makes the two runs as similar as possible. Let <span class="math inline">\(\delta_t = \|w_t - w_t'\|\)</span> be the distance between the two runs after <span class="math inline">\(t\)</span> steps, with <span class="math inline">\(\delta_0 = 0\)</span> because both start at <span class="math inline">\(w_0\)</span>. Step <span class="math inline">\(t\)</span> uses the index <span class="math inline">\(I_t\)</span> and the step size <span class="math inline">\(\eta_t\)</span> and turns <span class="math inline">\(\delta_{t-1}\)</span> into <span class="math inline">\(\delta_t\)</span>. (Only here, <span class="math inline">\(\delta_t\)</span> is a distance, not a failure probability.)</p>
+<ol type="1">
+<li><strong>Same example picked</strong> (<span class="math inline">\(I_t \ne i\)</span>, probability <span class="math inline">\(1 - 1/n\)</span>). Both runs take a gradient step on the same function <span class="math inline">\(\ell(\cdot, z_{I_t})\)</span>. By Fact 4 (a gradient step with <span class="math inline">\(\eta_t \le 2/\rho\)</span> on a convex smooth function does not increase distances), <span class="math inline">\(\delta_t \le \delta_{t-1}\)</span>.</li>
+<li><strong>Differing example picked</strong> (<span class="math inline">\(I_t = i\)</span>, probability <span class="math inline">\(1/n\)</span>). One run steps on <span class="math inline">\(z_i\)</span>, the other on <span class="math inline">\(z_i'\)</span>, so Fact 4 does not apply. Instead, write <span class="math inline">\(w_t - w_t' = (w_{t-1} - w_{t-1}') - \eta_t\nabla\ell(w_{t-1}, z_i) + \eta_t\nabla\ell(w_{t-1}', z_i')\)</span> and use the triangle inequality on the three terms: <span class="math inline">\(\delta_t \le \|w_{t-1} - w_{t-1}'\| + \eta_t\|\nabla\ell(w_{t-1}, z_i)\| + \eta_t\|\nabla\ell(w_{t-1}', z_i')\| \le \delta_{t-1} + 2\eta_tL\)</span>, since each gradient has norm at most <span class="math inline">\(L\)</span>.</li>
+<li><strong>Take expectations</strong> over <span class="math inline">\(I_t\)</span>. The index <span class="math inline">\(I_t\)</span> is drawn fresh at step <span class="math inline">\(t\)</span>, so it is independent of <span class="math inline">\(\delta_{t-1}\)</span>, which depends only on earlier indices. Weighting the two cases by their probabilities, <span class="math inline">\(\mathbb E\delta_t \le (1 - \frac1n)\mathbb E\delta_{t-1} + \frac1n(\mathbb E\delta_{t-1} + 2\eta_tL) = \mathbb E\delta_{t-1} + \frac{2\eta_tL}{n}\)</span>.</li>
+<li><strong>Unroll.</strong> Starting from <span class="math inline">\(\delta_0 = 0\)</span> and adding the increments of steps <span class="math inline">\(t = 1, \dots, T\)</span>, <span class="math inline">\(\mathbb E\delta_T \le \frac{2L}n\sum_{t=1}^T\eta_t\)</span>.</li>
+<li><strong>From weights to losses.</strong> By Fact 1, at every test point <span class="math inline">\(z\)</span> the loss difference is at most <span class="math inline">\(L\delta_T\)</span>, so its expectation is at most <span class="math inline">\(L\,\mathbb E\delta_T\)</span>: <span class="math inline">\(\big|\mathbb E[\ell(w_T, z) - \ell(w_T', z)]\big| \le L\,\mathbb E\delta_T\)</span>. Multiplying the bound of step 4 by <span class="math inline">\(L\)</span> gives <a href="#eq-stability-hrs" class="quarto-xref">Equation&nbsp;<span>7.19</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-3" class="level3" data-number="7.7.4">
+<h3 data-number="7.7.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">7.7.4</span> Interpretation</h3>
+<p>The derivation says that the two runs only drift apart when the differing example is used. <a href="#fig-stability-sgd-divergence" class="quarto-xref">Figure&nbsp;<span>7.5</span></a> shows this as a staircase: each single run jumps when index <span class="math inline">\(i\)</span> is drawn and otherwise does not grow. Since <span class="math inline">\(i\)</span> is drawn with probability <span class="math inline">\(1/n\)</span> and an epoch is <span class="math inline">\(n\)</span> steps, a jump happens on average once per epoch.</p>
+<p>As a result, stability degrades linearly with training time. With a constant step <span class="math inline">\(\eta\)</span> and <span class="math inline">\(E\)</span> epochs, so <span class="math inline">\(T = En\)</span> steps, the sum of the step sizes is <span class="math inline">\(\eta En\)</span>, and <a href="#eq-stability-hrs" class="quarto-xref">Equation&nbsp;<span>7.19</span></a> gives <span class="math inline">\(\beta \le (2L^2/n)\eta En = 2L^2\eta E\)</span>. The <span class="math inline">\(n\)</span> cancels: for a fixed number of epochs the bound does not improve with more data. One pass (<span class="math inline">\(E = 1\)</span>) gives <span class="math inline">\(\beta \le 2L^2\eta\)</span>.</p>
+<p>This makes early stopping a trade-off. Training longer lowers the optimization error but raises <span class="math inline">\(\beta\)</span>, and the excess test loss pays for both. To see the balance, split the excess test loss of the SGD output <span class="math inline">\(\bar w\)</span> over the best weights <span class="math inline">\(w^*\)</span> into three pieces: <span class="math inline">\(R(\bar w) - R(w^*) = [R(\bar w) - \hat R_S(\bar w)] + [\hat R_S(\bar w) - \hat R_S(w^*)] + [\hat R_S(w^*) - R(w^*)]\)</span>. The first piece is the gap, at most <span class="math inline">\(\beta\)</span> on average. The second is the optimization error. The third has mean zero, because <span class="math inline">\(w^*\)</span> is a fixed model. For convex <span class="math inline">\(L\)</span>-Lipschitz losses, SGD with constant step <span class="math inline">\(\eta\)</span> reaches an optimization error of at most <span class="math inline">\(\frac{\|w^*\|^2}{2\eta T} + \frac{\eta L^2}2\)</span> for the averaged iterate (see <a href="../part01-prerequisites/06-optimization.html">Optimization</a>; Shalev-Shwartz &amp; Ben-David 2014, ch.&nbsp;14). The first term falls with training time and the gap bound <span class="math inline">\(2L^2\eta T/n\)</span> rises with it. With <span class="math inline">\(u = \eta T\)</span>, the sum to balance is <span class="math inline">\(\frac{\|w^*\|^2}{2u} + \frac{2L^2u}{n}\)</span>. Setting its derivative <span class="math inline">\(-\frac{\|w^*\|^2}{2u^2} + \frac{2L^2}{n}\)</span> to zero gives <span class="math inline">\(u^* = \frac{\|w^*\|\sqrt n}{2L}\)</span>, and at that value both terms equal <span class="math inline">\(\frac{L\|w^*\|}{\sqrt n}\)</span>, so the excess test loss is at most <span class="math inline">\(\frac{2L\|w^*\|}{\sqrt n}\)</span>, plus the <span class="math inline">\(\eta L^2/2\)</span> term. Training much longer than <span class="math inline">\(u^*\)</span> buys optimization accuracy that the growing stability term gives back.</p>
+<p>The bound is loose because step 1 only uses that a step does not expand distances. In practice a gradient step on a curved loss often contracts them, so the true divergence saturates instead of growing linearly (<a href="#fig-stability-sgd-divergence" class="quarto-xref">Figure&nbsp;<span>7.5</span></a>).</p>
+</section>
+<section id="example-unregularized-logistic-regression-with-sgd" class="level3" data-number="7.7.5">
+<h3 data-number="7.7.5" class="anchored" data-anchor-id="example-unregularized-logistic-regression-with-sgd"><span class="header-section-number">7.7.5</span> Example: unregularized logistic regression with SGD</h3>
+<p>Take <span class="math inline">\(n = 100\)</span> examples of the running example and a constant step <span class="math inline">\(\eta = 0.25\)</span>. To apply the theorem you need the smoothness <span class="math inline">\(\rho\)</span>. Along the margin <span class="math inline">\(m\)</span>, the logistic loss <span class="math inline">\(\ln(1 + e^{-m})\)</span> has second derivative <span class="math inline">\(\sigma(m)\sigma(-m) = \sigma(m)(1 - \sigma(m))\)</span>, a product of two numbers that sum to 1, which is at most <span class="math inline">\(\frac12 \cdot \frac12 = \frac14\)</span>. With <span class="math inline">\(\|x\| \le 1\)</span> the curvature in weight space is no larger, so the loss is <span class="math inline">\(\frac14\)</span>-smooth, <span class="math inline">\(\rho = \frac14\)</span>, and the condition <span class="math inline">\(\eta \le 2/\rho = 8\)</span> holds. The script averages over 100 coupled pairs of runs, with <span class="math inline">\(z_1\)</span> replaced by a fresh draw. With <span class="math inline">\(L = 1\)</span> and <span class="math inline">\(\eta = 0.25\)</span>, the loss bound <span class="math inline">\(2L^2\eta E\)</span> and the distance bound <span class="math inline">\(2L\eta E\)</span> are both <span class="math inline">\(0.5E\)</span>:</p>
+<div id="tbl-stability-sgd" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-sgd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.5: SGD on unregularized logistic regression, <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\eta = 0.25\)</span>, averaged over 100 runs. With <span class="math inline">\(L = 1\)</span> the two bounds coincide.
+</figcaption>
+<div aria-describedby="tbl-stability-sgd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Epochs</th>
+<th>Train loss</th>
+<th>Test loss</th>
+<th>Gap</th>
+<th>Bound <span class="math inline">\(2L^2\eta E\)</span></th>
+<th>Mean <span class="math inline">\(\lVert w_T - w_T'\rVert\)</span></th>
+<th>Bound <span class="math inline">\(2L\eta E\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0.559</td>
+<td>0.596</td>
+<td>0.036</td>
+<td>0.5</td>
+<td>0.130</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>0.515</td>
+<td>0.567</td>
+<td>0.052</td>
+<td>1.0</td>
+<td>0.189</td>
+<td>1.0</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>0.478</td>
+<td>0.557</td>
+<td>0.079</td>
+<td>2.5</td>
+<td>0.277</td>
+<td>2.5</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>0.470</td>
+<td>0.567</td>
+<td>0.097</td>
+<td>5.0</td>
+<td>0.363</td>
+<td>5.0</td>
+</tr>
+<tr class="odd">
+<td>20</td>
+<td>0.467</td>
+<td>0.582</td>
+<td>0.115</td>
+<td>10.0</td>
+<td>0.355</td>
+<td>10.0</td>
+</tr>
+<tr class="even">
+<td>40</td>
+<td>0.467</td>
+<td>0.588</td>
+<td>0.121</td>
+<td>20.0</td>
+<td>0.395</td>
+<td>20.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The qualitative prediction holds (<a href="#tbl-stability-sgd" class="quarto-xref">Table&nbsp;<span>7.5</span></a>, <a href="#fig-stability-sgd-epochs" class="quarto-xref">Figure&nbsp;<span>7.6</span></a>): the gap grows with the number of epochs, and the test loss is lowest after about 5 epochs and rises afterwards, while the training loss keeps falling. Quantitatively the bound is loose, by a factor of 14 after one epoch (<span class="math inline">\(0.5/0.036\)</span>) and of 165 after 40 (<span class="math inline">\(20.0/0.121\)</span>), because the divergence saturates near 0.4 instead of growing linearly.</p>
+<div id="fig-stability-sgd-divergence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-sgd-divergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_sgd_divergence.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-sgd-divergence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.5: Distance between coupled SGD runs on <span class="math inline">\(S\)</span> and <span class="math inline">\(S^{(1)}\)</span> (<span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\eta = 0.25\)</span>), for three single runs and the average over 200 runs, against the bound <span class="math inline">\((2L/n)\sum_t\eta_t\)</span>. Single runs jump when example 1 is drawn and contract otherwise. Dotted lines mark epochs.
+</figcaption>
+</figure>
+</div>
+<div id="fig-stability-sgd-epochs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_sgd_epochs.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.6: Left: train and test loss of SGD against the number of epochs. Right: the measured gap against the stability bound <span class="math inline">\(2L^2\eta T/n\)</span>, on a log scale. Both grow with training time; the bound grows faster.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-4" class="level3" data-number="7.7.6">
+<h3 data-number="7.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">7.7.6</span> Check yourself</h3>
+<ul>
+<li>Why must both runs use the same index sequence? <em>(Otherwise they would step on different examples at almost every step, and step 1 could not use non-expansiveness. The bound concerns the distribution of each run, so you may couple them as you like.)</em></li>
+<li>What breaks for non-convex losses? <em>(Fact 4: a gradient step on a non-convex function can expand distances, by up to a factor <span class="math inline">\(1 + \eta_t\rho\)</span>. Hardt, Recht &amp; Singer still get a bound, but it grows polynomially in <span class="math inline">\(T\)</span> rather than linearly in <span class="math inline">\(\sum_t\eta_t\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="an-unstable-algorithm-1-nearest-neighbour" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="an-unstable-algorithm-1-nearest-neighbour"><span class="header-section-number">7.8</span> An unstable algorithm: 1-nearest neighbour</h2>
+<section id="context-5" class="level3" data-number="7.8.1">
+<h3 data-number="7.8.1" class="anchored" data-anchor-id="context-5"><span class="header-section-number">7.8.1</span> Context</h3>
+<p>Stability is sufficient for generalization, in the sense of a vanishing gap. Seeing an algorithm without it makes clear what it rules out. The nearest neighbour (NN) rule with one neighbour, 1-NN, predicts the label of the closest training point. It fits every training example perfectly, using that example itself, which is exactly the dependence on single examples that stability forbids.</p>
+</section>
+<section id="statement-5" class="level3" data-number="7.8.2">
+<h3 data-number="7.8.2" class="anchored" data-anchor-id="statement-5"><span class="header-section-number">7.8.2</span> Statement</h3>
+<p>1-NN is as unstable as an algorithm can be, and its gap does not close. With 0-1 loss, 1-NN is <span class="math inline">\(\beta\)</span>-uniformly stable only for <span class="math inline">\(\beta = 1\)</span>, the largest possible value. Its training error is 0, and as <span class="math inline">\(n \to \infty\)</span> its test error tends to <span class="math inline">\(\mathbb E[2p(x)(1 - p(x))]\)</span>, where <span class="math inline">\(p(x) = \Pr[y = 1 \mid x]\)</span> is the probability that the label at <span class="math inline">\(x\)</span> is <span class="math inline">\(+1\)</span> (Cover &amp; Hart 1967). So whenever the labels are noisy, its gap stays bounded away from zero.</p>
+</section>
+<section id="derivation-4" class="level3" data-number="7.8.3">
+<h3 data-number="7.8.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">7.8.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Training error is 0.</strong> Each training point is its own nearest neighbour (assume distinct points), so it is predicted with its own label.</li>
+<li><strong><span class="math inline">\(\beta = 1\)</span>.</strong> It is enough to find one training set, one replacement and one test point where the loss changes by 1. Take any <span class="math inline">\(S\)</span> and the test point <span class="math inline">\(z = z_i = (x_i, y_i)\)</span>. On <span class="math inline">\(S\)</span> the prediction at <span class="math inline">\(x_i\)</span> is <span class="math inline">\(y_i\)</span>: loss 0. Replace <span class="math inline">\(z_i\)</span> by <span class="math inline">\(z_i' = (x_i, -y_i)\)</span>, the same point with the opposite label. On <span class="math inline">\(S^{(i)}\)</span> the nearest neighbour of <span class="math inline">\(x_i\)</span> is <span class="math inline">\(z_i'\)</span>, so the prediction is <span class="math inline">\(-y_i\)</span>: loss 1.</li>
+<li><strong>The gap equals the test error.</strong> By step 1 the training loss is 0, so <span class="math inline">\(\mathrm{gap}(S) = R(A(S))\)</span>. As <span class="math inline">\(n\)</span> grows, the training points fill the space, so the nearest neighbour of a test point <span class="math inline">\(x\)</span> lies at (essentially) <span class="math inline">\(x\)</span>, and its label is an independent draw that is <span class="math inline">\(+1\)</span> with probability <span class="math inline">\(p(x)\)</span>. The test label is another independent draw with the same probability. The two disagree when one is <span class="math inline">\(+1\)</span> and the other <span class="math inline">\(-1\)</span>, which happens with probability <span class="math inline">\(p(1 - p) + (1 - p)p = 2p(1 - p)\)</span>. Averaging over <span class="math inline">\(x\)</span> gives the limit.</li>
+</ol>
+</section>
+<section id="interpretation-4" class="level3" data-number="7.8.4">
+<h3 data-number="7.8.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">7.8.4</span> Interpretation</h3>
+<p>Zero training error says nothing here. 1-NN is a reasonable classifier: the best possible classifier, the <strong>Bayes classifier</strong>, predicts the more likely label at each <span class="math inline">\(x\)</span> and has error <span class="math inline">\(\mathbb E[\min(p, 1 - p)]\)</span>, and since <span class="math inline">\(2p(1 - p) = 2\min(p, 1-p)\max(p, 1-p) \le 2\min(p, 1-p)\)</span>, the limiting error of 1-NN is at most twice that. But its training error carries no information about how close it gets.</p>
+<p>The result is consistent with the theorem but not explained by it. The gap of 1-NN is below <span class="math inline">\(\beta = 1\)</span>, so <a href="#eq-stability-expected" class="quarto-xref">Equation&nbsp;<span>7.11</span></a> holds; it just says nothing useful when the loss is at most 1 anyway.</p>
+<p>More neighbours give more stability. <span class="math inline">\(k\)</span>-NN with majority vote averages <span class="math inline">\(k\)</span> labels, so replacing one example rarely changes a prediction. Its worst-case <span class="math inline">\(\beta\)</span> is still 1, because some training set leaves a test point with a vote split as evenly as possible, and replacing one of its neighbours flips the majority, but average-case stability notions capture its behaviour (Devroye &amp; Wagner 1979; <a href="../../book-exercises/part01-prerequisites/07-stability-generalization.html#sec-sol-stability-generalization-6">Exercise 6</a>).</p>
+</section>
+<section id="example-1-nn-against-regularized-logistic-regression" class="level3" data-number="7.8.5">
+<h3 data-number="7.8.5" class="anchored" data-anchor-id="example-1-nn-against-regularized-logistic-regression"><span class="header-section-number">7.8.5</span> Example: 1-NN against regularized logistic regression</h3>
+<p>In the running example the Bayes error is 0.250 and the 1-NN limit <span class="math inline">\(\mathbb E[2p(1 - p)]\)</span> is 0.338. The table compares 1-NN with the stable regularized logistic regression, averaging over 10 training sets, with 0-1 error measured on 2,000 test points:</p>
+<div id="tbl-stability-nn" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-nn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.6: 0-1 error of 1-nearest neighbour and of regularized logistic regression.
+</figcaption>
+<div aria-describedby="tbl-stability-nn-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th>1-NN train</th>
+<th>1-NN test</th>
+<th>Logistic (<span class="math inline">\(\lambda = 0.01\)</span>) train</th>
+<th>Logistic test</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>50</td>
+<td>0.000</td>
+<td>0.404</td>
+<td>0.170</td>
+<td>0.301</td>
+</tr>
+<tr class="even">
+<td>200</td>
+<td>0.000</td>
+<td>0.380</td>
+<td>0.232</td>
+<td>0.274</td>
+</tr>
+<tr class="odd">
+<td>1,000</td>
+<td>0.000</td>
+<td>0.367</td>
+<td>0.244</td>
+<td>0.266</td>
+</tr>
+<tr class="even">
+<td>4,000</td>
+<td>0.000</td>
+<td>0.352</td>
+<td>0.249</td>
+<td>0.259</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The gap of 1-NN is its test error, which falls towards 0.338 and no further. The gap of the stable logistic regression, test minus train, falls from <span class="math inline">\(0.301 - 0.170 = 0.131\)</span> at <span class="math inline">\(n = 50\)</span> to <span class="math inline">\(0.259 - 0.249 = 0.010\)</span> at <span class="math inline">\(n = 4{,}000\)</span> (<a href="#tbl-stability-nn" class="quarto-xref">Table&nbsp;<span>7.6</span></a>, <a href="#fig-stability-nearest-neighbour" class="quarto-xref">Figure&nbsp;<span>7.7</span></a>).</p>
+<div id="fig-stability-nearest-neighbour" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-nearest-neighbour-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_nearest_neighbour.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-nearest-neighbour-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.7: Train (dashed) and test (solid) 0-1 error of 1-nearest neighbour and of regularized logistic regression against <span class="math inline">\(n\)</span>, with the Bayes error and the 1-NN limit <span class="math inline">\(\mathbb E[2p(1-p)]\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-5" class="level3" data-number="7.8.6">
+<h3 data-number="7.8.6" class="anchored" data-anchor-id="check-yourself-5"><span class="header-section-number">7.8.6</span> Check yourself</h3>
+<ul>
+<li>Is the memorizing lookup table less stable than 1-NN? <em>(No; both have <span class="math inline">\(\beta = 1\)</span>. But 1-NN generalizes its memory to nearby points, so its test error is far better.)</em></li>
+<li>Would label noise of zero (<span class="math inline">\(p(x) \in \{0, 1\}\)</span>) rescue 1-NN’s gap? <em>(In the limit, yes: <span class="math inline">\(2p(1 - p) = 0\)</span>. The gap of a memorizer is driven by examples whose label could have gone either way.)</em></li>
+</ul>
+</section>
+</section>
+<section id="overfitting-is-memorization-of-individual-examples" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="overfitting-is-memorization-of-individual-examples"><span class="header-section-number">7.9</span> Overfitting is memorization of individual examples</h2>
+<section id="context-6" class="level3" data-number="7.9.1">
+<h3 data-number="7.9.1" class="anchored" data-anchor-id="context-6"><span class="header-section-number">7.9.1</span> Context</h3>
+<p><a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.10</span></a> says the expected gap is the average, over training examples, of how much each example’s own loss rises when that example is replaced. This quantity, the <strong>self-influence</strong> (or <strong>memorization score</strong>) of example <span class="math inline">\(i\)</span>, can be measured directly by retraining. Measuring it shows <em>which</em> examples carry the gap.</p>
+</section>
+<section id="statement-6" class="level3" data-number="7.9.2">
+<h3 data-number="7.9.2" class="anchored" data-anchor-id="statement-6"><span class="header-section-number">7.9.2</span> Statement</h3>
+<p>Give the bracket of <a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.10</span></a> a name: for each training example, its self-influence is its loss under the model trained without it (with a fresh point in its place) minus its loss under the model trained with it, <span id="eq-auto-07stabilitygeneralization-14"><span class="math display">\[\mathrm{mem}_i(S) = \ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big). \tag{7.20}\]</span></span> Then <span class="math inline">\(\mathbb E[\mathrm{gap}(S)] = \frac1n\sum_i\mathbb E[\mathrm{mem}_i(S)]\)</span>, by <a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.10</span></a>. Feldman (2020) uses the same idea with removal instead of replacement and accuracy instead of loss: the probability that the model is right on example <span class="math inline">\(i\)</span> when trained with it, minus the same probability when trained without it, <span class="math inline">\(\Pr[A(S) \text{ is right on } x_i] - \Pr[A(S \setminus z_i) \text{ is right on } x_i]\)</span>.</p>
+</section>
+<section id="derivation-5" class="level3" data-number="7.9.3">
+<h3 data-number="7.9.3" class="anchored" data-anchor-id="derivation-5"><span class="header-section-number">7.9.3</span> Derivation</h3>
+<p>Nothing new: this is <a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.10</span></a> with the bracket given a name. The content is in the measurement.</p>
+</section>
+<section id="interpretation-5" class="level3" data-number="7.9.4">
+<h3 data-number="7.9.4" class="anchored" data-anchor-id="interpretation-5"><span class="header-section-number">7.9.4</span> Interpretation</h3>
+<p>The gap is a sum of per-example contributions. A model with a large gap has, on average, examples whose fit depends on themselves. Uniform stability caps every contribution at <span class="math inline">\(\beta\)</span>; the identity says the average is what matters for the expected gap.</p>
+<p>The contributions are uneven. Typical examples are fitted well whether or not they are present, because their neighbours carry the same information. Atypical examples, such as mislabeled points or members of rare subgroups, are fitted only if they themselves are in the training set, so they carry most of the gap.</p>
+<p>That does not make memorization a defect to remove at any cost, because it can be necessary. Feldman (2020) shows that when the data distribution has a long tail of rare subpopulations, each seen about once, an algorithm that does not memorize those singletons loses accuracy on the tail. So for natural data, a large gap can come with good test accuracy. The empirical evidence points the same way. Zhang et al.&nbsp;(2017) found that deep networks fit even randomly relabeled training data perfectly, and Feldman &amp; Zhang (2020) estimated memorization scores on image benchmarks and found the highest scores on atypical and mislabeled examples.</p>
+</section>
+<section id="example-self-influence-in-logistic-regression" class="level3" data-number="7.9.5">
+<h3 data-number="7.9.5" class="anchored" data-anchor-id="example-self-influence-in-logistic-regression"><span class="header-section-number">7.9.5</span> Example: self-influence in logistic regression</h3>
+<p>The script draws training sets of <span class="math inline">\(n = 40\)</span> points, fits the model, then for each <span class="math inline">\(i\)</span> replaces <span class="math inline">\(z_i\)</span> by a fresh draw, refits, and records <span class="math inline">\(\mathrm{mem}_i\)</span>. Over 100 training sets, with ± one standard error, the measured gap and the average self-influence are close. At <span class="math inline">\(\lambda = 0.01\)</span> the gap is <span class="math inline">\(0.1482 \pm 0.0073\)</span> and the average self-influence is <span class="math inline">\(0.1422 \pm 0.0025\)</span>. At <span class="math inline">\(\lambda = 0.1\)</span> the gap is <span class="math inline">\(0.0420 \pm 0.0017\)</span> and the average self-influence is <span class="math inline">\(0.0416 \pm 0.0003\)</span>.</p>
+<p>The two agree within their errors, as the identity requires. The self-influence estimate is less noisy, because it averages <span class="math inline">\(n\)</span> refits per training set.</p>
+<p>To see which examples carry the gap, split them by whether the label goes with the trend (<span class="math inline">\(y_ix_{i1} \ge 0\)</span>, the more likely label, since <span class="math inline">\(\Pr[y = 1 \mid x] = \sigma(5x_1)\)</span> favours the sign of <span class="math inline">\(x_1\)</span>) or against it. About a quarter go against it (24% and 25% in the two runs). At <span class="math inline">\(\lambda = 0.01\)</span>, their average self-influence is <span class="math inline">\(0.284\)</span>, against <span class="math inline">\(0.097\)</span> for the others: three times larger. At <span class="math inline">\(\lambda = 0.1\)</span> the two are <span class="math inline">\(0.055\)</span> and <span class="math inline">\(0.037\)</span>. <a href="#fig-stability-self-influence" class="quarto-xref">Figure&nbsp;<span>7.8</span></a> shows the full picture: the least typical examples are the most memorized, and regularization flattens the profile.</p>
+<div id="fig-stability-self-influence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stability-self-influence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/stability_self_influence.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stability-self-influence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.8: Self-influence <span class="math inline">\(\ell(w(S^{(i)}), z_i) - \ell(w(S), z_i)\)</span> of each training example against <span class="math inline">\(y_ix_{i1}\)</span>, which measures how typical its label is, for <span class="math inline">\(n = 40\)</span> and two values of <span class="math inline">\(\lambda\)</span>. Examples whose label goes against the trend have the largest self-influence. The dashed line is the average, which equals the expected gap.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-6" class="level3" data-number="7.9.6">
+<h3 data-number="7.9.6" class="anchored" data-anchor-id="check-yourself-6"><span class="header-section-number">7.9.6</span> Check yourself</h3>
+<ul>
+<li>Uniform stability bounds every <span class="math inline">\(\mathrm{mem}_i\)</span>. Why is it a stronger requirement than a small expected gap? <em>(A small gap only needs the average to be small. A few heavily memorized examples are compatible with a small gap but not with small uniform stability.)</em></li>
+<li>Why does regularization shrink the self-influence of atypical examples the most? <em>(It caps how far any one example can pull the weights, <span class="math inline">\(2L/(\lambda n)\)</span>, and atypical examples are the ones that pull hardest.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-stability-code" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="sec-stability-code"><span class="header-section-number">7.10</span> Code: check every bound by simulation</h2>
+<p>The script <a href="../../../code/part01-prerequisites/stability.py">code/stability.py</a> draws every figure in this chapter and computes the numbers quoted in it. The running example has features <span class="math inline">\(x\)</span> uniform on the unit sphere in <span class="math inline">\(\mathbb R^{10}\)</span> and labels with <span class="math inline">\(\Pr[y = 1 \mid x] = \sigma(5x_1)\)</span>. The model is logistic regression without intercept, fitted by Newton’s method with backtracking. Because <span class="math inline">\(\|x\| = 1\)</span>, the logistic loss is 1-Lipschitz and <span class="math inline">\(\frac14\)</span>-smooth. The test loss of a model is computed without sampling error. The features are spread evenly over the sphere and the label depends only on <span class="math inline">\(x_1\)</span>, so rotating the other nine coordinates changes nothing; the test loss therefore depends only on <span class="math inline">\(w_1\)</span> and the norm of the other coordinates of <span class="math inline">\(w\)</span>. That makes it a two-dimensional integral, done on a grid. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/stability.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-stability-code" class="quarto-xref">Table&nbsp;<span>7.7</span></a>:</p>
+<div id="tbl-stability-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.7: Summary of the script’s output.
+</figcaption>
+<div aria-describedby="tbl-stability-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Renaming, <span class="math inline">\(n = 1\)</span>, <span class="math inline">\(p = 0.3\)</span> (<a href="#tbl-stability-renaming" class="quarto-xref">Table&nbsp;<span>7.2</span></a>)</td>
+<td>Train 0.0750; test 0.2850; renamed 0.2850; gap 0.2100; <span class="math inline">\(\beta = 0.75\)</span></td>
+</tr>
+<tr class="even">
+<td>Replace-one change, regularized logistic (<a href="#tbl-stability-replace-one" class="quarto-xref">Table&nbsp;<span>7.3</span></a>)</td>
+<td>Loss change between 0.14 and 0.25 of <span class="math inline">\(2L^2/(\lambda n)\)</span>, for <span class="math inline">\(n\)</span> from 100 to 10,000 and <span class="math inline">\(\lambda\)</span> from 0.01 to 1</td>
+</tr>
+<tr class="odd">
+<td>Expected gap, regularized logistic (<a href="#tbl-stability-gap" class="quarto-xref">Table&nbsp;<span>7.4</span></a>)</td>
+<td>Falls like <span class="math inline">\(1/n\)</span>; about 3% of the bound at <span class="math inline">\(\lambda = 0.01\)</span>, 11% to 13% at <span class="math inline">\(\lambda = 1\)</span></td>
+</tr>
+<tr class="even">
+<td>High-probability width, <span class="math inline">\(n = 10{,}000\)</span>, <span class="math inline">\(\delta = 0.05\)</span></td>
+<td><span class="math inline">\(\lambda = 1\)</span>: 0.065; <span class="math inline">\(\lambda = 0.1\)</span>: 0.614</td>
+</tr>
+<tr class="odd">
+<td>Self-influence, <span class="math inline">\(n = 40\)</span></td>
+<td><span class="math inline">\(\lambda = 0.01\)</span>: gap <span class="math inline">\(0.1482 \pm 0.0073\)</span>, self-influence <span class="math inline">\(0.1422 \pm 0.0025\)</span>. <span class="math inline">\(\lambda = 0.1\)</span>: <span class="math inline">\(0.0420 \pm 0.0017\)</span> and <span class="math inline">\(0.0416 \pm 0.0003\)</span></td>
+</tr>
+<tr class="even">
+<td>SGD, <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(\eta = 0.25\)</span> (<a href="#tbl-stability-sgd" class="quarto-xref">Table&nbsp;<span>7.5</span></a>)</td>
+<td>Gap 0.036 after 1 epoch, 0.121 after 40; bound 0.5 and 20.0</td>
+</tr>
+<tr class="odd">
+<td>1-NN against logistic (<a href="#tbl-stability-nn" class="quarto-xref">Table&nbsp;<span>7.6</span></a>)</td>
+<td>1-NN test error 0.404 → 0.352 with train error 0; limit 0.338; Bayes 0.250</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_stability.py">tests/test_stability.py</a> checks that the output still matches the numbers in this chapter.</p>
+<p><strong>What to take from it.</strong> The <span class="math inline">\(1/(\lambda n)\)</span> scaling holds, but the constant is loose: replace-one changes and gaps follow <span class="math inline">\(1/(\lambda n)\)</span> closely when <span class="math inline">\(\lambda \ge 0.1\)</span> (with weaker regularization the data’s own curvature makes them smaller still), yet sit between 4 and 36 times below the bound, because the bound takes the worst case at every step. The identity, unlike the bounds, is exact: the average self-influence matches the measured gap within simulation error. The SGD bound gets the direction right and the size wrong: the gap grows with training time, but the divergence between coupled runs saturates while the bound grows linearly. Finally, memorizers do not generalize their training error: 1-NN has training error 0 and test error 0.35, while regularized logistic regression has train and test errors that meet.</p>
+</section>
+<section id="references" class="level2" data-number="7.11">
+<h2 data-number="7.11" class="anchored" data-anchor-id="references"><span class="header-section-number">7.11</span> References</h2>
+<ul>
+<li>Bousquet &amp; Elisseeff, “Stability and Generalization” (JMLR 2002): defines uniform and weaker stability notions; Theorem 12 is the high-probability bound</li>
+<li>Shalev-Shwartz &amp; Ben-David, <em>Understanding Machine Learning</em> (2014), ch.&nbsp;13: the clearest textbook treatment; Theorem 13.2 is <a href="#eq-stability-identity" class="quarto-xref">Equation&nbsp;<span>7.10</span></a> and Corollary 13.6 the regularized-ERM bound. Chapter 14 covers SGD convergence.</li>
+<li>Hardt, Recht &amp; Singer, “Train Faster, Generalize Better: Stability of Stochastic Gradient Descent” (ICML 2016): SGD stability for convex (Theorem 3.8), strongly convex and non-convex losses</li>
+<li>Feldman &amp; Vondrák, “Generalization Bounds for Uniformly Stable Algorithms” (NeurIPS 2018) and “High Probability Generalization Bounds for Uniformly Stable Algorithms with Nearly Optimal Rate” (COLT 2019): the improved high-probability bounds</li>
+<li>Bousquet, Klochkov &amp; Zhivotovskiy, “Sharper Bounds for Uniformly Stable Algorithms” (COLT 2020): removes a log factor from the 2019 bound</li>
+<li>Shalev-Shwartz, Shamir, Srebro &amp; Sridharan, “Learnability, Stability and Uniform Convergence” (JMLR 2010): stability as the characterization of learnability</li>
+<li>Cover &amp; Hart, “Nearest Neighbor Pattern Classification” (IEEE Trans. Information Theory 1967): the 1-NN limit</li>
+<li>Devroye &amp; Wagner, “Distribution-Free Performance Bounds for Potential Function Rules” (IEEE Trans. Information Theory 1979): stability arguments for <span class="math inline">\(k\)</span>-NN and local rules</li>
+<li>Nesterov, <em>Introductory Lectures on Convex Optimization</em> (2004), §2.1: co-coercivity and smooth convex functions (Fact 4)</li>
+<li>Feldman, “Does Learning Require Memorization? A Short Tale about a Long Tail” (STOC 2020): why memorizing rare examples can be necessary for accuracy</li>
+<li>Feldman &amp; Zhang, “What Neural Networks Memorize and Why” (NeurIPS 2020): memorization scores measured on image benchmarks</li>
+<li>Zhang, Bengio, Hardt, Recht &amp; Vinyals, “Understanding Deep Learning Requires Rethinking Generalization” (ICLR 2017): networks fit random labels</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="7.12">
+<h2 data-number="7.12" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">7.12</span> Cheat sheet</h2>
+<p><a href="#tbl-stability-cheat" class="quarto-xref">Table&nbsp;<span>7.8</span></a> collects every result. <span class="math inline">\(S^{(i)}\)</span> replaces example <span class="math inline">\(i\)</span> by a fresh draw; <span class="math inline">\(\beta\)</span> is uniform stability, the largest change in loss at any test point when one example is replaced; <span class="math inline">\(\delta\)</span> is the failure probability.</p>
+<div id="tbl-stability-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stability-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;7.8: Every result of the chapter.
+</figcaption>
+<div aria-describedby="tbl-stability-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Assumptions</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gap identity</td>
+<td>None</td>
+<td><span class="math inline">\(\mathbb E[\mathrm{gap}] = \frac1n\sum_i\mathbb E[\ell(A(S^{(i)}), z_i) - \ell(A(S), z_i)]\)</span></td>
+</tr>
+<tr class="even">
+<td>Expected gap</td>
+<td><span class="math inline">\(\beta\)</span>-uniformly stable</td>
+<td><span class="math inline">\(\lvert\mathbb E[\mathrm{gap}]\rvert \le \beta\)</span></td>
+</tr>
+<tr class="odd">
+<td>High probability (Bousquet–Elisseeff)</td>
+<td><span class="math inline">\(\beta\)</span>-uniformly stable, <span class="math inline">\(0 \le \ell \le M\)</span></td>
+<td><span class="math inline">\(\mathrm{gap} \le \beta + (2n\beta + M)\sqrt{\ln(1/\delta)/(2n)}\)</span></td>
+</tr>
+<tr class="even">
+<td>Improved high probability (Feldman–Vondrák; Bousquet–Klochkov–Zhivotovskiy)</td>
+<td>Same, <span class="math inline">\(M = 1\)</span></td>
+<td><span class="math inline">\(\mathrm{gap} \lesssim \beta\log n\log(1/\delta) + \sqrt{\log(1/\delta)/n}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Regularized ERM</td>
+<td>Convex, <span class="math inline">\(L\)</span>-Lipschitz loss, <span class="math inline">\(\frac\lambda2\lVert w\rVert^2\)</span></td>
+<td><span class="math inline">\(\lVert\Delta w\rVert \le 2L/(\lambda n)\)</span>, <span class="math inline">\(\beta = 2L^2/(\lambda n)\)</span></td>
+</tr>
+<tr class="even">
+<td>SGD (Hardt–Recht–Singer)</td>
+<td>Convex, <span class="math inline">\(\rho\)</span>-smooth, <span class="math inline">\(L\)</span>-Lipschitz, <span class="math inline">\(\eta_t \le 2/\rho\)</span></td>
+<td><span class="math inline">\(\beta \le (2L^2/n)\sum_t\eta_t\)</span></td>
+</tr>
+<tr class="odd">
+<td>1-NN, lookup table</td>
+<td>0-1 loss</td>
+<td><span class="math inline">\(\beta = 1\)</span>; training error 0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>A gap bound from stability needs <span class="math inline">\(\beta \to 0\)</span>; a high-probability bound from McDiarmid needs <span class="math inline">\(\beta = o(1/\sqrt n)\)</span>.</li>
+<li>Regularization strength and training time are the two stability knobs: <span class="math inline">\(\beta \propto 1/\lambda\)</span> for ERM, <span class="math inline">\(\beta \propto \eta T\)</span> for SGD.</li>
+<li>Training error 0 is a warning, not a result: it means the model may depend entirely on individual examples.</li>
+<li>The examples a model memorizes most are the atypical ones.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part01-prerequisites/07-stability-generalization.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part01-prerequisites/06-optimization.html" class="pagination-link" aria-label="Optimization">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part01-prerequisites/08-crypto-basics.html" class="pagination-link" aria-label="Cryptography basics">
+        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

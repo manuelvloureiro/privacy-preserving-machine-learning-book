@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Appendix A — Privacy-Preserving ML Study Plan – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./glossary.html" rel="next">
+<link href="./part05-dp-ml/10-auditing.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./study_plan.html">Appendices</a></li><li class="breadcrumb-item"><a href="./study_plan.html"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./study_plan.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#how-to-use-this-plan" id="toc-how-to-use-this-plan" class="nav-link active" data-scroll-target="#how-to-use-this-plan"><span class="header-section-number">A.1</span> How to use this plan</a></li>
+  <li><a href="#how-the-plan-maps-to-the-book" id="toc-how-the-plan-maps-to-the-book" class="nav-link" data-scroll-target="#how-the-plan-maps-to-the-book"><span class="header-section-number">A.2</span> How the plan maps to the book</a></li>
+  <li><a href="#phase-1-prerequisites-weeks-12" id="toc-phase-1-prerequisites-weeks-12" class="nav-link" data-scroll-target="#phase-1-prerequisites-weeks-12"><span class="header-section-number">A.3</span> Phase 1 — Prerequisites (weeks 1–2)</a></li>
+  <li><a href="#phase-2-threat-models-and-attacks-weeks-13" id="toc-phase-2-threat-models-and-attacks-weeks-13" class="nav-link" data-scroll-target="#phase-2-threat-models-and-attacks-weeks-13"><span class="header-section-number">A.4</span> Phase 2 — Threat models and attacks (weeks 1–3)</a></li>
+  <li><a href="#phase-3-differential-privacy-foundations-weeks-47" id="toc-phase-3-differential-privacy-foundations-weeks-47" class="nav-link" data-scroll-target="#phase-3-differential-privacy-foundations-weeks-47"><span class="header-section-number">A.5</span> Phase 3 — Differential privacy foundations (weeks 4–7)</a></li>
+  <li><a href="#phase-4-privacy-accounting-rényi-dp-and-its-relatives-weeks-810" id="toc-phase-4-privacy-accounting-rényi-dp-and-its-relatives-weeks-810" class="nav-link" data-scroll-target="#phase-4-privacy-accounting-rényi-dp-and-its-relatives-weeks-810"><span class="header-section-number">A.6</span> Phase 4 — Privacy accounting: Rényi DP and its relatives (weeks 8–10)</a></li>
+  <li><a href="#phase-5-dp-in-ml-and-auditing-weeks-1114" id="toc-phase-5-dp-in-ml-and-auditing-weeks-1114" class="nav-link" data-scroll-target="#phase-5-dp-in-ml-and-auditing-weeks-1114"><span class="header-section-number">A.7</span> Phase 5 — DP in ML and auditing (weeks 11–14)</a></li>
+  <li><a href="#phase-6-synthetic-data-weeks-1517" id="toc-phase-6-synthetic-data-weeks-1517" class="nav-link" data-scroll-target="#phase-6-synthetic-data-weeks-1517"><span class="header-section-number">A.8</span> Phase 6 — Synthetic data (weeks 15–17)</a></li>
+  <li><a href="#phase-7-formal-methods-for-privacy-weeks-1821" id="toc-phase-7-formal-methods-for-privacy-weeks-1821" class="nav-link" data-scroll-target="#phase-7-formal-methods-for-privacy-weeks-1821"><span class="header-section-number">A.9</span> Phase 7 — Formal methods for privacy (weeks 18–21)</a></li>
+  <li><a href="#phase-8-cryptographic-approaches-weeks-2225" id="toc-phase-8-cryptographic-approaches-weeks-2225" class="nav-link" data-scroll-target="#phase-8-cryptographic-approaches-weeks-2225"><span class="header-section-number">A.10</span> Phase 8 — Cryptographic approaches (weeks 22–25)</a></li>
+  <li><a href="#phase-9-federated-learning-weeks-2627" id="toc-phase-9-federated-learning-weeks-2627" class="nav-link" data-scroll-target="#phase-9-federated-learning-weeks-2627"><span class="header-section-number">A.11</span> Phase 9 — Federated learning (weeks 26–27)</a></li>
+  <li><a href="#phase-10-statistical-disclosure-control-and-de-identification-in-practice-week-28" id="toc-phase-10-statistical-disclosure-control-and-de-identification-in-practice-week-28" class="nav-link" data-scroll-target="#phase-10-statistical-disclosure-control-and-de-identification-in-practice-week-28"><span class="header-section-number">A.12</span> Phase 10 — Statistical disclosure control and de-identification in practice (week 28)</a></li>
+  <li><a href="#phase-11-machine-unlearning-week-29" id="toc-phase-11-machine-unlearning-week-29" class="nav-link" data-scroll-target="#phase-11-machine-unlearning-week-29"><span class="header-section-number">A.13</span> Phase 11 — Machine unlearning (week 29)</a></li>
+  <li><a href="#phase-12-llm-and-agent-privacy-weeks-3031" id="toc-phase-12-llm-and-agent-privacy-weeks-3031" class="nav-link" data-scroll-target="#phase-12-llm-and-agent-privacy-weeks-3031"><span class="header-section-number">A.14</span> Phase 12 — LLM and agent privacy (weeks 30–31)</a></li>
+  <li><a href="#phase-13-governance-law-and-standards-week-32-then-ongoing" id="toc-phase-13-governance-law-and-standards-week-32-then-ongoing" class="nav-link" data-scroll-target="#phase-13-governance-law-and-standards-week-32-then-ongoing"><span class="header-section-number">A.15</span> Phase 13 — Governance, law and standards (week 32, then ongoing)</a></li>
+  <li><a href="#capstones-and-tooling" id="toc-capstones-and-tooling" class="nav-link" data-scroll-target="#capstones-and-tooling"><span class="header-section-number">A.16</span> Capstones and tooling</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./study_plan.html">Appendices</a></li><li class="breadcrumb-item"><a href="./study_plan.html"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Appendix A — Privacy-Preserving ML Study Plan</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Oct 14, 2026 · <span class="citation" data-cites="Manuel">@Manuel</span> Loureiro</p>
+<section id="how-to-use-this-plan" class="level2" data-number="A.1">
+<h2 data-number="A.1" class="anchored" data-anchor-id="how-to-use-this-plan"><span class="header-section-number">A.1</span> How to use this plan</h2>
+<p>The plan runs about 32 weeks at 8–10 hours a week, attacks first, then differential privacy (DP) in depth, then the specialist tracks. Each phase lists the concepts you must be able to explain and derive, core readings (do these), further readings (pick by interest), and one exercise. Each phase that the book already covers also says which chapters cover it.</p>
+<ol type="1">
+<li>Phase 1 — Prerequisites (weeks 1–2, run alongside Phase 2)</li>
+<li>Phase 2 — Threat models and attacks (weeks 1–3)</li>
+<li>Phase 3 — DP foundations (weeks 4–7)</li>
+<li>Phase 4 — Privacy accounting: Rényi DP and its relatives (weeks 8–10)</li>
+<li>Phase 5 — DP in ML and auditing (weeks 11–14)</li>
+<li>Phase 6 — Synthetic data (weeks 15–17)</li>
+<li>Phase 7 — Formal methods (weeks 18–21)</li>
+<li>Phase 8 — Cryptographic approaches (weeks 22–25)</li>
+<li>Phase 9 — Federated learning (weeks 26–27, can run in parallel with Phase 8)</li>
+<li>Phase 10 — Statistical disclosure control and de-identification in practice (week 28)</li>
+<li>Phase 11 — Machine unlearning (week 29)</li>
+<li>Phase 12 — Large language model (LLM) and agent privacy (weeks 30–31)</li>
+<li>Phase 13 — Governance, law, standards (week 32, plus ongoing)</li>
+</ol>
+<p>Rationale: attacks motivate everything, and the syntactic defences (k-anonymity, l-diversity, t-closeness) are studied with them, because the attacks that break them, composition above all, are the requirements DP is built to meet; DP is the backbone the later tracks reference, and accounting gets its own phase because every DP-ML claim is only as tight as the accountant behind it; formal methods land better after you have seen implementation bugs; crypto and federated learning (FL) are largely independent; LLM/agent privacy and governance draw on all of it and are where your profile differentiates.</p>
+<p>Readings are standard references cited by author, title and year; search arXiv or the venue for the current version. Spine textbooks used throughout:</p>
+<ul>
+<li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014) — <a href="https://www.cis.upenn.edu/~aaroth/Papers/privacybook.pdf">free PDF</a></li>
+<li>Near &amp; Abuah, <em>Programming Differential Privacy</em> — <a href="https://programming-dp.com/">programming-dp.com</a></li>
+<li>Vadhan, <em>The Complexity of Differential Privacy</em> (2017)</li>
+<li>Evans, Kolesnikov &amp; Rosulek, <em>A Pragmatic Introduction to Secure Multi-Party Computation</em> (2018)</li>
+</ul>
+</section>
+<section id="how-the-plan-maps-to-the-book" class="level2" data-number="A.2">
+<h2 data-number="A.2" class="anchored" data-anchor-id="how-the-plan-maps-to-the-book"><span class="header-section-number">A.2</span> How the plan maps to the book</h2>
+<p>The book follows the plan one phase per part, so Phase N is Part N. Each chapter of a part covers one topic of its phase, and the exercise book, a companion website, has every chapter’s exercises with worked solutions. Phases 1–5 are written. Phases 6–13 are not yet.</p>
+<div id="tbl-plan-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-plan-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.1: The phases of the plan and the parts and chapters of the book that cover them.
+</figcaption>
+<div aria-describedby="tbl-plan-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Phase</th>
+<th>Part</th>
+<th>Chapters</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1 — Prerequisites</td>
+<td><a href="./part01-prerequisites/00-introduction.html">Prerequisites</a></td>
+<td>1–8</td>
+</tr>
+<tr class="even">
+<td>2 — Threat models and attacks</td>
+<td><a href="./part02-attacks/00-introduction.html">Threat models and attacks</a></td>
+<td>9–17</td>
+</tr>
+<tr class="odd">
+<td>3 — DP foundations</td>
+<td><a href="./part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></td>
+<td>18–26</td>
+</tr>
+<tr class="even">
+<td>4 — Privacy accounting</td>
+<td><a href="./part04-privacy-accounting/00-introduction.html">Privacy accounting</a></td>
+<td>27–35</td>
+</tr>
+<tr class="odd">
+<td>5 — DP in ML and auditing</td>
+<td><a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></td>
+<td>36–45</td>
+</tr>
+<tr class="even">
+<td>6–13</td>
+<td>Not yet written</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The book scales the plan’s exercises down where they need hours of GPU time or a tool that is not a dependency of the repository. Each written phase says how.</p>
+</section>
+<section id="phase-1-prerequisites-weeks-12" class="level2" data-number="A.3">
+<h2 data-number="A.3" class="anchored" data-anchor-id="phase-1-prerequisites-weeks-12"><span class="header-section-number">A.3</span> Phase 1 — Prerequisites (weeks 1–2)</h2>
+<p>Refresh only what you can’t derive on demand; the divergence and hypothesis-testing material is the part most ML backgrounds lack.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Distributions: Bernoulli, binomial, Poisson, exponential, Laplace and normal; moments and moment generating functions; comparing a density with its shifted copy</li>
+<li>Concentration: Markov, Chebyshev, Chernoff, Hoeffding, McDiarmid and Azuma; Gaussian and Laplace tails; sub-Gaussian variables</li>
+<li>Divergences: Kullback–Leibler (KL), Rényi divergence of order α, total variation, hockey-stick divergence E_γ, f-divergences; the data-processing inequality; Pinsker’s inequality</li>
+<li>Hypothesis testing: type I/II errors, Neyman–Pearson lemma, receiver operating characteristic (ROC) and trade-off curves; best advantage equals total variation; why the area under the curve (AUC) hides the regime of low false positive rate (FPR); the Bayesian view; estimating error rates from finite trials</li>
+<li>Information theory: Shannon entropy, mutual information, channel capacity, min-entropy and min-entropy leakage, Fano’s inequality</li>
+<li>Optimization: stochastic gradient descent (SGD) convergence for convex, strongly convex and non-convex objectives, Lipschitz and smoothness, gradient noise and minibatches, sensitivity of regularized empirical risk minimization (ERM)</li>
+<li>Learning theory: algorithmic stability and its link to generalization; stability of regularized ERM and early-stopped SGD; overfitting as memorization of individual examples</li>
+<li>Crypto basics: negligible functions, computational indistinguishability and the hybrid argument, pseudorandom generators (PRGs) and pseudorandom functions (PRFs), perfect secrecy and security against chosen-plaintext attack (CPA), written IND-CPA, the simulation paradigm, learning with errors (LWE)</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Vershynin, <em>High-Dimensional Probability</em> (2018), ch.&nbsp;2 (concentration)</li>
+<li>van Erven &amp; Harremoës, “Rényi Divergence and Kullback–Leibler Divergence” (2014), sections 1–3</li>
+<li>Lindell, “How to Simulate It — A Tutorial on the Simulation Proof Technique” (2017)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Boneh &amp; Shoup, <em>A Graduate Course in Applied Cryptography</em>, ch.&nbsp;2–3</li>
+<li>Bousquet &amp; Elisseeff, “Stability and Generalization” (JMLR 2002)</li>
+<li>Cover &amp; Thomas, <em>Elements of Information Theory</em>, ch.&nbsp;2</li>
+</ul>
+<p><strong>Exercise:</strong> derive the Chernoff bound for a sum of Bernoullis; compute the KL and Rényi divergence between two Gaussians with equal variance by hand.</p>
+<p><strong>In the book:</strong> <a href="./part01-prerequisites/00-introduction.html">Prerequisites</a>, chapters 1–8, one per bullet above. The Chernoff bound is derived in <a href="./part01-prerequisites/02-concentration.html">Concentration inequalities</a> and the two Gaussians are worked in <a href="./part01-prerequisites/03-divergences.html">Divergences</a>. The part teaches the mathematics only: privacy starts in Part 2.</p>
+</section>
+<section id="phase-2-threat-models-and-attacks-weeks-13" class="level2" data-number="A.4">
+<h2 data-number="A.4" class="anchored" data-anchor-id="phase-2-threat-models-and-attacks-weeks-13"><span class="header-section-number">A.4</span> Phase 2 — Threat models and attacks (weeks 1–3)</h2>
+<p>Learn to break models before protecting them: every defence in later phases is calibrated against one of these attacks.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Adversary taxonomy: black-box vs white-box, honest-but-curious vs malicious, central vs local trust, auxiliary knowledge</li>
+<li>Privacy games: attacks as games, advantage, total variation and the trade-off curve; average-case vs worst-case privacy</li>
+<li>Membership inference: the loss attack and the generalization gap, shadow models, likelihood-ratio attacks (LiRA), evaluation by true positive rate (TPR) at low FPR rather than accuracy/AUC, why outliers are most exposed</li>
+<li>Attribute inference and model inversion: the imputation baseline, the maximum a posteriori (MAP) attack, confidence masking</li>
+<li>Property inference (dataset-level properties): why a property leaks when no record does, meta-classifiers</li>
+<li>Training data extraction: verbatim vs approximate memorization, extractable vs discoverable memorization, effect of duplication and model size</li>
+<li>Canaries: inserting random secrets into training data and measuring their exposure (rank of the true secret among all candidates); the measurement tool reused for auditing in Phase 5</li>
+<li>Gradient inversion in federated settings</li>
+<li>Linkage and re-identification: quasi-identifiers, uniqueness in high-dimensional data, whether releasing a sample protects</li>
+<li>Syntactic anonymity and its failures: k-anonymity (generalization, suppression, Mondrian), l-diversity, t-closeness, and the attacks that break each (homogeneity, background knowledge, skewness, similarity, composition)</li>
+<li>Reconstruction: Dinur–Nissim (the exponential attack, the linear-programming decoder, least squares), the Fundamental Law of Information Recovery, US Census 2010 reconstruction</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Shokri et al., “Membership Inference Attacks against Machine Learning Models” (S&amp;P 2017)</li>
+<li>Carlini et al., “Membership Inference Attacks From First Principles” (S&amp;P 2022) — LiRA</li>
+<li>Carlini et al., “The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks” (USENIX Security 2019) — canaries and exposure</li>
+<li>Carlini et al., “Extracting Training Data from Large Language Models” (USENIX Security 2021)</li>
+<li>Carlini et al., “Quantifying Memorization Across Neural Language Models” (ICLR 2023)</li>
+<li>Dinur &amp; Nissim, “Revealing Information while Preserving Privacy” (PODS 2003)</li>
+<li>Narayanan &amp; Shmatikov, “Robust De-anonymization of Large Sparse Datasets” (S&amp;P 2008) — Netflix Prize</li>
+<li>Sweeney, “k-Anonymity: A Model for Protecting Privacy” (2002)</li>
+<li>Machanavajjhala et al., “l-Diversity: Privacy Beyond k-Anonymity” (TKDD 2007)</li>
+<li>Ganta, Kasiviswanathan &amp; Smith, “Composition Attacks and Auxiliary Information in Data Privacy” (KDD 2008)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Fredrikson et al., “Model Inversion Attacks that Exploit Confidence Information” (CCS 2015)</li>
+<li>Zhu et al., “Deep Leakage from Gradients” (NeurIPS 2019)</li>
+<li>Ganju et al., “Property Inference Attacks on Fully Connected Neural Networks” (CCS 2018)</li>
+<li>Nasr et al., “Scalable Extraction of Training Data from (Production) Language Models” (2023)</li>
+<li>Garfinkel, Abowd &amp; Martindale, “Understanding Database Reconstruction Attacks on Public Data” (CACM 2019)</li>
+<li>Rocher, Hendrickx &amp; de Montjoye, “Estimating the success of re-identifications in incomplete datasets” (Nature Communications 2019)</li>
+<li>Salem et al., “SoK: Let the Privacy Games Begin!” (S&amp;P 2023) — unifies attack definitions as games</li>
+<li>Li, Li &amp; Venkatasubramanian, “t-Closeness: Privacy Beyond k-Anonymity and l-Diversity” (ICDE 2007)</li>
+<li>LeFevre, DeWitt &amp; Ramakrishnan, “Mondrian Multidimensional k-Anonymity” (ICDE 2006)</li>
+</ul>
+<p><strong>Exercise:</strong> train a CIFAR-10 ResNet, run LiRA with 16 shadow models, and report TPR at 0.1% FPR. Keep this pipeline: you will reuse it to audit DP models in Phase 5. Then k-anonymize a census extract with ARX, link it back to a public auxiliary table, measure the re-identification rate, and intersect two independently anonymized releases.</p>
+<p><strong>In the book:</strong> <a href="./part02-attacks/00-introduction.html">Threat models and attacks</a>, chapters 9–17, in the order of the bullets above, with canaries in <a href="./part02-attacks/05-memorization-extraction.html">Memorization and training-data extraction</a>. <a href="./part02-attacks/02-membership-inference.html">Membership inference</a> runs LiRA at small scale (logistic regression, 64 shadow models) and lists what changes for a CIFAR-10 ResNet. <a href="./part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a> uses its own Mondrian anonymizer on a synthetic hospital table in place of ARX on a census extract.</p>
+</section>
+<section id="phase-3-differential-privacy-foundations-weeks-47" class="level2" data-number="A.5">
+<h2 data-number="A.5" class="anchored" data-anchor-id="phase-3-differential-privacy-foundations-weeks-47"><span class="header-section-number">A.5</span> Phase 3 — Differential privacy foundations (weeks 4–7)</h2>
+<p>This is the backbone: by week 7 you should be able to prove privacy of a new mechanism, calibrate its noise and compose it with others in (ε,δ) terms.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Definitions: pure ε-DP, approximate (ε,δ)-DP; neighbouring relations (add/remove vs replace; example-, user-, and group-level); randomized response; divergence forms and the privacy loss; why δ must be much smaller than 1/n</li>
+<li>Interpretations: hypothesis testing and the bound on membership advantage, the Bayesian reading; what DP does not protect</li>
+<li>Properties: post-processing, group privacy, basic sequential and parallel composition; what composes and what doesn’t</li>
+<li>Mechanisms: Laplace, Gaussian (classic calibration vs the exact privacy curve and analytic calibration); Laplace against Gaussian in many dimensions</li>
+<li>Composition: advanced (Dwork–Rothblum–Vadhan), optimal (Kairouz–Oh–Viswanath); adaptive composition; the privacy loss random variable and why (ε,δ) composes loosely</li>
+<li>Selection: exponential mechanism and its utility, report-noisy-max (with Gumbel noise it is the exponential mechanism), sparse vector technique and the ways it goes wrong</li>
+<li>Sensitivity: global, local, smooth sensitivity; propose-test-release; subsample-and-aggregate; clipping</li>
+<li>Discrete and floating-point-safe mechanisms: why floating-point Laplace breaks DP, the snapping mechanism, exact samplers, discrete Laplace and discrete Gaussian</li>
+<li>Trust models: central vs local DP and the √n price of local privacy, frequency estimation (k-ary randomized response, unary encoding), the shuffle model, distributed DP</li>
+<li>Lower bounds: packing arguments, fingerprinting codes and tracing attacks, Dinur–Nissim as a lower bound; sample-complexity cost of privacy</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Dwork &amp; Roth (2014), ch.&nbsp;1–3 (definitions, basic mechanisms, composition) and ch.&nbsp;8 (lower bounds)</li>
+<li>Near &amp; Abuah, <em>Programming Differential Privacy</em>, all chapters (code alongside Dwork &amp; Roth)</li>
+<li>Balle &amp; Wang, “Improving the Gaussian Mechanism for Differential Privacy: Analytical Calibration and Optimal Denoising” (ICML 2018)</li>
+<li>Kasiviswanathan et al., “What Can We Learn Privately?” (FOCS 2008) — local DP (amplification by subsampling is Phase 4)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Vadhan, <em>The Complexity of Differential Privacy</em> (2017) — lower bounds and theory depth</li>
+<li>Kairouz, Oh &amp; Viswanath, “The Composition Theorem for Differential Privacy” (ICML 2015)</li>
+<li>Nissim, Raskhodnikova &amp; Smith, “Smooth Sensitivity and Sampling in Private Data Analysis” (STOC 2007)</li>
+<li>Canonne, Kamath &amp; Steinke, “The Discrete Gaussian for Differential Privacy” (NeurIPS 2020)</li>
+<li>Kifer &amp; Machanavajjhala, “No Free Lunch in Data Privacy” (SIGMOD 2011) — what DP does and doesn’t promise</li>
+</ul>
+<p><strong>Exercise:</strong> implement Laplace, Gaussian (classic and analytic calibration), exponential and sparse vector from scratch; then plot ε after k-fold composition of the Gaussian mechanism under basic, advanced and optimal composition.</p>
+<p><strong>In the book:</strong> <a href="./part03-dp-foundations/00-introduction.html">Differential privacy foundations</a>, chapters 18–26, in the order of the bullets above, with the definition and its interpretations in one chapter. The mechanisms are implemented in the scripts of <a href="./part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a> and <a href="./part03-dp-foundations/05-selection.html">Selection</a>, and the composition plot is in <a href="./part03-dp-foundations/04-composition.html">Advanced and optimal composition</a>.</p>
+</section>
+<section id="phase-4-privacy-accounting-rényi-dp-and-its-relatives-weeks-810" class="level2" data-number="A.6">
+<h2 data-number="A.6" class="anchored" data-anchor-id="phase-4-privacy-accounting-rényi-dp-and-its-relatives-weeks-810"><span class="header-section-number">A.6</span> Phase 4 — Privacy accounting: Rényi DP and its relatives (weeks 8–10)</h2>
+<p>(ε,δ)-DP is the guarantee you report, but it is a poor quantity to compose. Every accountant in practice tracks something else: a Rényi differential privacy (RDP) curve, a trade-off function, or the full privacy loss distribution. By week 10 you should be able to account for DP-SGD by hand in RDP, convert the result to (ε,δ), and explain how much the conversion loses against a numerical accountant.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Rényi DP: ε(α) as the Rényi divergence of order α between neighbouring outputs; the RDP curve of randomized response, Laplace and Gaussian; composition by adding curves; post-processing; weak group privacy</li>
+<li>The moments accountant as RDP in disguise: the log moment generating function of the privacy loss equals (α − 1) times the RDP ε(α)</li>
+<li>Converting RDP to (ε,δ): Mironov’s ε + log(1/δ)/(α − 1), the improved conversions, RDP as a constraint on tests, optimizing over α, and the slack that remains</li>
+<li>Concentrated differential privacy (CDP): ρ-zCDP as RDP linear in α; Gaussian is ρ = Δ²/2σ²; ε-DP implies (ε²/2)-zCDP; group privacy; approximate zCDP; truncated CDP and why plain zCDP does not amplify under subsampling</li>
+<li>f-DP and Gaussian differential privacy (GDP): trade-off functions, μ-GDP, duality with the (ε,δ) profile, composition and the central limit theorem (CLT), the CLT for DP-SGD; RDP as a lossy summary of the trade-off curve</li>
+<li>Amplification by subsampling: (ε,δ)-DP under Poisson sampling, Poisson vs fixed-size sampling and why the scheme must match the neighbouring relation (mixing them is a bug), the RDP of the Poisson-subsampled Gaussian, why there is no tight amplification theorem that works for every mechanism; DP-SGD accounted by RDP</li>
+<li>Numerical accounting: privacy loss distributions (PLD), composition as convolution, pessimistic vs optimistic discretization, fast Fourier transform (FFT) and privacy loss random variable (PRV) accountants, characteristic-function accounting</li>
+<li>Amplification by shuffling and by iteration: shuffled randomized response exactly, the clone bound; last-iterate (hidden-state) analysis of noisy SGD via shifted Rényi divergences</li>
+<li>Adaptive budgets: privacy filters and odometers, fully adaptive composition, Rényi filters for individual (per-example) privacy accounting</li>
+<li>Choosing and reporting an accountant: which one is tight for which mechanism, the noise needed for a target ε, matching the accountant to the training code, checking an accountant, and what NIST SP 800-226 asks you to disclose</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Mironov, “Rényi Differential Privacy” (CSF 2017)</li>
+<li>Mironov, Talwar &amp; Zhang, “Rényi Differential Privacy of the Sampled Gaussian Mechanism” (2019, arXiv)</li>
+<li>Bun &amp; Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (TCC 2016)</li>
+<li>Dong, Roth &amp; Su, “Gaussian Differential Privacy” (JRSS-B 2022)</li>
+<li>Balle, Barthe, Gaboardi, Hsu &amp; Sato, “Hypothesis Testing Interpretations and Rényi Differential Privacy” (AISTATS 2020) — tighter RDP-to-(ε,δ) conversion</li>
+<li>Gopi, Lee &amp; Wutschitz, “Numerical Composition of Differential Privacy” (NeurIPS 2021) — PRV accountant</li>
+<li>Steinke, “Composition of Differential Privacy &amp; Privacy Amplification by Subsampling” (2022 survey, arXiv)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Dwork &amp; Rothblum, “Concentrated Differential Privacy” (2016, arXiv)</li>
+<li>Bun, Dwork, Rothblum &amp; Steinke, “Composable and Versatile Privacy via Truncated CDP” (STOC 2018)</li>
+<li>Wang, Balle &amp; Kasiviswanathan, “Subsampled Rényi Differential Privacy and Analytical Moments Accountant” (AISTATS 2019)</li>
+<li>Zhu &amp; Wang, “Poisson Subsampled Rényi Differential Privacy” (ICML 2019)</li>
+<li>Asoodeh, Liao, Calmon, Kosut &amp; Sankar, “Three Variants of Differential Privacy: Lossless Conversion and Applications” (IEEE Journal on Selected Areas in Information Theory 2021)</li>
+<li>Balle, Barthe &amp; Gaboardi, “Privacy Amplification by Subsampling: Tight Analyses via Couplings and Divergences” (NeurIPS 2018)</li>
+<li>Koskela, Jälkö &amp; Honkela, “Computing Tight Differential Privacy Guarantees Using FFT” (AISTATS 2020)</li>
+<li>Doroshenko et al., “Connect the Dots: Tighter Discrete Approximations of Privacy Loss Distributions” (PoPETs 2022)</li>
+<li>Zhu, Dong &amp; Wang, “Optimal Accounting of Differential Privacy via Characteristic Function” (AISTATS 2022)</li>
+<li>Erlingsson et al., “Amplification by Shuffling” (SODA 2019); Feldman, McMillan &amp; Talwar, “Hiding Among the Clones” (FOCS 2021)</li>
+<li>Feldman, Mironov, Talwar &amp; Thakurta, “Privacy Amplification by Iteration” (FOCS 2018)</li>
+<li>Altschuler &amp; Talwar, “Privacy of Noisy Stochastic Gradient Descent: More Iterations without More Privacy Loss” (NeurIPS 2022)</li>
+<li>Rogers et al., “Privacy Odometers and Filters: Pay-as-you-Go Composition” (NeurIPS 2016)</li>
+<li>Feldman &amp; Zrnic, “Individual Privacy Accounting via a Rényi Filter” (NeurIPS 2021)</li>
+<li>Whitehouse, Ramdas, Rogers &amp; Wu, “Fully-Adaptive Composition in Differential Privacy” (ICML 2023)</li>
+<li>Lebeda, Regehr, Kamath &amp; Steinke, “Avoiding Pitfalls for Privacy Accounting of Subsampled Mechanisms under Composition” (IEEE SaTML 2025)</li>
+<li>Chua et al., “How Private are DP-SGD Implementations?” (ICML 2024)</li>
+</ul>
+<p><strong>Exercise:</strong> write an RDP accountant for the Poisson-subsampled Gaussian and check it against Google’s <code>dp_accounting</code> within 1%. Then, for DP-SGD with q = 0.01, σ = 1 and up to 10,000 steps, plot ε at δ = 10⁻⁵ from four accountants: RDP with Mironov’s conversion, RDP with the improved conversion, the GDP central-limit approximation, and PLD, alongside advanced composition applied per step. The gap between the curves is the cost of choosing a loose accountant.</p>
+<p><strong>In the book:</strong> <a href="./part04-privacy-accounting/00-introduction.html">Privacy accounting</a>, chapters 27–35, in the order of the bullets above, with the moments accountant in the Rényi DP chapter. The RDP accountant is built in <a href="./part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a> and the four-way comparison is in <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>. The check against <code>dp_accounting</code> is left to you, since the library is not a dependency of the repository.</p>
+</section>
+<section id="phase-5-dp-in-ml-and-auditing-weeks-1114" class="level2" data-number="A.7">
+<h2 data-number="A.7" class="anchored" data-anchor-id="phase-5-dp-in-ml-and-auditing-weeks-1114"><span class="header-section-number">A.7</span> Phase 5 — DP in ML and auditing (weeks 11–14)</h2>
+<p>The practical core: train with DP, reason about which ε is defensible, and audit the claim empirically.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>DP-ERM: output, objective, and gradient perturbation</li>
+<li>DP-SGD: per-example clipping, noise multiplier, sampling rate; accounting under Poisson sampling; large-batch training</li>
+<li>Efficient per-sample gradients: vectorized/ghost clipping</li>
+<li>Hyperparameter tuning leaks privacy; private selection</li>
+<li>Alternatives: private aggregation of teacher ensembles (PATE), follow the regularized leader (FTRL) with tree aggregation (DP-FTRL), matrix-factorization mechanisms (no amplification assumption)</li>
+<li>Public-data leverage: public pretraining + private fine-tuning, DP-LoRA, parameter-efficient DP</li>
+<li>User-level vs example-level DP in practice</li>
+<li>Private prediction and DP in-context learning</li>
+<li>Disparate impact of DP on under-represented groups</li>
+<li>Choosing ε: deployed values and how to justify them</li>
+<li>Auditing: canary design (input-space canaries vs crafted gradient canaries, mislabeled examples, how many to insert), empirical ε lower bounds from membership inference, one-run auditing; finding implementation bugs</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Abadi et al., “Deep Learning with Differential Privacy” (CCS 2016)</li>
+<li>Ponomareva et al., “How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy” (JAIR 2023) — read in full</li>
+<li>De et al., “Unlocking High-Accuracy Differentially Private Image Classification through Scale” (2022)</li>
+<li>Li et al., “Large Language Models Can Be Strong Differentially Private Learners” (ICLR 2022)</li>
+<li>Papernot et al., “Scalable Private Learning with PATE” (ICLR 2018)</li>
+<li>Jagielski, Ullman &amp; Oprea, “Auditing Differentially Private Machine Learning: How Private is Private SGD?” (NeurIPS 2020)</li>
+<li>Steinke, Nasr &amp; Jagielski, “Privacy Auditing with One (1) Training Run” (NeurIPS 2023)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Chaudhuri, Monteleoni &amp; Sarwate, “Differentially Private Empirical Risk Minimization” (JMLR 2011)</li>
+<li>Bassily, Smith &amp; Thakurta, “Private Empirical Risk Minimization: Efficient Algorithms and Tight Error Bounds” (FOCS 2014)</li>
+<li>Kairouz et al., “Practical and Private (Deep) Learning without Sampling or Shuffling” (ICML 2021) — DP-FTRL</li>
+<li>Choquette-Choo et al., “Multi-Epoch Matrix Factorization Mechanisms for Private Machine Learning” (ICML 2023)</li>
+<li>Papernot &amp; Steinke, “Hyperparameter Tuning with Rényi Differential Privacy” (ICLR 2022)</li>
+<li>Tramèr &amp; Boneh, “Differentially Private Learning Needs Better Features (or Much More Data)” (ICLR 2021)</li>
+<li>Yu et al., “Differentially Private Fine-tuning of Language Models” (ICLR 2022)</li>
+<li>Bagdasaryan, Poursaeed &amp; Shmatikov, “Differential Privacy Has Disparate Impact on Model Accuracy” (NeurIPS 2019)</li>
+<li>Nasr et al., “Adversary Instantiation: Lower Bounds for Differentially Private Machine Learning” (S&amp;P 2021)</li>
+<li>Nasr et al., “Tight Auditing of Differentially Private Machine Learning” (USENIX Security 2023) — gradient canaries that make audits tight</li>
+<li>Duan et al., “Flocks of Stochastic Parrots: Differentially Private Prompt Learning for Large Language Models” (NeurIPS 2023); Wu et al., “Privacy-Preserving In-Context Learning for Large Language Models” (ICLR 2024)</li>
+<li>Desfontaines, “A list of real-world uses of differential privacy” (blog, damien.desfontaines.net) — deployed ε values</li>
+<li>Chua et al., “Mind the Privacy Unit! User-Level Differential Privacy for Language Model Fine-Tuning” (2024)</li>
+</ul>
+<p><strong>Exercise:</strong> implement DP-SGD from scratch in PyTorch (per-sample clipping via <code>torch.func.vmap</code>), match Opacus on CIFAR-10 at ε = 8, then audit both models with your Phase 2 LiRA pipeline using inserted canaries.</p>
+<p><strong>In the book:</strong> <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, chapters 36–45, one per bullet above with three changes: per-sample gradients are a section of the DP-SGD chapter, DP-FTRL and matrix factorization get their own chapter, and PATE moves to the chapter on private prediction and in-context learning. DP-SGD is implemented from scratch in NumPy in <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, on a small network that runs in seconds, and audited with inserted canaries in <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>. The CIFAR-10 run and the comparison with Opacus are left to you, since PyTorch and Opacus are not dependencies of the repository.</p>
+</section>
+<section id="phase-6-synthetic-data-weeks-1517" class="level2" data-number="A.8">
+<h2 data-number="A.8" class="anchored" data-anchor-id="phase-6-synthetic-data-weeks-1517"><span class="header-section-number">A.8</span> Phase 6 — Synthetic data (weeks 15–17)</h2>
+<p>Synthetic data is only private if the generator is DP; the winning recipe for tabular data is select–measure–generate over marginals, not deep generative models.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Why non-DP synthetic data leaks: generator memorization, membership inference on synthetic releases</li>
+<li>Marginal-based methods: multiplicative weights exponential mechanism (MWEM), PrivBayes, MST, AIM; graphical-model inference (Private-PGM)</li>
+<li>Select–measure–generate paradigm and query workloads</li>
+<li>Deep generative methods: generative adversarial networks (GANs) trained with DP (DP-GAN, PATE-GAN), DP diffusion; why they underperform on tabular data</li>
+<li>API-only DP synthesis with foundation models (Private Evolution)</li>
+<li>DP text synthesis via DP fine-tuned LLMs</li>
+<li>Evaluation: fidelity (marginals, correlations), utility (train-synthetic-test-real), privacy (attack-based, including canaries planted in the source data and searched for in the release); why distance-to-closest-record is not a privacy guarantee</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>McKenna, Miklau &amp; Sheldon, “Winning the NIST Contest: A Scalable and General Approach to Differentially Private Synthetic Data” (JPC 2021) — MST</li>
+<li>McKenna et al., “AIM: An Adaptive and Iterative Mechanism for Differentially Private Synthetic Data” (VLDB 2022)</li>
+<li>McKenna, Sheldon &amp; Miklau, “Graphical-model based estimation and inference for differential privacy” (ICML 2019) — Private-PGM</li>
+<li>Stadler, Oprisanu &amp; Troncoso, “Synthetic Data – Anonymisation Groundhog Day” (USENIX Security 2022)</li>
+<li>Tao et al., “Benchmarking Differentially Private Synthetic Data Generation Algorithms” (2021)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Hardt, Ligett &amp; McSherry, “A Simple and Practical Algorithm for Differentially Private Data Release” (NeurIPS 2012) — MWEM</li>
+<li>Zhang et al., “PrivBayes: Private Data Release via Bayesian Networks” (TODS 2017)</li>
+<li>Jordon, Yoon &amp; van der Schaar, “PATE-GAN” (ICLR 2019)</li>
+<li>Lin et al., “Differentially Private Synthetic Data via Foundation Model APIs 1: Images” (ICLR 2024); Xie et al., “…2: Text” (ICML 2024)</li>
+<li>Yue et al., “Synthetic Text Generation with Differential Privacy: A Simple and Practical Recipe” (ACL 2023)</li>
+<li>Dockhorn et al., “Differentially Private Diffusion Models” (TMLR 2023)</li>
+<li>Meeus et al., “The Canary’s Echo: Auditing Privacy Risks of LLM-Generated Synthetic Text” (ICML 2025) — canaries designed to survive generation</li>
+<li>Jordon et al., “Synthetic Data — what, why and how?” (Royal Society report, 2022)</li>
+<li>Annamalai, Gadotti &amp; Rocher, “A Linear Reconstruction Approach for Attribute Inference Attacks against Synthetic Data” (USENIX Security 2024)</li>
+</ul>
+<p><strong>Exercise:</strong> on the UCI Adult dataset, generate data with AIM (Private-PGM repo) and with CTGAN (non-DP), compare train-on-synthetic, test-on-real accuracy and run a membership inference attack against both.</p>
+</section>
+<section id="phase-7-formal-methods-for-privacy-weeks-1821" class="level2" data-number="A.9">
+<h2 data-number="A.9" class="anchored" data-anchor-id="phase-7-formal-methods-for-privacy-weeks-1821"><span class="header-section-number">A.9</span> Phase 7 — Formal methods for privacy (weeks 18–21)</h2>
+<p>Formal methods close the gap between a paper proof and the code that ships: verify mechanisms, type-check sensitivity, hunt counterexamples, and quantify leakage beyond DP.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Relational program logics: probabilistic relational Hoare logic, apRHL; approximate couplings / liftings as the proof technique for DP</li>
+<li>Randomness alignment: LightDP, ShadowDP</li>
+<li>Linear and sensitivity type systems: Fuzz, DFuzz, Duet</li>
+<li>Counterexample finding and testing: statistical testing (StatDP), optimization-based search (DP-Finder, DP-Sniper), CheckDP</li>
+<li>Implementation pitfalls: timing side channels; floating-point attacks on Laplace, the snapping mechanism and exact discrete samplers (introduced in Phase 3), now checked by machine</li>
+<li>Verified libraries: OpenDP’s measurement/transformation framework with proofs; verified samplers in Lean (SampCert)</li>
+<li>Information flow: noninterference, declassification, taint tracking</li>
+<li>Quantitative information flow: channels, min-entropy leakage, g-leakage, capacity; relationship to DP</li>
+<li>Formal privacy policies: contextual integrity in temporal logic, purpose-based access control</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Barthe et al., “Probabilistic Relational Reasoning for Differential Privacy” (POPL 2012) — CertiPriv/apRHL</li>
+<li>Barthe et al., “Proving Differential Privacy via Probabilistic Couplings” (LICS 2016)</li>
+<li>Reed &amp; Pierce, “Distance Makes the Types Grow Stronger: A Calculus for Differential Privacy” (ICFP 2010) — Fuzz</li>
+<li>Mironov, “On Significance of the Least Significant Bits for Differential Privacy” (CCS 2012)</li>
+<li>Ding et al., “Detecting Violations of Differential Privacy” (CCS 2018) — StatDP</li>
+<li>Alvim, Chatzikokolakis, McIver, Morgan, Palamidessi &amp; Smith, <em>The Science of Quantitative Information Flow</em> (Springer 2020), ch.&nbsp;1–5 and the chapter relating quantitative information flow to DP</li>
+<li>Barth, Datta, Mitchell &amp; Nissenbaum, “Privacy and Contextual Integrity: Framework and Applications” (S&amp;P 2006)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Zhang &amp; Kifer, “LightDP: Towards Automating Differential Privacy Proofs” (POPL 2017)</li>
+<li>Wang et al., “Proving Differential Privacy with Shadow Execution” (PLDI 2019); “CheckDP” (CCS 2020)</li>
+<li>Near et al., “Duet: An Expressive Higher-Order Language and Linear Type System for Statically Enforcing Differential Privacy” (OOPSLA 2019)</li>
+<li>Bichsel et al., “DP-Finder” (CCS 2018); “DP-Sniper” (S&amp;P 2021)</li>
+<li>Barthe et al., <em>Foundations of Probabilistic Programming</em> (CUP 2020), the chapters on relational verification and couplings</li>
+<li>Sabelfeld &amp; Myers, “Language-Based Information-Flow Security” (JSAC 2003)</li>
+<li>OpenDP documentation and Gaboardi et al., “A Programming Framework for OpenDP” (2020)</li>
+<li>Jin et al., “Are We There Yet? Timing and Floating-Point Attacks on Differential Privacy Systems” (S&amp;P 2022)</li>
+<li>SampCert repository (verified DP samplers in Lean) and its accompanying paper</li>
+<li>Garg, Jia &amp; Datta, “Policy Auditing over Incomplete Logs: Theory, Implementation and Applications” (CCS 2011) — enforcing HIPAA-style policies formalized in logic</li>
+</ul>
+<p><strong>Exercise:</strong> write an apRHL-style coupling proof for report-noisy-max by hand; then run StatDP or DP-Sniper against a deliberately buggy sparse vector implementation and against your Phase 3 one.</p>
+</section>
+<section id="phase-8-cryptographic-approaches-weeks-2225" class="level2" data-number="A.10">
+<h2 data-number="A.10" class="anchored" data-anchor-id="phase-8-cryptographic-approaches-weeks-2225"><span class="header-section-number">A.10</span> Phase 8 — Cryptographic approaches (weeks 22–25)</h2>
+<p>Crypto protects inputs during computation; DP protects what the output reveals. Production systems combine them, so learn where each one’s guarantee stops.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Secure multi-party computation: additive and Shamir secret sharing, Beaver triples, garbled circuits, oblivious transfer; semi-honest vs malicious security; 2PC vs 3PC</li>
+<li>Private ML inference and training with secure multiparty computation (MPC): cost of non-linearities, fixed-point arithmetic</li>
+<li>Homomorphic encryption: Paillier; BFV, BGV, CKKS (approximate arithmetic for ML), TFHE; noise budgets, bootstrapping, polynomial approximation of activations; packing into single instruction, multiple data slots</li>
+<li>Hybrid homomorphic encryption (HE) + MPC private inference</li>
+<li>Secure aggregation for federated learning</li>
+<li>Zero-knowledge proofs: succinct non-interactive arguments of knowledge vs scalable transparent arguments of knowledge; zkML for proving inference or training integrity</li>
+<li>Private set intersection and private information retrieval for data joins</li>
+<li>Trusted execution environments: SGX, SEV-SNP, TDX, confidential GPUs; remote attestation; side-channel attacks</li>
+<li>Composition with DP: computational DP, distributed noise generation</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Evans, Kolesnikov &amp; Rosulek, <em>A Pragmatic Introduction to Secure Multi-Party Computation</em> (2018), ch.&nbsp;1–6</li>
+<li>Mohassel &amp; Zhang, “SecureML: A System for Scalable Privacy-Preserving Machine Learning” (S&amp;P 2017)</li>
+<li>Cheon, Kim, Kim &amp; Song, “Homomorphic Encryption for Arithmetic of Approximate Numbers” (ASIACRYPT 2017) — CKKS</li>
+<li>Gilad-Bachrach et al., “CryptoNets” (ICML 2016)</li>
+<li>Juvekar, Vaikuntanathan &amp; Chandrakasan, “GAZELLE: A Low Latency Framework for Secure Neural Network Inference” (USENIX Security 2018)</li>
+<li>Bonawitz et al., “Practical Secure Aggregation for Privacy-Preserving Machine Learning” (CCS 2017)</li>
+<li>Costan &amp; Devadas, “Intel SGX Explained” (2016)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Gentry, “Fully Homomorphic Encryption Using Ideal Lattices” (STOC 2009) — historical; skim</li>
+<li>Halevi &amp; Shoup, HElib design notes; OpenFHE documentation for BFV/CKKS parameter selection</li>
+<li>Mohassel &amp; Rindal, “ABY3” (CCS 2018)</li>
+<li>Knott et al., “CrypTen: Secure Multi-Party Computation Meets Machine Learning” (NeurIPS 2021)</li>
+<li>Huang et al., “Cheetah: Lean and Fast Secure Two-Party Deep Neural Network Inference” (USENIX Security 2022)</li>
+<li>Thaler, <em>Proofs, Arguments, and Zero-Knowledge</em> (2022, free online)</li>
+<li>Kang et al., “Scaling up Trustless Deep Neural Network Inference with Zero-Knowledge Proofs” (2022)</li>
+<li>Van Bulck et al., “Foreshadow” (USENIX Security 2018) — side channels in trusted execution environments</li>
+<li>NVIDIA, “Confidential Computing on H100 GPUs” whitepaper</li>
+<li>Mironov, Pandey, Reingold &amp; Vadhan, “Computational Differential Privacy” (CRYPTO 2009)</li>
+<li>Kairouz, Liu &amp; Steinke, “The Distributed Discrete Gaussian Mechanism for Federated Learning with Secure Aggregation” (ICML 2021)</li>
+</ul>
+<p><strong>Exercise:</strong> run encrypted logistic-regression inference with CKKS in TenSEAL or OpenFHE, tuning parameters for 128-bit security; then run the same model under 2PC in CrypTen and compare latency and communication.</p>
+</section>
+<section id="phase-9-federated-learning-weeks-2627" class="level2" data-number="A.11">
+<h2 data-number="A.11" class="anchored" data-anchor-id="phase-9-federated-learning-weeks-2627"><span class="header-section-number">A.11</span> Phase 9 — Federated learning (weeks 26–27)</h2>
+<p>Federated learning keeps raw data local but leaks through updates; it is private only when combined with secure aggregation and DP.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>FedAvg; cross-device vs cross-silo; client heterogeneity (data that is not independent and identically distributed (IID), stragglers)</li>
+<li>Why FL alone is not private: gradient inversion, malicious-server attacks that defeat secure aggregation</li>
+<li>The production stack: FL + secure aggregation + client-level DP (DP-FedAvg, DP-FTRL)</li>
+<li>Robustness vs privacy: Byzantine-robust aggregation, poisoning and backdoors, why they conflict with secure aggregation</li>
+<li>Personalization under client-level DP</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>McMahan et al., “Communication-Efficient Learning of Deep Networks from Decentralized Data” (AISTATS 2017) — FedAvg</li>
+<li>McMahan et al., “Learning Differentially Private Recurrent Language Models” (ICLR 2018) — DP-FedAvg</li>
+<li>Kairouz et al., “Advances and Open Problems in Federated Learning” (FnTML 2021), sections on privacy and robustness</li>
+<li>Xu et al., “Federated Learning of Gboard Language Models with Differential Privacy” (ACL Industry 2023)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Geiping et al., “Inverting Gradients — How easy is it to break privacy in federated learning?” (NeurIPS 2020)</li>
+<li>Boenisch et al., “When the Curious Abandon Honesty: Federated Learning Is Not Private” (EuroS&amp;P 2023)</li>
+<li>Bagdasaryan et al., “How To Backdoor Federated Learning” (AISTATS 2020)</li>
+<li>Blanchard et al., “Machine Learning with Adversaries: Byzantine Tolerant Gradient Descent” (NeurIPS 2017) — Krum</li>
+<li>Flower framework documentation and tutorials</li>
+</ul>
+<p><strong>Exercise:</strong> in Flower, train a model across 100 simulated non-IID clients with client-level DP, then run a gradient inversion attack on a single client update with and without DP.</p>
+</section>
+<section id="phase-10-statistical-disclosure-control-and-de-identification-in-practice-week-28" class="level2" data-number="A.12">
+<h2 data-number="A.12" class="anchored" data-anchor-id="phase-10-statistical-disclosure-control-and-de-identification-in-practice-week-28"><span class="header-section-number">A.12</span> Phase 10 — Statistical disclosure control and de-identification in practice (week 28)</h2>
+<p>Learn the toolkit that statistics offices, regulators and most enterprises still use, now that you can compare it with DP. k-anonymity and its successors, and the attacks on them, were covered with the attacks in Phase 2; this phase is about practice and law.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Pseudonymization vs anonymization as a legal distinction; singling out, linkability and inference as the regulators’ tests</li>
+<li>Statistical disclosure control: suppression, generalization, top-coding, data swapping, noise addition, cell-key method; how statistics offices choose and tune them</li>
+<li>Text de-identification: scrubbing personally identifiable information (PII) with named entity recognition, its recall limits, re-identification of redacted text</li>
+<li>Where statistical disclosure control (SDC) and DP meet: the US Census Bureau’s move from swapping to DP for 2020</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Ohm, “Broken Promises of Privacy: Responding to the Surprising Failure of Anonymization” (UCLA Law Review 2010)</li>
+<li>Article 29 Working Party, Opinion 05/2014 on Anonymisation Techniques</li>
+<li>Hundepool et al., <em>Statistical Disclosure Control</em> (Wiley 2012), the chapters on microdata and tabular data</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Lison et al., “Anonymisation Models for Text Data: State of the Art, Challenges and Future Directions” (ACL 2021)</li>
+<li>Abowd, “The U.S. Census Bureau Adopts Differential Privacy” (KDD 2018)</li>
+</ul>
+<p><strong>Exercise:</strong> take a public microdata extract, apply the SDC methods a statistics office would (top-coding, swapping, cell-key perturbation of tables), and compare the disclosure risk and the accuracy of a few published tables against a DP release with the same accuracy budget.</p>
+</section>
+<section id="phase-11-machine-unlearning-week-29" class="level2" data-number="A.13">
+<h2 data-number="A.13" class="anchored" data-anchor-id="phase-11-machine-unlearning-week-29"><span class="header-section-number">A.13</span> Phase 11 — Machine unlearning (week 29)</h2>
+<p>Unlearning is the operational answer to erasure requests; exact methods are expensive, approximate methods mostly fail rigorous audits.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Exact unlearning: retraining, SISA (sharded, isolated, sliced and aggregated training)</li>
+<li>Certified approximate unlearning and its relation to DP (indistinguishability from retraining)</li>
+<li>LLM unlearning: gradient ascent, preference-based methods, task arithmetic; benchmarks (TOFU, WMDP, MUSE)</li>
+<li>Evaluation: membership inference as the unlearning test; canaries inserted then unlearned, with exposure measured before and after; relearning and extraction attacks on “unlearned” models</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Bourtoule et al., “Machine Unlearning” (S&amp;P 2021) — SISA</li>
+<li>Guo et al., “Certified Data Removal from Machine Learning Models” (ICML 2020)</li>
+<li>Maini et al., “TOFU: A Task of Fictitious Unlearning for LLMs” (2024)</li>
+<li>Cooper et al., “Machine Unlearning Doesn’t Do What You Think: Lessons for Generative AI Policy, Research, and Practice” (2024)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Ginart et al., “Making AI Forget You: Data Deletion in Machine Learning” (NeurIPS 2019)</li>
+<li>Sekhari et al., “Remember What You Want to Forget: Algorithms for Machine Unlearning” (NeurIPS 2021)</li>
+<li>Shi et al., “MUSE: Machine Unlearning Six-Way Evaluation for Language Models” (2024)</li>
+<li>Hayes et al., “Inexact Unlearning Needs More Careful Evaluations to Avoid a False Sense of Privacy” (2024)</li>
+</ul>
+<p><strong>Exercise:</strong> fine-tune a small LLM on TOFU, apply gradient-ascent unlearning, and test with both the TOFU metrics and a LiRA-style membership attack.</p>
+</section>
+<section id="phase-12-llm-and-agent-privacy-weeks-3031" class="level2" data-number="A.14">
+<h2 data-number="A.14" class="anchored" data-anchor-id="phase-12-llm-and-agent-privacy-weeks-3031"><span class="header-section-number">A.14</span> Phase 12 — LLM and agent privacy (weeks 30–31)</h2>
+<p>This is the frontier and the least settled area: agents move data across tools, memories and principals, so contextual integrity becomes the right frame and DP covers only part of it.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>Memorization scaling and mitigations: deduplication, DP pretraining/fine-tuning, output filtering; canary exposure as the check that a mitigation worked</li>
+<li>PII in pretraining corpora; data provenance and documentation</li>
+<li>Inference-time privacy: prompts and context as sensitive data, logging and retention, confidential inference</li>
+<li>Retrieval-augmented generation leakage: extraction of retrieval corpora, DP retrieval</li>
+<li>Contextual integrity for LLMs and agents: appropriate information flows across tools, memory and users</li>
+<li>Agent memory as a privacy surface: persistence, cross-session and cross-user leakage</li>
+<li>Prompt injection as a data-exfiltration channel; information-flow control for agents</li>
+<li>Privacy-preserving telemetry and usage analytics (DP aggregation, clustering with privacy thresholds)</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>Brown et al., “What Does it Mean for a Language Model to Preserve Privacy?” (FAccT 2022)</li>
+<li>Lukas et al., “Analyzing Leakage of Personally Identifiable Information in Language Models” (S&amp;P 2023)</li>
+<li>Mireshghallah et al., “Can LLMs Keep a Secret? Testing Privacy Implications of Language Models via Contextual Integrity Theory” (ICLR 2024)</li>
+<li>Greshake et al., “Not What You’ve Signed Up For: Compromising Real-World LLM-Integrated Applications with Indirect Prompt Injection” (AISec 2023)</li>
+<li>Debenedetti et al., “Defeating Prompt Injections by Design” (2025) — CaMeL, information-flow control for agents</li>
+<li>Nissenbaum, <em>Privacy in Context</em> (2009), part III</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Kandpal, Wallace &amp; Raffel, “Deduplicating Training Data Mitigates Privacy Risks in Language Models” (ICML 2022)</li>
+<li>Zeng et al., “The Good and The Bad: Exploring Privacy Issues in Retrieval-Augmented Generation” (ACL Findings 2024)</li>
+<li>Bagdasarian et al., “AirGapAgent: Protecting Privacy-Conscious Conversational Agents” (CCS 2024)</li>
+<li>Shao et al., “PrivacyLens: Evaluating Privacy Norm Awareness of Language Models in Action” (NeurIPS 2024)</li>
+<li>Wu et al., “IsolateGPT” (NDSS 2025) — execution isolation for LLM apps</li>
+<li>Tamkin et al., “Clio: Privacy-Preserving Insights into Real-World AI Use” (Anthropic, 2024)</li>
+<li>Apple Differential Privacy Team, “Learning with Privacy at Scale” (2017)</li>
+</ul>
+<p><strong>Exercise:</strong> build a two-tool agent with persistent memory, design 20 contextual-integrity test cases (appropriate vs inappropriate flows), measure violation rate, then add an information-flow policy layer and remeasure.</p>
+</section>
+<section id="phase-13-governance-law-and-standards-week-32-then-ongoing" class="level2" data-number="A.15">
+<h2 data-number="A.15" class="anchored" data-anchor-id="phase-13-governance-law-and-standards-week-32-then-ongoing"><span class="header-section-number">A.15</span> Phase 13 — Governance, law and standards (week 32, then ongoing)</h2>
+<p>The technical guarantee only matters if it maps onto a legal standard; learn where GDPR’s anonymization threshold and the AI Act’s data duties meet DP, synthetic data and unlearning.</p>
+<p><strong>Key concepts</strong></p>
+<ul>
+<li>GDPR: personal data, Recital 26 anonymization threshold (means reasonably likely to be used), pseudonymization, lawful basis, data protection impact assessments (DPIAs), Article 17 erasure, Article 22 automated decisions</li>
+<li>Whether trained models contain personal data: the EDPB position on AI models</li>
+<li>EU AI Act: Article 10 data governance, GPAI obligations, interplay with GDPR</li>
+<li>US: HIPAA Safe Harbor vs Expert Determination, CCPA/CPRA, sectoral regimes</li>
+<li>Standards: NIST SP 800-226 on evaluating DP guarantees, NIST Privacy Framework, ISO/IEC 27559 (de-identification), ISO/IEC 20889 (terminology)</li>
+<li>Communicating ε and privacy budgets to non-technical stakeholders; budgets as organizational policy</li>
+<li>Case studies: US Census 2020 Disclosure Avoidance System and the debate around it; Apple and Google DP telemetry</li>
+</ul>
+<p><strong>Core readings</strong></p>
+<ul>
+<li>GDPR text: Articles 4, 5, 6, 17, 22, 25, 35 and Recital 26</li>
+<li>EDPB, Opinion 28/2024 on certain data protection aspects related to the processing of personal data in the context of AI models</li>
+<li>NIST SP 800-226, <em>Guidelines for Evaluating Differential Privacy Guarantees</em> (final, 2025)</li>
+<li>Nissim et al., “Bridging the Gap between Computer Science and Legal Approaches to Privacy” (Harvard JOLT 2018)</li>
+<li>Abowd et al., “The 2020 Census Disclosure Avoidance System TopDown Algorithm” (HDSR 2022)</li>
+<li>EU AI Act, Article 10 and the GPAI provisions (Articles 53–55)</li>
+</ul>
+<p><strong>Further</strong></p>
+<ul>
+<li>Cohen &amp; Nissim, “Towards formalizing the GDPR’s notion of singling out” (PNAS 2020)</li>
+<li>boyd &amp; Sarathy, “Differential Perspectives: Epistemic Disconnects Surrounding the U.S. Census Bureau’s Use of Differential Privacy” (HDSR 2022)</li>
+<li>Dwork, Kohli &amp; Mulligan, “Differential Privacy in Practice: Expose your Epsilons!” (JPC 2019)</li>
+<li>Veale, Binns &amp; Edwards, “Algorithms that remember: model inversion attacks and data protection law” (Phil. Trans. R. Soc. A 2018)</li>
+<li>ICO guidance on anonymisation, pseudonymisation and privacy-enhancing technologies</li>
+<li>Irish DPC guidance on anonymisation and pseudonymisation</li>
+<li>HHS, Guidance Regarding Methods for De-identification of Protected Health Information under HIPAA</li>
+</ul>
+<p><strong>Exercise:</strong> write a two-page DPIA for the DP model from Phase 5 that states the privacy unit, ε and δ, accountant, threat model, residual risks, and how the release maps onto Recital 26.</p>
+</section>
+<section id="capstones-and-tooling" class="level2" data-number="A.16">
+<h2 data-number="A.16" class="anchored" data-anchor-id="capstones-and-tooling"><span class="header-section-number">A.16</span> Capstones and tooling</h2>
+<p>Finish with one capstone that combines at least three phases; the first option sits closest to agentic AI governance work.</p>
+<p><strong>Capstone options</strong></p>
+<ol type="1">
+<li>Governed agent memory: an agent memory layer with contextual-integrity policies, DP aggregate analytics over stored memories, and an audit harness (Phases 3, 7, 12, 13).</li>
+<li>DP fine-tuning with end-to-end audit: user-level DP-LoRA on a domain corpus, PRV accounting, canary audit, and a published privacy card (Phases 4, 5, 13).</li>
+<li>DP synthetic data service: AIM-based tabular synthesis with workload-driven evaluation and attack-based privacy tests (Phases 2, 6, 10).</li>
+<li>Verified mechanism library: a small DP library in a typed language with sensitivity tracking, discrete samplers and counterexample tests (Phases 3, 7).</li>
+</ol>
+<div id="tbl-tooling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-tooling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;A.2: Tooling by area.
+</figcaption>
+<div aria-describedby="tbl-tooling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Area</th>
+<th>Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DP libraries</td>
+<td>OpenDP, Google DP library, Tumult Analytics, <code>dp_accounting</code></td>
+</tr>
+<tr class="even">
+<td>DP training</td>
+<td>Opacus, TensorFlow Privacy, JAX Privacy</td>
+</tr>
+<tr class="odd">
+<td>Synthetic data</td>
+<td>Private-PGM, SmartNoise Synth, synthcity, SDV (non-DP baseline)</td>
+</tr>
+<tr class="even">
+<td>Attacks and auditing</td>
+<td>ML Privacy Meter, LiRA reference code</td>
+</tr>
+<tr class="odd">
+<td>MPC and HE</td>
+<td>CrypTen, MP-SPDZ, OpenFHE, TenSEAL, Concrete ML</td>
+</tr>
+<tr class="even">
+<td>zkML</td>
+<td>EZKL</td>
+</tr>
+<tr class="odd">
+<td>Federated learning</td>
+<td>Flower, TensorFlow Federated</td>
+</tr>
+<tr class="even">
+<td>Anonymization</td>
+<td>ARX, Presidio (PII detection)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Keeping current:</strong> TPDP workshop and PETS proceedings, IEEE S&amp;P / USENIX Security / CCS privacy tracks, Damien Desfontaines’ blog, DifferentialPrivacy.org.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./part05-dp-ml/10-auditing.html" class="pagination-link" aria-label="Auditing private training">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./glossary.html" class="pagination-link" aria-label="Glossary">
+        <span class="nav-page-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

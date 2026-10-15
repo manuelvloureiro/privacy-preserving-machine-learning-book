@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>13&nbsp; Memorization and training-data extraction – Privacy-Preserving Machine Learning for Practitioners</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-attacks/06-gradient-inversion.html" rel="next">
+<link href="../part02-attacks/04-property-inference.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/05-memorization-extraction.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning for Practitioners</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">13.1</span> Why this matters</a></li>
+  <li><a href="#sec-memo-definitions" id="toc-sec-memo-definitions" class="nav-link" data-scroll-target="#sec-memo-definitions"><span class="header-section-number">13.2</span> Verbatim, approximate, discoverable, extractable</a></li>
+  <li><a href="#sec-memo-copies" id="toc-sec-memo-copies" class="nav-link" data-scroll-target="#sec-memo-copies"><span class="header-section-number">13.3</span> Duplication and model size</a></li>
+  <li><a href="#sec-memo-exposure" id="toc-sec-memo-exposure" class="nav-link" data-scroll-target="#sec-memo-exposure"><span class="header-section-number">13.4</span> Canaries and the exposure metric</a></li>
+  <li><a href="#sec-memo-attack" id="toc-sec-memo-attack" class="nav-link" data-scroll-target="#sec-memo-attack"><span class="header-section-number">13.5</span> Extraction without the prefix: generate, rank, verify</a></li>
+  <li><a href="#sec-memo-code" id="toc-sec-memo-code" class="nav-link" data-scroll-target="#sec-memo-code"><span class="header-section-number">13.6</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">13.7</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">13.8</span> Further reading</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/05-memorization-extraction.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">13.1</span> Why this matters</h2>
+<p>A language model trained on scraped text sees phone numbers, addresses, keys and private messages. Ask it to continue “Anna Smith’s phone number is” and it may finish with the real number. Nothing was breached: the number is stored in the weights and comes out through the normal interface. That is <strong>training-data extraction</strong>. <a href="../part02-attacks/02-membership-inference.html">Membership inference</a> asks whether a record you already hold was in the training set; extraction hands the attacker the record itself, often one it did not know existed.</p>
+<p>The idea that organizes the chapter is the <strong>rank</strong> of a secret under the model. A language model gives every string a probability. Fix the context in which a secret appears, say “my pin is”, and list every possible filler in order of the model’s probability, most likely first. The secret’s rank is its position in that list, and it is also the number of guesses an attacker needs if it tries the most likely fillers first. Memorization is the model putting a training string far above the strings that could have stood in its place. Every measure below reads that rank in its own way.</p>
+<p>The examples use one toy: a contact list of 5,000 background lines like <code>toneka 14524</code> (a made-up name and a five-digit pin), plus 600 secret lines, 100 each repeated 1, 2, 4, 8, 16 and 32 times. The model is a character <span class="math inline">\(n\)</span>-gram model, which predicts each character from the previous <span class="math inline">\(n - 1\)</span> by counting. Its order <span class="math inline">\(n\)</span> plays the role of model size.</p>
+</section>
+<section id="sec-memo-definitions" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="sec-memo-definitions"><span class="header-section-number">13.2</span> Verbatim, approximate, discoverable, extractable</h2>
+<p>“The model memorized its training data” can mean several things, and the numbers differ by orders of magnitude between them, so a report must say which it measures. The definitions differ in what the attacker is assumed to know. A string is <strong>extractable</strong> (Carlini et al.&nbsp;2021) if <em>some</em> prompt makes greedy decoding, which appends the most likely next symbol at each step, emit it. That is the real attacker, who has only the model, but measuring it means searching over all prompts. A suffix is <strong>discoverable</strong> (Carlini et al.&nbsp;2023) if prompting with its own training prefix makes greedy decoding emit it. That assumes an attacker who holds the prefix, which is strong, but it is easy to measure: prompt with each training prefix and compare. Discoverable implies extractable, since the prefix is one prompt among all. A string is <strong><span class="math inline">\(k\)</span>-eidetic</strong> if it is extractable and appears in at most <span class="math inline">\(k\)</span> training documents; small <span class="math inline">\(k\)</span> is the worrying case, a secret seen once and given back.</p>
+<p>The definitions also differ in how close the output must be. The ones above are <strong>verbatim</strong>; a string is <strong>approximately</strong> memorized (Ippolito et al.&nbsp;2023) if the output is within some distance of it. Verbatim matching misses near copies, and a phone number with one digit changed has still leaked to anyone who reads it. Ippolito et al.&nbsp;show that prompts which change the style slip approximate copies past a filter that blocks verbatim training text. A verbatim rate is therefore a lower bound on the leak, not a measure of it, and a verbatim filter is not a defence.</p>
+<p>Greedy decoding is a convenience for measurement; deployed models sample. A string greedy decoding never emits can still come out. If one sample reproduces it with probability <span class="math inline">\(p\)</span>, then <span class="math inline">\(m\)</span> independent samples all miss it with probability <span class="math inline">\((1 - p)^m\)</span>, which is at most <span class="math inline">\(e^{-pm}\)</span>, so <span id="eq-memo-samples"><span class="math display">\[m \ge \frac{\ln(1/\beta)}{p} \tag{13.1}\]</span></span> samples extract it with probability at least <span class="math inline">\(1 - \beta\)</span>. The budget is inversely proportional to <span class="math inline">\(p\)</span>: a string with probability <span class="math inline">\(10^{-3}\)</span> after its prefix comes out with 99% confidence (<span class="math inline">\(\beta = 0.01\)</span>) within about 4,600 samples. In the toy, an order-5 model reproduces a secret’s pin in one sample with probability <span class="math inline">\(1.4\times10^{-3}\)</span> on average at 4 copies and 0.142 at 32 copies, which means 3,252 and 31 samples for a 99% chance. Duplication made the search trivial.</p>
+</section>
+<section id="sec-memo-copies" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="sec-memo-copies"><span class="header-section-number">13.3</span> Duplication and model size</h2>
+<p>Which strings get memorized? In the <span class="math inline">\(n\)</span>-gram toy the answer can be read off the counts. Greedy decoding follows the largest count at each step, so memorization is a vote. Each copy of a training line adds one vote for the line’s own next symbol in every context the line passes through. The line comes out when, at every step, its votes beat the strongest rival from the rest of the corpus, so the number of copies it needs, <span class="math inline">\(k^*\)</span>, is its largest gap to a rival plus one, set by its most contested step. The fraction of lines memorized at <span class="math inline">\(k\)</span> copies is the fraction with <span class="math inline">\(k^* \le k\)</span>; this matched greedy decoding exactly in all 36 cells of <a href="#tbl-memo-discoverable" class="quarto-xref">Table&nbsp;<span>13.1</span></a>, because it is a restatement of what greedy decoding does with counts.</p>
+<p>Model size works by splitting the vote. A longer context is a finer partition of the training positions: fewer positions share a given context of length 7 than of length 2. So rival counts shrink as the order grows, while the line’s own <span class="math inline">\(k\)</span> votes stay with it in every context it passes through. In the limit every line has contexts of its own and is memorized from a single copy. That is the toy version of “larger models memorize more”: a larger model can afford to give rare strings parameters of their own.</p>
+<p><a href="#tbl-memo-discoverable" class="quarto-xref">Table&nbsp;<span>13.1</span></a> shows both effects. Along a row, at order 5, the verbatim rate climbs from 0 at one copy to 0.70 at 32. Down a column, a line seen once is safe up to order 5, memorized 8% of the time at order 6, 70% at order 7 and 98% at order 8; those singletons are 1-eidetic.</p>
+<div id="tbl-memo-discoverable" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-memo-discoverable-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;13.1: Fraction of 100 secret lines per cell whose pin greedy decoding reproduces from the true prefix, verbatim / with at most one digit wrong. Rows are model orders, columns copies in the training set.
+</figcaption>
+<div aria-describedby="tbl-memo-discoverable-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Order <span class="math inline">\(n\)</span></th>
+<th><span class="math inline">\(k = 1\)</span></th>
+<th><span class="math inline">\(k = 2\)</span></th>
+<th><span class="math inline">\(k = 4\)</span></th>
+<th><span class="math inline">\(k = 8\)</span></th>
+<th><span class="math inline">\(k = 16\)</span></th>
+<th><span class="math inline">\(k = 32\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3</td>
+<td>0.00 / 0.00</td>
+<td>0.00 / 0.03</td>
+<td>0.00 / 0.00</td>
+<td>0.00 / 0.00</td>
+<td>0.00 / 0.02</td>
+<td>0.00 / 0.05</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>0.00 / 0.00</td>
+<td>0.00 / 0.00</td>
+<td>0.00 / 0.01</td>
+<td>0.00 / 0.00</td>
+<td>0.00 / 0.00</td>
+<td>0.13 / 0.17</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>0.00 / 0.00</td>
+<td>0.00 / 0.00</td>
+<td>0.05 / 0.06</td>
+<td>0.11 / 0.15</td>
+<td>0.42 / 0.42</td>
+<td>0.70 / 0.70</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>0.08 / 0.13</td>
+<td>0.65 / 0.69</td>
+<td>0.76 / 0.78</td>
+<td>0.80 / 0.85</td>
+<td>0.90 / 0.91</td>
+<td>0.96 / 0.97</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>0.70 / 0.78</td>
+<td>0.95 / 0.96</td>
+<td>0.98 / 0.98</td>
+<td>0.98 / 0.99</td>
+<td>0.99 / 0.99</td>
+<td>0.97 / 0.98</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>0.98 / 0.98</td>
+<td>1.00 / 1.00</td>
+<td>1.00 / 1.00</td>
+<td>0.99 / 0.99</td>
+<td>1.00 / 1.00</td>
+<td>1.00 / 1.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>For real models, Carlini et al.&nbsp;(2023) found that discoverable memorization grows log-linearly with duplication, model size and prompt length, and that the largest model they measured, GPT-J, reproduces at least 1% of its training data from 50-token prefixes.</p>
+<p>The vote picture also says who is exposed first. A line whose name shares little with other names reaches a context of its own sooner, so rare and atypical strings are memorized first; this is the high <strong>self-influence</strong> of atypical examples from <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>, which can only be fitted by memorizing them. Deduplication lowers <span class="math inline">\(k\)</span> for every repeated string, so it is the cheapest defence: Lee et al.&nbsp;(2022) found that models trained on deduplicated data emit memorized text about ten times less often without losing quality. But it cannot touch a singleton in a large model, where <span class="math inline">\(k = 1\)</span> already suffices; deduplicating the order-8 model’s data would barely change its 98%. And because larger models memorize from fewer copies, an audit passed at one size must be redone after scaling up.</p>
+</section>
+<section id="sec-memo-exposure" class="level2" data-number="13.4">
+<h2 data-number="13.4" class="anchored" data-anchor-id="sec-memo-exposure"><span class="header-section-number">13.4</span> Canaries and the exposure metric</h2>
+<p>Discoverable memorization is all or nothing; an auditor wants a graded answer with a known false alarm rate. Carlini et al.&nbsp;(2019) plant <strong>canaries</strong>, random secrets of a fixed format such as “my pin is” followed by five random digits, in the training data, then read off the trained model’s rank of the canary among all values of that format. Because you chose the canary at random, you know the answer and the size of the space <span class="math inline">\(\mathcal R\)</span>. The <strong>exposure</strong> reads the rank on a log scale, <span id="eq-memo-exposure"><span class="math display">\[\mathrm{exposure}(\hat r) = \log_2|\mathcal R| - \log_2\operatorname{rank}(\hat r). \tag{13.2}\]</span></span> Before seeing the model, an attacker guessing the canary faces <span class="math inline">\(|\mathcal R|\)</span> equally likely values; guessing in the model’s order, it needs <span class="math inline">\(\operatorname{rank}\)</span> tries. Exposure is the difference in bits, the number of halvings of the search the model has done for the attacker.</p>
+<p>What makes exposure an audit tool is that its behaviour without memorization is known exactly. If the model does not depend on the canary, for instance because it was never inserted, the canary is just a uniformly random value, so its rank is uniform over the list. The chance of landing in the top fraction <span class="math inline">\(2^{-e}\)</span> of the list is then <span class="math inline">\(2^{-e}\)</span>: <span id="eq-memo-null"><span class="math display">\[\Pr[\mathrm{exposure} \ge e] \le 2^{-e}. \tag{13.3}\]</span></span> So exposure is <span class="math inline">\(-\log_2\)</span> of a p-value, and the test “inserted if exposure <span class="math inline">\(\ge e\)</span>” has false positive rate (FPR) at most <span class="math inline">\(2^{-e}\)</span>. “Was this canary inserted?” is a membership question, but where membership inference calibrates its test with shadow models, here the canary’s own randomness does the calibration. In the toy, uninserted pins show mean exposure 1.443 bits, the <span class="math inline">\(\log_2 e\)</span> the uniform rank predicts, and a fraction <span class="math inline">\(1/32 = 2^{-5}\)</span> with exposure at least 5.</p>
+<p>For “my pin is 58745”, <span class="math inline">\(|\mathcal R| = 10^5\)</span> and the maximum exposure is 16.61 bits. <a href="#tbl-memo-exposure" class="quarto-xref">Table&nbsp;<span>13.2</span></a> gives the exact exposure, from scoring all <span class="math inline">\(10^5\)</span> pins. The order-4 model reaches the maximum at 16 copies. The order-2 model barely moves even at 64, because its one-character contexts are shared with every line, the vote-splitting argument run backwards.</p>
+<div id="tbl-memo-exposure" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-memo-exposure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;13.2: Exposure in bits of the canary “my pin is 58745” against the number of copies <span class="math inline">\(k\)</span> in the training set. The maximum is <span class="math inline">\(\log_2 10^5 = 16.61\)</span>.
+</figcaption>
+<div aria-describedby="tbl-memo-exposure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 11%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Order <span class="math inline">\(n\)</span></th>
+<th><span class="math inline">\(k = 0\)</span></th>
+<th><span class="math inline">\(k = 1\)</span></th>
+<th><span class="math inline">\(k = 2\)</span></th>
+<th><span class="math inline">\(k = 4\)</span></th>
+<th><span class="math inline">\(k = 8\)</span></th>
+<th><span class="math inline">\(k = 16\)</span></th>
+<th><span class="math inline">\(k = 32\)</span></th>
+<th><span class="math inline">\(k = 64\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>0.40</td>
+<td>0.41</td>
+<td>0.43</td>
+<td>0.47</td>
+<td>0.55</td>
+<td>0.73</td>
+<td>1.21</td>
+<td>2.54</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0.89</td>
+<td>4.05</td>
+<td>4.44</td>
+<td>4.71</td>
+<td>5.24</td>
+<td>6.59</td>
+<td>9.69</td>
+<td>15.61</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>3.76</td>
+<td>9.98</td>
+<td>12.15</td>
+<td>15.02</td>
+<td>15.61</td>
+<td>16.61</td>
+<td>16.61</td>
+<td>16.61</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-memo-exposure-vs-copies" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-memo-exposure-vs-copies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/memo_exposure_vs_copies.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-memo-exposure-vs-copies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.1: Exposure against copies of the canary for <span class="math inline">\(n\)</span>-gram models of order 2, 3 and 4; thin lines are individual canaries and markers their mean, and the dotted line is the maximum. Larger models reach it with fewer copies.
+</figcaption>
+</figure>
+</div>
+<p>For a large space the rank must be estimated. Counting how many of <span class="math inline">\(m\)</span> random candidates score above the canary is reliable, but a canary above all of them only says its rank fraction is below about <span class="math inline">\(1/m\)</span>, so it cannot resolve exposures above <span class="math inline">\(\log_2 m\)</span>. Fitting a distribution to the scores reaches further, but only as far as its tail is right, and the tail is the part you cannot sample. At order 3 with 8 copies, counting 10,000 random pins gives 5.35 bits against an exact 5.24, while a normal fit gives 8.28, because the scores have a heavier right tail than a normal. Ties are a further trap: a model that has never seen a context gives every candidate the same score, so every rank is the last and every exposure 0, which hides rather than measures.</p>
+<p>Because you control what was planted, use canaries to compare training runs that differ in one thing: with and without deduplication, before and after an unlearning method, or with private training (<a href="../part03-dp-foundations/00-introduction.html">Part 3</a>). Carlini et al.&nbsp;(2019) found that differentially private training kept their canaries at the exposure of canaries never inserted.</p>
+</section>
+<section id="sec-memo-attack" class="level2" data-number="13.5">
+<h2 data-number="13.5" class="anchored" data-anchor-id="sec-memo-attack"><span class="header-section-number">13.5</span> Extraction without the prefix: generate, rank, verify</h2>
+<p>A real attacker has only the model. Carlini et al.&nbsp;(2021) extracted training data from GPT-2 in three steps: generate many samples, rank them by how likely they are to be memorized, and verify the top of the ranking against a search or public sources. The ranking is the hard step, and it is a hypothesis test. A model can find a string likely because text like it is common, or because it memorized it, and only the second is a leak. Ranking by the target’s likelihood alone surfaces the common, such as licences and boilerplate, which reveal nothing. A <strong>reference model</strong>, trained on similar data that excludes the target’s training set, stands in for “common text”, and the right score is how much more likely the target finds <span class="math inline">\(x\)</span> than the reference does: <span id="eq-memo-ratio"><span class="math display">\[\Lambda(x) = \ln p_\theta(x) - \ln p_{\mathrm{ref}}(x). \tag{13.4}\]</span></span> Text both models know cancels. By the Neyman–Pearson lemma of <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, this likelihood ratio is the most powerful ranking at every FPR; it is the per-example calibration of membership inference again. The reference can be crude: a smaller model of the same family, the zlib-compressed length of the text, or the target’s own likelihood on the lowercased text.</p>
+<p>In the toy, the attacker draws 20,000 lines from the order-6 model, whose training set also contains 50 public lines repeated 100 times each. Among the 14,852 distinct samples are 197 private training lines. Of the top 100 by likelihood only 45 are private, since the public lines are the most likely strings the model knows. Ranked by <a href="#eq-memo-ratio" class="quarto-xref">Equation&nbsp;<span>13.4</span></a>, with a reference trained on an independent contact list that also contains the public lines, 85 of the top 100 are private (<a href="#fig-memo-extraction" class="quarto-xref">Figure&nbsp;<span>13.2</span></a>).</p>
+<div id="fig-memo-extraction" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-memo-extraction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/memo_extraction.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-memo-extraction-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.2: Fraction of the top-ranked distinct generations that are private training lines (solid) or public lines (dashed), from 20,000 samples of an order-6 model. Ranking by likelihood puts the public lines first; ranking by the likelihood ratio to a reference model puts the private lines first.
+</figcaption>
+</figure>
+</div>
+<p>Without the prefix the attacker gets much less than is discoverable: none of the secrets inserted 1, 2 or 4 times appear in the samples, though 76% of the 4-copy secrets are discoverable at order 6. A sample must first produce the right name before it can produce the pin, and only heavily duplicated lines make their names likely enough.</p>
+<p>“Less than discoverable” can still be a great deal. Nasr et al.&nbsp;(2023) attacked an aligned chat model, which rarely emits training data in normal use because alignment taught it to answer as an assistant, not to continue documents. Asked to repeat a single word forever, it diverged into text that looked like pretraining documents; about 200 US dollars of queries extracted over 10,000 unique memorized examples, including personal contact details. Alignment changed how the model usually responds, not what it had memorized, so it is not a defence, and a red team should test prompts that escape the chat behaviour. Verify outputs against the training set, or against a large public corpus as a lower bound. Report precision at the top of the ranking, which is the low-FPR operating point an attacker checking candidates by hand cares about, not recall over all memorized strings.</p>
+</section>
+<section id="sec-memo-code" class="level2" data-number="13.6">
+<h2 data-number="13.6" class="anchored" data-anchor-id="sec-memo-code"><span class="header-section-number">13.6</span> Code</h2>
+<p>Exposure and sample budgets are what you compute in an audit, and they need only logarithms:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> ceil, log, log2</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exposure(rank: <span class="bu">int</span>, space: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Bits of guessing the model saves: log2 |R| - log2 rank."""</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> log2(space) <span class="op">-</span> log2(rank)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> null_p_value(exposure_bits: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Upper bound on the chance that a canary never inserted scores this high."""</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">2.0</span><span class="op">**-</span>exposure_bits</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> samples_needed(p: <span class="bu">float</span>, beta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Smallest m with (1 - p)^m &lt;= beta: samples for a 1 - beta chance of drawing a string of probability p."""</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ceil(log(beta) <span class="op">/</span> log(<span class="dv">1</span> <span class="op">-</span> p))</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> samples_bound(p: <span class="bu">float</span>, beta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The simpler sufficient budget ln(1 / beta) / p."""</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ceil(log(<span class="dv">1</span> <span class="op">/</span> beta) <span class="op">/</span> p)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>exposure(<span class="dv">1</span>, <span class="dv">10</span><span class="op">**</span><span class="dv">5</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 16.61</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>exposure(<span class="dv">6018</span>, <span class="dv">10</span><span class="op">**</span><span class="dv">5</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 4.05</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>null_p_value(<span class="dv">10</span>)<span class="sc">:.5f}</span><span class="ss">"</span>)  <span class="co"># 0.00098</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(samples_needed(<span class="fl">0.142</span>, <span class="fl">0.01</span>))  <span class="co"># 31</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(samples_bound(<span class="fl">1e-3</span>, <span class="fl">0.01</span>))  <span class="co"># 4606</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Rank 6,018 of <span class="math inline">\(10^5\)</span> is the order-3 canary at one copy. An exposure of 10 bits has a p-value below 0.001, whatever the size of the space. The full edition’s script runs every experiment in this chapter:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/memorization.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="cheat-sheet" class="level2" data-number="13.7">
+<h2 data-number="13.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">13.7</span> Cheat sheet</h2>
+<div id="tbl-memo-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-memo-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;13.3: The results of this chapter.
+</figcaption>
+<div aria-describedby="tbl-memo-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Formula</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Discoverable</td>
+<td>Greedy decoding from the true prefix emits the suffix</td>
+<td>Easy to measure; implies extractable</td>
+</tr>
+<tr class="even">
+<td>Extractable, <span class="math inline">\(k\)</span>-eidetic</td>
+<td>Some prompt emits it; in at most <span class="math inline">\(k\)</span> documents</td>
+<td>The real attacker’s notion</td>
+</tr>
+<tr class="odd">
+<td>Approximate</td>
+<td>Output within distance <span class="math inline">\(\tau\)</span></td>
+<td>Verbatim rates understate the leak</td>
+</tr>
+<tr class="even">
+<td>Samples needed</td>
+<td><span class="math inline">\(m \ge \ln(1/\beta)/p\)</span></td>
+<td><span class="math inline">\(p\)</span> the probability of the string after the prompt</td>
+</tr>
+<tr class="odd">
+<td>Exposure</td>
+<td><span class="math inline">\(\log_2\lvert\mathcal R\rvert - \log_2\operatorname{rank}\)</span></td>
+<td>Bits of guessing saved</td>
+</tr>
+<tr class="even">
+<td>Exposure null</td>
+<td><span class="math inline">\(\Pr[\mathrm{exposure} \ge e] \le 2^{-e}\)</span>; mean <span class="math inline">\(\to 1.443\)</span> bits</td>
+<td><span class="math inline">\(-\log_2\)</span> of a p-value</td>
+</tr>
+<tr class="odd">
+<td>Ranking generations</td>
+<td><span class="math inline">\(\ln p_\theta(x) - \ln p_{\mathrm{ref}}(x)\)</span></td>
+<td>Cancels text that is likely under any model</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>Memorization is a rank: the secret above the strings it could have been.</li>
+<li>Duplication and model size drive memorization. Deduplicate, but expect singletons in large models to be memorized anyway.</li>
+<li>Audit with planted canaries and report exposure, which is graded and has a known null.</li>
+<li>Rank generations against a reference model, never by raw likelihood.</li>
+</ul>
+</section>
+<section id="further-reading" class="level2" data-number="13.8">
+<h2 data-number="13.8" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">13.8</span> Further reading</h2>
+<ul>
+<li>Carlini, Liu, Erlingsson, Kos &amp; Song, “The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks” (USENIX Security 2019): canaries, exposure and how to estimate it.</li>
+<li>Carlini et al., “Extracting Training Data from Large Language Models” (USENIX Security 2021): the generate-rank-verify attack and its reference-based rankings.</li>
+<li>Carlini, Ippolito, Jagielski, Lee, Tramèr &amp; Zhang, “Quantifying Memorization Across Neural Language Models” (ICLR 2023): how memorization scales with duplication, model size and prompt length.</li>
+<li>Nasr et al., “Scalable Extraction of Training Data from (Production) Language Models” (2023): discoverable against extractable memorization, and the divergence attack on an aligned chat model.</li>
+</ul>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part02-attacks/05-memorization-extraction.html">the full edition’s chapter</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-attacks/04-property-inference.html" class="pagination-link" aria-label="Property inference">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-attacks/06-gradient-inversion.html" class="pagination-link" aria-label="Gradient inversion">
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

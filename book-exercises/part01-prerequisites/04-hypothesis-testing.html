@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>4&nbsp; Exercises: Hypothesis testing – Privacy-Preserving Machine Learning: Exercises</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part01-prerequisites/05-information-theory.html" rel="next">
+<link href="../part01-prerequisites/03-divergences.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-prerequisites/01-distributions.html">Prerequisites</a></li><li class="breadcrumb-item"><a href="../part01-prerequisites/04-hypothesis-testing.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Exercises: Hypothesis testing</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning: Exercises</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Exercises: Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Exercises: Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Exercises: Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Exercises: Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Exercises: Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Exercises: Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Exercises: Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Exercises: Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Exercises: Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Exercises: Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Exercises: Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Exercises: Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Exercises: Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Exercises: Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Exercises: Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Exercises: Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Exercises: Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Exercises: The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Exercises: Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Exercises: The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Exercises: Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Exercises: Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-sol-hypothesis-testing-1" id="toc-sec-sol-hypothesis-testing-1" class="nav-link active" data-scroll-target="#sec-sol-hypothesis-testing-1"><span class="header-section-number">4.1</span> Symmetry of the Gaussian curve</a></li>
+  <li><a href="#sec-sol-hypothesis-testing-2" id="toc-sec-sol-hypothesis-testing-2" class="nav-link" data-scroll-target="#sec-sol-hypothesis-testing-2"><span class="header-section-number">4.2</span> Swapping the hypotheses</a></li>
+  <li><a href="#sec-sol-hypothesis-testing-3" id="toc-sec-sol-hypothesis-testing-3" class="nav-link" data-scroll-target="#sec-sol-hypothesis-testing-3"><span class="header-section-number">4.3</span> Laplace total variation</a></li>
+  <li><a href="#sec-sol-hypothesis-testing-4" id="toc-sec-sol-hypothesis-testing-4" class="nav-link" data-scroll-target="#sec-sol-hypothesis-testing-4"><span class="header-section-number">4.4</span> Sample size</a></li>
+  <li><a href="#sec-sol-hypothesis-testing-5" id="toc-sec-sol-hypothesis-testing-5" class="nav-link" data-scroll-target="#sec-sol-hypothesis-testing-5"><span class="header-section-number">4.5</span> A detector that AUC undersells</a></li>
+  <li><a href="#sec-sol-hypothesis-testing-6" id="toc-sec-sol-hypothesis-testing-6" class="nav-link" data-scroll-target="#sec-sol-hypothesis-testing-6"><span class="header-section-number">4.6</span> A curve that starts below 1</a></li>
+  <li><a href="#sec-sol-hypothesis-testing-7" id="toc-sec-sol-hypothesis-testing-7" class="nav-link" data-scroll-target="#sec-sol-hypothesis-testing-7"><span class="header-section-number">4.7</span> Bayes error and total variation</a></li>
+  <li><a href="#sec-sol-hypothesis-testing-8" id="toc-sec-sol-hypothesis-testing-8" class="nav-link" data-scroll-target="#sec-sol-hypothesis-testing-8"><span class="header-section-number">4.8</span> Errors decay at the KL rate</a></li>
+  <li><a href="#sec-sol-hypothesis-testing-9" id="toc-sec-sol-hypothesis-testing-9" class="nav-link" data-scroll-target="#sec-sol-hypothesis-testing-9"><span class="header-section-number">4.9</span> Certifying a low rate</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-prerequisites/01-distributions.html">Prerequisites</a></li><li class="breadcrumb-item"><a href="../part01-prerequisites/04-hypothesis-testing.html"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Exercises: Hypothesis testing</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Exercises: Hypothesis testing</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Exercises for <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, each with a worked solution. Try each exercise before opening its solution. The notation is the chapter’s: <span class="math inline">\(T = T(P, Q)\)</span> is the trade-off function, <span class="math inline">\(\Phi\)</span> the standard normal cumulative distribution function (CDF), and the summaries are the total variation (TV), the true positive rate (TPR), the false positive rate (FPR), the receiver operating characteristic (ROC) curve and the area under the curve (AUC). Every number that is not a one-line hand calculation comes from <a href="../../../code/part01-prerequisites/solutions_hypothesis_testing.py">code/solutions_hypothesis_testing.py</a>, which you run with <code>uv run python code/part01-prerequisites/solutions_hypothesis_testing.py</code>.</p>
+<section id="sec-sol-hypothesis-testing-1" class="level2" data-number="4.1">
+<h2 data-number="4.1" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-1"><span class="header-section-number">4.1</span> Symmetry of the Gaussian curve</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 1.</strong> Show that <span class="math inline">\(T(T(\alpha)) = \alpha\)</span> for <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-gaussian-tradeoff">Equation&nbsp;4.10</a>. <em>Hint: use <span class="math inline">\(1 - \Phi(x) = \Phi(-x)\)</span>.</em> <em>Check: at <span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(T(0.05) = 0.7405\)</span> and <span class="math inline">\(T(0.7405) = 0.0500\)</span>.</em> <em>(Gaussian trade-off)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Fix <span class="math inline">\(\alpha \in (0, 1)\)</span>. At the ends, <span class="math inline">\(T(0) = 1\)</span> and <span class="math inline">\(T(1) = 0\)</span>, so <span class="math inline">\(T(T(0)) = 0\)</span> and <span class="math inline">\(T(T(1)) = 1\)</span> directly.</p>
+<ol type="1">
+<li><strong>Name the threshold.</strong> Let <span class="math inline">\(z = \Phi^{-1}(1 - \alpha)\)</span>. By <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-gaussian-tradeoff">Equation&nbsp;4.10</a>, <span class="math inline">\(\beta = T(\alpha) = \Phi(z - \mu)\)</span>.</li>
+<li><strong>Compute <span class="math inline">\(1 - \beta\)</span>.</strong> By the hint (Fact 4 of the chapter), <span class="math inline">\(1 - \beta = 1 - \Phi(z - \mu) = \Phi(\mu - z)\)</span>.</li>
+<li><strong>Invert.</strong> <span class="math inline">\(\Phi\)</span> is strictly increasing, so step 2 gives <span class="math inline">\(\Phi^{-1}(1 - \beta) = \mu - z\)</span>.</li>
+<li><strong>Apply <span class="math inline">\(T\)</span> again.</strong> By <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-gaussian-tradeoff">Equation&nbsp;4.10</a> at <span class="math inline">\(\beta\)</span>, <span class="math inline">\(T(\beta) = \Phi\big(\Phi^{-1}(1 - \beta) - \mu\big) = \Phi(\mu - z - \mu) = \Phi(-z)\)</span>.</li>
+<li><strong>Use the hint once more.</strong> <span class="math inline">\(\Phi(-z) = 1 - \Phi(z) = 1 - (1 - \alpha) = \alpha\)</span>.</li>
+</ol>
+<p><strong>The check, step by step.</strong> At <span class="math inline">\(\mu = 1\)</span> and <span class="math inline">\(\alpha = 0.05\)</span>: <span class="math inline">\(z = 1.6449\)</span>, so <span class="math inline">\(\beta = \Phi(0.6449) = 0.7405\)</span>. Then <span class="math inline">\(\Phi^{-1}(1 - 0.7405) = \Phi^{-1}(0.2595) = -0.6449 = \mu - z\)</span>, and <span class="math inline">\(T(0.7405) = \Phi(-0.6449 - 1) = \Phi(-1.6449) = 0.0500\)</span>. The script also evaluates <span class="math inline">\(|T(T(\alpha)) - \alpha|\)</span> on 999 values of <span class="math inline">\(\alpha\)</span> for <span class="math inline">\(\mu = 0.5, 1, 2, 3\)</span>: every defect is below <span class="math inline">\(10^{-9}\)</span>, which is rounding error.</p>
+<p><em>Geometrically, the point <span class="math inline">\((\alpha, \beta)\)</span> is on the curve exactly when <span class="math inline">\((\beta, \alpha)\)</span> is: the Gaussian curve is symmetric about the diagonal <span class="math inline">\(\alpha = \beta\)</span>. With Exercise 2, this says that swapping which normal is the null hypothesis does not make the problem easier or harder.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-hypothesis-testing-2" class="level2" data-number="4.2">
+<h2 data-number="4.2" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-2"><span class="header-section-number">4.2</span> Swapping the hypotheses</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 2.</strong> Show that if <span class="math inline">\(T(P, Q)\)</span> is strictly decreasing on <span class="math inline">\([0, 1]\)</span>, then <span class="math inline">\(T(Q, P)\)</span> is its inverse function. <em>Hint: a test <span class="math inline">\(\phi\)</span> for <span class="math inline">\(P\)</span> against <span class="math inline">\(Q\)</span> with errors <span class="math inline">\((\alpha, \beta)\)</span> gives the test <span class="math inline">\(1 - \phi\)</span> for <span class="math inline">\(Q\)</span> against <span class="math inline">\(P\)</span> with errors <span class="math inline">\((\beta, \alpha)\)</span>.</em> <em>(Trade-off functions)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Write <span class="math inline">\(f = T(P, Q)\)</span> and <span class="math inline">\(g = T(Q, P)\)</span>.</p>
+<ol type="1">
+<li><strong>The hint.</strong> In the problem “<span class="math inline">\(Q\)</span> against <span class="math inline">\(P\)</span>”, the null hypothesis is <span class="math inline">\(Q\)</span> and the alternative is <span class="math inline">\(P\)</span>. By Fact 1, the test <span class="math inline">\(\psi = 1 - \phi\)</span> has type I error <span class="math inline">\(\mathbb E_Q[\psi] = 1 - \mathbb E_Q[\phi] = \beta_\phi\)</span> and type II error <span class="math inline">\(1 - \mathbb E_P[\psi] = \mathbb E_P[\phi] = \alpha_\phi\)</span>. The map <span class="math inline">\(\phi \mapsto 1 - \phi\)</span> is a bijection between tests, so the achievable pairs of the swapped problem are exactly the pairs <span class="math inline">\((\beta, \alpha)\)</span> with <span class="math inline">\((\alpha, \beta)\)</span> achievable in the original.</li>
+<li><strong>What <span class="math inline">\(f\)</span> looks like.</strong> <span class="math inline">\(f\)</span> is continuous (property 4 of <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#sec-ht-tradeoff">Section&nbsp;4.5</a>), strictly decreasing by assumption, and <span class="math inline">\(f(1) = 0\)</span> (property 2). So <span class="math inline">\(f\)</span> maps <span class="math inline">\([0, 1]\)</span> one-to-one onto <span class="math inline">\([0, f(0)]\)</span>, and for each <span class="math inline">\(b \in [0, f(0)]\)</span> there is exactly one <span class="math inline">\(a = f^{-1}(b)\)</span> with <span class="math inline">\(f(a) = b\)</span>.</li>
+<li><strong><span class="math inline">\(g(b) \le a\)</span>.</strong> By the Neyman–Pearson lemma, the infimum in <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-tradeoff">Equation&nbsp;4.8</a> is attained: some test has errors <span class="math inline">\((\alpha_\phi, \beta_\phi) = (a, f(a)) = (a, b)\)</span> for <span class="math inline">\(P\)</span> against <span class="math inline">\(Q\)</span> (for <span class="math inline">\(a = 0\)</span>, the test <span class="math inline">\(\mathbf 1[p = 0]\)</span>). By step 1, <span class="math inline">\(1 - \phi\)</span> has type I error <span class="math inline">\(b\)</span> and type II error <span class="math inline">\(a\)</span> for <span class="math inline">\(Q\)</span> against <span class="math inline">\(P\)</span>. So <span class="math inline">\(g(b) \le a\)</span>.</li>
+<li><strong><span class="math inline">\(g(b) \ge a\)</span>.</strong> Take any test of the swapped problem with type I error at most <span class="math inline">\(b\)</span>. By step 1 it is <span class="math inline">\(1 - \phi\)</span> for a test <span class="math inline">\(\phi\)</span> of the original problem with <span class="math inline">\(\beta_\phi \le b\)</span>, and its type II error is <span class="math inline">\(\alpha_\phi\)</span>. If <span class="math inline">\(\alpha_\phi &lt; a\)</span>, then <span class="math inline">\(f(\alpha_\phi) &gt; f(a) = b\)</span> because <span class="math inline">\(f\)</span> is strictly decreasing, while <span class="math inline">\(f(\alpha_\phi) \le \beta_\phi \le b\)</span> by the definition of <span class="math inline">\(f\)</span> as an infimum. That is a contradiction, so <span class="math inline">\(\alpha_\phi \ge a\)</span>, and taking the infimum, <span class="math inline">\(g(b) \ge a\)</span>.</li>
+<li><strong>Conclusion.</strong> <span class="math inline">\(g(b) = f^{-1}(b)\)</span> for every <span class="math inline">\(b \in [0, f(0)]\)</span>.</li>
+</ol>
+<p><strong>A boundary case.</strong> If <span class="math inline">\(f(0) &lt; 1\)</span> (<span class="math inline">\(Q\)</span> puts mass where <span class="math inline">\(P\)</span> has none), <span class="math inline">\(f^{-1}\)</span> is defined only on <span class="math inline">\([0, f(0)]\)</span>. For <span class="math inline">\(b &gt; f(0)\)</span>, the size-0 test of the original problem, flipped, has type I error <span class="math inline">\(f(0) \le b\)</span> and type II error 0, so <span class="math inline">\(g(b) = 0\)</span> there. “<span class="math inline">\(g\)</span> is the inverse of <span class="math inline">\(f\)</span>” then means: <span class="math inline">\(g = f^{-1}\)</span> on <span class="math inline">\([0, f(0)]\)</span> and <span class="math inline">\(g = 0\)</span> beyond. When <span class="math inline">\(f(0) = 1\)</span>, as for every pair in the chapter, <span class="math inline">\(g = f^{-1}\)</span> on all of <span class="math inline">\([0, 1]\)</span>.</p>
+<p><strong>Concrete.</strong> Take one bit with <span class="math inline">\(P = (0.5, 0.5)\)</span> and <span class="math inline">\(Q = (0.2, 0.8)\)</span> on <span class="math inline">\(\{0, 1\}\)</span>, which is not symmetric like the spam example. For <span class="math inline">\(P\)</span> against <span class="math inline">\(Q\)</span> the likelihood ratios are <span class="math inline">\(q/p = 0.4\)</span> at 0 and <span class="math inline">\(1.6\)</span> at 1, so the likelihood ratio (LR) tests reject nothing, then <span class="math inline">\(\{1\}\)</span>, then everything. For <span class="math inline">\(Q\)</span> against <span class="math inline">\(P\)</span> the ratios are <span class="math inline">\(p/q = 2.5\)</span> at 0 and <span class="math inline">\(0.625\)</span> at 1, so the LR tests reject nothing, then <span class="math inline">\(\{0\}\)</span>, then everything. The corners of the two curves are in <a href="#tbl-sol-hypothesis-testing-swap" class="quarto-xref">Table&nbsp;<span>4.1</span></a>. Each curve is piecewise linear between its corners (Fact 3), and the corners of one are those of the other with the coordinates swapped, so each curve is the reflection of the other across the diagonal.</p>
+<div id="tbl-sol-hypothesis-testing-swap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-hypothesis-testing-swap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.1: Corners of the trade-off curves for <span class="math inline">\(P = (0.5, 0.5)\)</span> against <span class="math inline">\(Q = (0.2, 0.8)\)</span> and with the roles swapped.
+</figcaption>
+<div aria-describedby="tbl-sol-hypothesis-testing-swap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Problem</th>
+<th>Corners <span class="math inline">\((\alpha, \beta)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(T(P, Q)\)</span></td>
+<td><span class="math inline">\((0, 1)\)</span>, <span class="math inline">\((0.5, 0.2)\)</span>, <span class="math inline">\((1, 0)\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(T(Q, P)\)</span></td>
+<td><span class="math inline">\((0, 1)\)</span>, <span class="math inline">\((0.2, 0.5)\)</span>, <span class="math inline">\((1, 0)\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><em>Swapping null and alternative reflects the trade-off curve across the diagonal. Exercise 1 is the special case where the reflection gives back the same curve.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-hypothesis-testing-3" class="level2" data-number="4.3">
+<h2 data-number="4.3" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-3"><span class="header-section-number">4.3</span> Laplace total variation</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 3.</strong> Compute <span class="math inline">\(\frac12\int|q - p|\)</span> directly for <span class="math inline">\(\mathrm{Lap}(0, b)\)</span> and <span class="math inline">\(\mathrm{Lap}(s, b)\)</span> and confirm <span class="math inline">\(1 - e^{-s/(2b)}\)</span>. <em>Check: 0.3935 at <span class="math inline">\(s = b\)</span>.</em> <em>(Total variation)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Rescale.</strong> Substitute <span class="math inline">\(x = bu\)</span>. The densities are <span class="math inline">\(p(x) = \frac1{2b}e^{-|x|/b}\)</span> and <span class="math inline">\(q(x) = \frac1{2b}e^{-|x - s|/b}\)</span>, and <span class="math inline">\(dx = b\,du\)</span>, so <span class="math inline">\(\int|q - p|\,dx = \int\big|\tfrac12e^{-|u - \kappa|} - \tfrac12e^{-|u|}\big|\,du\)</span> with <span class="math inline">\(\kappa = s/b\)</span>. From here on <span class="math inline">\(b = 1\)</span> and the shift is <span class="math inline">\(\kappa\)</span>.</li>
+<li><strong>Where <span class="math inline">\(q &gt; p\)</span>.</strong> <span class="math inline">\(q(u) &gt; p(u)\)</span> exactly when <span class="math inline">\(|u - \kappa| &lt; |u|\)</span>, that is, when <span class="math inline">\(u\)</span> is closer to <span class="math inline">\(\kappa\)</span> than to 0: <span class="math inline">\(u &gt; \kappa/2\)</span>. So split the line at <span class="math inline">\(0\)</span>, <span class="math inline">\(\kappa/2\)</span> and <span class="math inline">\(\kappa\)</span>, where the absolute values change form.</li>
+<li><strong>Left tail, <span class="math inline">\(u \le 0\)</span>.</strong> Here <span class="math inline">\(p = \frac12e^u\)</span> and <span class="math inline">\(q = \frac12e^{u - \kappa}\)</span>, so <span class="math inline">\(p - q = \frac12e^u(1 - e^{-\kappa})\)</span> and <span class="math inline">\(\int_{-\infty}^0(p - q)\,du = \frac12(1 - e^{-\kappa})\)</span>.</li>
+<li><strong>Right tail, <span class="math inline">\(u \ge \kappa\)</span>.</strong> Here <span class="math inline">\(p = \frac12e^{-u}\)</span> and <span class="math inline">\(q = \frac12e^{-(u - \kappa)}\)</span>, so <span class="math inline">\(q - p = \frac12e^{-u}(e^\kappa - 1)\)</span> and <span class="math inline">\(\int_\kappa^\infty(q - p)\,du = \frac12e^{-\kappa}(e^\kappa - 1) = \frac12(1 - e^{-\kappa})\)</span>.</li>
+<li><strong>Middle, <span class="math inline">\(0 &lt; u &lt; \kappa\)</span>.</strong> Here <span class="math inline">\(p = \frac12e^{-u}\)</span> and <span class="math inline">\(q = \frac12e^{u - \kappa}\)</span>. On <span class="math inline">\((0, \kappa/2)\)</span>, <span class="math inline">\(p &gt; q\)</span> and <span id="eq-auto-04hypothesistesting-1"><span class="math display">\[\int_0^{\kappa/2}\tfrac12\big(e^{-u} - e^{u - \kappa}\big)\,du = \tfrac12\big[(1 - e^{-\kappa/2}) - (e^{-\kappa/2} - e^{-\kappa})\big] = \tfrac12\big(1 - e^{-\kappa/2}\big)^2. \tag{4.1}\]</span></span> The substitution <span class="math inline">\(u \mapsto \kappa - u\)</span> swaps <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> and maps <span class="math inline">\((\kappa/2, \kappa)\)</span> onto <span class="math inline">\((0, \kappa/2)\)</span>, so the integral over <span class="math inline">\((\kappa/2, \kappa)\)</span> is the same.</li>
+<li><strong>Add.</strong> With <span class="math inline">\(a = e^{-\kappa/2}\)</span>, so that <span class="math inline">\(e^{-\kappa} = a^2\)</span>, <span id="eq-auto-04hypothesistesting-2"><span class="math display">\[\int|q - p| = (1 - a^2) + (1 - a)^2 = 2 - 2a, \qquad \tfrac12\int|q - p| = 1 - e^{-\kappa/2} = 1 - e^{-s/(2b)}. \tag{4.2}\]</span></span></li>
+</ol>
+<p><strong>The check.</strong> At <span class="math inline">\(s = b\)</span>, <span class="math inline">\(\kappa = 1\)</span>. <a href="#tbl-sol-hypothesis-testing-laplace-tv" class="quarto-xref">Table&nbsp;<span>4.2</span></a> lists the four pieces. Their sum is 0.7869, half of it is 0.3935, and <span class="math inline">\(1 - e^{-1/2} = 0.3935\)</span>. A trapezoid-rule integral of <span class="math inline">\(\frac12|q - p|\)</span> on 2,000,001 points also gives 0.3935.</p>
+<div id="tbl-sol-hypothesis-testing-laplace-tv" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-hypothesis-testing-laplace-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.2: The four pieces of <span class="math inline">\(\int|q - p|\)</span> for <span class="math inline">\(\mathrm{Lap}(0, 1)\)</span> against <span class="math inline">\(\mathrm{Lap}(1, 1)\)</span>.
+</figcaption>
+<div aria-describedby="tbl-sol-hypothesis-testing-laplace-tv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Piece</th>
+<th><span class="math inline">\(u \le 0\)</span></th>
+<th><span class="math inline">\(0 &lt; u &lt; \frac12\)</span></th>
+<th><span class="math inline">\(\frac12 &lt; u &lt; 1\)</span></th>
+<th><span class="math inline">\(u \ge 1\)</span></th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\int|q - p|\)</span></td>
+<td>0.3161</td>
+<td>0.0774</td>
+<td>0.0774</td>
+<td>0.3161</td>
+<td>0.7869</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><em>Most of the <span class="math inline">\(L^1\)</span> distance sits in the two tails, where the likelihood ratio is flat at <span class="math inline">\(e^{\pm\kappa}\)</span>. The result matches the chapter’s route through the trade-off curve, which maximized <span class="math inline">\(1 - \alpha - T(\alpha)\)</span> on the middle piece of <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-laplace-tradeoff">Equation&nbsp;4.14</a>.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-hypothesis-testing-4" class="level2" data-number="4.4">
+<h2 data-number="4.4" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-4"><span class="header-section-number">4.4</span> Sample size</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 4.</strong> How many readings does the drift monitor need for power 0.9 at <span class="math inline">\(\alpha = 0.01\)</span> when <span class="math inline">\(\delta/\sigma = 0.25\)</span>? Rederive the formula, then halve <span class="math inline">\(\delta\)</span>: by what factor does <span class="math inline">\(n\)</span> grow? <em>Check: <span class="math inline">\(n = 209\)</span>; halving <span class="math inline">\(\delta\)</span> multiplies <span class="math inline">\(n\)</span> by 4.</em> <em>(Gaussian trade-off, many observations)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Reduce to one Gaussian pair.</strong> The mean of <span class="math inline">\(n\)</span> readings is <span class="math inline">\(\mathcal N(0, \sigma^2/n)\)</span> under “no drift” and <span class="math inline">\(\mathcal N(\delta, \sigma^2/n)\)</span> under “drift”. The chapter showed it carries all the evidence, so the best test has the trade-off <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-gaussian-tradeoff">Equation&nbsp;4.10</a> with <span class="math inline">\(\mu = \delta\sqrt n/\sigma\)</span>.</li>
+<li><strong>Write the power target.</strong> Power <span class="math inline">\(1 - \beta'\)</span> at level <span class="math inline">\(\alpha\)</span> means <span class="math inline">\(T(\alpha) \le \beta'\)</span>, that is, <span class="math inline">\(\Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big) \le \beta'\)</span>.</li>
+<li><strong>Invert <span class="math inline">\(\Phi\)</span>.</strong> <span class="math inline">\(\Phi\)</span> is increasing, so this is <span class="math inline">\(\Phi^{-1}(1 - \alpha) - \mu \le \Phi^{-1}(\beta')\)</span>. By Fact 4, <span class="math inline">\(\Phi^{-1}(\beta') = -\Phi^{-1}(1 - \beta')\)</span>, so the condition is <span id="eq-auto-04hypothesistesting-3"><span class="math display">\[\mu \ge \Phi^{-1}(1 - \alpha) + \Phi^{-1}(1 - \beta'). \tag{4.3}\]</span></span></li>
+<li><strong>Solve for <span class="math inline">\(n\)</span>.</strong> Substitute <span class="math inline">\(\mu = \delta\sqrt n/\sigma\)</span> and square both sides (both are positive): <span id="eq-auto-04hypothesistesting-4"><span class="math display">\[n \ge \left(\frac{\Phi^{-1}(1 - \alpha) + \Phi^{-1}(1 - \beta')}{\delta/\sigma}\right)^2. \tag{4.4}\]</span></span></li>
+<li><strong>Plug in.</strong> <span class="math inline">\(\alpha = 0.01\)</span> and <span class="math inline">\(\beta' = 0.1\)</span> give <span class="math inline">\(\Phi^{-1}(0.99) = 2.3263\)</span> and <span class="math inline">\(\Phi^{-1}(0.9) = 1.2816\)</span>. With <span class="math inline">\(\delta/\sigma = 0.25\)</span>, <span class="math inline">\(n \ge (3.6079/0.25)^2 = 208.3\)</span>, so <span class="math inline">\(n = 209\)</span>. As a check, the power at <span class="math inline">\(n = 208\)</span> is 0.8996, just short of 0.9, and at <span class="math inline">\(n = 209\)</span> it is 0.9011.</li>
+<li><strong>Halve <span class="math inline">\(\delta\)</span>.</strong> The bound in step 4 is proportional to <span class="math inline">\((\sigma/\delta)^2\)</span>, so halving <span class="math inline">\(\delta\)</span> multiplies it by exactly 4: <span class="math inline">\(208.3 \to 833.1\)</span>, and <span class="math inline">\(n = 834\)</span>. The rounded counts grow by <span class="math inline">\(834/209 = 3.99\)</span> because each is rounded up separately.</li>
+</ol>
+<p><em>Distinguishability grows like <span class="math inline">\(\sqrt n\)</span>, so the number of readings grows like <span class="math inline">\(1/\delta^2\)</span>. Detecting half the drift costs four times the data.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-hypothesis-testing-5" class="level2" data-number="4.5">
+<h2 data-number="4.5" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-5"><span class="header-section-number">4.5</span> A detector that AUC undersells</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 5.</strong> Negatives score <span class="math inline">\(\mathcal N(0, 1)\)</span>. Positives score <span class="math inline">\(\mathcal N(0, 1)\)</span> too, except a fraction <span class="math inline">\(w = 0.05\)</span> that scores <span class="math inline">\(\mathcal N(6, 1)\)</span>. Show that <span class="math inline">\(\mathrm{AUC} = (1 - w)\frac12 + w\,\Phi(6/\sqrt2)\)</span> and find the TPR at FPR <span class="math inline">\(10^{-3}\)</span>. Compare with a Gaussian-shift detector of the same AUC. <em>Check: AUC 0.5250 and TPR 0.0509; the equal-AUC shift is <span class="math inline">\(\mu = 0.0887\)</span>, with TPR 0.0013.</em> <em>(AUC, ROC at low FPR)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><strong>The AUC.</strong></p>
+<ol type="1">
+<li><strong>Ranking probability.</strong> By <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#sec-ht-auc">Section&nbsp;4.9</a>, <span class="math inline">\(\mathrm{AUC} = \Pr[S_+ &gt; S_-]\)</span> for independent <span class="math inline">\(S_+\)</span> and <span class="math inline">\(S_-\)</span>.</li>
+<li><strong>Condition on the component.</strong> Let <span class="math inline">\(C\)</span> be the component of the positive: “bulk” with probability <span class="math inline">\(1 - w\)</span>, “far” with probability <span class="math inline">\(w\)</span>. By the law of total probability, <span class="math inline">\(\Pr[S_+ &gt; S_-] = (1 - w)\Pr[S_+ &gt; S_- \mid \text{bulk}] + w\Pr[S_+ &gt; S_- \mid \text{far}]\)</span>.</li>
+<li><strong>Bulk.</strong> Given bulk, <span class="math inline">\(S_+\)</span> and <span class="math inline">\(S_-\)</span> are independent draws from the same continuous distribution. By symmetry <span class="math inline">\(\Pr[S_+ &gt; S_-] = \Pr[S_- &gt; S_+]\)</span>, and ties have probability 0, so each is <span class="math inline">\(\frac12\)</span>.</li>
+<li><strong>Far.</strong> Given far, <span class="math inline">\(S_+ - S_- \sim \mathcal N(6, 2)\)</span>, the binormal case of <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#sec-ht-auc">Section&nbsp;4.9</a>. So <span class="math inline">\(\Pr[S_+ &gt; S_-] = \Phi(6/\sqrt2) = 0.999989\)</span>.</li>
+<li><strong>Add.</strong> <span class="math inline">\(\mathrm{AUC} = 0.95 \times 0.5 + 0.05 \times 0.999989 = 0.5250\)</span>. A simulation with 1,000,000 pairs gives 0.5259, within two standard errors (about 0.0005 each).</li>
+</ol>
+<p><strong>The TPR at FPR <span class="math inline">\(10^{-3}\)</span>.</strong></p>
+<ol type="1">
+<li><strong>Threshold.</strong> Negatives are <span class="math inline">\(\mathcal N(0, 1)\)</span>, so the threshold with FPR <span class="math inline">\(10^{-3}\)</span> is <span class="math inline">\(t = \Phi^{-1}(0.999) = 3.0902\)</span> (Fact 4).</li>
+<li><strong>Split the TPR by component.</strong> A bulk positive is distributed like a negative, so it passes with probability <span class="math inline">\(10^{-3}\)</span>. A far positive passes with probability <span class="math inline">\(\Pr[\mathcal N(6, 1) &gt; t] = \Phi(6 - t)\)</span>. So <span id="eq-auto-04hypothesistesting-5"><span class="math display">\[\mathrm{TPR} = (1 - w)\cdot10^{-3} + w\,\Phi(6 - 3.0902) = 0.00095 + 0.04991 = 0.0509. \tag{4.5}\]</span></span></li>
+</ol>
+<p><strong>The equal-AUC shift detector.</strong> A detector whose positives score <span class="math inline">\(\mathcal N(\mu, 1)\)</span> has <span class="math inline">\(\mathrm{AUC} = \Phi(\mu/\sqrt2)\)</span> (binormal model with <span class="math inline">\(\sigma = 1\)</span>). Setting this to 0.5250 gives <span class="math inline">\(\mu = \sqrt2\,\Phi^{-1}(0.5250) = 0.0887\)</span>. Its TPR at the same threshold is <span class="math inline">\(\Pr[\mathcal N(\mu, 1) &gt; 3.0902] = \Phi(\mu - 3.0902) = 0.0013\)</span>.</p>
+<p><strong>Comparison.</strong> The two detectors have the same AUC, 0.5250, barely above a coin flip. At FPR <span class="math inline">\(10^{-3}\)</span> the mixture detector catches 0.0509 of the positives and the shift detector 0.0013: 38 times fewer. The mixture’s AUC is low because 95% of its positives are indistinguishable from negatives. Those pairs contribute <span class="math inline">\(\frac12\)</span> each and swamp the average. A strict threshold ignores them and catches nearly every far positive.</p>
+<p>The threshold test is in fact the best possible test here. The likelihood ratio of the positive score against the negative one is <span class="math inline">\((1 - w) + w\,e^{6s - 18}\)</span>, which is increasing in <span class="math inline">\(s\)</span>, so by the monotone-ratio rule of <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#sec-ht-np">Section&nbsp;4.4</a> thresholding <span class="math inline">\(s\)</span> is an LR test.</p>
+<p><em>AUC averages over all FPRs. A detector that is excellent on a small subpopulation and blind elsewhere gets an AUC near 0.5 and can still dominate where false alarms must be rare.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-hypothesis-testing-6" class="level2" data-number="4.6">
+<h2 data-number="4.6" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-6"><span class="header-section-number">4.6</span> A curve that starts below 1</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 6.</strong> For <span class="math inline">\(P = U[0, 1]\)</span> and <span class="math inline">\(Q = U[s, 1 + s]\)</span> with <span class="math inline">\(0 &lt; s &lt; 1\)</span>, show that <span class="math inline">\(T(\alpha) = \max(0, 1 - s - \alpha)\)</span>. Which outcomes have <span class="math inline">\(\Lambda = \infty\)</span>, <span class="math inline">\(\Lambda = 1\)</span> and <span class="math inline">\(\Lambda = 0\)</span>? <em>Check: at <span class="math inline">\(s = 0.2\)</span>, <span class="math inline">\(T(0) = 0.8\)</span> and <span class="math inline">\(\mathrm{TV} = 0.2\)</span>.</em> <em>(Neyman–Pearson with <span class="math inline">\(p = 0\)</span>, continuity at 0)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-6" class="callout-6-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p><span class="math inline">\(p = 1\)</span> on <span class="math inline">\([0, 1]\)</span> and <span class="math inline">\(q = 1\)</span> on <span class="math inline">\([s, 1 + s]\)</span>, so the line splits into the three regions of <a href="#tbl-sol-hypothesis-testing-uniform" class="quarto-xref">Table&nbsp;<span>4.3</span></a>.</p>
+<div id="tbl-sol-hypothesis-testing-uniform" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-hypothesis-testing-uniform-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.3: The three regions of the uniform pair. Outside <span class="math inline">\([0, 1 + s]\)</span> both densities are 0, which has probability 0 under both hypotheses.
+</figcaption>
+<div aria-describedby="tbl-sol-hypothesis-testing-uniform-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Region</th>
+<th><span class="math inline">\(p\)</span></th>
+<th><span class="math inline">\(q\)</span></th>
+<th><span class="math inline">\(\Lambda = q/p\)</span></th>
+<th><span class="math inline">\(P\)</span>-mass</th>
+<th><span class="math inline">\(Q\)</span>-mass</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\([0, s)\)</span></td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td><span class="math inline">\(s\)</span></td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\([s, 1]\)</span></td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td><span class="math inline">\(1 - s\)</span></td>
+<td><span class="math inline">\(1 - s\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\((1, 1 + s]\)</span></td>
+<td>0</td>
+<td>1</td>
+<td><span class="math inline">\(\infty\)</span></td>
+<td>0</td>
+<td><span class="math inline">\(s\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<ol type="1">
+<li><strong>The likelihood ratio.</strong> <span class="math inline">\(\Lambda = \infty\)</span> on <span class="math inline">\((1, 1 + s]\)</span>, where only <span class="math inline">\(Q\)</span> can land; <span class="math inline">\(\Lambda = 1\)</span> on the overlap <span class="math inline">\([s, 1]\)</span>; and <span class="math inline">\(\Lambda = 0\)</span> on <span class="math inline">\([0, s)\)</span>, where only <span class="math inline">\(P\)</span> can land.</li>
+<li><strong><span class="math inline">\(\alpha = 0\)</span>.</strong> A size-0 test must have <span class="math inline">\(\phi = 0\)</span> on almost all of <span class="math inline">\([0, 1]\)</span>, so it can only reject on <span class="math inline">\((1, 1 + s]\)</span>. Rejecting all of it gives power <span class="math inline">\(s\)</span>. So <span class="math inline">\(T(0) = 1 - s\)</span>, which is the chapter’s <span class="math inline">\(T(0) = 1 - Q[p = 0]\)</span>.</li>
+<li><strong><span class="math inline">\(0 &lt; \alpha \le 1 - s\)</span>.</strong> Take the LR test <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-lr-test">Equation&nbsp;4.5</a> with <span class="math inline">\(\eta = 1\)</span>: reject where <span class="math inline">\(q &gt; p\)</span>, which is <span class="math inline">\((1, 1 + s]\)</span>; on the tie set <span class="math inline">\(q = p\)</span>, which is <span class="math inline">\([s, 1]\)</span>, reject with the constant probability <span class="math inline">\(\gamma = \alpha/(1 - s) \in (0, 1]\)</span>; keep <span class="math inline">\([0, s)\)</span>. Its size is <span class="math inline">\(\gamma(1 - s) = \alpha\)</span> and its power is <span class="math inline">\(s + \gamma(1 - s) = s + \alpha\)</span>. By the Neyman–Pearson lemma it is the most powerful test of level <span class="math inline">\(\alpha\)</span>, so <span class="math inline">\(T(\alpha) = 1 - s - \alpha\)</span>.</li>
+<li><strong><span class="math inline">\(\alpha &gt; 1 - s\)</span>.</strong> The test “reject <span class="math inline">\(x \ge s\)</span>” has size <span class="math inline">\(1 - s &lt; \alpha\)</span> and power 1, so <span class="math inline">\(T(\alpha) = 0\)</span>.</li>
+<li><strong>Combine.</strong> Steps 2 to 4 give <span class="math inline">\(T(\alpha) = 1 - s - \alpha\)</span> for <span class="math inline">\(\alpha \le 1 - s\)</span> and 0 beyond, which is <span class="math inline">\(\max(0, 1 - s - \alpha)\)</span>.</li>
+</ol>
+<p><strong>The check.</strong> At <span class="math inline">\(s = 0.2\)</span>, <span class="math inline">\(T(0) = 0.8\)</span>. By <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-tv">Equation&nbsp;4.16</a>, <span class="math inline">\(\mathrm{TV} = \frac12\int|q - p| = \frac12(s + s) = s = 0.2\)</span>: the two regions where exactly one density is 1. A midpoint-rule integral gives 0.2000. A simulation of the randomized test of step 3 at <span class="math inline">\(\alpha = 0.3\)</span>, with 1,000,000 draws per hypothesis, gives size 0.3004 and power 0.5001, against the exact 0.3 and <span class="math inline">\(1 - T(0.3) = 0.5\)</span>.</p>
+<p><strong>Continuity at 0.</strong> <span class="math inline">\(T\)</span> starts at <span class="math inline">\(1 - s &lt; 1\)</span>, but it is continuous there: <span class="math inline">\(T(\alpha) \to 1 - s = T(0)\)</span> as <span class="math inline">\(\alpha \to 0\)</span>. This is property 4 of <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#sec-ht-tradeoff">Section&nbsp;4.5</a>, and the <span class="math inline">\(\mathbb E_P[\Lambda\,\mathbf 1[\Lambda &gt; K]]\)</span> term in its proof is 0 here because <span class="math inline">\(\Lambda \le 1\)</span> wherever <span class="math inline">\(p &gt; 0\)</span>. The curve is also a single segment of slope <span class="math inline">\(-1\)</span>, so the advantage <span class="math inline">\(1 - \alpha - T(\alpha) = s\)</span> at every <span class="math inline">\(\alpha \le 1 - s\)</span>: every point of the segment attains the TV.</p>
+<p><em>Mass that only <span class="math inline">\(Q\)</span> can produce is free power: a test catches it with no false alarms, so the curve starts at <span class="math inline">\(1 - Q[p = 0]\)</span> instead of 1.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-hypothesis-testing-7" class="level2" data-number="4.7">
+<h2 data-number="4.7" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-7"><span class="header-section-number">4.7</span> Bayes error and total variation</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 7.</strong> Prove that with equal priors the smallest achievable error probability is <span class="math inline">\(\frac12(1 - \mathrm{TV}(P, Q))\)</span>. <em>Check: 0.3085 for the Gaussian pair at <span class="math inline">\(\mu = 1\)</span>.</em> <em>(Bayesian view, best advantage)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Error of a test.</strong> With prior <span class="math inline">\(\pi = \frac12\)</span>, a test <span class="math inline">\(\phi\)</span> errs with probability <span class="math inline">\(\frac12\alpha_\phi + \frac12\beta_\phi\)</span> (step 2 of the Bayesian derivation in <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#sec-ht-bayes">Section&nbsp;4.10</a>).</li>
+<li><strong>Rewrite with the advantage.</strong> <span class="math inline">\(\frac12(\alpha_\phi + \beta_\phi) = \frac12\big(1 - (1 - \alpha_\phi - \beta_\phi)\big)\)</span>. The error is a decreasing function of the advantage <span class="math inline">\(1 - \alpha_\phi - \beta_\phi\)</span>, so the test with the smallest error is the one with the largest advantage.</li>
+<li><strong>Use the best advantage.</strong> By <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-tv">Equation&nbsp;4.16</a> the largest advantage over all tests, randomized or not, is <span class="math inline">\(\mathrm{TV}(P, Q)\)</span>, attained by rejecting where <span class="math inline">\(q &gt; p\)</span>. So the smallest error is <span class="math inline">\(\frac12(1 - \mathrm{TV}(P, Q))\)</span>, attained by the same test, which is the Bayes rule <span class="math inline">\(\Lambda(x) &gt; (1 - \pi)/\pi = 1\)</span>.</li>
+</ol>
+<p><strong>Concrete: the spam example.</strong> <span class="math inline">\(\mathrm{TV} = 0.40\)</span>, so the bound is <span class="math inline">\(\frac12(1 - 0.40) = 0.30\)</span>. Of the 16 deterministic tests on <span class="math inline">\(\{0, 1, 2, 3\}\)</span>, the script finds the smallest error 0.30, at the rejection region <span class="math inline">\(\{2, 3\}\)</span>: <span class="math inline">\(\frac12(0.3 + 0.3) = 0.30\)</span> from <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#tbl-ht-spam-tests">Table&nbsp;4.3</a>.</p>
+<p><strong>The check.</strong> For the Gaussian pair at <span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(\mathrm{TV} = 2\Phi(\frac12) - 1 = 0.3829\)</span>, so the smallest error is <span class="math inline">\(\frac12(1 - 0.3829) = 1 - \Phi(\frac12) = 0.3085\)</span>. Minimizing <span class="math inline">\(\frac12(\alpha + T(\alpha))\)</span> over a grid of 100,001 values of <span class="math inline">\(\alpha\)</span> gives the same 0.3085. It is also the optimal <span class="math inline">\(\alpha\)</span> of <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#fig-ht-tv-advantage">Figure&nbsp;4.5</a>: at <span class="math inline">\(\eta = 1\)</span> the threshold is <span class="math inline">\(\mu/2\)</span>, so <span class="math inline">\(\alpha = \beta = 1 - \Phi(\frac12)\)</span>, and their average is the same number.</p>
+<p><em>With equal priors, the best accuracy is <span class="math inline">\(\frac12 + \frac12\mathrm{TV}\)</span>, which is <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-tv-test">Equation&nbsp;3.21</a>. TV is exactly what a single balanced decision can extract.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-hypothesis-testing-8" class="level2" data-number="4.8">
+<h2 data-number="4.8" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-8"><span class="header-section-number">4.8</span> Errors decay at the KL rate</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 8.</strong> For <span class="math inline">\(n\)</span> draws from <span class="math inline">\(\mathcal N(0, 1)\)</span> against <span class="math inline">\(\mathcal N(1, 1)\)</span> and a fixed <span class="math inline">\(\alpha = 0.05\)</span>, the optimal test has <span class="math inline">\(\beta_n = \Phi(\Phi^{-1}(0.95) - \sqrt n)\)</span>. Compute <span class="math inline">\(-\ln(\beta_n)/n\)</span> and compare its limit with <span class="math inline">\(\mathrm{KL}(P\,\|\,Q) = \mu^2/2\)</span> from <a href="../../book-full/part01-prerequisites/03-divergences.html">Divergences</a>. This is the Chernoff–Stein lemma. <em>Check: 0.2740, 0.3796 and 0.4537 at <span class="math inline">\(n = 10\)</span>, 100 and 1,000, approaching 0.5 slowly.</em> <em>(Many observations, Gaussian tails)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Here the Kullback–Leibler (KL) divergence is <span class="math inline">\(\mu^2/2 = 0.5\)</span> by <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-gauss-renyi">Equation&nbsp;3.15</a>.</p>
+<ol type="1">
+<li><strong>Where <span class="math inline">\(\beta_n\)</span> comes from.</strong> By the averaging rule of <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#sec-ht-gaussian">Section&nbsp;4.6</a>, <span class="math inline">\(n\)</span> draws with <span class="math inline">\(\delta = \sigma = 1\)</span> give <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#eq-ht-gaussian-tradeoff">Equation&nbsp;4.10</a> with <span class="math inline">\(\mu = \sqrt n\)</span>. At <span class="math inline">\(\alpha = 0.05\)</span>, with <span class="math inline">\(z = \Phi^{-1}(0.95) = 1.6449\)</span>, that is <span class="math inline">\(\beta_n = \Phi(z - \sqrt n) = \Phi(-x)\)</span> with <span class="math inline">\(x = \sqrt n - z\)</span>, which is positive for <span class="math inline">\(n \ge 3\)</span>.</li>
+<li><strong>Compute.</strong> <a href="#tbl-sol-hypothesis-testing-stein" class="quarto-xref">Table&nbsp;<span>4.4</span></a> gives the exact rate. It matches the check: 0.2740, 0.3796, 0.4537.</li>
+<li><strong>A lower bound on the rate.</strong> The Mills-ratio bound of <a href="../../book-full/part01-prerequisites/02-concentration.html">Concentration inequalities</a> gives <span class="math inline">\(\Phi(-x) = \Pr[Z \ge x] \le \varphi(x)/x\)</span>. Take <span class="math inline">\(-\ln\)</span>: <span id="eq-auto-04hypothesistesting-6"><span class="math display">\[-\ln\beta_n \ge \frac{x^2}2 + \ln x + \tfrac12\ln(2\pi). \tag{4.6}\]</span></span></li>
+<li><strong>An upper bound on the rate.</strong> <span class="math inline">\(\varphi\)</span> is decreasing on <span class="math inline">\([x, x + 1]\)</span>, so <span class="math inline">\(\Phi(-x) \ge \int_x^{x + 1}\varphi(z)\,dz \ge \varphi(x + 1)\)</span>. Take <span class="math inline">\(-\ln\)</span>: <span id="eq-auto-04hypothesistesting-7"><span class="math display">\[-\ln\beta_n \le \frac{(x + 1)^2}2 + \tfrac12\ln(2\pi). \tag{4.7}\]</span></span></li>
+<li><strong>Divide by <span class="math inline">\(n\)</span> and let <span class="math inline">\(n \to \infty\)</span>.</strong> With <span class="math inline">\(x = \sqrt n - z\)</span>, <span class="math inline">\(\frac{x^2}{2n} = \frac12 - \frac z{\sqrt n} + \frac{z^2}{2n} \to \frac12\)</span>, and <span class="math inline">\(\frac{(x + 1)^2}{2n} \to \frac12\)</span> the same way. The <span class="math inline">\(\ln x\)</span> and constant terms divided by <span class="math inline">\(n\)</span> tend to 0. Both bounds tend to <span class="math inline">\(\frac12\)</span>, so <span id="eq-auto-04hypothesistesting-8"><span class="math display">\[\lim_{n \to \infty}\frac{-\ln\beta_n}{n} = \frac12 = \mathrm{KL}(P\,\|\,Q). \tag{4.8}\]</span></span></li>
+<li><strong>Why so slowly.</strong> The leading correction in step 5 is <span class="math inline">\(-z/\sqrt n\)</span>, which shrinks only like <span class="math inline">\(1/\sqrt n\)</span>. At <span class="math inline">\(n = 1{,}000\)</span> it is <span class="math inline">\(-1.6449/31.62 = -0.052\)</span>, and most of it remains in the gap <span class="math inline">\(0.5 - 0.4537 = 0.046\)</span>. A fixed <span class="math inline">\(\alpha\)</span> costs a threshold <span class="math inline">\(z\)</span> that does not shrink with <span class="math inline">\(n\)</span>, and that offset is what slows the approach.</li>
+</ol>
+<div id="tbl-sol-hypothesis-testing-stein" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-hypothesis-testing-stein-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4.4: The exponent <span class="math inline">\(-\ln(\beta_n)/n\)</span> of the optimal size-0.05 test for <span class="math inline">\(\mathcal N(0, 1)\)</span> against <span class="math inline">\(\mathcal N(1, 1)\)</span>, with the bounds of steps 3 and 4. Beyond <span class="math inline">\(n = 1{,}000\)</span> the value of <span class="math inline">\(\beta_n\)</span> underflows, but the bounds still pin the exponent down.
+</figcaption>
+<div aria-describedby="tbl-sol-hypothesis-testing-stein-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th><span class="math inline">\(\beta_n\)</span></th>
+<th><span class="math inline">\(-\ln(\beta_n)/n\)</span></th>
+<th>Mills lower bound</th>
+<th>Upper bound</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td><span class="math inline">\(6.458\times10^{-2}\)</span></td>
+<td>0.2740</td>
+<td>0.2487</td>
+<td>0.4088</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td><span class="math inline">\(3.268\times10^{-17}\)</span></td>
+<td>0.3796</td>
+<td>0.3795</td>
+<td>0.4468</td>
+</tr>
+<tr class="odd">
+<td>1,000</td>
+<td><span class="math inline">\(9.520\times10^{-198}\)</span></td>
+<td>0.4537</td>
+<td>0.4537</td>
+<td>0.4807</td>
+</tr>
+<tr class="even">
+<td>10,000</td>
+<td>below double precision</td>
+<td></td>
+<td>0.4842</td>
+<td>0.4937</td>
+</tr>
+<tr class="odd">
+<td>100,000</td>
+<td>below double precision</td>
+<td></td>
+<td>0.4949</td>
+<td>0.4980</td>
+</tr>
+<tr class="even">
+<td>1,000,000</td>
+<td>below double precision</td>
+<td></td>
+<td>0.4984</td>
+<td>0.4994</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The Mills lower bound is within <span class="math inline">\(10^{-4}\)</span> of the exact rate at <span class="math inline">\(n = 100\)</span> and agrees to four digits at <span class="math inline">\(n = 1{,}000\)</span>, because the Mills ratio is asymptotically exact. Both bounds close in on 0.5.</p>
+<p><em>At a fixed level, the type II error of the best test decays like <span class="math inline">\(e^{-n\,\mathrm{KL}(P\|Q)}\)</span>: KL divergence is the exponent of distinguishability. The convergence is slow, so read it as the rate for large <span class="math inline">\(n\)</span>, not as a formula for <span class="math inline">\(\beta_n\)</span> at moderate <span class="math inline">\(n\)</span>.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-hypothesis-testing-9" class="level2" data-number="4.9">
+<h2 data-number="4.9" class="anchored" data-anchor-id="sec-sol-hypothesis-testing-9"><span class="header-section-number">4.9</span> Certifying a low rate</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 9.</strong> How many negatives with zero false positives do you need to claim FPR <span class="math inline">\(&lt; 10^{-3}\)</span> at 95% confidence? <em>Check: 2,995.</em> <em>(Clopper–Pearson, rule of three)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The one-sided bound.</strong> “FPR below <span class="math inline">\(u\)</span> at 95% confidence” is a one-sided Clopper–Pearson upper bound. Rerun the upper-end derivation of <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html#sec-ht-estimation">Section&nbsp;4.11</a> with <span class="math inline">\(a/2\)</span> replaced by <span class="math inline">\(0.05\)</span>: if <span class="math inline">\(u\)</span> solves <span class="math inline">\(\Pr[\mathrm{Bin}(n, u) \le k] = 0.05\)</span>, then <span class="math inline">\(\Pr[p \ge u(K)] \le 0.05\)</span>.</li>
+<li><strong>Zero counts.</strong> At <span class="math inline">\(k = 0\)</span>, <span class="math inline">\(\Pr[\mathrm{Bin}(n, u) \le 0] = (1 - u)^n\)</span>, so <span class="math inline">\(u\)</span> solves <span class="math inline">\((1 - u)^n = 0.05\)</span>.</li>
+<li><strong>The requirement.</strong> You need <span class="math inline">\(u \le 10^{-3}\)</span>. <span class="math inline">\((1 - u)^n\)</span> is decreasing in <span class="math inline">\(u\)</span>, so this holds exactly when <span class="math inline">\((1 - 10^{-3})^n \le 0.05\)</span>.</li>
+<li><strong>Solve for <span class="math inline">\(n\)</span>.</strong> Take logs and divide by <span class="math inline">\(\ln(1 - 10^{-3}) &lt; 0\)</span>, which flips the inequality: <span id="eq-auto-04hypothesistesting-9"><span class="math display">\[n \ge \frac{\ln 20}{-\ln(1 - 10^{-3})} = 2{,}994.2, \tag{4.9}\]</span></span> so <span class="math inline">\(n = 2{,}995\)</span>.</li>
+<li><strong>Check both sides.</strong> <span class="math inline">\(0.999^{2994} = 0.05001 &gt; 0.05\)</span> but <span class="math inline">\(0.999^{2995} = 0.04996 \le 0.05\)</span>. The chapter’s two-sided Clopper–Pearson routine at 90% has the same upper end as the one-sided 95% bound. At <span class="math inline">\(k = 0\)</span> it gives <span class="math inline">\(1.0001\times10^{-3}\)</span> for <span class="math inline">\(n = 2{,}994\)</span> and <span class="math inline">\(9.9974\times10^{-4}\)</span> for <span class="math inline">\(n = 2{,}995\)</span>.</li>
+</ol>
+<p><strong>As a hypothesis test.</strong> Step 3 is a test of “FPR <span class="math inline">\(\ge 10^{-3}\)</span>” against “FPR <span class="math inline">\(&lt; 10^{-3}\)</span>” that rejects the first when it sees no false positive. If the true FPR is at least <span class="math inline">\(10^{-3}\)</span>, it sees none with probability at most <span class="math inline">\(0.999^n\)</span>, its type I error. That is at most 0.05 from <span class="math inline">\(n = 2{,}995\)</span> on. The rule of three, <span class="math inline">\(3/10^{-3} = 3{,}000\)</span>, is within five of it. If you report the two-sided 95% interval instead, its upper end uses <span class="math inline">\(0.025\)</span>, and you need <span class="math inline">\(\ln 40/(-\ln 0.999) = 3{,}687.0\)</span>, so 3,688 negatives.</p>
+<p><em>Certifying a rate of <span class="math inline">\(10^{-3}\)</span> needs about <span class="math inline">\(3/10^{-3}\)</span> clean trials, and that only bounds the rate. Measuring it to within about 20% needs on the order of <span class="math inline">\(100/10^{-3} = 10^5\)</span>, over thirty times more.</em></p>
+</div>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part01-prerequisites/03-divergences.html" class="pagination-link" aria-label="Exercises: Divergences">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Exercises: Divergences</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part01-prerequisites/05-information-theory.html" class="pagination-link" aria-label="Exercises: Information theory">
+        <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Exercises: Information theory</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

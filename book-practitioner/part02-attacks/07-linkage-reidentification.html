@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>15&nbsp; Linkage and re-identification – Privacy-Preserving Machine Learning for Practitioners</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-attacks/08-syntactic-anonymity.html" rel="next">
+<link href="../part02-attacks/06-gradient-inversion.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/07-linkage-reidentification.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning for Practitioners</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">15.1</span> Why this matters</a></li>
+  <li><a href="#sec-link-quasi" id="toc-sec-link-quasi" class="nav-link" data-scroll-target="#sec-link-quasi"><span class="header-section-number">15.2</span> Quasi-identifiers and the linkage attack</a></li>
+  <li><a href="#sec-link-unique" id="toc-sec-link-unique" class="nav-link" data-scroll-target="#sec-link-unique"><span class="header-section-number">15.3</span> How many people are unique?</a></li>
+  <li><a href="#sec-link-sparse" id="toc-sec-link-sparse" class="nav-link" data-scroll-target="#sec-link-sparse"><span class="header-section-number">15.4</span> Sparse, high-dimensional data: the Netflix attack</a></li>
+  <li><a href="#sec-link-sampling" id="toc-sec-link-sampling" class="nav-link" data-scroll-target="#sec-link-sampling"><span class="header-section-number">15.5</span> Does releasing a sample protect?</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">15.6</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">15.7</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">15.8</span> Further reading</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/07-linkage-reidentification.html"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="15.1">
+<h2 data-number="15.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">15.1</span> Why this matters</h2>
+<p>A hospital shares its discharge records with researchers after deleting names and addresses, keeping postcode, date of birth, sex and diagnosis. But most people are the only person with their postcode, birth date and sex, so anyone holding a table with names and those three columns, such as a voter roll, can join the two and put a name back on most rows. This is a <strong>linkage attack</strong>, and naming a “de-identified” record is <strong>re-identification</strong>. It needs only the release and some auxiliary data, so run it before you sign off on sharing a dataset.</p>
+<p>What makes it work is that identifying information is measured in bits, and bits add up. Picking one person out of <span class="math inline">\(n\)</span> takes <span class="math inline">\(\log_2 n\)</span> bits, because each bit halves the candidates: 27.9 bits for the 248.7 million people in the United States in 1990, 32.9 for 8 billion. An attribute with <span class="math inline">\(v\)</span> equally likely values carries at most <span class="math inline">\(\log_2 v\)</span> bits, and for independent attributes the bits add, because probabilities multiply and the logarithm turns the product into a sum. Once the bits an adversary knows exceed <span class="math inline">\(\log_2 n\)</span> by a few, almost everyone is unique.</p>
+</section>
+<section id="sec-link-quasi" class="level2" data-number="15.2">
+<h2 data-number="15.2" class="anchored" data-anchor-id="sec-link-quasi"><span class="header-section-number">15.2</span> Quasi-identifiers and the linkage attack</h2>
+<p><strong>Direct identifiers</strong>, such as a name, name a person on their own. <strong>Sensitive attributes</strong>, such as a diagnosis, are what the release is about. <strong>Quasi-identifiers</strong> sit in between: they name nobody alone, but in combination they single people out, and they also appear in other datasets next to names. ZIP code, birth date and sex are the classic example. Deleting the first kind and keeping the third is the most common form of “de-identification”, and linkage is aimed at exactly that gap.</p>
+<p>Group the records of a release into <strong>equivalence classes</strong>, sets of records with identical quasi-identifiers. An adversary who knows the target is in the release, and knows the target’s quasi-identifiers, finds the target’s class and picks a record from it: right for sure if the class has one record, one time in <span class="math inline">\(k\)</span> if it has <span class="math inline">\(k\)</span>. Each class therefore contributes exactly one record’s worth of wins however large it is, and the best possible success is <span id="eq-link-success"><span class="math display">\[\Pr[\text{win}] = \frac{J}{n}, \tag{15.1}\]</span></span> the number <span class="math inline">\(J\)</span> of distinct quasi-identifier combinations divided by the number <span class="math inline">\(n\)</span> of records.</p>
+<div id="tbl-link-release" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-link-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.1: A de-identified hospital release: no names, three quasi-identifiers, one sensitive attribute.
+</figcaption>
+<div aria-describedby="tbl-link-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>ZIP code</th>
+<th>Birth date</th>
+<th>Sex</th>
+<th>Diagnosis</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>02138</td>
+<td>1961-03-14</td>
+<td>F</td>
+<td>asthma</td>
+</tr>
+<tr class="even">
+<td>02138</td>
+<td>1972-11-02</td>
+<td>M</td>
+<td>diabetes</td>
+</tr>
+<tr class="odd">
+<td>02138</td>
+<td>1972-11-02</td>
+<td>M</td>
+<td>hypertension</td>
+</tr>
+<tr class="even">
+<td>02139</td>
+<td>1958-06-21</td>
+<td>F</td>
+<td>depression</td>
+</tr>
+<tr class="odd">
+<td>02139</td>
+<td>1990-01-01</td>
+<td>F</td>
+<td>migraine</td>
+</tr>
+<tr class="even">
+<td>02139</td>
+<td>1990-01-01</td>
+<td>F</td>
+<td>asthma</td>
+</tr>
+<tr class="odd">
+<td>02139</td>
+<td>1990-01-01</td>
+<td>F</td>
+<td>fracture</td>
+</tr>
+<tr class="even">
+<td>02141</td>
+<td>1983-09-30</td>
+<td>M</td>
+<td>pneumonia</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-link-voters" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-link-voters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.2: Part of a voter roll: names with the same three quasi-identifiers.
+</figcaption>
+<div aria-describedby="tbl-link-voters-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>ZIP code</th>
+<th>Birth date</th>
+<th>Sex</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Ana Silva</td>
+<td>02138</td>
+<td>1961-03-14</td>
+<td>F</td>
+</tr>
+<tr class="even">
+<td>Ben Cole</td>
+<td>02138</td>
+<td>1972-11-02</td>
+<td>M</td>
+</tr>
+<tr class="odd">
+<td>Carla Diaz</td>
+<td>02139</td>
+<td>1958-06-21</td>
+<td>F</td>
+</tr>
+<tr class="even">
+<td>Dan Eto</td>
+<td>02141</td>
+<td>1983-09-30</td>
+<td>M</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Join <a href="#tbl-link-release" class="quarto-xref">Table&nbsp;<span>15.1</span></a> with <a href="#tbl-link-voters" class="quarto-xref">Table&nbsp;<span>15.2</span></a>. Ana, Carla and Dan are each alone in their class, so their diagnoses come out with certainty; Ben shares his class with one other record, so the adversary is right about him half the time. The classes have sizes 1, 1, 1, 2 and 3, so <span class="math inline">\(J = 5\)</span> for <span class="math inline">\(n = 8\)</span> and the success is <span class="math inline">\(5/8 = 0.625\)</span>. Sweeney re-identified the governor of Massachusetts this way in the late 1990s: on the Cambridge voter roll, six people shared his birth date, three were men, and one lived in his ZIP code.</p>
+<p>Every unique record is a certain win, so the fraction of unique records is a floor on the success, and predicting uniqueness is the core of a risk assessment. Conversely, if every class has at least <span class="math inline">\(k\)</span> records then <span class="math inline">\(J \le n/k\)</span> and the success is at most <span class="math inline">\(1/k\)</span>. That is the promise of k-anonymity, and it holds against this adversary only: had all three women born on 1990-01-01 had asthma, the adversary would learn it without picking a record, the gap studied in <a href="../part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>. And which columns are quasi-identifiers is not a property of the table but a guess about what auxiliary data exist; in sparse data, every column is one (<a href="#sec-link-sparse" class="quarto-xref"><span>Section 15.4</span></a>).</p>
+</section>
+<section id="sec-link-unique" class="level2" data-number="15.3">
+<h2 data-number="15.3" class="anchored" data-anchor-id="sec-link-unique"><span class="header-section-number">15.3</span> How many people are unique?</h2>
+<p>To predict uniqueness for a release not yet made, use a model of the population. Call a person’s combination of attribute values their <strong>cell</strong>, and suppose each person falls in cell <span class="math inline">\(c\)</span> with probability <span class="math inline">\(p_c\)</span>, independently. A person in cell <span class="math inline">\(c\)</span> is unique when all <span class="math inline">\(n - 1\)</span> others land elsewhere, which happens with probability <span class="math inline">\((1 - p_c)^{n-1}\)</span>; averaging over the person’s own cell gives the expected fraction unique, <span id="eq-link-unique"><span class="math display">\[\frac{\mathbb E U}{n} = \sum_c p_c(1 - p_c)^{n-1}. \tag{15.2}\]</span></span></p>
+<p>With <span class="math inline">\(M\)</span> equally likely cells this becomes the bits picture. Each person stays alone with probability about <span class="math inline">\(e^{-n/M}\)</span>, where <span class="math inline">\(n/M\)</span> is the average occupancy of a cell. With <span class="math inline">\(b = \log_2 M\)</span> bits the occupancy is <span class="math inline">\(2^{\log_2 n - b}\)</span>, so the fraction unique is about <span class="math inline">\(\exp(-2^{\log_2 n - b})\)</span>: it depends only on the bits beyond the <span class="math inline">\(\log_2 n\)</span> needed to name one person, the same curve for a town and for the planet (<a href="#fig-link-uniqueness" class="quarto-xref">Figure&nbsp;<span>15.1</span></a>, right). Every extra bit halves the occupancy, so the curve is steep: half the people are unique at 0.53 bits beyond <span class="math inline">\(\log_2 n\)</span>, 99% at 6.64 bits beyond.</p>
+<p>So “33 bits identify anyone” is misleading: 33 bits for 8 billion people put about one person in the average cell, where only a fraction 0.394 is unique, because random labels collide often. 99% uniqueness takes 39.5 bits.</p>
+<p>Sweeney’s attributes show the accounting. About 40,000 ZIP codes are worth 15.3 bits, a birth date over 80 years 14.8, and sex 1.0: at most 31.1 bits against the 27.9 that single out one American, so about 0.106 people per cell and a uniqueness of <span class="math inline">\(e^{-0.106} = 0.899\)</span> if cells were equally likely. From 1990 census tables she estimated 87%. The gap is skew: people crowd into popular cells, which hold nobody unique, while rare cells stay empty. Correlation pulls the same way, because correlated attributes (ZIP code and income) say partly the same thing, so their joint bits are less than the sum. A bits sum is a quick screen, not an estimate. <a href="#tbl-link-census" class="quarto-xref">Table&nbsp;<span>15.3</span></a> reveals the attributes of a synthetic census of 10,000 people one at a time (<span class="math inline">\(\log_2 n = 13.29\)</span> bits).</p>
+<div id="tbl-link-census" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-link-census-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.3: Fraction of 10,000 people who are unique as attributes are revealed: the exact expectation, the collision floor, and the uniform-cells value for the same number of cells. <span class="math inline">\(H\)</span> is the entropy of the attributes known so far.
+</figcaption>
+<div aria-describedby="tbl-link-census-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Attributes known</th>
+<th>Bits <span class="math inline">\(H\)</span></th>
+<th>Exact</th>
+<th>Collision bound</th>
+<th>Uniform cells</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sex, age band, region</td>
+<td>9.31</td>
+<td>0.0158</td>
+<td>0.0000</td>
+<td>0.0004</td>
+</tr>
+<tr class="even">
+<td>+ birth month</td>
+<td>12.90</td>
+<td>0.3328</td>
+<td>0.0834</td>
+<td>0.5215</td>
+</tr>
+<tr class="odd">
+<td>+ marital status</td>
+<td>14.60</td>
+<td>0.5789</td>
+<td>0.4237</td>
+<td>0.8498</td>
+</tr>
+<tr class="even">
+<td>+ children</td>
+<td>16.48</td>
+<td>0.7939</td>
+<td>0.7443</td>
+<td>0.9732</td>
+</tr>
+<tr class="odd">
+<td>+ occupation</td>
+<td>20.39</td>
+<td>0.9747</td>
+<td>0.9736</td>
+<td>0.9986</td>
+</tr>
+<tr class="even">
+<td>+ blood group</td>
+<td>22.57</td>
+<td>0.9925</td>
+<td>0.9924</td>
+<td>0.9998</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>With 12.90 bits, just under <span class="math inline">\(\log_2 n\)</span>, a third of people are unique; about 7 bits beyond it, 97.5% are. The uniform model overstates uniqueness, by up to 0.27, because the attributes are skewed: a few large regions hold many people, who are not unique. A floor that never overstates comes from the <strong>collision probability</strong> <span class="math inline">\(\sum_c p_c^2\)</span>, the chance that two random people share a cell: <span class="math inline">\(\mathbb E U/n \ge (1 - \sum_c p_c^2)^{n-1}\)</span>. For independent attributes it is a product over columns, since two people share a cell exactly when they agree on every attribute, so the floor needs only each column’s frequencies. It is loose when a few crowded cells hold most people and tight once most cells are nearly empty. For a real audit, compute <a href="#eq-link-unique" class="quarto-xref">Equation&nbsp;<span>15.2</span></a> from a model of the joint distribution, such as the Gaussian copula of Rocher, Hendrickx and de Montjoye (2019).</p>
+<div id="fig-link-uniqueness" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-link-uniqueness-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/link_uniqueness.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-link-uniqueness-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.1: Left: the fraction of people who are unique in the synthetic census as attributes are added, exact against one simulated population, with the collision floor and an entropy-based rule of thumb. Right: with uniform cells, the fraction unique depends only on the bits beyond <span class="math inline">\(\log_2 n\)</span>; the curves for <span class="math inline">\(n = 10^4\)</span>, <span class="math inline">\(10^6\)</span> and <span class="math inline">\(8\times10^9\)</span> coincide.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-link-sparse" class="level2" data-number="15.4">
+<h2 data-number="15.4" class="anchored" data-anchor-id="sec-link-sparse"><span class="header-section-number">15.4</span> Sparse, high-dimensional data: the Netflix attack</h2>
+<p>In 2006 Netflix released about 100 million ratings by 480,189 subscribers, names replaced by random numbers. There are no columns to join on, and what an adversary knows (“she watched these films around these dates”) is partial and noisy, so the release looks safe. Narayanan and Shmatikov (2008) showed that it is not, by the same accounting. Most films are rated by few people, so each film in a record carries many bits: one rated by 1% of subscribers is worth <span class="math inline">\(\log_2 100 = 6.64\)</span> bits, and three such films carry 19.9 bits, more than the 18.9 that single out a subscriber.</p>
+<p>Since no record matches exactly, the attack scores every record by how well it agrees with the auxiliary information <span class="math inline">\(\mathrm{aux}\)</span>, item by item: <span id="eq-link-score"><span class="math display">\[\mathrm{Score}(\mathrm{aux}, r) = \sum_{i \in \mathrm{aux}} w_i\,\mathrm{Sim}(\mathrm{aux}_i, r_i), \tag{15.3}\]</span></span> where <span class="math inline">\(\mathrm{Sim}\)</span> is 1 if record <span class="math inline">\(r\)</span> agrees on item <span class="math inline">\(i\)</span> (say, within one star) and 0 otherwise. Rarer items get larger weights, because agreeing on a film half the subscribers rated says little and agreeing on an obscure one says a lot; Narayanan and Shmatikov used <span class="math inline">\(w_i = 1/\ln\lvert\mathrm{supp}(i)\rvert\)</span>, with <span class="math inline">\(\lvert\mathrm{supp}(i)\rvert\)</span> the number of records that rated item <span class="math inline">\(i\)</span>. The likelihood ratio of “target” against “unrelated” gives the principled version, <span class="math inline">\(w_i \approx \ln(1/s_i) + \ln\frac{1 - \varepsilon}{\varepsilon}\)</span>, with <span class="math inline">\(s_i\)</span> the chance an unrelated record agrees on item <span class="math inline">\(i\)</span> and <span class="math inline">\(\varepsilon\)</span> the chance the adversary is wrong about it. Because the score adds up evidence, noise costs little: a wrong item costs the target one term, and unrelated records rarely gain one. On Netflix, 8 ratings of which 2 may be wrong, with dates known within 14 days, identify 99% of records.</p>
+<div id="tbl-link-netflix" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-link-netflix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.4: Re-identification rate in a synthetic ratings matrix with 5,000 users: the fraction of 400 targets whose record gets the top score, for three weightings of <a href="#eq-link-score" class="quarto-xref">Equation&nbsp;<span>15.3</span></a>.
+</figcaption>
+<div aria-describedby="tbl-link-netflix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Auxiliary information</th>
+<th>Equal weights</th>
+<th><span class="math inline">\(1/\ln\lvert\mathrm{supp}(i)\rvert\)</span></th>
+<th><span class="math inline">\(\ln(n/\lvert\mathrm{supp}(i)\rvert)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2 items</td>
+<td>0.428</td>
+<td>0.440</td>
+<td>0.402</td>
+</tr>
+<tr class="even">
+<td>4 items</td>
+<td>0.936</td>
+<td>0.941</td>
+<td>0.924</td>
+</tr>
+<tr class="odd">
+<td>8 items</td>
+<td>1.000</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="even">
+<td>8 items, 2 of them wrong</td>
+<td>0.943</td>
+<td>0.989</td>
+<td>0.978</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>A synthetic matrix of 5,000 users with Netflix-like density shows the bits deciding (<a href="#tbl-link-netflix" class="quarto-xref">Table&nbsp;<span>15.4</span></a>). An item carries a median of 5.83 bits against <span class="math inline">\(\log_2 5000 = 12.29\)</span> needed, so two items fall a little short and re-identify about 43% of targets, while four clear the bar and re-identify 93%. The weighting barely matters except when some items are wrong: then equal weights drop to 94%, because a wrong popular item lets many unrelated records score. For a defender, perturbing a few values does not protect sparse data; the score needs a margin, not a perfect match.</p>
+<p>If the target might not be in the release, the adversary must also decide when to trust the top score. The <strong>eccentricity test</strong> declares a match only when the best score <span class="math inline">\(s_1\)</span> stands out from the second best <span class="math inline">\(s_2\)</span>, in standard deviations <span class="math inline">\(\sigma\)</span> of all scores: <span class="math inline">\((s_1 - s_2)/\sigma \ge \varphi\)</span>. How often an outsider’s top score stands out by chance depends on the score distribution, so no threshold is safe in the abstract. With 8 items of which 2 are wrong, the popular <span class="math inline">\(\varphi = 1.5\)</span> matches 94.8% of insiders but also “matches” 26.3% of outsiders. Holding false matches to 1% of outsiders takes <span class="math inline">\(\varphi = 4.83\)</span>, which still re-identifies 73.0% of insiders. So calibrate the threshold on records known not to be the target, and read the attack at a small false positive rate (<a href="#fig-link-eccentricity" class="quarto-xref">Figure&nbsp;<span>15.2</span></a>).</p>
+<div id="fig-link-eccentricity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-link-eccentricity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/link_eccentricity_roc.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-link-eccentricity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;15.2: True against false positive rates of the eccentricity test as the threshold <span class="math inline">\(\varphi\)</span> is swept, for 4, 6 and 8 auxiliary items with 1, 1 and 2 of them wrong. The dots mark <span class="math inline">\(\varphi = 1.5\)</span>. A false positive rate of 0 is drawn at the left edge.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-link-sampling" class="level2" data-number="15.5">
+<h2 data-number="15.5" class="anchored" data-anchor-id="sec-link-sampling"><span class="header-section-number">15.5</span> Does releasing a sample protect?</h2>
+<p>Agencies often release a 1% sample, arguing plausible deniability: a record unique in the sample need not be unique in the population. Let each person be in the release with probability <span class="math inline">\(\pi\)</span>, the <strong>sampling fraction</strong>, and let <span class="math inline">\(\lambda\)</span> be the expected number of other people in the target’s cell.</p>
+<p>Suppose the adversary knows a person’s cell and finds exactly one record there. Either the target was sampled and nobody else in the cell was, or the target was left out and one other person was. Each other person in the cell supplies a wrong story as likely as the right one, and since the release shows no second record, those others are all unsampled, about <span class="math inline">\(\lambda(1 - \pi)\)</span> of them. The match is right with probability right over right plus wrong: <span id="eq-link-kappa"><span class="math display">\[\kappa \approx \frac{1}{1 + \lambda(1 - \pi)}. \tag{15.4}\]</span></span> Going the other way, a record alone in the sample is named by a population register, such as a voter roll, when nobody unsampled shares its cell, which has probability <span id="eq-link-xi"><span class="math display">\[\xi \approx e^{-\lambda(1 - \pi)}. \tag{15.5}\]</span></span></p>
+<p>Sampling enters both only through <span class="math inline">\(1 - \pi\)</span>, which is already close to 1 for any small sample. So what protects a person is a crowded cell, not the sampling: shrinking the sample can never push <span class="math inline">\(\kappa\)</span> below <span class="math inline">\(1/(1 + \lambda)\)</span> or <span class="math inline">\(\xi\)</span> below <span class="math inline">\(e^{-\lambda}\)</span>, and for a rare cell both stay near 1 (<a href="#tbl-link-kappa" class="quarto-xref">Table&nbsp;<span>15.5</span></a>). Going from a 50% to a 1% sample lowers <span class="math inline">\(\kappa\)</span> by only 0.04 for a rare cell, and by 0.16 for a crowded one.</p>
+<div id="tbl-link-kappa" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-link-kappa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.5: Probability that a match in a sample is correct: from a person to the release (<span class="math inline">\(\kappa\)</span>) and from a sample-unique record to the population (<span class="math inline">\(\xi\)</span>).
+</figcaption>
+<div aria-describedby="tbl-link-kappa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\lambda\)</span> (expected others in the cell)</th>
+<th><span class="math inline">\(\kappa\)</span>, <span class="math inline">\(\pi = 0.01\)</span></th>
+<th><span class="math inline">\(\kappa\)</span>, <span class="math inline">\(\pi = 0.5\)</span></th>
+<th><span class="math inline">\(\xi\)</span>, <span class="math inline">\(\pi = 0.01\)</span></th>
+<th><span class="math inline">\(\xi\)</span>, <span class="math inline">\(\pi = 0.5\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.1</td>
+<td>0.910</td>
+<td>0.952</td>
+<td>0.906</td>
+<td>0.951</td>
+</tr>
+<tr class="even">
+<td>0.5</td>
+<td>0.669</td>
+<td>0.800</td>
+<td>0.610</td>
+<td>0.779</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.336</td>
+<td>0.500</td>
+<td>0.138</td>
+<td>0.368</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Over a whole release, a small sample grants deniability only to people who were not unique in the population anyway. In a synthetic population of 100,000 with seven attributes, 82.8% of people are unique, and in a 1% sample 0.8301 of the sample-unique records are population-unique. Nor does “any match might be wrong” help, because a sample is a fair picture of the population: the adversary can estimate each cell’s <span class="math inline">\(\lambda\)</span> from the sample itself and compute <span class="math inline">\(\xi\)</span> record by record. Doing that from one 1% sample predicts 0.817 on average against an actual 0.824, and the records it rates above 0.95 are population-unique 99.3% of the time.</p>
+<p>Removing names, perturbing values and sampling all failed the same way: they left enough bits in each record and bet on what the adversary didn’t know. A defence has to hold whatever auxiliary data exist. The classic attempts, k-anonymity and its successors, are tested against that requirement in <a href="../part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>, and <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a> gives the guarantee that meets it.</p>
+</section>
+<section id="code" class="level2" data-number="15.6">
+<h2 data-number="15.6" class="anchored" data-anchor-id="code"><span class="header-section-number">15.6</span> Code</h2>
+<p>Three numbers summarise the linkage risk of a release you hold: <span class="math inline">\(J/n\)</span>, the fraction of unique records and the smallest class size. For a planned release, the uniform-cells formula and <a href="#eq-link-kappa" class="quarto-xref">Equation&nbsp;<span>15.4</span></a> give quick estimates.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> exp, log2</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> linkage_report(rows: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, ...]]) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>, <span class="bu">int</span>]:</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Linkage success J/n, fraction of unique records, and smallest class size of a release."""</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    sizes <span class="op">=</span> Counter(rows).values()  <span class="co"># one count per distinct quasi-identifier combination</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    n <span class="op">=</span> <span class="bu">len</span>(rows)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">len</span>(sizes) <span class="op">/</span> n, <span class="bu">sum</span>(<span class="dv">1</span> <span class="cf">for</span> k <span class="kw">in</span> sizes <span class="cf">if</span> k <span class="op">==</span> <span class="dv">1</span>) <span class="op">/</span> n, <span class="bu">min</span>(sizes)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> uniform_unique(n: <span class="bu">float</span>, cells: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Expected fraction of n people who are unique when they fall in `cells` equally likely cells."""</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> exp(<span class="op">-</span>n <span class="op">/</span> cells)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> match_correct(lam: <span class="bu">float</span>, pi: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]:</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""In a sample of fraction pi, with lam expected others in the cell: (kappa, xi)."""</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> lam <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> pi)), exp(<span class="op">-</span>lam <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> pi))</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>release <span class="op">=</span> [</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"02138"</span>, <span class="st">"1961-03-14"</span>, <span class="st">"F"</span>), (<span class="st">"02138"</span>, <span class="st">"1972-11-02"</span>, <span class="st">"M"</span>), (<span class="st">"02138"</span>, <span class="st">"1972-11-02"</span>, <span class="st">"M"</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"02139"</span>, <span class="st">"1958-06-21"</span>, <span class="st">"F"</span>), (<span class="st">"02139"</span>, <span class="st">"1990-01-01"</span>, <span class="st">"F"</span>), (<span class="st">"02139"</span>, <span class="st">"1990-01-01"</span>, <span class="st">"F"</span>),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    (<span class="st">"02139"</span>, <span class="st">"1990-01-01"</span>, <span class="st">"F"</span>), (<span class="st">"02141"</span>, <span class="st">"1983-09-30"</span>, <span class="st">"M"</span>),</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>]</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>success, unique, k <span class="op">=</span> linkage_report(release)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>success<span class="sc">:.3f}</span><span class="ss"> </span><span class="sc">{</span>unique<span class="sc">:.3f}</span><span class="ss"> </span><span class="sc">{</span>k<span class="sc">}</span><span class="ss">"</span>)  <span class="co"># 0.625 0.375 1</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>cells <span class="op">=</span> <span class="dv">40_000</span> <span class="op">*</span> <span class="dv">365</span> <span class="op">*</span> <span class="dv">80</span> <span class="op">*</span> <span class="dv">2</span>  <span class="co"># ZIP code x birth date over 80 years x sex</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>log2(cells)<span class="sc">:.1f}</span><span class="ss"> </span><span class="sc">{</span>uniform_unique(<span class="fl">248.7e6</span>, cells)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 31.1 0.899</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>kappa, xi <span class="op">=</span> match_correct(<span class="fl">0.1</span>, <span class="fl">0.01</span>)</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>kappa<span class="sc">:.3f}</span><span class="ss"> </span><span class="sc">{</span>xi<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.910 0.906</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The full edition’s script, <a href="../../../code/part02-attacks/linkage.py">linkage.py</a>, computes every number in this chapter, including the synthetic Netflix experiment and the sampling simulations:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/linkage.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="cheat-sheet" class="level2" data-number="15.7">
+<h2 data-number="15.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">15.7</span> Cheat sheet</h2>
+<div id="tbl-link-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-link-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;15.6: The results of this chapter.
+</figcaption>
+<div aria-describedby="tbl-link-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Formula</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bits to name one person</td>
+<td><span class="math inline">\(\log_2 n\)</span></td>
+<td>33 for the world, 28 for the US, 13 for 10,000 people</td>
+</tr>
+<tr class="even">
+<td>Linkage success</td>
+<td><span class="math inline">\(J/n\)</span></td>
+<td>Target known to be in the release; at most <span class="math inline">\(1/k\)</span> if every class has <span class="math inline">\(\ge k\)</span> records</td>
+</tr>
+<tr class="odd">
+<td>Expected fraction unique</td>
+<td><span class="math inline">\(\sum_c p_c(1 - p_c)^{n-1}\)</span></td>
+<td>Needs a model of the joint distribution</td>
+</tr>
+<tr class="even">
+<td>Uniform cells, <span class="math inline">\(b\)</span> bits</td>
+<td><span class="math inline">\(\exp(-2^{\log_2 n - b})\)</span></td>
+<td>50% unique at <span class="math inline">\(\log_2 n + 0.53\)</span> bits, 99% at <span class="math inline">\(\log_2 n + 6.64\)</span></td>
+</tr>
+<tr class="odd">
+<td>Collision floor</td>
+<td><span class="math inline">\((1 - \sum_c p_c^2)^{n-1}\)</span></td>
+<td>Needs only the marginals for independent attributes</td>
+</tr>
+<tr class="even">
+<td>Sparse-data score</td>
+<td><span class="math inline">\(\sum_i w_i\,\mathrm{Sim}(\mathrm{aux}_i, r_i)\)</span>, <span class="math inline">\(w_i \approx \ln(1/s_i) + \ln\frac{1-\varepsilon}{\varepsilon}\)</span></td>
+<td>Each agreeing item is worth <span class="math inline">\(\log_2(1/s_i)\)</span> bits</td>
+</tr>
+<tr class="odd">
+<td>Eccentricity</td>
+<td><span class="math inline">\((s_1 - s_2)/\sigma \ge \varphi\)</span></td>
+<td>Calibrate <span class="math inline">\(\varphi\)</span> on outsiders at a small false positive rate</td>
+</tr>
+<tr class="even">
+<td>Match in a sample</td>
+<td><span class="math inline">\(\kappa \approx 1/(1 + \lambda(1 - \pi))\)</span>, <span class="math inline">\(\xi \approx e^{-\lambda(1 - \pi)}\)</span></td>
+<td>At least <span class="math inline">\(1/(1 + \lambda)\)</span> and <span class="math inline">\(e^{-\lambda}\)</span> for every <span class="math inline">\(\pi\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>Add up the bits of every attribute an adversary might know; above <span class="math inline">\(\log_2 n\)</span>, assume most people are unique.</li>
+<li>Score a release you hold by <span class="math inline">\(J/n\)</span> and its unique records, not by whether names were removed.</li>
+<li>Removing names, releasing a sample or perturbing a few values does not anonymize a dataset.</li>
+</ul>
+</section>
+<section id="further-reading" class="level2" data-number="15.8">
+<h2 data-number="15.8" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">15.8</span> Further reading</h2>
+<ul>
+<li>Sweeney, “Simple Demographics Often Identify People Uniquely” (2000): the 87% estimate and its variants with coarser geography.</li>
+<li>Narayanan &amp; Shmatikov, “Robust De-anonymization of Large Sparse Datasets” (IEEE Symposium on Security and Privacy, 2008): the scoring algorithm, the eccentricity test and the Netflix experiments.</li>
+<li>Rocher, Hendrickx &amp; de Montjoye, “Estimating the success of re-identifications in incomplete datasets using generative models” (Nature Communications, 2019): per-record re-identification risk from a copula model, and why sampling does not protect.</li>
+<li>Ohm, “Broken Promises of Privacy: Responding to the Surprising Failure of Anonymization” (UCLA Law Review, 2010): the legal side, with the Massachusetts, search-log and Netflix cases.</li>
+</ul>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part02-attacks/07-linkage-reidentification.html">the full edition’s chapter</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-attacks/06-gradient-inversion.html" class="pagination-link" aria-label="Gradient inversion">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-attacks/08-syntactic-anonymity.html" class="pagination-link" aria-label="Syntactic anonymity and how it breaks">
+        <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

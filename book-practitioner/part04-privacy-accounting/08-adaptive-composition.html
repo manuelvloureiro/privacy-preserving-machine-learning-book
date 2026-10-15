@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>34&nbsp; Adaptive composition: filters, odometers and individual accounting – Privacy-Preserving Machine Learning for Practitioners</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part04-privacy-accounting/09-choosing-an-accountant.html" rel="next">
+<link href="../part04-privacy-accounting/07-shuffling-iteration.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/08-adaptive-composition.html"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning for Practitioners</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">34.1</span> Why this matters</a></li>
+  <li><a href="#sec-adapt-why-breaks" id="toc-sec-adapt-why-breaks" class="nav-link" data-scroll-target="#sec-adapt-why-breaks"><span class="header-section-number">34.2</span> Why plugging in the realized parameters fails</a></li>
+  <li><a href="#sec-adapt-renyi-filter" id="toc-sec-adapt-renyi-filter" class="nav-link" data-scroll-target="#sec-adapt-renyi-filter"><span class="header-section-number">34.3</span> The Rényi filter</a></li>
+  <li><a href="#sec-adapt-dp-filters" id="toc-sec-adapt-dp-filters" class="nav-link" data-scroll-target="#sec-adapt-dp-filters"><span class="header-section-number">34.4</span> Filters for pure differential privacy</a></li>
+  <li><a href="#sec-adapt-odometers" id="toc-sec-adapt-odometers" class="nav-link" data-scroll-target="#sec-adapt-odometers"><span class="header-section-number">34.5</span> Odometers</a></li>
+  <li><a href="#sec-adapt-individual" id="toc-sec-adapt-individual" class="nav-link" data-scroll-target="#sec-adapt-individual"><span class="header-section-number">34.6</span> Individual privacy accounting in DP-SGD</a></li>
+  <li><a href="#sec-adapt-code" id="toc-sec-adapt-code" class="nav-link" data-scroll-target="#sec-adapt-code"><span class="header-section-number">34.7</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">34.8</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">34.9</span> Further reading</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/08-adaptive-composition.html"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="34.1">
+<h2 data-number="34.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">34.1</span> Why this matters</h2>
+<p>You train a model with differential privacy (DP) using stochastic gradient descent (SGD) with clipped per-example gradients and Gaussian noise, called DP-SGD. You may want to stop when the validation loss stalls, lower the noise mid-run, or let well-fitted records keep training. Every composition theorem so far assumes the opposite: the per-step budgets <span class="math inline">\(\varepsilon_1, \dots, \varepsilon_k\)</span> and the number of steps <span class="math inline">\(k\)</span> are fixed before the run (<a href="../part03-dp-foundations/04-composition.html">Advanced and optimal composition</a>). Once they depend on what the run released, they are random, and plugging the values you happened to use into a fixed-parameter theorem afterwards is not valid.</p>
+<p>So the question splits in two. A <strong>privacy filter</strong> answers “may I run one more step without exceeding a budget fixed in advance?” A <strong>privacy odometer</strong> answers “how much have I spent so far?”, and since you may stop at any moment, its answer must hold at every step at once. Both rest on one fact about Rényi differential privacy (RDP): at an order fixed before the run, adding up the spends as you go is as safe as if they had been fixed. That makes a filter free, an odometer cheap, and per-record accounting possible.</p>
+</section>
+<section id="sec-adapt-why-breaks" class="level2" data-number="34.2">
+<h2 data-number="34.2" class="anchored" data-anchor-id="sec-adapt-why-breaks"><span class="header-section-number">34.2</span> Why plugging in the realized parameters fails</h2>
+<p>Advanced composition is a high-probability statement: at a time <span class="math inline">\(t\)</span> fixed in advance, the total privacy loss exceeds a bound <span class="math inline">\(U_t\)</span>, its mean plus a spread growing like <span class="math inline">\(\sqrt t\)</span>, only with probability <span class="math inline">\(\delta\)</span>. It says nothing about a time chosen by watching the outputs. An analyst who stops when the loss happens to be high picks exactly the paths on which the bound fails, and so does stopping on anything correlated with it, such as “these answers look unusual”.</p>
+<p>Ask randomized response with <span class="math inline">\(\varepsilon = 0.1\)</span> about one person’s bit at every step. Each report moves the privacy loss up or down by 0.1, so the loss is a random walk with a slight upward drift. At any single step up to 1,000, the plug-in bound at <span class="math inline">\(\delta = 0.01\)</span> fails with probability at most 0.0016. Now stop at the first crossing and report <span class="math inline">\(U_T\)</span>. The bound is narrow early, when <span class="math inline">\(\sqrt t\)</span> is small, so a few walks cross it early and are frozen there (<a href="#fig-adapt-plugin-failure" class="quarto-xref">Figure&nbsp;<span>34.1</span></a>). By <span class="math inline">\(10^4\)</span> steps a fraction 0.0318 of runs have crossed (<a href="#tbl-adapt-plugin" class="quarto-xref">Table&nbsp;<span>34.1</span></a>): “<span class="math inline">\(\varepsilon = U_T\)</span> with <span class="math inline">\(\delta = 0.01\)</span>” is wrong 3.18 times as often as it claims. A smaller <span class="math inline">\(\delta\)</span> does not save it (<a href="#tbl-adapt-plugin" class="quarto-xref">Table&nbsp;<span>34.1</span></a>, last row).</p>
+<div id="tbl-adapt-plugin" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adapt-plugin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;34.1: Exact probability that randomized response with <span class="math inline">\(\varepsilon = 0.1\)</span> crosses the plug-in advanced-composition bound by step <span class="math inline">\(n\)</span>. It exceeds <span class="math inline">\(\delta\)</span> and keeps growing with the horizon.
+</figcaption>
+<div aria-describedby="tbl-adapt-plugin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Horizon <span class="math inline">\(n\)</span></th>
+<th>100</th>
+<th>1000</th>
+<th>10,000</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\delta = 0.05\)</span></td>
+<td>0.0575</td>
+<td>0.1004</td>
+<td>0.1424</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\delta = 0.01\)</span></td>
+<td>0.0090</td>
+<td>0.0202</td>
+<td>0.0318</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\delta = 10^{-5}\)</span></td>
+<td><span class="math inline">\(3.12\times10^{-6}\)</span></td>
+<td><span class="math inline">\(1.80\times10^{-5}\)</span></td>
+<td><span class="math inline">\(3.69\times10^{-5}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-adapt-plugin-failure" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-adapt-plugin-failure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/adaptive_composition_plugin_failure.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adapt-plugin-failure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;34.1: Left: forty runs of randomized response with <span class="math inline">\(\varepsilon = 0.1\)</span>, the loss in units of <span class="math inline">\(\varepsilon\)</span>, and the plug-in bound at <span class="math inline">\(\delta = 0.01\)</span>; an analyst who stops at the first crossing freezes the red paths there. Right: the probability that the bound is crossed by step <span class="math inline">\(n\)</span>, for <span class="math inline">\(\delta = 0.05\)</span> and <span class="math inline">\(0.01\)</span> (dashed lines); it passes <span class="math inline">\(\delta\)</span> and keeps growing.
+</figcaption>
+</figure>
+</div>
+<p>The probability keeps growing because a random walk eventually wanders further than any fixed multiple of <span class="math inline">\(\sqrt t\)</span> (its reach grows like <span class="math inline">\(\sqrt{t\ln\ln t}\)</span>), so given time it crosses with certainty. A valid running bound must be wider, and Rogers et al.&nbsp;(2016) showed that every odometer pays at least an extra <span class="math inline">\(\ln\ln n\)</span> inside the logarithm for <span class="math inline">\(n\)</span> steps.</p>
+<p>Basic composition escapes the problem: the sum of the realized <span class="math inline">\(\varepsilon_t\)</span> bounds the loss of every output, so there is no bad event for a stopping rule to select. A filter escapes it too, because it makes no running claim to catch at a bad moment; it only asks whether the next step fits a budget fixed in advance.</p>
+</section>
+<section id="sec-adapt-renyi-filter" class="level2" data-number="34.3">
+<h2 data-number="34.3" class="anchored" data-anchor-id="sec-adapt-renyi-filter"><span class="header-section-number">34.3</span> The Rényi filter</h2>
+<p>RDP describes each step by a curve <span class="math inline">\(\varepsilon_t(\alpha)\)</span> over orders <span class="math inline">\(\alpha &gt; 1\)</span>, and with fixed parameters the curves of a run add (<a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>). This survives adaptivity at one fixed order. Fix an order <span class="math inline">\(\alpha\)</span> and an RDP budget <span class="math inline">\(B\)</span> before the run. Let step <span class="math inline">\(t\)</span> be <span class="math inline">\((\alpha, \varepsilon_t(\alpha))\)</span>-RDP whatever happened before it, with <span class="math inline">\(\varepsilon_t(\alpha)\)</span> known before the step runs. Run step <span class="math inline">\(t\)</span> only if the spends so far, its own included, fit: <span id="eq-adapt-renyi-filter"><span class="math display">\[\sum_{j \le t}\varepsilon_j(\alpha) \le B. \tag{34.1}\]</span></span> Then the stopped run is <span class="math inline">\((\alpha, B)\)</span>-RDP, as if the spends had been fixed.</p>
+<p>The reason is a betting argument. Treat <span class="math inline">\(e^{(\alpha - 1)(\text{loss} - \text{spend})}\)</span> as your wealth in a game. RDP at order <span class="math inline">\(\alpha\)</span> bounds the average of <span class="math inline">\(e^{(\alpha - 1)\times\text{loss}}\)</span>, so a step charged its RDP spend cannot make this wealth grow on average: the game is fair or tilted against you. In such a game no quitting rule raises your expected final wealth, as long as you decide whether to play each round before seeing its result. If the total spend is at most <span class="math inline">\(B\)</span> on every path, the average of <span class="math inline">\(e^{(\alpha - 1)\times\text{loss}}\)</span> at the end is at most <span class="math inline">\(e^{(\alpha - 1)B}\)</span>, which is exactly what <span class="math inline">\((\alpha, B)\)</span>-RDP says.</p>
+<p>Each condition is a step of that argument. A step’s price must be known before it runs: a mechanism allowed to charge little on exactly the outputs that reveal most would make the game a winning one. The budget must hold on every path, not on average, because the paths that spend most may be those where the loss is high. And the order must be fixed in advance. You may track several orders and halt when any one is exhausted, since then each held on every path; continuing while <em>some</em> order still fits, chosen after seeing the spends, is not free (<a href="#sec-adapt-odometers" class="quarto-xref"><span>Section 34.5</span></a> prices it).</p>
+<p>You train with full-batch noisy gradient descent towards <span class="math inline">\((5.299, 10^{-5})\)</span> at order <span class="math inline">\(\alpha = 5.8\)</span>. Mironov’s conversion turns <span class="math inline">\((\alpha, B)\)</span>-RDP into <span class="math inline">\((B + \ln(1/\delta)/(\alpha - 1), \delta)\)</span>-DP, so run backwards it sets <span class="math inline">\(B = 5.299 - \ln(10^5)/4.8 = 2.900\)</span>. A full-batch Gaussian step with noise multiplier <span class="math inline">\(\sigma_t\)</span> spends <span class="math inline">\(\alpha/(2\sigma_t^2)\)</span>. With <span class="math inline">\(\sigma_t = 10\)</span> each step spends <span class="math inline">\(5.8/200 = 0.0290\)</span> and you get 100 steps. If training plateaus at step 60 and you drop to <span class="math inline">\(\sigma_t = 5\)</span>, each later step costs <span class="math inline">\(5.8/50 = 0.1160\)</span>, and the filter allows <span class="math inline">\((2.900 - 60\times0.0290)/0.1160 = 10\)</span> more. Either way the run is <span class="math inline">\((5.8, 2.900)\)</span>-RDP, whatever rule decided the switch.</p>
+<p>At a fixed order the filter costs nothing. It can even beat fixed-curve composition, which charges every step its worst branch, while the filter charges what each path spent.</p>
+</section>
+<section id="sec-adapt-dp-filters" class="level2" data-number="34.4">
+<h2 data-number="34.4" class="anchored" data-anchor-id="sec-adapt-dp-filters"><span class="header-section-number">34.4</span> Filters for pure differential privacy</h2>
+<p>An interactive query system has a global budget <span class="math inline">\((\varepsilon_g, \delta)\)</span>, and each query brings a pure-DP <span class="math inline">\(\varepsilon_t\)</span> chosen after earlier answers. Summing the <span class="math inline">\(\varepsilon_t\)</span> is valid but grows like the number of queries <span class="math inline">\(k\)</span>; you want advanced composition’s <span class="math inline">\(\sqrt k\)</span> without the failure of <a href="#sec-adapt-why-breaks" class="quarto-xref"><span>Section 34.2</span></a>.</p>
+<p>The Rényi filter delivers it. An <span class="math inline">\(\varepsilon_t\)</span>-DP step spends at most <span class="math inline">\(\alpha\varepsilon_t^2/2\)</span> at every order <span class="math inline">\(\alpha\)</span> (<a href="../part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>). So a rule that keeps <span class="math inline">\(\frac12\sum_t\varepsilon_t^2\)</span> below a fixed level is a Rényi filter at every order at once, and because the rule does not mention the order, the conversion may pick the best one afterwards. Doing that conversion gives the <strong>Whitehouse filter</strong> (Whitehouse et al.&nbsp;2023): continue while <span id="eq-adapt-whitehouse"><span class="math display">\[\sqrt{2\ln(1/\delta)\textstyle\sum_t\varepsilon_t^2} + \tfrac12\textstyle\sum_t\varepsilon_t^2 \le \varepsilon_g, \tag{34.2}\]</span></span> with sums over every step so far. It reads like advanced composition, the first term the spread of the total loss and the second its mean, and the stopped run is <span class="math inline">\((\varepsilon_g, \delta)\)</span>-DP.</p>
+<p>At <span class="math inline">\(\delta = 10^{-6}\)</span> and <span class="math inline">\(\varepsilon_g = 1\)</span>, the filter allows 349 steps of 0.01, slightly more than the 337 of advanced composition with <span class="math inline">\(k\)</span> fixed in advance (<a href="#tbl-adapt-steps" class="quarto-xref">Table&nbsp;<span>34.2</span></a>). It wins, despite allowing adaptivity, because its mean term, <span class="math inline">\(\varepsilon_t^2/2\)</span> per step, is tighter than the <span class="math inline">\(\varepsilon_t(e^{\varepsilon_t} - 1)\)</span> of the fixed-<span class="math inline">\(k\)</span> form. From the budget side, 1,000 steps of 0.01 need 1.712 under the Whitehouse filter, 1.763 under fixed-<span class="math inline">\(k\)</span> advanced composition and 10.000 under the basic filter <span class="math inline">\(\sum_t\varepsilon_t \le \varepsilon_g\)</span>.</p>
+<div id="tbl-adapt-steps" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adapt-steps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;34.2: Steps of <span class="math inline">\(\varepsilon_0\)</span> allowed by a global budget <span class="math inline">\(\varepsilon_g = 1\)</span> at <span class="math inline">\(\delta = 10^{-6}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-adapt-steps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon_0\)</span></th>
+<th>Basic</th>
+<th>Advanced (fixed <span class="math inline">\(k\)</span>)</th>
+<th>Rogers filter</th>
+<th>Whitehouse filter</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.01</td>
+<td>100</td>
+<td>337</td>
+<td>154</td>
+<td>349</td>
+</tr>
+<tr class="even">
+<td>0.001</td>
+<td>1000</td>
+<td>33,785</td>
+<td>15,481</td>
+<td>34,937</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-adapt-filter-budgets" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-adapt-filter-budgets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/adaptive_composition_filter_budgets.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adapt-filter-budgets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;34.2: Global budget needed to run <span class="math inline">\(k\)</span> steps of <span class="math inline">\(\varepsilon_0 = 0.01\)</span> at <span class="math inline">\(\delta = 10^{-6}\)</span>: basic composition, advanced composition with <span class="math inline">\(k\)</span> fixed in advance, and the Rogers and Whitehouse filters. The Whitehouse filter lies on or below fixed-<span class="math inline">\(k\)</span> advanced composition; the Rogers filter sits a constant factor above.
+</figcaption>
+</figure>
+</div>
+<p>The older Rogers et al.&nbsp;(2016) filter has the same shape, but its inequality must hold for every value of <span class="math inline">\(\sum_t\varepsilon_t^2\)</span> at once, and that costs 1.40 to 1.51 times the budget and fewer than half the steps; use the Whitehouse form. Check it <em>before</em> each step, with that step’s <span class="math inline">\(\varepsilon_t\)</span> included, since the guarantee is about the decision to run it. For steps with <span class="math inline">\(\delta_t &gt; 0\)</span>, add a second rule, <span class="math inline">\(\sum_t\delta_t \le \delta''\)</span>, and the guarantee becomes <span class="math inline">\((\varepsilon_g, \delta + \delta'')\)</span>.</p>
+</section>
+<section id="sec-adapt-odometers" class="level2" data-number="34.5">
+<h2 data-number="34.5" class="anchored" data-anchor-id="sec-adapt-odometers"><span class="header-section-number">34.5</span> Odometers</h2>
+<p>Early stopping and open-ended analyses need a running “how much have I spent?” that is true whenever the run stops. Return to the betting game of <a href="#sec-adapt-renyi-filter" class="quarto-xref"><span>Section 34.3</span></a>. Markov’s inequality says that the wealth, which starts at 1, reaches <span class="math inline">\(c\)</span> at one given time with probability at most <span class="math inline">\(1/c\)</span>. Ville’s inequality extends this to reaching <span class="math inline">\(c\)</span> at <em>any</em> time, because “stop the first time you reach <span class="math inline">\(c\)</span>” is itself a quitting rule and cannot raise the mean. Unpacked, at one order fixed in advance, Mironov’s conversion of the running spend holds at every step at once, for free.</p>
+<p>The cost comes from the order: the best order for 10 steps is not the best for 1,000. To choose it late, fix a grid <span class="math inline">\(\Lambda\)</span> of <span class="math inline">\(|\Lambda|\)</span> orders, track the spend <span class="math inline">\(S_t(\alpha) = \sum_{j\le t}\varepsilon_j(\alpha)\)</span> at each, and give each order a share <span class="math inline">\(\delta/|\Lambda|\)</span> of the failure probability. The <strong>Ville odometer</strong> reports the best order’s conversion, <span id="eq-adapt-ville-odometer"><span class="math display">\[U_t = \min_{\alpha\in\Lambda}\Big[S_t(\alpha) + \frac{\ln(|\Lambda|/\delta)}{\alpha - 1}\Big], \tag{34.3}\]</span></span> and with probability at least <span class="math inline">\(1 - \delta\)</span> the loss stays below <span class="math inline">\(U_t\)</span> at every step. It is Mironov’s conversion with <span class="math inline">\(\delta\)</span> replaced by <span class="math inline">\(\delta/|\Lambda|\)</span>; that union bound is the whole price.</p>
+<p>For full-batch Gaussian steps with <span class="math inline">\(\sigma = 10\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, the part’s 154 orders raise <span class="math inline">\(\ln(1/\delta) = 11.513\)</span> to 16.550, and the odometer costs 15–19% over the fixed-time value: 6.253 against 5.299 at <span class="math inline">\(t = 100\)</span> (<a href="#tbl-adapt-odometers" class="quarto-xref">Table&nbsp;<span>34.3</span></a>). A single order chosen in advance, 5.8, is free at <span class="math inline">\(t = 100\)</span>, its design point, and poor elsewhere: 31.399 at <span class="math inline">\(t = 1000\)</span>. On the part’s running example (DP-SGD with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, <span class="math inline">\(10^4\)</span> steps, <span class="math inline">\(\delta = 10^{-5}\)</span>), the fixed-time RDP value is 7.43, and an odometer valid whenever the run stops costs 8.82 (Ville) or 9.08 (the slightly looser odometer of Lécuyer 2021).</p>
+<div id="tbl-adapt-odometers" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adapt-odometers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;34.3: Running <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> for <span class="math inline">\(t\)</span> full-batch Gaussian steps with <span class="math inline">\(\sigma = 10\)</span>. Only the last three columns are valid when <span class="math inline">\(t\)</span> is chosen from the outputs.
+</figcaption>
+<div aria-describedby="tbl-adapt-odometers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Steps <span class="math inline">\(t\)</span></th>
+<th>Fixed-time conversion</th>
+<th>Ville odometer (154 orders)</th>
+<th>Lécuyer odometer</th>
+<th>Ville at <span class="math inline">\(\alpha = 5.8\)</span> only</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>1.568</td>
+<td>1.869</td>
+<td>1.916</td>
+<td>2.689</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td>5.299</td>
+<td>6.253</td>
+<td>6.507</td>
+<td>5.299</td>
+</tr>
+<tr class="odd">
+<td>1000</td>
+<td>20.175</td>
+<td>23.194</td>
+<td>24.633</td>
+<td>31.399</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-adapt-odometers" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-adapt-odometers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/adaptive_composition_odometers.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adapt-odometers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;34.3: Running privacy bounds at <span class="math inline">\(\delta = 10^{-5}\)</span> for full-batch Gaussian steps with <span class="math inline">\(\sigma = 10\)</span>: the fixed-time conversion (dashed, not a valid odometer), the Ville odometer over 154 orders, Lécuyer’s odometer, and a Ville odometer at the single order 5.8.
+</figcaption>
+</figure>
+</div>
+<p>Keep the grid small. Read an odometer for what it is: “<span class="math inline">\(\varepsilon = U_T\)</span>” says the loss exceeds the random number <span class="math inline">\(U_T\)</span> with probability at most <span class="math inline">\(\delta\)</span>, a tail bound rather than an <span class="math inline">\((\varepsilon, \delta)\)</span>-DP guarantee. To get a guarantee, stop by a rule that keeps <span class="math inline">\(U_T \le \varepsilon_g\)</span>, which turns the odometer into a filter; if you have a budget anyway, a Rényi filter at one order is cheaper.</p>
+</section>
+<section id="sec-adapt-individual" class="level2" data-number="34.6">
+<h2 data-number="34.6" class="anchored" data-anchor-id="sec-adapt-individual"><span class="header-section-number">34.6</span> Individual privacy accounting in DP-SGD</h2>
+<p>DP-SGD’s usual analysis charges every record at every step as if its clipped gradient had norm <span class="math inline">\(C\)</span>, the clipping norm. But once the model fits a record, its gradient shrinks and it moves the noisy sum less, so the same noise hides it better.</p>
+<p>That cost is exact. With full-batch steps and noise of standard deviation <span class="math inline">\(\sigma C\)</span> on the summed clipped gradients, removing record <span class="math inline">\(i\)</span> shifts the output by its clipped gradient <span class="math inline">\(\bar g_{i,t}\)</span>, so its spend is the Gaussian RDP for that shift: <span id="eq-adapt-individual-rdp"><span class="math display">\[\varepsilon_{i,t}(\alpha) = \frac{\alpha\|\bar g_{i,t}\|^2}{2\sigma^2C^2} \le \frac{\alpha}{2\sigma^2}. \tag{34.4}\]</span></span> It depends only on the record and the current model, which depends only on earlier releases, so it is known before the step: what the Rényi filter needs. The <strong>individual filter</strong> (Feldman &amp; Zrnic 2021) runs one Rényi filter per record. Record <span class="math inline">\(i\)</span> joins the sum only while its own spends total at most <span class="math inline">\(B\)</span>; once dropped, it no longer changes the output and spends nothing. Neighbouring datasets differ in one record, whose filter held, so the run is <span class="math inline">\((\alpha, B)\)</span>-RDP. No step costs more than the worst case, so every record trains at least as long as in the worst-case run.</p>
+<p>The full edition simulates 10,000 records (<span class="math inline">\(C = 1\)</span>, <span class="math inline">\(\sigma = 10\)</span>, full batch): 90% typical records whose gradients shrink as the model fits them, 10% hard records it never fits. The worst-case run has 100 steps and <span class="math inline">\(\varepsilon = 5.299\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, best at order 5.8, where <span class="math inline">\(B = 2.900\)</span>. Converting each record’s own spend after 100 steps (<a href="#tbl-adapt-individual" class="quarto-xref">Table&nbsp;<span>34.4</span></a>) gives a typical median of 3.17 and a hard median of 5.02, near the worst case. Run the individual filter for 300 steps and hard records reach the budget and are dropped from step 101 (the median one at step 111), while no typical record ever is: their median spend at step 300 is 0.778, a quarter of the budget (<a href="#fig-adapt-individual-spend" class="quarto-xref">Figure&nbsp;<span>34.4</span></a>).</p>
+<div id="tbl-adapt-individual" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adapt-individual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;34.4: Individual <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> after 100 full-batch steps with <span class="math inline">\(\sigma = 10\)</span>, at order 5.8. The worst case is 5.299.
+</figcaption>
+<div aria-describedby="tbl-adapt-individual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Records</th>
+<th>10th percentile</th>
+<th>Median</th>
+<th>90th percentile</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>All</td>
+<td>2.56</td>
+<td>3.25</td>
+<td>3.81</td>
+</tr>
+<tr class="even">
+<td>Typical</td>
+<td>2.55</td>
+<td>3.17</td>
+<td>3.67</td>
+</tr>
+<tr class="odd">
+<td>Hard</td>
+<td>4.23</td>
+<td>5.02</td>
+<td>5.26</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-adapt-individual-spend" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-adapt-individual-spend-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/adaptive_composition_individual_spend.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adapt-individual-spend-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;34.4: Left: cumulative spend at order 5.8 under the individual filter for four typical records (blue) and three hard records (red), against the worst case (dotted) and the budget <span class="math inline">\(B = 2.90\)</span> (dashed). Hard records reach the budget and stop; typical records level off far below it. Right: the fraction of each group taking part at each step.
+</figcaption>
+</figure>
+</div>
+<p>The filter certifies one guarantee for everyone, <span class="math inline">\((5.8, 2.900)\)</span>-RDP. The per-record values in the table are estimates: each is a fixed-time conversion of a random spend, the mistake of <a href="#sec-adapt-why-breaks" class="quarto-xref"><span>Section 34.2</span></a>, and at a fixed order none can fall below the conversion’s toll <span class="math inline">\(\ln(1/\delta)/(\alpha - 1) = 2.399\)</span>. They are also sensitive, since a small spend says “the model fits this record well”: show a value to the record’s owner, never publish them all. There is a fairness cost too: records the model fits worst, often from under-represented groups, keep large gradients, exhaust their budget first and are dropped first, so the model sees even less of them. With Poisson subsampling the argument still works, using the subsampled Gaussian at noise multiplier <span class="math inline">\(\sigma C/\|\bar g_{i,t}\|\)</span> (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>), but you need every record’s gradient norm at every step, sampled or not.</p>
+</section>
+<section id="sec-adapt-code" class="level2" data-number="34.7">
+<h2 data-number="34.7" class="anchored" data-anchor-id="sec-adapt-code"><span class="header-section-number">34.7</span> Code</h2>
+<p>Filters and odometers are a sum of spends and a comparison. This snippet implements the Whitehouse filter, the Rényi filter for a noise schedule and the Ville odometer for full-batch Gaussian steps, and reproduces the numbers above.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> log, sqrt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> whitehouse_statistic(eps_steps: <span class="bu">list</span>[<span class="bu">float</span>], delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Advanced composition of pure-DP budgets with mean term eps^2 / 2: valid under adaptivity."""</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    v <span class="op">=</span> <span class="bu">sum</span>(e <span class="op">*</span> e <span class="cf">for</span> e <span class="kw">in</span> eps_steps)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sqrt(<span class="dv">2</span> <span class="op">*</span> log(<span class="dv">1</span> <span class="op">/</span> delta) <span class="op">*</span> v) <span class="op">+</span> v <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> steps_allowed(eps_step: <span class="bu">float</span>, eps_global: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run steps of eps_step while the Whitehouse filter, checked before each step, says continue."""</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    spent: <span class="bu">list</span>[<span class="bu">float</span>] <span class="op">=</span> []</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> whitehouse_statistic([<span class="op">*</span>spent, eps_step], delta) <span class="op">&lt;=</span> eps_global:</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        spent.append(eps_step)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">len</span>(spent)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gaussian_rdp(alpha: <span class="bu">float</span>, sigma: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""RDP at order alpha of one full-batch Gaussian step with noise multiplier sigma."""</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> alpha <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> sigma<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> renyi_filter(sigmas: <span class="bu">list</span>[<span class="bu">float</span>], alpha: <span class="bu">float</span>, budget: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Number of steps of a noise schedule that a Renyi filter at order alpha lets through."""</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    spent, steps <span class="op">=</span> <span class="fl">0.0</span>, <span class="dv">0</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sigma <span class="kw">in</span> sigmas:</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        cost <span class="op">=</span> gaussian_rdp(alpha, sigma)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> spent <span class="op">+</span> cost <span class="op">&gt;</span> budget <span class="op">+</span> <span class="fl">1e-12</span>:  <span class="co"># tolerance for floating-point sums</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        spent, steps <span class="op">=</span> spent <span class="op">+</span> cost, steps <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> steps</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>ORDERS <span class="op">=</span> [<span class="dv">1</span> <span class="op">+</span> x <span class="op">/</span> <span class="dv">10</span> <span class="cf">for</span> x <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">100</span>)] <span class="op">+</span> [<span class="bu">float</span>(x) <span class="cf">for</span> x <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">12</span>, <span class="dv">64</span>)] <span class="op">+</span> [<span class="fl">128.0</span>, <span class="fl">256.0</span>, <span class="fl">512.0</span>]</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> ville_odometer(t: <span class="bu">int</span>, sigma: <span class="bu">float</span>, delta: <span class="bu">float</span>, orders: <span class="bu">list</span>[<span class="bu">float</span>]) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Running epsilon after t full-batch Gaussian steps, valid whenever the run stops."""</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">min</span>(t <span class="op">*</span> gaussian_rdp(a, sigma) <span class="op">+</span> log(<span class="bu">len</span>(orders) <span class="op">/</span> delta) <span class="op">/</span> (a <span class="op">-</span> <span class="dv">1</span>) <span class="cf">for</span> a <span class="kw">in</span> orders)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>whitehouse_statistic([<span class="fl">0.01</span>] <span class="op">*</span> <span class="dv">1000</span>, <span class="fl">1e-6</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 1.712</span></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(steps_allowed(<span class="fl">0.01</span>, <span class="fl">1.0</span>, <span class="fl">1e-6</span>))  <span class="co"># 349</span></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>alpha, budget <span class="op">=</span> <span class="fl">5.8</span>, <span class="fl">2.9</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(renyi_filter([<span class="fl">10.0</span>] <span class="op">*</span> <span class="dv">1000</span>, alpha, budget))  <span class="co"># 100</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(renyi_filter([<span class="fl">10.0</span>] <span class="op">*</span> <span class="dv">60</span> <span class="op">+</span> [<span class="fl">5.0</span>] <span class="op">*</span> <span class="dv">1000</span>, alpha, budget) <span class="op">-</span> <span class="dv">60</span>)  <span class="co"># 10</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>budget <span class="op">+</span> log(<span class="dv">1</span> <span class="op">/</span> <span class="fl">1e-5</span>) <span class="op">/</span> (alpha <span class="op">-</span> <span class="dv">1</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 5.299</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">len</span>(ORDERS))  <span class="co"># 154</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>ville_odometer(<span class="dv">100</span>, <span class="fl">10.0</span>, <span class="fl">1e-5</span>, ORDERS)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 6.253</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>ville_odometer(<span class="dv">100</span>, <span class="fl">10.0</span>, <span class="fl">1e-5</span>, [alpha])<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 5.299</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>ville_odometer(<span class="dv">1000</span>, <span class="fl">10.0</span>, <span class="fl">1e-5</span>, [alpha])<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 31.399</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><code>ORDERS</code> is the part’s grid of orders. The full edition’s script, <a href="../../../code/part04-privacy-accounting/adaptive_composition.py">adaptive_composition.py</a>, also computes the plug-in failure exactly, checks the Rényi filter by simulation and runs the individual-accounting experiment:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part04-privacy-accounting/adaptive_composition.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="cheat-sheet" class="level2" data-number="34.8">
+<h2 data-number="34.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">34.8</span> Cheat sheet</h2>
+<div id="tbl-adapt-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adapt-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;34.5: Filters, odometers and individual accounting.
+</figcaption>
+<div aria-describedby="tbl-adapt-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Object</th>
+<th>Rule or bound</th>
+<th>Guarantee</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Basic filter and odometer</td>
+<td>Continue while <span class="math inline">\(\sum_t\varepsilon_t \le \varepsilon_g\)</span>; report <span class="math inline">\(\sum_{j\le t}\varepsilon_j\)</span></td>
+<td><span class="math inline">\((\varepsilon_g, 0)\)</span>-DP; holds on every path</td>
+</tr>
+<tr class="even">
+<td>Whitehouse filter (pure DP)</td>
+<td><span class="math inline">\(\sqrt{2\ln(1/\delta)\sum_t\varepsilon_t^2} + \frac12\sum_t\varepsilon_t^2 \le \varepsilon_g\)</span></td>
+<td><span class="math inline">\((\varepsilon_g, \delta)\)</span>-DP</td>
+</tr>
+<tr class="odd">
+<td>Rényi filter</td>
+<td><span class="math inline">\(\sum_{j\le t}\varepsilon_j(\alpha) \le B\)</span> on every path, <span class="math inline">\(\alpha\)</span> fixed in advance</td>
+<td><span class="math inline">\((\alpha, B)\)</span>-RDP; DP target: <span class="math inline">\(B = \varepsilon_g - \ln(1/\delta)/(\alpha - 1)\)</span></td>
+</tr>
+<tr class="even">
+<td>Ville odometer</td>
+<td><span class="math inline">\(U_t = \min_{\alpha\in\Lambda}[S_t(\alpha) + \ln(\lvert\Lambda\rvert/\delta)/(\alpha - 1)]\)</span></td>
+<td>Loss above <span class="math inline">\(U_t\)</span> at some <span class="math inline">\(t\)</span> with probability at most <span class="math inline">\(\delta\)</span></td>
+</tr>
+<tr class="odd">
+<td>Individual spend, Gaussian sum</td>
+<td><span class="math inline">\(\varepsilon_{i,t}(\alpha) = \alpha\lVert\bar g_{i,t}\rVert^2/(2\sigma^2C^2)\)</span>, at most <span class="math inline">\(\alpha/(2\sigma^2)\)</span></td>
+<td>Per-record filter gives <span class="math inline">\((\alpha, B)\)</span>-RDP for every record</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>Never report a fixed-time bound at a time chosen from the outputs. With a budget, use a Rényi filter at an order fixed before the run: it costs nothing. Without one, use an odometer over a small grid of orders.</li>
+<li>Per-record <span class="math inline">\(\varepsilon\)</span> values are sensitive estimates, not guarantees.</li>
+</ul>
+</section>
+<section id="further-reading" class="level2" data-number="34.9">
+<h2 data-number="34.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">34.9</span> Further reading</h2>
+<ul>
+<li>Rogers, Roth, Ullman &amp; Vadhan, “Privacy Odometers and Filters: Pay-as-you-Go Composition” (NeurIPS 2016): the definitions, and why odometers cost more.</li>
+<li>Whitehouse, Ramdas, Rogers &amp; Wu, “Fully-Adaptive Composition in Differential Privacy” (ICML 2023): the filter that matches advanced composition.</li>
+<li>Feldman &amp; Zrnic, “Individual Privacy Accounting via a Rényi Filter” (NeurIPS 2021): the Rényi filter and per-record accounting.</li>
+<li>Koskela, Tobaben &amp; Honkela, “Individual Privacy Accounting with Gaussian Differential Privacy” (ICLR 2023): tighter individual accounting, including subsampled DP-SGD.</li>
+</ul>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part04-privacy-accounting/08-adaptive-composition.html">the full edition’s chapter</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="pagination-link" aria-label="Amplification by shuffling and by iteration">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="pagination-link" aria-label="Choosing an accountant">
+        <span class="nav-page-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

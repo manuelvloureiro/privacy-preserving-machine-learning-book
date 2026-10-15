@@ -1,0 +1,1837 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>23&nbsp; Beyond global sensitivity – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part03-dp-foundations/07-discrete-mechanisms.html" rel="next">
+<link href="../part03-dp-foundations/05-selection.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/06-sensitivity.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">23.1</span> Why this matters</a></li>
+  <li><a href="#toolkit-four-facts-every-derivation-uses" id="toc-toolkit-four-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-four-facts-every-derivation-uses"><span class="header-section-number">23.2</span> Toolkit: four facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-the-laplace-mechanism-with-global-sensitivity" id="toc-fact-1-the-laplace-mechanism-with-global-sensitivity" class="nav-link" data-scroll-target="#fact-1-the-laplace-mechanism-with-global-sensitivity"><span class="header-section-number">23.2.1</span> Fact 1 — The Laplace mechanism with global sensitivity</a></li>
+  <li><a href="#fact-2-a-tail-bound-on-the-privacy-loss-gives-varepsilon-delta" id="toc-fact-2-a-tail-bound-on-the-privacy-loss-gives-varepsilon-delta" class="nav-link" data-scroll-target="#fact-2-a-tail-bound-on-the-privacy-loss-gives-varepsilon-delta"><span class="header-section-number">23.2.2</span> Fact 2 — A tail bound on the privacy loss gives <span class="math inline">\((\varepsilon, \delta)\)</span></a></li>
+  <li><a href="#fact-3-distances-to-a-set-have-sensitivity-1" id="toc-fact-3-distances-to-a-set-have-sensitivity-1" class="nav-link" data-scroll-target="#fact-3-distances-to-a-set-have-sensitivity-1"><span class="header-section-number">23.2.3</span> Fact 3 — Distances to a set have sensitivity 1</a></li>
+  <li><a href="#fact-4-changing-k-records-moves-each-order-statistic-by-at-most-k-places" id="toc-fact-4-changing-k-records-moves-each-order-statistic-by-at-most-k-places" class="nav-link" data-scroll-target="#fact-4-changing-k-records-moves-each-order-statistic-by-at-most-k-places"><span class="header-section-number">23.2.4</span> Fact 4 — Changing <span class="math inline">\(k\)</span> records moves each order statistic by at most <span class="math inline">\(k\)</span> places</a></li>
+  </ul></li>
+  <li><a href="#sec-sens-local" id="toc-sec-sens-local" class="nav-link" data-scroll-target="#sec-sens-local"><span class="header-section-number">23.3</span> Local sensitivity, and why it leaks</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">23.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">23.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">23.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation-the-noise-scale-is-a-statistic" id="toc-interpretation-the-noise-scale-is-a-statistic" class="nav-link" data-scroll-target="#interpretation-the-noise-scale-is-a-statistic"><span class="header-section-number">23.3.4</span> Interpretation: the noise scale is a statistic</a></li>
+  <li><a href="#example-two-neighbours-with-the-same-median" id="toc-example-two-neighbours-with-the-same-median" class="nav-link" data-scroll-target="#example-two-neighbours-with-the-same-median"><span class="header-section-number">23.3.5</span> Example: two neighbours with the same median</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">23.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-sens-smooth" id="toc-sec-sens-smooth" class="nav-link" data-scroll-target="#sec-sens-smooth"><span class="header-section-number">23.4</span> Smooth sensitivity</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">23.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">23.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">23.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-why-heavy-tails-and-what-admissibility-means" id="toc-interpretation-why-heavy-tails-and-what-admissibility-means" class="nav-link" data-scroll-target="#interpretation-why-heavy-tails-and-what-admissibility-means"><span class="header-section-number">23.4.4</span> Interpretation: why heavy tails, and what admissibility means</a></li>
+  <li><a href="#computing-s-for-the-median" id="toc-computing-s-for-the-median" class="nav-link" data-scroll-target="#computing-s-for-the-median"><span class="header-section-number">23.4.5</span> Computing <span class="math inline">\(S^*\)</span> for the median</a></li>
+  <li><a href="#example-the-median-age" id="toc-example-the-median-age" class="nav-link" data-scroll-target="#example-the-median-age"><span class="header-section-number">23.4.6</span> Example: the median age</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">23.4.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-sens-ptr" id="toc-sec-sens-ptr" class="nav-link" data-scroll-target="#sec-sens-ptr"><span class="header-section-number">23.5</span> Propose-test-release</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">23.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">23.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">23.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">23.5.4</span> Interpretation</a></li>
+  <li><a href="#example-the-median-age-1" id="toc-example-the-median-age-1" class="nav-link" data-scroll-target="#example-the-median-age-1"><span class="header-section-number">23.5.5</span> Example: the median age</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">23.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-sens-saa" id="toc-sec-sens-saa" class="nav-link" data-scroll-target="#sec-sens-saa"><span class="header-section-number">23.6</span> Subsample-and-aggregate</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">23.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">23.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">23.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">23.6.4</span> Interpretation</a></li>
+  <li><a href="#example-estimating-a-rate" id="toc-example-estimating-a-rate" class="nav-link" data-scroll-target="#example-estimating-a-rate"><span class="header-section-number">23.6.5</span> Example: estimating a rate</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">23.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-sens-clip" id="toc-sec-sens-clip" class="nav-link" data-scroll-target="#sec-sens-clip"><span class="header-section-number">23.7</span> Clipping</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">23.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">23.7.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">23.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">23.7.4</span> Interpretation</a></li>
+  <li><a href="#example-mean-income" id="toc-example-mean-income" class="nav-link" data-scroll-target="#example-mean-income"><span class="header-section-number">23.7.5</span> Example: mean income</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">23.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-every-number-by-computation" id="toc-code-check-every-number-by-computation" class="nav-link" data-scroll-target="#code-check-every-number-by-computation"><span class="header-section-number">23.8</span> Code: check every number by computation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">23.9</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">23.10</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/06-sensitivity.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="23.1">
+<h2 data-number="23.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">23.1</span> Why this matters</h2>
+<p>The <a href="../part03-dp-foundations/03-laplace-gaussian.html">Laplace and Gaussian mechanisms</a> answer a numeric query <span class="math inline">\(f\)</span> by adding random noise to the true answer, and they set the size of that noise by the <strong>global sensitivity</strong>: the most that changing one record can move <span class="math inline">\(f\)</span>, looking at <em>every</em> pair of neighbouring datasets that could exist, not just at yours. In symbols, <span class="math inline">\(\Delta f = \max_{D \simeq D'}|f(D) - f(D')|\)</span>, where <span class="math inline">\(D \simeq D'\)</span> means the two datasets are neighbours. For counts and bounded sums this is the right scale: one person changes a count by at most 1, whatever the data. For many other statistics it is hopeless, for three different reasons.</p>
+<p>The first is that the worst case can be absurd. The <strong>median</strong> of ages in <span class="math inline">\([0, 100]\)</span> has global sensitivity 100. To see it, take a dataset in which half the people are 0 and half are 100, with one more person at 0 so that the median is 0. Replacing that one person by a 100-year-old moves the median from one end to the other. So the Laplace mechanism must add noise of scale <span class="math inline">\(100/\varepsilon\)</span>, which swamps any real answer, even though no realistic dataset of ages looks like this. The second is that the worst case can be infinite. The <strong>mean of unbounded data</strong> (incomes, session lengths, gradient norms) can be moved arbitrarily far by one record, because that record can be arbitrarily large, so no amount of Laplace noise makes it private. The third is that the worst case can be unknown. For a <strong>statistic you can only compute</strong>, such as an estimator fitted by an algorithm, nobody knows how to bound how far one record moves it.</p>
+<p>Yet on the dataset you actually hold, the median of 1,001 ages typically moves by a tenth of a year when one person changes, because with that many people the ages near the middle are packed tightly together. That is the <strong>local sensitivity</strong>, and it is hundreds of times smaller than the global one. This chapter asks: <strong>can you add noise on the scale of the data you have, rather than the worst dataset there could be, and still satisfy differential privacy (DP)?</strong></p>
+<p>Recall what DP asks for. A randomized mechanism <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if, for every pair of neighbouring datasets <span class="math inline">\(D \simeq D'\)</span> and every set <span class="math inline">\(S\)</span> of outputs, <span class="math inline">\(\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta\)</span>: one record can change the probability of any outcome by at most a factor <span class="math inline">\(e^\varepsilon\)</span>, up to a small slack <span class="math inline">\(\delta\)</span>. With <span class="math inline">\(\delta = 0\)</span> this is <strong>pure</strong> <span class="math inline">\(\varepsilon\)</span>-DP. The answer to the question is yes, with one idea that organizes the whole chapter:</p>
+<blockquote class="blockquote">
+<p><strong>The noise scale is itself a function of the data, so it must be private too.</strong></p>
+</blockquote>
+<p>If you calibrate noise to the local sensitivity of your dataset, the <em>size</em> of the noise reveals something about the dataset: an observer who sees a release with very wide noise learns that the data were of the kind that has a large local sensitivity. That is enough to break the guarantee. Each technique of this chapter repairs this in a different way:</p>
+<ul>
+<li><strong>Smooth sensitivity</strong> replaces the local sensitivity by an upper bound that changes slowly between neighbours, so that the noise scale leaks little.</li>
+<li><strong>Propose-test-release</strong> proposes a noise scale, and privately tests whether the dataset is far from any dataset where that scale would be too small.</li>
+<li><strong>Subsample-and-aggregate</strong> makes the sensitivity small by construction: run the statistic on disjoint blocks and privately combine the block answers, each of which one record can affect only once.</li>
+<li><strong>Clipping</strong> forces bounded sensitivity on unbounded data, at the price of a bias that you trade against the noise.</li>
+</ul>
+<p><a href="#tbl-sens-uses" class="quarto-xref">Table&nbsp;<span>23.1</span></a> lists where each result is used.</p>
+<div id="tbl-sens-uses" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sens-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.1: The results of this chapter, what each gives you, and where it is used.
+</figcaption>
+<div aria-describedby="tbl-sens-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>What it gives you</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Local sensitivity and its leak</td>
+<td>Why “noise proportional to how sensitive <em>this</em> dataset is” fails</td>
+<td>The motivation for everything below</td>
+</tr>
+<tr class="even">
+<td>Smooth sensitivity and admissible noise</td>
+<td>Data-dependent noise with a proof: Cauchy-like noise for <span class="math inline">\(\varepsilon\)</span>-DP, Laplace for <span class="math inline">\((\varepsilon,\delta)\)</span>-DP</td>
+<td>Private medians, quantiles and robust statistics</td>
+</tr>
+<tr class="odd">
+<td>Smooth sensitivity of the median</td>
+<td>An exact <span class="math inline">\(O(n^2)\)</span> formula</td>
+<td>Private quantiles; choosing clip bounds</td>
+</tr>
+<tr class="even">
+<td>Propose-test-release</td>
+<td>Release with small noise if the data are stable, refuse otherwise</td>
+<td>Robust statistics (Dwork &amp; Lei 2009); stability-based release</td>
+</tr>
+<tr class="odd">
+<td>Subsample-and-aggregate</td>
+<td>Privacy for a black-box statistic</td>
+<td>Private model training by ensembles of teachers; estimators without known sensitivity</td>
+</tr>
+<tr class="even">
+<td>Clipping</td>
+<td>Bounded sensitivity for unbounded data, and the bias–variance trade-off of the clip bound</td>
+<td>Private means and sums; per-example gradient clipping in private training</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Throughout, datasets have a fixed size <span class="math inline">\(n\)</span> and <span class="math inline">\(D \simeq D'\)</span> means that <span class="math inline">\(D'\)</span> is obtained from <span class="math inline">\(D\)</span> by <strong>replacing</strong> one record (the bounded relation of <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>). The <strong>Hamming distance</strong> <span class="math inline">\(d(D, D')\)</span> counts the records in which two datasets differ, so neighbours are datasets at distance 1, and <span class="math inline">\(d(D, D'') = k\)</span> means you can walk from <span class="math inline">\(D\)</span> to <span class="math inline">\(D''\)</span> by changing one record at a time in <span class="math inline">\(k\)</span> steps. Every proof below compares the output densities <span class="math inline">\(p_{M(D)}\)</span> and <span class="math inline">\(p_{M(D')}\)</span> of a mechanism on two neighbours, point by point. The natural quantity for that is the log of their ratio at an output <span class="math inline">\(y\)</span>, the <strong>privacy loss</strong>: it says how much more likely <span class="math inline">\(y\)</span> is under <span class="math inline">\(D\)</span> than under <span class="math inline">\(D'\)</span>, and pure <span class="math inline">\(\varepsilon\)</span>-DP holds when it never exceeds <span class="math inline">\(\varepsilon\)</span>. In symbols, <span class="math inline">\(L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}\)</span>.</p>
+</section>
+<section id="toolkit-four-facts-every-derivation-uses" class="level2" data-number="23.2">
+<h2 data-number="23.2" class="anchored" data-anchor-id="toolkit-four-facts-every-derivation-uses"><span class="header-section-number">23.2</span> Toolkit: four facts every derivation uses</h2>
+<section id="fact-1-the-laplace-mechanism-with-global-sensitivity" class="level3" data-number="23.2.1">
+<h3 data-number="23.2.1" class="anchored" data-anchor-id="fact-1-the-laplace-mechanism-with-global-sensitivity"><span class="header-section-number">23.2.1</span> Fact 1 — The Laplace mechanism with global sensitivity</h3>
+<p>If one record never moves <span class="math inline">\(f\)</span> by more than <span class="math inline">\(\Delta\)</span>, then adding Laplace noise of scale <span class="math inline">\(\Delta/\varepsilon\)</span> is enough. Formally, if <span class="math inline">\(|f(D) - f(D')| \le \Delta\)</span> for all <span class="math inline">\(D \simeq D'\)</span>, then <span class="math inline">\(f(D) + \mathrm{Lap}(\Delta/\varepsilon)\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP. This is the <a href="../part03-dp-foundations/03-laplace-gaussian.html">Laplace mechanism</a>, and the reason is short. The Laplace density with centre <span class="math inline">\(\mu\)</span> and scale <span class="math inline">\(b\)</span> is <span class="math inline">\(\frac1{2b}e^{-|y - \mu|/b}\)</span>, so with <span class="math inline">\(b = \Delta/\varepsilon\)</span> the normalizing constants cancel in the ratio of the two densities, and the privacy loss is <span class="math inline">\(\big(|y - f(D')| - |y - f(D)|\big)\varepsilon/\Delta\)</span>. The triangle inequality says <span class="math inline">\(|y - f(D')| \le |y - f(D)| + |f(D) - f(D')|\)</span>, so the bracket is at most <span class="math inline">\(|f(D) - f(D')| \le \Delta\)</span>, and the loss is at most <span class="math inline">\(\varepsilon\)</span> at every <span class="math inline">\(y\)</span>. A density that is at most <span class="math inline">\(e^\varepsilon\)</span> times another at every point has at most <span class="math inline">\(e^\varepsilon\)</span> times its probability on every set (integrate over the set), which is <span class="math inline">\(\varepsilon\)</span>-DP. Every technique in this chapter ends by applying this fact, or a cousin of it, to something whose sensitivity <em>is</em> bounded.</p>
+</section>
+<section id="fact-2-a-tail-bound-on-the-privacy-loss-gives-varepsilon-delta" class="level3" data-number="23.2.2">
+<h3 data-number="23.2.2" class="anchored" data-anchor-id="fact-2-a-tail-bound-on-the-privacy-loss-gives-varepsilon-delta"><span class="header-section-number">23.2.2</span> Fact 2 — A tail bound on the privacy loss gives <span class="math inline">\((\varepsilon, \delta)\)</span></h3>
+<p>Some mechanisms in this chapter have a privacy loss that is at most <span class="math inline">\(\varepsilon\)</span> for almost every output, but not for all of them. This fact says that is enough for <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, with <span class="math inline">\(\delta\)</span> the probability of the rare outputs where the loss is too large. For every set <span class="math inline">\(S\)</span> of outputs, <span id="eq-sens-loss-tail"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon \Pr[M(D') \in S] + \Pr_{y \sim M(D)}\big[L_{D,D'}(y) &gt; \varepsilon\big]. \tag{23.1}\]</span></span></p>
+<p>The proof splits <span class="math inline">\(S\)</span> into the outputs where the loss is small and those where it is large: <span class="math inline">\(S_1 = S \cap \{L \le \varepsilon\}\)</span> and <span class="math inline">\(S_2 = S \cap \{L &gt; \varepsilon\}\)</span>. On <span class="math inline">\(S_1\)</span> the loss is at most <span class="math inline">\(\varepsilon\)</span>, which says exactly that the densities satisfy <span class="math inline">\(p_{M(D)} \le e^\varepsilon p_{M(D')}\)</span> there, so integrating over <span class="math inline">\(S_1\)</span> gives <span class="math inline">\(\Pr[M(D) \in S_1] \le e^\varepsilon\Pr[M(D') \in S_1] \le e^\varepsilon\Pr[M(D') \in S]\)</span>. On <span class="math inline">\(S_2\)</span> you give up comparing and just bound the probability: <span class="math inline">\(\Pr[M(D) \in S_2]\)</span> is at most the probability that the loss exceeds <span class="math inline">\(\varepsilon\)</span> at all, <span class="math inline">\(\Pr_{M(D)}[L &gt; \varepsilon]\)</span>. Adding the two pieces gives <a href="#eq-sens-loss-tail" class="quarto-xref">Equation&nbsp;<span>23.1</span></a>.</p>
+<p>So if the privacy loss exceeds <span class="math inline">\(\varepsilon\)</span> only with probability <span class="math inline">\(\delta\)</span>, the mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. This “bad event” argument is behind every <span class="math inline">\(\delta\)</span> in this chapter.</p>
+</section>
+<section id="fact-3-distances-to-a-set-have-sensitivity-1" class="level3" data-number="23.2.3">
+<h3 data-number="23.2.3" class="anchored" data-anchor-id="fact-3-distances-to-a-set-have-sensitivity-1"><span class="header-section-number">23.2.3</span> Fact 3 — Distances to a set have sensitivity 1</h3>
+<p>A question of the form “how many records would have to change before something bad happens?” has an answer that one record can change by at most 1. Formally, for any set <span class="math inline">\(\mathcal B\)</span> of datasets (the “bad” ones), let <span class="math inline">\(\operatorname{dist}(D, \mathcal B) = \min_{D'' \in \mathcal B} d(D, D'')\)</span> be the number of changes needed to reach the nearest of them. Then <span class="math inline">\(|\operatorname{dist}(D, \mathcal B) - \operatorname{dist}(D', \mathcal B)| \le 1\)</span> for <span class="math inline">\(D \simeq D'\)</span>.</p>
+<p>The reason is that a path from <span class="math inline">\(D'\)</span> to a bad dataset can always go through <span class="math inline">\(D\)</span> first, at the cost of one extra step. In terms of the Hamming distance, which satisfies the triangle inequality, <span class="math inline">\(d(D', D'') \le d(D', D) + d(D, D'') = 1 + d(D, D'')\)</span> for every <span class="math inline">\(D''\)</span>. Minimizing both sides over <span class="math inline">\(D'' \in \mathcal B\)</span> gives <span class="math inline">\(\operatorname{dist}(D', \mathcal B) \le 1 + \operatorname{dist}(D, \mathcal B)\)</span>, and the same argument with <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> exchanged gives the other direction. So such a count can be released with <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> noise by Fact 1. Propose-test-release is built on it.</p>
+</section>
+<section id="fact-4-changing-k-records-moves-each-order-statistic-by-at-most-k-places" class="level3" data-number="23.2.4">
+<h3 data-number="23.2.4" class="anchored" data-anchor-id="fact-4-changing-k-records-moves-each-order-statistic-by-at-most-k-places"><span class="header-section-number">23.2.4</span> Fact 4 — Changing <span class="math inline">\(k\)</span> records moves each order statistic by at most <span class="math inline">\(k\)</span> places</h3>
+<p>If you change <span class="math inline">\(k\)</span> records, the <span class="math inline">\(j\)</span>-th smallest value can move, but only as far as the <span class="math inline">\((j-k)\)</span>-th or <span class="math inline">\((j+k)\)</span>-th smallest value of the original data. To state it, sort the values of <span class="math inline">\(D\)</span> as <span class="math inline">\(x_1 \le \dots \le x_n\)</span> (the <strong>order statistics</strong>), all in <span class="math inline">\([0, \Lambda]\)</span>. Ranks <span class="math inline">\(j - k\)</span> or <span class="math inline">\(j + k\)</span> can fall outside <span class="math inline">\(1, \dots, n\)</span>, so pad with <span class="math inline">\(x_i = 0\)</span> for <span class="math inline">\(i \le 0\)</span> and <span class="math inline">\(x_i = \Lambda\)</span> for <span class="math inline">\(i &gt; n\)</span>: “below the smallest” means “possibly as low as 0”, and “above the largest” means “possibly as high as <span class="math inline">\(\Lambda\)</span>”. If <span class="math inline">\(D''\)</span> differs from <span class="math inline">\(D\)</span> in at most <span class="math inline">\(k\)</span> records and has sorted values <span class="math inline">\(y_1 \le \dots \le y_n\)</span>, then <span id="eq-auto-06sensitivity-1"><span class="math display">\[x_{j-k} \le y_j \le x_{j+k} \quad\text{for every } j. \tag{23.2}\]</span></span></p>
+<p>For the upper bound, count the values below <span class="math inline">\(x_{j+k}\)</span>. At least <span class="math inline">\(j + k\)</span> values of <span class="math inline">\(D\)</span> are <span class="math inline">\(\le x_{j+k}\)</span> (when <span class="math inline">\(j + k &gt; n\)</span> the padding sets <span class="math inline">\(x_{j+k} = \Lambda\)</span>, which bounds every value, so the claim is trivially true). Changing <span class="math inline">\(k\)</span> records removes at most <span class="math inline">\(k\)</span> of them, so at least <span class="math inline">\(j\)</span> values of <span class="math inline">\(D''\)</span> are still <span class="math inline">\(\le x_{j+k}\)</span>, and that says the <span class="math inline">\(j\)</span>-th smallest value of <span class="math inline">\(D''\)</span> is at most <span class="math inline">\(x_{j+k}\)</span>: <span class="math inline">\(y_j \le x_{j+k}\)</span>. The lower bound is the same argument counting values above <span class="math inline">\(x_{j-k}\)</span>. This fact pins down how far the median of a modified dataset can travel.</p>
+</section>
+</section>
+<section id="sec-sens-local" class="level2" data-number="23.3">
+<h2 data-number="23.3" class="anchored" data-anchor-id="sec-sens-local"><span class="header-section-number">23.3</span> Local sensitivity, and why it leaks</h2>
+<section id="context" class="level3" data-number="23.3.1">
+<h3 data-number="23.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">23.3.1</span> Context</h3>
+<p>Global sensitivity takes a maximum over all pairs of neighbours, including pathological ones that look nothing like your data. The natural fix is to take the maximum only over the neighbours of the dataset you hold. That gives a much smaller number. But adding noise proportional to it is not private, and seeing exactly why is the key to everything else in this chapter.</p>
+</section>
+<section id="statement" class="level3" data-number="23.3.2">
+<h3 data-number="23.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">23.3.2</span> Statement</h3>
+<p>The <strong>local sensitivity</strong> of <span class="math inline">\(f\)</span> at <span class="math inline">\(D\)</span> is the most that one record can move <span class="math inline">\(f\)</span> starting from <span class="math inline">\(D\)</span> itself, rather than from the worst dataset: <span id="eq-auto-06sensitivity-2"><span class="math display">\[\mathrm{LS}_f(D) = \max_{D':\ d(D, D') = 1}|f(D) - f(D')|, \tag{23.3}\]</span></span> and the global sensitivity is its worst case over all datasets, <span class="math inline">\(\Delta f = \max_D \mathrm{LS}_f(D)\)</span>.</p>
+<p>For the median, one change can push the median at most one place up or down the sorted list, so its local sensitivity is the larger of the two gaps next to it. Take <span class="math inline">\(n\)</span> values in <span class="math inline">\([0, \Lambda]\)</span>, with <span class="math inline">\(n\)</span> odd and <span class="math inline">\(m = (n+1)/2\)</span> the rank of the median, so that the median is <span class="math inline">\(x_m\)</span>. Then <span id="eq-sens-median-ls"><span class="math display">\[\mathrm{LS}_{\mathrm{med}}(D) = \max\big(x_m - x_{m-1},\ x_{m+1} - x_m\big), \qquad \Delta\,\mathrm{med} = \Lambda. \tag{23.4}\]</span></span></p>
+</section>
+<section id="derivation" class="level3" data-number="23.3.3">
+<h3 data-number="23.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">23.3.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>The median of a neighbour lies between <span class="math inline">\(x_{m-1}\)</span> and <span class="math inline">\(x_{m+1}\)</span>.</strong> This is Fact 4 with <span class="math inline">\(k = 1\)</span> change and rank <span class="math inline">\(j = m\)</span>. So the median moves from <span class="math inline">\(x_m\)</span> by at most the larger of the gaps to its two sorted neighbours: <span class="math inline">\(|\mathrm{med}(D') - x_m| \le \max(x_m - x_{m-1}, x_{m+1} - x_m)\)</span>.</li>
+<li><strong>Both ends are reached.</strong> To show the bound is attained, move the median value itself to an extreme. Replace <span class="math inline">\(x_m\)</span> by <span class="math inline">\(\Lambda\)</span>: the sorted values become <span class="math inline">\(x_1, \dots, x_{m-1}, x_{m+1}, \dots, x_n, \Lambda\)</span>, and the <span class="math inline">\(m\)</span>-th of them is <span class="math inline">\(x_{m+1}\)</span>. Replace <span class="math inline">\(x_m\)</span> by 0 instead, and everything above it keeps its rank while the new 0 goes first, so the <span class="math inline">\(m\)</span>-th value becomes <span class="math inline">\(x_{m-1}\)</span>. So the bound of step 1 is attained, which is <a href="#eq-sens-median-ls" class="quarto-xref">Equation&nbsp;<span>23.4</span></a>.</li>
+<li><strong>The global sensitivity is <span class="math inline">\(\Lambda\)</span>.</strong> Take <span class="math inline">\(m\)</span> values equal to 0 and <span class="math inline">\(m - 1\)</span> equal to <span class="math inline">\(\Lambda\)</span>. Then <span class="math inline">\(x_m = 0\)</span> and <span class="math inline">\(x_{m+1} = \Lambda\)</span>, so <a href="#eq-sens-median-ls" class="quarto-xref">Equation&nbsp;<span>23.4</span></a> gives <span class="math inline">\(\Lambda\)</span>, and no dataset can do worse because every value lies in <span class="math inline">\([0, \Lambda]\)</span>, so no gap exceeds <span class="math inline">\(\Lambda\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-the-noise-scale-is-a-statistic" class="level3" data-number="23.3.4">
+<h3 data-number="23.3.4" class="anchored" data-anchor-id="interpretation-the-noise-scale-is-a-statistic"><span class="header-section-number">23.3.4</span> Interpretation: the noise scale is a statistic</h3>
+<p>Consider the mechanism that adds Laplace noise scaled to the local sensitivity of the data it is given, <span class="math inline">\(M_{\mathrm{LS}}(D) = f(D) + \mathrm{Lap}(\mathrm{LS}_f(D)/\varepsilon)\)</span>. Its noise scale is the function <span class="math inline">\(\mathrm{LS}_f\)</span> of the data, and <strong><span class="math inline">\(\mathrm{LS}_f\)</span> itself can have large sensitivity</strong>: one record can change the local sensitivity of the median from 0 to <span class="math inline">\(\Lambda\)</span>. The mechanism then releases <span class="math inline">\(f(D)\)</span> with no noise on one dataset and with enormous noise on its neighbour, and the noise level alone tells the two apart, even when <span class="math inline">\(f\)</span> is the same on both.</p>
+<p>The degenerate case makes this stark (Nissim, Raskhodnikova &amp; Smith 2007, Example 1). With <span class="math inline">\(n = 5\)</span> and <span class="math inline">\(\Lambda = 100\)</span>, the dataset <span class="math inline">\(D = (0, 0, 0, 0, 100)\)</span> has median 0, and both gaps next to the median are 0, so <span class="math inline">\(\mathrm{LS} = 0\)</span> and <span class="math inline">\(M_{\mathrm{LS}}(D) = 0\)</span> exactly. Its neighbour <span class="math inline">\(D' = (0, 0, 0, 100, 100)\)</span> also has median 0, but the gap above the median is now 100, so <span class="math inline">\(\mathrm{LS} = 100\)</span> and <span class="math inline">\(M_{\mathrm{LS}}(D')\)</span> has a continuous distribution, which equals 0 with probability 0. The event “the output is exactly 0” has probability 1 under <span class="math inline">\(D\)</span> and 0 under <span class="math inline">\(D'\)</span>. No finite <span class="math inline">\(\varepsilon\)</span> and no <span class="math inline">\(\delta &lt; 1\)</span> cover that, because the DP inequality would need <span class="math inline">\(1 \le e^\varepsilon \cdot 0 + \delta\)</span>.</p>
+</section>
+<section id="example-two-neighbours-with-the-same-median" class="level3" data-number="23.3.5">
+<h3 data-number="23.3.5" class="anchored" data-anchor-id="example-two-neighbours-with-the-same-median"><span class="header-section-number">23.3.5</span> Example: two neighbours with the same median</h3>
+<p>The leak does not need a degenerate dataset. Take <span class="math inline">\(\Lambda = 100\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>, and the two datasets of <a href="#tbl-sens-leak" class="quarto-xref">Table&nbsp;<span>23.2</span></a>, which differ in one record and have the same median, but whose local sensitivities differ by a factor of six.</p>
+<div id="tbl-sens-leak" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sens-leak-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.2: Two neighbouring datasets with the same median and very different local sensitivities.
+</figcaption>
+<div aria-describedby="tbl-sens-leak-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Dataset</th>
+<th>Values</th>
+<th>Median</th>
+<th><span class="math inline">\(\mathrm{LS}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(D\)</span></td>
+<td>10, 20, 30, 31, 90</td>
+<td>30</td>
+<td><span class="math inline">\(\max(30 - 20, 31 - 30) = 10\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(D'\)</span> (31 replaced by 90)</td>
+<td>10, 20, 30, 90, 90</td>
+<td>30</td>
+<td><span class="math inline">\(\max(30 - 20, 90 - 30) = 60\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The two releases are <span class="math inline">\(30 + \mathrm{Lap}(10)\)</span> and <span class="math inline">\(30 + \mathrm{Lap}(60)\)</span>. They have the same centre, so the privacy loss depends only on the distance <span class="math inline">\(u = |y - 30|\)</span> from it. Far from the centre the wide density is much larger than the narrow one, because the narrow one decays six times faster, so the loss should grow with <span class="math inline">\(u\)</span>. Writing the two Laplace densities <span class="math inline">\(\frac1{2b}e^{-u/b}\)</span> with <span class="math inline">\(b = 60\)</span> and <span class="math inline">\(b = 10\)</span> and taking the log of their ratio: <span id="eq-auto-06sensitivity-3"><span class="math display">\[L_{D',D}(y) = \ln\frac{e^{-u/60}/120}{e^{-u/10}/20} = -\ln 6 + u\Big(\frac1{10} - \frac1{60}\Big) = -1.792 + \frac{u}{12}. \tag{23.5}\]</span></span> The constant is <span class="math inline">\(\ln(20/120) = -\ln 6 = -1.792\)</span>, and the slope is <span class="math inline">\(\frac{6 - 1}{60} = \frac1{12}\)</span>. The loss grows without bound in <span class="math inline">\(u\)</span> (<a href="#fig-sens-local-leak" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>), so no pure <span class="math inline">\(\varepsilon\)</span> can hold. It exceeds <span class="math inline">\(\varepsilon = 1\)</span> once <span class="math inline">\(-\ln 6 + u/12 &gt; 1\)</span>, that is once <span class="math inline">\(u &gt; 12(1 + \ln 6) = 33.50\)</span>. A Laplace variable of scale <span class="math inline">\(b\)</span> lands more than <span class="math inline">\(u\)</span> from its centre with probability <span class="math inline">\(e^{-u/b}\)</span>, so this happens with probability <span class="math inline">\(e^{-33.5/60} = 0.572\)</span> under <span class="math inline">\(D'\)</span> and <span class="math inline">\(e^{-33.5/10} = 0.0351\)</span> under <span class="math inline">\(D\)</span>.</p>
+<p>How large must <span class="math inline">\(\delta\)</span> be for this pair? The smallest <span class="math inline">\(\delta\)</span> for which the pair satisfies the <span class="math inline">\((1, \delta)\)</span> inequality is the <strong>hockey-stick divergence</strong> of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>: the largest gap <span class="math inline">\(\Pr[M(D') \in S] - e^{1}\Pr[M(D) \in S]\)</span> over all sets <span class="math inline">\(S\)</span>, which is attained by taking <span class="math inline">\(S\)</span> to be exactly the outputs where the loss exceeds 1. The script computes it as <span class="math inline">\(0.477\)</span> in the direction <span class="math inline">\(D'\)</span> against <span class="math inline">\(D\)</span> (and <span class="math inline">\(0.215\)</span> in the other direction). An adversary who sees a value more than 34 away from 30 can bet on <span class="math inline">\(D'\)</span> and be right far more often than any reasonable <span class="math inline">\((\varepsilon, \delta)\)</span> allows. This is the distinguishing game of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>, in which an adversary who knows both candidate datasets sees one release and guesses which dataset produced it. Here it wins by looking at the spread of the noise, not its centre.</p>
+<div id="fig-sens-local-leak" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sens-local-leak-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sens_local_leak.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sens-local-leak-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.1: Left: the densities of the median of <span class="math inline">\(D\)</span> and of <span class="math inline">\(D'\)</span> released with Laplace noise scaled to their own local sensitivities, 10 and 60. Right: the privacy loss <span class="math inline">\(L_{D',D}(y)\)</span> grows linearly in <span class="math inline">\(|y - 30|\)</span> and crosses <span class="math inline">\(\varepsilon = 1\)</span> at distance 33.5.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself" class="level3" data-number="23.3.6">
+<h3 data-number="23.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">23.3.6</span> Check yourself</h3>
+<ul>
+<li>Is <span class="math inline">\(\mathrm{LS}_f(D) \le \Delta f\)</span> always, and when are they equal? <em>(Always, since the global sensitivity is the maximum of the local one over all datasets. They are equal at the datasets where that maximum is attained, such as half zeros and half <span class="math inline">\(\Lambda\)</span> for the median.)</em></li>
+<li>Why doesn’t the Laplace proof of Fact 1 go through for <span class="math inline">\(M_{\mathrm{LS}}\)</span>? <em>(It needs the same scale <span class="math inline">\(\Delta\)</span> on both sides. With scales <span class="math inline">\(b \ne b'\)</span> the loss contains <span class="math inline">\(|y - f(D')|/b' - |y - f(D)|/b\)</span>, whose slopes no longer cancel, so it is unbounded in <span class="math inline">\(y\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-sens-smooth" class="level2" data-number="23.4">
+<h2 data-number="23.4" class="anchored" data-anchor-id="sec-sens-smooth"><span class="header-section-number">23.4</span> Smooth sensitivity</h2>
+<section id="context-1" class="level3" data-number="23.4.1">
+<h3 data-number="23.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">23.4.1</span> Context</h3>
+<p>The leak came from the noise scale jumping between neighbours. So use a noise scale that cannot jump: an upper bound on the local sensitivity whose <em>logarithm</em> changes by at most <span class="math inline">\(\beta\)</span> between neighbours, so that the scale itself changes by at most a factor <span class="math inline">\(e^\beta\)</span>. A change by a bounded <em>factor</em> is the right kind of control, because a privacy loss is a log-ratio: rescaling the noise by <span class="math inline">\(e^\beta\)</span> shifts log-densities by about <span class="math inline">\(\beta\)</span>. Nissim, Raskhodnikova &amp; Smith (2007) call such a bound smooth, find the smallest one, and show which noise distributions can be scaled by it. Two questions need answers: how to compute the bound, and which noise makes the result private.</p>
+</section>
+<section id="statement-1" class="level3" data-number="23.4.2">
+<h3 data-number="23.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">23.4.2</span> Statement</h3>
+<p>A function <span class="math inline">\(S\)</span> is a <strong><span class="math inline">\(\beta\)</span>-smooth upper bound</strong> on <span class="math inline">\(\mathrm{LS}_f\)</span> if it is never below the local sensitivity and changes by at most a factor <span class="math inline">\(e^\beta\)</span> between neighbours: <span id="eq-auto-06sensitivity-4"><span class="math display">\[S(D) \ge \mathrm{LS}_f(D) \quad\text{and}\quad S(D) \le e^\beta S(D') \quad\text{for all } D \simeq D'. \tag{23.6}\]</span></span> The smallest such bound has an explicit form. If some dataset <span class="math inline">\(D''\)</span> at distance <span class="math inline">\(k\)</span> has a large local sensitivity, a smooth bound cannot be small at <span class="math inline">\(D\)</span>, because it can only decrease by a factor <span class="math inline">\(e^{-\beta}\)</span> per step on the way from <span class="math inline">\(D''\)</span> to <span class="math inline">\(D\)</span>. So the bound at <span class="math inline">\(D\)</span> must be at least <span class="math inline">\(\mathrm{LS}_f(D'')e^{-\beta k}\)</span> for every <span class="math inline">\(D''\)</span>, and the <strong><span class="math inline">\(\beta\)</span>-smooth sensitivity</strong> takes exactly the largest of these: <span id="eq-sens-smooth"><span class="math display">\[S^*_{f,\beta}(D) = \max_{D''}\ \mathrm{LS}_f(D'')\,e^{-\beta\,d(D, D'')} \tag{23.7}\]</span></span> It is a <span class="math inline">\(\beta\)</span>-smooth upper bound, and it is the smallest one: <span class="math inline">\(S^*_{f,\beta}(D) \le S(D)\)</span> for every <span class="math inline">\(\beta\)</span>-smooth upper bound <span class="math inline">\(S\)</span>.</p>
+<p>The mechanism adds noise from a fixed shape, stretched by <span class="math inline">\(S(D)\)</span>: <span id="eq-sens-smooth-mech"><span class="math display">\[M(D) = f(D) + \frac{S(D)}{\alpha}\,Z, \tag{23.8}\]</span></span> where <span class="math inline">\(Z\)</span> is drawn from a fixed density <span class="math inline">\(h\)</span> and <span class="math inline">\(\alpha &gt; 0\)</span> is a constant that sets how many noise scales one record’s shift is worth. Which <span class="math inline">\(h\)</span> work is the content of the next two results. They differ in how heavy the tail of <span class="math inline">\(h\)</span> is, and the derivation will show why that matters: the noise scale differs between neighbours, and a light-tailed density compared with a stretched copy of itself has a log-ratio that grows without bound in the tail, as in the example of <a href="#tbl-sens-leak" class="quarto-xref">Table&nbsp;<span>23.2</span></a>.</p>
+<p><strong>Pure DP with Cauchy-like noise.</strong> Let <span class="math inline">\(h_\gamma(z) \propto 1/(1 + |z|^\gamma)\)</span> with <span class="math inline">\(\gamma &gt; 1\)</span>, a density whose tails decay like the power <span class="math inline">\(|z|^{-\gamma}\)</span> (<span class="math inline">\(\gamma = 2\)</span> is the standard Cauchy). If <span class="math inline">\(S\)</span> is a <span class="math inline">\(\beta\)</span>-smooth upper bound and the sources of privacy loss together fit within the budget (the shift of the centre is worth <span class="math inline">\(\gamma\alpha\)</span>, and the change of scale is worth <span class="math inline">\(\beta\)</span> through the density’s normalizing factor plus <span class="math inline">\(\gamma\beta\)</span> through the stretch of its shape), <span id="eq-sens-cauchy-cond"><span class="math display">\[\gamma\alpha + (\gamma + 1)\beta \le \varepsilon, \tag{23.9}\]</span></span> then <a href="#eq-sens-smooth-mech" class="quarto-xref">Equation&nbsp;<span>23.8</span></a> is <span class="math inline">\(\varepsilon\)</span>-DP. Nissim, Raskhodnikova &amp; Smith (2007, Lemma 2.7) use <span class="math inline">\(\alpha = \beta = \varepsilon/(2(\gamma + 1))\)</span>, which satisfies <a href="#eq-sens-cauchy-cond" class="quarto-xref">Equation&nbsp;<span>23.9</span></a> with room to spare. For the Cauchy, <span class="math inline">\(\gamma = 2\)</span> gives <span class="math inline">\(\alpha = \beta = \varepsilon/6\)</span>, the often-quoted release <span class="math inline">\(f(D) + \frac{6}{\varepsilon}S^*_{f,\varepsilon/6}(D)\cdot Z\)</span>.</p>
+<p><strong>Approximate DP with Laplace noise.</strong> Let <span class="math inline">\(Z \sim \mathrm{Lap}(1)\)</span>, the Laplace density <span class="math inline">\(\frac12e^{-|z|}\)</span>. Its tail is too light for pure DP, so the condition gains a term that charges for the rare draws of size above <span class="math inline">\(\ln(1/\delta)\)</span>. If <span class="math inline">\(S\)</span> is a <span class="math inline">\(\beta\)</span>-smooth upper bound and <span id="eq-sens-laplace-cond"><span class="math display">\[\beta + e^\beta\alpha + (e^\beta - 1)\ln(1/\delta) \le \varepsilon, \tag{23.10}\]</span></span> then <a href="#eq-sens-smooth-mech" class="quarto-xref">Equation&nbsp;<span>23.8</span></a> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. Nissim, Raskhodnikova &amp; Smith (2007, Lemma 2.9) prove a version with a slightly different split of the budget, <span class="math inline">\(\alpha = \varepsilon/2\)</span> and <span class="math inline">\(\beta = \varepsilon/(2\ln(2/\delta))\)</span>. Because the third term is roughly <span class="math inline">\(\beta\ln(1/\delta)\)</span> for small <span class="math inline">\(\beta\)</span>, here <span class="math inline">\(\beta\)</span> must shrink like <span class="math inline">\(1/\ln(1/\delta)\)</span>, and no <span class="math inline">\(\beta &gt; 0\)</span> gives pure DP with Laplace noise.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="23.4.3">
+<h3 data-number="23.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">23.4.3</span> Derivation</h3>
+<p><strong><span class="math inline">\(S^*\)</span> is a smooth upper bound, and the smallest one.</strong></p>
+<ol type="1">
+<li><em>Upper bound.</em> One of the datasets in the maximum of <a href="#eq-sens-smooth" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> is <span class="math inline">\(D'' = D\)</span> itself, at distance 0, which contributes <span class="math inline">\(\mathrm{LS}_f(D)e^0 = \mathrm{LS}_f(D)\)</span>. A maximum is at least each of its terms, so <span class="math inline">\(S^*_{f,\beta}(D) \ge \mathrm{LS}_f(D)\)</span>.</li>
+<li><em>Smooth.</em> Moving from <span class="math inline">\(D\)</span> to a neighbour <span class="math inline">\(D'\)</span> makes every dataset at most one step further away: <span class="math inline">\(d(D', D'') \le d(D, D'') + 1\)</span>, by the triangle inequality of Fact 3. So each term <span class="math inline">\(\mathrm{LS}_f(D'')e^{-\beta d(D', D'')}\)</span> of <span class="math inline">\(S^*(D')\)</span> is at least <span class="math inline">\(e^{-\beta}\)</span> times the term for the same <span class="math inline">\(D''\)</span> in <span class="math inline">\(S^*(D)\)</span>. Taking the maximum over <span class="math inline">\(D''\)</span> on both sides, <span class="math inline">\(S^*(D') \ge e^{-\beta}S^*(D)\)</span>. Nothing in this argument depended on which of the two neighbours was called <span class="math inline">\(D\)</span>, so running it with <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> exchanged gives <span class="math inline">\(S^*(D) \ge e^{-\beta}S^*(D')\)</span>, the smoothness condition.</li>
+<li><em>Smallest.</em> This is the argument that motivated the definition. Let <span class="math inline">\(S\)</span> be any <span class="math inline">\(\beta\)</span>-smooth upper bound and <span class="math inline">\(D''\)</span> any dataset at distance <span class="math inline">\(k\)</span> from <span class="math inline">\(D\)</span>. Walk from <span class="math inline">\(D''\)</span> to <span class="math inline">\(D\)</span> through <span class="math inline">\(k\)</span> neighbours; smoothness lets <span class="math inline">\(S\)</span> drop by at most a factor <span class="math inline">\(e^{-\beta}\)</span> per step, so <span class="math inline">\(S(D) \ge e^{-\beta k}S(D'')\)</span>, and <span class="math inline">\(S(D'') \ge \mathrm{LS}_f(D'')\)</span> because <span class="math inline">\(S\)</span> is an upper bound. So <span class="math inline">\(S(D) \ge e^{-\beta k}\mathrm{LS}_f(D'')\)</span> for every <span class="math inline">\(D''\)</span>; maximize over <span class="math inline">\(D''\)</span>.</li>
+</ol>
+<p><strong>Pure DP for Cauchy-like noise.</strong> The plan is to write the privacy loss at an output <span class="math inline">\(y\)</span> as a sum of three pieces, one for each way the two output distributions differ (their scales differ, their centres differ, and the noise draw that explains <span class="math inline">\(y\)</span> is stretched), and to bound each piece by smoothness or by the upper-bound property.</p>
+<ol type="1">
+<li><em>Write out the privacy loss.</em> Stretching <span class="math inline">\(Z\)</span> by <span class="math inline">\(S(D)/\alpha\)</span> divides its density by that factor, so the density of <span class="math inline">\(M(D)\)</span> at <span class="math inline">\(y\)</span> is <span class="math inline">\(\frac{\alpha}{S(D)}h\big(z\big)\)</span>, where <span class="math inline">\(z = \alpha\frac{y - f(D)}{S(D)}\)</span> is the noise draw that would produce <span class="math inline">\(y\)</span> from <span class="math inline">\(D\)</span>. Likewise that of <span class="math inline">\(M(D')\)</span> is <span class="math inline">\(\frac{\alpha}{S(D')}h(z')\)</span> with <span class="math inline">\(z' = \alpha\frac{y - f(D')}{S(D')}\)</span>. To compare the two draws, substitute <span class="math inline">\(y = f(D) + S(D)z/\alpha\)</span> into <span class="math inline">\(z'\)</span>: <span class="math inline">\(z' = \frac{S(D)}{S(D')}\big(z + \alpha\frac{f(D) - f(D')}{S(D)}\big)\)</span>. That is, <span class="math inline">\(z'\)</span> is <span class="math inline">\(z\)</span> shifted and then stretched: <span id="eq-auto-06sensitivity-5"><span class="math display">\[z' = e^{\lambda}(z + \Delta), \qquad e^\lambda = \frac{S(D)}{S(D')},\quad \Delta = \alpha\,\frac{f(D) - f(D')}{S(D)}. \tag{23.11}\]</span></span> (Here <span class="math inline">\(\Delta\)</span> is this shift, not the global sensitivity.) The log of the ratio of the two densities splits into the ratio of the prefactors and the ratio of <span class="math inline">\(h\)</span> at <span class="math inline">\(z\)</span> and at <span class="math inline">\(z'\)</span>, and inserting <span class="math inline">\(h(z + \Delta)\)</span> in the middle splits the second part into the shift and the stretch: <span id="eq-auto-06sensitivity-6"><span class="math display">\[L_{D,D'}(y) = \underbrace{\ln\frac{S(D')}{S(D)}}_{\text{scale}} + \underbrace{\ln\frac{h(z)}{h(z + \Delta)}}_{\text{sliding}} + \underbrace{\ln\frac{h(z + \Delta)}{h(e^\lambda(z + \Delta))}}_{\text{dilation}}. \tag{23.12}\]</span></span></li>
+<li><em>Size of the shift and the stretch.</em> Smoothness says <span class="math inline">\(S(D)/S(D')\)</span> lies between <span class="math inline">\(e^{-\beta}\)</span> and <span class="math inline">\(e^\beta\)</span>, so <span class="math inline">\(|\lambda| \le \beta\)</span>. And one record moves <span class="math inline">\(f\)</span> by at most the local sensitivity, which is at most <span class="math inline">\(S(D)\)</span>: <span class="math inline">\(|f(D) - f(D')| \le \mathrm{LS}_f(D) \le S(D)\)</span>, so <span class="math inline">\(|\Delta| \le \alpha\)</span>. This is the only place where “<span class="math inline">\(S\)</span> is an upper bound on the local sensitivity” enters.</li>
+<li><em>Scale term:</em> at most <span class="math inline">\(\beta\)</span>, by smoothness again.</li>
+<li><em>Sliding term.</em> The question is how fast <span class="math inline">\(-\ln h\)</span> can change when its argument shifts by <span class="math inline">\(|\Delta|\)</span>. Write <span class="math inline">\(\varphi(u) = \ln(1 + u^\gamma)\)</span> for <span class="math inline">\(u \ge 0\)</span>, so <span class="math inline">\(-\ln h_\gamma(z) = \varphi(|z|) + \text{const}\)</span>. Its slope is <span class="math inline">\(\varphi'(u) = \gamma u^{\gamma-1}/(1 + u^\gamma) \le \gamma\)</span>, because <span class="math inline">\(u^{\gamma-1} \le 1 + u^\gamma\)</span> (if <span class="math inline">\(u \le 1\)</span> the left side is at most 1; if <span class="math inline">\(u &gt; 1\)</span> it is below <span class="math inline">\(u^\gamma\)</span>). The mean value theorem says a function whose slope is at most <span class="math inline">\(\gamma\)</span> in size changes by at most <span class="math inline">\(\gamma\)</span> times the change in its argument. The argument changes from <span class="math inline">\(|z|\)</span> to <span class="math inline">\(|z + \Delta|\)</span>, and these differ by at most <span class="math inline">\(|\Delta|\)</span> (the reverse triangle inequality). So <span class="math inline">\(|\varphi(|z + \Delta|) - \varphi(|z|)| \le \gamma\big||z + \Delta| - |z|\big| \le \gamma|\Delta| \le \gamma\alpha\)</span>.</li>
+<li><em>Dilation term.</em> Here the question is how much <span class="math inline">\(h\)</span> changes when its argument is stretched by <span class="math inline">\(e^\lambda\)</span>. With <span class="math inline">\(w = |z + \Delta|\)</span> and <span class="math inline">\(\lambda \ge 0\)</span>, <span class="math inline">\(\frac{h(w)}{h(e^\lambda w)} = \frac{1 + e^{\lambda\gamma}w^\gamma}{1 + w^\gamma} \le e^{\lambda\gamma}\)</span>, since <span class="math inline">\((1 + ca)/(1 + a) \le c\)</span> for <span class="math inline">\(c \ge 1\)</span> (multiply out: <span class="math inline">\(1 + ca \le c + ca\)</span>). This bound holds for every <span class="math inline">\(w\)</span>, however far in the tail, and that is what the power-law tail buys. For <span class="math inline">\(\lambda &lt; 0\)</span> the stretch moves the argument towards 0, where <span class="math inline">\(h\)</span> is larger, so the ratio is at most 1. Either way the term is at most <span class="math inline">\(\gamma|\lambda| \le \gamma\beta\)</span>.</li>
+<li><em>Add up:</em> <span class="math inline">\(L_{D,D'}(y) \le \beta + \gamma\alpha + \gamma\beta\)</span> for <strong>every</strong> <span class="math inline">\(y\)</span>. That is <span class="math inline">\(\gamma\alpha + (\gamma + 1)\beta\)</span>, so under <a href="#eq-sens-cauchy-cond" class="quarto-xref">Equation&nbsp;<span>23.9</span></a> it is at most <span class="math inline">\(\varepsilon\)</span>, which is pure <span class="math inline">\(\varepsilon\)</span>-DP. With <span class="math inline">\(\alpha = \beta = \varepsilon/6\)</span> and <span class="math inline">\(\gamma = 2\)</span> the bound is <span class="math inline">\(\gamma\alpha + (\gamma + 1)\beta = \frac{2}{6} + \frac{3}{6} = 0.8333\,\varepsilon\)</span>.</li>
+</ol>
+<p><strong>Approximate DP for Laplace noise.</strong> Steps 1–3 are unchanged. For <span class="math inline">\(h(z) = \frac12e^{-|z|}\)</span> the log of a ratio of <span class="math inline">\(h\)</span> values is just a difference of absolute values, so the sliding and dilation terms combine into one. Using <span class="math inline">\(|e^\lambda(z + \Delta)| \le e^\lambda(|z| + |\Delta|)\)</span>, then <span class="math inline">\(e^\lambda \le e^\beta\)</span> and <span class="math inline">\(|\Delta| \le \alpha\)</span> from step 2: <span id="eq-auto-06sensitivity-7"><span class="math display">\[\ln\frac{h(z)}{h(z')} = |e^\lambda(z + \Delta)| - |z| \le e^\lambda(|z| + |\Delta|) - |z| \le (e^\beta - 1)|z| + e^\beta\alpha. \tag{23.13}\]</span></span> Adding the scale term, <span class="math inline">\(L_{D,D'}(y) \le \beta + e^\beta\alpha + (e^\beta - 1)|z|\)</span>, where <span class="math inline">\(z\)</span> is the noise actually drawn, <span class="math inline">\(Z \sim \mathrm{Lap}(1)\)</span>. This is <strong>not</strong> bounded: the stretch makes the Laplace log-density change by an amount proportional to <span class="math inline">\(|z|\)</span>, so far in the tail the dilation term wins. But large draws are rare. A <span class="math inline">\(\mathrm{Lap}(1)\)</span> variable exceeds <span class="math inline">\(t\)</span> in absolute value with probability <span class="math inline">\(e^{-t}\)</span> (integrate the two tails of <span class="math inline">\(\frac12e^{-|z|}\)</span>; see <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>), so <span class="math inline">\(\Pr[|Z| &gt; \ln(1/\delta)] = \delta\)</span>. Outside that event of probability <span class="math inline">\(\delta\)</span>, <span class="math inline">\(|z| \le \ln(1/\delta)\)</span> and the loss is at most the left side of <a href="#eq-sens-laplace-cond" class="quarto-xref">Equation&nbsp;<span>23.10</span></a>, hence at most <span class="math inline">\(\varepsilon\)</span>. Fact 2 turns that into <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</p>
+</section>
+<section id="interpretation-why-heavy-tails-and-what-admissibility-means" class="level3" data-number="23.4.4">
+<h3 data-number="23.4.4" class="anchored" data-anchor-id="interpretation-why-heavy-tails-and-what-admissibility-means"><span class="header-section-number">23.4.4</span> Interpretation: why heavy tails, and what admissibility means</h3>
+<p>Pure DP forces polynomial tails. The dilation step needed <span class="math inline">\(h(w)/h(e^\lambda w)\)</span> to be bounded for all <span class="math inline">\(w\)</span>, however large. Write <span class="math inline">\(h(w) \approx e^{-g(w)}\)</span>; the condition says <span class="math inline">\(g(e^\beta w) - g(w)\)</span> stays below some constant <span class="math inline">\(c\)</span>. Applying it <span class="math inline">\(k\)</span> times from <span class="math inline">\(w = 1\)</span> gives <span class="math inline">\(g(e^{k\beta}) \le g(1) + kc\)</span>, so <span class="math inline">\(g\)</span> can grow at most like <span class="math inline">\(\frac{c}{\beta}\ln w\)</span>, and <span class="math inline">\(h\)</span> can decay at most like a power of <span class="math inline">\(w\)</span>: Cauchy-like. Laplace noise has <span class="math inline">\(g(w) = w\)</span>, for which <span class="math inline">\(g(e^\beta w) - g(w) = (e^\beta - 1)w\)</span> grows without bound, and the Gaussian is worse. That is why both fail for pure DP and pay with <span class="math inline">\(\delta\)</span>.</p>
+<p>The two conditions are what Nissim, Raskhodnikova &amp; Smith call <strong>admissibility</strong>. They call <span class="math inline">\(h\)</span> <span class="math inline">\((\alpha, \beta)\)</span>-admissible when shifting it by at most <span class="math inline">\(\alpha\)</span> (sliding) and rescaling it by at most a factor <span class="math inline">\(e^{\pm\beta}\)</span> (dilation) each change probabilities by at most a factor <span class="math inline">\(e^{\varepsilon/2}\)</span> plus <span class="math inline">\(\delta/2\)</span>. The derivation above bounds the two together, which gives slightly different constants.</p>
+<p>The price of heavy tails shows up in the error. The Cauchy has no mean, so its error is reported through the median. For a standard Cauchy, <span class="math inline">\(\Pr[|Z| \le t] = \frac2\pi\arctan t\)</span>, which is <span class="math inline">\(\frac12\)</span> at <span class="math inline">\(t = 1\)</span> because <span class="math inline">\(\arctan 1 = \pi/4\)</span>. So <span class="math inline">\(|Z|\)</span> has median 1, and the typical error is the noise scale <span class="math inline">\(S/\alpha\)</span>. But the tail is heavy: <span class="math inline">\(\Pr[|Z| &gt; 10] = 1 - \frac2\pi\arctan 10 = 0.0635\)</span>, so about one release in 16 is off by more than ten times the typical error. With Laplace noise the same probability is <span class="math inline">\(e^{-10} \approx 4.5\times10^{-5}\)</span>.</p>
+<p>Finally, <span class="math inline">\(\beta\)</span> is a lever. A small <span class="math inline">\(\beta\)</span> makes <span class="math inline">\(S^*\)</span> larger, because the factor <span class="math inline">\(e^{-\beta k}\)</span> discounts distant datasets less and so lets more of them raise the maximum. In exchange it costs less privacy per unit of noise. Laplace noise needs <span class="math inline">\(\beta \approx \varepsilon/(2\ln(1/\delta))\)</span>, much smaller than the Cauchy’s <span class="math inline">\(\varepsilon/6\)</span>, because in <a href="#eq-sens-laplace-cond" class="quarto-xref">Equation&nbsp;<span>23.10</span></a> the change of scale is charged once for every unit of <span class="math inline">\(\ln(1/\delta)\)</span>.</p>
+</section>
+<section id="computing-s-for-the-median" class="level3" data-number="23.4.5">
+<h3 data-number="23.4.5" class="anchored" data-anchor-id="computing-s-for-the-median"><span class="header-section-number">23.4.5</span> Computing <span class="math inline">\(S^*\)</span> for the median</h3>
+<p><a href="#eq-sens-smooth" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> is a maximum over all datasets, which is not something you can enumerate. The way out is to group the datasets by their distance <span class="math inline">\(k\)</span> from <span class="math inline">\(D\)</span>: all datasets at distance <span class="math inline">\(k\)</span> get the same discount <span class="math inline">\(e^{-k\beta}\)</span>, so within a group you only need the largest local sensitivity, <span class="math inline">\(A^{(k)}(D)\)</span>, and then the best discounted group: <span id="eq-sens-smooth-by-k"><span class="math display">\[S^*_{\beta}(D) = \max_{k = 0, \dots, n} e^{-k\beta}A^{(k)}(D), \qquad A^{(k)}(D) = \max_{D'':\ d(D, D'') \le k}\mathrm{LS}(D''). \tag{23.14}\]</span></span> (Using “<span class="math inline">\(\le k\)</span>” instead of “<span class="math inline">\(= k\)</span>” changes nothing: a dataset at distance <span class="math inline">\(j &lt; k\)</span> is counted again with the smaller weight <span class="math inline">\(e^{-k\beta}\)</span>, which never beats its own weight <span class="math inline">\(e^{-j\beta}\)</span>.)</p>
+<p>For the median, <span class="math inline">\(A^{(k)}\)</span> asks: by changing <span class="math inline">\(k\)</span> records, how wide a gap can you open next to the median? A gap is opened by moving the values that lie inside an interval of the sorted data out of it, to 0 or to <span class="math inline">\(\Lambda\)</span>. With <span class="math inline">\(k\)</span> changes you can empty out the <span class="math inline">\(k\)</span> values between two order statistics <span class="math inline">\(k + 1\)</span> ranks apart, and you can choose how many to move down and how many up so that the emptied interval ends up next to the median. So the answer is the widest such window that sits close enough to rank <span class="math inline">\(m\)</span>. With the padding of Fact 4, Nissim, Raskhodnikova &amp; Smith (2007, Proposition 3.4) show <span id="eq-sens-median-ak"><span class="math display">\[A^{(k)}(D) = \max_{0 \le t \le k+1}\big(x_{m+t} - x_{m+t-k-1}\big). \tag{23.15}\]</span></span> Each window runs from rank <span class="math inline">\(m + t - k - 1\)</span> to rank <span class="math inline">\(m + t\)</span>, and <span class="math inline">\(t\)</span> slides it across the median. Each <span class="math inline">\(A^{(k)}\)</span> costs <span class="math inline">\(O(k)\)</span> to evaluate, one subtraction per window, and <span class="math inline">\(k\)</span> never needs to exceed <span class="math inline">\(n\)</span>: at <span class="math inline">\(k = n\)</span> the window with <span class="math inline">\(t = m\)</span> spans <span class="math inline">\(x_0 = 0\)</span> to <span class="math inline">\(x_{n+1} = \Lambda\)</span>, so <span class="math inline">\(A^{(n)} = \Lambda\)</span>, the largest possible value, and larger <span class="math inline">\(k\)</span> only lowers the weight. So the exact <span class="math inline">\(S^*_\beta\)</span> takes <span class="math inline">\(O(n^2)\)</span> time. (An <span class="math inline">\(O(n\log n)\)</span> algorithm exists; the script uses the plain formula.)</p>
+<p><strong>Derivation of <a href="#eq-sens-median-ak" class="quarto-xref">Equation&nbsp;<span>23.15</span></a>.</strong> Steps 1–4 show that no dataset within distance <span class="math inline">\(k\)</span> has a gap next to its median wider than the widest window, and step 5 shows that every window is achieved.</p>
+<ol type="1">
+<li><em>What the gap looks like.</em> Let <span class="math inline">\(D''\)</span> be within distance <span class="math inline">\(k\)</span> of <span class="math inline">\(D\)</span>, with sorted values <span class="math inline">\(y_i\)</span>. By <a href="#eq-sens-median-ls" class="quarto-xref">Equation&nbsp;<span>23.4</span></a> its local sensitivity is one of its two gaps next to the median. Take the upper one, <span class="math inline">\((y_m, y_{m+1})\)</span>. The lower one needs no separate argument: reflecting every value, <span class="math inline">\(x \mapsto \Lambda - x\)</span>, turns lower gaps into upper gaps and maps the set of windows in <a href="#eq-sens-median-ak" class="quarto-xref">Equation&nbsp;<span>23.15</span></a> to itself.</li>
+<li><em>The gap contains at most <span class="math inline">\(k\)</span> original values.</em> Assume the gap is positive (otherwise there is nothing to bound), so exactly <span class="math inline">\(m\)</span> values of <span class="math inline">\(D''\)</span> are <span class="math inline">\(\le y_m\)</span>. No value of <span class="math inline">\(D''\)</span> lies strictly inside <span class="math inline">\((y_m, y_{m+1})\)</span>, so every value of <span class="math inline">\(D\)</span> strictly inside it must have been one of the <span class="math inline">\(k\)</span> changed records. Call the values of <span class="math inline">\(D\)</span> inside the gap <span class="math inline">\(x_{a+1}, \dots, x_{a+j}\)</span> with <span class="math inline">\(j \le k\)</span>. Then <span class="math inline">\(x_a \le y_m\)</span> and <span class="math inline">\(x_{a+j+1} \ge y_{m+1}\)</span>, so the gap is at most <span class="math inline">\(x_{a+j+1} - x_a\)</span>, a window of the original data.</li>
+<li><em>The gap sits near rank <span class="math inline">\(m\)</span>.</em> Now pin down <span class="math inline">\(a\)</span> by counting values of <span class="math inline">\(D''\)</span> at or below <span class="math inline">\(y_m\)</span>, of which there are exactly <span class="math inline">\(m\)</span>. Each is either an unchanged value of <span class="math inline">\(D\)</span>, and those are among <span class="math inline">\(x_1, \dots, x_a\)</span> (everything above <span class="math inline">\(x_a\)</span> is inside the gap or beyond it), or one of at most <span class="math inline">\(k\)</span> new values. So <span class="math inline">\(m \le a + k\)</span>, that is <span class="math inline">\(a \ge m - k\)</span>. In the other direction, at least <span class="math inline">\(a - (k - j)\)</span> of <span class="math inline">\(x_1, \dots, x_a\)</span> are unchanged (the <span class="math inline">\(j\)</span> values inside the gap used up <span class="math inline">\(j\)</span> of the <span class="math inline">\(k\)</span> changes), and all of them are <span class="math inline">\(\le y_m\)</span>, so <span class="math inline">\(a - (k - j) \le m\)</span>, that is <span class="math inline">\(a \le m + k - j\)</span>.</li>
+<li><em>Fit it in a window.</em> Let <span class="math inline">\(i = \min(a, m)\)</span>, the lower end of the window to use. If <span class="math inline">\(a \le m\)</span>, the window <span class="math inline">\([x_a, x_{a+k+1}]\)</span> has <span class="math inline">\(i = a \ge m - k\)</span>, so it is one of the windows of <a href="#eq-sens-median-ak" class="quarto-xref">Equation&nbsp;<span>23.15</span></a> (<span class="math inline">\(t = a + k + 1 - m \in [0, k+1]\)</span>), and it contains <span class="math inline">\([x_a, x_{a+j+1}]\)</span> because <span class="math inline">\(j \le k\)</span>. If <span class="math inline">\(a &gt; m\)</span>, the window <span class="math inline">\([x_m, x_{m+k+1}]\)</span> (<span class="math inline">\(t = k + 1\)</span>) starts below <span class="math inline">\(x_a\)</span> and contains <span class="math inline">\([x_a, x_{a+j+1}]\)</span> because <span class="math inline">\(a + j + 1 \le m + k + 1\)</span> by step 3. Either way the gap is at most the right side of <a href="#eq-sens-median-ak" class="quarto-xref">Equation&nbsp;<span>23.15</span></a>.</li>
+<li><em>Every window is reached.</em> For a window <span class="math inline">\([x_\ell, x_u]\)</span> with <span class="math inline">\(\ell = m + t - k - 1\)</span> and <span class="math inline">\(u = m + t\)</span>, there are exactly <span class="math inline">\(u - \ell - 1 = k\)</span> values strictly between its ends. Change them: move <span class="math inline">\(k + 1 - t\)</span> of them to 0 and the rest to <span class="math inline">\(\Lambda\)</span> (for <span class="math inline">\(t = 0\)</span>, move all <span class="math inline">\(k\)</span> to 0). Each value moved to 0 now sits below <span class="math inline">\(x_\ell\)</span> and raises its rank by one. So <span class="math inline">\(x_\ell\)</span> has rank <span class="math inline">\(\ell + (k + 1 - t) = m\)</span> and <span class="math inline">\(x_u\)</span> rank <span class="math inline">\(m + 1\)</span> for <span class="math inline">\(t \ge 1\)</span> (for <span class="math inline">\(t = 0\)</span>, ranks <span class="math inline">\(m - 1\)</span> and <span class="math inline">\(m\)</span>). Either way the median sits at one end of an empty interval of length <span class="math inline">\(x_u - x_\ell\)</span>, which is then one of its two gaps.</li>
+</ol>
+<p><strong>A walkthrough.</strong> Take <span class="math inline">\(n = 5\)</span> values on <span class="math inline">\([0, 10]\)</span>, <span class="math inline">\(D = (1, 3, 4, 6, 9)\)</span>, so <span class="math inline">\(m = 3\)</span> and the median is 4, and pad with <span class="math inline">\(x_i = 0\)</span> for <span class="math inline">\(i \le 0\)</span> and <span class="math inline">\(x_i = 10\)</span> for <span class="math inline">\(i \ge 6\)</span>. <a href="#tbl-sens-walk" class="quarto-xref">Table&nbsp;<span>23.3</span></a> evaluates <a href="#eq-sens-median-ak" class="quarto-xref">Equation&nbsp;<span>23.15</span></a> window by window, with <span class="math inline">\(\beta = 0.5\)</span>, and checks it against brute force: the script enumerates all <span class="math inline">\(11^5 = 161{,}051\)</span> datasets with values in <span class="math inline">\(\{0, \dots, 10\}\)</span>, computes the local sensitivity of each and its distance from <span class="math inline">\(D\)</span>, and takes the maximum for each <span class="math inline">\(k\)</span>.</p>
+<div id="tbl-sens-walk" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sens-walk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.3: The smooth sensitivity of the median of <span class="math inline">\(D = (1, 3, 4, 6, 9)\)</span> on <span class="math inline">\([0, 10]\)</span> with <span class="math inline">\(\beta = 0.5\)</span>: the formula for <span class="math inline">\(A^{(k)}\)</span> against brute force over all datasets, and the discounted values whose maximum is <span class="math inline">\(S^*_{0.5}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-sens-walk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(k\)</span></th>
+<th>Windows <span class="math inline">\(x_{m+t} - x_{m+t-k-1}\)</span>, <span class="math inline">\(t = 0, \dots, k+1\)</span></th>
+<th><span class="math inline">\(A^{(k)}\)</span></th>
+<th>Brute force</th>
+<th><span class="math inline">\(e^{-0.5k}A^{(k)}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td><span class="math inline">\(4 - 3,\ 6 - 4\)</span></td>
+<td>2</td>
+<td>2</td>
+<td>2.00</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td><span class="math inline">\(4 - 1,\ 6 - 3,\ 9 - 4\)</span></td>
+<td>5</td>
+<td>5</td>
+<td><strong>3.03</strong></td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td><span class="math inline">\(4 - 0,\ 6 - 1,\ 9 - 3,\ 10 - 4\)</span></td>
+<td>6</td>
+<td>6</td>
+<td>2.21</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td><span class="math inline">\(4 - 0,\ 6 - 0,\ 9 - 1,\ 10 - 3,\ 10 - 4\)</span></td>
+<td>8</td>
+<td>8</td>
+<td>1.79</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td><span class="math inline">\(\dots,\ 9 - 0,\ 10 - 1,\ \dots\)</span></td>
+<td>9</td>
+<td>9</td>
+<td>1.22</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td><span class="math inline">\(\dots,\ 10 - 0,\ \dots\)</span></td>
+<td>10</td>
+<td>10</td>
+<td>0.82</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The local sensitivity (the row <span class="math inline">\(k = 0\)</span>) is 2, the gap from 4 up to 6. But one change, moving the 6 up to 10, opens a gap of <span class="math inline">\(9 - 4 = 5\)</span> next to the median, and even after the discount <span class="math inline">\(e^{-0.5} = 0.6065\)</span> for one step, <span class="math inline">\(e^{-0.5}\times 5 = 3.03\)</span> beats 2. Further rows open wider gaps but pay a larger discount. So <span class="math inline">\(S^*_{0.5}(D) = 3.03\)</span>, attained at <span class="math inline">\(k = 1\)</span> (<a href="#fig-sens-smooth-profile" class="quarto-xref">Figure&nbsp;<span>23.2</span></a>, left).</p>
+<div id="fig-sens-smooth-profile" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sens-smooth-profile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sens_smooth_profile.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sens-smooth-profile-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.2: Left: <span class="math inline">\(A^{(k)}\)</span> and <span class="math inline">\(e^{-k\beta}A^{(k)}\)</span> for the walkthrough dataset; the star marks <span class="math inline">\(S^*_{0.5} = 3.03\)</span>. Right: the same for the median of 1,001 synthetic ages (a fresh draw) with <span class="math inline">\(\beta = 1/6\)</span> (Cauchy) and <span class="math inline">\(\beta = 0.032\)</span> (Laplace, <span class="math inline">\(\delta = 10^{-6}\)</span>); the stars mark the maxima. The smaller <span class="math inline">\(\beta\)</span> reaches further out.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-median-age" class="level3" data-number="23.4.6">
+<h3 data-number="23.4.6" class="anchored" data-anchor-id="example-the-median-age"><span class="header-section-number">23.4.6</span> Example: the median age</h3>
+<p>The script draws <span class="math inline">\(n = 1001\)</span> ages from a normal distribution with mean 38 and standard deviation 14, clipped to <span class="math inline">\([0, 100]\)</span>, and releases the median (36.96) with <span class="math inline">\(\varepsilon = 1\)</span>. Each option is compared by its median absolute error. For noise <span class="math inline">\(bZ\)</span> that is <span class="math inline">\(b\)</span> times the median of <span class="math inline">\(|Z|\)</span>: 1 for the Cauchy, as shown above, and <span class="math inline">\(\ln 2\)</span> for the Laplace, because <span class="math inline">\(\Pr[|Z| &gt; t] = e^{-t}\)</span> equals <span class="math inline">\(\frac12\)</span> at <span class="math inline">\(t = \ln 2\)</span>.</p>
+<p>With global sensitivity, Laplace noise has scale <span class="math inline">\(\Lambda/\varepsilon = 100\)</span> and median absolute value <span class="math inline">\(100\ln 2 = 69.31\)</span> years: useless. The local sensitivity is 0.1386 years, but releasing with it is not private, as <a href="#sec-sens-local" class="quarto-xref"><span>Section 23.3</span></a> showed.</p>
+<p>Smooth sensitivity with Cauchy noise uses <span class="math inline">\(\alpha = \beta = 1/6\)</span>. Then <span class="math inline">\(S^*_{1/6} = 0.1632\)</span>, attained at <span class="math inline">\(k = 7\)</span>: only slightly above the local sensitivity, because with this many people even seven changes cannot open a wide gap near the middle. The noise scale <span class="math inline">\(6S^*/\varepsilon = 6 \times 0.1632 = 0.979\)</span> is also the median absolute error (simulation: 0.980).</p>
+<p>Smooth sensitivity with Laplace noise uses <span class="math inline">\(\delta = 10^{-6}\)</span> and <span class="math inline">\(\alpha = 1/2\)</span>. The largest <span class="math inline">\(\beta\)</span> allowed by <a href="#eq-sens-laplace-cond" class="quarto-xref">Equation&nbsp;<span>23.10</span></a> is then <span class="math inline">\(0.0322\)</span> (close to the <span class="math inline">\(0.0345\)</span> of Nissim, Raskhodnikova &amp; Smith). The smaller <span class="math inline">\(\beta\)</span> lets more distant datasets count, so <span class="math inline">\(S^*_{0.0322} = 0.5144\)</span>, attained at <span class="math inline">\(k = 21\)</span>. The noise scale is <span class="math inline">\(S^*/\alpha = 2S^*/\varepsilon = 1.029\)</span> and the median absolute error <span class="math inline">\(1.029\ln 2 = 0.713\)</span>.</p>
+<p>Both smooth releases are 70 to 100 times more accurate than the global one (<span class="math inline">\(69.31/0.979\)</span> and <span class="math inline">\(69.31/0.713\)</span>). <a href="#fig-sens-methods-vs-n" class="quarto-xref">Figure&nbsp;<span>23.3</span></a> shows the gain grows with <span class="math inline">\(n\)</span>: the smooth noise falls roughly like <span class="math inline">\(1/n\)</span>, the spacing of the data near the median, while the global noise stays put. For <span class="math inline">\(n \lesssim 20\)</span> the smooth noise is <em>worse</em> than the global one, because with few points a handful of changes can open a gap of nearly the whole range, so <span class="math inline">\(S^*\)</span> can be close to <span class="math inline">\(\Lambda\)</span>, and then the factor <span class="math inline">\(1/\alpha\)</span> multiplies it.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="23.4.7">
+<h3 data-number="23.4.7" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">23.4.7</span> Check yourself</h3>
+<ul>
+<li>Why does <span class="math inline">\(S^*_\beta(D) &gt; 0\)</span> even when <span class="math inline">\(\mathrm{LS}(D) = 0\)</span>? <em>(Some dataset at finite distance <span class="math inline">\(k\)</span> has positive local sensitivity, and it contributes <span class="math inline">\(e^{-k\beta}\)</span> times that. For the median, <span class="math inline">\(A^{(n)} = \Lambda\)</span> gives <span class="math inline">\(S^* \ge e^{-n\beta}\Lambda &gt; 0\)</span>, which also means the scale in <a href="#eq-sens-smooth-mech" class="quarto-xref">Equation&nbsp;<span>23.8</span></a> is never zero.)</em></li>
+<li>In the Cauchy derivation, where is “upper bound” used and where is “smooth” used? <em>(Upper bound bounds the shift: <span class="math inline">\(|\Delta| \le \alpha\)</span>. Smoothness bounds the scale term and the stretch <span class="math inline">\(|\lambda| \le \beta\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-sens-ptr" class="level2" data-number="23.5">
+<h2 data-number="23.5" class="anchored" data-anchor-id="sec-sens-ptr"><span class="header-section-number">23.5</span> Propose-test-release</h2>
+<section id="context-2" class="level3" data-number="23.5.1">
+<h3 data-number="23.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">23.5.1</span> Context</h3>
+<p>Smooth sensitivity needs a formula like <a href="#eq-sens-median-ak" class="quarto-xref">Equation&nbsp;<span>23.15</span></a>, and those are known for only a few functions. Dwork &amp; Lei (2009) take a cruder route that needs much less. Guess a bound <span class="math inline">\(b\)</span> on the local sensitivity, check privately that the data are not near any dataset where the guess fails, and only then release with noise of scale <span class="math inline">\(b/\varepsilon\)</span>. If the check fails, refuse to answer. The check is private because it is a “how many changes until something bad” count, which has sensitivity 1 by Fact 3.</p>
+</section>
+<section id="statement-2" class="level3" data-number="23.5.2">
+<h3 data-number="23.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">23.5.2</span> Statement</h3>
+<p>Fix a proposed bound <span class="math inline">\(b &gt; 0\)</span>, a privacy parameter <span class="math inline">\(\varepsilon &gt; 0\)</span> and a failure probability <span class="math inline">\(\delta \in (0, 1)\)</span>. The quantity to test is the number of records you must change before the local sensitivity can exceed <span class="math inline">\(b\)</span>, that is, how far <span class="math inline">\(D\)</span> is from the nearest dataset where the proposal would be too small: <span id="eq-auto-06sensitivity-8"><span class="math display">\[\operatorname{dist}_b(D) = \min\big\{d(D, D''):\ \mathrm{LS}_f(D'') &gt; b\big\}. \tag{23.16}\]</span></span> <strong>Propose-test-release</strong> adds Laplace noise to this distance and compares it with a threshold <span class="math inline">\(\ln(1/\delta)/\varepsilon\)</span>, chosen so that the noise alone pushes a distance of 0 over it only with probability <span class="math inline">\(\delta/2\)</span>. It outputs one of two things:</p>
+<ul>
+<li><span class="math inline">\(\bot\)</span> (“no answer”) if <span class="math inline">\(\operatorname{dist}_b(D) + \mathrm{Lap}(1/\varepsilon) \le \ln(1/\delta)/\varepsilon\)</span>;</li>
+<li><span class="math inline">\(f(D) + \mathrm{Lap}(b/\varepsilon)\)</span> otherwise.</li>
+</ul>
+<p>It is <span class="math inline">\((2\varepsilon, \delta/2)\)</span>-DP, so in particular <span class="math inline">\((2\varepsilon, \delta)\)</span>-DP. For the median, <span class="math inline">\(\operatorname{dist}_b(D) = \min\{k : A^{(k)}(D) &gt; b\}\)</span>, directly from <a href="#eq-sens-median-ak" class="quarto-xref">Equation&nbsp;<span>23.15</span></a>: <span class="math inline">\(A^{(k)}\)</span> is the largest local sensitivity within <span class="math inline">\(k\)</span> changes, so the first <span class="math inline">\(k\)</span> where it exceeds <span class="math inline">\(b\)</span> is the distance to the first dataset where <span class="math inline">\(b\)</span> fails.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="23.5.3">
+<h3 data-number="23.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">23.5.3</span> Derivation</h3>
+<p>The idea is to split neighbouring pairs into two cases. If the proposal <span class="math inline">\(b\)</span> is right for this pair, the release is an ordinary Laplace mechanism. If it is wrong, both datasets sit right at an unstable point, the distance is 0, and the test almost always refuses.</p>
+<ol type="1">
+<li><strong>The test is <span class="math inline">\(\varepsilon\)</span>-DP.</strong> <span class="math inline">\(\operatorname{dist}_b\)</span> is a distance to the set of datasets whose local sensitivity exceeds <span class="math inline">\(b\)</span>, so it has sensitivity 1 (Fact 3), and adding <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> is the Laplace mechanism (Fact 1). Whether the test passes is a post-processing of that noisy value: a function of it that does not look at the data again, which cannot increase the privacy loss.</li>
+<li><strong>Case 1: <span class="math inline">\(|f(D) - f(D')| \le b\)</span>.</strong> Then the release step is also <span class="math inline">\(\varepsilon\)</span>-DP (Fact 1 with <span class="math inline">\(\Delta = b\)</span>). The output is a function of two independent <span class="math inline">\(\varepsilon\)</span>-DP outputs, the noisy distance and the noisy value. Basic composition says that running two mechanisms with independent noise costs the sum of their <span class="math inline">\(\varepsilon\)</span>s, because the privacy loss of the pair is the sum of the two losses; post-processing says the function of them costs nothing more (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). So the mechanism is <span class="math inline">\(2\varepsilon\)</span>-DP on this pair.</li>
+<li><strong>Case 2: <span class="math inline">\(|f(D) - f(D')| &gt; b\)</span>.</strong> Then both <span class="math inline">\(\mathrm{LS}_f(D) &gt; b\)</span> and <span class="math inline">\(\mathrm{LS}_f(D') &gt; b\)</span>, because each local sensitivity is the largest change over that dataset’s neighbours, and each of <span class="math inline">\(D\)</span>, <span class="math inline">\(D'\)</span> is a neighbour of the other. So <span class="math inline">\(\operatorname{dist}_b(D) = 0\)</span>, and the test passes only if <span class="math inline">\(\mathrm{Lap}(1/\varepsilon) &gt; \ln(1/\delta)/\varepsilon\)</span>. A <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> variable exceeds <span class="math inline">\(t\)</span> with probability <span class="math inline">\(\frac12e^{-\varepsilon t}\)</span> (one tail of the density), so this has probability <span class="math inline">\(\frac12e^{-\ln(1/\delta)} = \delta/2\)</span>.</li>
+<li><strong>Bound case 2.</strong> For any set <span class="math inline">\(S\)</span> of outputs, <span class="math inline">\(M(D)\)</span> lands in <span class="math inline">\(S\)</span> either by refusing (if <span class="math inline">\(\bot \in S\)</span>) or by releasing, and the release happens with probability at most <span class="math inline">\(\delta/2\)</span> by step 3. So <span class="math inline">\(\Pr[M(D) \in S] \le \Pr[M(D) = \bot]\,\mathbf 1[\bot \in S] + \delta/2\)</span>, where <span class="math inline">\(\mathbf 1[\bot \in S]\)</span> is 1 if <span class="math inline">\(\bot\)</span> is in <span class="math inline">\(S\)</span> and 0 otherwise. The refusal is a post-processing of the <span class="math inline">\(\varepsilon\)</span>-DP test of step 1, so the first term is at most <span class="math inline">\(e^\varepsilon\Pr[M(D') = \bot]\,\mathbf 1[\bot\in S] \le e^{2\varepsilon}\Pr[M(D') \in S]\)</span>.</li>
+<li><strong>Combine:</strong> in both cases <span class="math inline">\(\Pr[M(D) \in S] \le e^{2\varepsilon}\Pr[M(D') \in S] + \delta/2\)</span>.</li>
+</ol>
+<p>The “release the median for free” failure of the previous section is now confined to step 3: a dataset whose local sensitivity exceeds the proposal leaks only when a Laplace draw lands <span class="math inline">\(\ln(1/\delta)/\varepsilon\)</span> above zero.</p>
+</section>
+<section id="interpretation" class="level3" data-number="23.5.4">
+<h3 data-number="23.5.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">23.5.4</span> Interpretation</h3>
+<p>Propose-test-release is all or nothing. When the data are stable, you get noise of scale <span class="math inline">\(b/\varepsilon\)</span>, set by your proposal rather than by the data, so the noise scale reveals nothing. When they are not, you get <span class="math inline">\(\bot\)</span>, and <span class="math inline">\(\bot\)</span> itself is a private answer: it says only that the data were probably near an unstable dataset.</p>
+<p>The threshold the distance must clear is large. The test passes with probability <span class="math inline">\(\frac12\)</span> when the distance equals the threshold, because the Laplace noise is positive half the time. With <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span> that threshold is <span class="math inline">\(\ln(10^6) = 13.82\)</span>, so the test needs <span class="math inline">\(\operatorname{dist}_b(D) \gtrsim 13.82\)</span> to pass with probability <span class="math inline">\(\frac12\)</span>. The data must be stable against more than a dozen changes, not just one.</p>
+<p>The proposal <span class="math inline">\(b\)</span> must not depend on the data. It is a proposal made before looking. Choosing <span class="math inline">\(b\)</span> as, say, twice the observed local sensitivity makes the noise scale of the release a function of the data again, and reintroduces the leak of the previous section through the back door.</p>
+<p>Compared with smooth sensitivity, propose-test-release needs only the distance to instability, which is often easier to compute or bound than <span class="math inline">\(S^*\)</span>. It pays <span class="math inline">\(2\varepsilon\)</span> instead of <span class="math inline">\(\varepsilon\)</span>, and it can refuse.</p>
+</section>
+<section id="example-the-median-age-1" class="level3" data-number="23.5.5">
+<h3 data-number="23.5.5" class="anchored" data-anchor-id="example-the-median-age-1"><span class="header-section-number">23.5.5</span> Example: the median age</h3>
+<p>On the 1,001 ages, propose <span class="math inline">\(b = 1\)</span> year. The first <span class="math inline">\(k\)</span> with <span class="math inline">\(A^{(k)} &gt; 1\)</span> is <span class="math inline">\(k = 21\)</span>, so <span class="math inline">\(\operatorname{dist}_1(D) = 21\)</span>, comfortably above the threshold <span class="math inline">\(13.82\)</span>. The test fails only if the noise drops the distance by more than <span class="math inline">\(21 - 13.82\)</span>, which a <span class="math inline">\(\mathrm{Lap}(1)\)</span> draw does with probability <span class="math inline">\(\frac12e^{-(21 - 13.82)}\)</span>. So the pass probability is <span class="math inline">\(1 - \frac12e^{-(21 - 13.82)} = 0.999621\)</span>, and the release has noise <span class="math inline">\(\mathrm{Lap}(1)\)</span>, with median absolute error <span class="math inline">\(\ln 2 = 0.693\)</span> years at a total budget of <span class="math inline">\(2\varepsilon = 2\)</span>. On a sample of 101 ages, <span class="math inline">\(\operatorname{dist}_1 = 1\)</span>, and the test passes only if the noise adds more than <span class="math inline">\(13.82 - 1\)</span>, which has probability <span class="math inline">\(\frac12e^{-(13.82 - 1)} = 1.36\times10^{-6}\)</span>: there, one year is far too optimistic a proposal. <a href="#fig-sens-methods-vs-n" class="quarto-xref">Figure&nbsp;<span>23.3</span></a> (right) shows the pass probability switching from 0 to 1 between <span class="math inline">\(n = 500\)</span> and <span class="math inline">\(n = 1000\)</span>.</p>
+<div id="fig-sens-methods-vs-n" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sens-methods-vs-n-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sens_methods_vs_n.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sens-methods-vs-n-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.3: Left: median absolute noise when releasing the median age with <span class="math inline">\(\varepsilon = 1\)</span>, by global sensitivity, smooth sensitivity with Cauchy noise and with Laplace noise (<span class="math inline">\(\delta = 10^{-6}\)</span>), and propose-test-release with <span class="math inline">\(b = 1\)</span> when it passes, averaged over 10 synthetic datasets per <span class="math inline">\(n\)</span>. The dotted line is the non-private local sensitivity. Right: the probability that propose-test-release with <span class="math inline">\(b = 1\)</span> answers.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-2" class="level3" data-number="23.5.6">
+<h3 data-number="23.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">23.5.6</span> Check yourself</h3>
+<ul>
+<li>Why does step 3 need <em>both</em> local sensitivities to exceed <span class="math inline">\(b\)</span>, and why is that automatic? <em>(If either were at most <span class="math inline">\(b\)</span>, the pair would fall into case 1. It is automatic because <span class="math inline">\(|f(D) - f(D')|\)</span> is one of the terms in the maximum defining each local sensitivity.)</em></li>
+<li>Why does propose-test-release cost <span class="math inline">\(2\varepsilon\)</span> while smooth sensitivity costs <span class="math inline">\(\varepsilon\)</span>? <em>(It runs two Laplace mechanisms, one for the test and one for the release, and composes them. Smooth sensitivity folds the cost of a data-dependent scale into the single noise draw.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-sens-saa" class="level2" data-number="23.6">
+<h2 data-number="23.6" class="anchored" data-anchor-id="sec-sens-saa"><span class="header-section-number">23.6</span> Subsample-and-aggregate</h2>
+<section id="context-3" class="level3" data-number="23.6.1">
+<h3 data-number="23.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">23.6.1</span> Context</h3>
+<p>Sometimes you cannot analyse <span class="math inline">\(f\)</span> at all: it is an estimator fitted by an optimizer, a trained model, or a pipeline you did not write. Subsample-and-aggregate (Nissim, Raskhodnikova &amp; Smith 2007; Smith 2011) treats <span class="math inline">\(f\)</span> as a black box. It runs <span class="math inline">\(f\)</span> on disjoint pieces of the data and privately combines the answers. One record lives in one piece, so it can change only one answer, and the aggregator needs to be private only with respect to changing one of its inputs.</p>
+</section>
+<section id="statement-3" class="level3" data-number="23.6.2">
+<h3 data-number="23.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">23.6.2</span> Statement</h3>
+<p>Split the <span class="math inline">\(n\)</span> records into <span class="math inline">\(B\)</span> disjoint blocks of <span class="math inline">\(n/B\)</span> records, by a partition fixed in advance (for example by position, or by a hash of a record identifier). Compute the block answers <span class="math inline">\(z_j = f(\text{block } j)\)</span>, clip each to a range <span class="math inline">\([0, R]\)</span> (replace values below 0 by 0 and above <span class="math inline">\(R\)</span> by <span class="math inline">\(R\)</span>), and release their average plus Laplace noise. One record can move one clipped answer by at most <span class="math inline">\(R\)</span>, so it moves the average by at most <span class="math inline">\(R/B\)</span>, and that sets the noise: <span id="eq-auto-06sensitivity-9"><span class="math display">\[M(D) = \frac1B\sum_{j=1}^B \operatorname{clip}_{[0,R]}(z_j) + \mathrm{Lap}\Big(\frac{R}{B\varepsilon}\Big). \tag{23.17}\]</span></span> This is <span class="math inline">\(\varepsilon\)</span>-DP for any <span class="math inline">\(f\)</span>.</p>
+<p>How accurate is it, as an estimate of a target <span class="math inline">\(\theta\)</span>? Three things go wrong, and they add up in the mean squared error. Each block sees only <span class="math inline">\(n/B\)</span> records, so <span class="math inline">\(f\)</span> on a block can be biased in a way that <span class="math inline">\(f\)</span> on the whole dataset is not; averaging the blocks keeps some random sampling error; and the Laplace noise has variance <span class="math inline">\(2(R/(B\varepsilon))^2\)</span>. Writing <span class="math inline">\(z\)</span> for the output of <span class="math inline">\(f\)</span> on one block, <span id="eq-sens-saa-error"><span class="math display">\[\underbrace{\big(\mathbb E[z] - \theta\big)^2}_{\text{bias of } f \text{ on } n/B \text{ records}} + \underbrace{\frac{\operatorname{Var}(z)}{B}}_{\text{sampling}} + \underbrace{2\Big(\frac{R}{B\varepsilon}\Big)^2}_{\text{noise}}, \tag{23.18}\]</span></span> when the clipping is inactive and the blocks are independent samples.</p>
+</section>
+<section id="derivation-3" class="level3" data-number="23.6.3">
+<h3 data-number="23.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">23.6.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>One record touches one block.</strong> Replacing record <span class="math inline">\(i\)</span> changes only the block that contains it, because the partition does not depend on the values. So the vector <span class="math inline">\((z_1, \dots, z_B)\)</span> changes in at most one coordinate.</li>
+<li><strong>The aggregate has sensitivity <span class="math inline">\(R/B\)</span>.</strong> After clipping, that coordinate moves by at most <span class="math inline">\(R\)</span>, the width of the clip range, and dividing by <span class="math inline">\(B\)</span> in the average divides that by <span class="math inline">\(B\)</span>.</li>
+<li><strong>Privacy:</strong> Fact 1 with <span class="math inline">\(\Delta = R/B\)</span>.</li>
+<li><strong>Error.</strong> The released value minus <span class="math inline">\(\theta\)</span> is the sum of three pieces: <span class="math inline">\(\mathbb E[z] - \theta\)</span> (a constant, the bias), <span class="math inline">\(\frac1B\sum_j(z_j - \mathbb E z)\)</span> (mean zero; it is an average of <span class="math inline">\(B\)</span> independent terms, each with variance <span class="math inline">\(\operatorname{Var}(z)\)</span>, so its variance is <span class="math inline">\(\operatorname{Var}(z)/B\)</span>) and the Laplace noise (mean zero, variance <span class="math inline">\(2(R/(B\varepsilon))^2\)</span>, since a <span class="math inline">\(\mathrm{Lap}(s)\)</span> variable has variance <span class="math inline">\(2s^2\)</span>). Squaring the sum gives the three squares plus cross terms. Each cross term is a product involving at least one mean-zero piece that is independent of the other factor, so it averages to zero. That leaves <a href="#eq-sens-saa-error" class="quarto-xref">Equation&nbsp;<span>23.18</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="23.6.4">
+<h3 data-number="23.6.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">23.6.4</span> Interpretation</h3>
+<p>The number of blocks sets the trade-off: more blocks means less noise but more bias. The noise falls like <span class="math inline">\(1/B\)</span>, because one record’s influence on the average is diluted over more blocks. The sampling term hardly moves: for estimators whose variance scales like one over the sample size, a block estimate has variance about <span class="math inline">\(B\)</span> times that of <span class="math inline">\(f\)</span> on all <span class="math inline">\(n\)</span> records, and averaging <span class="math inline">\(B\)</span> of them divides it by <span class="math inline">\(B\)</span> again, so the term stays near <span class="math inline">\(\operatorname{Var}(f \text{ on } n \text{ records})\)</span>. The bias of <span class="math inline">\(f\)</span> on small blocks grows with <span class="math inline">\(B\)</span>, because the blocks get smaller. The best <span class="math inline">\(B\)</span> balances the first and the last.</p>
+<p>The privacy proof never looks inside <span class="math inline">\(f\)</span>. This is what makes the method useful for trained models: an ensemble of “teacher” models, each trained on a disjoint shard and combined by a noisy vote (private aggregation of teacher ensembles, Papernot et al.&nbsp;2017), is subsample-and-aggregate with a vote as the aggregator.</p>
+<p>The range <span class="math inline">\(R\)</span> is still a global bound, on the output of <span class="math inline">\(f\)</span> rather than on the data, and a loose <span class="math inline">\(R\)</span> means large noise. Nissim, Raskhodnikova &amp; Smith replace the clipped average by a “center of attention” aggregator with smooth sensitivity, which adapts to how tightly the <span class="math inline">\(z_j\)</span> cluster. Smith (2011) shows that for asymptotically normal estimators a version of this method loses nothing in the leading-order error.</p>
+</section>
+<section id="example-estimating-a-rate" class="level3" data-number="23.6.5">
+<h3 data-number="23.6.5" class="anchored" data-anchor-id="example-estimating-a-rate"><span class="header-section-number">23.6.5</span> Example: estimating a rate</h3>
+<p>You observe <span class="math inline">\(n = 10{,}000\)</span> inter-arrival times, independent <span class="math inline">\(\mathrm{Exponential}\)</span> with rate <span class="math inline">\(\theta = 1\)</span>, and want to estimate <span class="math inline">\(\theta\)</span> privately with <span class="math inline">\(\varepsilon = 1\)</span>. The maximum-likelihood estimate is one over the sample mean, <span class="math inline">\(1/\bar x\)</span>, whose global sensitivity is infinite: a dataset of tiny times has a huge <span class="math inline">\(1/\bar x\)</span>, and one record changes it by an arbitrary amount.</p>
+<p>To fill in <a href="#eq-sens-saa-error" class="quarto-xref">Equation&nbsp;<span>23.18</span></a> you need the mean and variance of <span class="math inline">\(1/\bar x\)</span> on a block of <span class="math inline">\(n_b = n/B\)</span> records. The block sum <span class="math inline">\(n_b\bar x\)</span> is a sum of <span class="math inline">\(n_b\)</span> independent exponentials with rate <span class="math inline">\(\theta\)</span>, which has the gamma distribution with shape <span class="math inline">\(n_b\)</span> and rate <span class="math inline">\(\theta\)</span>: <span class="math inline">\(n_b\bar x \sim \mathrm{Gamma}(n_b, \theta)\)</span>. The inverse moments of a gamma variable <span class="math inline">\(G\)</span> with shape <span class="math inline">\(k\)</span> are <span class="math inline">\(\mathbb E[1/G] = \theta/(k - 1)\)</span> and <span class="math inline">\(\mathbb E[1/G^2] = \theta^2/((k - 1)(k - 2))\)</span>: integrate <span class="math inline">\(g^{-1}\)</span> or <span class="math inline">\(g^{-2}\)</span> against the gamma density <span class="math inline">\(\theta^kg^{k-1}e^{-\theta g}/\Gamma(k)\)</span>, recognize what is left as a gamma density with shape <span class="math inline">\(k - 1\)</span> or <span class="math inline">\(k - 2\)</span>, and use <span class="math inline">\(\Gamma(k) = (k - 1)\Gamma(k - 1)\)</span>. Since <span class="math inline">\(z = 1/\bar x = n_b/G\)</span>, multiplying by <span class="math inline">\(n_b\)</span> and <span class="math inline">\(n_b^2\)</span> gives <span id="eq-auto-06sensitivity-10"><span class="math display">\[\mathbb E[z] = \frac{n_b\theta}{n_b - 1}, \qquad \text{bias } \frac{\theta}{n_b - 1}, \qquad \operatorname{Var}(z) = \frac{n_b^2\theta^2}{(n_b - 1)^2(n_b - 2)}. \tag{23.19}\]</span></span> The variance is <span class="math inline">\(\mathbb E[z^2] - \mathbb E[z]^2 = n_b^2\theta^2\big(\frac1{(n_b-1)(n_b-2)} - \frac1{(n_b-1)^2}\big)\)</span>, which simplifies to the form shown. With clip range <span class="math inline">\(R = 5\)</span>, <a href="#tbl-sens-saa" class="quarto-xref">Table&nbsp;<span>23.4</span></a> and <a href="#fig-sens-saa-blocks" class="quarto-xref">Figure&nbsp;<span>23.4</span></a> show the trade-off. For example, with <span class="math inline">\(B = 10\)</span> blocks the noise standard deviation is <span class="math inline">\(\sqrt2\,R/(B\varepsilon) = \sqrt2 \times 0.5 = 0.7071\)</span>, and the bias on blocks of 1,000 is <span class="math inline">\(1/999 = 0.0010\)</span>.</p>
+<div id="tbl-sens-saa" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sens-saa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.4: Error of subsample-and-aggregate for the rate of an exponential distribution, <span class="math inline">\(n = 10{,}000\)</span>, <span class="math inline">\(\theta = 1\)</span>, <span class="math inline">\(R = 5\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>: the three terms of <a href="#eq-sens-saa-error" class="quarto-xref">Equation&nbsp;<span>23.18</span></a>, their combination, and a simulation with 1,000 repetitions.
+</figcaption>
+<div aria-describedby="tbl-sens-saa-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Blocks <span class="math inline">\(B\)</span></th>
+<th>Block size</th>
+<th>Bias</th>
+<th>Sampling sd</th>
+<th>Noise sd</th>
+<th>Root-mean-square error</th>
+<th>Simulated</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>1,000</td>
+<td>0.0010</td>
+<td>0.0100</td>
+<td>0.7071</td>
+<td>0.7072</td>
+<td>0.7205</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td>100</td>
+<td>0.0101</td>
+<td>0.0102</td>
+<td>0.0707</td>
+<td>0.0722</td>
+<td>0.0733</td>
+</tr>
+<tr class="odd">
+<td>250</td>
+<td>40</td>
+<td>0.0256</td>
+<td>0.0105</td>
+<td>0.0283</td>
+<td>0.0396</td>
+<td>0.0401</td>
+</tr>
+<tr class="even">
+<td>1,000</td>
+<td>10</td>
+<td>0.1111</td>
+<td>0.0124</td>
+<td>0.0071</td>
+<td>0.1120</td>
+<td>0.1114</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The best <span class="math inline">\(B\)</span> on the script’s grid is 250, with error <span class="math inline">\(0.0396\)</span>, where the bias and the noise are of similar size. A non-private estimate has standard deviation about <span class="math inline">\(\theta/\sqrt n = 0.0100\)</span>, so privacy at <span class="math inline">\(\varepsilon = 1\)</span> costs a factor of four here, for an estimator whose sensitivity you never had to bound.</p>
+<div id="fig-sens-saa-blocks" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sens-saa-blocks-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sens_saa_blocks.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sens-saa-blocks-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.4: Root-mean-square error of subsample-and-aggregate for the exponential rate against the number of blocks <span class="math inline">\(B\)</span> (formula and simulation), with its three components: the bias of the estimator on small blocks, the Laplace noise, and the sampling error.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-3" class="level3" data-number="23.6.6">
+<h3 data-number="23.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">23.6.6</span> Check yourself</h3>
+<ul>
+<li>Why must the partition into blocks not depend on the data values? <em>(Otherwise replacing one record could reshuffle many records between blocks and change many <span class="math inline">\(z_j\)</span>, breaking step 1.)</em></li>
+<li>Why does the sampling term in <a href="#tbl-sens-saa" class="quarto-xref">Table&nbsp;<span>23.4</span></a> barely move with <span class="math inline">\(B\)</span>? <em>(The average of <span class="math inline">\(B\)</span> block estimates, each with variance about <span class="math inline">\(\theta^2 B/n\)</span>, has variance about <span class="math inline">\(\theta^2/n\)</span> whatever <span class="math inline">\(B\)</span> is. Only the higher-order terms of the inverse-gamma variance depend on the block size.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-sens-clip" class="level2" data-number="23.7">
+<h2 data-number="23.7" class="anchored" data-anchor-id="sec-sens-clip"><span class="header-section-number">23.7</span> Clipping</h2>
+<section id="context-4" class="level3" data-number="23.7.1">
+<h3 data-number="23.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">23.7.1</span> Context</h3>
+<p>The mean is the most common statistic of all, and on unbounded data its global sensitivity is infinite. <strong>Clipping</strong> forces a bound: replace each value <span class="math inline">\(x\)</span> by <span class="math inline">\(\min(x, C)\)</span> before averaging. The sensitivity becomes <span class="math inline">\(C/n\)</span>, and Laplace noise of scale <span class="math inline">\(C/(n\varepsilon)\)</span> makes the mean private. Nothing is free, though. Clipping changes the quantity you estimate, and the choice of <span class="math inline">\(C\)</span> trades that bias against the noise. The same move, applied to per-example gradients rather than to values, is the heart of private model training in later parts.</p>
+</section>
+<section id="statement-4" class="level3" data-number="23.7.2">
+<h3 data-number="23.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">23.7.2</span> Statement</h3>
+<p>Take non-negative data <span class="math inline">\(X_1, \dots, X_n\)</span> drawn independently from a distribution with mean <span class="math inline">\(\mu\)</span>. The clipped mean averages the clipped values and adds noise for sensitivity <span class="math inline">\(C/n\)</span>: <span id="eq-auto-06sensitivity-11"><span class="math display">\[M(D) = \frac1n\sum_{i=1}^n\min(x_i, C) + \mathrm{Lap}\Big(\frac{C}{n\varepsilon}\Big) \tag{23.20}\]</span></span> It is <span class="math inline">\(\varepsilon\)</span>-DP. Its error has the same three parts as in subsample-and-aggregate. Clipping cuts off the part of each value above <span class="math inline">\(C\)</span>, written <span class="math inline">\((x - C)_+ = \max(x - C, 0)\)</span>, and its average is the bias. The clipped values still vary from sample to sample, and the noise adds its own variance. So the mean squared error is <span id="eq-sens-clip-error"><span class="math display">\[\operatorname{err}(C)^2 = \underbrace{\mathbb E[(X - C)_+]^2}_{\text{bias}^2} + \underbrace{\frac{\operatorname{Var}(\min(X, C))}{n}}_{\text{sampling}} + \underbrace{\frac{2C^2}{n^2\varepsilon^2}}_{\text{noise}}. \tag{23.21}\]</span></span> Raising <span class="math inline">\(C\)</span> shrinks the bias and grows the noise, so the best <span class="math inline">\(C\)</span> is where the two rates of change balance, which is where the derivative of <a href="#eq-sens-clip-error" class="quarto-xref">Equation&nbsp;<span>23.21</span></a> in <span class="math inline">\(C\)</span> is zero. Here <span class="math inline">\(\Pr[X &gt; C]\)</span> is the fraction of values that clipping touches. The best <span class="math inline">\(C\)</span> solves <span id="eq-sens-clip-opt"><span class="math display">\[\Pr[X &gt; C]\Big(\mathbb E[(X - C)_+] - \frac{C - \mathbb E[\min(X, C)]}{n}\Big) = \frac{2C}{n^2\varepsilon^2}. \tag{23.22}\]</span></span></p>
+</section>
+<section id="derivation-4" class="level3" data-number="23.7.3">
+<h3 data-number="23.7.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">23.7.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Sensitivity.</strong> Each clipped value lies in <span class="math inline">\([0, C]\)</span>, so replacing one record changes the sum by at most <span class="math inline">\(C\)</span> and the mean by at most <span class="math inline">\(C/n\)</span>. Fact 1 gives <span class="math inline">\(\varepsilon\)</span>-DP.</li>
+<li><strong>The bias.</strong> Clipping removes exactly the excess above <span class="math inline">\(C\)</span>: <span class="math inline">\(x - \min(x, C) = (x - C)_+\)</span>. Taking expectations, <span class="math inline">\(\mu - \mathbb E[\min(X, C)] = \mathbb E[(X - C)_+]\)</span>: the mass that clipping cuts off.</li>
+<li><strong>Error decomposition.</strong> As in the subsample-and-aggregate derivation, the error is a constant (minus the bias), a mean-zero sampling term with variance <span class="math inline">\(\operatorname{Var}(\min(X, C))/n\)</span>, and independent Laplace noise with variance <span class="math inline">\(2(C/(n\varepsilon))^2\)</span>. Squaring and averaging kills the cross terms, since each contains a mean-zero factor independent of the other: <a href="#eq-sens-clip-error" class="quarto-xref">Equation&nbsp;<span>23.21</span></a>.</li>
+<li><strong>Derivatives in <span class="math inline">\(C\)</span>.</strong> Raising <span class="math inline">\(C\)</span> by a small amount <span class="math inline">\(h\)</span> raises <span class="math inline">\(\min(X, C)\)</span> by <span class="math inline">\(h\)</span> exactly when <span class="math inline">\(X &gt; C\)</span> and leaves it alone otherwise, so <span class="math inline">\(\frac{d}{dC}\mathbb E[\min(X, C)] = \Pr[X &gt; C]\)</span>. By the same reasoning <span class="math inline">\(\frac{d}{dC}\mathbb E[\min(X, C)^2] = 2C\Pr[X &gt; C]\)</span>. The bias is <span class="math inline">\(\mathbb E[(X - C)_+] = \mu - \mathbb E[\min(X, C)]\)</span>, whose derivative is <span class="math inline">\(-\Pr[X &gt; C]\)</span>, so by the chain rule the bias term has derivative <span class="math inline">\(-2\,\mathbb E[(X - C)_+]\Pr[X &gt; C]\)</span>. The variance is <span class="math inline">\(\mathbb E[\min(X, C)^2] - \mathbb E[\min(X, C)]^2\)</span>, so the sampling term has derivative <span class="math inline">\(\frac1n\big(2C\Pr[X &gt; C] - 2\,\mathbb E[\min(X, C)]\Pr[X &gt; C]\big) = \frac2n\Pr[X &gt; C]\big(C - \mathbb E[\min(X, C)]\big)\)</span>. The noise term has derivative <span class="math inline">\(\frac{4C}{n^2\varepsilon^2}\)</span>.</li>
+<li><strong>Set the sum to zero</strong> and divide by 2: <a href="#eq-sens-clip-opt" class="quarto-xref">Equation&nbsp;<span>23.22</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-2" class="level3" data-number="23.7.4">
+<h3 data-number="23.7.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">23.7.4</span> Interpretation</h3>
+<p>The bias does not shrink with <span class="math inline">\(n\)</span>, but the noise does. So the best <span class="math inline">\(C\)</span> grows with <span class="math inline">\(n\)</span>: with more data you can afford to clip less. For large <span class="math inline">\(n\)</span> the sampling part of <a href="#eq-sens-clip-opt" class="quarto-xref">Equation&nbsp;<span>23.22</span></a>, which has an extra <span class="math inline">\(1/n\)</span>, drops out, and the condition reads <span class="math inline">\(\Pr[X &gt; C]\,\mathbb E[(X - C)_+] \approx 2C/(n\varepsilon)^2\)</span>. The right side shrinks as <span class="math inline">\(n\varepsilon\)</span> grows, so the left side must shrink too, which pushes <span class="math inline">\(C\)</span> out into the tail.</p>
+<p>The bias has a sign. Clipping only from above always lowers values, so it always underestimates. For data on both sides of zero, clipping to <span class="math inline">\([-C, C]\)</span> cuts off mass on both sides, and the two cuts cancel only for distributions symmetric about 0, so only those are estimated without bias.</p>
+<p>Choosing <span class="math inline">\(C\)</span> is itself a data-dependent decision. Setting <span class="math inline">\(C\)</span> to the observed maximum, or to the empirical 99th percentile, makes the noise scale a function of the data, and the leak of <a href="#sec-sens-local" class="quarto-xref"><span>Section 23.3</span></a> returns. Choose <span class="math inline">\(C\)</span> from domain knowledge, or spend part of the budget on a private quantile: the <a href="../part03-dp-foundations/05-selection.html">exponential mechanism</a>, or the smooth-sensitivity and propose-test-release methods above applied to an order statistic.</p>
+<p>Clipping is the honest version of “bounded data”. Every “assume <span class="math inline">\(x \in [0, \Lambda]\)</span>” in earlier chapters is a clip in disguise, and its bias is the price of that assumption.</p>
+</section>
+<section id="example-mean-income" class="level3" data-number="23.7.5">
+<h3 data-number="23.7.5" class="anchored" data-anchor-id="example-mean-income"><span class="header-section-number">23.7.5</span> Example: mean income</h3>
+<p>Incomes (in thousands) follow a log-normal distribution with <span class="math inline">\(\ln X \sim \mathcal N(\ln 40, 0.8^2)\)</span>: the log of an income is normal. The median is <span class="math inline">\(e^{\ln 40} = 40\)</span>, because the exponential preserves the median. The mean is larger, <span class="math inline">\(e^{\ln 40 + 0.32} = 55.085\)</span>, because a log-normal with <span class="math inline">\(\ln X \sim \mathcal N(\eta, s^2)\)</span> has mean <span class="math inline">\(e^{\eta + s^2/2}\)</span> and here <span class="math inline">\(s^2/2 = 0.64/2 = 0.32\)</span>; the gap reflects a heavy right tail.</p>
+<p>Every term of <a href="#eq-sens-clip-error" class="quarto-xref">Equation&nbsp;<span>23.21</span></a> needs averages of <span class="math inline">\(X\)</span> and <span class="math inline">\(X^2\)</span> over the values below <span class="math inline">\(C\)</span>. For a log-normal these partial moments have a closed form, <span class="math inline">\(\mathbb E[X^j\mathbf 1\{X \le c\}] = e^{j\eta + j^2s^2/2}\,\Phi\big((\ln c - \eta - js^2)/s\big)\)</span>, where <span class="math inline">\(\Phi\)</span> is the standard normal cumulative distribution function and <span class="math inline">\(\mathbf 1\{X \le c\}\)</span> is 1 when <span class="math inline">\(X \le c\)</span> and 0 otherwise. To get it, write <span class="math inline">\(X = e^Y\)</span> with <span class="math inline">\(Y\)</span> normal, so the integral is <span class="math inline">\(\int_{-\infty}^{\ln c}e^{jy}\varphi(y)\,dy\)</span> with <span class="math inline">\(\varphi\)</span> the normal density of <span class="math inline">\(Y\)</span>; completing the square in the exponent turns <span class="math inline">\(e^{jy}\varphi(y)\)</span> into <span class="math inline">\(e^{j\eta + j^2s^2/2}\)</span> times a normal density with mean shifted to <span class="math inline">\(\eta + js^2\)</span>, whose integral up to <span class="math inline">\(\ln c\)</span> is the <span class="math inline">\(\Phi\)</span> term (as in <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). <a href="#tbl-sens-clip" class="quarto-xref">Table&nbsp;<span>23.5</span></a> uses these with <span class="math inline">\(n = 1000\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>.</p>
+<div id="tbl-sens-clip" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sens-clip-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.5: Error of the clipped private mean of log-normal incomes, <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>, for four clip bounds: the three terms of <a href="#eq-sens-clip-error" class="quarto-xref">Equation&nbsp;<span>23.21</span></a>, their combination, and a simulation with 5,000 repetitions.
+</figcaption>
+<div aria-describedby="tbl-sens-clip-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Clip bound <span class="math inline">\(C\)</span></th>
+<th><span class="math inline">\(\Pr[X &gt; C]\)</span></th>
+<th>Bias</th>
+<th>Sampling sd</th>
+<th>Noise sd</th>
+<th>Root-mean-square error</th>
+<th>Simulated</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>40 (the median)</td>
+<td>0.5000</td>
+<td>23.415</td>
+<td>0.335</td>
+<td>0.057</td>
+<td>23.417</td>
+<td>23.411</td>
+</tr>
+<tr class="even">
+<td>257.23 (99th percentile)</td>
+<td>0.0100</td>
+<td>0.924</td>
+<td>1.462</td>
+<td>0.364</td>
+<td>1.767</td>
+<td>1.747</td>
+</tr>
+<tr class="odd">
+<td>331.34 (optimal)</td>
+<td>0.0041</td>
+<td>0.438</td>
+<td>1.538</td>
+<td>0.469</td>
+<td>1.666</td>
+<td>1.649</td>
+</tr>
+<tr class="even">
+<td>1000</td>
+<td>0.0000</td>
+<td>0.006</td>
+<td>1.645</td>
+<td>1.414</td>
+<td>2.169</td>
+<td>2.134</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Clipping at the median is a disaster: half the incomes are cut back, and the bias of 23 dwarfs everything. The optimum, <span class="math inline">\(C^* = 331.34\)</span>, cuts off only 0.4% of the population and has total error <span class="math inline">\(1.666\)</span>, only 1% above the standard deviation <span class="math inline">\(1.649\)</span> of the unclipped, non-private mean (the ratio is <span class="math inline">\(1.666/1.649 \approx 1.01\)</span>). Above the optimum, the noise takes over: its standard deviation <span class="math inline">\(\sqrt2\,C/(n\varepsilon)\)</span> grows linearly in <span class="math inline">\(C\)</span>, reaching <span class="math inline">\(1.414\)</span> at <span class="math inline">\(C = 1000\)</span> (<a href="#fig-sens-clip-tradeoff" class="quarto-xref">Figure&nbsp;<span>23.5</span></a>, left). The optimum grows with <span class="math inline">\(n\)</span>, as the interpretation predicted: <span class="math inline">\(177.5\)</span> at <span class="math inline">\(n = 100\)</span>, <span class="math inline">\(557.3\)</span> at <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(876.3\)</span> at <span class="math inline">\(n = 100{,}000\)</span> (<a href="#fig-sens-clip-tradeoff" class="quarto-xref">Figure&nbsp;<span>23.5</span></a>, right).</p>
+<div id="fig-sens-clip-tradeoff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sens-clip-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sens_clip_tradeoff.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sens-clip-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.5: Left: root-mean-square error of the clipped private mean of log-normal incomes against the clip bound <span class="math inline">\(C\)</span>, with its bias, noise and sampling components and simulated points; the dotted line marks the optimum <span class="math inline">\(C^* = 331\)</span>. Right: the optimal clip bound as a function of the dataset size.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-4" class="level3" data-number="23.7.6">
+<h3 data-number="23.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">23.7.6</span> Check yourself</h3>
+<ul>
+<li>Under the add/remove relation, why is a clipped <em>sum</em> easier to release than a clipped mean? <em>(Adding or removing one record changes the sum by at most <span class="math inline">\(C\)</span>, but it also changes <span class="math inline">\(n\)</span>, so the mean’s denominator is not public. One releases a noisy sum and a noisy count and divides.)</em></li>
+<li>If you double <span class="math inline">\(n\)</span>, roughly how does the noise term change, and which way does <span class="math inline">\(C^*\)</span> move? <em>(The noise standard deviation halves at fixed <span class="math inline">\(C\)</span>, so the balance in <a href="#eq-sens-clip-opt" class="quarto-xref">Equation&nbsp;<span>23.22</span></a> shifts toward a larger <span class="math inline">\(C^*\)</span> with less bias.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-every-number-by-computation" class="level2" data-number="23.8">
+<h2 data-number="23.8" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">23.8</span> Code: check every number by computation</h2>
+<p>The script <a href="../../../code/part03-dp-foundations/sensitivity.py">code/sensitivity.py</a> computes every number in this chapter and draws its figures. Local and smooth sensitivity, the noise parameters, propose-test-release, subsample-and-aggregate and the clipped mean are each small typed functions; the table calls them once and the figures loop over them. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/sensitivity.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="#tbl-sens-results" class="quarto-xref">Table&nbsp;<span>23.6</span></a> shows the output with seed 0.</p>
+<div id="tbl-sens-results" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sens-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.6: Results of the chapter’s script with seed 0.
+</figcaption>
+<div aria-describedby="tbl-sens-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Local-sensitivity noise on <span class="math inline">\(D\)</span>, <span class="math inline">\(D'\)</span> of <a href="#tbl-sens-leak" class="quarto-xref">Table&nbsp;<span>23.2</span></a>, <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td><span class="math inline">\(\mathrm{LS} = 10\)</span> and 60; <span class="math inline">\(\delta(1) = 0.477\)</span> (<span class="math inline">\(D'\)</span> against <span class="math inline">\(D\)</span>) and <span class="math inline">\(0.215\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(A^{(k)}\)</span> for <span class="math inline">\(D = (1, 3, 4, 6, 9)\)</span>, <span class="math inline">\(\Lambda = 10\)</span></td>
+<td>Formula equals brute force over <span class="math inline">\(11^5\)</span> datasets for every <span class="math inline">\(k\)</span>; <span class="math inline">\(S^*_{0.5} = 3.03\)</span> at <span class="math inline">\(k = 1\)</span></td>
+</tr>
+<tr class="odd">
+<td>Noise parameters, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-6}\)</span></td>
+<td>Cauchy <span class="math inline">\(\alpha = \beta = 0.1667\)</span>, loss bound 0.8333; Laplace <span class="math inline">\(\alpha = 0.5\)</span>, <span class="math inline">\(\beta = 0.0322\)</span></td>
+</tr>
+<tr class="even">
+<td>Median of 1,001 ages</td>
+<td>local sensitivity 0.1386; Cauchy scale 0.979 (simulated median error 0.980); Laplace median error 0.713; global 69.31</td>
+</tr>
+<tr class="odd">
+<td>Propose-test-release, <span class="math inline">\(b = 1\)</span></td>
+<td><span class="math inline">\(n = 1001\)</span>: distance 21, pass probability 0.999621; <span class="math inline">\(n = 101\)</span>: distance 1, pass probability <span class="math inline">\(1.36\times10^{-6}\)</span></td>
+</tr>
+<tr class="even">
+<td>Subsample-and-aggregate, exponential rate</td>
+<td>Best <span class="math inline">\(B = 250\)</span> on the grid, error 0.0396, against 0.0100 without privacy</td>
+</tr>
+<tr class="odd">
+<td>Clipped mean of incomes, <span class="math inline">\(n = 1000\)</span></td>
+<td><span class="math inline">\(C^* = 331.34\)</span>, error 1.666 (simulated 1.649); 99th percentile 1.767; median 23.417</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_sensitivity.py">tests/test_sensitivity.py</a> checks that the output still matches this table.</p>
+<p><strong>What to take from it.</strong> The first lesson is that a data-dependent noise scale can leak more than the answer: in the leak example both datasets have the same median, so the whole <span class="math inline">\(\delta = 0.477\)</span> comes from the spread of the noise. The repair for the median rests on an exact formula, and the <span class="math inline">\(O(n^2)\)</span> formula for <span class="math inline">\(A^{(k)}\)</span> matches brute force at every distance <span class="math inline">\(k\)</span>, so the smooth sensitivities it produces can be trusted. With it, smooth sensitivity and propose-test-release buy about two orders of magnitude over global sensitivity for the median of a thousand points, though they lose to it on tiny datasets, where a few changes can open a gap across the whole range. Finally, every method ends in a bias–noise trade-off you can compute: the number of blocks and the clip bound both have optima you can find in closed form before touching the data.</p>
+</section>
+<section id="references" class="level2" data-number="23.9">
+<h2 data-number="23.9" class="anchored" data-anchor-id="references"><span class="header-section-number">23.9</span> References</h2>
+<ul>
+<li>Nissim, Raskhodnikova &amp; Smith, “Smooth Sensitivity and Sampling in Private Data Analysis” (STOC 2007; full version on the authors’ pages): local and smooth sensitivity, admissible noise (Lemmas 2.6–2.9), the median (Proposition 3.4) and the original sample-and-aggregate framework</li>
+<li>Dwork &amp; Lei, “Differential Privacy and Robust Statistics” (STOC 2009): propose-test-release, and private robust estimators of scale, location and regression built on it</li>
+<li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014), ch.&nbsp;7: propose-test-release and subsample-and-aggregate in textbook form</li>
+<li>Near &amp; Abuah, <em>Programming Differential Privacy</em>, chapter on local sensitivity: the same ideas with short code</li>
+<li>Smith, “Privacy-Preserving Statistical Estimation with Optimal Convergence Rates” (STOC 2011): subsample-and-aggregate for asymptotically normal estimators</li>
+<li>Bun &amp; Steinke, “Average-Case Averages: Private Algorithms for Smooth Sensitivity and Mean Estimation” (NeurIPS 2019): better noise distributions for smooth sensitivity, under concentrated DP</li>
+<li>Amin, Kulesza, Muñoz Medina &amp; Vassilvitskii, “Bounding User Contributions: A Bias-Variance Trade-off in Differential Privacy” (ICML 2019): the clipping trade-off when users contribute many records</li>
+<li>Papernot, Abadi, Erlingsson, Goodfellow &amp; Talwar, “Semi-supervised Knowledge Transfer for Deep Learning from Private Training Data” (ICLR 2017): subsample-and-aggregate for model training</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="23.10">
+<h2 data-number="23.10" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">23.10</span> Cheat sheet</h2>
+<p><a href="#tbl-sens-cheat-sheet" class="quarto-xref">Table&nbsp;<span>23.7</span></a> collects the results. Datasets have fixed size <span class="math inline">\(n\)</span> and neighbours differ by one replaced record.</p>
+<div id="tbl-sens-cheat-sheet" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sens-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.7: Summary of the results in this chapter.
+</figcaption>
+<div aria-describedby="tbl-sens-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+<th>Privacy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Local sensitivity</td>
+<td><span class="math inline">\(\mathrm{LS}_f(D) = \max_{d(D, D') = 1}\lvert f(D) - f(D')\rvert\)</span>; noise scaled by it is <strong>not</strong> private</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Median</td>
+<td><span class="math inline">\(\mathrm{LS} = \max(x_m - x_{m-1}, x_{m+1} - x_m)\)</span>; <span class="math inline">\(\Delta = \Lambda\)</span></td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Smooth sensitivity</td>
+<td><span class="math inline">\(S^*_\beta(D) = \max_{D''}\mathrm{LS}(D'')e^{-\beta d(D, D'')}\)</span>, the smallest <span class="math inline">\(\beta\)</span>-smooth upper bound</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Median, exact</td>
+<td><span class="math inline">\(S^*_\beta = \max_{k \le n}e^{-k\beta}\max_{0 \le t \le k+1}(x_{m+t} - x_{m+t-k-1})\)</span>, <span class="math inline">\(O(n^2)\)</span></td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Cauchy-like noise</td>
+<td><span class="math inline">\(f + (S/\alpha)Z\)</span>, <span class="math inline">\(h \propto 1/(1 + \lvert z\rvert^\gamma)\)</span>, <span class="math inline">\(\gamma\alpha + (\gamma + 1)\beta \le \varepsilon\)</span>; Cauchy: <span class="math inline">\(6S^*_{\varepsilon/6}/\varepsilon\)</span></td>
+<td><span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="even">
+<td>Laplace noise</td>
+<td><span class="math inline">\(f + (S/\alpha)\,\mathrm{Lap}(1)\)</span>, <span class="math inline">\(\beta + e^\beta\alpha + (e^\beta - 1)\ln(1/\delta) \le \varepsilon\)</span></td>
+<td><span class="math inline">\((\varepsilon, \delta)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Propose-test-release</td>
+<td><span class="math inline">\(\bot\)</span> if <span class="math inline">\(\operatorname{dist}_b + \mathrm{Lap}(1/\varepsilon) \le \ln(1/\delta)/\varepsilon\)</span>, else <span class="math inline">\(f + \mathrm{Lap}(b/\varepsilon)\)</span></td>
+<td><span class="math inline">\((2\varepsilon, \delta/2)\)</span></td>
+</tr>
+<tr class="even">
+<td>Subsample-and-aggregate</td>
+<td>Mean of <span class="math inline">\(B\)</span> clipped block outputs <span class="math inline">\(+ \mathrm{Lap}(R/(B\varepsilon))\)</span>; error = bias of small blocks + sampling + noise</td>
+<td><span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="odd">
+<td>Clipped mean</td>
+<td><span class="math inline">\(\frac1n\sum\min(x_i, C) + \mathrm{Lap}(C/(n\varepsilon))\)</span>; bias <span class="math inline">\(\mathbb E[(X - C)_+]\)</span></td>
+<td><span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>If the noise scale depends on the data, ask what the noise scale reveals. If you cannot answer, use one of the four repairs.</li>
+<li>Pure DP with a data-dependent scale needs polynomial tails; light tails need <span class="math inline">\(\delta\)</span> and a much smaller <span class="math inline">\(\beta \approx \varepsilon/(2\ln(1/\delta))\)</span>.</li>
+<li>Smooth sensitivity pays off once the data are dense around the statistic: for the median, once <span class="math inline">\(n\)</span> is in the hundreds.</li>
+<li>Choose clip bounds and block counts before looking at the data, by the error formula, or with a separate slice of the privacy budget.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part03-dp-foundations/06-sensitivity.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part03-dp-foundations/05-selection.html" class="pagination-link" aria-label="Selection: exponential mechanism, report-noisy-max, sparse vector">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="pagination-link" aria-label="Discrete and floating-point-safe mechanisms">
+        <span class="nav-page-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

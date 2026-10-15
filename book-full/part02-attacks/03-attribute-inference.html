@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>11&nbsp; Attribute inference and model inversion – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-attacks/04-property-inference.html" rel="next">
+<link href="../part02-attacks/02-membership-inference.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/03-attribute-inference.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">11.1</span> Why this matters</a>
+  <ul class="collapse">
+  <li><a href="#the-one-idea-compare-with-the-guesser-who-never-sees-the-model" id="toc-the-one-idea-compare-with-the-guesser-who-never-sees-the-model" class="nav-link" data-scroll-target="#the-one-idea-compare-with-the-guesser-who-never-sees-the-model"><span class="header-section-number">11.1.1</span> The one idea: compare with the guesser who never sees the model</a></li>
+  </ul></li>
+  <li><a href="#toolkit-three-facts-every-derivation-uses" id="toc-toolkit-three-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-three-facts-every-derivation-uses"><span class="header-section-number">11.2</span> Toolkit: three facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-the-map-guess-is-the-best-guess" id="toc-fact-1-the-map-guess-is-the-best-guess" class="nav-link" data-scroll-target="#fact-1-the-map-guess-is-the-best-guess"><span class="header-section-number">11.2.1</span> Fact 1 — The MAP guess is the best guess</a></li>
+  <li><a href="#fact-2-an-independent-observation-is-useless" id="toc-fact-2-an-independent-observation-is-useless" class="nav-link" data-scroll-target="#fact-2-an-independent-observation-is-useless"><span class="header-section-number">11.2.2</span> Fact 2 — An independent observation is useless</a></li>
+  <li><a href="#fact-3-processing-an-observation-cannot-help-the-best-guesser" id="toc-fact-3-processing-an-observation-cannot-help-the-best-guesser" class="nav-link" data-scroll-target="#fact-3-processing-an-observation-cannot-help-the-best-guesser"><span class="header-section-number">11.2.3</span> Fact 3 — Processing an observation cannot help the best guesser</a></li>
+  </ul></li>
+  <li><a href="#sec-attr-game" id="toc-sec-attr-game" class="nav-link" data-scroll-target="#sec-attr-game"><span class="header-section-number">11.3</span> The attribute inference game</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">11.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">11.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">11.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">11.3.4</span> Interpretation</a></li>
+  <li><a href="#example-one-model-200-times" id="toc-example-one-model-200-times" class="nav-link" data-scroll-target="#example-one-model-200-times"><span class="header-section-number">11.3.5</span> Example: one model, 200 times</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">11.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-attr-imputation" id="toc-sec-attr-imputation" class="nav-link" data-scroll-target="#sec-attr-imputation"><span class="header-section-number">11.4</span> The imputation baseline</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">11.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">11.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">11.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">11.4.4</span> Interpretation</a></li>
+  <li><a href="#example-the-smoking-table" id="toc-example-the-smoking-table" class="nav-link" data-scroll-target="#example-the-smoking-table"><span class="header-section-number">11.4.5</span> Example: the smoking table</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">11.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-attr-inversion" id="toc-sec-attr-inversion" class="nav-link" data-scroll-target="#sec-attr-inversion"><span class="header-section-number">11.5</span> Model inversion: the MAP attack</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">11.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">11.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">11.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">11.5.4</span> Interpretation</a></li>
+  <li><a href="#example-walking-through-the-inversion" id="toc-example-walking-through-the-inversion" class="nav-link" data-scroll-target="#example-walking-through-the-inversion"><span class="header-section-number">11.5.5</span> Example: walking through the inversion</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">11.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-attr-masking" id="toc-sec-attr-masking" class="nav-link" data-scroll-target="#sec-attr-masking"><span class="header-section-number">11.6</span> Confidence masking</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">11.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">11.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">11.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">11.6.4</span> Interpretation</a></li>
+  <li><a href="#example-rounding-and-labels-on-the-toy-model" id="toc-example-rounding-and-labels-on-the-toy-model" class="nav-link" data-scroll-target="#example-rounding-and-labels-on-the-toy-model"><span class="header-section-number">11.6.5</span> Example: rounding and labels on the toy model</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">11.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-attr-code" id="toc-sec-attr-code" class="nav-link" data-scroll-target="#sec-attr-code"><span class="header-section-number">11.7</span> Code: the game on a toy model</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">11.8</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">11.9</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/03-attribute-inference.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="11.1">
+<h2 data-number="11.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">11.1</span> Why this matters</h2>
+<p>A hospital trains a model that predicts whether a patient will develop a lung disease from their age band and whether they smoke, and puts it behind an interface that anyone can query. An insurer knows your age and, from a claim, that you have the disease. Can it use the model to find out whether you smoke?</p>
+<p>It can make a better guess than it could without the model. But that is not yet a privacy failure. If smokers get the disease more often, the insurer learns something about every person with the disease, whether or not their record was used for training. A published study saying “smoking causes this disease” would let it make the same guess. The question that matters for <em>you</em> is different: <strong>does the model reveal more about your attribute because your record was in its training data?</strong></p>
+<p>That question needs a baseline, and this chapter builds it and measures attacks against it. The attacks have a name. <strong>Attribute inference</strong> asks an adversary to recover one sensitive field of a record, such as smoking status, a genotype or an income band, from the other fields of the record and access to a model. <strong>Model inversion</strong> is the classic way to do it: you query the model once for each candidate value of the sensitive field, and keep the value whose prediction best explains the label you already know. In the insurer’s case, you ask the model “how likely is the disease for a smoker of this age?” and “for a non-smoker of this age?”, and lean towards whichever answer makes the known diagnosis less surprising.</p>
+<section id="the-one-idea-compare-with-the-guesser-who-never-sees-the-model" class="level3" data-number="11.1.1">
+<h3 data-number="11.1.1" class="anchored" data-anchor-id="the-one-idea-compare-with-the-guesser-who-never-sees-the-model"><span class="header-section-number">11.1.1</span> The one idea: compare with the guesser who never sees the model</h3>
+<p>Imagine a second insurer who has no access to the model but knows the population perfectly: how common smoking is, how it relates to age and how it relates to the disease. For each combination of the fields it can see, it picks the value of the sensitive field that is most probable in the population. That guess is called the maximum a posteriori (MAP) guess, “a posteriori” because it is made after seeing the other fields, and its success rate is the <strong>imputation baseline</strong>. No model is involved in computing it. (<a href="../part01-prerequisites/05-information-theory.html">Information theory</a> calls this success rate the posterior vulnerability.)</p>
+<p>The chapter rests on one claim about this baseline. <strong>For a record that was not in the training set, no attack can beat the imputation baseline. For a record that was, an attack can.</strong> The reason is that a model trained without your record was built from other people’s data only, so it cannot carry any information about you specifically; at most it teaches the adversary about the population, and the baseline already assumes the population is known perfectly. So everything an attack achieves up to the baseline is population inference. What it achieves on training records beyond what it achieves on fresh ones is the leak about individuals. Measuring that leak means comparing people who were in the training set with people who were not, so attribute inference turns out to be a membership question in disguise, which ties this chapter to <a href="../part02-attacks/02-membership-inference.html">Membership inference</a>.</p>
+<p><a href="#tbl-attr-uses" class="quarto-xref">Table&nbsp;<span>11.1</span></a> lists the results and where each is used.</p>
+<div id="tbl-attr-uses" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-attr-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11.1: The results of this chapter and where each is used.
+</figcaption>
+<div aria-describedby="tbl-attr-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>The attribute inference game and its advantage</td>
+<td>Measuring an attack as a difference between training and fresh records (<a href="../part02-attacks/01-threat-models.html">Threat models</a>)</td>
+</tr>
+<tr class="even">
+<td>Attribute advantage is a membership advantage</td>
+<td>Turning any attribute attack into a membership test; bounding it by total variation</td>
+</tr>
+<tr class="odd">
+<td>The non-member ceiling: imputation is the best possible on fresh records</td>
+<td>Separating population inference from individual leakage</td>
+</tr>
+<tr class="even">
+<td>MAP model inversion; it equals imputation for a calibrated model</td>
+<td>Reading an inversion attack as Bayes’ rule with the model as likelihood</td>
+</tr>
+<tr class="odd">
+<td>Overfitting lets members beat the baseline</td>
+<td>Why the leak shrinks with the training-set size</td>
+</tr>
+<tr class="even">
+<td>Masking the confidences cannot help the best attacker</td>
+<td>What rounding or label-only outputs do, and what they don’t</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>What you need.</strong> Everything this chapter borrows is restated where it is used, so the links below are pointers for more detail. The MAP guess, vulnerability and min-entropy leakage are in <a href="../part01-prerequisites/05-information-theory.html">Information theory</a>. Bayes’ rule, true and false positive rates, and the fact that the best advantage of a test is the total variation distance are in <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>. Games and the vocabulary of adversaries are in <a href="../part02-attacks/01-threat-models.html">Threat models</a>, and the loss-threshold attack and the generalization gap are in <a href="../part02-attacks/02-membership-inference.html">Membership inference</a>.</p>
+<p><strong>Notation.</strong> A record is <span class="math inline">\(z = (s, x, y)\)</span>: a sensitive attribute <span class="math inline">\(s\)</span> that takes a few values (smoker or not), public features <span class="math inline">\(x\)</span> (the age band), and a label <span class="math inline">\(y\)</span> (the disease). Records come from a population distribution <span class="math inline">\(\mathcal D\)</span>, and <span class="math inline">\(p(s, x, y)\)</span> is the probability of a record (or its density, when <span class="math inline">\(x\)</span> is continuous). A training set <span class="math inline">\(S \sim \mathcal D^n\)</span> is <span class="math inline">\(n\)</span> records drawn independently from <span class="math inline">\(\mathcal D\)</span>, and a training algorithm turns it into a model <span class="math inline">\(M\)</span>. The model’s <strong>confidence</strong> in label <span class="math inline">\(y\)</span> at input <span class="math inline">\((x, s)\)</span> is <span class="math inline">\(f_y(x, s)\)</span>, the probability the model assigns to <span class="math inline">\(y\)</span>.</p>
+<p>The chapter keeps returning to one number: how often the best possible guess of <span class="math inline">\(s\)</span> is right when the guesser sees <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> and knows the population. For each pair <span class="math inline">\((x, y)\)</span>, the best guess is the value of <span class="math inline">\(s\)</span> with the largest probability <span class="math inline">\(p(s, x, y)\)</span>, and it is right on exactly that much probability. Adding over all pairs gives the success rate, written</p>
+<p><span id="eq-auto-03attributeinference-1"><span class="math display">\[V(S \mid X, Y) = \sum_{x, y}\max_s p(s, x, y). \tag{11.1}\]</span></span></p>
+<p>For continuous <span class="math inline">\(x\)</span>, read it as <span class="math inline">\(\mathbb E\big[\max_s p(s \mid X, Y)\big]\)</span>: the average, over records, of the probability of the most likely value of <span class="math inline">\(s\)</span> given that record’s <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span>. The capital letters <span class="math inline">\(S, X, Y\)</span> stand for the random fields; the letter <span class="math inline">\(S\)</span> does double duty as the training set, and the context always says which is meant.</p>
+</section>
+</section>
+<section id="toolkit-three-facts-every-derivation-uses" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="toolkit-three-facts-every-derivation-uses"><span class="header-section-number">11.2</span> Toolkit: three facts every derivation uses</h2>
+<section id="fact-1-the-map-guess-is-the-best-guess" class="level3" data-number="11.2.1">
+<h3 data-number="11.2.1" class="anchored" data-anchor-id="fact-1-the-map-guess-is-the-best-guess"><span class="header-section-number">11.2.1</span> Fact 1 — The MAP guess is the best guess</h3>
+<p>Suppose you must guess <span class="math inline">\(s\)</span> after seeing some observation <span class="math inline">\(o\)</span>. For each value of <span class="math inline">\(o\)</span>, whatever you answer is right exactly when the true <span class="math inline">\(s\)</span> is your answer, so the best you can do is answer the value of <span class="math inline">\(s\)</span> that is most probable together with that <span class="math inline">\(o\)</span>. That answer is the <strong>MAP guess</strong>, <span class="math inline">\(\arg\max_s p(s \mid o)\)</span>, and its success probability is the sum of the largest probabilities, one per observation:</p>
+<p><span id="eq-auto-03attributeinference-2"><span class="math display">\[V(S \mid O) = \sum_o\max_s p(s, o) = \mathbb E_O\Big[\max_s p(s \mid O)\Big]. \tag{11.2}\]</span></span></p>
+<p>The second form is the same sum written as an average: <span class="math inline">\(p(s, o) = p(o)\,p(s \mid o)\)</span>, and <span class="math inline">\(p(o)\)</span> does not depend on <span class="math inline">\(s\)</span>, so it comes out of the maximum. <span class="math inline">\(V\)</span> stands for <strong>vulnerability</strong>, the name <a href="../part01-prerequisites/05-information-theory.html">Information theory</a> gives this success rate.</p>
+<p>The proof is the counting argument made precise. A deterministic guessing rule <span class="math inline">\(g\)</span> maps each observation <span class="math inline">\(o\)</span> to a guess <span class="math inline">\(g(o)\)</span>. It is right when <span class="math inline">\(o\)</span> occurs and <span class="math inline">\(s = g(o)\)</span>, which has probability <span class="math inline">\(p(g(o), o)\)</span>, so its success is <span class="math inline">\(\sum_o p(g(o), o)\)</span>, one term per value of <span class="math inline">\(o\)</span>. Each term is at most <span class="math inline">\(\max_s p(s, o)\)</span>, and equals it when <span class="math inline">\(g(o)\)</span> is the MAP guess. A randomized rule picks among deterministic rules at random, so its success is an average of their successes, and an average is never above the best one.</p>
+<p>For a concrete case, take no observation at all and a prior of 0.3 that a person smokes. The rule “always say non-smoker” is right 70% of the time and “always say smoker” 30%, so the best guess is “non-smoker”, with <span class="math inline">\(V(S) = 0.7\)</span>.</p>
+</section>
+<section id="fact-2-an-independent-observation-is-useless" class="level3" data-number="11.2.2">
+<h3 data-number="11.2.2" class="anchored" data-anchor-id="fact-2-an-independent-observation-is-useless"><span class="header-section-number">11.2.2</span> Fact 2 — An independent observation is useless</h3>
+<p>If an extra observation <span class="math inline">\(M\)</span> has nothing to do with <span class="math inline">\(s\)</span> and <span class="math inline">\(o\)</span>, seeing it cannot change which value of <span class="math inline">\(s\)</span> is most likely, so it cannot raise the best success. In symbols: if <span class="math inline">\(M\)</span> is independent of <span class="math inline">\((S, O)\)</span>, then <span class="math inline">\(V(S \mid O, M) = V(S \mid O)\)</span>.</p>
+<p>Independence means the probabilities multiply, <span class="math inline">\(p(s, o, m) = p(s, o)\,p(m)\)</span>. Put that into Fact 1 with the observation <span class="math inline">\((o, m)\)</span>: <span id="eq-auto-03attributeinference-3"><span class="math display">\[V(S \mid O, M) = \sum_{o, m}\max_s p(s, o)\,p(m) = \sum_m p(m)\sum_o\max_s p(s, o) = V(S \mid O). \tag{11.3}\]</span></span> The middle step pulls <span class="math inline">\(p(m)\)</span> out of the maximum, which is allowed because <span class="math inline">\(p(m) \ge 0\)</span> does not depend on <span class="math inline">\(s\)</span>; the last step uses that the <span class="math inline">\(p(m)\)</span> add up to 1. For instance, a coin flip you see before guessing does not change which smoking status is more likely, so it cannot change your success. This fact is what gives the non-member ceiling: a model trained without you is, as far as your record goes, such an independent observation.</p>
+</section>
+<section id="fact-3-processing-an-observation-cannot-help-the-best-guesser" class="level3" data-number="11.2.3">
+<h3 data-number="11.2.3" class="anchored" data-anchor-id="fact-3-processing-an-observation-cannot-help-the-best-guesser"><span class="header-section-number">11.2.3</span> Fact 3 — Processing an observation cannot help the best guesser</h3>
+<p>If you only see a transformed version <span class="math inline">\(g(O)\)</span> of the observation, you have at most the information in <span class="math inline">\(O\)</span> itself, so you cannot do better: for any function <span class="math inline">\(g\)</span>, <span class="math inline">\(V(S \mid g(O)) \le V(S \mid O)\)</span>.</p>
+<p>The reason is that whoever sees <span class="math inline">\(o\)</span> can compute <span class="math inline">\(g(o)\)</span> and then guess. A rule <span class="math inline">\(h\)</span> that guesses from <span class="math inline">\(g(o)\)</span> is therefore also a rule on <span class="math inline">\(o\)</span>, namely “apply <span class="math inline">\(g\)</span>, then <span class="math inline">\(h\)</span>”, written <span class="math inline">\(h \circ g\)</span>. So every rule on <span class="math inline">\(g(O)\)</span> is among the rules on <span class="math inline">\(O\)</span>, and by Fact 1 none of those beats <span class="math inline">\(V(S \mid O)\)</span>. For example, rounding a confidence of 0.62 to 0.6 can only merge observations that a guesser could have told apart; it never separates two that were the same. This is the guessing version of the data-processing inequality of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>, and the chapter uses it for confidence masking.</p>
+</section>
+</section>
+<section id="sec-attr-game" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="sec-attr-game"><span class="header-section-number">11.3</span> The attribute inference game</h2>
+<section id="context" class="level3" data-number="11.3.1">
+<h3 data-number="11.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">11.3.1</span> Context</h3>
+<p>“The attack recovered 78% of smoking statuses” sounds alarming, but it means nothing until you know two other numbers: how often the attribute could be guessed without the model, and how often the attack succeeds on people who were not in the training set. Yeom et al.&nbsp;(2018) made this precise with a game in the style of <a href="../part02-attacks/01-threat-models.html">Threat models</a>: a challenger sets up a hidden situation, the adversary gets a fixed view of it, and its guess is scored. Here the challenger flips a coin to decide whether the target record comes from the training set or fresh from the population. The coin is not a model of anything an attacker does; it is just a way to run both situations, member and non-member, under one set of rules, so that the attack’s success in one can be compared with its success in the other.</p>
+</section>
+<section id="statement" class="level3" data-number="11.3.2">
+<h3 data-number="11.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">11.3.2</span> Statement</h3>
+<p><strong>The game</strong> (Yeom et al.&nbsp;2018) is played for a training algorithm, a population <span class="math inline">\(\mathcal D\)</span>, a training-set size <span class="math inline">\(n\)</span> and an adversary <span class="math inline">\(\mathcal A\)</span>. It has three steps.</p>
+<ol type="1">
+<li>The challenger draws a training set <span class="math inline">\(S \sim \mathcal D^n\)</span> and trains a model <span class="math inline">\(M\)</span> on it.</li>
+<li>It draws a hidden bit <span class="math inline">\(b \in \{0, 1\}\)</span>, each value with probability <span class="math inline">\(\frac12\)</span>. If <span class="math inline">\(b = 1\)</span>, it picks the target <span class="math inline">\(z = (s, x, y)\)</span> uniformly from <span class="math inline">\(S\)</span>, so the target is a <strong>member</strong> of the training set. If <span class="math inline">\(b = 0\)</span>, it draws <span class="math inline">\(z \sim \mathcal D\)</span> afresh, so the target is a <strong>non-member</strong>.</li>
+<li>The adversary receives the target’s public fields and label <span class="math inline">\((x, y)\)</span>, but not <span class="math inline">\(s\)</span>, and access to <span class="math inline">\(M\)</span>. It may also know some or all of <span class="math inline">\(\mathcal D\)</span>: that is its auxiliary knowledge. It outputs a guess <span class="math inline">\(\hat s\)</span> of the sensitive attribute.</li>
+</ol>
+<p>The score should measure how much better the attack does on people who were in the training data than on people who were not, because that difference is what the model knows about its training records beyond the population. So the <strong>attribute advantage</strong> is the success rate on members minus the success rate on non-members, <span id="eq-attr-advantage"><span class="math display">\[\mathrm{Adv}^{\mathrm{attr}}(\mathcal A) = \Pr[\hat s = s \mid b = 1] - \Pr[\hat s = s \mid b = 0]. \tag{11.4}\]</span></span> Here <span class="math inline">\(\Pr[\hat s = s \mid b = 1]\)</span> is the probability that the guess equals the target’s true attribute, over everything random in the game, given that the target is a member.</p>
+<p><strong>Attribute advantage is membership advantage.</strong> Any attribute attack can be turned into a membership attack, by a simple observation: if the attribute attack is right more often on members, then “the attribute attack was right” is itself evidence of membership. Build the membership adversary <span class="math inline">\(\mathcal B\)</span> that receives the whole record <span class="math inline">\(z = (s, x, y)\)</span> and <span class="math inline">\(M\)</span>, runs <span class="math inline">\(\mathcal A\)</span> on <span class="math inline">\((x, y)\)</span> and <span class="math inline">\(M\)</span>, and says “member” exactly when <span class="math inline">\(\hat s = s\)</span>. A membership attack is described by two rates: its true positive rate (TPR), the probability that it says “member” for a member, and its false positive rate (FPR), the probability that it says “member” for a non-member. Its advantage is their difference. For <span class="math inline">\(\mathcal B\)</span> these are <span id="eq-auto-03attributeinference-4"><span class="math display">\[\mathrm{TPR}_{\mathcal B} = \Pr[\hat s = s \mid b = 1], \qquad \mathrm{FPR}_{\mathcal B} = \Pr[\hat s = s \mid b = 0], \qquad \mathrm{TPR}_{\mathcal B} - \mathrm{FPR}_{\mathcal B} = \mathrm{Adv}^{\mathrm{attr}}(\mathcal A). \tag{11.5}\]</span></span></p>
+<p>Membership attacks have a ceiling: no attack can tell two distributions apart better than their <strong>total variation distance</strong>, which is half the total absolute difference between their probabilities, <span class="math inline">\(\mathrm{TV}(P, Q) = \frac12\sum_v|p(v) - q(v)|\)</span>. Because <span class="math inline">\(\mathcal B\)</span> is a membership attack, its ceiling is also a ceiling on every attribute attack: <span id="eq-attr-tv"><span class="math display">\[\mathrm{Adv}^{\mathrm{attr}}(\mathcal A) \le \mathrm{TV}\big(P_{\mathrm{in}}, P_{\mathrm{out}}\big), \tag{11.6}\]</span></span> where <span class="math inline">\(P_{\mathrm{in}}\)</span> and <span class="math inline">\(P_{\mathrm{out}}\)</span> are the distributions of the pair <span class="math inline">\((z, M)\)</span>, the target record together with the model, when <span class="math inline">\(z\)</span> is a member and when it is not.</p>
+</section>
+<section id="derivation" class="level3" data-number="11.3.3">
+<h3 data-number="11.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">11.3.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>The membership test fires when the attribute guess is right.</strong> <span class="math inline">\(\mathcal B\)</span> is given <span class="math inline">\(s\)</span>, so it can check whether <span class="math inline">\(\hat s = s\)</span>, and it says “member” on exactly that event.</li>
+<li><strong>Read off its rates.</strong> Its TPR is the probability that it says “member” when <span class="math inline">\(b = 1\)</span>, and it says “member” exactly when the guess is right, so the TPR is <span class="math inline">\(\Pr[\hat s = s \mid b = 1]\)</span>. In the same way its FPR, the probability of “member” when <span class="math inline">\(b = 0\)</span>, is <span class="math inline">\(\Pr[\hat s = s \mid b = 0]\)</span>.</li>
+<li><strong>Subtract.</strong> <span class="math inline">\(\mathrm{TPR} - \mathrm{FPR}\)</span> is the right-hand side of <a href="#eq-attr-advantage" class="quarto-xref">Equation&nbsp;<span>11.4</span></a> term by term.</li>
+<li><strong>Bound by total variation.</strong> Why can no test beat the total variation distance? A test that says “member” on a set <span class="math inline">\(A\)</span> of views <span class="math inline">\(v = (z, M)\)</span> has <span class="math inline">\(\mathrm{TPR} = P_{\mathrm{in}}(A)\)</span> and <span class="math inline">\(\mathrm{FPR} = P_{\mathrm{out}}(A)\)</span>, so its advantage is <span class="math inline">\(\sum_{v \in A}\big(p_{\mathrm{in}}(v) - p_{\mathrm{out}}(v)\big)\)</span>. That sum is largest when <span class="math inline">\(A\)</span> contains exactly the views with a positive term, those more likely for members, and its largest value is the total excess of <span class="math inline">\(p_{\mathrm{in}}\)</span> over <span class="math inline">\(p_{\mathrm{out}}\)</span>. Since both distributions add up to 1, the total excess one way equals the total excess the other way, so it is half the total absolute difference, <span class="math inline">\(\mathrm{TV}(P_{\mathrm{in}}, P_{\mathrm{out}})\)</span>. A randomized test averages such sets and does no better. (<a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a> proves this in general.) Applied to <span class="math inline">\(\mathcal B\)</span>, this gives <a href="#eq-attr-tv" class="quarto-xref">Equation&nbsp;<span>11.6</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation" class="level3" data-number="11.3.4">
+<h3 data-number="11.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">11.3.4</span> Interpretation</h3>
+<p>The subtraction in <a href="#eq-attr-advantage" class="quarto-xref">Equation&nbsp;<span>11.4</span></a> is what makes the advantage a measure of privacy. Any success that comes from knowing the population, for example “people with the disease tend to smoke”, is the same for members and non-members, so it appears in both terms and cancels. What is left is what the model knows about its own training records.</p>
+<p>The reduction also says which leak implies which. If a model reveals nothing about membership, in the sense that <span class="math inline">\(P_{\mathrm{in}}\)</span> and <span class="math inline">\(P_{\mathrm{out}}\)</span> are equal and their total variation is 0, then <a href="#eq-attr-tv" class="quarto-xref">Equation&nbsp;<span>11.6</span></a> forces the attribute advantage of every adversary to 0. The converse fails. A membership leak does not have to come with an attribute leak: if <span class="math inline">\(s\)</span> is irrelevant to the label, a model can memorize who was in its training set without its predictions depending on <span class="math inline">\(s\)</span> at all, and then no attribute attack gains anything on members.</p>
+<p>Because the advantage is a difference, it is not enough to report it alone. Report the success on members and on non-members, as a membership attack reports its TPR and FPR. The advantage by itself hides how much of the success is population inference, which is the part common to both.</p>
+<p>Finally, the membership test <span class="math inline">\(\mathcal B\)</span> that the reduction produces is a weak one. It outputs a single bit, so when it says “member” the only evidence it carries is how much more often that happens for members than for non-members, the ratio <span class="math inline">\(\mathrm{TPR}/\mathrm{FPR}\)</span>. An attack that is right on most people of the population, members or not, has an FPR close to its TPR and a ratio close to 1, so at a low FPR it is much weaker than the dedicated attacks of <a href="../part02-attacks/02-membership-inference.html">Membership inference</a> (<a href="../../book-exercises/part02-attacks/03-attribute-inference.html#sec-sol-attribute-inference-3">Exercise 3</a>).</p>
+</section>
+<section id="example-one-model-200-times" class="level3" data-number="11.3.5">
+<h3 data-number="11.3.5" class="anchored" data-anchor-id="example-one-model-200-times"><span class="header-section-number">11.3.5</span> Example: one model, 200 times</h3>
+<p>The toy experiment of this chapter (<a href="#sec-attr-code" class="quarto-xref"><span>Section 11.7</span></a>) has a binary sensitive attribute with prior <span class="math inline">\(\Pr[s = 1] = 0.3\)</span>, ten public features and a binary label. A logistic regression with one weight vector per value of <span class="math inline">\(s\)</span> is trained on <span class="math inline">\(n = 100\)</span> records, and this is repeated 200 times. Each time, the MAP inversion attack of <a href="#sec-attr-inversion" class="quarto-xref"><span>Section 11.5</span></a> guesses <span class="math inline">\(s\)</span> for the 100 members and for 100 fresh records. It is right on 0.7832 of members and 0.7262 of non-members, and the attribute advantage is the difference (computed before rounding the two rates), <span id="eq-auto-03attributeinference-5"><span class="math display">\[\mathrm{Adv}^{\mathrm{attr}} = 0.7832 - 0.7262 = 0.0569, \tag{11.7}\]</span></span> with a standard error of 0.0045 over the 200 models. Read as a membership test, the same attack has TPR 0.7832 at FPR 0.7262. Its likelihood ratio when it fires is <span class="math inline">\(0.7832/0.7262 = 1.08\)</span>: being right is barely more likely for a member than for a non-member. Its balanced accuracy, the average of its accuracy on members (the TPR) and on non-members (<span class="math inline">\(1 - \mathrm{FPR}\)</span>), is <span class="math inline">\(\frac12\big(\mathrm{TPR} + 1 - \mathrm{FPR}\big) = \frac12 + \frac12 \times 0.0569 = 0.5285\)</span>, hardly better than the <span class="math inline">\(\frac12\)</span> of a coin flip. Most of its 78% success would be there even if the person had never been in the training data.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="11.3.6">
+<h3 data-number="11.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">11.3.6</span> Check yourself</h3>
+<ul>
+<li>An attack guesses the right attribute for 90% of members and 90% of non-members. What is its attribute advantage, and does it leak anything about individuals? <em>(Zero, since <span class="math inline">\(0.9 - 0.9 = 0\)</span>. It is doing population inference: whatever it learned applies equally to people outside the training set.)</em></li>
+<li>Why does the membership adversary <span class="math inline">\(\mathcal B\)</span> need the sensitive attribute <span class="math inline">\(s\)</span> of the target, while <span class="math inline">\(\mathcal A\)</span> does not get it? <em>(The membership game hands the adversary the whole record and asks only whether it was used. <span class="math inline">\(\mathcal B\)</span> uses <span class="math inline">\(s\)</span> to check whether <span class="math inline">\(\mathcal A\)</span>’s guess was right.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-attr-imputation" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="sec-attr-imputation"><span class="header-section-number">11.4</span> The imputation baseline</h2>
+<section id="context-1" class="level3" data-number="11.4.1">
+<h3 data-number="11.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">11.4.1</span> Context</h3>
+<p>The game removes population inference by subtracting it. It is just as useful to measure it directly, because it tells you how much of an attack’s success any model trained on the same population would give, or any published statistics about it. The measure is the success of the best guess of <span class="math inline">\(s\)</span> from <span class="math inline">\((x, y)\)</span> when the population law is known. Statisticians call filling in a missing field from the others <strong>imputation</strong>, so this is the imputation baseline. Jayaraman &amp; Evans (2022) found that many published attribute inference attacks do no better than imputation from similar data, and argued that this baseline is the one an attack must beat.</p>
+</section>
+<section id="statement-1" class="level3" data-number="11.4.2">
+<h3 data-number="11.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">11.4.2</span> Statement</h3>
+<p>On a non-member, the model was trained without the target, so it is an independent observation (Fact 2) and the best any adversary can do is the best guess from <span class="math inline">\((x, y)\)</span> alone (Fact 1). That gives the <strong>non-member ceiling</strong>: for every adversary in the game, <span id="eq-attr-ceiling"><span class="math display">\[\Pr[\hat s = s \mid b = 0] \le V(S \mid X, Y) = \sum_{x, y}\max_s p(s, x, y). \tag{11.8}\]</span></span></p>
+<p>The second result is about attacks that never look at the model. A training record, picked at random from a training set drawn from the population, looks exactly like a fresh draw if you ignore the model, so such attacks cannot tell the two worlds apart. <strong>Model-free attacks have zero advantage:</strong> if <span class="math inline">\(\hat s\)</span> depends on <span class="math inline">\((x, y)\)</span> only, not on <span class="math inline">\(M\)</span>, then <span class="math inline">\(\Pr[\hat s = s \mid b = 1] = \Pr[\hat s = s \mid b = 0]\)</span>, and the Bayes imputation guess <span class="math inline">\(\arg\max_s p(s \mid x, y)\)</span>, the MAP guess under the true population, attains the bound <a href="#eq-attr-ceiling" class="quarto-xref">Equation&nbsp;<span>11.8</span></a> in both worlds.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="11.4.3">
+<h3 data-number="11.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">11.4.3</span> Derivation</h3>
+<p><strong>The ceiling.</strong></p>
+<ol type="1">
+<li><strong>A non-member is independent of the model.</strong> When <span class="math inline">\(b = 0\)</span>, <span class="math inline">\(z\)</span> is drawn afresh, separately from <span class="math inline">\(S\)</span>. The model depends only on <span class="math inline">\(S\)</span> and the randomness of training, so <span class="math inline">\(M\)</span> is independent of <span class="math inline">\(z = (s, x, y)\)</span>.</li>
+<li><strong>So the model is a useless observation for the guess.</strong> Fact 2 says that adding an observation independent of <span class="math inline">\((s, x, y)\)</span> does not change the best success: <span class="math inline">\(V(S \mid X, Y, M) = V(S \mid X, Y)\)</span>.</li>
+<li><strong>No guessing rule beats the MAP guess.</strong> The adversary’s rule is a function of <span class="math inline">\((x, y, M)\)</span>, possibly randomized. By Fact 1 its success is at most the best success from that observation, <span class="math inline">\(V(S \mid X, Y, M)\)</span>, which step 2 showed is <span class="math inline">\(V(S \mid X, Y)\)</span>.</li>
+</ol>
+<p><strong>Model-free attacks.</strong></p>
+<ol type="1">
+<li><strong>A member is a population record.</strong> <span class="math inline">\(S\)</span> consists of <span class="math inline">\(n\)</span> independent draws from <span class="math inline">\(\mathcal D\)</span>, and the target is one of them chosen uniformly at random. Whichever one is chosen, it was drawn from <span class="math inline">\(\mathcal D\)</span>, so on its own (ignoring the model) the target has distribution <span class="math inline">\(\mathcal D\)</span>, the same as a fresh draw.</li>
+<li><strong>A rule that ignores <span class="math inline">\(M\)</span> sees the same distribution in both worlds.</strong> Its success is <span class="math inline">\(\Pr[g(X, Y) = S]\)</span> for a record drawn from <span class="math inline">\(\mathcal D\)</span> either way, so the two terms of <a href="#eq-attr-advantage" class="quarto-xref">Equation&nbsp;<span>11.4</span></a> are equal and the advantage is 0.</li>
+<li><strong>Imputation attains the ceiling.</strong> With <span class="math inline">\(g\)</span> the MAP guess under <span class="math inline">\(\mathcal D\)</span>, Fact 1 says this common success is <span class="math inline">\(V(S \mid X, Y)\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="11.4.4">
+<h3 data-number="11.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">11.4.4</span> Interpretation</h3>
+<p>Below the ceiling, the model only teaches you the population. An adversary who does not know <span class="math inline">\(\mathcal D\)</span> can use the model to learn it, and so raise its success on non-members towards <span class="math inline">\(V(S \mid X, Y)\)</span>, but it cannot go further. For a person outside the training data, the model is no more dangerous than a perfect description of the population.</p>
+<p>This is the point of the “smoking causes cancer” example in Dwork &amp; Roth (2014, §1). A study shows that smoking causes cancer. An insurer who reads it can now infer more about any smoker’s health, whether or not that smoker took part in the study. The study disclosed a fact about the world, not about its participants, and a privacy definition that forbade this would forbid learning anything from data. The privacy question is the gap between members and non-members, which the ceiling isolates.</p>
+<p>That does not make population inference harmless. Being guessed to be a smoker hurts whether or not the guess used your record. But no mechanism that limits what one record contributes can prevent it, since the harm would be there with your record removed. It is a question for policy and fairness, not for the attacks of this part.</p>
+<p>Note also that the ceiling is a property of the population, not of the model, and it can be high. If <span class="math inline">\(x\)</span> and <span class="math inline">\(y\)</span> nearly determine <span class="math inline">\(s\)</span>, every model and every statistic about the population “reveals” <span class="math inline">\(s\)</span>. That is why attacks should be reported relative to it.</p>
+</section>
+<section id="example-the-smoking-table" class="level3" data-number="11.4.5">
+<h3 data-number="11.4.5" class="anchored" data-anchor-id="example-the-smoking-table"><span class="header-section-number">11.4.5</span> Example: the smoking table</h3>
+<p>Let <span class="math inline">\(s = 1\)</span> mean “smoker”, <span class="math inline">\(x\)</span> the age band (young or old) and <span class="math inline">\(y = 1\)</span> “has the disease”. The population has <span class="math inline">\(\Pr[s = 1] = 0.3\)</span>. Among non-smokers a fraction <span class="math inline">\(\Pr[\text{old} \mid s] = 0.4\)</span> is old, and among smokers <span class="math inline">\(0.6\)</span>. The disease probabilities <span class="math inline">\(\Pr[y = 1 \mid x, s]\)</span> are 0.1 (young non-smoker), 0.3 (old non-smoker), 0.4 (young smoker) and 0.7 (old smoker). The probability of a full record is the chance of the smoking status, times the chance of the age band given it, times the chance of the disease outcome given both; multiplying gives the joint table, <a href="#tbl-attr-smoking" class="quarto-xref">Table&nbsp;<span>11.2</span></a>. For example, <span class="math inline">\(p(\text{smoker}, \text{old}, \text{disease}) = 0.3 \times 0.6 \times 0.7 = 0.126\)</span>, and <span class="math inline">\(p(\text{non-smoker}, \text{young}, \text{no disease}) = 0.7 \times 0.6 \times 0.9 = 0.378\)</span>.</p>
+<div id="tbl-attr-smoking" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-attr-smoking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11.2: The smoking table: the joint distribution of smoking status <span class="math inline">\(s\)</span>, age band <span class="math inline">\(x\)</span> and disease <span class="math inline">\(y\)</span>, with the column maxima in bold and the posterior probability of smoking in each column.
+</figcaption>
+<div aria-describedby="tbl-attr-smoking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(p(s, x, y)\)</span></th>
+<th>young, no disease</th>
+<th>young, disease</th>
+<th>old, no disease</th>
+<th>old, disease</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>non-smoker (<span class="math inline">\(s = 0\)</span>)</td>
+<td><strong>0.378</strong></td>
+<td>0.042</td>
+<td><strong>0.196</strong></td>
+<td>0.084</td>
+</tr>
+<tr class="even">
+<td>smoker (<span class="math inline">\(s = 1\)</span>)</td>
+<td>0.072</td>
+<td><strong>0.048</strong></td>
+<td>0.054</td>
+<td><strong>0.126</strong></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\Pr[\text{smoker} \mid x, y]\)</span></td>
+<td>0.1600</td>
+<td>0.5333</td>
+<td>0.2160</td>
+<td>0.6000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The last row is each column’s smoker entry divided by the column total; for young people with the disease, <span class="math inline">\(0.048/(0.042 + 0.048) = 0.5333\)</span>. Now watch the best guess improve as the guesser sees more.</p>
+<p>With no observation, the best guess is “non-smoker”, right with probability <span class="math inline">\(V(S) = 0.7\)</span>, as in Fact 1.</p>
+<p>With age alone, the guesser adds the two columns of each age band. Young smokers have probability <span class="math inline">\(0.3 \times 0.4 = 0.12\)</span> and young non-smokers <span class="math inline">\(0.7 \times 0.6 = 0.42\)</span>, so a young person is a smoker with probability <span class="math inline">\(0.12/0.54 = 0.2222\)</span>. Old smokers have <span class="math inline">\(0.3 \times 0.6 = 0.18\)</span> and old non-smokers <span class="math inline">\(0.7 \times 0.4 = 0.28\)</span>, so an old person is a smoker with probability <span class="math inline">\(0.18/0.46 = 0.3913\)</span>. Both are below <span class="math inline">\(\frac12\)</span>, so the guess stays “non-smoker” in both age bands and <span class="math inline">\(V(S \mid X) = 0.7\)</span>. Age changes the odds but never the decision, so it adds nothing to the success.</p>
+<p>With age and disease, the posterior crosses <span class="math inline">\(\frac12\)</span> in the two disease columns (<a href="#fig-attr-smoking" class="quarto-xref">Figure&nbsp;<span>11.1</span></a>), so the MAP guess becomes “smoker” there. By Fact 1 the success is the sum of the largest entry in each column, the bold ones: <span class="math inline">\(V(S \mid X, Y) = 0.378 + 0.048 + 0.196 + 0.126 = 0.748\)</span>.</p>
+<p>The <strong>min-entropy leakage</strong> of <a href="../part01-prerequisites/05-information-theory.html">Information theory</a> turns this gain into bits: it is the base-2 logarithm of how many times more likely the best guess is to succeed with the observation than without. Here the disease label, given age, raises the success from 0.7 to 0.748, a leakage of <span class="math inline">\(\log_2(0.748/0.7) = 0.0957\)</span> bits.</p>
+<p>Every one of these numbers comes from the population. A model trained on 10,000 patients from it, if it predicts well, lets an insurer reach 0.748 on <em>anyone</em> drawn from the population, and the ceiling <a href="#eq-attr-ceiling" class="quarto-xref">Equation&nbsp;<span>11.8</span></a> says nobody outside the training set can be attacked more successfully than that.</p>
+<div id="fig-attr-smoking" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-attr-smoking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/attr_smoking_posterior.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-attr-smoking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.1: The posterior probability of smoking in each cell of the smoking table, with each cell’s probability in brackets. Red bars cross <span class="math inline">\(\frac12\)</span>, where imputation guesses “smoker”; together they add 0.048 to the 0.7 of the blind guess.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-1" class="level3" data-number="11.4.6">
+<h3 data-number="11.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">11.4.6</span> Check yourself</h3>
+<ul>
+<li>In the smoking table, which cell would the imputation guess get wrong most often, measured by probability mass? <em>(Old, with disease: the guess there is “smoker”, which is wrong on the 0.084 of non-smokers in that cell, the largest non-bold entry.)</em></li>
+<li>Does the ceiling <a href="#eq-attr-ceiling" class="quarto-xref">Equation&nbsp;<span>11.8</span></a> hold for an adversary that sees the whole training set <span class="math inline">\(S\)</span>, not only the model? <em>(Yes. The argument only needs the observation to be independent of the fresh target, and <span class="math inline">\(S\)</span> is.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-attr-inversion" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="sec-attr-inversion"><span class="header-section-number">11.5</span> Model inversion: the MAP attack</h2>
+<section id="context-2" class="level3" data-number="11.5.1">
+<h3 data-number="11.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">11.5.1</span> Context</h3>
+<p>The imputation guess needs <span class="math inline">\(p(y \mid x, s)\)</span>, the link between the label and the sensitive attribute, and the adversary usually does not know it. But a model that predicts <span class="math inline">\(y\)</span> from <span class="math inline">\(x\)</span> and <span class="math inline">\(s\)</span> is an estimate of exactly that link. Fredrikson et al.&nbsp;(2014) used this in a study of warfarin dosing: a linear model predicted the stable dose of the drug from demographics and two genetic markers, and an adversary who knew a patient’s demographics and dose could infer their genotype. They called the attack <strong>model inversion</strong>: run the model “backwards” from its output to an input. Fredrikson, Jha &amp; Ristenpart (2015) extended it to models that release <strong>confidences</strong>, the predicted probability of each label, and showed that confidences make the attack much stronger.</p>
+</section>
+<section id="statement-2" class="level3" data-number="11.5.2">
+<h3 data-number="11.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">11.5.2</span> Statement</h3>
+<p>The idea is Bayes’ rule. The value of <span class="math inline">\(s\)</span> that best explains what you see is the one with the largest product of “how plausible is <span class="math inline">\(s\)</span> for someone with these features” and “how likely is the observed label if the attribute were <span class="math inline">\(s\)</span>”. The adversary supplies the first factor from what it knows about the population, and gets the second by querying the model with each candidate value of <span class="math inline">\(s\)</span>. The <strong>MAP inversion attack</strong> guesses <span id="eq-attr-map-inversion"><span class="math display">\[\hat s_{\mathrm{inv}}(x, y) = \arg\max_s\; p(s \mid x)\, f_y(x, s). \tag{11.9}\]</span></span> Here <span class="math inline">\(p(s \mid x)\)</span> is what the adversary knows about how <span class="math inline">\(s\)</span> relates to the public features, and <span class="math inline">\(f_y(x, s)\)</span> is the model’s confidence in the observed label <span class="math inline">\(y\)</span> when it is fed the candidate <span class="math inline">\(s\)</span>. Fredrikson et al.&nbsp;used the marginal <span class="math inline">\(p(s)\)</span> in place of <span class="math inline">\(p(s \mid x)\)</span>, which treats <span class="math inline">\(s\)</span> as independent of <span class="math inline">\(x\)</span>.</p>
+<p>If the model’s confidences were exactly the population’s probabilities, the second factor would be the true likelihood, and the attack would be the imputation guess. A model with that property is called <strong>calibrated</strong>. So, <strong>for a calibrated model, inversion is imputation</strong>: if <span class="math inline">\(f_y(x, s) = p(y \mid x, s)\)</span> for all <span class="math inline">\(s, x, y\)</span>, then <span class="math inline">\(\hat s_{\mathrm{inv}}\)</span> is the Bayes imputation guess, and its success is <span class="math inline">\(V(S \mid X, Y)\)</span> on members and non-members alike.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="11.5.3">
+<h3 data-number="11.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">11.5.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Bayes’ rule.</strong> The joint probability of <span class="math inline">\(s\)</span> and <span class="math inline">\(y\)</span> given <span class="math inline">\(x\)</span> can be built in two stages, first <span class="math inline">\(s\)</span> from <span class="math inline">\(x\)</span> and then <span class="math inline">\(y\)</span> from both: <span class="math inline">\(p(s, y \mid x) = p(s \mid x)\,p(y \mid x, s)\)</span>. Dividing by <span class="math inline">\(p(y \mid x)\)</span> turns it into the posterior of <span class="math inline">\(s\)</span>: <span id="eq-auto-03attributeinference-6"><span class="math display">\[p(s \mid x, y) = \frac{p(s \mid x)\,p(y \mid x, s)}{p(y \mid x)}. \tag{11.10}\]</span></span></li>
+<li><strong>The denominator does not depend on <span class="math inline">\(s\)</span>.</strong> It is the same number for every candidate, so it cannot change which candidate is largest: <span class="math inline">\(\arg\max_s p(s \mid x, y) = \arg\max_s p(s \mid x)\,p(y \mid x, s)\)</span>.</li>
+<li><strong>Plug in the model.</strong> Replace the unknown <span class="math inline">\(p(y \mid x, s)\)</span> by the model’s estimate <span class="math inline">\(f_y(x, s)\)</span>. This is <a href="#eq-attr-map-inversion" class="quarto-xref">Equation&nbsp;<span>11.9</span></a>.</li>
+<li><strong>Calibrated case.</strong> If <span class="math inline">\(f_y = p(y \mid x, s)\)</span> exactly, step 3 changes nothing and the guess is the MAP guess of Fact 1, with success <span class="math inline">\(V(S \mid X, Y)\)</span>. The guess then uses nothing about <span class="math inline">\(M\)</span> beyond the population’s probabilities, so it is a model-free attack, and the argument of <a href="#sec-attr-imputation" class="quarto-xref"><span>Section 11.4</span></a> gives equal success on members and non-members.</li>
+</ol>
+</section>
+<section id="interpretation-2" class="level3" data-number="11.5.4">
+<h3 data-number="11.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">11.5.4</span> Interpretation</h3>
+<p>The attack is Bayes’ rule with the model as the likelihood, so everything it does well or badly comes from how the model’s <span class="math inline">\(f_y(x, s)\)</span> differs from the population’s <span class="math inline">\(p(y \mid x, s)\)</span>. Two differences matter, one on members and one on non-members.</p>
+<p>On members, the model is too sure of the truth. Training lowers the loss <span class="math inline">\(-\ln f_y(x, s)\)</span> on each training record at its <em>true</em> <span class="math inline">\(s\)</span>, which pushes <span class="math inline">\(f_y(x, s)\)</span> up towards 1. The other candidate value <span class="math inline">\(s'\)</span> was never paired with this record during training, so <span class="math inline">\(f_y(x, s')\)</span> stays closer to an honest prediction. (In the toy model below this holds exactly: each value of <span class="math inline">\(s\)</span> has its own weight vector, so the record never touched the weights used at <span class="math inline">\(s'\)</span>.) The ratio <span class="math inline">\(f_y(x, s)/f_y(x, s')\)</span> that decides the attack is therefore tilted towards the truth for members. This is the generalization gap of <a href="../part02-attacks/02-membership-inference.html">Membership inference</a>, the difference between a model’s loss on its training records and on fresh ones, seen through the sensitive attribute. In the toy experiment the mean log-loss is 0.2965 on members and 0.6690 on non-members.</p>
+<p>On non-members, an overfit model does worse than imputation. Its confidences carry the noise of a small training set rather than the population’s exact probabilities, so the attack’s guesses fall below the ceiling.</p>
+<p>More data closes both gaps. As <span class="math inline">\(n\)</span> grows, the model approaches <span class="math inline">\(p(y \mid x, s)\)</span> and both success rates approach <span class="math inline">\(V(S \mid X, Y)\)</span> (<a href="#fig-attr-success-vs-n" class="quarto-xref">Figure&nbsp;<span>11.3</span></a>). The population inference gets better and the individual leak gets smaller.</p>
+<p>The same idea can invert the whole input rather than one field. Fredrikson, Jha &amp; Ristenpart (2015) also attacked a face recognition model in which each class is one person. They searched for the input image that maximizes the confidence of a chosen class, by gradient descent on the image, and obtained a recognizable, blurred image of that person. It is the same idea with <span class="math inline">\(s\)</span> replaced by the whole input, and the prior <span class="math inline">\(p(s \mid x)\)</span> replaced by an image regularizer that keeps the search among plausible images. What it recovers is a typical input of the class, which is population inference about the class; it is a privacy problem because the class is a single person.</p>
+</section>
+<section id="example-walking-through-the-inversion" class="level3" data-number="11.5.5">
+<h3 data-number="11.5.5" class="anchored" data-anchor-id="example-walking-through-the-inversion"><span class="header-section-number">11.5.5</span> Example: walking through the inversion</h3>
+<p><strong>On the smoking table, with a calibrated model.</strong> Take an old patient with the disease. From the age-alone step of the smoking-table example, the adversary knows <span class="math inline">\(\Pr[\text{smoker} \mid \text{old}] = 0.3913\)</span>, so <span class="math inline">\(\Pr[\text{non-smoker} \mid \text{old}] = 1 - 0.3913 = 0.6087\)</span>. It queries the model at both values of <span class="math inline">\(s\)</span>, and a calibrated model returns the disease probabilities of the population: <span class="math inline">\(f_1(\text{old}, \text{smoker}) = 0.7\)</span> and <span class="math inline">\(f_1(\text{old}, \text{non-smoker}) = 0.3\)</span>. The scores of <a href="#eq-attr-map-inversion" class="quarto-xref">Equation&nbsp;<span>11.9</span></a> are <span class="math inline">\(0.3913 \times 0.7 = 0.2739\)</span> for “smoker” and <span class="math inline">\(0.6087 \times 0.3 = 0.1826\)</span> for “non-smoker”, so it guesses “smoker”. Dividing the smoker score by the sum of the two, which is the normalization that step 1 of the derivation leaves out, gives <span class="math inline">\(0.2739/(0.2739 + 0.1826) = 0.6000\)</span>, the posterior of <a href="#tbl-attr-smoking" class="quarto-xref">Table&nbsp;<span>11.2</span></a>. The attack is imputation.</p>
+<p><strong>On the toy model.</strong> The population draws <span class="math inline">\(s\)</span> with <span class="math inline">\(\Pr[s = 1] = 0.3\)</span> and ten standard normal features, the first shifted by 0.5 when <span class="math inline">\(s = 1\)</span>. The label follows a logistic model whose weights depend on <span class="math inline">\(s\)</span>. Guessing from <span class="math inline">\(x\)</span> alone is right 0.7045 of the time, and Bayes imputation, which knows the true logistic weights, is right 0.7517 of the time (both on a million fresh records). Over 200 models trained on <span class="math inline">\(n = 100\)</span> records, imputation is right on 0.7508 of members and 0.7555 of non-members. The difference, <span class="math inline">\(-0.0046\)</span>, is about one standard error from zero, as the model-free argument predicts. MAP inversion, which uses the trained model’s confidences, is right on 0.7832 of members, <span class="math inline">\(0.7832 - 0.7517 = 0.0315\)</span> <em>above</em> the imputation ceiling, and on 0.7262 of non-members, 0.0254 below it (computed before rounding).</p>
+<p>The member success above the ceiling is something no population-level knowledge could produce, since the ceiling is the best that perfect population knowledge achieves. <a href="#fig-attr-evidence" class="quarto-xref">Figure&nbsp;<span>11.2</span></a> shows where it comes from. It plots the attack’s evidence for the true value <span class="math inline">\(s\)</span> over the other value <span class="math inline">\(s'\)</span>, the log of the ratio of their two scores, <span class="math inline">\(\ln\frac{p(s \mid x)f_y(x, s)}{p(s' \mid x)f_y(x, s')}\)</span>. The attack is right when this is positive. For members the distribution has a thinner left tail: training has removed most of the cases where the model strongly prefers the wrong value. <a href="#fig-attr-success-vs-n" class="quarto-xref">Figure&nbsp;<span>11.3</span></a> repeats the game for training sets from 25 to 1600 records. At <span class="math inline">\(n = 25\)</span> the attack is right on 0.8420 of members and 0.6810 of non-members, an advantage of <span class="math inline">\(0.8420 - 0.6810 = 0.1610\)</span>. At <span class="math inline">\(n = 400\)</span> the advantage is 0.0111, and at <span class="math inline">\(n = 1600\)</span> it is 0.0052.</p>
+<div id="fig-attr-evidence" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-attr-evidence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/attr_inversion_evidence.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-attr-evidence-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.2: The evidence of MAP inversion for the true attribute, the log of the score of the true value over the other, for members and non-members of 50 models trained on 100 records each. The attack is right when the evidence is positive; members have far fewer large negative values.
+</figcaption>
+</figure>
+</div>
+<div id="fig-attr-success-vs-n" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-attr-success-vs-n-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/attr_success_vs_n.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-attr-success-vs-n-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.3: Success of MAP inversion on members and non-members against the training-set size <span class="math inline">\(n\)</span>, 40 models per point. Members start above the Bayes imputation ceiling and non-members below it; both converge to the ceiling as the model approaches the population.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-2" class="level3" data-number="11.5.6">
+<h3 data-number="11.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">11.5.6</span> Check yourself</h3>
+<ul>
+<li>If the model ignored <span class="math inline">\(s\)</span> entirely, <span class="math inline">\(f_y(x, s) = f_y(x, s')\)</span>, what would MAP inversion guess? <em>(The MAP guess from <span class="math inline">\(x\)</span> alone, <span class="math inline">\(\arg\max_s p(s \mid x)\)</span>: the confidence is the same factor for every candidate in <a href="#eq-attr-map-inversion" class="quarto-xref">Equation&nbsp;<span>11.9</span></a>, so it cannot change which candidate wins.)</em></li>
+<li>Why does using the marginal <span class="math inline">\(p(s)\)</span> instead of <span class="math inline">\(p(s \mid x)\)</span> in <a href="#eq-attr-map-inversion" class="quarto-xref">Equation&nbsp;<span>11.9</span></a> lose success even with a calibrated model? <em>(It drops the evidence that <span class="math inline">\(x\)</span> carries about <span class="math inline">\(s\)</span>, so the score is no longer proportional to <span class="math inline">\(p(s \mid x, y)\)</span>. <a href="../../book-exercises/part02-attacks/03-attribute-inference.html#sec-sol-attribute-inference-2">Exercise 2</a> computes the loss on the smoking table.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-attr-masking" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="sec-attr-masking"><span class="header-section-number">11.6</span> Confidence masking</h2>
+<section id="context-3" class="level3" data-number="11.6.1">
+<h3 data-number="11.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">11.6.1</span> Context</h3>
+<p>If confidences make inversion stronger, why release them? Fredrikson, Jha &amp; Ristenpart (2015) suggested rounding the confidences an interface returns, and many deployed interfaces return only the top label. Such <strong>confidence masking</strong> is cheap and leaves the predicted label unchanged. Does it close the leak?</p>
+</section>
+<section id="statement-3" class="level3" data-number="11.6.2">
+<h3 data-number="11.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">11.6.2</span> Statement</h3>
+<p>Masking only coarsens what the adversary sees, so by Fact 3 it can never help the best attacker. To write this down, let <span class="math inline">\(F = \big(f(x, s)\big)_s\)</span> be the list of answers the adversary gets by querying the model at every candidate value of <span class="math inline">\(s\)</span>, where each answer <span class="math inline">\(f(x, s)\)</span> is the model’s vector of confidences over the labels. Let <span class="math inline">\(g\)</span> be any masking function applied to these answers: rounding, keeping only the top label, adding noise. Then the best attack on the masked answers does no better than the best attack on the full ones, on members and on non-members alike: <span id="eq-attr-masking"><span class="math display">\[V\big(S \mid X, Y, g(F)\big) \le V\big(S \mid X, Y, F\big). \tag{11.11}\]</span></span> The inequality is about the <em>best</em> attacker in each world separately. It says nothing about the <em>difference</em> between members and non-members, and masking need not shrink it.</p>
+</section>
+<section id="derivation-3" class="level3" data-number="11.6.3">
+<h3 data-number="11.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">11.6.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>A masked attack is an unmasked one.</strong> Anyone holding the full answers can apply the mask themselves. So a rule <span class="math inline">\(h\)</span> that guesses from <span class="math inline">\((x, y, g(F))\)</span> is also the rule <span class="math inline">\((x, y, F) \mapsto h(x, y, g(F))\)</span> on the unmasked answers.</li>
+<li><strong>The best unmasked rule is at least as good.</strong> This is Fact 3, with the observation <span class="math inline">\(O = (X, Y, F)\)</span> and the processing function <span class="math inline">\((x, y, F) \mapsto (x, y, g(F))\)</span>. It gives <a href="#eq-attr-masking" class="quarto-xref">Equation&nbsp;<span>11.11</span></a>, separately for <span class="math inline">\(b = 0\)</span> and for <span class="math inline">\(b = 1\)</span>, since the argument never used which world the target came from.</li>
+<li><strong>Why the difference can survive.</strong> Write <span class="math inline">\(V_{\mathrm{in}}\)</span> and <span class="math inline">\(V_{\mathrm{out}}\)</span> for the best success on members and on non-members. Masking lowers both, by amounts that depend on <span class="math inline">\(g\)</span> and on how the confidences of members and non-members differ. Nothing forces the two drops to be equal, so <span class="math inline">\(V_{\mathrm{in}} - V_{\mathrm{out}}\)</span> can rise or fall.</li>
+</ol>
+</section>
+<section id="interpretation-3" class="level3" data-number="11.6.4">
+<h3 data-number="11.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">11.6.4</span> Interpretation</h3>
+<p>Labels alone still leak, for the same reason confidences do. With only the top label, the adversary still sees, for each candidate <span class="math inline">\(s\)</span>, whether the predicted label <span class="math inline">\(\mathrm{label}(x, s)\)</span> equals the known label <span class="math inline">\(y\)</span>. On a member, the model usually predicts the training label at the true <span class="math inline">\(s\)</span>, because it fit that record. At the other value it gives an honest prediction, which matches <span class="math inline">\(y\)</span> less often. So “the label matches only at one candidate” points to that candidate, and on members it usually points to the truth. Non-members rarely get this help: the two predicted labels usually agree, and the attack falls back on the guess from <span class="math inline">\(x\)</span> alone. Label-only membership inference (Choquette-Choo et al.&nbsp;2021) exploits the same asymmetry.</p>
+<p>This is why masking hurts the population inference more than the individual leak. The toy experiment below shows it: non-member success drops almost to the <span class="math inline">\(x\)</span>-only guess, while member success stays above the imputation ceiling.</p>
+<p>Do not read too much into small changes either way. The inequality is about the optimal attacker, and MAP inversion with an overfit model is not optimal, so a particular masking can even raise its success slightly. That does not contradict <a href="#eq-attr-masking" class="quarto-xref">Equation&nbsp;<span>11.11</span></a>.</p>
+<p>Above all, masking is obfuscation, not a guarantee. It removes one attack’s input without bounding what any attack can learn about a member. Part 3 introduces differential privacy, which bounds the member/non-member difference itself, for every attacker and every output format.</p>
+</section>
+<section id="example-rounding-and-labels-on-the-toy-model" class="level3" data-number="11.6.5">
+<h3 data-number="11.6.5" class="anchored" data-anchor-id="example-rounding-and-labels-on-the-toy-model"><span class="header-section-number">11.6.5</span> Example: rounding and labels on the toy model</h3>
+<p>The same 200 models of <a href="#sec-attr-inversion" class="quarto-xref"><span>Section 11.5</span></a>, attacked through three interfaces, give <a href="#tbl-attr-masking" class="quarto-xref">Table&nbsp;<span>11.3</span></a> and <a href="#fig-attr-masking" class="quarto-xref">Figure&nbsp;<span>11.4</span></a>.</p>
+<div id="tbl-attr-masking" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-attr-masking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11.3: MAP inversion success through three interfaces, averaged over 200 models trained on 100 records each. Guessing from <span class="math inline">\(x\)</span> alone gives 0.7045 and Bayes imputation 0.7517.
+</figcaption>
+<div aria-describedby="tbl-attr-masking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Interface</th>
+<th>Members</th>
+<th>Non-members</th>
+<th>Advantage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Full confidences</td>
+<td>0.7832</td>
+<td>0.7262</td>
+<td>0.0569</td>
+</tr>
+<tr class="even">
+<td>Confidences rounded to one decimal</td>
+<td>0.7836</td>
+<td>0.7253</td>
+<td>0.0583</td>
+</tr>
+<tr class="odd">
+<td>Top label only</td>
+<td>0.7741</td>
+<td>0.7092</td>
+<td>0.0650</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Rounding to one decimal changes almost nothing. The attack only compares the scores of the two candidates, and most confidences are far enough from the rounding boundaries that the comparison keeps its sign. With labels only, non-member success drops from 0.7262 to 0.7092, close to the 0.7045 of guessing from <span class="math inline">\(x\)</span> alone. Member success drops less, to 0.7741, still <span class="math inline">\(0.7741 - 0.7517 = 0.0224\)</span> above the imputation ceiling. So the advantage <em>grows</em>, from 0.0569 to 0.0650. The interface now leaks less about the population and as much as before about the people in the training set.</p>
+<div id="fig-attr-masking" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-attr-masking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/attr_masking.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-attr-masking-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11.4: MAP inversion success on members and non-members through three interfaces, for models trained on 100 records. The dashed line is Bayes imputation, the dotted line the guess from the public features alone.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-3" class="level3" data-number="11.6.6">
+<h3 data-number="11.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">11.6.6</span> Check yourself</h3>
+<ul>
+<li>Can adding Gaussian noise to the returned confidences increase the best attacker’s success? <em>(No.&nbsp;Noise is a randomized function of <span class="math inline">\(F\)</span>, so a rule on the noisy answers is a randomized rule on <span class="math inline">\(F\)</span>: it draws the noise itself and then guesses. Fact 1 shows a randomized rule does no better than the best deterministic one.)</em></li>
+<li>Why does the label-only attack on a non-member usually fall back on the guess from <span class="math inline">\(x\)</span> alone? <em>(For a fresh record, the predicted labels at the two candidate values usually agree. Both then match <span class="math inline">\(y\)</span> or both miss, the masked confidences tie, and the tie is broken by <span class="math inline">\(p(s \mid x)\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-attr-code" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="sec-attr-code"><span class="header-section-number">11.7</span> Code: the game on a toy model</h2>
+<p>The script <a href="../../../code/part02-attacks/attribute_inference.py">code/attribute_inference.py</a> computes every number in this chapter and draws every figure. It works out the smoking table exactly. For the toy model it samples the population, trains a ridge-regularized logistic regression with one weight vector per value of <span class="math inline">\(s\)</span> by Newton’s method, and plays the game: each run trains a model on <span class="math inline">\(n\)</span> records and attacks those <span class="math inline">\(n\)</span> members and <span class="math inline">\(n\)</span> fresh non-members with MAP inversion, Bayes imputation and the guess from <span class="math inline">\(x\)</span> alone. The real attacks of Fredrikson et al.&nbsp;used a warfarin dosing model and face recognition networks; the toy keeps the structure (a sensitive input, a known label, a model queried at each candidate value) and runs in a few seconds. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/attribute_inference.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-attr-code" class="quarto-xref">Table&nbsp;<span>11.4</span></a>:</p>
+<div id="tbl-attr-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-attr-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11.4: The script’s output with the default seed. Pairs are success on members / non-members.
+</figcaption>
+<div aria-describedby="tbl-attr-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Smoking table</td>
+<td><span class="math inline">\(V(S) = 0.7000\)</span>; <span class="math inline">\(V(S \mid X) = 0.7000\)</span>; <span class="math inline">\(V(S \mid X, Y) = 0.7480\)</span>; leakage 0.0957 bits; posteriors 0.1600, 0.5333, 0.2160, 0.6000</td>
+</tr>
+<tr class="even">
+<td>Toy population, <span class="math inline">\(10^6\)</span> fresh records</td>
+<td>Guess from <span class="math inline">\(x\)</span> alone 0.7045; Bayes imputation 0.7517</td>
+</tr>
+<tr class="odd">
+<td>Game, <span class="math inline">\(n = 100\)</span>, 200 models: mean log-loss</td>
+<td>Members 0.2965; non-members 0.6690; gap 0.3725</td>
+</tr>
+<tr class="even">
+<td>Guess from <span class="math inline">\(x\)</span> alone</td>
+<td>Members 0.7017; non-members 0.7089</td>
+</tr>
+<tr class="odd">
+<td>Bayes imputation</td>
+<td>Members 0.7508; non-members 0.7555; advantage <span class="math inline">\(-0.0046\)</span></td>
+</tr>
+<tr class="even">
+<td>MAP inversion</td>
+<td>Members 0.7832; non-members 0.7262; advantage 0.0569 (standard error 0.0045)</td>
+</tr>
+<tr class="odd">
+<td>MAP inversion against the ceiling</td>
+<td>Members <span class="math inline">\(+0.0315\)</span>; non-members <span class="math inline">\(-0.0254\)</span></td>
+</tr>
+<tr class="even">
+<td>As a membership test</td>
+<td>TPR 0.7832; FPR 0.7262; balanced accuracy 0.5285</td>
+</tr>
+<tr class="odd">
+<td>Masking</td>
+<td>Rounded: 0.7836 / 0.7253, advantage 0.0583. Label only: 0.7741 / 0.7092, advantage 0.0650</td>
+</tr>
+<tr class="even">
+<td>Training-set size, 40 models each</td>
+<td><span class="math inline">\(n = 25\)</span>: 0.8420 / 0.6810. <span class="math inline">\(n = 400\)</span>: 0.7611 / 0.7500. <span class="math inline">\(n = 1600\)</span>: 0.7550 / 0.7497</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_attribute_inference.py">tests/test_attribute_inference.py</a> checks that the output still matches.</p>
+<p><strong>What to take from it.</strong> First, the ceiling holds: non-member success never exceeds Bayes imputation, at any training-set size, as the independence argument of <a href="#sec-attr-imputation" class="quarto-xref"><span>Section 11.4</span></a> requires. Second, members beat it. At <span class="math inline">\(n = 100\)</span> the attack is 0.0315 above the best population-level guess on members, and since no knowledge of the population can do better than that guess, only individual leakage can explain the excess. Third, the model-free attacks show no advantage, as they should. Imputation and the <span class="math inline">\(x\)</span>-only guess differ between members and non-members by less than 0.01, which is sampling noise: each rate is an average over <span class="math inline">\(200 \times 100 = 20{,}000\)</span> records, and a success rate near 0.75 averaged over that many records has a standard error of about <span class="math inline">\(\sqrt{0.75 \times 0.25/20{,}000} = 0.0031\)</span>. Fourth, overfitting drives the leak. The advantage falls from 0.1610 at <span class="math inline">\(n = 25\)</span> to 0.0052 at <span class="math inline">\(n = 1600\)</span>, as the gap between member and non-member loss closes. Finally, masking is not a fix: label-only outputs lower success on both members and non-members, and the advantage stays.</p>
+</section>
+<section id="references" class="level2" data-number="11.8">
+<h2 data-number="11.8" class="anchored" data-anchor-id="references"><span class="header-section-number">11.8</span> References</h2>
+<ul>
+<li>Yeom, Giacomelli, Fredrikson &amp; Jha, “Privacy Risk in Machine Learning: Analyzing the Connection to Overfitting” (IEEE CSF 2018). The attribute inference game with members and non-members, its advantage, the reduction between attribute and membership advantage, and the link to the generalization gap.</li>
+<li>Fredrikson, Lantz, Jha, Lin, Page &amp; Ristenpart, “Privacy in Pharmacogenetics: An End-to-End Case Study of Personalized Warfarin Dosing” (USENIX Security 2014). The first model inversion attack: inferring genetic markers from a dosing model and a patient’s demographics and dose.</li>
+<li>Fredrikson, Jha &amp; Ristenpart, “Model Inversion Attacks that Exploit Confidence Information and Basic Countermeasures” (CCS 2015). Inversion from confidences for decision trees and for face recognition, and rounding as a countermeasure.</li>
+<li>Wu, Fredrikson, Jha &amp; Naughton, “A Methodology for Formalizing Model-Inversion Attacks” (IEEE CSF 2016). Model inversion as a game, with the distinction between what a model reveals about its training data and about the population.</li>
+<li>Jayaraman &amp; Evans, “Are Attribute Inference Attacks Just Imputation?” (CCS 2022). The imputation baseline made central: many attacks do no better, and what it takes to beat it.</li>
+<li>Choquette-Choo, Tramèr, Carlini &amp; Papernot, “Label-Only Membership Inference Attacks” (ICML 2021). Why returning only labels does not stop inference about members.</li>
+<li>Salem, Cherubin, Evans, Köpf, Paverd, Suri, Tople &amp; Zanella-Béguelin, “SoK: Let the Privacy Games Begin! A Unified Treatment of Data Inference Privacy in Machine Learning” (IEEE S&amp;P 2023). Attribute inference among the other privacy games, with their relationships.</li>
+<li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014), §1. The smoking example and why learning about the population is not a privacy breach of the individual.</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="11.9">
+<h2 data-number="11.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">11.9</span> Cheat sheet</h2>
+<p>A record is <span class="math inline">\((s, x, y)\)</span>; <span class="math inline">\(f_y(x, s)\)</span> is the model’s confidence in label <span class="math inline">\(y\)</span>; <span class="math inline">\(V(S \mid O) = \sum_o\max_s p(s, o)\)</span> is the success of the best guess of <span class="math inline">\(s\)</span> from <span class="math inline">\(O\)</span>. <a href="#tbl-attr-cheat" class="quarto-xref">Table&nbsp;<span>11.5</span></a> collects the results.</p>
+<div id="tbl-attr-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-attr-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;11.5: Every result in this chapter.
+</figcaption>
+<div aria-describedby="tbl-attr-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+<th>Where it comes from</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Attribute advantage</td>
+<td><span class="math inline">\(\Pr[\hat s = s \mid \text{member}] - \Pr[\hat s = s \mid \text{non-member}]\)</span></td>
+<td>Yeom et al.’s game</td>
+</tr>
+<tr class="even">
+<td>Reduction to membership</td>
+<td>Fire when <span class="math inline">\(\hat s = s\)</span>: TPR <span class="math inline">\(-\)</span> FPR <span class="math inline">\(=\)</span> attribute advantage <span class="math inline">\(\le \mathrm{TV}(P_{\mathrm{in}}, P_{\mathrm{out}})\)</span></td>
+<td>Best advantage is total variation</td>
+</tr>
+<tr class="odd">
+<td>Non-member ceiling</td>
+<td><span class="math inline">\(\Pr[\hat s = s \mid \text{non-member}] \le V(S \mid X, Y)\)</span></td>
+<td>Model independent of a fresh record; MAP is optimal</td>
+</tr>
+<tr class="even">
+<td>Model-free attacks</td>
+<td>Equal success on members and non-members; imputation attains <span class="math inline">\(V(S \mid X, Y)\)</span></td>
+<td>A member is marginally a population draw</td>
+</tr>
+<tr class="odd">
+<td>MAP inversion</td>
+<td><span class="math inline">\(\hat s = \arg\max_s p(s \mid x)\,f_y(x, s)\)</span></td>
+<td>Bayes’ rule with the model as likelihood</td>
+</tr>
+<tr class="even">
+<td>Calibrated model</td>
+<td>Inversion = imputation, zero advantage</td>
+<td><span class="math inline">\(f_y = p(y \mid x, s)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Masking</td>
+<td><span class="math inline">\(V(S \mid X, Y, g(F)) \le V(S \mid X, Y, F)\)</span>, but the member/non-member gap can grow</td>
+<td>Processing cannot help the best guesser</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>Report success on members and non-members, and the imputation baseline. A single success rate says nothing about privacy.</li>
+<li>Success up to the imputation baseline is population inference; any model or statistic of the population gives it.</li>
+<li>Success on members beyond what non-members get is the individual leak. It comes from overfitting and shrinks as the training set grows.</li>
+<li>An attribute attack is a membership test that outputs one bit. It is weak at low false positive rates.</li>
+<li>Rounding confidences or returning labels only changes the attacks, not the fact that the model has memorized its training records.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part02-attacks/03-attribute-inference.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-attacks/02-membership-inference.html" class="pagination-link" aria-label="Membership inference">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-attacks/04-property-inference.html" class="pagination-link" aria-label="Property inference">
+        <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

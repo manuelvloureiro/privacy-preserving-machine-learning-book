@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>38&nbsp; Hyperparameter tuning and private selection – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part05-dp-ml/04-matrix-mechanisms.html" rel="next">
+<link href="../part05-dp-ml/02-dp-sgd.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">38.1</span> Why this matters</a>
+  <ul class="collapse">
+  <li><a href="#the-one-idea-the-release-is-a-function-of-every-run-but-a-random-number-of-runs-hides-which-ones" id="toc-the-one-idea-the-release-is-a-function-of-every-run-but-a-random-number-of-runs-hides-which-ones" class="nav-link" data-scroll-target="#the-one-idea-the-release-is-a-function-of-every-run-but-a-random-number-of-runs-hides-which-ones"><span class="header-section-number">38.1.1</span> The one idea: the release is a function of every run, but a random number of runs hides which ones</a></li>
+  </ul></li>
+  <li><a href="#toolkit-four-facts-every-derivation-uses" id="toc-toolkit-four-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-four-facts-every-derivation-uses"><span class="header-section-number">38.2</span> Toolkit: four facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-rdp-curves-add-and-convert-to-varepsilon-delta" id="toc-fact-1-rdp-curves-add-and-convert-to-varepsilon-delta" class="nav-link" data-scroll-target="#fact-1-rdp-curves-add-and-convert-to-varepsilon-delta"><span class="header-section-number">38.2.1</span> Fact 1 — RDP curves add, and convert to <span class="math inline">\((\varepsilon, \delta)\)</span></a></li>
+  <li><a href="#fact-2-post-processing-and-why-the-best-is-a-post-processing-of-all-runs" id="toc-fact-2-post-processing-and-why-the-best-is-a-post-processing-of-all-runs" class="nav-link" data-scroll-target="#fact-2-post-processing-and-why-the-best-is-a-post-processing-of-all-runs"><span class="header-section-number">38.2.2</span> Fact 2 — Post-processing, and why “the best” is a post-processing of all runs</a></li>
+  <li><a href="#fact-3-the-best-of-k-draws-and-the-generating-function" id="toc-fact-3-the-best-of-k-draws-and-the-generating-function" class="nav-link" data-scroll-target="#fact-3-the-best-of-k-draws-and-the-generating-function"><span class="header-section-number">38.2.3</span> Fact 3 — The best of <span class="math inline">\(K\)</span> draws, and the generating function</a></li>
+  <li><a href="#fact-4-disjoint-parts-of-the-data-cost-the-larger-of-their-costs" id="toc-fact-4-disjoint-parts-of-the-data-cost-the-larger-of-their-costs" class="nav-link" data-scroll-target="#fact-4-disjoint-parts-of-the-data-cost-the-larger-of-their-costs"><span class="header-section-number">38.2.4</span> Fact 4 — Disjoint parts of the data cost the larger of their costs</a></li>
+  </ul></li>
+  <li><a href="#sec-hpt-leak" id="toc-sec-hpt-leak" class="nav-link" data-scroll-target="#sec-hpt-leak"><span class="header-section-number">38.3</span> Best of k is k times worse</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">38.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">38.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">38.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">38.3.4</span> Interpretation</a></li>
+  <li><a href="#example-the-numbers-for-varepsilon-1" id="toc-example-the-numbers-for-varepsilon-1" class="nav-link" data-scroll-target="#example-the-numbers-for-varepsilon-1"><span class="header-section-number">38.3.5</span> Example: the numbers for <span class="math inline">\(\varepsilon = 1\)</span></a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">38.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-hpt-composition" id="toc-sec-hpt-composition" class="nav-link" data-scroll-target="#sec-hpt-composition"><span class="header-section-number">38.4</span> Paying by composition</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">38.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">38.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">38.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">38.4.4</span> Interpretation</a></li>
+  <li><a href="#example-the-running-examples-grid" id="toc-example-the-running-examples-grid" class="nav-link" data-scroll-target="#example-the-running-examples-grid"><span class="header-section-number">38.4.5</span> Example: the running example’s grid</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">38.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-hpt-stopping" id="toc-sec-hpt-stopping" class="nav-link" data-scroll-target="#sec-hpt-stopping"><span class="header-section-number">38.5</span> Random stopping: the best of a geometric number of runs</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">38.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">38.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">38.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">38.5.4</span> Interpretation</a></li>
+  <li><a href="#example-a-3ε-pair-and-the-utility-of-stopping" id="toc-example-a-3ε-pair-and-the-utility-of-stopping" class="nav-link" data-scroll-target="#example-a-3ε-pair-and-the-utility-of-stopping"><span class="header-section-number">38.5.5</span> Example: a 3ε pair, and the utility of stopping</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">38.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-hpt-rdp" id="toc-sec-hpt-rdp" class="nav-link" data-scroll-target="#sec-hpt-rdp"><span class="header-section-number">38.6</span> Rényi bounds for a random number of runs</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">38.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">38.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">38.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">38.6.4</span> Interpretation</a></li>
+  <li><a href="#example-the-running-example" id="toc-example-the-running-example" class="nav-link" data-scroll-target="#example-the-running-example"><span class="header-section-number">38.6.5</span> Example: the running example</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">38.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-hpt-select" id="toc-sec-hpt-select" class="nav-link" data-scroll-target="#sec-hpt-select"><span class="header-section-number">38.7</span> Selecting by a noisy validation score</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">38.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">38.7.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">38.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">38.7.4</span> Interpretation</a></li>
+  <li><a href="#example-choosing-a-step-size-on-5000-validation-records" id="toc-example-choosing-a-step-size-on-5000-validation-records" class="nav-link" data-scroll-target="#example-choosing-a-step-size-on-5000-validation-records"><span class="header-section-number">38.7.5</span> Example: choosing a step size on 5,000 validation records</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">38.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-hpt-run" id="toc-sec-hpt-run" class="nav-link" data-scroll-target="#sec-hpt-run"><span class="header-section-number">38.8</span> Tuning the running example</a>
+  <ul class="collapse">
+  <li><a href="#context-5" id="toc-context-5" class="nav-link" data-scroll-target="#context-5"><span class="header-section-number">38.8.1</span> Context</a></li>
+  <li><a href="#statement-5" id="toc-statement-5" class="nav-link" data-scroll-target="#statement-5"><span class="header-section-number">38.8.2</span> Statement</a></li>
+  <li><a href="#derivation-5" id="toc-derivation-5" class="nav-link" data-scroll-target="#derivation-5"><span class="header-section-number">38.8.3</span> Derivation</a></li>
+  <li><a href="#interpretation-5" id="toc-interpretation-5" class="nav-link" data-scroll-target="#interpretation-5"><span class="header-section-number">38.8.4</span> Interpretation</a></li>
+  <li><a href="#example-what-the-bug-changes-in-a-papers-table" id="toc-example-what-the-bug-changes-in-a-papers-table" class="nav-link" data-scroll-target="#example-what-the-bug-changes-in-a-papers-table"><span class="header-section-number">38.8.5</span> Example: what the bug changes in a paper’s table</a></li>
+  <li><a href="#check-yourself-5" id="toc-check-yourself-5" class="nav-link" data-scroll-target="#check-yourself-5"><span class="header-section-number">38.8.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-hpt-practice" id="toc-sec-hpt-practice" class="nav-link" data-scroll-target="#sec-hpt-practice"><span class="header-section-number">38.9</span> What to do and what to report</a>
+  <ul class="collapse">
+  <li><a href="#context-6" id="toc-context-6" class="nav-link" data-scroll-target="#context-6"><span class="header-section-number">38.9.1</span> Context</a></li>
+  <li><a href="#statement-6" id="toc-statement-6" class="nav-link" data-scroll-target="#statement-6"><span class="header-section-number">38.9.2</span> Statement</a></li>
+  <li><a href="#derivation-6" id="toc-derivation-6" class="nav-link" data-scroll-target="#derivation-6"><span class="header-section-number">38.9.3</span> Derivation</a></li>
+  <li><a href="#interpretation-6" id="toc-interpretation-6" class="nav-link" data-scroll-target="#interpretation-6"><span class="header-section-number">38.9.4</span> Interpretation</a></li>
+  <li><a href="#example-the-report-for-the-running-example" id="toc-example-the-report-for-the-running-example" class="nav-link" data-scroll-target="#example-the-report-for-the-running-example"><span class="header-section-number">38.9.5</span> Example: the report for the running example</a></li>
+  <li><a href="#check-yourself-6" id="toc-check-yourself-6" class="nav-link" data-scroll-target="#check-yourself-6"><span class="header-section-number">38.9.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-every-number-by-computation" id="toc-code-check-every-number-by-computation" class="nav-link" data-scroll-target="#code-check-every-number-by-computation"><span class="header-section-number">38.10</span> Code: check every number by computation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">38.11</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">38.12</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="38.1">
+<h2 data-number="38.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">38.1</span> Why this matters</h2>
+<p><a href="../part05-dp-ml/02-dp-sgd.html">The previous chapter</a> proved a guarantee for one training run. Stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, run once with a fixed step size, clipping norm, batch size and number of steps, satisfies differential privacy (DP) with the <span class="math inline">\((\varepsilon, \delta)\)</span> that the accountant reports; this algorithm is DP-SGD. Nobody trains once. A practitioner tries a grid of step sizes, perhaps several clipping norms and architectures, scores each trained model on a validation set, and ships the best one. The validation set and the training set are private data, and every run touched them. <strong>How much does the search leak, and how do you pay for it honestly?</strong></p>
+<p>The question has a sharp answer, and it is not “nothing” and not always “the sum of all runs”. Releasing the best of <span class="math inline">\(k\)</span> private runs can cost exactly <span class="math inline">\(k\)</span> times one run: there are mechanisms for which the best-of-<span class="math inline">\(k\)</span> release is no better than releasing all <span class="math inline">\(k\)</span> runs. That is what composition, the bound that adds up the costs of all runs in Rényi differential privacy (RDP), charges anyway, and for a grid of 10 DP-SGD runs of the running example it turns <span class="math inline">\(\varepsilon = 6.71\)</span> into 27.23. But a small change to the procedure changes the answer completely. If the <em>number</em> of runs is random, drawn from a suitable distribution before the search starts, the best-of release costs a constant factor (two or three times one run for pure DP) plus a term that grows only with the logarithm of the expected number of runs. For 10 runs in expectation, the cost falls from 27.23 to between 10.08 and 13.67 depending on the distribution, and for 1,000 runs from 1,035.93 to 13.46.</p>
+<section id="the-one-idea-the-release-is-a-function-of-every-run-but-a-random-number-of-runs-hides-which-ones" class="level3" data-number="38.1.1">
+<h3 data-number="38.1.1" class="anchored" data-anchor-id="the-one-idea-the-release-is-a-function-of-every-run-but-a-random-number-of-runs-hides-which-ones"><span class="header-section-number">38.1.1</span> The one idea: the release is a function of every run, but a random number of runs hides which ones</h3>
+<p>The model you ship was chosen by comparing all the runs, so it is a function of all of them, and post-processing says its privacy is at most that of all the runs together. That is the composition bound. It can be tight because a fixed number of runs gives the adversary a sharp event to test for: “every one of the <span class="math inline">\(k\)</span> runs came out badly”, whose probability multiplies <span class="math inline">\(k\)</span> per-run likelihood ratios together. A random number of runs blurs that event. If <span class="math inline">\(K\)</span> is random, the adversary does not know how many runs failed, and the event “all runs failed” is mostly explained by “there were few runs” rather than by the data. The mathematics of this is the <strong>generating function</strong> <span class="math inline">\(\mathbb E[x^K]\)</span> of the number of runs, which turns “the best of <span class="math inline">\(K\)</span> draws” into a formula, and the right choice of its distribution trades a slightly worse search for a much cheaper guarantee.</p>
+<p><a href="#tbl-hpt-overview" class="quarto-xref">Table&nbsp;<span>38.1</span></a> lists the results and where each is used.</p>
+<div id="tbl-hpt-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.1: The results of this chapter and where each is used.
+</figcaption>
+<div aria-describedby="tbl-hpt-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>The best of <span class="math inline">\(k\)</span> private runs can cost <span class="math inline">\(k\)</span> runs</td>
+<td>Why tuning must be accounted for; the common reporting bug</td>
+</tr>
+<tr class="even">
+<td>Composition: <span class="math inline">\(k\)</span> runs cost <span class="math inline">\(k\)</span> times the RDP curve</td>
+<td>The baseline; small grids</td>
+</tr>
+<tr class="odd">
+<td>Random stopping: the best of a geometric number of runs is <span class="math inline">\(3\varepsilon\)</span>-DP</td>
+<td>Pure-DP candidates; the idea behind everything that follows</td>
+</tr>
+<tr class="even">
+<td>Rényi bounds for a random number of runs (Poisson, truncated negative binomial)</td>
+<td>Tuning DP-SGD with sublinear cost</td>
+</tr>
+<tr class="odd">
+<td>Selecting by a noisy validation score</td>
+<td>Choosing among fixed candidates; protecting the validation set</td>
+</tr>
+<tr class="even">
+<td>Tuning the running example, and what to report</td>
+<td>Every private training project; <a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a> and <a href="../part05-dp-ml/10-auditing.html">Auditing</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Notation.</strong> One <strong>run</strong> is a randomized algorithm <span class="math inline">\(Q\)</span> that trains a model on the private data with hyperparameters drawn from a fixed set of <strong>candidates</strong>, and outputs the model together with its <strong>score</strong>, a number used to rank runs, such as a validation accuracy. The outputs of <span class="math inline">\(Q\)</span> are totally ordered by score, so “the best” is well defined. <span class="math inline">\(Q(D)\)</span> also denotes the distribution of one run’s output on dataset <span class="math inline">\(D\)</span>, and <span class="math inline">\(D \simeq D'\)</span> are neighbours. <span class="math inline">\(K\)</span> is the number of runs, fixed (<span class="math inline">\(K = k\)</span>) or random, and <span class="math inline">\(f(x) = \mathbb E[x^K]\)</span> its generating function. The <strong>best-of-<span class="math inline">\(K\)</span></strong> algorithm <span class="math inline">\(A\)</span> draws <span class="math inline">\(K\)</span>, runs <span class="math inline">\(Q\)</span> independently <span class="math inline">\(K\)</span> times, and releases the best output. <span class="math inline">\(\varepsilon(\lambda)\)</span> is an RDP curve at order <span class="math inline">\(\lambda\)</span> (the papers this chapter follows write <span class="math inline">\(\lambda\)</span> for the order, and so does this chapter), <span class="math inline">\(\varepsilon_A\)</span> the curve of <span class="math inline">\(A\)</span>, and <span class="math inline">\(\gamma\)</span>, <span class="math inline">\(\eta\)</span>, <span class="math inline">\(\mu\)</span> parameters of distributions of <span class="math inline">\(K\)</span>. The running example is that of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>: a network with 3,329 weights trained on <span class="math inline">\(n = 10{,}000\)</span> records, sampling rate <span class="math inline">\(q = 0.01\)</span>, clipping norm <span class="math inline">\(C = 0.5\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>.</p>
+<p><strong>How to read this chapter.</strong> The toolkit has the two facts every derivation uses, post-processing and the distribution of a maximum. <a href="#sec-hpt-leak" class="quarto-xref"><span>Section 38.3</span></a> shows why tuning is not free, and <a href="#sec-hpt-composition" class="quarto-xref"><span>Section 38.4</span></a> what the obvious fix costs. <a href="#sec-hpt-stopping" class="quarto-xref"><span>Section 38.5</span></a> is the key idea, in its simplest form, and <a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 38.6</span></a> its version for DP-SGD; read the statements and the examples first, the derivations on a second pass. <a href="#sec-hpt-select" class="quarto-xref"><span>Section 38.7</span></a> covers the classical selection mechanisms, <a href="#sec-hpt-run" class="quarto-xref"><span>Section 38.8</span></a> runs everything on the running example, and <a href="#sec-hpt-practice" class="quarto-xref"><span>Section 38.9</span></a> says what to do and what to report.</p>
+</section>
+</section>
+<section id="toolkit-four-facts-every-derivation-uses" class="level2" data-number="38.2">
+<h2 data-number="38.2" class="anchored" data-anchor-id="toolkit-four-facts-every-derivation-uses"><span class="header-section-number">38.2</span> Toolkit: four facts every derivation uses</h2>
+<section id="fact-1-rdp-curves-add-and-convert-to-varepsilon-delta" class="level3" data-number="38.2.1">
+<h3 data-number="38.2.1" class="anchored" data-anchor-id="fact-1-rdp-curves-add-and-convert-to-varepsilon-delta"><span class="header-section-number">38.2.1</span> Fact 1 — RDP curves add, and convert to <span class="math inline">\((\varepsilon, \delta)\)</span></h3>
+<p>A mechanism <span class="math inline">\(M\)</span> satisfies <span class="math inline">\((\lambda, \varepsilon(\lambda))\)</span>-<strong>Rényi differential privacy</strong> if, for all neighbours <span class="math inline">\(D \simeq D'\)</span>, the Rényi divergence of order <span class="math inline">\(\lambda &gt; 1\)</span> between its output distributions is at most <span class="math inline">\(\varepsilon(\lambda)\)</span>: <span id="eq-auto-03hyperparametertuning-1"><span class="math display">\[D_\lambda\big(M(D)\,\|\,M(D')\big) = \frac{1}{\lambda - 1}\ln\sum_y P_D[y]^\lambda P_{D'}[y]^{1 - \lambda} \le \varepsilon(\lambda), \tag{38.1}\]</span></span> where <span class="math inline">\(P_D[y]\)</span> is the probability that <span class="math inline">\(M(D)\)</span> outputs <span class="math inline">\(y\)</span>. The sum is the average of the likelihood ratio <span class="math inline">\(P_D[y]/P_{D'}[y]\)</span> raised to the power <span class="math inline">\(\lambda - 1\)</span>, averaged over outputs drawn from <span class="math inline">\(D\)</span>; large orders weight the rare, large ratios more. As <span class="math inline">\(\lambda \to \infty\)</span> the divergence becomes the largest log ratio, so pure <span class="math inline">\(\varepsilon\)</span>-DP is the point <span class="math inline">\(\lambda = \infty\)</span>. Three properties are used here (<a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>). Running mechanisms in sequence, even adaptively, adds their curves. The divergence grows with the order, so a bound at order <span class="math inline">\(\lambda_2\)</span> also holds at every <span class="math inline">\(\lambda_1 &lt; \lambda_2\)</span>. And a curve converts to <span class="math inline">\((\varepsilon, \delta)\)</span>-DP at the best order, <span id="eq-hpt-convert"><span class="math display">\[\varepsilon = \min_\lambda\Big[\varepsilon(\lambda) + \ln\frac{\lambda - 1}{\lambda} - \frac{\ln\delta + \ln\lambda}{\lambda - 1}\Big], \tag{38.2}\]</span></span> or, read the other way, <span class="math inline">\((\lambda, \varepsilon(\lambda))\)</span>-RDP gives <span class="math inline">\((\hat\varepsilon, \hat\delta)\)</span>-DP for every <span class="math inline">\(\hat\varepsilon\)</span> with <span class="math inline">\(\hat\delta = e^{(\lambda - 1)(\varepsilon(\lambda) - \hat\varepsilon)}(1 - 1/\lambda)^{\lambda - 1}/\lambda\)</span> (<a href="../part04-privacy-accounting/02-rdp-conversions.html">From RDP to (ε, δ)</a>). DP-SGD with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span> and 10,000 steps has <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> by this conversion.</p>
+</section>
+<section id="fact-2-post-processing-and-why-the-best-is-a-post-processing-of-all-runs" class="level3" data-number="38.2.2">
+<h3 data-number="38.2.2" class="anchored" data-anchor-id="fact-2-post-processing-and-why-the-best-is-a-post-processing-of-all-runs"><span class="header-section-number">38.2.2</span> Fact 2 — Post-processing, and why “the best” is a post-processing of all runs</h3>
+<p>A computation that uses only a private output, and not the data, is as private as that output (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). The best of <span class="math inline">\(k\)</span> runs is computed from the <span class="math inline">\(k\)</span> outputs alone: compare their scores and keep the winner. So the best-of-<span class="math inline">\(k\)</span> release is a post-processing of the <span class="math inline">\(k\)</span> runs, and it is at least as private as releasing all of them, which by composition costs <span class="math inline">\(k\)</span> times one run. The question of this chapter is whether it can be <em>more</em> private than that. Post-processing never makes things worse, but it does not promise to make them better.</p>
+</section>
+<section id="fact-3-the-best-of-k-draws-and-the-generating-function" class="level3" data-number="38.2.3">
+<h3 data-number="38.2.3" class="anchored" data-anchor-id="fact-3-the-best-of-k-draws-and-the-generating-function"><span class="header-section-number">38.2.3</span> Fact 3 — The best of <span class="math inline">\(K\)</span> draws, and the generating function</h3>
+<p>Draw an output <span class="math inline">\(Y\)</span> from a distribution <span class="math inline">\(Q\)</span> on outcomes ordered from best to worst. The best of <span class="math inline">\(k\)</span> independent draws is no better than <span class="math inline">\(y\)</span> exactly when every draw is no better than <span class="math inline">\(y\)</span>, so <span id="eq-auto-03hyperparametertuning-2"><span class="math display">\[P[\text{best of } k \preceq y] = Q(\preceq y)^k, \tag{38.3}\]</span></span> where <span class="math inline">\(Q(\preceq y)\)</span> is the probability that one draw is no better than <span class="math inline">\(y\)</span> and <span class="math inline">\(Q(\prec y)\)</span> the probability that it is strictly worse. The best is exactly <span class="math inline">\(y\)</span> when all draws are no better than <span class="math inline">\(y\)</span> but not all are strictly worse: <span class="math inline">\(Q(\preceq y)^k - Q(\prec y)^k\)</span>. Now let the number of draws <span class="math inline">\(K\)</span> be random, independent of the draws. Averaging over <span class="math inline">\(K\)</span> replaces <span class="math inline">\(x^k\)</span> by <span class="math inline">\(\mathbb E[x^K]\)</span>, which is the <strong>generating function</strong> of <span class="math inline">\(K\)</span>, written <span class="math inline">\(f(x) = \sum_k P[K = k]\,x^k\)</span>. So <span id="eq-hpt-pgf"><span class="math display">\[P[A = y] = f\big(Q(\preceq y)\big) - f\big(Q(\prec y)\big). \tag{38.4}\]</span></span> A fixed <span class="math inline">\(K = k\)</span> has <span class="math inline">\(f(x) = x^k\)</span>; a Poisson number of runs with mean <span class="math inline">\(\mu\)</span> has <span class="math inline">\(f(x) = e^{\mu(x - 1)}\)</span>; a geometric number on <span class="math inline">\(\{1, 2, \dots\}\)</span>, <span class="math inline">\(P[K = k] = \gamma(1 - \gamma)^{k - 1}\)</span>, has <span class="math inline">\(f(x) = \gamma x/(1 - (1 - \gamma)x)\)</span>, by summing the geometric series.</p>
+<p><em>A die.</em> The best of two rolls of a fair die is a 6 unless both rolls are below 6: <span class="math inline">\(1 - (5/6)^2 = 11/36 = 0.3056\)</span>. In the form of <a href="#eq-hpt-pgf" class="quarto-xref">Equation&nbsp;<span>38.4</span></a> with outcome <span class="math inline">\(y = 6\)</span> the best, <span class="math inline">\(Q(\preceq 6) = 1\)</span> and <span class="math inline">\(Q(\prec 6) = 5/6\)</span>, so <span class="math inline">\(P = 1^2 - (5/6)^2\)</span>. If instead you roll once or twice with probability <span class="math inline">\(\frac12\)</span> each, <span class="math inline">\(f(x) = \frac12x + \frac12x^2\)</span> and <span class="math inline">\(P[\text{best} = 6] = f(1) - f(5/6) = 1 - \frac12\cdot\frac56 - \frac12\cdot\frac{25}{36} = 17/72 = 0.2361\)</span>, the average of the one-roll answer <span class="math inline">\(1/6\)</span> and the two-roll answer <span class="math inline">\(11/36\)</span>.</p>
+</section>
+<section id="fact-4-disjoint-parts-of-the-data-cost-the-larger-of-their-costs" class="level3" data-number="38.2.4">
+<h3 data-number="38.2.4" class="anchored" data-anchor-id="fact-4-disjoint-parts-of-the-data-cost-the-larger-of-their-costs"><span class="header-section-number">38.2.4</span> Fact 4 — Disjoint parts of the data cost the larger of their costs</h3>
+<p>Suppose a dataset is split into two disjoint parts, a training set and a validation set, and each record lives in exactly one of them. An algorithm that is <span class="math inline">\(\varepsilon_1\)</span>-DP in the training records (with the validation set fixed) and <span class="math inline">\(\varepsilon_2\)</span>-DP in the validation records (with the training set fixed) is <span class="math inline">\(\max(\varepsilon_1, \varepsilon_2)\)</span>-DP for neighbours that add or remove one record anywhere, because a pair of neighbours differs in one record, which sits in one part only. The same holds order by order for RDP curves: the curve is the pointwise maximum. This is the idea of <strong>parallel composition</strong>, and it is why a held-out validation set does not add its cost to training’s cost: it adds its own cost only where it is larger.</p>
+</section>
+</section>
+<section id="sec-hpt-leak" class="level2" data-number="38.3">
+<h2 data-number="38.3" class="anchored" data-anchor-id="sec-hpt-leak"><span class="header-section-number">38.3</span> Best of k is k times worse</h2>
+<section id="context" class="level3" data-number="38.3.1">
+<h3 data-number="38.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">38.3.1</span> Context</h3>
+<p>The intuitive argument for ignoring tuning goes: the release is one model, chosen among a handful by one comparison, and a choice among eight step sizes carries at most three bits. That argument is wrong in two ways. The released model is not the choice; it is a whole private run, picked <em>because</em> of how it came out. And the comparison is a function of every run. How bad can it be?</p>
+</section>
+<section id="statement" class="level3" data-number="38.3.2">
+<h3 data-number="38.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">38.3.2</span> Statement</h3>
+<p>Let one run be <strong>randomized response</strong> on two outcomes, “good” and “bad” (best first). On <span class="math inline">\(D\)</span> the run comes out good with probability <span class="math inline">\(\frac{1}{1 + e^\varepsilon}\)</span>, and on its neighbour <span class="math inline">\(D'\)</span> with probability <span class="math inline">\(\frac{e^\varepsilon}{1 + e^\varepsilon}\)</span>. One run is exactly <span class="math inline">\(\varepsilon\)</span>-DP. Releasing the best of <span class="math inline">\(k\)</span> runs is exactly <span class="math inline">\(k\varepsilon\)</span>-DP: <span id="eq-hpt-rr-k"><span class="math display">\[\frac{P_D[\text{best of } k \text{ is bad}]}{P_{D'}[\text{best of } k \text{ is bad}]} = \frac{\big(e^\varepsilon/(1 + e^\varepsilon)\big)^k}{\big(1/(1 + e^\varepsilon)\big)^k} = e^{k\varepsilon}. \tag{38.5}\]</span></span> In RDP, Papernot &amp; Steinke (2022, Proposition 17) show that the same release has <span class="math inline">\(D_\lambda \ge k\varepsilon - k\ln(1 + e^{-\varepsilon})/(\lambda - 1)\)</span>, so at large orders it also costs about <span class="math inline">\(k\)</span> times one run.</p>
+</section>
+<section id="derivation" class="level3" data-number="38.3.3">
+<h3 data-number="38.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">38.3.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Best of <span class="math inline">\(k\)</span> is bad only if every run is bad.</strong> By Fact 3 with outcome “bad” the worst, <span class="math inline">\(P[\text{best is bad}] = Q(\text{bad})^k\)</span>.</li>
+<li><strong>Each run’s ratio is <span class="math inline">\(e^\varepsilon\)</span>.</strong> <span class="math inline">\(Q_D(\text{bad}) = e^\varepsilon/(1 + e^\varepsilon)\)</span> and <span class="math inline">\(Q_{D'}(\text{bad}) = 1/(1 + e^\varepsilon)\)</span>, a ratio of <span class="math inline">\(e^\varepsilon\)</span>.</li>
+<li><strong>The <span class="math inline">\(k\)</span> ratios multiply.</strong> Raising both to the power <span class="math inline">\(k\)</span> gives <a href="#eq-hpt-rr-k" class="quarto-xref">Equation&nbsp;<span>38.5</span></a>. The other outcome, “good”, has the ratio <span class="math inline">\((1 - Q_D(\text{bad})^k)/(1 - Q_{D'}(\text{bad})^k)\)</span>, which is between <span class="math inline">\(e^{-\varepsilon}\)</span> and 1, so the largest log ratio over outcomes is <span class="math inline">\(k\varepsilon\)</span>.</li>
+<li><strong>The Rényi version.</strong> Keep only the “bad” term in the sum of Fact 1: <span class="math inline">\(e^{(\lambda - 1)D_\lambda} \ge P_D[\text{bad}]^\lambda P_{D'}[\text{bad}]^{1 - \lambda} = e^{k\varepsilon\lambda}(1 + e^\varepsilon)^{-k}\)</span>, which is <span class="math inline">\((e^{k\varepsilon})^\lambda\)</span> times <span class="math inline">\(P_{D'}[\text{bad}]\)</span>. Taking logarithms and dividing by <span class="math inline">\(\lambda - 1\)</span> gives <span class="math inline">\(D_\lambda \ge (k\varepsilon\lambda - k\ln(1 + e^\varepsilon))/(\lambda - 1) = k\varepsilon - k\ln(1 + e^{-\varepsilon})/(\lambda - 1)\)</span>, using <span class="math inline">\(\ln(1 + e^\varepsilon) = \varepsilon + \ln(1 + e^{-\varepsilon})\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation" class="level3" data-number="38.3.4">
+<h3 data-number="38.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">38.3.4</span> Interpretation</h3>
+<p><strong>Where the loss comes from.</strong> The whole loss sits on one event: every run failed. Its probability is small on both datasets, but its ratio is the product of <span class="math inline">\(k\)</span> per-run ratios, because the runs are independent and the event requires all of them. <a href="#fig-hpt-leak" class="quarto-xref">Figure&nbsp;<span>38.1</span></a> (right) shows the privacy loss distribution for <span class="math inline">\(\varepsilon = 1\)</span>: one run has losses <span class="math inline">\(\pm1\)</span>; the best of 10 has a loss of <span class="math inline">\(-0.0446\)</span> with probability 0.9564 and a loss of 10 with probability 0.0436. A test that looks for “the released model is bad” detects membership with a likelihood ratio of <span class="math inline">\(e^{10}\)</span> whenever it fires.</p>
+<p><strong>This is not an artefact of a contrived mechanism.</strong> A DP-SGD run that sometimes diverges, a learning rate that sometimes produces a useless model, a candidate that rarely clears a threshold: each is a run with a “bad” outcome whose probability depends a little on the data. Best-of-<span class="math inline">\(k\)</span> multiplies those small dependences. The example is extreme because it puts all of each run’s privacy loss on a single binary outcome. A particular DP-SGD search may leak much less, but no analysis that knows only each run’s guarantee can promise it, so the general bound for a fixed <span class="math inline">\(k\)</span> is composition, which grows linearly (<a href="#sec-hpt-composition" class="quarto-xref"><span>Section 38.4</span></a>).</p>
+<p><strong>The bound for a fixed <span class="math inline">\(k\)</span> is tight, so the procedure must change.</strong> Composition says best-of-<span class="math inline">\(k\)</span> costs at most <span class="math inline">\(k\varepsilon\)</span>, and <a href="#eq-hpt-rr-k" class="quarto-xref">Equation&nbsp;<span>38.5</span></a> says some mechanism attains it. No better analysis of “the best of exactly <span class="math inline">\(k\)</span> runs” exists for all mechanisms. A better guarantee needs a different procedure, and the next sections change one thing: the number of runs.</p>
+<p><strong>Non-private tuning leaks too.</strong> If you tune without any noise and then train privately once with the chosen hyperparameters, the hyperparameters are a non-private function of the data, and the final run’s <span class="math inline">\(\varepsilon\)</span> does not cover them. Papernot &amp; Steinke (2022, Section 2) build a support vector machine whose best regularization weight changes when a few outliers are added, so the chosen value reveals whether the outliers were in the training set, a <a href="../part02-attacks/02-membership-inference.html">membership inference</a> through a single number.</p>
+<div id="fig-hpt-leak" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hpt-leak-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hpt_leak.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hpt-leak-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.1: Left: the exact <span class="math inline">\(\varepsilon\)</span> of releasing the best of <span class="math inline">\(K\)</span> randomized-response runs, each <span class="math inline">\(1\)</span>-DP, against the expected number of runs, for a fixed number of runs, a Poisson, a geometric and a logarithmic number. A fixed number grows linearly; the geometric and logarithmic numbers stay below their bounds <span class="math inline">\(3\varepsilon\)</span> and <span class="math inline">\(2\varepsilon\)</span>. Right: the privacy loss of the released outcome under <span class="math inline">\(D\)</span> for one run, the best of 10 runs and the best of a Poisson number with mean 10; the best of 10 puts a loss of 10 on an event of probability 0.0436.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-numbers-for-varepsilon-1" class="level3" data-number="38.3.5">
+<h3 data-number="38.3.5" class="anchored" data-anchor-id="example-the-numbers-for-varepsilon-1"><span class="header-section-number">38.3.5</span> Example: the numbers for <span class="math inline">\(\varepsilon = 1\)</span></h3>
+<p>With <span class="math inline">\(\varepsilon = 1\)</span> a run is good with probability 0.2689 on <span class="math inline">\(D\)</span> and 0.7311 on <span class="math inline">\(D'\)</span>. The script computes the best-of-<span class="math inline">\(k\)</span> distributions exactly. The largest log ratio is 2.0000 for <span class="math inline">\(k = 2\)</span>, 3.0000 for <span class="math inline">\(k = 3\)</span> and 10.0000 for <span class="math inline">\(k = 10\)</span>, exactly <span class="math inline">\(k\varepsilon\)</span>. At order <span class="math inline">\(\lambda = 2\)</span>, the Rényi divergence of the best of 10 is 6.8683, between the lower bound of step 4, 6.8674, and composition’s upper bound, ten times one run’s 0.7353, which is 7.3533. Composition overstates the exact value by 7%; at order 2 it is nearly tight, as at order <span class="math inline">\(\infty\)</span>.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="38.3.6">
+<h3 data-number="38.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">38.3.6</span> Check yourself</h3>
+<ul>
+<li>Releasing only the index of the best run, not the trained model, would it fix <a href="#eq-hpt-rr-k" class="quarto-xref">Equation&nbsp;<span>38.5</span></a>? <em>(No.&nbsp;In the example the output is “good” or “bad”, and the index of the best run carries the same event: if all runs are bad, every index is a bad run, and the chosen one reveals it. What matters is that the release depends on every run.)</em></li>
+<li>Suppose each run is <span class="math inline">\(\varepsilon\)</span>-DP and you release the best of <span class="math inline">\(k\)</span> runs together with all <span class="math inline">\(k\)</span> scores. What is the cost? <em>(At most <span class="math inline">\(k\varepsilon\)</span> by composition, the same as the best alone in the worst case; releasing more does not cost more here because the best of <span class="math inline">\(k\)</span> already attains the bound.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-hpt-composition" class="level2" data-number="38.4">
+<h2 data-number="38.4" class="anchored" data-anchor-id="sec-hpt-composition"><span class="header-section-number">38.4</span> Paying by composition</h2>
+<section id="context-1" class="level3" data-number="38.4.1">
+<h3 data-number="38.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">38.4.1</span> Context</h3>
+<p>The safe answer is to charge for every run. What does it cost on the running example, and how much more noise does each run need to keep the total fixed?</p>
+</section>
+<section id="statement-1" class="level3" data-number="38.4.2">
+<h3 data-number="38.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">38.4.2</span> Statement</h3>
+<p>If each of <span class="math inline">\(k\)</span> runs has RDP curve <span class="math inline">\(\varepsilon(\lambda)\)</span>, releasing anything computed from all of them, in particular the best, has curve at most <span id="eq-hpt-compose"><span class="math display">\[\varepsilon_A(\lambda) \le k\,\varepsilon(\lambda), \tag{38.6}\]</span></span> converted to <span class="math inline">\((\varepsilon, \delta)\)</span> by <a href="#eq-hpt-convert" class="quarto-xref">Equation&nbsp;<span>38.2</span></a>. For DP-SGD, <span class="math inline">\(k\)</span> runs of <span class="math inline">\(T\)</span> steps at noise multiplier <span class="math inline">\(\sigma\)</span> cost the same as one run of <span class="math inline">\(kT\)</span> steps, so keeping the total at a target <span class="math inline">\(\varepsilon\)</span> means choosing <span class="math inline">\(\sigma\)</span> for <span class="math inline">\(kT\)</span> steps.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="38.4.3">
+<h3 data-number="38.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">38.4.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>The release is a post-processing of the <span class="math inline">\(k\)</span> runs</strong> (Fact 2).</li>
+<li><strong>The <span class="math inline">\(k\)</span> runs compose.</strong> Each run uses fresh randomness, and RDP curves add (Fact 1), so their joint output has curve <span class="math inline">\(k\varepsilon(\lambda)\)</span>. This holds even if the candidates are chosen adaptively, each after seeing the earlier results, since RDP composition covers adaptive sequences.</li>
+<li><strong>DP-SGD.</strong> One run of <span class="math inline">\(T\)</span> steps has curve <span class="math inline">\(T\varepsilon_{q,\sigma}(\lambda)\)</span>, where <span class="math inline">\(\varepsilon_{q,\sigma}\)</span> is one subsampled Gaussian step. <span class="math inline">\(k\)</span> runs give <span class="math inline">\(kT\varepsilon_{q,\sigma}(\lambda)\)</span>, the curve of one run of <span class="math inline">\(kT\)</span> steps.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="38.4.4">
+<h3 data-number="38.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">38.4.4</span> Interpretation</h3>
+<p><strong>Composition is cheaper than <span class="math inline">\(k\varepsilon\)</span>, but still grows like <span class="math inline">\(k\)</span>.</strong> In <span class="math inline">\((\varepsilon, \delta)\)</span> terms, <span class="math inline">\(k\)</span> runs cost less than <span class="math inline">\(k\)</span> times one run’s <span class="math inline">\(\varepsilon\)</span>, because the conversion of <a href="#eq-hpt-convert" class="quarto-xref">Equation&nbsp;<span>38.2</span></a> pays its <span class="math inline">\(\ln(1/\delta)\)</span> term once, and because adding curves behaves like advanced composition, roughly <span class="math inline">\(\sqrt k\)</span> at small <span class="math inline">\(\varepsilon\)</span>. On the running example, <a href="#tbl-hpt-compose" class="quarto-xref">Table&nbsp;<span>38.2</span></a>, 10 runs cost 4.06 times one run, not 10. But the curve grows linearly, and so does <span class="math inline">\(\varepsilon\)</span> once the budget is large: from 30 to 100 runs, <span class="math inline">\(\varepsilon\)</span> grows by a factor 2.5.</p>
+<p><strong>Raising the noise is the honest way to keep the budget.</strong> To keep the total at <span class="math inline">\(\varepsilon = 6.71\)</span>, each of 10 runs needs <span class="math inline">\(\sigma = 2.45\)</span> instead of 1. <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> showed what that costs on this task: more noise per step means fewer useful steps, and accuracy falls steeply below some budget.</p>
+<p><strong>When composition is the right tool.</strong> For a handful of candidates, two or three, composition costs little more than the alternatives below and needs no change to the procedure. <a href="#fig-hpt-overhead" class="quarto-xref">Figure&nbsp;<span>38.2</span></a> shows that the random-<span class="math inline">\(K\)</span> methods only pull away from composition from a few runs on.</p>
+</section>
+<section id="example-the-running-examples-grid" class="level3" data-number="38.4.5">
+<h3 data-number="38.4.5" class="anchored" data-anchor-id="example-the-running-examples-grid"><span class="header-section-number">38.4.5</span> Example: the running example’s grid</h3>
+<p><a href="#tbl-hpt-compose" class="quarto-xref">Table&nbsp;<span>38.2</span></a> takes the running example, <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps, one run <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, and composes <span class="math inline">\(k\)</span> runs. The values for 10 and 100 runs are those <a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a> reported.</p>
+<div id="tbl-hpt-compose" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-compose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.2: Composition of <span class="math inline">\(k\)</span> DP-SGD runs of the running example, at <span class="math inline">\(\delta = 10^{-5}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-hpt-compose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Runs <span class="math inline">\(k\)</span></th>
+<th>1</th>
+<th>3</th>
+<th>10</th>
+<th>30</th>
+<th>100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\varepsilon\)</span> of <span class="math inline">\(k\)</span> runs at <span class="math inline">\(\sigma = 1\)</span></td>
+<td>6.71</td>
+<td>12.73</td>
+<td>27.23</td>
+<td>58.25</td>
+<td>145.17</td>
+</tr>
+<tr class="even">
+<td>Ratio to one run</td>
+<td>1.00</td>
+<td>1.90</td>
+<td>4.06</td>
+<td>8.68</td>
+<td>21.63</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span> per run for a total of 6.71</td>
+<td>1</td>
+<td>1.46</td>
+<td>2.45</td>
+<td>4.12</td>
+<td>7.44</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="check-yourself-1" class="level3" data-number="38.4.6">
+<h3 data-number="38.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">38.4.6</span> Check yourself</h3>
+<ul>
+<li>Why does <span class="math inline">\(k\)</span> runs of <span class="math inline">\(T\)</span> steps cost exactly as much as one run of <span class="math inline">\(kT\)</span> steps, if the runs start from different initializations? <em>(The accountant does not look at the weights. Each step costs <span class="math inline">\(\varepsilon_{q,\sigma}(\lambda)\)</span> whatever it is applied to, and curves add.)</em></li>
+<li>Your team ran 30 configurations, each at <span class="math inline">\(\varepsilon = 6.71\)</span>, and reports 6.71. What does composition say the release costs? <em>(58.25. The best-of release can be at most that; <a href="#sec-hpt-leak" class="quarto-xref"><span>Section 38.3</span></a> shows that without more structure no smaller number is guaranteed.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-hpt-stopping" class="level2" data-number="38.5">
+<h2 data-number="38.5" class="anchored" data-anchor-id="sec-hpt-stopping"><span class="header-section-number">38.5</span> Random stopping: the best of a geometric number of runs</h2>
+<section id="context-2" class="level3" data-number="38.5.1">
+<h3 data-number="38.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">38.5.1</span> Context</h3>
+<p>Liu &amp; Talwar (2019) asked whether the best of many <span class="math inline">\(\varepsilon\)</span>-DP runs can cost a constant multiple of <span class="math inline">\(\varepsilon\)</span>, independent of how many runs are made. They found that it can, with one change: after each run, flip a coin and stop with probability <span class="math inline">\(\gamma\)</span>. The number of runs is then geometric with mean <span class="math inline">\(1/\gamma\)</span>, and releasing the best run seen is <span class="math inline">\(3\varepsilon\)</span>-DP whatever <span class="math inline">\(\gamma\)</span> is.</p>
+</section>
+<section id="statement-2" class="level3" data-number="38.5.2">
+<h3 data-number="38.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">38.5.2</span> Statement</h3>
+<p><strong>Algorithm (random stopping).</strong> Repeat: run <span class="math inline">\(Q\)</span> on the data and keep its output; with probability <span class="math inline">\(\gamma\)</span>, stop and release the best output kept so far.</p>
+<p>If <span class="math inline">\(Q\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP, the release is <span class="math inline">\(3\varepsilon\)</span>-DP (Liu &amp; Talwar 2019, Theorem 3.2). Its output distribution is explicit: for an outcome <span class="math inline">\(y\)</span> with probability <span class="math inline">\(p\)</span> under one run, <span class="math inline">\(p_&gt;\)</span> the probability that one run is strictly better than <span class="math inline">\(y\)</span> and <span class="math inline">\(p_\ge = p_&gt; + p\)</span> the probability that it is at least as good, <span id="eq-hpt-lt"><span class="math display">\[P[A = y] = \frac{\gamma\,p}{\big(\gamma + (1 - \gamma)p_&gt;\big)\big(\gamma + (1 - \gamma)p_\ge\big)}. \tag{38.7}\]</span></span> Its utility: for any fraction <span class="math inline">\(\pi\)</span>, the release falls below the top <span class="math inline">\(\pi\)</span>-quantile of one run’s score with probability <span id="eq-hpt-lt-utility"><span class="math display">\[P[\text{miss}] = \frac{\gamma(1 - \pi)}{\gamma + (1 - \gamma)\pi} \le \frac{\gamma}{\pi}. \tag{38.8}\]</span></span></p>
+</section>
+<section id="derivation-2" class="level3" data-number="38.5.3">
+<h3 data-number="38.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">38.5.3</span> Derivation</h3>
+<p>The idea: the probability of each output is a ratio built from three probabilities of one run, <span class="math inline">\(p\)</span>, <span class="math inline">\(p_&gt;\)</span> and <span class="math inline">\(p_\ge\)</span>. Each moves by at most <span class="math inline">\(e^\varepsilon\)</span> between neighbours, and the parameter <span class="math inline">\(\gamma\)</span> enters in a way that cannot amplify those moves.</p>
+<ol type="1">
+<li><strong>The number of runs.</strong> The algorithm stops after run <span class="math inline">\(j\)</span> with probability <span class="math inline">\(\gamma(1 - \gamma)^{j - 1}\)</span>: it continued <span class="math inline">\(j - 1\)</span> times and stopped once. So <span class="math inline">\(K\)</span> is geometric with mean <span class="math inline">\(1/\gamma\)</span> and generating function <span class="math inline">\(f(x) = \gamma x/(1 - (1 - \gamma)x)\)</span> (Fact 3).</li>
+<li><strong>Apply <a href="#eq-hpt-pgf" class="quarto-xref">Equation&nbsp;<span>38.4</span></a>.</strong> One run is no better than <span class="math inline">\(y\)</span> with probability <span class="math inline">\(1 - p_&gt;\)</span> and strictly worse with probability <span class="math inline">\(1 - p_\ge\)</span>. So <span class="math inline">\(P[A = y] = f(1 - p_&gt;) - f(1 - p_\ge)\)</span>. Since <span class="math inline">\(1 - (1 - \gamma)(1 - p_&gt;) = \gamma + (1 - \gamma)p_&gt;\)</span>, this is <span id="eq-auto-03hyperparametertuning-3"><span class="math display">\[\frac{\gamma(1 - p_&gt;)}{\gamma + (1 - \gamma)p_&gt;} - \frac{\gamma(1 - p_\ge)}{\gamma + (1 - \gamma)p_\ge}. \tag{38.9}\]</span></span></li>
+<li><strong>Simplify.</strong> Over the common denominator, the numerator is <span class="math inline">\(\gamma\)</span> times <span class="math inline">\((1 - p_&gt;)(\gamma + (1 - \gamma)p_\ge) - (1 - p_\ge)(\gamma + (1 - \gamma)p_&gt;)\)</span>. Expanding, the terms with <span class="math inline">\(\gamma\)</span> give <span class="math inline">\(\gamma(p_\ge - p_&gt;) = \gamma p\)</span>, and the terms with <span class="math inline">\(1 - \gamma\)</span> give <span class="math inline">\((1 - \gamma)(p_\ge - p_&gt;p_\ge - p_&gt; + p_\ge p_&gt;) = (1 - \gamma)p\)</span>. Their sum is <span class="math inline">\(p\)</span>, which gives <a href="#eq-hpt-lt" class="quarto-xref">Equation&nbsp;<span>38.7</span></a>.</li>
+<li><strong>Bound each factor.</strong> Write primes for the same quantities on <span class="math inline">\(D'\)</span>. Each of <span class="math inline">\(p\)</span>, <span class="math inline">\(p_&gt;\)</span> and <span class="math inline">\(p_\ge\)</span> is the probability of an event about one run’s output, so <span class="math inline">\(\varepsilon\)</span>-DP of <span class="math inline">\(Q\)</span> gives <span class="math inline">\(p \le e^\varepsilon p'\)</span>, <span class="math inline">\(p'_&gt; \le e^\varepsilon p_&gt;\)</span> and <span class="math inline">\(p'_\ge \le e^\varepsilon p_\ge\)</span>. The first bounds the numerator ratio. For the denominators, <span class="math inline">\(\gamma + (1 - \gamma)p'_&gt; \le e^\varepsilon\big(\gamma + (1 - \gamma)p_&gt;\big)\)</span>, because <span class="math inline">\(\gamma \le e^\varepsilon\gamma\)</span> and <span class="math inline">\(p'_&gt; \le e^\varepsilon p_&gt;\)</span>; the same for <span class="math inline">\(p_\ge\)</span>.</li>
+<li><strong>Multiply.</strong> <span class="math inline">\(P[A(D) = y]/P[A(D') = y] = \frac{p}{p'}\cdot\frac{\gamma + (1 - \gamma)p'_&gt;}{\gamma + (1 - \gamma)p_&gt;}\cdot\frac{\gamma + (1 - \gamma)p'_\ge}{\gamma + (1 - \gamma)p_\ge} \le e^{3\varepsilon}\)</span>. This holds for every outcome, so the release is <span class="math inline">\(3\varepsilon\)</span>-DP.</li>
+<li><strong>Utility.</strong> The release is below the top <span class="math inline">\(\pi\)</span>-quantile only if every run is: <span class="math inline">\(\sum_j\gamma(1 - \gamma)^{j - 1}(1 - \pi)^j = \gamma(1 - \pi)/(1 - (1 - \gamma)(1 - \pi))\)</span>, by the geometric series, which is the equality in <a href="#eq-hpt-lt-utility" class="quarto-xref">Equation&nbsp;<span>38.8</span></a>. It is at most <span class="math inline">\(\gamma/\pi\)</span> because <span class="math inline">\(\pi(1 - \pi) \le \gamma(1 - \pi) + \pi\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-2" class="level3" data-number="38.5.4">
+<h3 data-number="38.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">38.5.4</span> Interpretation</h3>
+<p><strong>Why the fixed-<span class="math inline">\(k\)</span> disaster disappears.</strong> In <a href="#eq-hpt-pgf" class="quarto-xref">Equation&nbsp;<span>38.4</span></a> with <span class="math inline">\(f(x) = x^k\)</span>, the ratio for the worst outcome is <span class="math inline">\((Q(\preceq y)/Q'(\preceq y))^k\)</span>, a <span class="math inline">\(k\)</span>-th power. The geometric generating function is a ratio of linear functions of <span class="math inline">\(x\)</span>, so the ratio of outputs is a product of three ratios of linear functions, each moved by at most <span class="math inline">\(e^\varepsilon\)</span>. The event “every run was bad” is now mostly the event “the coin stopped early”, which does not depend on the data.</p>
+<p><strong>The <span class="math inline">\(3\)</span> is real.</strong> The bound is attained in the limit. Take three outcomes, best first, with probabilities <span class="math inline">\((a, b, 1 - a - b)\)</span> on <span class="math inline">\(D\)</span> and <span class="math inline">\((ae^\varepsilon, be^{-\varepsilon}, \dots)\)</span> on <span class="math inline">\(D'\)</span>, with <span class="math inline">\(\gamma \ll b \ll a\)</span> small. For the middle outcome, the numerator ratio <span class="math inline">\(p/p' = e^\varepsilon\)</span> and, since <span class="math inline">\(\gamma\)</span> is negligible next to <span class="math inline">\(p_&gt;\)</span> and <span class="math inline">\(p_\ge \approx p_&gt;\)</span>, both denominator ratios approach <span class="math inline">\(e^\varepsilon\)</span>. The example below computes it.</p>
+<p><strong>Two outcomes give only <span class="math inline">\(2\varepsilon\)</span>.</strong> On randomized response, the “good” outcome has <span class="math inline">\(p_&gt; = 0\)</span>, so one denominator factor is <span class="math inline">\(\gamma\)</span> on both datasets, and only two factors can move. <a href="#fig-hpt-leak" class="quarto-xref">Figure&nbsp;<span>38.1</span></a> (left) shows the exact <span class="math inline">\(\varepsilon\)</span> of geometric stopping on randomized response rising toward <span class="math inline">\(2\varepsilon\)</span> as the mean number of runs grows.</p>
+<p><strong>The utility guarantee is about quantiles, and it costs runs.</strong> <a href="#eq-hpt-lt-utility" class="quarto-xref">Equation&nbsp;<span>38.8</span></a> does not promise the best candidate. It promises that, with probability at least <span class="math inline">\(1 - \gamma/\pi\)</span>, the release is at least as good as the top <span class="math inline">\(\pi\)</span> fraction of a single run’s outcomes. To find a candidate in the top <span class="math inline">\(1/m\)</span> of a grid of <span class="math inline">\(m\)</span> with probability 0.9, you need <span class="math inline">\(\gamma/\pi \le 0.1\)</span>, so <span class="math inline">\(\gamma = 0.1/m\)</span>, a mean of <span class="math inline">\(10m\)</span> runs, ten times the grid. The exact miss probability is smaller than the bound, but not by much when <span class="math inline">\(\pi\)</span> is small. This is the price of the method: you buy a constant privacy cost with extra runs, and the geometric distribution often stops after one or two.</p>
+<p><strong>Approximate DP and threshold variants.</strong> Liu &amp; Talwar also give a version with a known score threshold, which stops as soon as a run clears it and costs <span class="math inline">\(2\varepsilon\)</span> plus a small term (their Theorem 3.1), and versions for <span class="math inline">\((\varepsilon, \delta)\)</span>-DP runs and with a hard cap on the number of runs (Theorems 3.4 and 3.5). For DP-SGD, which is analysed in RDP, <a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 38.6</span></a> is the version to use.</p>
+</section>
+<section id="example-a-3ε-pair-and-the-utility-of-stopping" class="level3" data-number="38.5.5">
+<h3 data-number="38.5.5" class="anchored" data-anchor-id="example-a-3ε-pair-and-the-utility-of-stopping"><span class="header-section-number">38.5.5</span> Example: a 3ε pair, and the utility of stopping</h3>
+<p>On randomized response with <span class="math inline">\(\varepsilon = 1\)</span>, geometric stopping gives an exact <span class="math inline">\(\varepsilon\)</span> of 1.3106 at <span class="math inline">\(\gamma = 0.5\)</span>, 1.7957 at <span class="math inline">\(\gamma = 0.1\)</span>, 1.9769 at <span class="math inline">\(\gamma = 0.01\)</span> and 1.9977 at <span class="math inline">\(\gamma = 0.001\)</span>, approaching 2. On the three-outcome pair, with <span class="math inline">\(\varepsilon = 1\)</span> for one run, <a href="#tbl-hpt-three" class="quarto-xref">Table&nbsp;<span>38.3</span></a> shows the exact <span class="math inline">\(\varepsilon\)</span> of the release approaching 3, and the logarithmic distribution of <a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 38.6</span></a> approaching 2.</p>
+<div id="tbl-hpt-three" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-three-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.3: Exact <span class="math inline">\(\varepsilon\)</span> of the best-of release on a three-outcome mechanism that is exactly 1-DP, computed from <a href="#eq-hpt-pgf" class="quarto-xref">Equation&nbsp;<span>38.4</span></a>. The middle outcome attains the maximum, and <a href="#eq-hpt-lt" class="quarto-xref">Equation&nbsp;<span>38.7</span></a> gives the same value.
+</figcaption>
+<div aria-describedby="tbl-hpt-three-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(a\)</span></th>
+<th><span class="math inline">\(b\)</span></th>
+<th><span class="math inline">\(\gamma\)</span></th>
+<th>Geometric stopping</th>
+<th>Logarithmic number, same <span class="math inline">\(\gamma\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.01</td>
+<td>0.001</td>
+<td>0.1</td>
+<td>1.2598</td>
+<td>1.1299</td>
+</tr>
+<tr class="even">
+<td>0.01</td>
+<td>0.0001</td>
+<td>0.01</td>
+<td>2.2316</td>
+<td>1.6158</td>
+</tr>
+<tr class="odd">
+<td>0.01</td>
+<td><span class="math inline">\(10^{-6}\)</span></td>
+<td><span class="math inline">\(10^{-4}\)</span></td>
+<td>2.9874</td>
+<td>1.9937</td>
+</tr>
+<tr class="even">
+<td>0.001</td>
+<td><span class="math inline">\(10^{-9}\)</span></td>
+<td><span class="math inline">\(10^{-6}\)</span></td>
+<td>2.9987</td>
+<td>1.9994</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>For utility, suppose a grid of 8 candidates with one best. With <span class="math inline">\(\gamma = 1/8\)</span>, a mean of 8 runs, the chance of never trying the top eighth is 0.4667, and the bound <span class="math inline">\(\gamma/\pi = 1\)</span> says nothing. With <span class="math inline">\(\gamma = 1/80\)</span>, a mean of 80 runs, the chance falls to 0.0805 against a bound of 0.1. To have the same chance of hitting a top <span class="math inline">\(1/80\)</span> fraction you would again need ten times more runs: with <span class="math inline">\(\gamma = 1/80\)</span> the miss probability for <span class="math inline">\(\pi = 1/80\)</span> is 0.4969.</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="38.5.6">
+<h3 data-number="38.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">38.5.6</span> Check yourself</h3>
+<ul>
+<li>In step 4, why does <span class="math inline">\(\gamma \le e^\varepsilon\gamma\)</span> matter? <em>(The denominator is a mixture of the constant <span class="math inline">\(\gamma\)</span>, which does not depend on the data, and <span class="math inline">\(p_&gt;\)</span>, which does. Each part grows by at most <span class="math inline">\(e^\varepsilon\)</span>, so the sum does. The constant part is what blurs the “all runs failed” event.)</em></li>
+<li>If you wanted to run exactly 8 candidates, could you emulate it by setting <span class="math inline">\(\gamma = 1/8\)</span>? <em>(Only in mean. The geometric distribution stops after one run with probability 1/8 and after more than 16 runs with probability <span class="math inline">\((7/8)^{16} = 0.118\)</span>; <a href="#fig-hpt-k" class="quarto-xref">Figure&nbsp;<span>38.3</span></a> shows how spread out it is. That spread is what buys the privacy.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-hpt-rdp" class="level2" data-number="38.6">
+<h2 data-number="38.6" class="anchored" data-anchor-id="sec-hpt-rdp"><span class="header-section-number">38.6</span> Rényi bounds for a random number of runs</h2>
+<section id="context-3" class="level3" data-number="38.6.1">
+<h3 data-number="38.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">38.6.1</span> Context</h3>
+<p>DP-SGD is not usefully <span class="math inline">\(\varepsilon\)</span>-DP for any small <span class="math inline">\(\varepsilon\)</span>; its guarantee is an RDP curve that converts to <span class="math inline">\((\varepsilon, \delta)\)</span>. Papernot &amp; Steinke (2022) extended random stopping to RDP and to a family of distributions for <span class="math inline">\(K\)</span>, which lets you choose between more runs and less privacy cost. What do their bounds say, and what do they cost on the running example?</p>
+</section>
+<section id="statement-3" class="level3" data-number="38.6.2">
+<h3 data-number="38.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">38.6.2</span> Statement</h3>
+<p><strong>The generic bound</strong> (Papernot &amp; Steinke 2022, Lemma 7). Let <span class="math inline">\(K\)</span> have generating function <span class="math inline">\(f\)</span>, and let <span class="math inline">\(A\)</span> release the best of <span class="math inline">\(K\)</span> independent runs of <span class="math inline">\(Q\)</span> (if <span class="math inline">\(K = 0\)</span>, an output that does not depend on the data). For neighbours with run distributions <span class="math inline">\(Q, Q'\)</span> and best-of distributions <span class="math inline">\(A, A'\)</span>, <span id="eq-hpt-generic"><span class="math display">\[D_\lambda(A\|A') \le D_\lambda(Q\|Q') + \frac{1}{\lambda - 1}\ln\Big[f'(q)^\lambda f'(q')^{1 - \lambda}\Big] \tag{38.10}\]</span></span> for some numbers <span class="math inline">\(q, q' \in [0, 1]\)</span> that are the probabilities of one and the same randomized test accepting a run’s output, on <span class="math inline">\(D\)</span> and on <span class="math inline">\(D'\)</span>.</p>
+<p><strong>Poisson</strong> (Theorem 6). If <span class="math inline">\(K\)</span> is Poisson with mean <span class="math inline">\(\mu\)</span>, and <span class="math inline">\(Q\)</span> is <span class="math inline">\((\lambda, \varepsilon(\lambda))\)</span>-RDP and <span class="math inline">\((\hat\varepsilon, \hat\delta)\)</span>-DP with <span class="math inline">\(e^{\hat\varepsilon} \le 1 + \frac{1}{\lambda - 1}\)</span>, then <span id="eq-hpt-poisson"><span class="math display">\[\varepsilon_A(\lambda) \le \varepsilon(\lambda) + \mu\hat\delta + \frac{\ln\mu}{\lambda - 1}. \tag{38.11}\]</span></span></p>
+<p><strong>Truncated negative binomial</strong> (Theorem 2). For <span class="math inline">\(\eta &gt; -1\)</span> and <span class="math inline">\(\gamma \in (0, 1)\)</span>, let <span class="math inline">\(K\)</span> on <span class="math inline">\(\{1, 2, \dots\}\)</span> have <span class="math inline">\(P[K = k] = \frac{(1 - \gamma)^k}{\gamma^{-\eta} - 1}\prod_{\ell = 0}^{k - 1}\frac{\ell + \eta}{\ell + 1}\)</span>, and for <span class="math inline">\(\eta = 0\)</span> the <strong>logarithmic distribution</strong> <span class="math inline">\(P[K = k] = \frac{(1 - \gamma)^k}{k\ln(1/\gamma)}\)</span>. The case <span class="math inline">\(\eta = 1\)</span> is the geometric distribution. If <span class="math inline">\(Q\)</span> is <span class="math inline">\((\lambda, \varepsilon(\lambda))\)</span>-RDP and <span class="math inline">\((\hat\lambda, \varepsilon(\hat\lambda))\)</span>-RDP, then <span id="eq-hpt-tnb"><span class="math display">\[\varepsilon_A(\lambda) \le \varepsilon(\lambda) + (1 + \eta)\Big(1 - \frac1{\hat\lambda}\Big)\varepsilon(\hat\lambda) + \frac{(1 + \eta)\ln(1/\gamma)}{\hat\lambda} + \frac{\ln\mathbb E[K]}{\lambda - 1}, \tag{38.12}\]</span></span> for every <span class="math inline">\(\hat\lambda \ge 1\)</span>, with <span class="math inline">\(\mathbb E[K] = \frac{\eta(1 - \gamma)}{\gamma(1 - \gamma^\eta)}\)</span> (<span class="math inline">\(\eta \neq 0\)</span>) or <span class="math inline">\(\frac{1/\gamma - 1}{\ln(1/\gamma)}\)</span> (<span class="math inline">\(\eta = 0\)</span>). For an <span class="math inline">\(\varepsilon\)</span>-DP run, letting both orders go to infinity gives <span class="math inline">\((2 + \eta)\varepsilon\)</span>-DP (their Corollary 3): <span class="math inline">\(3\varepsilon\)</span> for the geometric distribution, as in <a href="#sec-hpt-stopping" class="quarto-xref"><span>Section 38.5</span></a>, and <span class="math inline">\(2\varepsilon\)</span> for the logarithmic.</p>
+</section>
+<section id="derivation-3" class="level3" data-number="38.6.3">
+<h3 data-number="38.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">38.6.3</span> Derivation</h3>
+<p>The generic bound comes from writing the best-of distribution of Fact 3 as a derivative, then pulling the derivative out of the Rényi sum. The Poisson bound then follows in a few lines. Take outputs finite and <span class="math inline">\(P[K = 0] = 0\)</span> for simplicity (the paper handles the general case).</p>
+<ol type="1">
+<li><strong>The best-of probability is an average of <span class="math inline">\(f'\)</span>.</strong> By <a href="#eq-hpt-pgf" class="quarto-xref">Equation&nbsp;<span>38.4</span></a> and the fundamental theorem of calculus, <span class="math inline">\(A(y) = f(Q(\preceq y)) - f(Q(\prec y)) = \int_{Q(\prec y)}^{Q(\preceq y)}f'(x)\,dx\)</span>. The interval has length <span class="math inline">\(Q(y)\)</span>, so <span class="math inline">\(A(y) = Q(y)\,c(y)\)</span>, where <span class="math inline">\(c(y)\)</span> is the average of <span class="math inline">\(f'\)</span> over that interval, the expectation of <span class="math inline">\(f'(X)\)</span> for <span class="math inline">\(X\)</span> uniform on it. Likewise <span class="math inline">\(A'(y) = Q'(y)\,c'(y)\)</span>.</li>
+<li><strong>Put it in the Rényi sum.</strong> <span class="math inline">\(e^{(\lambda - 1)D_\lambda(A\|A')} = \sum_yA(y)^\lambda A'(y)^{1 - \lambda} = \sum_yQ(y)^\lambda Q'(y)^{1 - \lambda}\,c(y)^\lambda c'(y)^{1 - \lambda}\)</span>.</li>
+<li><strong>Bound the averages by a worst case.</strong> Couple <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> at the same relative position <span class="math inline">\(t \in [0, 1]\)</span> in their intervals. The function <span class="math inline">\((u, v) \mapsto u^\lambda v^{1 - \lambda}\)</span> is jointly convex for <span class="math inline">\(\lambda &gt; 1\)</span>, so by Jensen’s inequality <span class="math inline">\(c(y)^\lambda c'(y)^{1 - \lambda} \le \mathbb E[f'(X)^\lambda f'(X')^{1 - \lambda}]\)</span>, which is at most the largest value of <span class="math inline">\(f'(q)^\lambda f'(q')^{1 - \lambda}\)</span> over <span class="math inline">\(t\)</span>, with <span class="math inline">\(q = Q(\prec y) + tQ(y)\)</span> and <span class="math inline">\(q' = Q'(\prec y) + tQ'(y)\)</span>.</li>
+<li><strong>Pull the worst case out of the sum.</strong> Bounding every <span class="math inline">\(c^\lambda c'^{1 - \lambda}\)</span> by the largest one over <span class="math inline">\(y\)</span> and <span class="math inline">\(t\)</span> leaves <span class="math inline">\(\sum_yQ(y)^\lambda Q'(y)^{1 - \lambda} = e^{(\lambda - 1)D_\lambda(Q\|Q')}\)</span> times that maximum. Taking logarithms and dividing by <span class="math inline">\(\lambda - 1\)</span> gives <a href="#eq-hpt-generic" class="quarto-xref">Equation&nbsp;<span>38.10</span></a>.</li>
+<li><strong><span class="math inline">\(q\)</span> and <span class="math inline">\(q'\)</span> come from one test.</strong> The test “accept an output worse than <span class="math inline">\(y\)</span>; accept <span class="math inline">\(y\)</span> itself with probability <span class="math inline">\(t\)</span>; reject anything better” accepts with probability <span class="math inline">\(q\)</span> on <span class="math inline">\(Q\)</span> and <span class="math inline">\(q'\)</span> on <span class="math inline">\(Q'\)</span>. Any privacy guarantee of <span class="math inline">\(Q\)</span> therefore constrains the pair, by post-processing (Fact 2).</li>
+<li><strong>Poisson: compute <span class="math inline">\(f'\)</span>.</strong> <span class="math inline">\(f(x) = e^{\mu(x - 1)}\)</span>, so <span class="math inline">\(f'(x) = \mu e^{\mu(x - 1)}\)</span> and <span class="math inline">\(\ln[f'(q)^\lambda f'(q')^{1 - \lambda}] = \ln\mu + \mu\big[\lambda(q - 1) + (1 - \lambda)(q' - 1)\big] = \ln\mu + \mu\big[(\lambda - 1)(1 - q') - \lambda(1 - q)\big]\)</span>.</li>
+<li><strong>Use <span class="math inline">\((\hat\varepsilon, \hat\delta)\)</span>-DP on the rejection event.</strong> <span class="math inline">\(1 - q'\)</span> and <span class="math inline">\(1 - q\)</span> are the probabilities that the test of step 5 rejects, on <span class="math inline">\(D'\)</span> and <span class="math inline">\(D\)</span>, so <span class="math inline">\(1 - q' \le e^{\hat\varepsilon}(1 - q) + \hat\delta\)</span>. The bracket is at most <span class="math inline">\((1 - q)\big[(\lambda - 1)e^{\hat\varepsilon} - \lambda\big] + (\lambda - 1)\hat\delta\)</span>.</li>
+<li><strong>The condition on <span class="math inline">\(\hat\varepsilon\)</span> kills the first term.</strong> <span class="math inline">\(e^{\hat\varepsilon} \le 1 + \frac{1}{\lambda - 1}\)</span> is the same as <span class="math inline">\((\lambda - 1)e^{\hat\varepsilon} \le \lambda\)</span>, so the first term is not positive and the bracket is at most <span class="math inline">\((\lambda - 1)\hat\delta\)</span>. Divide by <span class="math inline">\(\lambda - 1\)</span> and add <span class="math inline">\(D_\lambda(Q\|Q') \le \varepsilon(\lambda)\)</span>: that is <a href="#eq-hpt-poisson" class="quarto-xref">Equation&nbsp;<span>38.11</span></a>.</li>
+<li><strong>Truncated negative binomial.</strong> Here <span class="math inline">\(f'(x) = \gamma^{\eta + 1}\mathbb E[K]\,(1 - (1 - \gamma)x)^{-\eta - 1}\)</span>. The same steps apply, except that step 7 bounds the probabilities <span class="math inline">\(1 - q\)</span> and <span class="math inline">\(1 - q'\)</span> through the run’s RDP guarantee at a second order <span class="math inline">\(\hat\lambda\)</span>, again by post-processing, which gives <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a>; Papernot &amp; Steinke (2022, Appendix B.2) carry out the algebra.</li>
+</ol>
+</section>
+<section id="interpretation-3" class="level3" data-number="38.6.4">
+<h3 data-number="38.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">38.6.4</span> Interpretation</h3>
+<p><strong>What each term pays for.</strong> In <a href="#eq-hpt-poisson" class="quarto-xref">Equation&nbsp;<span>38.11</span></a> and <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a> the first term, <span class="math inline">\(\varepsilon(\lambda)\)</span>, is one run: you never pay less than one run, since the release contains a run. The last term, <span class="math inline">\(\ln\mathbb E[K]/(\lambda - 1)\)</span>, is the price of the number of runs, and it is logarithmic: multiplying the expected number of runs by 10 adds <span class="math inline">\(\ln 10/(\lambda - 1)\)</span>. The middle terms are the price of the tail of <span class="math inline">\(K\)</span>: how much the distribution of <span class="math inline">\(K\)</span> lets the adversary tell “many runs, all bad” from “few runs”. For the truncated negative binomial it is a constant times the run’s own privacy at another order, so the total is a constant multiple of one run plus the logarithm. For the Poisson distribution it is <span class="math inline">\(\mu\hat\delta\)</span>, which is linear in <span class="math inline">\(\mu\)</span> but multiplied by the run’s <span class="math inline">\(\hat\delta\)</span> at a small <span class="math inline">\(\hat\varepsilon\)</span>, and so is small only when one run is very private.</p>
+<p><strong>Choosing <span class="math inline">\(\eta\)</span>: privacy against the shape of <span class="math inline">\(K\)</span>.</strong> Smaller <span class="math inline">\(\eta\)</span> means a smaller multiple, <span class="math inline">\((1 + \eta)\)</span>, of the second term, so better privacy; the logarithmic distribution (<span class="math inline">\(\eta = 0\)</span>) is the best of the family that keeps <span class="math inline">\(K \ge 1\)</span> with a finite mean. But smaller <span class="math inline">\(\eta\)</span> also means a more skewed distribution of <span class="math inline">\(K\)</span>. With mean 10, the logarithmic distribution has <span class="math inline">\(\gamma = 0.02692\)</span> and stops after a single run with probability 0.2692, against 0.1000 for the geometric (<span class="math inline">\(\eta = 1\)</span>) and 0.1562 for <span class="math inline">\(\eta = 0.5\)</span>. The Poisson distribution is the limit <span class="math inline">\(\eta \to \infty\)</span> at a fixed mean, and is concentrated near its mean: with mean 10, <span class="math inline">\(P[K \le 1] = 4.99 \times 10^{-4}\)</span>. <a href="#fig-hpt-k" class="quarto-xref">Figure&nbsp;<span>38.3</span></a> shows the four distributions with mean 8. A skewed <span class="math inline">\(K\)</span> often runs few candidates, which <a href="#sec-hpt-run" class="quarto-xref"><span>Section 38.8</span></a> shows costs accuracy.</p>
+<p><strong>How tight are the bounds?</strong> They are upper bounds for every run with the given curve, so they can be loose for a particular one. On randomized response with <span class="math inline">\(\varepsilon = 0.5\)</span> and a logarithmic number of runs with mean 10, <a href="#tbl-hpt-rr-check" class="quarto-xref">Table&nbsp;<span>38.4</span></a> compares the exact Rényi divergence of the release with <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a> (best <span class="math inline">\(\hat\lambda\)</span>) and with composition of 10 runs. At order 2, <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a> is worse than composition, because its constant terms dominate at small orders. At orders 5 and 20, where conversions to <span class="math inline">\((\varepsilon, \delta)\)</span> usually land, it is two to four times below composition and two to three times above the exact value.</p>
+<div id="tbl-hpt-rr-check" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-rr-check-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.4: Randomized response with <span class="math inline">\(\varepsilon = 0.5\)</span>, best of a logarithmic number of runs with mean 10: the exact Rényi divergence against the bound and against composition.
+</figcaption>
+<div aria-describedby="tbl-hpt-rr-check-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Order <span class="math inline">\(\lambda\)</span></th>
+<th>Exact <span class="math inline">\(D_\lambda\)</span></th>
+<th>Bound <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a></th>
+<th>Composition of 10 runs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>0.1438</td>
+<td>3.0561</td>
+<td>2.2734</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>0.3912</td>
+<td>1.4860</td>
+<td>3.8424</td>
+</tr>
+<tr class="odd">
+<td>20</td>
+<td>0.6379</td>
+<td>1.1224</td>
+<td>4.7505</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>For the Poisson bound on the same mechanism with mean 10, randomized response is <span class="math inline">\(\hat\delta = 0\)</span> at <span class="math inline">\(\hat\varepsilon = 0.5\)</span>, so <a href="#eq-hpt-poisson" class="quarto-xref">Equation&nbsp;<span>38.11</span></a> applies at the order where <span class="math inline">\(e^{0.5} = 1 + 1/(\lambda - 1)\)</span>, <span class="math inline">\(\lambda = 2.5415\)</span>. There the exact divergence is 0.4421, the bound 1.7654 and composition 2.7165.</p>
+<p><strong>What the theorems do not cover.</strong> Each run must draw its candidate independently from a fixed distribution, typically uniform on the grid: this is random search. Adaptive methods that pick the next candidate from the scores so far, such as Bayesian optimization, are not covered and need adaptive composition (<a href="../part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition</a>). The score must be part of each run’s private output: if it is computed on private validation data, it must be private too (<a href="#sec-hpt-select" class="quarto-xref"><span>Section 38.7</span></a>). And for zero-concentrated DP runs, whose curve is a line <span class="math inline">\(\varepsilon(\lambda) = \rho\lambda\)</span>, the paper’s Corollary 4 gives the closed form <span class="math inline">\(\varepsilon_A(\lambda) \le 2\sqrt{\rho\ln\mathbb E[K]} + 2(1 + \eta)\sqrt{\rho\ln(1/\gamma)} - \eta\rho\)</span> for orders up to <span class="math inline">\(1 + \sqrt{\ln\mathbb E[K]/\rho}\)</span>, when <span class="math inline">\(\rho \le \ln(1/\gamma)\)</span>: the overhead grows like the square root of the logarithm of the expected number of runs.</p>
+<div id="fig-hpt-overhead" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hpt-overhead-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hpt_overhead.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hpt-overhead-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.2: The <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of releasing the best of several DP-SGD runs of the running example (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps, one run <span class="math inline">\(\varepsilon = 6.71\)</span>), against the expected number of runs, by composition, by the Poisson bound and by the truncated negative binomial bound with <span class="math inline">\(\eta = 1\)</span> (geometric), <span class="math inline">\(0.5\)</span> and <span class="math inline">\(0\)</span> (logarithmic). Both axes are logarithmic.
+</figcaption>
+</figure>
+</div>
+<div id="fig-hpt-k" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hpt-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hpt_k_distributions.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hpt-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.3: Four distributions of the number of runs, each with mean 8: Poisson, geometric, logarithmic and a fixed 8. The logarithmic distribution stops after one run with probability 0.29.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-running-example" class="level3" data-number="38.6.5">
+<h3 data-number="38.6.5" class="anchored" data-anchor-id="example-the-running-example"><span class="header-section-number">38.6.5</span> Example: the running example</h3>
+<p>The script evaluates <a href="#eq-hpt-poisson" class="quarto-xref">Equation&nbsp;<span>38.11</span></a> and <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a> on the RDP curve of one DP-SGD run of the running example, at every order of the accountant, takes the best <span class="math inline">\(\hat\lambda\)</span> for <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a> and, for <a href="#eq-hpt-poisson" class="quarto-xref">Equation&nbsp;<span>38.11</span></a>, the best <span class="math inline">\(\hat\delta\)</span> that the curve gives at <span class="math inline">\(\hat\varepsilon = \ln(1 + 1/(\lambda - 1))\)</span> by the conversion of Fact 1, uses that a bound at a larger order holds at a smaller one, and converts with <a href="#eq-hpt-convert" class="quarto-xref">Equation&nbsp;<span>38.2</span></a>. <a href="#tbl-hpt-overhead" class="quarto-xref">Table&nbsp;<span>38.5</span></a> and <a href="#fig-hpt-overhead" class="quarto-xref">Figure&nbsp;<span>38.2</span></a> show the result.</p>
+<div id="tbl-hpt-overhead" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-overhead-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.5: The <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of tuning with DP-SGD runs of the running example (one run: <span class="math inline">\(\varepsilon = 6.71\)</span>), by the number of runs and how it is chosen.
+</figcaption>
+<div aria-describedby="tbl-hpt-overhead-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Expected runs</th>
+<th>3</th>
+<th>10</th>
+<th>30</th>
+<th>100</th>
+<th>1,000</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Composition</td>
+<td>12.73</td>
+<td>27.23</td>
+<td>58.25</td>
+<td>145.17</td>
+<td>1035.93</td>
+</tr>
+<tr class="even">
+<td>Poisson</td>
+<td>8.93</td>
+<td>13.67</td>
+<td>26.43</td>
+<td>67.77</td>
+<td>302.57</td>
+</tr>
+<tr class="odd">
+<td>Geometric (<span class="math inline">\(\eta = 1\)</span>)</td>
+<td>9.22</td>
+<td>11.31</td>
+<td>12.85</td>
+<td>14.32</td>
+<td>16.76</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\eta = 0.5\)</span></td>
+<td>9.03</td>
+<td>10.75</td>
+<td>11.98</td>
+<td>13.15</td>
+<td>15.09</td>
+</tr>
+<tr class="odd">
+<td>Logarithmic (<span class="math inline">\(\eta = 0\)</span>)</td>
+<td>8.75</td>
+<td>10.08</td>
+<td>11.04</td>
+<td>11.95</td>
+<td>13.46</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>For 10 runs in expectation, the logarithmic distribution costs 10.08, 1.5 times one run, against 27.23 for composition. From 10 to 1,000 runs it adds only 3.38 more. The Poisson bound starts well, 8.93 for 3 runs, but grows nearly linearly, because one run at <span class="math inline">\(\varepsilon = 6.71\)</span> is far from private enough to make <span class="math inline">\(\mu\hat\delta\)</span> small: at the orders the conversion uses, <span class="math inline">\(\hat\varepsilon\)</span> must be small and the run’s <span class="math inline">\(\hat\delta\)</span> there is not. At a smaller per-run budget the Poisson bound does much better, as the experiment of <a href="#sec-hpt-run" class="quarto-xref"><span>Section 38.8</span></a> shows.</p>
+</section>
+<section id="check-yourself-3" class="level3" data-number="38.6.6">
+<h3 data-number="38.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">38.6.6</span> Check yourself</h3>
+<ul>
+<li>In <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a>, why can’t the cost fall below one run, <span class="math inline">\(\varepsilon(\lambda)\)</span>, however few runs are expected? <em>(The release is the output of one run. If <span class="math inline">\(K = 1\)</span> it is exactly one run, so no bound can be below one run’s divergence.)</em></li>
+<li>The Poisson distribution has <span class="math inline">\(P[K = 0] = e^{-\mu}\)</span>. What must the algorithm release then, and why does it not matter much? <em>(Something that does not depend on the data, such as the untrained initialization. With <span class="math inline">\(\mu = 8\)</span> this happens with probability <span class="math inline">\(3.35 \times 10^{-4}\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-hpt-select" class="level2" data-number="38.7">
+<h2 data-number="38.7" class="anchored" data-anchor-id="sec-hpt-select"><span class="header-section-number">38.7</span> Selecting by a noisy validation score</h2>
+<section id="context-4" class="level3" data-number="38.7.1">
+<h3 data-number="38.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">38.7.1</span> Context</h3>
+<p>The methods so far treat each run as a black box that outputs a model and its score. A different situation is common too: the candidates are already fixed, for example public pretrained checkpoints or models whose training is accounted for separately, and only the choice among them uses private data, a held-out validation set. That is a <strong>selection</strong> problem, and <a href="../part03-dp-foundations/05-selection.html">Selection</a> solved it with the exponential mechanism and report-noisy-max. How do those tools apply to tuning, and what do they leave out?</p>
+</section>
+<section id="statement-4" class="level3" data-number="38.7.2">
+<h3 data-number="38.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">38.7.2</span> Statement</h3>
+<p>Let the score of candidate <span class="math inline">\(r\)</span> be its number of correct predictions <span class="math inline">\(u(r)\)</span> on a private validation set of <span class="math inline">\(m\)</span> records. Adding or removing one validation record changes every count by at most <span class="math inline">\(\Delta = 1\)</span>. The <strong>exponential mechanism</strong> picks candidate <span class="math inline">\(r\)</span> with probability proportional to <span class="math inline">\(e^{\varepsilon u(r)/(2\Delta)}\)</span>; it is <span class="math inline">\(\varepsilon\)</span>-DP for the validation records, and its expected gap to the best count among <span class="math inline">\(k\)</span> candidates is at most <span class="math inline">\(\frac{2\Delta}{\varepsilon}(\ln k + 1)\)</span>, an accuracy gap of <span class="math inline">\(\frac{2}{\varepsilon m}(\ln k + 1)\)</span>. Report-noisy-max, which adds Laplace or Gumbel noise to each count and releases the index of the largest, has the same guarantee (with Gumbel noise it is the same mechanism).</p>
+<p>If the candidates were trained on the private training set, with runs whose RDP curves are <span class="math inline">\(\varepsilon_1(\lambda), \dots, \varepsilon_k(\lambda)\)</span>, and the validation set is disjoint from it, releasing the selected model costs <span id="eq-hpt-select"><span class="math display">\[\varepsilon_A(\lambda) \le \max\Big(\sum_{j = 1}^k\varepsilon_j(\lambda),\ \varepsilon_{\text{sel}}(\lambda)\Big), \tag{38.13}\]</span></span> where <span class="math inline">\(\varepsilon_{\text{sel}}\)</span> is the selection mechanism’s curve in the validation records.</p>
+</section>
+<section id="derivation-4" class="level3" data-number="38.7.3">
+<h3 data-number="38.7.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">38.7.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>The exponential mechanism.</strong> One record changes each count by at most 1, so each weight <span class="math inline">\(e^{\varepsilon u(r)/2}\)</span> by at most <span class="math inline">\(e^{\varepsilon/2}\)</span> and the normalizing sum by at most <span class="math inline">\(e^{\varepsilon/2}\)</span>; the ratio of probabilities is at most <span class="math inline">\(e^\varepsilon\)</span> (<a href="../part03-dp-foundations/05-selection.html#sec-sel-exp">Selection</a>). Candidates more than <span class="math inline">\(c\)</span> below the best have weight at most <span class="math inline">\(e^{-\varepsilon c/2}\)</span> times the best’s, so the probability of picking one is at most <span class="math inline">\(ke^{-\varepsilon c/2}\)</span>, and integrating the tail gives the expected gap (<a href="../part03-dp-foundations/05-selection.html#sec-sel-utility">Utility of the exponential mechanism</a>).</li>
+<li><strong>Training records.</strong> For a training record, the validation set and the selection noise are fixed and independent of it. The released model and index are a post-processing of the <span class="math inline">\(k\)</span> trained models (Fact 2), which compose (Fact 1): <span class="math inline">\(\sum_j\varepsilon_j(\lambda)\)</span>.</li>
+<li><strong>Validation records.</strong> For a validation record, the trained models do not depend on it, and the release is the selection mechanism applied to fixed candidates: <span class="math inline">\(\varepsilon_{\text{sel}}(\lambda)\)</span>.</li>
+<li><strong>Combine.</strong> Each record is in one of the two sets, so Fact 4 gives the maximum.</li>
+</ol>
+</section>
+<section id="interpretation-4" class="level3" data-number="38.7.4">
+<h3 data-number="38.7.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">38.7.4</span> Interpretation</h3>
+<p><strong>Selection is cheap; training is not.</strong> On a validation set of thousands of records, selecting privately costs almost nothing: the scores differ by tens of correct predictions and the mechanism’s temperature, <span class="math inline">\(2/\varepsilon\)</span>, is a few. The expensive part of tuning is that each candidate was <em>trained</em> on private data, and <a href="#eq-hpt-select" class="quarto-xref">Equation&nbsp;<span>38.13</span></a> still charges for all <span class="math inline">\(k\)</span> trainings by composition. The exponential mechanism has nothing to say about it, because a trained model is not a low-sensitivity score: Liu &amp; Talwar’s starting point was exactly that the candidates’ quality is only known through private, randomized runs.</p>
+<p><strong>When the classical tools are the right ones.</strong> If the candidates do not depend on the private training data, the training term in <a href="#eq-hpt-select" class="quarto-xref">Equation&nbsp;<span>38.13</span></a> vanishes. Choosing which public checkpoint to fine-tune, which public model to deploy, or which hyperparameters to use from a list validated elsewhere, by their accuracy on a private validation set, is a pure selection problem, and the exponential mechanism or report-noisy-max is the tool, with <span class="math inline">\(\ln k\)</span> utility cost and no linear privacy cost.</p>
+<p><strong>The validation set needs protection under every method.</strong> The best-of methods of <a href="#sec-hpt-stopping" class="quarto-xref"><span>Section 38.5</span></a> and <a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 38.6</span></a> assume that the score is part of each run’s private output. If it is an exact validation accuracy, the validation records are not protected at all: the choice and the released score depend on them with no noise. Adding Gaussian noise of standard deviation <span class="math inline">\(\sigma_{\text{val}}\)</span> to each validation count makes each run’s score a Gaussian mechanism with RDP curve <span class="math inline">\(\lambda/(2\sigma_{\text{val}}^2)\)</span>, and by Fact 4 a run’s curve is the larger of its training curve and this one.</p>
+<p><strong>A cheaper score is not a cheaper run.</strong> Each noisy count adds to the cost in validation records, but by Fact 4 it adds nothing as long as it stays below the training curve at every order. With <span class="math inline">\(\sigma_{\text{val}} = 20\)</span> correct predictions, one noisy count alone has <span class="math inline">\(\varepsilon = 0.182\)</span> and eight composed have <span class="math inline">\(0.546\)</span>, well below the training runs in the example below.</p>
+</section>
+<section id="example-choosing-a-step-size-on-5000-validation-records" class="level3" data-number="38.7.5">
+<h3 data-number="38.7.5" class="anchored" data-anchor-id="example-choosing-a-step-size-on-5000-validation-records"><span class="header-section-number">38.7.5</span> Example: choosing a step size on 5,000 validation records</h3>
+<p>In the experiment of <a href="#sec-hpt-run" class="quarto-xref"><span>Section 38.8</span></a>, eight DP-SGD runs at <span class="math inline">\(\sigma = 2.07\)</span>, with step sizes from 0.0625 to 8, get these counts out of <span class="math inline">\(m = 5{,}000\)</span>: 4,486, 4,604, 4,681, 4,694, 4,600, 4,470, 4,232 and 4,123. The best, step size 0.5, beats the second, 0.25, by 13 correct predictions. <a href="#tbl-hpt-em" class="quarto-xref">Table&nbsp;<span>38.6</span></a> selects among them with the exponential mechanism.</p>
+<div id="tbl-hpt-em" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-em-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.6: The exponential mechanism selecting among eight trained models by their correct predictions on 5,000 private validation records.
+</figcaption>
+<div aria-describedby="tbl-hpt-em-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon_{\text{sel}}\)</span></th>
+<th><span class="math inline">\(P[\text{best}]\)</span></th>
+<th>Expected gap (correct predictions)</th>
+<th>Accuracy gap</th>
+<th>Bound <span class="math inline">\(2(\ln 8 + 1)/\varepsilon_{\text{sel}}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.01</td>
+<td>0.2478</td>
+<td>87.62</td>
+<td>1.752%</td>
+<td>615.9</td>
+</tr>
+<tr class="even">
+<td>0.1</td>
+<td>0.6484</td>
+<td>5.61</td>
+<td>0.112%</td>
+<td>61.6</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>0.9985</td>
+<td>0.02</td>
+<td>0.000%</td>
+<td>6.2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>At <span class="math inline">\(\varepsilon_{\text{sel}} = 0.1\)</span> the selection costs about a tenth of a point of accuracy, and at 1 nothing measurable. The training costs much more: each run at <span class="math inline">\(\sigma = 2.07\)</span> and 1,000 steps has <span class="math inline">\(\varepsilon = 0.657\)</span>, and the eight together 1.994. Adding the eight noisy validation counts, run by run, changes nothing: the total stays at 1.994, because the counts’ curve is below the training curve at the orders that matter.</p>
+</section>
+<section id="check-yourself-4" class="level3" data-number="38.7.6">
+<h3 data-number="38.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">38.7.6</span> Check yourself</h3>
+<ul>
+<li>Why is the sensitivity of a count of correct predictions 1 under add/remove, while an accuracy has a sensitivity that depends on <span class="math inline">\(m\)</span>? <em>(Adding a record adds one prediction, which is right or wrong, so the count moves by at most 1. The accuracy is the count divided by the number of records, and both change; the count avoids dividing by a private number.)</em></li>
+<li>Fifty public checkpoints, a private validation set of 2,000 records and <span class="math inline">\(\varepsilon = 0.5\)</span>: what expected accuracy gap does the exponential mechanism guarantee? <em>(At most <span class="math inline">\(2(\ln 50 + 1)/(0.5 \times 2{,}000) = 0.0098\)</span>, about one point.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-hpt-run" class="level2" data-number="38.8">
+<h2 data-number="38.8" class="anchored" data-anchor-id="sec-hpt-run"><span class="header-section-number">38.8</span> Tuning the running example</h2>
+<section id="context-5" class="level3" data-number="38.8.1">
+<h3 data-number="38.8.1" class="anchored" data-anchor-id="context-5"><span class="header-section-number">38.8.1</span> Context</h3>
+<p>Put the strategies side by side on the running example: tune the step size of DP-SGD over a grid of eight values, at the same total budget, and compare what each strategy delivers. The budget must cover the training runs and the validation scores.</p>
+</section>
+<section id="statement-5" class="level3" data-number="38.8.2">
+<h3 data-number="38.8.2" class="anchored" data-anchor-id="statement-5"><span class="header-section-number">38.8.2</span> Statement</h3>
+<p>Each run trains the running example’s network with DP-SGD (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(C = 0.5\)</span>) for <strong>1,000 steps instead of the 10,000 of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a></strong>, to keep the script’s runtime at a few minutes, with one of eight step sizes <span class="math inline">\(\eta \in \{0.0625, 0.125, \dots, 8\}\)</span>. The first 5,000 of the 20,000 held-out records are a private validation set, and the other 15,000 the test set. A run’s score is its number of correct validation predictions plus Gaussian noise with <span class="math inline">\(\sigma_{\text{val}} = 20\)</span>. The total budget is <span class="math inline">\(\varepsilon = 2\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, and each strategy chooses its noise multiplier <span class="math inline">\(\sigma\)</span> so that the whole procedure meets it, by the accountant of <a href="#sec-hpt-composition" class="quarto-xref"><span>Section 38.4</span></a> or <a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 38.6</span></a>.</p>
+<div id="tbl-hpt-run" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.7: Tuning the step size of the running example (1,000 steps per run) at a total budget of <span class="math inline">\(\varepsilon = 2\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>. Test accuracy of the released model, mean and standard deviation over repetitions of the whole procedure, estimated by resampling from three runs per step size; runs on private data is the average number of training runs.
+</figcaption>
+<div aria-describedby="tbl-hpt-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Strategy</th>
+<th><span class="math inline">\(\sigma\)</span></th>
+<th><span class="math inline">\(\varepsilon\)</span> of one run</th>
+<th>Total <span class="math inline">\(\varepsilon\)</span></th>
+<th>Test accuracy</th>
+<th>Runs on private data</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>No tuning: step size 0.5 from <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a></td>
+<td>1.03</td>
+<td>1.97</td>
+<td>1.97</td>
+<td><span class="math inline">\(0.9509 \pm 0.0015\)</span></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>Grid of 8, single-run <span class="math inline">\(\varepsilon\)</span> reported</td>
+<td>1.03</td>
+<td>1.97</td>
+<td>5.60</td>
+<td><span class="math inline">\(0.9479 \pm 0.0030\)</span></td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<td>Tune on proxy data, then one run</td>
+<td>1.03</td>
+<td>1.97</td>
+<td>1.97</td>
+<td><span class="math inline">\(0.9487 \pm 0.0025\)</span></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>Grid of 8, composition</td>
+<td>2.07</td>
+<td>0.66</td>
+<td>1.99</td>
+<td><span class="math inline">\(0.9430 \pm 0.0022\)</span></td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<td>Random search, Poisson, mean 8</td>
+<td>1.53</td>
+<td>0.98</td>
+<td>1.99</td>
+<td><span class="math inline">\(0.9433 \pm 0.0060\)</span></td>
+<td>8.01</td>
+</tr>
+<tr class="even">
+<td>Random search, logarithmic, mean 8</td>
+<td>1.36</td>
+<td>1.17</td>
+<td>2.00</td>
+<td><span class="math inline">\(0.9372 \pm 0.0200\)</span></td>
+<td>7.95</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="derivation-5" class="level3" data-number="38.8.3">
+<h3 data-number="38.8.3" class="anchored" data-anchor-id="derivation-5"><span class="header-section-number">38.8.3</span> Derivation</h3>
+<p>The rows are computed as follows; each uses the facts and results named.</p>
+<ol type="1">
+<li><strong>No tuning.</strong> One run with the step size the previous chapter used, at the noise multiplier for <span class="math inline">\(\varepsilon = 2\)</span>, <span class="math inline">\(\sigma = 1.03\)</span> (the accountant rounds up, so the run costs 1.97).</li>
+<li><strong>The reporting bug.</strong> The same eight runs at <span class="math inline">\(\sigma = 1.03\)</span>, one per step size, best noisy validation count released, and the single-run <span class="math inline">\(\varepsilon\)</span> reported. Its honest cost is the composition of eight runs, 5.60 (<a href="#eq-hpt-compose" class="quarto-xref">Equation&nbsp;<span>38.6</span></a>).</li>
+<li><strong>Proxy data.</strong> A second task built the same way with a different random teacher stands in for public data from a related distribution. The grid is run there, the best step size by validation on the proxy task is kept, and one private run is trained with it at <span class="math inline">\(\sigma = 1.03\)</span>. The proxy runs touch no private data, so they cost nothing (Fact 2).</li>
+<li><strong>Composition.</strong> The eight runs at the <span class="math inline">\(\sigma\)</span> for which eight runs together cost 2, which is 2.07 (<a href="#eq-hpt-compose" class="quarto-xref">Equation&nbsp;<span>38.6</span></a> with Fact 4 for the noisy counts).</li>
+<li><strong>Random search.</strong> <span class="math inline">\(K\)</span> runs, each with a step size drawn uniformly from the grid, with <span class="math inline">\(K\)</span> Poisson or logarithmic with mean 8, <span class="math inline">\(\sigma\)</span> chosen by <a href="#eq-hpt-poisson" class="quarto-xref">Equation&nbsp;<span>38.11</span></a> or <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a> so that the procedure costs 2.</li>
+<li><strong>Estimating accuracy.</strong> Training is the slow part, so the script trains three independent runs per step size for each <span class="math inline">\(\sigma\)</span>, and repeats each tuning procedure 4,000 times by drawing runs from this pool, with fresh validation noise and, for random search, a fresh <span class="math inline">\(K\)</span>. Drawing with replacement from three runs understates the variety of a real search a little.</li>
+</ol>
+</section>
+<section id="interpretation-5" class="level3" data-number="38.8.4">
+<h3 data-number="38.8.4" class="anchored" data-anchor-id="interpretation-5"><span class="header-section-number">38.8.4</span> Interpretation</h3>
+<p><strong>The honest strategies cost about a point of accuracy here, and the bug hides it.</strong> At the same total budget, composition reaches 0.9430 and Poisson random search 0.9433, against 0.9509 without tuning. Reporting the single-run budget makes the grid search look free: it claims 1.97 and spends at most 5.60.</p>
+<p><strong>Tuning did not pay on this task, for an instructive reason.</strong> Even with the budget misreported, the grid search, 0.9479, is below the untuned step size of 0.5, 0.9509. The step size 0.5 is the best of the grid here, and the noisy validation count sometimes picks a neighbour. It is the best because <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> chose its running example’s settings with knowledge of this very task, a leak of exactly the kind this chapter is about, which no accountant in the book has charged for. On a new task, you would not have such a guess, and a search would be needed.</p>
+<p><strong>Random search with a Poisson number of runs beats composition only slightly here.</strong> At a total of <span class="math inline">\(\varepsilon = 2\)</span> and a mean of 8 runs, Poisson random search allows <span class="math inline">\(\sigma = 1.53\)</span> instead of 2.07, each run costing 0.98 instead of 0.66. But it tries a given step size with probability only <span class="math inline">\(1 - e^{-1}\)</span>, since a candidate is missed with probability 0.3679, and its accuracy varies more from one search to the next, 0.0060 against 0.0022. The two effects roughly cancel at this small grid. With more candidates, <a href="#tbl-hpt-overhead" class="quarto-xref">Table&nbsp;<span>38.5</span></a> says the gap in <span class="math inline">\(\sigma\)</span> grows.</p>
+<p><strong>The logarithmic distribution has the cheapest bound and the worst search.</strong> It allows the least noise of the honest strategies, <span class="math inline">\(\sigma = 1.36\)</span>, but with mean 8 it stops after a single run with probability 0.2907, and then releases a random step size. That is why its accuracy is lowest and most variable, <span class="math inline">\(0.9372 \pm 0.0200\)</span>. Papernot &amp; Steinke report the same trade-off, and found the Poisson distribution best in their own small search. <a href="#fig-hpt-accuracy" class="quarto-xref">Figure&nbsp;<span>38.4</span></a> repeats the comparison at <span class="math inline">\(\varepsilon = 1\)</span> and 4 (one run per step size, so those points are noisier).</p>
+<p><strong>Tuning on proxy data is nearly free, when proxy data exist.</strong> The proxy task has a different teacher, so its best step size is not always the private task’s, and the released model reaches 0.9487 for a total cost of one private run. Its quality depends on how close the proxy is.</p>
+<div id="fig-hpt-accuracy" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hpt-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hpt_accuracy.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hpt-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;38.4: Test accuracy of the model released by each tuning strategy against the total <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> it costs (1,000 DP-SGD steps per run). The red dashed line places the grid search at the single-run <span class="math inline">\(\varepsilon\)</span> that the reporting bug claims, and the arrows move each point to its honest cost by composition. Points at <span class="math inline">\(\varepsilon = 2\)</span> use three runs per step size; those at 1 and 4 one run.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-what-the-bug-changes-in-a-papers-table" class="level3" data-number="38.8.5">
+<h3 data-number="38.8.5" class="anchored" data-anchor-id="example-what-the-bug-changes-in-a-papers-table"><span class="header-section-number">38.8.5</span> Example: what the bug changes in a paper’s table</h3>
+<p>A paper reports “test accuracy 0.948 at <span class="math inline">\(\varepsilon = 1.97\)</span>” for a model chosen from eight step sizes. A reader comparing it with a paper that reports 0.943 at <span class="math inline">\(\varepsilon = 1.99\)</span> after an honest grid search concludes that the first method is better at the same budget. In <a href="#tbl-hpt-run" class="quarto-xref">Table&nbsp;<span>38.7</span></a> both rows are the same algorithm; the difference is the accounting. At its honest cost of 5.60, the first row should be compared with other methods at <span class="math inline">\(\varepsilon = 5.60\)</span>, not at 1.97; <a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-run">DP-SGD</a> shows how much accuracy a budget that large buys.</p>
+</section>
+<section id="check-yourself-5" class="level3" data-number="38.8.6">
+<h3 data-number="38.8.6" class="anchored" data-anchor-id="check-yourself-5"><span class="header-section-number">38.8.6</span> Check yourself</h3>
+<ul>
+<li>Why does the composition row use <span class="math inline">\(\sigma = 2.07\)</span> while the logarithmic row can use 1.36, both at a total of 2? <em>(Composition charges eight full runs; <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a> charges one run plus a constant multiple of one run at another order plus <span class="math inline">\(\ln 8/(\lambda - 1)\)</span>, which is less than seven more runs.)</em></li>
+<li>The bootstrap draws runs with replacement from three per step size. Which strategy’s accuracy does this distort most? <em>(Those that run the same step size many times, random search with large <span class="math inline">\(K\)</span>: repeated draws of the same three runs make the best of many runs look less good than independent runs would. With a mean of 8 runs over 8 step sizes, the effect is small.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-hpt-practice" class="level2" data-number="38.9">
+<h2 data-number="38.9" class="anchored" data-anchor-id="sec-hpt-practice"><span class="header-section-number">38.9</span> What to do and what to report</h2>
+<section id="context-6" class="level3" data-number="38.9.1">
+<h3 data-number="38.9.1" class="anchored" data-anchor-id="context-6"><span class="header-section-number">38.9.1</span> Context</h3>
+<p>The results of this chapter turn into a short procedure. What should a team training a private model actually do about hyperparameters, and what must a reported <span class="math inline">\(\varepsilon\)</span> cover for a reader to rely on it?</p>
+</section>
+<section id="statement-6" class="level3" data-number="38.9.2">
+<h3 data-number="38.9.2" class="anchored" data-anchor-id="statement-6"><span class="header-section-number">38.9.2</span> Statement</h3>
+<ol type="1">
+<li><strong>Spend private runs only where you must.</strong> Tune on public data or on proxy data from a related distribution when it exists. Reuse hyperparameters that worked on similar tasks. Shrink the search: <a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-clipping">DP-SGD</a> showed that below the typical gradient norm only the product of step size and clipping norm matters, so one of the two need not be searched.</li>
+<li><strong>Fix the search before touching the private data.</strong> Write down the candidate set, the distribution of the number of runs, the score and the validation set.</li>
+<li><strong>Make the score private.</strong> Use a held-out validation set and a noisy count, or spend part of the budget on a private score.</li>
+<li><strong>Account for the whole search.</strong> For a few candidates, compose. For more, run random search with a random number of runs and use <a href="#eq-hpt-poisson" class="quarto-xref">Equation&nbsp;<span>38.11</span></a> (small per-run budget, moderate number of runs) or <a href="#eq-hpt-tnb" class="quarto-xref">Equation&nbsp;<span>38.12</span></a> (many runs). Account for every run on the private data, including runs that crashed, runs for debugging, and evaluations used for early stopping.</li>
+<li><strong>Report both numbers.</strong> The <span class="math inline">\(\varepsilon\)</span> of the released run, and the <span class="math inline">\(\varepsilon\)</span> of the whole procedure with how it was computed: the candidate set, the distribution of <span class="math inline">\(K\)</span>, the accountant, <span class="math inline">\(\delta\)</span> and the neighbouring relation.</li>
+</ol>
+</section>
+<section id="derivation-6" class="level3" data-number="38.9.3">
+<h3 data-number="38.9.3" class="anchored" data-anchor-id="derivation-6"><span class="header-section-number">38.9.3</span> Derivation</h3>
+<p>Each item follows from a result above.</p>
+<ol type="1">
+<li>Runs on public data cost nothing (Fact 2), and every private run costs something by <a href="#sec-hpt-composition" class="quarto-xref"><span>Section 38.4</span></a> and <a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 38.6</span></a>. A smaller candidate set gives the same utility with fewer runs, which lowers <span class="math inline">\(\ln\mathbb E[K]\)</span> or <span class="math inline">\(k\)</span>.</li>
+<li>The theorems of <a href="#sec-hpt-stopping" class="quarto-xref"><span>Section 38.5</span></a> and <a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 38.6</span></a> require that the candidates are drawn from a fixed distribution and that <span class="math inline">\(K\)</span> is drawn from its distribution independently of the data. Choosing them after looking at results makes them functions of the data that no theorem covers.</li>
+<li>Every best-of theorem assumes that the score is part of a private output (<a href="#sec-hpt-select" class="quarto-xref"><span>Section 38.7</span></a>). An exact validation score makes the validation records unprotected.</li>
+<li>Composition and the random-<span class="math inline">\(K\)</span> bounds are both valid; which is smaller depends on the number of runs and the per-run budget (<a href="#tbl-hpt-overhead" class="quarto-xref">Table&nbsp;<span>38.5</span></a>, <a href="#tbl-hpt-run" class="quarto-xref">Table&nbsp;<span>38.7</span></a>). A crashed run still computed on the data, and if its failure influenced what was done next, it is part of the adaptive sequence.</li>
+<li>The released run’s <span class="math inline">\(\varepsilon\)</span> says how much the final model alone leaks if the hyperparameters were public; the procedure’s <span class="math inline">\(\varepsilon\)</span> is what the release actually guarantees. Papernot &amp; Steinke (2022) suggest stating both when the second is much larger.</li>
+</ol>
+</section>
+<section id="interpretation-6" class="level3" data-number="38.9.4">
+<h3 data-number="38.9.4" class="anchored" data-anchor-id="interpretation-6"><span class="header-section-number">38.9.4</span> Interpretation</h3>
+<p><strong>The cheapest fix is usually upstream.</strong> In <a href="#tbl-hpt-run" class="quarto-xref">Table&nbsp;<span>38.7</span></a>, the strategies that spend the whole budget on one private run, no tuning and proxy tuning, beat every honest search. That will not always hold, since a poor guess can be far worse than a noisy search, but it says where to start: get good hyperparameters without the private data, and search privately only over what remains uncertain.</p>
+<p><strong>Pre-registration is part of the guarantee.</strong> The random-<span class="math inline">\(K\)</span> theorems are statements about a procedure. An engineer who looks at the first few results and decides to “try a few more” has changed the procedure, and the theorem no longer applies. Logging the search configuration before it runs is to tuning what fixing the clipping norm in advance is to DP-SGD.</p>
+<p><strong>Reporting standards exist.</strong> Ponomareva et al.&nbsp;(2023, Section 5.3.3) ask for the formal guarantee of the final model and of the tuning, and <a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a> lists tuning among the checks of a reported <span class="math inline">\(\varepsilon\)</span>. <a href="../part05-dp-ml/10-auditing.html">Auditing</a> cannot catch the bug: an audit tests the trained model, not how it was chosen.</p>
+</section>
+<section id="example-the-report-for-the-running-example" class="level3" data-number="38.9.5">
+<h3 data-number="38.9.5" class="anchored" data-anchor-id="example-the-report-for-the-running-example"><span class="header-section-number">38.9.5</span> Example: the report for the running example</h3>
+<p>For the Poisson row of <a href="#tbl-hpt-run" class="quarto-xref">Table&nbsp;<span>38.7</span></a>, a complete report reads: “DP-SGD with Poisson sampling rate 0.01, clipping norm 0.5, noise multiplier 1.53, 1,000 steps; one run satisfies <span class="math inline">\((0.98, 10^{-5})\)</span>-DP. The step size was selected by random search over <span class="math inline">\(\{0.0625, 0.125, \dots, 8\}\)</span> with a Poisson number of runs with mean 8, scored by correct predictions on a disjoint validation set of 5,000 records with Gaussian noise of standard deviation 20; the whole procedure satisfies <span class="math inline">\((1.99, 10^{-5})\)</span>-DP by the Rényi bound of Papernot &amp; Steinke (2022, Theorem 6), add/remove neighbours, record level.”</p>
+</section>
+<section id="check-yourself-6" class="level3" data-number="38.9.6">
+<h3 data-number="38.9.6" class="anchored" data-anchor-id="check-yourself-6"><span class="header-section-number">38.9.6</span> Check yourself</h3>
+<ul>
+<li>A colleague tunes on the private data, then retrains the chosen configuration from scratch with fresh noise and releases only the retrained model. Does the retraining make the tuning free? <em>(No.&nbsp;The chosen hyperparameters are a function of the tuning runs, so the release is a post-processing of the tuning runs plus the new run; the tuning must be accounted for, and the new run adds its own cost.)</em></li>
+<li>Why can’t an audit of the released model detect that tuning was not accounted for? <em>(An audit estimates how much the trained model reveals about its training records. The best-of-<span class="math inline">\(k\)</span> leak is in the event “every run was bad”, which an audit of one released model at one fixed configuration does not replicate unless it reruns the whole search on neighbouring datasets.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-every-number-by-computation" class="level2" data-number="38.10">
+<h2 data-number="38.10" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">38.10</span> Code: check every number by computation</h2>
+<p>The script <a href="../../../code/part05-dp-ml/hyperparameter_tuning.py">code/hyperparameter_tuning.py</a> computes the exact best-of-<span class="math inline">\(K\)</span> distributions of <a href="#eq-hpt-pgf" class="quarto-xref">Equation&nbsp;<span>38.4</span></a> for randomized response and the three-outcome mechanism, evaluates the bounds of Liu &amp; Talwar and Papernot &amp; Steinke on the RDP accountant of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, whose model and accountant it imports from <a href="../../../code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a>, and runs the tuning experiment. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/hyperparameter_tuning.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It trains about 200 DP-SGD runs of 1,000 steps each and takes two to four minutes. Its accountants are reusable: <code>tuned_epsilon(q, sigma, steps, strategy)</code> gives the total <span class="math inline">\(\varepsilon\)</span> of a search with <code>strategy</code> one of <code>("fixed", k)</code>, <code>("poisson", mean)</code> or <code>("tnb&lt;η&gt;", mean)</code>, and <code>sigma_for_tuning(q, steps, eps, strategy)</code> the noise multiplier that keeps a search within a budget.</p>
+<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-hpt-code" class="quarto-xref">Table&nbsp;<span>38.8</span></a>:</p>
+<div id="tbl-hpt-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.8: The script’s output with the default seed.
+</figcaption>
+<div aria-describedby="tbl-hpt-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Best of 10 randomized responses, <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td>Exactly <span class="math inline">\(\varepsilon = 10\)</span>; loss 10 with probability 0.0436</td>
+</tr>
+<tr class="even">
+<td>Composition, running example</td>
+<td>27.23 for 10 runs, 145.17 for 100</td>
+</tr>
+<tr class="odd">
+<td>Geometric stopping, three outcomes</td>
+<td>Exact <span class="math inline">\(\varepsilon\)</span> up to 2.9987, below the bound 3</td>
+</tr>
+<tr class="even">
+<td>Logarithmic number of runs, running example</td>
+<td>10.08 for 10 runs, 13.46 for 1,000</td>
+</tr>
+<tr class="odd">
+<td>Exponential mechanism over 8 models</td>
+<td><span class="math inline">\(P[\text{best}] = 0.6484\)</span> at <span class="math inline">\(\varepsilon = 0.1\)</span></td>
+</tr>
+<tr class="even">
+<td>Tuning at <span class="math inline">\(\varepsilon = 2\)</span></td>
+<td>Honest search 0.9430 to 0.9433; bug claims 1.97 and spends 5.60</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_hyperparameter_tuning.py">tests/test_hyperparameter_tuning.py</a> checks that the output still matches.</p>
+<p><strong>What to take from it.</strong> The exact computations show that the bounds are attained in the worst case: <span class="math inline">\(k\varepsilon\)</span> for a fixed number of runs, <span class="math inline">\(3\varepsilon\)</span> and <span class="math inline">\(2\varepsilon\)</span> for the geometric and logarithmic numbers. The accountant shows that for DP-SGD the random-<span class="math inline">\(K\)</span> bounds grow logarithmically while composition grows linearly. The experiment shows that on a small grid the accuracy gained by tuning can be smaller than the accuracy lost by paying for it, and that the cheapest strategy is to need fewer private runs.</p>
+</section>
+<section id="references" class="level2" data-number="38.11">
+<h2 data-number="38.11" class="anchored" data-anchor-id="references"><span class="header-section-number">38.11</span> References</h2>
+<ul>
+<li>Liu &amp; Talwar, “Private Selection from Private Candidates” (STOC 2019; arXiv:1811.07971). Random stopping and the <span class="math inline">\(3\varepsilon\)</span> bound of <a href="#sec-hpt-stopping" class="quarto-xref"><span>Section 38.5</span></a>; threshold and <span class="math inline">\((\varepsilon, \delta)\)</span> variants; the fixed-<span class="math inline">\(k\)</span> counterexample (their Appendix B).</li>
+<li>Papernot &amp; Steinke, “Hyperparameter Tuning with Renyi Differential Privacy” (ICLR 2022; arXiv:2110.03620). The generic bound, the Poisson and truncated negative binomial theorems of <a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 38.6</span></a>, the lower bound of <a href="#sec-hpt-leak" class="quarto-xref"><span>Section 38.3</span></a>, and an experiment on image classification that recommends the Poisson distribution for small searches.</li>
+<li>Chaudhuri &amp; Vinterbo, “A Stability-Based Validation Procedure for Differentially Private Machine Learning” (NeurIPS 2013). The first improvement over composition for tuning, for learning algorithms that are stable.</li>
+<li>Mohapatra, Sasy, He, Kamath &amp; Thakkar, “The Role of Adaptive Optimizers for Honest Private Hyperparameter Selection” (arXiv:2111.04906, 2021). Honest tuning with composition, and optimizers that need less tuning.</li>
+<li>McSherry &amp; Talwar, “Mechanism Design via Differential Privacy” (FOCS 2007). The exponential mechanism of <a href="#sec-hpt-select" class="quarto-xref"><span>Section 38.7</span></a>.</li>
+<li>Papernot, Thakurta, Song, Chien &amp; Erlingsson, “Tempered Sigmoid Activations for Deep Learning with Differential Privacy” (arXiv:2007.14191, 2020). Architecture choices that are best without privacy are not best with it, so tuning cannot simply be done non-privately.</li>
+<li>Ponomareva et al., “How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy” (JAIR 2023). What to tune, how, and what to report.</li>
+<li>Bergstra &amp; Bengio, “Random Search for Hyper-Parameter Optimization” (JMLR 2012). Why random search, which the random-<span class="math inline">\(K\)</span> theorems require, is a sound tuning method in its own right.</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="38.12">
+<h2 data-number="38.12" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">38.12</span> Cheat sheet</h2>
+<p><span class="math inline">\(K\)</span> runs of a private algorithm <span class="math inline">\(Q\)</span> with RDP curve <span class="math inline">\(\varepsilon(\lambda)\)</span>, best output released, generating function <span class="math inline">\(f(x) = \mathbb E[x^K]\)</span>. <a href="#tbl-hpt-cheat" class="quarto-xref">Table&nbsp;<span>38.9</span></a> collects the results.</p>
+<div id="tbl-hpt-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;38.9: Every result of the chapter.
+</figcaption>
+<div aria-describedby="tbl-hpt-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Formula</th>
+<th>Conditions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Best of <span class="math inline">\(K\)</span></td>
+<td><span class="math inline">\(P[A = y] = f(Q(\preceq y)) - f(Q(\prec y))\)</span></td>
+<td>Independent runs, <span class="math inline">\(K\)</span> independent of them</td>
+</tr>
+<tr class="even">
+<td>Fixed <span class="math inline">\(k\)</span></td>
+<td><span class="math inline">\(\varepsilon_A(\lambda) \le k\varepsilon(\lambda)\)</span>; attained for <span class="math inline">\(\lambda = \infty\)</span></td>
+<td>Always valid</td>
+</tr>
+<tr class="odd">
+<td>Random stopping</td>
+<td><span class="math inline">\(3\varepsilon\)</span>-DP; misses top <span class="math inline">\(\pi\)</span> fraction w.p. <span class="math inline">\(\le \gamma/\pi\)</span></td>
+<td><span class="math inline">\(\varepsilon\)</span>-DP runs, <span class="math inline">\(K\)</span> geometric with mean <span class="math inline">\(1/\gamma\)</span></td>
+</tr>
+<tr class="even">
+<td>Generic</td>
+<td><span class="math inline">\(\varepsilon_A(\lambda) \le \varepsilon(\lambda) + \frac{1}{\lambda - 1}\ln[f'(q)^\lambda f'(q')^{1 - \lambda}]\)</span></td>
+<td><span class="math inline">\(q, q'\)</span> from one test</td>
+</tr>
+<tr class="odd">
+<td>Poisson</td>
+<td><span class="math inline">\(\varepsilon(\lambda) + \mu\hat\delta + \frac{\ln\mu}{\lambda - 1}\)</span></td>
+<td><span class="math inline">\((\hat\varepsilon, \hat\delta)\)</span>-DP with <span class="math inline">\(e^{\hat\varepsilon} \le 1 + \frac{1}{\lambda - 1}\)</span></td>
+</tr>
+<tr class="even">
+<td>Truncated negative binomial</td>
+<td><span class="math inline">\(\varepsilon(\lambda) + (1 + \eta)(1 - \frac1{\hat\lambda})\varepsilon(\hat\lambda) + \frac{(1 + \eta)\ln(1/\gamma)}{\hat\lambda} + \frac{\ln\mathbb E[K]}{\lambda - 1}\)</span></td>
+<td>Any <span class="math inline">\(\hat\lambda \ge 1\)</span>; pure DP: <span class="math inline">\((2 + \eta)\varepsilon\)</span></td>
+</tr>
+<tr class="odd">
+<td>Selection among fixed candidates</td>
+<td>Exponential mechanism, gap <span class="math inline">\(\le \frac{2}{\varepsilon m}(\ln k + 1)\)</span> in accuracy</td>
+<td>Count score on <span class="math inline">\(m\)</span> validation records</td>
+</tr>
+<tr class="even">
+<td>Trained candidates, disjoint validation</td>
+<td><span class="math inline">\(\max(\sum_j\varepsilon_j(\lambda), \varepsilon_{\text{sel}}(\lambda))\)</span></td>
+<td>Each record in one set</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>The best of <span class="math inline">\(k\)</span> runs is not cheaper than <span class="math inline">\(k\)</span> runs unless <span class="math inline">\(k\)</span> is random. Report the cost of the search, not of the released run.</li>
+<li>For DP-SGD, random search with a Poisson number of runs suits small searches at small per-run budgets; the logarithmic or <span class="math inline">\(\eta = 0.5\)</span> distributions suit large searches, at the price of often running few candidates.</li>
+<li>Validation scores on private data must be noisy; a few thousand validation records make the noise cheap.</li>
+<li>The best tuning is the tuning you do not do on private data: public or proxy data, reused settings, fewer knobs.</li>
+<li>Fix the candidate set and the distribution of the number of runs in advance; adaptive searches need adaptive composition.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part05-dp-ml/03-hyperparameter-tuning.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part05-dp-ml/02-dp-sgd.html" class="pagination-link" aria-label="DP-SGD">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="pagination-link" aria-label="DP-FTRL and matrix factorization">
+        <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

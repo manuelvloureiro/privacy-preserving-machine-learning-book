@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>36&nbsp; Private empirical risk minimization – Privacy-Preserving Machine Learning for Practitioners</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part05-dp-ml/02-dp-sgd.html" rel="next">
+<link href="../part05-dp-ml/00-introduction.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning for Practitioners</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">36.1</span> Why this matters</a></li>
+  <li><a href="#sec-dperm-output" id="toc-sec-dperm-output" class="nav-link" data-scroll-target="#sec-dperm-output"><span class="header-section-number">36.2</span> Output perturbation</a></li>
+  <li><a href="#sec-dperm-objective" id="toc-sec-dperm-objective" class="nav-link" data-scroll-target="#sec-dperm-objective"><span class="header-section-number">36.3</span> Objective perturbation</a></li>
+  <li><a href="#sec-dperm-gradient" id="toc-sec-dperm-gradient" class="nav-link" data-scroll-target="#sec-dperm-gradient"><span class="header-section-number">36.4</span> Gradient perturbation: noisy gradient descent</a></li>
+  <li><a href="#sec-dperm-compare" id="toc-sec-dperm-compare" class="nav-link" data-scroll-target="#sec-dperm-compare"><span class="header-section-number">36.5</span> Which to use</a></li>
+  <li><a href="#sec-dperm-nonconvex" id="toc-sec-dperm-nonconvex" class="nav-link" data-scroll-target="#sec-dperm-nonconvex"><span class="header-section-number">36.6</span> When the model is not convex</a></li>
+  <li><a href="#sec-dperm-code" id="toc-sec-dperm-code" class="nav-link" data-scroll-target="#sec-dperm-code"><span class="header-section-number">36.7</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">36.8</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">36.9</span> Further reading</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="36.1">
+<h2 data-number="36.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">36.1</span> Why this matters</h2>
+<p>Most of machine learning is <strong>empirical risk minimization (ERM)</strong>: choose the weights <span class="math inline">\(w\)</span> that minimize the average loss on the training data, usually plus a ridge penalty <span class="math inline">\(\frac\lambda2\|w\|^2\)</span>. The trained weights are a function of every record, and <a href="../part02-attacks/02-membership-inference.html">Membership inference</a> showed that they give some of those records away. Differential privacy (DP) promises that the distribution of whatever you release changes by at most a factor <span class="math inline">\(e^\varepsilon\)</span>, plus a slack <span class="math inline">\(\delta\)</span>, when one record changes. To keep that promise for a trained model, randomness has to enter somewhere between the data and the released weights, and there are three natural places: on the final weights (<strong>output perturbation</strong>), inside the objective (<strong>objective perturbation</strong>), or on every gradient during training (<strong>gradient perturbation</strong>).</p>
+<p>The one idea that organizes all three is that <strong>privacy needs a bound on how far one record can move what you release</strong>. That bound is the <strong>sensitivity</strong>, and the noise is sized to hide a move of that length. The three methods differ only in which quantity they bound, and each step back toward the data needs fewer assumptions. Output perturbation needs an exact, unique minimizer of a strongly convex objective. Objective perturbation needs that and a loss with bounded curvature. Gradient perturbation, for its privacy, needs only that each record’s gradient is bounded, with no convexity and no exact solution, which is why it is the one that survives in deep learning, as stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>.</p>
+<p>Throughout, neighbouring datasets differ by <strong>replacing</strong> one record, so both have <span class="math inline">\(n\)</span> records; <span class="math inline">\(L\)</span> bounds the length of every record’s loss gradient. The running example is ridge-regularized logistic regression in <span class="math inline">\(d = 10\)</span> dimensions with <span class="math inline">\(\lambda = 0.01\)</span>, features on the unit sphere (so <span class="math inline">\(L = 1\)</span>), and a target of <span class="math inline">\(\varepsilon = 1\)</span>, with <span class="math inline">\(\delta = 10^{-5}\)</span> for the methods that need one. Quality is measured by the <strong>excess risk</strong>, how much worse the private weights fit the training objective than the exact minimizer.</p>
+</section>
+<section id="sec-dperm-output" class="level2" data-number="36.2">
+<h2 data-number="36.2" class="anchored" data-anchor-id="sec-dperm-output"><span class="header-section-number">36.2</span> Output perturbation</h2>
+<p>The simplest private trainer treats training as a black box: compute the exact minimizer <span class="math inline">\(w^*\)</span>, then add noise. For that you need the minimizer’s sensitivity. Replacing one record changes the average loss by one term in and one out, so the objective’s gradient changes by at most <span class="math inline">\(2L/n\)</span> anywhere. The ridge makes the objective <strong><span class="math inline">\(\lambda\)</span>-strongly convex</strong>: its gradient grows by at least <span class="math inline">\(\lambda\)</span> per unit of distance, so a point where the gradient is <span class="math inline">\(g\)</span> long lies within <span class="math inline">\(g/\lambda\)</span> of the minimizer. At the new minimizer, the old objective’s gradient is at most <span class="math inline">\(2L/n\)</span>, hence the minimizer moves by at most <span id="eq-auto-01dperm-1"><span class="math display">\[\|w^*(D) - w^*(D')\| \le \frac{2L}{\lambda n}. \tag{36.1}\]</span></span> Add Gaussian noise to that, and you have the Gaussian mechanism (<a href="../part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>). Its privacy depends only on the ratio <span class="math inline">\(\mu\)</span> of the sensitivity to the noise standard deviation, and the exact calibration (Balle &amp; Wang 2018) gives the largest admissible ratio <span class="math inline">\(\mu(\varepsilon, \delta)\)</span>. At <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>, <span class="math inline">\(\mu = 0.2681\)</span>, so the noise must be <span class="math inline">\(\sigma = 3.7306\)</span> times the sensitivity. The classic formula <span class="math inline">\(\sqrt{2\ln(1.25/\delta)}/\varepsilon\)</span> asks for 4.8448 times, 30% more noise for the same guarantee, so always calibrate exactly.</p>
+<p>The noise must hide the worst case, not the actual move. In one dimension with <span class="math inline">\(n = 20\)</span> records and <span class="math inline">\(\lambda = 0.5\)</span>, replacing one record moves the minimizer by 0.0832, but the bound is <span class="math inline">\(2/(0.5 \times 20) = 0.2\)</span>, and the noise is sized for 0.2 (<a href="#fig-dperm-output-1d" class="quarto-xref">Figure&nbsp;<span>36.1</span></a>).</p>
+<div id="fig-dperm-output-1d" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dperm-output-1d-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/erm_output_1d.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dperm-output-1d-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;36.1: Left: two neighbouring regularized logistic objectives in one dimension (<span class="math inline">\(n = 20\)</span>, <span class="math inline">\(\lambda = 0.5\)</span>), their minimizers (vertical lines) 0.083 apart, below the bound <span class="math inline">\(2L/(\lambda n) = 0.2\)</span>. Right: the released weight’s density under each dataset with Gaussian noise for <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>; the noise must hide a shift as large as the bound, not the actual shift.
+</figcaption>
+</figure>
+</div>
+<p>What does the noise cost? Near the minimizer the objective is a bowl whose curvature is the Hessian <span class="math inline">\(H\)</span>, so a random displacement <span class="math inline">\(Z\)</span> raises it by about <span class="math inline">\(\frac12 Z^\top HZ\)</span>, and for Gaussian noise that averages to <span id="eq-dperm-output-risk"><span class="math display">\[\mathbb E\big[J(\tilde w) - J(w^*)\big] \approx \frac{\sigma^2}{2}\operatorname{tr}H. \tag{36.2}\]</span></span> Notice the mismatch: the noise is calibrated to the curvature the ridge guarantees, <span class="math inline">\(\lambda\)</span>, but the damage is weighed by the actual curvature <span class="math inline">\(H\)</span>, data included. A small ridge buys a better non-private fit and costs a lot of noise, since <span class="math inline">\(\sigma \propto 1/\lambda\)</span>. In the running example at <span class="math inline">\(n = 10{,}000\)</span>, the sensitivity is <span class="math inline">\(2/(0.01 \times 10{,}000) = 0.02\)</span>, so <span class="math inline">\(\sigma = 0.07461\)</span> per coordinate, next to a minimizer of length 2.886. The Hessian has trace 0.3129, and <a href="#eq-dperm-output-risk" class="quarto-xref">Equation&nbsp;<span>36.2</span></a> predicts an excess risk of <span class="math inline">\(8.711 \times 10^{-4}\)</span>; 20 simulated releases average <span class="math inline">\(9.274 \times 10^{-4}\)</span>. Because the noise falls like <span class="math inline">\(1/n\)</span>, the excess risk falls like <span class="math inline">\(1/n^2\)</span>, faster than the <span class="math inline">\(1/n\)</span> statistical error of the non-private model, so in this convex, low-dimensional setting privacy eventually costs less than sampling does.</p>
+<p>The weak point is that the sensitivity bound holds for the <em>exact</em> minimizer. If the optimizer stops at a point whose gradient has length <span class="math inline">\(g\)</span>, each output may sit <span class="math inline">\(g/\lambda\)</span> from its exact minimizer, and the sensitivity becomes <span class="math inline">\(2L/(\lambda n) + 2g/\lambda\)</span>. In the running example a tolerance of <span class="math inline">\(g = 10^{-3}\)</span>, which looks tight, gives a sensitivity of 0.22 instead of 0.02: eleven times the noise and roughly 121 times the excess risk. To keep the extra term small you need <span class="math inline">\(g\)</span> well below <span class="math inline">\(L/n\)</span>, which shrinks with the dataset. And the stopping rule must be a gradient check, not a step count: the privacy proof needs the bound on every pair of datasets, and “50 Newton steps” only guarantees it on datasets where 50 steps happen to be enough.</p>
+</section>
+<section id="sec-dperm-objective" class="level2" data-number="36.3">
+<h2 data-number="36.3" class="anchored" data-anchor-id="sec-dperm-objective"><span class="header-section-number">36.3</span> Objective perturbation</h2>
+<p>Output perturbation wastes the data’s curvature: it pays for the worst case <span class="math inline">\(\lambda\)</span> and is judged on the actual <span class="math inline">\(H\)</span>. Chaudhuri, Monteleoni &amp; Sarwate (2011) put the noise inside the optimization instead. They add a random linear term <span class="math inline">\(\frac1n\langle b, w\rangle\)</span> to the objective and minimize exactly. A linear term acts like a constant force pushing the minimizer, and all of the objective’s curvature resists it, so where the data add curvature the minimizer moves less.</p>
+<p>The privacy argument is subtler, because the output is no longer “something fixed plus noise”, and its result says where the budget goes. Each noise vector <span class="math inline">\(b\)</span> produces exactly one output, so the output’s density is the noise density at the matching <span class="math inline">\(b\)</span> times a stretching factor from the change of variables. Both factors differ between neighbours, and each consumes part of <span class="math inline">\(\varepsilon\)</span>. The stretching factor is governed by how much one record can change the objective’s curvature, which needs a loss of the form <span class="math inline">\(g(y\langle w, x\rangle)\)</span> with <span class="math inline">\(|g'| \le 1\)</span>, curvature <span class="math inline">\(0 \le g'' \le c\)</span> and <span class="math inline">\(\|x\| \le 1\)</span>; logistic regression qualifies with <span class="math inline">\(c = \frac14\)</span>. What is left for the noise is <span id="eq-auto-01dperm-2"><span class="math display">\[\varepsilon' = \varepsilon - 2\ln\Big(1 + \frac{c}{n\lambda}\Big), \tag{36.3}\]</span></span> and <span class="math inline">\(b\)</span> is drawn with density proportional to <span class="math inline">\(e^{-\varepsilon'\|b\|/2}\)</span>. The result is pure <span class="math inline">\(\varepsilon\)</span>-DP. The stretching share shrinks as <span class="math inline">\(n\lambda\)</span> grows: at <span class="math inline">\(n = 10{,}000\)</span> in the running example it is 0.0050, so <span class="math inline">\(\varepsilon' = 0.9950\)</span>, while at <span class="math inline">\(n = 100\)</span> the noise would get only <span class="math inline">\(\varepsilon' = 0.5537\)</span>. If <span class="math inline">\(\varepsilon'\)</span> comes out non-positive, the method raises the ridge until the stretching takes only half the budget.</p>
+<p>The benefit shows in the excess risk. To first order the minimizer moves by <span class="math inline">\(-H^{-1}b/n\)</span>, so the damage is weighed by <span class="math inline">\(H^{-1}\)</span> rather than <span class="math inline">\(H\)</span>. If every eigenvalue of <span class="math inline">\(H\)</span> is close to some <span class="math inline">\(h\)</span>, objective perturbation beats output perturbation by about <span class="math inline">\((h/\lambda)^2\)</span>. When the ridge supplies all the curvature the two are the same; when the data add curvature, objective perturbation wins quadratically. In the running example the curvature lies between 0.0263 and 0.0330, about three times the ridge, and the measured excess risk at <span class="math inline">\(n = 10{,}000\)</span> is <span class="math inline">\(8.156 \times 10^{-5}\)</span>, against <span class="math inline">\(8.321 \times 10^{-4}\)</span> for pure-DP output perturbation at the same <span class="math inline">\(\varepsilon\)</span>: ten times better, close to the <span class="math inline">\(3^2 = 9\)</span> the rule of thumb predicts.</p>
+<p>The analysis is safe, not tight. In one dimension the output densities can be computed exactly, and over 500 random datasets of 5 records with <span class="math inline">\(\lambda = 0.1\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>, the largest log ratio is 0.3779 (<a href="#fig-dperm-objective-density" class="quarto-xref">Figure&nbsp;<span>36.2</span></a>). The noise part never exceeds 0.0992 of its budget of 0.1891, and the stretching part never exceeds 0.3395 of its budget of 0.8109, because the worst cases each factor assumes cannot happen together for logistic loss. The bound has to cover every dataset, so you cannot spend that slack, but for logistic loss the guarantee is conservative.</p>
+<div id="fig-dperm-objective-density" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dperm-objective-density-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/erm_objective_density.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dperm-objective-density-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;36.2: Objective perturbation in one dimension, <span class="math inline">\(n = 5\)</span>, <span class="math inline">\(\lambda = 0.1\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>. Left: the exact densities of the released weight under a dataset and its neighbour, computed by change of variables. Right: their log ratio, the privacy loss, which stays well inside <span class="math inline">\(\pm\varepsilon\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>The price is in the requirements: exact minimization (the change of variables needs a unique minimizer), a twice-differentiable loss (a support vector machine’s hinge loss must be smoothed first) and a known curvature bound. Kifer, Smith &amp; Thakurta (2012) extend it to Gaussian noise and constraints, and Iyengar et al.&nbsp;(2019) give a version that tolerates approximate solvers by adding a little output noise on top.</p>
+</section>
+<section id="sec-dperm-gradient" class="level2" data-number="36.4">
+<h2 data-number="36.4" class="anchored" data-anchor-id="sec-dperm-gradient"><span class="header-section-number">36.4</span> Gradient perturbation: noisy gradient descent</h2>
+<p>Real training is iterative and stops early. Gradient perturbation, analysed by Song, Chaudhuri &amp; Sarwate (2013) and Bassily, Smith &amp; Thakurta (2014), makes each step of the optimizer private and composes the steps. Its simplest form is full-batch gradient descent with Gaussian noise added to the mean gradient at each of <span class="math inline">\(T\)</span> steps.</p>
+<p>Each step is a Gaussian mechanism. Given the current weights, which are public at that moment because they were computed from earlier noisy outputs, replacing one record moves the mean gradient by at most <span class="math inline">\(2L/n\)</span>, whatever the weights are. Gaussian steps compose exactly: <span class="math inline">\(T\)</span> steps, each with ratio <span class="math inline">\(\mu_{\text{step}}\)</span>, are as private as one Gaussian mechanism with ratio <span class="math inline">\(\sqrt T\,\mu_{\text{step}}\)</span> (<a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>). Setting that equal to <span class="math inline">\(\mu(\varepsilon, \delta)\)</span> gives the noise on the mean gradient, <span id="eq-auto-01dperm-3"><span class="math display">\[\sigma = \frac{2L}{n}\cdot\frac{\sqrt T}{\mu(\varepsilon, \delta)}. \tag{36.4}\]</span></span> Releasing every iterate is covered. Nothing in this argument used convexity, a minimizer or smoothness: only the gradient bound at the points the algorithm visits.</p>
+<p>The consequence for practice is that <strong>the step count is a privacy parameter</strong>. Every step spends budget, so the per-step noise grows like <span class="math inline">\(\sqrt T\)</span>. For a strongly convex objective, the excess risk is an optimization error that shrinks geometrically with <span class="math inline">\(T\)</span> plus a noise floor, roughly <span class="math inline">\(d\sigma^2/(4\beta)\)</span> for a step size <span class="math inline">\(1/\beta\)</span> set by the largest curvature <span class="math inline">\(\beta\)</span>, that grows in proportion to <span class="math inline">\(T\)</span>. Too few steps leave optimization error; too many drown the solution in noise (<a href="#fig-dperm-noisy-gd-steps" class="quarto-xref">Figure&nbsp;<span>36.3</span></a>).</p>
+<div id="fig-dperm-noisy-gd-steps" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dperm-noisy-gd-steps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/erm_noisy_gd_steps.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dperm-noisy-gd-steps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;36.3: Excess risk of noisy gradient descent at <span class="math inline">\(n = 10{,}000\)</span>, <span class="math inline">\((\varepsilon, \delta) = (1, 10^{-5})\)</span>, against the number of steps <span class="math inline">\(T\)</span>, averaged over datasets, with the same steps without noise (dashed). The noiseless error falls geometrically and reaches machine precision; the noisy run is limited by noise that grows with <span class="math inline">\(T\)</span>, so its error is smallest near <span class="math inline">\(T = 50\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>You cannot pick <span class="math inline">\(T\)</span> by trying several and keeping the best validation score for free: that choice is itself a computation on the data (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>). One honest option is a rule that uses only public quantities, the ridge, a curvature bound, the dimension, <span class="math inline">\(n\)</span> and the budget, and minimizes the predicted excess risk. For <span class="math inline">\(n = 10{,}000\)</span> it picks <span class="math inline">\(T = 218\)</span>, with per-step noise <span class="math inline">\(\sigma = 0.01102\)</span> and a predicted excess risk of <span class="math inline">\(1.301 \times 10^{-3}\)</span>; simulated runs average <span class="math inline">\(1.384 \times 10^{-3}\)</span>. The rule is pessimistic, because it only knows that the curvature is at least <span class="math inline">\(\lambda\)</span>. With the data’s actual curvature the best <span class="math inline">\(T\)</span> is near 50, with <span class="math inline">\(2.875 \times 10^{-4}\)</span>, five times less, but you may only use that knowledge if you obtained it privately or from similar public data.</p>
+</section>
+<section id="sec-dperm-compare" class="level2" data-number="36.5">
+<h2 data-number="36.5" class="anchored" data-anchor-id="sec-dperm-compare"><span class="header-section-number">36.5</span> Which to use</h2>
+<p>Each method is private by its own argument, so the choice is about accuracy. Theory says that for strongly convex problems the best achievable excess risk under <span class="math inline">\((\varepsilon, \delta)\)</span>-DP falls like <span id="eq-auto-01dperm-4"><span class="math display">\[\frac{L^2\,d\,\ln(1/\delta)}{\lambda\,(n\varepsilon)^2}, \tag{36.5}\]</span></span> up to logarithmic factors in <span class="math inline">\(n\)</span> (Bassily, Smith &amp; Thakurta 2014), and that a version of noisy gradient descent attains it; no method can do better, by the fingerprinting lower bounds of <a href="../part03-dp-foundations/09-lower-bounds.html">Lower bounds</a>. Two practical readings follow. The cost grows with the dimension <span class="math inline">\(d\)</span>, so more parameters cost more privacy. And <span class="math inline">\(n\)</span> and <span class="math inline">\(\varepsilon\)</span> appear only as the product <span class="math inline">\(n\varepsilon\)</span>, because every sensitivity is proportional to <span class="math inline">\(1/n\)</span> and every noise to sensitivity over <span class="math inline">\(\varepsilon\)</span>: to keep the same accuracy at half the budget, you need twice the data.</p>
+<p>All methods share the rate; the constants differ, and the constant is what you choose by. <a href="#tbl-dperm-compare" class="quarto-xref">Table&nbsp;<span>36.1</span></a> measures them on the running example.</p>
+<div id="tbl-dperm-compare" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dperm-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;36.1: Mean excess risk over 20 datasets of the running example (<span class="math inline">\(d = 10\)</span>, <span class="math inline">\(\lambda = 0.01\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span> for the Gaussian methods), and the slope of a straight-line fit of <span class="math inline">\(\log\)</span> excess risk against <span class="math inline">\(\log n\)</span>.
+</figcaption>
+<div aria-describedby="tbl-dperm-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th>Output, Gaussian</th>
+<th>Output, pure</th>
+<th>Objective, pure</th>
+<th>Noisy gradient descent (public <span class="math inline">\(T\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1,000</td>
+<td><span class="math inline">\(8.170 \times 10^{-2}\)</span></td>
+<td><span class="math inline">\(7.060 \times 10^{-2}\)</span></td>
+<td><span class="math inline">\(1.009 \times 10^{-2}\)</span></td>
+<td><span class="math inline">\(6.558 \times 10^{-2}\)</span></td>
+</tr>
+<tr class="even">
+<td>10,000</td>
+<td><span class="math inline">\(9.274 \times 10^{-4}\)</span></td>
+<td><span class="math inline">\(8.321 \times 10^{-4}\)</span></td>
+<td><span class="math inline">\(8.156 \times 10^{-5}\)</span></td>
+<td><span class="math inline">\(1.384 \times 10^{-3}\)</span></td>
+</tr>
+<tr class="odd">
+<td>100,000</td>
+<td><span class="math inline">\(8.543 \times 10^{-6}\)</span></td>
+<td><span class="math inline">\(6.379 \times 10^{-6}\)</span></td>
+<td><span class="math inline">\(8.798 \times 10^{-7}\)</span></td>
+<td><span class="math inline">\(1.621 \times 10^{-5}\)</span></td>
+</tr>
+<tr class="even">
+<td>Slope in <span class="math inline">\(\log n\)</span></td>
+<td><span class="math inline">\(-2.01\)</span></td>
+<td><span class="math inline">\(-2.00\)</span></td>
+<td><span class="math inline">\(-2.01\)</span></td>
+<td><span class="math inline">\(-1.79\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The first three columns fall like <span class="math inline">\(1/n^2\)</span>; noisy gradient descent falls slightly slower, because its step count grows with <span class="math inline">\(\ln n\)</span>. Objective perturbation is about ten times better than output perturbation throughout (<a href="#fig-dperm-comparison" class="quarto-xref">Figure&nbsp;<span>36.4</span></a>), and noisy gradient descent with the public step rule is the worst for <span class="math inline">\(n \ge 10{,}000\)</span>; tuned privately to <span class="math inline">\(T \approx 50\)</span> it would sit between the two perturbation methods.</p>
+<div id="fig-dperm-comparison" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dperm-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/erm_comparison.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dperm-comparison-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;36.4: Excess risk of the four private releases against the dataset size on the running example, log-log, with a line of slope <span class="math inline">\(-2\)</span>. All fall like <span class="math inline">\(1/n^2\)</span>; objective perturbation is about ten times better than output perturbation throughout.
+</figcaption>
+</figure>
+</div>
+<p>The pure-DP column is slightly better than the Gaussian one here only because <span class="math inline">\(d = 10\)</span> is small. The pure-DP noise has a length that grows faster with the dimension than the Gaussian’s: at <span class="math inline">\(d = 10\)</span> their mean squared lengths are <span class="math inline">\(110\,\Delta^2\)</span> against <span class="math inline">\(139.2\,\Delta^2\)</span>, but at <span class="math inline">\(d = 100\)</span> they are <span class="math inline">\(10{,}100\,\Delta^2\)</span> against <span class="math inline">\(1{,}392\,\Delta^2\)</span>. Pure DP costs a factor that grows like <span class="math inline">\(d\)</span>, the price of <span class="math inline">\(\delta = 0\)</span>, which <a href="../part03-dp-foundations/09-lower-bounds.html">Lower bounds</a> shows is unavoidable; in high dimension a small <span class="math inline">\(\delta\)</span> is much cheaper.</p>
+<p>Excess risk is a fine measure, but you care about predictions, and those are forgiving. On held-out data the non-private model has accuracy 0.747 at <span class="math inline">\(n = 1{,}000\)</span>; output perturbation drops it to 0.681, noisy gradient descent to 0.695 and objective perturbation only to 0.736. By <span class="math inline">\(n = 10{,}000\)</span> all four are within 0.002 of the non-private 0.753. A low-dimensional convex model on ten thousand records can be made private almost for free.</p>
+</section>
+<section id="sec-dperm-nonconvex" class="level2" data-number="36.6">
+<h2 data-number="36.6" class="anchored" data-anchor-id="sec-dperm-nonconvex"><span class="header-section-number">36.6</span> When the model is not convex</h2>
+<p>A neural network’s loss is not convex, and that breaks the first two methods outright. Without strong convexity the minimizer need not be unique or move continuously with the data. Take a one-dimensional loss with two wells near <span class="math inline">\(\pm1\)</span>, where the empirical minimizer sits in the well favoured by the majority label: with 501 labels of one kind and 500 of the other, changing one label flips the majority and moves the minimizer by 2.0010. No <span class="math inline">\(1/n\)</span> appears, so output perturbation would need <span class="math inline">\(\sigma = 7.465\)</span> at <span class="math inline">\(\varepsilon = 1\)</span>, more than three times the distance between the wells, whatever the dataset size. Objective perturbation fails at its first step, since the map from noise to output is no longer invertible.</p>
+<p>Gradient perturbation keeps its guarantee, because its argument only used the gradient bound at the visited points. What it loses is the accuracy guarantee: whether it learns anything becomes an empirical question. For a neural network there is no bound <span class="math inline">\(L\)</span> either, since gradients can be arbitrarily long, but you can force one by <strong>clipping</strong>: rescale each record’s gradient to length at most <span class="math inline">\(C\)</span> before averaging, as <a href="../part03-dp-foundations/06-sensitivity.html">Beyond global sensitivity</a> clips a value before averaging it. The mean of clipped gradients moves by at most <span class="math inline">\(2C/n\)</span>, and the privacy argument goes through with <span class="math inline">\(L = C\)</span>. Clipping has a cost of its own: the mean of clipped gradients is no longer the gradient of the objective, so the algorithm optimizes something slightly different.</p>
+<p>Full-batch steps are also too slow for large datasets. Using a random minibatch at each step makes steps cheap and, by <a href="../part04-privacy-accounting/05-subsampling.html">amplification by subsampling</a>, more private, since each record is used only with a small probability. Clipping, noise, minibatches and a subsampled-Gaussian accountant together are <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>.</p>
+</section>
+<section id="sec-dperm-code" class="level2" data-number="36.7">
+<h2 data-number="36.7" class="anchored" data-anchor-id="sec-dperm-code"><span class="header-section-number">36.7</span> Code</h2>
+<p>The calibrations of this chapter take a few lines: find the largest admissible Gaussian ratio by bisection on the exact <span class="math inline">\(\delta\)</span>, then size the noise for each method.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> erfc, exp, log, sqrt</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> phi(x: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Standard normal cumulative distribution function."""</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.5</span> <span class="op">*</span> erfc(<span class="op">-</span>x <span class="op">/</span> sqrt(<span class="dv">2</span>))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gaussian_delta(eps: <span class="bu">float</span>, mu: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Exact delta of a Gaussian mechanism with sensitivity-to-noise ratio mu."""</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> phi(mu <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> eps <span class="op">/</span> mu) <span class="op">-</span> exp(eps) <span class="op">*</span> phi(<span class="op">-</span>mu <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> eps <span class="op">/</span> mu)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gaussian_mu(eps: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Largest ratio mu for which the Gaussian mechanism is (eps, delta)-DP."""</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> <span class="fl">1e-6</span>, <span class="fl">50.0</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">200</span>):</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        mid <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        lo, hi <span class="op">=</span> (lo, mid) <span class="cf">if</span> gaussian_delta(eps, mid) <span class="op">&gt;</span> delta <span class="cf">else</span> (mid, hi)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lo</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>mu <span class="op">=</span> gaussian_mu(<span class="fl">1.0</span>, <span class="fl">1e-5</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>mu<span class="sc">:.4f}</span><span class="ss"> </span><span class="sc">{</span><span class="dv">1</span> <span class="op">/</span> mu<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.2681 3.7306</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>sqrt(<span class="dv">2</span> <span class="op">*</span> log(<span class="fl">1.25</span> <span class="op">/</span> <span class="fl">1e-5</span>))<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 4.8448</span></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Output perturbation: sensitivity 2L/(lambda n), L = 1, lambda = 0.01, n = 10,000.</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="dv">2</span> <span class="op">/</span> (<span class="fl">0.01</span> <span class="op">*</span> <span class="dv">10_000</span>) <span class="op">/</span> mu<span class="sc">:.5f}</span><span class="ss">"</span>)  <span class="co"># 0.07461</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Objective perturbation: the share of eps left for the noise, c = 1/4.</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="dv">1</span> <span class="op">-</span> <span class="dv">2</span> <span class="op">*</span> log(<span class="dv">1</span> <span class="op">+</span> <span class="fl">0.25</span> <span class="op">/</span> (<span class="dv">10_000</span> <span class="op">*</span> <span class="fl">0.01</span>))<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.9950</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Noisy gradient descent: noise on the mean gradient for T = 218 steps.</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span><span class="dv">2</span> <span class="op">/</span> <span class="dv">10_000</span> <span class="op">*</span> sqrt(<span class="dv">218</span>) <span class="op">/</span> mu<span class="sc">:.5f}</span><span class="ss">"</span>)  <span class="co"># 0.01102</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The full edition’s script implements the three methods for logistic regression with exact Newton solves, computes the exact one-dimensional densities of objective perturbation, and runs the comparison:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/dp_erm.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="cheat-sheet" class="level2" data-number="36.8">
+<h2 data-number="36.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">36.8</span> Cheat sheet</h2>
+<div id="tbl-dperm-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dperm-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;36.2: The methods of this chapter, for replace-one neighbours, with <span class="math inline">\(\mu = \mu(\varepsilon, \delta)\)</span> the largest admissible Gaussian ratio.
+</figcaption>
+<div aria-describedby="tbl-dperm-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Noise</th>
+<th>Needs</th>
+<th>Guarantee</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Output perturbation</td>
+<td><span class="math inline">\(w^* + \mathcal N(0, \sigma^2I)\)</span>, <span class="math inline">\(\sigma = 2L/(\lambda n\mu)\)</span></td>
+<td>Strong convexity; exact minimizer, or sensitivity <span class="math inline">\(2L/(\lambda n) + 2g/\lambda\)</span> at gradient tolerance <span class="math inline">\(g\)</span></td>
+<td><span class="math inline">\((\varepsilon, \delta)\)</span>-DP</td>
+</tr>
+<tr class="even">
+<td>Objective perturbation</td>
+<td><span class="math inline">\(\arg\min J + \langle b, w\rangle/n\)</span>, density <span class="math inline">\(\propto e^{-\varepsilon'\|b\|/2}\)</span>, <span class="math inline">\(\varepsilon' = \varepsilon - 2\ln(1 + c/(n\lambda))\)</span></td>
+<td>Loss <span class="math inline">\(g(y\langle w, x\rangle)\)</span> with <span class="math inline">\(|g'| \le 1\)</span>, <span class="math inline">\(0 \le g'' \le c\)</span>, <span class="math inline">\(\|x\| \le 1\)</span>; exact minimizer</td>
+<td><span class="math inline">\(\varepsilon\)</span>-DP</td>
+</tr>
+<tr class="odd">
+<td>Noisy gradient descent</td>
+<td><span class="math inline">\(\sigma = (2L/n)\sqrt T/\mu\)</span> on the mean gradient</td>
+<td>Per-record gradients of length at most <span class="math inline">\(L\)</span>, or clipped</td>
+<td><span class="math inline">\((\varepsilon, \delta)\)</span>-DP, all iterates</td>
+</tr>
+<tr class="even">
+<td>Exact Gaussian ratio</td>
+<td><span class="math inline">\(\mu = 0.2681\)</span>, <span class="math inline">\(\sigma = 3.7306\,\Delta\)</span> at <span class="math inline">\((1, 10^{-5})\)</span></td>
+<td>—</td>
+<td>Classic formula gives <span class="math inline">\(4.8448\,\Delta\)</span></td>
+</tr>
+<tr class="odd">
+<td>Excess risk</td>
+<td>Output <span class="math inline">\(\approx \frac{\sigma^2}2\operatorname{tr}H\)</span>; objective better by <span class="math inline">\(\approx(h/\lambda)^2\)</span></td>
+<td>Strong convexity</td>
+<td>All fall like <span class="math inline">\(1/(n\varepsilon)^2\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Halving <span class="math inline">\(\varepsilon\)</span> costs as much as halving the data. Stop output and objective perturbation on a gradient tolerance well below <span class="math inline">\(L/n\)</span>, never on a step count. Count the steps of noisy gradient descent as part of the budget, and choose them from public quantities or pay for choosing them. Without convexity only gradient perturbation is private, and clipping supplies the bound it needs.</p>
+</section>
+<section id="further-reading" class="level2" data-number="36.9">
+<h2 data-number="36.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">36.9</span> Further reading</h2>
+<ul>
+<li>Chaudhuri, Monteleoni &amp; Sarwate, “Differentially Private Empirical Risk Minimization” (JMLR 2011): output and objective perturbation with their excess-risk bounds.</li>
+<li>Bassily, Smith &amp; Thakurta, “Private Empirical Risk Minimization: Efficient Algorithms and Tight Error Bounds” (FOCS 2014): noisy gradient methods that attain the optimal rates, and the matching lower bounds.</li>
+<li>Iyengar, Near, Song, Thakkar, Thakurta &amp; Wang, “Towards Practical Differentially Private Convex Optimization” (IEEE S&amp;P 2019): objective perturbation that tolerates inexact solvers, and a benchmark of the three methods.</li>
+</ul>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part05-dp-ml/01-dp-erm.html">the full edition’s chapter</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part05-dp-ml/00-introduction.html" class="pagination-link" aria-label="Differential privacy in machine learning">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Differential privacy in machine learning</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part05-dp-ml/02-dp-sgd.html" class="pagination-link" aria-label="DP-SGD">
+        <span class="nav-page-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

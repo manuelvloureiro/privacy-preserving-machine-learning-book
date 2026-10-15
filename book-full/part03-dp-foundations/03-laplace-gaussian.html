@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>20&nbsp; The Laplace and Gaussian mechanisms – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part03-dp-foundations/04-composition.html" rel="next">
+<link href="../part03-dp-foundations/02-properties.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/03-laplace-gaussian.html"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">20.1</span> Why this matters</a>
+  <ul class="collapse">
+  <li><a href="#the-one-idea-privacy-loss-of-additive-noise-is-a-shifted-copy-log-ratio" id="toc-the-one-idea-privacy-loss-of-additive-noise-is-a-shifted-copy-log-ratio" class="nav-link" data-scroll-target="#the-one-idea-privacy-loss-of-additive-noise-is-a-shifted-copy-log-ratio"><span class="header-section-number">20.1.1</span> The one idea: privacy loss of additive noise is a shifted-copy log-ratio</a></li>
+  </ul></li>
+  <li><a href="#toolkit-three-facts-every-derivation-uses" id="toc-toolkit-three-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-three-facts-every-derivation-uses"><span class="header-section-number">20.2</span> Toolkit: three facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-additive-noise-reduces-to-one-shifted-pair" id="toc-fact-1-additive-noise-reduces-to-one-shifted-pair" class="nav-link" data-scroll-target="#fact-1-additive-noise-reduces-to-one-shifted-pair"><span class="header-section-number">20.2.1</span> Fact 1 — Additive noise reduces to one shifted pair</a></li>
+  <li><a href="#fact-2-a-bounded-privacy-loss-gives-pure-dp" id="toc-fact-2-a-bounded-privacy-loss-gives-pure-dp" class="nav-link" data-scroll-target="#fact-2-a-bounded-privacy-loss-gives-pure-dp"><span class="header-section-number">20.2.2</span> Fact 2 — A bounded privacy loss gives pure DP</a></li>
+  <li><a href="#fact-3-the-bad-event-and-the-exact-delta" id="toc-fact-3-the-bad-event-and-the-exact-delta" class="nav-link" data-scroll-target="#fact-3-the-bad-event-and-the-exact-delta"><span class="header-section-number">20.2.3</span> Fact 3 — The bad event, and the exact <span class="math inline">\(\delta\)</span></a></li>
+  </ul></li>
+  <li><a href="#sec-lg-sensitivity" id="toc-sec-lg-sensitivity" class="nav-link" data-scroll-target="#sec-lg-sensitivity"><span class="header-section-number">20.3</span> Sensitivity</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">20.3.1</span> Context</a></li>
+  <li><a href="#definition" id="toc-definition" class="nav-link" data-scroll-target="#definition"><span class="header-section-number">20.3.2</span> Definition</a></li>
+  <li><a href="#derivation-the-standard-queries" id="toc-derivation-the-standard-queries" class="nav-link" data-scroll-target="#derivation-the-standard-queries"><span class="header-section-number">20.3.3</span> Derivation: the standard queries</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">20.3.4</span> Interpretation</a></li>
+  <li><a href="#example-the-average-age-of-a-cohort" id="toc-example-the-average-age-of-a-cohort" class="nav-link" data-scroll-target="#example-the-average-age-of-a-cohort"><span class="header-section-number">20.3.5</span> Example: the average age of a cohort</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">20.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-lg-laplace" id="toc-sec-lg-laplace" class="nav-link" data-scroll-target="#sec-lg-laplace"><span class="header-section-number">20.4</span> The Laplace mechanism</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">20.4.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">20.4.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">20.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">20.4.4</span> Interpretation</a></li>
+  <li><a href="#example-counts-and-a-histogram" id="toc-example-counts-and-a-histogram" class="nav-link" data-scroll-target="#example-counts-and-a-histogram"><span class="header-section-number">20.4.5</span> Example: counts and a histogram</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">20.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-lg-gauss-classic" id="toc-sec-lg-gauss-classic" class="nav-link" data-scroll-target="#sec-lg-gauss-classic"><span class="header-section-number">20.5</span> The Gaussian mechanism: classic calibration</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">20.5.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">20.5.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">20.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-three-sources-of-slack" id="toc-interpretation-three-sources-of-slack" class="nav-link" data-scroll-target="#interpretation-three-sources-of-slack"><span class="header-section-number">20.5.4</span> Interpretation: three sources of slack</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">20.5.5</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-lg-analytic" id="toc-sec-lg-analytic" class="nav-link" data-scroll-target="#sec-lg-analytic"><span class="header-section-number">20.6</span> The exact privacy curve of the Gaussian mechanism</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">20.6.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">20.6.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">20.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">20.6.4</span> Interpretation</a></li>
+  <li><a href="#example-the-diabetes-count-again" id="toc-example-the-diabetes-count-again" class="nav-link" data-scroll-target="#example-the-diabetes-count-again"><span class="header-section-number">20.6.5</span> Example: the diabetes count again</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">20.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-lg-high-dim" id="toc-sec-lg-high-dim" class="nav-link" data-scroll-target="#sec-lg-high-dim"><span class="header-section-number">20.7</span> Laplace against Gaussian in many dimensions</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">20.7.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">20.7.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">20.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">20.7.4</span> Interpretation</a></li>
+  <li><a href="#example-releasing-an-empirical-cdf" id="toc-example-releasing-an-empirical-cdf" class="nav-link" data-scroll-target="#example-releasing-an-empirical-cdf"><span class="header-section-number">20.7.5</span> Example: releasing an empirical CDF</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">20.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-every-mechanism-by-computation-and-simulation" id="toc-code-check-every-mechanism-by-computation-and-simulation" class="nav-link" data-scroll-target="#code-check-every-mechanism-by-computation-and-simulation"><span class="header-section-number">20.8</span> Code: check every mechanism by computation and simulation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">20.9</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">20.10</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/03-laplace-gaussian.html"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="20.1">
+<h2 data-number="20.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">20.1</span> Why this matters</h2>
+<p>You run a hospital database and want to publish how many patients have diabetes, the average age of a cohort, or a histogram of diagnoses, with a differential privacy (DP) guarantee. The <a href="../part03-dp-foundations/01-definition.html">definition of differential privacy</a> says what the release must satisfy: changing one person’s record must barely change the distribution of what you publish. It does not say how to build such a release. The two mechanisms of this chapter are the answer used almost everywhere. The idea is to compute the exact answer, call it <span class="math inline">\(f(D)\)</span> for the dataset <span class="math inline">\(D\)</span>, and then blur it with random noise <span class="math inline">\(Z\)</span> drawn fresh each time, so that what you publish is <span id="eq-auto-03laplacegaussian-1"><span class="math display">\[M(D) = f(D) + Z. \tag{20.1}\]</span></span> If the noise is wide compared with how far one person can move the answer, an observer cannot tell from the output whether that person was there.</p>
+<p>Three questions decide everything. The first is how much one record can move the answer. That is the <strong>sensitivity</strong> of <span class="math inline">\(f\)</span>, and it sets the scale of the noise. The second is which noise distribution to use. Laplace noise gives pure <span class="math inline">\(\varepsilon\)</span>-DP. Gaussian noise gives only <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, but it scales better when many numbers are released at once. The third is how much noise exactly. For Laplace noise the answer is a one-line formula. For Gaussian noise the textbook formula is loose, and the exact answer comes from solving one equation numerically.</p>
+<p>Every later mechanism that adds noise, from the private mean to the noisy gradients of private model training in a later part, is calibrated with the tools of this chapter.</p>
+<section id="the-one-idea-privacy-loss-of-additive-noise-is-a-shifted-copy-log-ratio" class="level3" data-number="20.1.1">
+<h3 data-number="20.1.1" class="anchored" data-anchor-id="the-one-idea-privacy-loss-of-additive-noise-is-a-shifted-copy-log-ratio"><span class="header-section-number">20.1.1</span> The one idea: privacy loss of additive noise is a shifted-copy log-ratio</h3>
+<p>Differential privacy is a bound on how much an output can favour one dataset over a neighbouring one. That is measured by the <strong>privacy loss</strong>: for an output <span class="math inline">\(y\)</span>, the log of how much more likely <span class="math inline">\(y\)</span> is when the data are <span class="math inline">\(D\)</span> than when they are <span class="math inline">\(D'\)</span>, <span id="eq-auto-03laplacegaussian-2"><span class="math display">\[L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}, \tag{20.2}\]</span></span> where <span class="math inline">\(p_{M(D)}\)</span> is the density of the published output on dataset <span class="math inline">\(D\)</span>. A loss of 0 means the output is equally likely under both datasets and says nothing about which one was used; a loss of <span class="math inline">\(\varepsilon\)</span> means it is <span class="math inline">\(e^\varepsilon\)</span> times more likely under <span class="math inline">\(D\)</span>.</p>
+<p>For additive noise this quantity has a simple shape. On neighbouring datasets <span class="math inline">\(D \simeq D'\)</span> (two datasets that differ in one person’s record) the mechanism outputs <span class="math inline">\(f(D) + Z\)</span> and <span class="math inline">\(f(D') + Z\)</span>: the <em>same</em> noise placed around two different centres. So the density of <span class="math inline">\(M(D')\)</span> is the density of <span class="math inline">\(M(D)\)</span> slid over by <span class="math inline">\(f(D') - f(D)\)</span>, and the privacy loss is the log-ratio of the noise density and a copy of itself shifted by that amount. <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a> computed this log-ratio for the two noise densities of this chapter, and the two answers are what everything else rests on. For the Laplace density, whose log falls off like <span class="math inline">\(-|z|\)</span>, the log-ratio is bounded by the shift divided by the scale, whatever <span class="math inline">\(y\)</span> is. For the normal density, whose log falls off like <span class="math inline">\(-z^2\)</span>, the log-ratio is a straight line in <span class="math inline">\(y\)</span>: unbounded, but large only far in the tail, where outputs are rare. <a href="#tbl-lg-shifted-pairs" class="quarto-xref">Table&nbsp;<span>20.1</span></a> puts the two side by side for a count, where the shift is 1, so the two centres are 0 and 1.</p>
+<div id="tbl-lg-shifted-pairs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-shifted-pairs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.1: The privacy loss of a count released with Laplace and with Gaussian noise.
+</figcaption>
+<div aria-describedby="tbl-lg-shifted-pairs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Noise</th>
+<th>Privacy loss <span class="math inline">\(L(y)\)</span> for centres 0 and 1</th>
+<th>Largest value</th>
+<th>Guarantee</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{Lap}(b)\)</span></td>
+<td><span class="math inline">\((\lvert y - 1\rvert - \lvert y\rvert)/b\)</span></td>
+<td><span class="math inline">\(1/b\)</span>, for every <span class="math inline">\(y \le 0\)</span></td>
+<td><span class="math inline">\(\varepsilon\)</span>-DP with <span class="math inline">\(\varepsilon = 1/b\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathcal N(0, \sigma^2)\)</span></td>
+<td><span class="math inline">\((1 - 2y)/(2\sigma^2)\)</span></td>
+<td>unbounded as <span class="math inline">\(y \to -\infty\)</span></td>
+<td><span class="math inline">\((\varepsilon, \delta)\)</span>-DP, with <span class="math inline">\(\delta\)</span> set by the tail where <span class="math inline">\(L &gt; \varepsilon\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Both rows come straight from the densities. The Laplace density with scale <span class="math inline">\(b\)</span> is <span class="math inline">\(\frac1{2b}e^{-|z|/b}\)</span>, so the log-ratio at <span class="math inline">\(y\)</span> of the copies centred at 0 and 1 is <span class="math inline">\((|y - 1| - |y|)/b\)</span>; for <span class="math inline">\(y \le 0\)</span> this is <span class="math inline">\(((1 - y) - (-y))/b = 1/b\)</span>, and it never exceeds that. The normal density with variance <span class="math inline">\(\sigma^2\)</span> is proportional to <span class="math inline">\(e^{-z^2/(2\sigma^2)}\)</span>, so the log-ratio is <span class="math inline">\(((y - 1)^2 - y^2)/(2\sigma^2) = (1 - 2y)/(2\sigma^2)\)</span>, which grows without limit as <span class="math inline">\(y\)</span> moves left.</p>
+<p><a href="#tbl-lg-overview" class="quarto-xref">Table&nbsp;<span>20.2</span></a> lists the results of the chapter and where each is used.</p>
+<div id="tbl-lg-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.2: The results of this chapter and where each is used.
+</figcaption>
+<div aria-describedby="tbl-lg-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\ell_1\)</span> and <span class="math inline">\(\ell_2\)</span> sensitivity of counts, sums, means, histograms</td>
+<td>Calibrating every noise-adding mechanism; clipping in <a href="../part03-dp-foundations/06-sensitivity.html">Beyond global sensitivity</a></td>
+</tr>
+<tr class="even">
+<td>Laplace mechanism: <span class="math inline">\(\mathrm{Lap}(\Delta_1 f/\varepsilon)\)</span> gives <span class="math inline">\(\varepsilon\)</span>-DP</td>
+<td>Counts, histograms, low-dimensional statistics; <a href="../part03-dp-foundations/05-selection.html">report-noisy-max</a></td>
+</tr>
+<tr class="odd">
+<td>Laplace accuracy: error <span class="math inline">\(\le (\Delta_1 f/\varepsilon)\ln(d/\beta)\)</span></td>
+<td>Choosing <span class="math inline">\(\varepsilon\)</span> for a target error</td>
+</tr>
+<tr class="even">
+<td>Classic Gaussian calibration <span class="math inline">\(\sigma = \Delta_2 f\sqrt{2\ln(1.25/\delta)}/\varepsilon\)</span></td>
+<td>Reading papers and libraries that still use it</td>
+</tr>
+<tr class="odd">
+<td>Exact <span class="math inline">\(\delta(\varepsilon)\)</span> of the Gaussian mechanism, analytic calibration</td>
+<td>Every Gaussian release; the accountants of <a href="../part04-privacy-accounting/00-introduction.html">Part 4</a></td>
+</tr>
+<tr class="even">
+<td>Laplace against Gaussian in <span class="math inline">\(d\)</span> dimensions</td>
+<td>Choosing the noise for vector-valued queries and gradients</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>What you need.</strong> The definition of <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, its hockey-stick form and neighbouring relations are in <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>; post-processing and basic composition are in <a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>. From Part 1: the Laplace and normal distributions and their shifted copies (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>), their tails (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>), and the hockey-stick divergence with its closed form for two Gaussians (<a href="../part01-prerequisites/03-divergences.html">Divergences</a>). Each of these is restated below where it is used.</p>
+<p><strong>Notation.</strong> <span class="math inline">\(M\)</span> is a mechanism, <span class="math inline">\(D \simeq D'\)</span> are neighbouring datasets, and <span class="math inline">\(f\)</span> is a query with values in <span class="math inline">\(\mathbb R^d\)</span>, a vector of <span class="math inline">\(d\)</span> numbers. <span class="math inline">\(\Phi\)</span> is the standard normal cumulative distribution function (CDF): <span class="math inline">\(\Phi(t)\)</span> is the probability that a standard normal variable is below <span class="math inline">\(t\)</span>. Its density is <span class="math inline">\(\varphi(t) = e^{-t^2/2}/\sqrt{2\pi}\)</span>. Because the normal curve is symmetric about 0, <span class="math inline">\(\Phi(-t) = 1 - \Phi(t)\)</span>.</p>
+<p>The guarantee itself says that no event can be much more likely under one dataset than under its neighbour, except for a small slack <span class="math inline">\(\delta\)</span>. Precisely, <span class="math inline">\(M\)</span> is <strong><span class="math inline">\((\varepsilon, \delta)\)</span>-DP</strong> if for all <span class="math inline">\(D \simeq D'\)</span> and all events <span class="math inline">\(S\)</span>, <span id="eq-auto-03laplacegaussian-3"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta. \tag{20.3}\]</span></span> For one pair of datasets, write <span class="math inline">\(P\)</span> for the distribution of <span class="math inline">\(M(D)\)</span> and <span class="math inline">\(Q\)</span> for that of <span class="math inline">\(M(D')\)</span>. Moving <span class="math inline">\(e^\varepsilon Q(S)\)</span> to the left, the inequality says that <span class="math inline">\(\delta\)</span> must be at least <span class="math inline">\(P(S) - e^\varepsilon Q(S)\)</span> for every event <span class="math inline">\(S\)</span>. So the smallest <span class="math inline">\(\delta\)</span> that works for this pair is the largest value of that difference over all events, <span class="math inline">\(\max_S[P(S) - e^\varepsilon Q(S)]\)</span>. That maximum has a name: it is the <strong>hockey-stick divergence</strong> <span class="math inline">\(E_{e^\varepsilon}(M(D)\|M(D'))\)</span> of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>, which in general is <span class="math inline">\(E_\gamma(P\|Q) = \max_S[P(S) - \gamma Q(S)]\)</span> for <span class="math inline">\(\gamma \ge 1\)</span>. We write <span class="math inline">\(\delta_M(\varepsilon)\)</span> for the largest of these over all neighbouring pairs, the smallest <span class="math inline">\(\delta\)</span> that works for the mechanism as a whole at that <span class="math inline">\(\varepsilon\)</span>. As a function of <span class="math inline">\(\varepsilon\)</span> it is the <strong>privacy curve</strong> of <span class="math inline">\(M\)</span>.</p>
+</section>
+</section>
+<section id="toolkit-three-facts-every-derivation-uses" class="level2" data-number="20.2">
+<h2 data-number="20.2" class="anchored" data-anchor-id="toolkit-three-facts-every-derivation-uses"><span class="header-section-number">20.2</span> Toolkit: three facts every derivation uses</h2>
+<section id="fact-1-additive-noise-reduces-to-one-shifted-pair" class="level3" data-number="20.2.1">
+<h3 data-number="20.2.1" class="anchored" data-anchor-id="fact-1-additive-noise-reduces-to-one-shifted-pair"><span class="header-section-number">20.2.1</span> Fact 1 — Additive noise reduces to one shifted pair</h3>
+<p>When you add noise to an answer, the true answer itself should not matter to privacy, only how far apart the two answers on neighbouring datasets are. Publishing <span class="math inline">\(1234 + Z\)</span> or <span class="math inline">\(1235 + Z\)</span> hides the difference between the two datasets exactly as well as publishing <span class="math inline">\(Z\)</span> or <span class="math inline">\(1 + Z\)</span>, because subtracting 1234 from the output is something anyone can do, and it can be undone.</p>
+<p>In symbols, let <span class="math inline">\(M(D) = f(D) + Z\)</span> where <span class="math inline">\(Z\)</span> has density <span class="math inline">\(g\)</span> on <span class="math inline">\(\mathbb R^d\)</span>, and let <span class="math inline">\(v = f(D') - f(D)\)</span> be the shift between the two answers. Then <span id="eq-auto-03laplacegaussian-4"><span class="math display">\[E_\gamma\big(M(D)\|M(D')\big) = E_\gamma\big(Z\|Z + v\big) \quad\text{for every } \gamma \ge 1. \tag{20.4}\]</span></span></p>
+<p>The proof is that subtracting <span class="math inline">\(f(D)\)</span> just relabels the outputs. The map <span class="math inline">\(y \mapsto y - f(D)\)</span> sends <span class="math inline">\(M(D)\)</span> to <span class="math inline">\(Z\)</span> and <span class="math inline">\(M(D')\)</span> to <span class="math inline">\(Z + v\)</span>, and it is a bijection: every output corresponds to exactly one relabelled output, and back. So an event <span class="math inline">\(S\)</span> about <span class="math inline">\(M\)</span>’s output is the same as the event <span class="math inline">\(S - f(D)\)</span> about the relabelled output, with the same probability under each dataset. The hockey-stick divergence is a maximum of <span class="math inline">\(P(S) - \gamma Q(S)\)</span> over events, and both sides range over the same values, so they are equal. (In the language of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>, the data-processing inequality applies in both directions, so no divergence can change.)</p>
+<p>For the count above, with <span class="math inline">\(f(D) = 1234\)</span> and <span class="math inline">\(f(D') = 1235\)</span>, the true value 1234 drops out and only the shift <span class="math inline">\(v = 1\)</span> remains. This is what makes privacy a property of the noise and of the set of shifts <span class="math inline">\(v\)</span> that neighbouring datasets can produce, and nothing else. <a href="#sec-lg-sensitivity" class="quarto-xref"><span>Section 20.3</span></a> bounds that set.</p>
+</section>
+<section id="fact-2-a-bounded-privacy-loss-gives-pure-dp" class="level3" data-number="20.2.2">
+<h3 data-number="20.2.2" class="anchored" data-anchor-id="fact-2-a-bounded-privacy-loss-gives-pure-dp"><span class="header-section-number">20.2.2</span> Fact 2 — A bounded privacy loss gives pure DP</h3>
+<p>If no single output can favour one dataset by more than a factor <span class="math inline">\(e^\varepsilon\)</span>, then no event can either, because an event is a collection of outputs and its probability is a sum (or integral) over them. Formally, if <span class="math inline">\(|L_{D,D'}(y)| \le \varepsilon\)</span> for every output <span class="math inline">\(y\)</span> and every neighbouring pair, then <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP, which is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span class="math inline">\(\delta = 0\)</span>.</p>
+<p>The proof is one line. <span class="math inline">\(L \le \varepsilon\)</span> means <span class="math inline">\(\ln(p_{M(D)}(y)/p_{M(D')}(y)) \le \varepsilon\)</span>, that is, <span class="math inline">\(p_{M(D)}(y) \le e^\varepsilon p_{M(D')}(y)\)</span> at every <span class="math inline">\(y\)</span>. Integrating both sides over the outputs in <span class="math inline">\(S\)</span> gives <span class="math inline">\(\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S]\)</span>. Only the upper bound <span class="math inline">\(L \le \varepsilon\)</span> is used here. The definition asks for the inequality in both directions, with <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> swapped, but neighbouring is symmetric, so the bound for the pair <span class="math inline">\((D', D)\)</span> supplies the other direction. The Laplace mechanism is proved private exactly this way.</p>
+</section>
+<section id="fact-3-the-bad-event-and-the-exact-delta" class="level3" data-number="20.2.3">
+<h3 data-number="20.2.3" class="anchored" data-anchor-id="fact-3-the-bad-event-and-the-exact-delta"><span class="header-section-number">20.2.3</span> Fact 3 — The bad event, and the exact <span class="math inline">\(\delta\)</span></h3>
+<p>Gaussian noise has an unbounded privacy loss, so Fact 2 does not apply. The way around is to look at the outputs where the loss is too large and count how much probability they carry. Call that set the <strong>bad event</strong>, <span class="math inline">\(B = \{y : L(y) &gt; \varepsilon\}\)</span>: the outputs that favour <span class="math inline">\(D\)</span> over <span class="math inline">\(D'\)</span> by more than a factor <span class="math inline">\(e^\varepsilon\)</span>. With <span class="math inline">\(P = M(D)\)</span> and <span class="math inline">\(Q = M(D')\)</span>, <span id="eq-lg-bad-event"><span class="math display">\[E_{e^\varepsilon}(P\|Q) = P(B) - e^\varepsilon Q(B) \le P(B) = \Pr_{y \sim P}[L(y) &gt; \varepsilon]. \tag{20.5}\]</span></span></p>
+<p>The equality says that the worst event <span class="math inline">\(S\)</span> in the definition of <span class="math inline">\(\delta\)</span> is the bad event itself. The reason is the argument of Fact 3 of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>: <span class="math inline">\(P(S) - e^\varepsilon Q(S)\)</span> is the integral over <span class="math inline">\(S\)</span> of <span class="math inline">\(p(y) - e^\varepsilon q(y)\)</span>. To make that integral as large as possible, include every output where the integrand is positive and no other. The integrand is positive exactly where <span class="math inline">\(p &gt; e^\varepsilon q\)</span>, that is where <span class="math inline">\(L &gt; \varepsilon\)</span>, which is <span class="math inline">\(B\)</span>. The inequality just drops the term <span class="math inline">\(e^\varepsilon Q(B)\)</span>, which is never negative. So the probability of the bad event under <span class="math inline">\(M(D)\)</span> is always a valid <span class="math inline">\(\delta\)</span>, though usually a loose one.</p>
+<p>The same quantity can be written as an average of the privacy loss. Write <span class="math inline">\((x)_+ = \max(x, 0)\)</span> for the positive part. The hockey-stick is the integral of <span class="math inline">\((p - e^\varepsilon q)_+\)</span>. Factor out <span class="math inline">\(q\)</span> to get <span class="math inline">\(q\,(p/q - e^\varepsilon)_+ = q\,(e^L - e^\varepsilon)_+\)</span>, or factor out <span class="math inline">\(p\)</span> to get <span class="math inline">\(p\,(1 - e^\varepsilon q/p)_+ = p\,(1 - e^{\varepsilon - L})_+\)</span>. Integrating, by change of measure, <span id="eq-auto-03laplacegaussian-5"><span class="math display">\[E_{e^\varepsilon}(P\|Q) = \mathbb E_Q[(e^L - e^\varepsilon)_+] = \mathbb E_P[(1 - e^{\varepsilon - L})_+]. \tag{20.6}\]</span></span> The last form needs only samples, or the distribution, of the privacy loss under <span class="math inline">\(P\)</span>, and it is the starting point of <a href="../part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting</a>. In this chapter, the inequality of <a href="#eq-lg-bad-event" class="quarto-xref">Equation&nbsp;<span>20.5</span></a> is the “bad event” argument behind the classic Gaussian calibration, and the equality is the exact calibration.</p>
+</section>
+</section>
+<section id="sec-lg-sensitivity" class="level2" data-number="20.3">
+<h2 data-number="20.3" class="anchored" data-anchor-id="sec-lg-sensitivity"><span class="header-section-number">20.3</span> Sensitivity</h2>
+<section id="context" class="level3" data-number="20.3.1">
+<h3 data-number="20.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">20.3.1</span> Context</h3>
+<p>To hide one record, the noise has to cover the largest change one record can make to the answer. That change is the sensitivity. It depends on the query, on the norm you measure the change in, and on the neighbouring relation (<a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>). Under <strong>add/remove</strong> a neighbour has one record more or less, so the dataset size changes. Under <strong>replace</strong> one record is swapped for another, so the size <span class="math inline">\(n\)</span> is fixed and public.</p>
+</section>
+<section id="definition" class="level3" data-number="20.3.2">
+<h3 data-number="20.3.2" class="anchored" data-anchor-id="definition"><span class="header-section-number">20.3.2</span> Definition</h3>
+<p>The sensitivity is the largest distance between the answers on any two neighbouring datasets. For a vector answer you need a way to measure distance, and two are used: the <span class="math inline">\(\ell_1\)</span> norm <span class="math inline">\(\|v\|_1 = \sum_i|v_i|\)</span>, the total change summed over coordinates, which is what Laplace noise is calibrated to, and the <span class="math inline">\(\ell_2\)</span> norm <span class="math inline">\(\|v\|_2 = \sqrt{\sum_iv_i^2}\)</span>, the straight-line length, which is what Gaussian noise is calibrated to. The <strong><span class="math inline">\(\ell_p\)</span> sensitivity</strong> of <span class="math inline">\(f\)</span> is <span id="eq-auto-03laplacegaussian-6"><span class="math display">\[\Delta_pf = \max_{D \simeq D'}\big\|f(D) - f(D')\big\|_p, \qquad p \in \{1, 2\}. \tag{20.7}\]</span></span> The two norms are never far apart, and how far depends on how the change is spread. For every vector <span class="math inline">\(v \in \mathbb R^d\)</span>, <span class="math inline">\(\|v\|_2 \le \|v\|_1\)</span> (squaring the sum <span class="math inline">\(\sum|v_i|\)</span> gives every <span class="math inline">\(v_i^2\)</span> plus non-negative cross terms) and <span class="math inline">\(\|v\|_1 \le \sqrt d\,\|v\|_2\)</span> (the Cauchy–Schwarz inequality applied to <span class="math inline">\(\sum_i 1\cdot|v_i|\)</span>). Taking the maximum over neighbours, <span id="eq-lg-norms"><span class="math display">\[\Delta_2f \le \Delta_1f \le \sqrt d\,\Delta_2f. \tag{20.8}\]</span></span> The left end is reached when one record moves a single coordinate, the right end when it moves all <span class="math inline">\(d\)</span> coordinates by the same amount.</p>
+</section>
+<section id="derivation-the-standard-queries" class="level3" data-number="20.3.3">
+<h3 data-number="20.3.3" class="anchored" data-anchor-id="derivation-the-standard-queries"><span class="header-section-number">20.3.3</span> Derivation: the standard queries</h3>
+<p>Records take values in a domain <span class="math inline">\(\mathcal X\)</span>. <a href="#tbl-lg-sensitivity" class="quarto-xref">Table&nbsp;<span>20.3</span></a> gives the sensitivities, and the steps below derive each row by asking what the single worst record can do.</p>
+<div id="tbl-lg-sensitivity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-sensitivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.3: Sensitivities of the standard queries under the two neighbouring relations.
+</figcaption>
+<div aria-describedby="tbl-lg-sensitivity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Query</th>
+<th>Add/remove <span class="math inline">\(\Delta_1\)</span></th>
+<th>Add/remove <span class="math inline">\(\Delta_2\)</span></th>
+<th>Replace <span class="math inline">\(\Delta_1\)</span></th>
+<th>Replace <span class="math inline">\(\Delta_2\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Count <span class="math inline">\(\lvert D\rvert\)</span></td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>Sum, records in <span class="math inline">\([0, B]\)</span></td>
+<td><span class="math inline">\(B\)</span></td>
+<td><span class="math inline">\(B\)</span></td>
+<td><span class="math inline">\(B\)</span></td>
+<td><span class="math inline">\(B\)</span></td>
+</tr>
+<tr class="odd">
+<td>Mean, records in <span class="math inline">\([0, B]\)</span>, <span class="math inline">\(n\)</span> public</td>
+<td>—</td>
+<td>—</td>
+<td><span class="math inline">\(B/n\)</span></td>
+<td><span class="math inline">\(B/n\)</span></td>
+</tr>
+<tr class="even">
+<td>Histogram with <span class="math inline">\(k\)</span> bins</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td><span class="math inline">\(\sqrt2\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(d\)</span> threshold counts <span class="math inline">\(\#\{x \ge j\}\)</span>, <span class="math inline">\(j = 1..d\)</span></td>
+<td><span class="math inline">\(d\)</span></td>
+<td><span class="math inline">\(\sqrt d\)</span></td>
+<td><span class="math inline">\(d\)</span></td>
+<td><span class="math inline">\(\sqrt d\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<ol type="1">
+<li><strong>Count.</strong> Adding or removing a record changes <span class="math inline">\(|D|\)</span> by exactly 1. Replacing a record leaves it unchanged, which is why under replace the size is not private and a count of all records needs no noise.</li>
+<li><strong>Sum.</strong> Adding a record <span class="math inline">\(x \in [0, B]\)</span> changes the sum by <span class="math inline">\(x \le B\)</span>. Replacing <span class="math inline">\(x\)</span> by <span class="math inline">\(x'\)</span> changes it by <span class="math inline">\(|x - x'| \le B\)</span>. Both bounds are reached with <span class="math inline">\(x = B\)</span>, <span class="math inline">\(x' = 0\)</span>.</li>
+<li><strong>Mean with public <span class="math inline">\(n\)</span>.</strong> Under replace the mean is the sum divided by the fixed <span class="math inline">\(n\)</span>, so its sensitivity is the sum’s, <span class="math inline">\(B\)</span>, divided by <span class="math inline">\(n\)</span>: <span class="math inline">\(B/n\)</span>. Under add/remove the denominator moves too, so there is no such simple bound; <a href="../../book-exercises/part03-dp-foundations/03-laplace-gaussian.html#sec-sol-lapgauss-1">Exercise 1</a> releases a noisy sum and a noisy count instead.</li>
+<li><strong>Histogram.</strong> Under add/remove the record lands in one bin, so that bin changes by 1 and the others not at all. The change vector is <span class="math inline">\(\pm e_j\)</span>, where <span class="math inline">\(e_j\)</span> is the vector with a 1 in bin <span class="math inline">\(j\)</span> and 0 elsewhere, and both of its norms are 1. Under replace one bin loses 1 and another gains 1: the change is <span class="math inline">\(e_{j'} - e_j\)</span>, with <span class="math inline">\(\ell_1\)</span> norm <span class="math inline">\(1 + 1 = 2\)</span> and <span class="math inline">\(\ell_2\)</span> norm <span class="math inline">\(\sqrt{1^2 + 1^2} = \sqrt2\)</span>.</li>
+<li><strong>Threshold counts.</strong> These are the empirical CDF read off at <span class="math inline">\(d\)</span> thresholds: the count for threshold <span class="math inline">\(j\)</span> is the number of records with <span class="math inline">\(x \ge j\)</span>, so record <span class="math inline">\(x\)</span> adds 1 to every count with <span class="math inline">\(j \le x\)</span>. A record with <span class="math inline">\(x \ge d\)</span> moves all <span class="math inline">\(d\)</span> counts by 1, so the change vector is <span class="math inline">\((1, \dots, 1)\)</span>, with <span class="math inline">\(\ell_1\)</span> norm <span class="math inline">\(d\)</span> and <span class="math inline">\(\ell_2\)</span> norm <span class="math inline">\(\sqrt{d \cdot 1^2} = \sqrt d\)</span>. Under replace, <span class="math inline">\(x \to x'\)</span> moves only the counts with <span class="math inline">\(j\)</span> between the two values, at most <span class="math inline">\(d\)</span> of them, by 1 each, so the same bounds hold.</li>
+</ol>
+<p><strong>A brute-force check.</strong> The script enumerates every dataset of one to three records with values in <span class="math inline">\(\{0, 1, 2, 3\}\)</span>, every neighbour under both relations, and takes the maximum change. With <span class="math inline">\(B = 3\)</span>, <span class="math inline">\(k = 4\)</span> bins and <span class="math inline">\(d = 3\)</span> thresholds it reproduces every row of <a href="#tbl-lg-sensitivity" class="quarto-xref">Table&nbsp;<span>20.3</span></a>: for example <span class="math inline">\(\ell_1 = 2\)</span> and <span class="math inline">\(\ell_2 = 1.4142\)</span> for the histogram under replace, and <span class="math inline">\(\ell_1 = 3\)</span>, <span class="math inline">\(\ell_2 = 1.7321\)</span> for the threshold counts. For the mean of three records under replace it gives <span class="math inline">\(3/3 = 1\)</span>.</p>
+</section>
+<section id="interpretation" class="level3" data-number="20.3.4">
+<h3 data-number="20.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">20.3.4</span> Interpretation</h3>
+<p>Sensitivity is a worst case over datasets. It does not depend on the data you hold, only on what the domain allows. That is why it can be computed before looking at the data, and also why it can be large for unbounded data: the sum of arbitrary real numbers has infinite sensitivity, since one record can be as large as it likes. Clipping, in <a href="../part03-dp-foundations/06-sensitivity.html">Beyond global sensitivity</a>, forces a finite <span class="math inline">\(B\)</span>.</p>
+<p>The neighbouring relation changes the answer by up to a factor of 2. A histogram has <span class="math inline">\(\Delta_1 = 1\)</span> under add/remove and 2 under replace, because replacing is removing one record and adding another. Since the noise is proportional to the sensitivity, a guarantee stated without its neighbouring relation is ambiguous by that factor in <span class="math inline">\(\varepsilon\)</span>.</p>
+<p>Finally, dense queries separate the two norms. When one record moves many coordinates, <span class="math inline">\(\Delta_1\)</span> grows like <span class="math inline">\(d\)</span> but <span class="math inline">\(\Delta_2\)</span> only like <span class="math inline">\(\sqrt d\)</span>, because the <span class="math inline">\(\ell_2\)</span> norm adds squares and then takes a square root. <a href="#sec-lg-high-dim" class="quarto-xref"><span>Section 20.7</span></a> shows that this is exactly when Gaussian noise beats Laplace noise.</p>
+</section>
+<section id="example-the-average-age-of-a-cohort" class="level3" data-number="20.3.5">
+<h3 data-number="20.3.5" class="anchored" data-anchor-id="example-the-average-age-of-a-cohort"><span class="header-section-number">20.3.5</span> Example: the average age of a cohort</h3>
+<p>A study releases the mean age of <span class="math inline">\(n = 1000\)</span> patients, with ages clipped to <span class="math inline">\([0, 100]\)</span>, under replace neighbours. By row 3 of <a href="#tbl-lg-sensitivity" class="quarto-xref">Table&nbsp;<span>20.3</span></a> the sensitivity is <span class="math inline">\(B/n = 100/1000 = 0.1\)</span> year. One patient can move the mean by at most a tenth of a year, however old they are.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="20.3.6">
+<h3 data-number="20.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">20.3.6</span> Check yourself</h3>
+<ul>
+<li>Under add/remove, what is the <span class="math inline">\(\ell_1\)</span> sensitivity of releasing both the count and the sum of records in <span class="math inline">\([0, 1]\)</span>? <em>(Adding a record changes the count by 1 and the sum by at most 1, so the <span class="math inline">\(\ell_1\)</span> norm of the change is at most <span class="math inline">\(1 + 1\)</span>: <span class="math inline">\(\Delta_1 = 2\)</span>.)</em></li>
+<li>A dataset has one row per user, and each user can rate up to 5 of <span class="math inline">\(k\)</span> films. What is <span class="math inline">\(\Delta_1\)</span> and <span class="math inline">\(\Delta_2\)</span> of the vector of <span class="math inline">\(k\)</span> rating counts under add/remove of a user? <em>(One user changes up to 5 counts by 1: <span class="math inline">\(\Delta_1 = 5\)</span>, <span class="math inline">\(\Delta_2 = \sqrt5\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-lg-laplace" class="level2" data-number="20.4">
+<h2 data-number="20.4" class="anchored" data-anchor-id="sec-lg-laplace"><span class="header-section-number">20.4</span> The Laplace mechanism</h2>
+<section id="context-1" class="level3" data-number="20.4.1">
+<h3 data-number="20.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">20.4.1</span> Context</h3>
+<p>The Laplace mechanism is the first mechanism to try. It adds independent Laplace noise to each coordinate, with scale proportional to the <span class="math inline">\(\ell_1\)</span> sensitivity. It works because of the fact from the start of this chapter: the log-ratio of a Laplace density and a shifted copy is bounded by the shift divided by the scale (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>), and a bounded log-ratio is exactly what pure DP asks for (Dwork, McSherry, Nissim &amp; Smith 2006).</p>
+</section>
+<section id="statement" class="level3" data-number="20.4.2">
+<h3 data-number="20.4.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">20.4.2</span> Statement</h3>
+<p>The <strong>Laplace distribution</strong> <span class="math inline">\(\mathrm{Lap}(b)\)</span> with scale <span class="math inline">\(b\)</span> has density <span class="math inline">\(\frac1{2b}e^{-|z|/b}\)</span>: a two-sided exponential, peaked at 0. Choose the scale so that the largest shift one record can cause, <span class="math inline">\(\Delta_1f\)</span>, divided by the scale is exactly <span class="math inline">\(\varepsilon\)</span>. For <span class="math inline">\(f: \mathcal D \to \mathbb R^d\)</span> with <span class="math inline">\(\ell_1\)</span> sensitivity <span class="math inline">\(\Delta_1f\)</span>, the <strong>Laplace mechanism</strong> <span id="eq-lg-laplace"><span class="math display">\[M(D) = f(D) + (Z_1, \dots, Z_d), \qquad Z_i \overset{\text{i.i.d.}}{\sim}\mathrm{Lap}(b), \quad b = \frac{\Delta_1f}{\varepsilon}, \tag{20.9}\]</span></span> is <span class="math inline">\(\varepsilon\)</span>-DP. (i.i.d. means independent and identically distributed.) Its error per coordinate is about <span class="math inline">\(b\)</span>, and a tail bound controls the largest error over all <span class="math inline">\(d\)</span> coordinates: for every failure probability <span class="math inline">\(\beta \in (0, 1)\)</span>, <span id="eq-auto-03laplacegaussian-7"><span class="math display">\[\mathbb E|Z_i| = b, \qquad \operatorname{Var}Z_i = 2b^2, \qquad \Pr\Big[\max_i|Z_i| &gt; b\ln\frac d\beta\Big] \le \beta. \tag{20.10}\]</span></span> No smaller scale works in general: for a count, <span class="math inline">\(b &lt; 1/\varepsilon\)</span> violates <span class="math inline">\(\varepsilon\)</span>-DP.</p>
+</section>
+<section id="derivation" class="level3" data-number="20.4.3">
+<h3 data-number="20.4.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">20.4.3</span> Derivation</h3>
+<p><strong>Privacy.</strong> The plan is to write the privacy loss down, bound it at every output by the triangle inequality, and then use Fact 2.</p>
+<ol type="1">
+<li><strong>Write the two densities.</strong> Fix <span class="math inline">\(D \simeq D'\)</span> and write <span class="math inline">\(a = f(D)\)</span> and <span class="math inline">\(a' = f(D')\)</span> for the two true answers. The coordinates of the noise are independent, so the density of <span class="math inline">\(M(D)\)</span> at <span class="math inline">\(y\)</span> is the product <span class="math inline">\(\prod_i\frac{1}{2b}e^{-|y_i - a_i|/b}\)</span>, and that of <span class="math inline">\(M(D')\)</span> is the same with <span class="math inline">\(a'\)</span> in place of <span class="math inline">\(a\)</span>.</li>
+<li><strong>Take the log-ratio.</strong> The constants <span class="math inline">\(\frac1{2b}\)</span> cancel, and the log of a product of exponentials is the sum of the exponents, so <span id="eq-auto-03laplacegaussian-8"><span class="math display">\[L_{D,D'}(y) = \frac1b\sum_{i=1}^d\big(|y_i - a'_i| - |y_i - a_i|\big). \tag{20.11}\]</span></span></li>
+<li><strong>Bound each term.</strong> The distance from <span class="math inline">\(y_i\)</span> to <span class="math inline">\(a'_i\)</span> is at most the distance from <span class="math inline">\(y_i\)</span> to <span class="math inline">\(a_i\)</span> plus the distance from <span class="math inline">\(a_i\)</span> to <span class="math inline">\(a'_i\)</span> (the triangle inequality, <span class="math inline">\(|y_i - a'_i| \le |y_i - a_i| + |a_i - a'_i|\)</span>). So each term in the sum is at most <span class="math inline">\(|a_i - a'_i|\)</span>, whatever <span class="math inline">\(y\)</span> is.</li>
+<li><strong>Add the terms.</strong> Summing over <span class="math inline">\(i\)</span> gives the <span class="math inline">\(\ell_1\)</span> norm of the shift, which is at most the sensitivity: <span class="math inline">\(L_{D,D'}(y) \le \|a - a'\|_1/b \le \Delta_1f/b = \varepsilon\)</span>, for every <span class="math inline">\(y\)</span>.</li>
+<li><strong>Conclude.</strong> The privacy loss is at most <span class="math inline">\(\varepsilon\)</span> at every output, so Fact 2 gives <span class="math inline">\(\varepsilon\)</span>-DP.</li>
+</ol>
+<p><strong>Concretely, for a count.</strong> Take <span class="math inline">\(f(D) = 0\)</span>, <span class="math inline">\(f(D') = 1\)</span> and <span class="math inline">\(b = 1\)</span>, so <span class="math inline">\(\varepsilon = 1\)</span>. <a href="#tbl-lg-laplace-points" class="quarto-xref">Table&nbsp;<span>20.4</span></a> evaluates the two densities and the privacy loss at a few outputs.</p>
+<div id="tbl-lg-laplace-points" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-laplace-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.4: The Laplace mechanism for a count with <span class="math inline">\(b = 1\)</span>: densities and privacy loss at five outputs.
+</figcaption>
+<div aria-describedby="tbl-lg-laplace-points-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Output <span class="math inline">\(y\)</span></th>
+<th><span class="math inline">\(-2\)</span></th>
+<th><span class="math inline">\(0\)</span></th>
+<th><span class="math inline">\(0.5\)</span></th>
+<th><span class="math inline">\(1\)</span></th>
+<th><span class="math inline">\(3\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(p_{M(D)}(y) = \frac12e^{-\lvert y\rvert}\)</span></td>
+<td>0.0677</td>
+<td>0.5</td>
+<td>0.3033</td>
+<td>0.1839</td>
+<td>0.0249</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(p_{M(D')}(y) = \frac12e^{-\lvert y - 1\rvert}\)</span></td>
+<td>0.0249</td>
+<td>0.1839</td>
+<td>0.3033</td>
+<td>0.5</td>
+<td>0.0677</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(L(y) = \lvert y - 1\rvert - \lvert y\rvert\)</span></td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td><span class="math inline">\(-1\)</span></td>
+<td><span class="math inline">\(-1\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Left of both true answers the ratio of the densities is stuck at <span class="math inline">\(e^1\)</span> (for example <span class="math inline">\(0.0677/0.0249\)</span> at <span class="math inline">\(y = -2\)</span>), right of them at <span class="math inline">\(e^{-1}\)</span>, and in between the privacy loss <span class="math inline">\(1 - 2y\)</span> falls linearly from 1 to <span class="math inline">\(-1\)</span>, so the ratio <span class="math inline">\(e^{1-2y}\)</span> passes through 1 at the midpoint <span class="math inline">\(y = 0.5\)</span>. The ratio stops growing because, once <span class="math inline">\(y\)</span> is past both centres, moving it further away multiplies both densities by the same factor. However far out an output lands, it never favours one dataset by more than a factor of <span class="math inline">\(e\)</span>.</p>
+<p><strong>Accuracy.</strong> The error is the noise itself, so you need facts about the Laplace distribution (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>). Its absolute value <span class="math inline">\(|Z_i|\)</span> has density <span class="math inline">\(\frac1be^{-z/b}\)</span> on <span class="math inline">\(z \ge 0\)</span>, an exponential distribution with mean <span class="math inline">\(b\)</span> and second moment <span class="math inline">\(2b^2\)</span>; since <span class="math inline">\(Z_i\)</span> has mean 0, that gives <span class="math inline">\(\mathbb E|Z_i| = b\)</span> and <span class="math inline">\(\operatorname{Var}Z_i = 2b^2\)</span>. Integrating the same density from <span class="math inline">\(t\)</span> to infinity gives the tail <span class="math inline">\(\Pr[|Z_i| &gt; t] = e^{-t/b}\)</span>. To bound all <span class="math inline">\(d\)</span> coordinates at once, give each coordinate a share <span class="math inline">\(\beta/d\)</span> of the failure probability: setting <span class="math inline">\(e^{-t/b} = \beta/d\)</span> gives <span class="math inline">\(t = b\ln(d/\beta)\)</span>. The probability that at least one of the <span class="math inline">\(d\)</span> coordinates fails is at most the sum of their failure probabilities (the union bound), <span class="math inline">\(d \cdot \beta/d = \beta\)</span>.</p>
+<p><strong>Tightness.</strong> To show that no smaller scale works, find an event whose probability ratio is as large as the bound allows. The outputs where the loss is largest are those left of both answers, so take a count with <span class="math inline">\(f(D) = 0\)</span> and <span class="math inline">\(f(D') = 1\)</span> and the event <span class="math inline">\(S = \{y \le 0\}\)</span>. Under <span class="math inline">\(\mathrm{Lap}(b)\)</span> noise, <span class="math inline">\(\Pr[M(D) \in S] = \Pr[Z \le 0] = \frac12\)</span>, by symmetry of the noise about 0, and <span class="math inline">\(\Pr[M(D') \in S] = \Pr[Z \le -1] = \frac12e^{-1/b}\)</span>, from the tail above. So the ratio is exactly <span class="math inline">\(e^{1/b}\)</span>. On <span class="math inline">\(S\)</span> the privacy loss is <span class="math inline">\((|y - 1| - |y|)/b = 1/b\)</span> at every point: the bound of step 4 holds with equality on half the mass of <span class="math inline">\(M(D)\)</span>. If <span class="math inline">\(b &lt; 1/\varepsilon\)</span>, the ratio <span class="math inline">\(e^{1/b}\)</span> exceeds <span class="math inline">\(e^\varepsilon\)</span> and the definition fails on this event (<a href="../../book-exercises/part03-dp-foundations/03-laplace-gaussian.html#sec-sol-lapgauss-2">Exercise 2</a>).</p>
+</section>
+<section id="interpretation-1" class="level3" data-number="20.4.4">
+<h3 data-number="20.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">20.4.4</span> Interpretation</h3>
+<p>The noise does not depend on <span class="math inline">\(n\)</span>. A count gets noise of scale <span class="math inline">\(1/\varepsilon\)</span> whether the database has a hundred records or a hundred million, because one record moves a count by 1 either way. The <em>relative</em> error of a count of size <span class="math inline">\(n\)</span> is therefore about <span class="math inline">\((1/\varepsilon)/n = 1/(n\varepsilon)\)</span>, so large populations are cheap to protect and small subgroups are expensive.</p>
+<p>The worst case is not rare. For the Laplace mechanism the privacy loss equals <span class="math inline">\(\varepsilon\)</span> on a set of probability <span class="math inline">\(\frac12\)</span> (<a href="#fig-lg-privacy-loss" class="quarto-xref">Figure&nbsp;<span>20.1</span></a>, left), the event <span class="math inline">\(S\)</span> of the tightness argument. The guarantee is tight in the strongest sense, not just at some unlikely output.</p>
+<p>The mechanism also satisfies a whole curve of weaker guarantees. Asked for a smaller <span class="math inline">\(\varepsilon' &lt; \varepsilon\)</span>, it is not <span class="math inline">\(\varepsilon'\)</span>-DP, but it is <span class="math inline">\((\varepsilon', \delta)\)</span>-DP with <span id="eq-auto-03laplacegaussian-9"><span class="math display">\[\delta = 1 - e^{-(\varepsilon - \varepsilon')/2}. \tag{20.12}\]</span></span> This is the hockey-stick divergence of a Laplace pair from <a href="../part01-prerequisites/03-divergences.html">Divergences</a>, with shift in units of the scale <span class="math inline">\(t = \Delta_1f/b = \varepsilon\)</span>, and Fact 3 explains where it comes from. With <span class="math inline">\(b = 1\)</span> and centres 0 and <span class="math inline">\(t\)</span>, the loss is <span class="math inline">\(t\)</span> left of 0 and falls linearly as <span class="math inline">\(t - 2y\)</span> between the centres, so the bad event <span class="math inline">\(\{L &gt; \varepsilon'\}\)</span> is <span class="math inline">\(\{y &lt; (t - \varepsilon')/2\}\)</span>. Its mass under <span class="math inline">\(M(D)\)</span> is <span class="math inline">\(1 - \frac12e^{-(t - \varepsilon')/2}\)</span> and under <span class="math inline">\(M(D')\)</span> is <span class="math inline">\(\frac12e^{-(t + \varepsilon')/2}\)</span>; multiplying the second by <span class="math inline">\(e^{\varepsilon'}\)</span> gives <span class="math inline">\(\frac12e^{-(t - \varepsilon')/2}\)</span>, and the difference is <span class="math inline">\(1 - e^{-(t - \varepsilon')/2}\)</span>. <a href="#fig-lg-delta-curves" class="quarto-xref">Figure&nbsp;<span>20.2</span></a> draws it as the dashed curve that hits zero at <span class="math inline">\(\varepsilon' = \varepsilon\)</span>.</p>
+<p>Why this shape of noise? What the proof used is that the log-density changes by at most <span class="math inline">\(\varepsilon/\Delta_1f\)</span> per unit of shift. Any density with that property would do, and the Laplace log-density <span class="math inline">\(-|z|/b\)</span> has exactly that slope everywhere. Other shapes are slightly better for large <span class="math inline">\(\varepsilon\)</span> (Geng &amp; Viswanath’s staircase mechanism), but the Laplace is within a small factor and is the standard choice.</p>
+<div id="fig-lg-privacy-loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lg-privacy-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/lapgauss_privacy_loss.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lg-privacy-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20.1: Left column: a count released with <span class="math inline">\(\mathrm{Lap}(1)\)</span> noise on neighbouring datasets with true counts 0 and 1, and the privacy loss <span class="math inline">\(L(y)\)</span>. It equals <span class="math inline">\(+\varepsilon\)</span> for every <span class="math inline">\(y \le 0\)</span> and <span class="math inline">\(-\varepsilon\)</span> for every <span class="math inline">\(y \ge 1\)</span>, never more. Right column: the same count with <span class="math inline">\(\mathcal N(0, 2^2)\)</span> noise. The privacy loss is a straight line, and exceeds <span class="math inline">\(\varepsilon = 1\)</span> on the shaded tail, which has probability 0.0401 under <span class="math inline">\(M(D)\)</span>. The exact <span class="math inline">\(\delta(1) = 0.0068\)</span> is smaller, because the hockey-stick subtracts <span class="math inline">\(e^\varepsilon\)</span> times the mass of <span class="math inline">\(M(D')\)</span> on the same tail.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-counts-and-a-histogram" class="level3" data-number="20.4.5">
+<h3 data-number="20.4.5" class="anchored" data-anchor-id="example-counts-and-a-histogram"><span class="header-section-number">20.4.5</span> Example: counts and a histogram</h3>
+<p><strong>A count.</strong> 1,234 of the hospital’s <span class="math inline">\(n = 10{,}000\)</span> patients have diabetes. Released with <span class="math inline">\(\varepsilon = 0.1\)</span> under add/remove, the sensitivity is 1, so the noise is <span class="math inline">\(\mathrm{Lap}(1/0.1) = \mathrm{Lap}(10)\)</span>. The expected absolute error is <span class="math inline">\(b = 10\)</span> (simulated over a million releases: 9.978). For a 95% guarantee take <span class="math inline">\(d = 1\)</span> and <span class="math inline">\(\beta = 0.05\)</span> in the accuracy bound: with probability 0.95 the error is below <span class="math inline">\(b\ln(1/0.05) = b\ln20 = 29.96\)</span> (simulated 95th percentile: 29.85). That is a relative error of <span class="math inline">\(29.96/1234 = 0.0243\)</span>.</p>
+<p><strong>The tight event, simulated.</strong> With <span class="math inline">\(b = 1\)</span> (<span class="math inline">\(\varepsilon = 1\)</span>), a million draws give <span class="math inline">\(\Pr[M(D) \le 0] = 0.5002\)</span> and <span class="math inline">\(\Pr[M(D') \le 0] = 0.1838\)</span>, against the exact <span class="math inline">\(\frac12\)</span> and <span class="math inline">\(\frac12e^{-1}\)</span>. Their ratio is 2.7221 against <span class="math inline">\(e = 2.7183\)</span>.</p>
+<p><strong>A histogram.</strong> A histogram of diagnoses with 20 bins, <span class="math inline">\(\varepsilon = 1\)</span> and add/remove has <span class="math inline">\(\Delta_1 = 1\)</span>, so each bin gets <span class="math inline">\(\mathrm{Lap}(1)\)</span> noise. With <span class="math inline">\(d = 20\)</span> and <span class="math inline">\(\beta = 0.05\)</span>, every bin is within <span class="math inline">\(\ln(20/0.05) = 5.99\)</span> of its true count with probability 0.95. In 20,000 simulated releases the maximum error exceeded 5.99 in a fraction 0.0464 of them, just under <span class="math inline">\(\beta\)</span>. The union bound adds the failure probabilities as if failures never happened together; for independent coordinates they rarely do, so the bound is nearly exact.</p>
+<p><strong>The cohort mean.</strong> With sensitivity 0.1 from <a href="#sec-lg-sensitivity" class="quarto-xref"><span>Section 20.3</span></a> and <span class="math inline">\(\varepsilon = 1\)</span>, the scale is <span class="math inline">\(b = 0.1/1 = 0.1\)</span>, and the mean age is accurate to <span class="math inline">\(\pm 0.1\ln20 = \pm0.2996\)</span> years with probability 0.95.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="20.4.6">
+<h3 data-number="20.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">20.4.6</span> Check yourself</h3>
+<ul>
+<li>A histogram under <em>replace</em> neighbours, <span class="math inline">\(\varepsilon = 1\)</span>. What Laplace scale do you need? <em>(<span class="math inline">\(\Delta_1 = 2\)</span>, so <span class="math inline">\(b = 2/1 = 2\)</span>: twice the add/remove noise.)</em></li>
+<li>You release 10 independent counts, each with <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> noise, and every record can affect all 10. What is the guarantee of the release as a whole? <em>(The vector has <span class="math inline">\(\Delta_1 = 10\)</span>, so by step 4 of the derivation the loss is at most <span class="math inline">\(10/(1/\varepsilon) = 10\varepsilon\)</span>: the release is <span class="math inline">\(10\varepsilon\)</span>-DP. That is the same as basic composition of ten <span class="math inline">\(\varepsilon\)</span>-DP releases in <a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>, which adds up the <span class="math inline">\(\varepsilon\)</span>s.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-lg-gauss-classic" class="level2" data-number="20.5">
+<h2 data-number="20.5" class="anchored" data-anchor-id="sec-lg-gauss-classic"><span class="header-section-number">20.5</span> The Gaussian mechanism: classic calibration</h2>
+<section id="context-2" class="level3" data-number="20.5.1">
+<h3 data-number="20.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">20.5.1</span> Context</h3>
+<p>Gaussian noise is the other natural choice. It has lighter tails than Laplace noise, a sum of independent Gaussians is again Gaussian, and it is calibrated to the <span class="math inline">\(\ell_2\)</span> sensitivity, which can be much smaller than the <span class="math inline">\(\ell_1\)</span> sensitivity. The price is that its privacy loss is a straight line in the output and so is unbounded (<a href="#fig-lg-privacy-loss" class="quarto-xref">Figure&nbsp;<span>20.1</span></a>, right): Fact 2 never applies, and Gaussian noise cannot give pure DP. Instead, you accept a small probability <span class="math inline">\(\delta\)</span> that the loss exceeds <span class="math inline">\(\varepsilon\)</span>. This section derives the calibration found in the textbook of Dwork &amp; Roth and in many papers and libraries, and shows where it is loose.</p>
+</section>
+<section id="statement-1" class="level3" data-number="20.5.2">
+<h3 data-number="20.5.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">20.5.2</span> Statement</h3>
+<p>Write <span class="math inline">\(\mathcal N(0, \sigma^2I_d)\)</span> for <span class="math inline">\(d\)</span> independent normal coordinates, each with mean 0 and standard deviation <span class="math inline">\(\sigma\)</span>. The noise must grow with the <span class="math inline">\(\ell_2\)</span> sensitivity and shrink as <span class="math inline">\(\varepsilon\)</span> grows, and it grows only slowly, like a square root of a logarithm, as <span class="math inline">\(\delta\)</span> shrinks. Let <span class="math inline">\(\varepsilon \in (0, 1)\)</span> and <span class="math inline">\(\delta \in (0, 1)\)</span>. The <strong>Gaussian mechanism</strong> <span class="math inline">\(M(D) = f(D) + Z\)</span> with <span class="math inline">\(Z \sim \mathcal N(0, \sigma^2I_d)\)</span> and <span id="eq-lg-classic"><span class="math display">\[\sigma = \frac{\Delta_2f\sqrt{2\ln(1.25/\delta)}}{\varepsilon} \tag{20.13}\]</span></span> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP (Dwork &amp; Roth 2014, Theorem A.1).</p>
+</section>
+<section id="derivation-1" class="level3" data-number="20.5.3">
+<h3 data-number="20.5.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">20.5.3</span> Derivation</h3>
+<p>The plan is to work out the distribution of the privacy loss, which turns out to be normal, bound <span class="math inline">\(\delta\)</span> by the probability that it exceeds <span class="math inline">\(\varepsilon\)</span> (the bad event of Fact 3), and then show with a standard normal tail bound that this probability is below <span class="math inline">\(\delta\)</span> for the <span class="math inline">\(\sigma\)</span> above. The route is the same as Dwork &amp; Roth’s, in a one-sided form that is a little shorter. Write <span class="math inline">\(c = \sqrt{2\ln(1.25/\delta)}\)</span>, so <span class="math inline">\(\sigma = c\,\Delta_2f/\varepsilon\)</span>.</p>
+<ol type="1">
+<li><strong>Find the privacy loss.</strong> By Fact 1, only the shift <span class="math inline">\(v = f(D') - f(D)\)</span> matters. Under <span class="math inline">\(M(D)\)</span>, write the output as <span class="math inline">\(y = f(D) + z\)</span>, where <span class="math inline">\(z\)</span> is the noise. The density of <span class="math inline">\(M(D)\)</span> at <span class="math inline">\(y\)</span> is proportional to <span class="math inline">\(e^{-\|z\|^2/(2\sigma^2)}\)</span>, and that of <span class="math inline">\(M(D')\)</span> to <span class="math inline">\(e^{-\|z - v\|^2/(2\sigma^2)}\)</span>, since <span class="math inline">\(y\)</span> sits at distance <span class="math inline">\(z - v\)</span> from <span class="math inline">\(f(D')\)</span>. The log of their ratio is the difference of exponents, and expanding <span class="math inline">\(\|z - v\|^2 = \|z\|^2 - 2\langle z, v\rangle + \|v\|^2\)</span> gives <span id="eq-auto-03laplacegaussian-10"><span class="math display">\[L(y) = \frac{\|z - v\|^2 - \|z\|^2}{2\sigma^2} = \frac{\|v\|^2 - 2\langle z, v\rangle}{2\sigma^2}. \tag{20.14}\]</span></span> The loss depends on <span class="math inline">\(z\)</span> only through the inner product <span class="math inline">\(\langle z, v\rangle = \sum_iz_iv_i\)</span>, the component of the noise along the shift. That is a sum of independent normals, so it is normal, with mean 0 and variance <span class="math inline">\(\sum_i\sigma^2v_i^2 = \sigma^2\|v\|^2\)</span>. A constant minus a multiple of a normal is normal, so the privacy loss under <span class="math inline">\(M(D)\)</span> is normal, with mean <span class="math inline">\(\|v\|^2/(2\sigma^2)\)</span> and variance <span class="math inline">\(4\sigma^2\|v\|^2/(4\sigma^4) = \|v\|^2/\sigma^2\)</span>. Writing <span class="math inline">\(\mu = \|v\|/\sigma\)</span> for the shift measured in standard deviations of the noise, <span id="eq-auto-03laplacegaussian-11"><span class="math display">\[L \sim \mathcal N\Big(\frac{\mu^2}2, \mu^2\Big), \qquad \mu = \frac{\|v\|}{\sigma}. \tag{20.15}\]</span></span> This is the one-dimensional result of <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a> with standardized shift <span class="math inline">\(\mu\)</span>; the other <span class="math inline">\(d - 1\)</span> directions of <span class="math inline">\(z\)</span>, perpendicular to <span class="math inline">\(v\)</span>, do not enter.</li>
+<li><strong>Bound <span class="math inline">\(\delta\)</span> by the bad event</strong> (Fact 3). The probability that the loss exceeds <span class="math inline">\(\varepsilon\)</span> is a normal tail. Standardize it, subtracting the mean <span class="math inline">\(\mu^2/2\)</span> and dividing by the standard deviation <span class="math inline">\(\mu\)</span>: <span class="math inline">\(L &gt; \varepsilon\)</span> exactly when a standard normal exceeds <span class="math inline">\((\varepsilon - \mu^2/2)/\mu = \frac\varepsilon\mu - \frac\mu2\)</span>. So <span class="math inline">\(\delta \le \Pr[L &gt; \varepsilon] = \Pr\big[\mathcal N(0, 1) &gt; \frac\varepsilon\mu - \frac\mu2\big] = \Phi(-t)\)</span> with <span class="math inline">\(t = \frac\varepsilon\mu - \frac\mu2\)</span>, using the symmetry of the normal curve to write the upper tail beyond <span class="math inline">\(t\)</span> as <span class="math inline">\(\Phi(-t)\)</span>.</li>
+<li><strong>Take the worst shift.</strong> A larger shift makes the bad event more likely: <span class="math inline">\(t\)</span> decreases as <span class="math inline">\(\mu\)</span> grows, since both <span class="math inline">\(\varepsilon/\mu\)</span> and <span class="math inline">\(-\mu/2\)</span> fall. So the worst neighbouring pair has the largest shift, <span class="math inline">\(\|v\| = \Delta_2f\)</span>, that is <span class="math inline">\(\mu = \Delta_2f/\sigma = \varepsilon/c\)</span>. Substituting, <span class="math inline">\(t = \varepsilon \cdot c/\varepsilon - \frac{\varepsilon}{2c} = c - \frac{\varepsilon}{2c}\)</span>.</li>
+<li><strong>Bound the normal tail.</strong> The Mills-ratio bound of <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> says <span class="math inline">\(\Phi(-t) \le \varphi(t)/t\)</span> for <span class="math inline">\(t &gt; 0\)</span>. The reason is that beyond <span class="math inline">\(t\)</span> every point <span class="math inline">\(z\)</span> has <span class="math inline">\(z/t \ge 1\)</span>, so <span class="math inline">\(\int_t^\infty\varphi(z)\,dz \le \int_t^\infty\frac zt\varphi(z)\,dz\)</span>, and since the derivative of <span class="math inline">\(\varphi(z)\)</span> is <span class="math inline">\(-z\varphi(z)\)</span>, the right side integrates to <span class="math inline">\(\varphi(t)/t\)</span>. So <span class="math inline">\(\Phi(-t) \le \frac{e^{-t^2/2}}{t\sqrt{2\pi}}\)</span>.</li>
+<li><strong>Expand <span class="math inline">\(t^2\)</span>.</strong> Squaring <span class="math inline">\(t = c - \varepsilon/(2c)\)</span> gives <span class="math inline">\(t^2 = c^2 - \varepsilon + \frac{\varepsilon^2}{4c^2} \ge c^2 - \varepsilon\)</span>, dropping the last term because it is positive. So <span class="math inline">\(e^{-t^2/2} \le e^{-c^2/2}e^{\varepsilon/2}\)</span>. By the definition of <span class="math inline">\(c\)</span>, <span class="math inline">\(c^2/2 = \ln(1.25/\delta)\)</span>, so <span class="math inline">\(e^{-c^2/2} = \delta/1.25\)</span>, and <span class="math inline">\(e^{-t^2/2} \le \frac{\delta}{1.25}e^{\varepsilon/2}\)</span>.</li>
+<li><strong>Combine.</strong> Putting steps 4 and 5 together, <span id="eq-auto-03laplacegaussian-12"><span class="math display">\[\Pr[L &gt; \varepsilon] \le \delta\cdot\frac{e^{\varepsilon/2}}{1.25\sqrt{2\pi}\,t}. \tag{20.16}\]</span></span> This is at most <span class="math inline">\(\delta\)</span> when the fraction is at most 1, that is when <span class="math inline">\(t \ge e^{\varepsilon/2}/(1.25\sqrt{2\pi})\)</span>. For <span class="math inline">\(\varepsilon \le 1\)</span> the right side is at most <span class="math inline">\(e^{1/2}/(1.25\sqrt{2\pi}) = 0.5262\)</span>.</li>
+<li><strong>Check that <span class="math inline">\(t\)</span> is large enough.</strong> It remains to show <span class="math inline">\(t \ge 0.5262\)</span>. For <span class="math inline">\(\varepsilon \le 1\)</span>, <span class="math inline">\(t = c - \varepsilon/(2c) \ge c - 1/(2c)\)</span>, and this lower bound grows with <span class="math inline">\(c\)</span>. It equals 0.5262 at the positive root of the quadratic <span class="math inline">\(c^2 - 0.5262c - \frac12 = 0\)</span> (multiply <span class="math inline">\(c - 1/(2c) = 0.5262\)</span> by <span class="math inline">\(c\)</span>). Since <span class="math inline">\(c\)</span> grows as <span class="math inline">\(\delta\)</span> shrinks, <span class="math inline">\(t\)</span> is large enough whenever <span class="math inline">\(\delta \le 0.7448\)</span>, the value of <span class="math inline">\(\delta\)</span> that puts <span class="math inline">\(c\)</span> at that root. Every <span class="math inline">\(\delta\)</span> of practical interest qualifies.</li>
+</ol>
+<p>The constant 1.25 is there to absorb <span class="math inline">\(e^{\varepsilon/2} \le e^{1/2}\)</span> and the <span class="math inline">\(1/(t\sqrt{2\pi})\)</span> factor of step 6, and the condition <span class="math inline">\(\varepsilon &lt; 1\)</span> is what keeps <span class="math inline">\(e^{\varepsilon/2}\)</span> under control.</p>
+</section>
+<section id="interpretation-three-sources-of-slack" class="level3" data-number="20.5.4">
+<h3 data-number="20.5.4" class="anchored" data-anchor-id="interpretation-three-sources-of-slack"><span class="header-section-number">20.5.4</span> Interpretation: three sources of slack</h3>
+<p>The proof made three approximations in a row: it replaced the exact <span class="math inline">\(\delta\)</span> by the bad-event probability, replaced that by the Mills-ratio bound, and then replaced the Mills bound by the target <span class="math inline">\(\delta\)</span> using the constants. To see how much each one costs, follow the chain at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>. There <span class="math inline">\(c = \sqrt{2\ln(1.25 \times 10^5)}\)</span>, so <span class="math inline">\(\sigma = 4.8448\,\Delta_2f\)</span> and <span class="math inline">\(t = c - 1/(2c) = 4.7416\)</span>:</p>
+<div id="tbl-lg-classic-chain" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-classic-chain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.5: The classic proof at <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>, step by step.
+</figcaption>
+<div aria-describedby="tbl-lg-classic-chain-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Quantity</th>
+<th>Value</th>
+<th>What was dropped to get the next line</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exact <span class="math inline">\(\delta(\varepsilon)\)</span>, the hockey-stick</td>
+<td><span class="math inline">\(4.11\times10^{-8}\)</span></td>
+<td>the term <span class="math inline">\(e^\varepsilon Q(B)\)</span> of <a href="#eq-lg-bad-event" class="quarto-xref">Equation&nbsp;<span>20.5</span></a></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\Pr[L &gt; \varepsilon] = \Phi(-t)\)</span></td>
+<td><span class="math inline">\(1.06\times10^{-6}\)</span></td>
+<td>the Mills-ratio approximation</td>
+</tr>
+<tr class="odd">
+<td>Mills bound <span class="math inline">\(\varphi(t)/t\)</span></td>
+<td><span class="math inline">\(1.10\times10^{-6}\)</span></td>
+<td>the constants <span class="math inline">\(e^{\varepsilon/2}\)</span>, 1.25 and <span class="math inline">\(t\sqrt{2\pi}\)</span></td>
+</tr>
+<tr class="even">
+<td>Target <span class="math inline">\(\delta\)</span></td>
+<td><span class="math inline">\(10^{-5}\)</span></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The classic <span class="math inline">\(\sigma\)</span> delivers a <span class="math inline">\(\delta\)</span> about 240 times smaller than asked for (<a href="#tbl-lg-classic-chain" class="quarto-xref">Table&nbsp;<span>20.5</span></a>: <span class="math inline">\(10^{-5}/(4.11\times10^{-8}) \approx 243\)</span>). Most of the slack is in two places. The bad-event bound throws away the <span class="math inline">\(e^\varepsilon Q(B)\)</span> correction, a factor of <span class="math inline">\(1.06\times10^{-6}/(4.11\times10^{-8}) \approx 26\)</span> here, and the constants of steps 5–6 lose another factor of <span class="math inline">\(10^{-5}/(1.10\times10^{-6}) \approx 9\)</span>. The Mills ratio itself costs almost nothing. Equivalently, you could use less noise for the same <span class="math inline">\((\varepsilon, \delta)\)</span>. <a href="#sec-lg-analytic" class="quarto-xref"><span>Section 20.6</span></a> finds exactly how much less.</p>
+<p>The classic theorem is stated for <span class="math inline">\(\varepsilon &lt; 1\)</span>, and its constants are designed for that range. The formula does not fail immediately above 1: the script finds that at <span class="math inline">\(\delta = 10^{-5}\)</span> the classic <span class="math inline">\(\sigma\)</span> still gives a valid guarantee up to <span class="math inline">\(\varepsilon = 8.42\)</span>, and violates it beyond (<a href="#fig-lg-calibration" class="quarto-xref">Figure&nbsp;<span>20.3</span></a>, right). But nothing in the classic proof tells you that, so for <span class="math inline">\(\varepsilon \ge 1\)</span> you need the exact curve.</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="20.5.5">
+<h3 data-number="20.5.5" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">20.5.5</span> Check yourself</h3>
+<ul>
+<li>Halving <span class="math inline">\(\delta\)</span> from <span class="math inline">\(10^{-5}\)</span> to <span class="math inline">\(5\times10^{-6}\)</span>: by what factor does the classic <span class="math inline">\(\sigma\)</span> grow? <em>(<span class="math inline">\(\sigma\)</span> is proportional to <span class="math inline">\(\sqrt{\ln(1.25/\delta)}\)</span>, so the factor is <span class="math inline">\(\sqrt{\ln(2.5\times10^5)/\ln(1.25\times10^5)} = \sqrt{12.43/11.74} \approx 1.03\)</span>. The dependence on <span class="math inline">\(\delta\)</span> is only logarithmic.)</em></li>
+<li>Why does step 3 take <span class="math inline">\(\|v\| = \Delta_2f\)</span> rather than any smaller shift? <em>(<span class="math inline">\(t = \varepsilon/\mu - \mu/2\)</span> is decreasing in <span class="math inline">\(\mu\)</span>, so the bad event <span class="math inline">\(\{L &gt; \varepsilon\}\)</span>, whose probability is <span class="math inline">\(\Phi(-t)\)</span>, is most likely at the largest shift.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-lg-analytic" class="level2" data-number="20.6">
+<h2 data-number="20.6" class="anchored" data-anchor-id="sec-lg-analytic"><span class="header-section-number">20.6</span> The exact privacy curve of the Gaussian mechanism</h2>
+<section id="context-3" class="level3" data-number="20.6.1">
+<h3 data-number="20.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">20.6.1</span> Context</h3>
+<p>Fact 3 says that the smallest valid <span class="math inline">\(\delta\)</span> is a hockey-stick divergence: the bad-event probability minus the correction <span class="math inline">\(e^\varepsilon Q(B)\)</span>. For two Gaussians with the same variance, both terms are normal tail probabilities, so the exact <span class="math inline">\(\delta\)</span> has a closed form, computed in <a href="../part01-prerequisites/03-divergences.html">Divergences</a>. Balle &amp; Wang (2018) turned that observation into a calibration: instead of bounding <span class="math inline">\(\delta\)</span>, compute it exactly, and pick the smallest <span class="math inline">\(\sigma\)</span> for which it is below the target.</p>
+</section>
+<section id="statement-2" class="level3" data-number="20.6.2">
+<h3 data-number="20.6.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">20.6.2</span> Statement</h3>
+<p>Measure the sensitivity in units of the noise, <span class="math inline">\(\mu = \Delta_2f/\sigma\)</span>. The exact <span class="math inline">\(\delta\)</span> is the probability of the bad event under <span class="math inline">\(M(D)\)</span> minus <span class="math inline">\(e^\varepsilon\)</span> times its probability under <span class="math inline">\(M(D')\)</span>. Both are normal tails, at points that depend only on <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\varepsilon\)</span>. The Gaussian mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP <strong>if and only if</strong> <span class="math inline">\(\delta \ge \delta_\mu(\varepsilon)\)</span>, where <span id="eq-lg-analytic"><span class="math display">\[\delta_\mu(\varepsilon) = \Phi\Big(\frac\mu2 - \frac\varepsilon\mu\Big) - e^\varepsilon\,\Phi\Big(-\frac\mu2 - \frac\varepsilon\mu\Big) = \Phi\Big(\frac{\Delta_2f}{2\sigma} - \frac{\varepsilon\sigma}{\Delta_2f}\Big) - e^\varepsilon\,\Phi\Big(-\frac{\Delta_2f}{2\sigma} - \frac{\varepsilon\sigma}{\Delta_2f}\Big). \tag{20.17}\]</span></span> (Here “if and only if” assumes some neighbouring pair reaches <span class="math inline">\(\|f(D) - f(D')\|_2 = \Delta_2f\)</span>, as the definition of sensitivity as a maximum ensures.) Moreover, <span class="math inline">\(\delta_\mu(\varepsilon)\)</span> is decreasing in <span class="math inline">\(\varepsilon\)</span> and increasing in <span class="math inline">\(\mu\)</span>. At <span class="math inline">\(\varepsilon = 0\)</span> it equals the total variation (TV) distance between the two output distributions, <span class="math inline">\(\Phi(\frac\mu2) - \Phi(-\frac\mu2) = 2\Phi(\mu/2) - 1\)</span>; the TV distance is <span class="math inline">\(\max_S[P(S) - Q(S)]\)</span>, the hockey-stick with <span class="math inline">\(\gamma = e^0 = 1\)</span>. And it tends to 0 as <span class="math inline">\(\varepsilon \to \infty\)</span>, since it is at most the first term, <span class="math inline">\(\Phi(\frac\mu2 - \frac\varepsilon\mu)\)</span>, which goes to 0. Because <span class="math inline">\(\delta_\mu\)</span> grows with <span class="math inline">\(\mu\)</span>, less noise always means a larger <span class="math inline">\(\delta\)</span>, and there is a single noise level that hits the target exactly. So the <strong>analytic calibration</strong> <span id="eq-auto-03laplacegaussian-13"><span class="math display">\[\sigma^*(\varepsilon, \delta) = \frac{\Delta_2f}{\mu^*}, \qquad \mu^* \text{ the unique solution of } \delta_\mu(\varepsilon) = \delta, \tag{20.18}\]</span></span> is the smallest <span class="math inline">\(\sigma\)</span> that makes the Gaussian mechanism <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="20.6.3">
+<h3 data-number="20.6.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">20.6.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Reduce to a shifted pair</strong> (Fact 1). For a neighbouring pair with shift <span class="math inline">\(v\)</span>, the smallest <span class="math inline">\(\delta\)</span> at this <span class="math inline">\(\varepsilon\)</span> is the hockey-stick of the noise against its shifted copy, <span class="math inline">\(E_{e^\varepsilon}\big(\mathcal N(0, \sigma^2I)\|\mathcal N(v, \sigma^2I)\big)\)</span>.</li>
+<li><strong>Reduce to one dimension.</strong> Rotate coordinates so that <span class="math inline">\(v\)</span> points along the first axis, <span class="math inline">\(v = \|v\|e_1\)</span>. A rotation is a bijection, so as in Fact 1 it changes no divergence, and the normal distribution with independent equal-variance coordinates looks the same after any rotation. Now both distributions are products: the first coordinate is <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> or <span class="math inline">\(\mathcal N(\|v\|, \sigma^2)\)</span>, and the other <span class="math inline">\(d - 1\)</span> are <span class="math inline">\(\mathcal N(0, \sigma^2 I_{d-1})\)</span> under both, with some density <span class="math inline">\(h\)</span>. The hockey-stick is the integral of <span class="math inline">\((p - \gamma q)_+\)</span>, and here <span class="math inline">\((p_1h - \gamma q_1h)_+ = h\,(p_1 - \gamma q_1)_+\)</span> because <span class="math inline">\(h \ge 0\)</span>. Integrating out the last <span class="math inline">\(d - 1\)</span> coordinates, where <span class="math inline">\(h\)</span> integrates to 1, leaves <span class="math inline">\(E_\gamma\)</span> of the first coordinate alone. Coordinates that are identical under both hypotheses carry no evidence.</li>
+<li><strong>Use the closed form.</strong> For <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> against <span class="math inline">\(\mathcal N(s, \sigma^2)\)</span> with <span class="math inline">\(\mu = s/\sigma\)</span>, Fact 3 says <span class="math inline">\(E_\gamma = P(B) - \gamma Q(B)\)</span> with <span class="math inline">\(B = \{L &gt; \ln\gamma\}\)</span>. Step 1 of <a href="#sec-lg-gauss-classic" class="quarto-xref"><span>Section 20.5</span></a> showed that under <span class="math inline">\(P\)</span> the loss is <span class="math inline">\(\mathcal N(\mu^2/2, \mu^2)\)</span>, so <span class="math inline">\(P(B) = \Phi(\frac\mu2 - \frac{\ln\gamma}\mu)\)</span>, as in step 2 there. Under <span class="math inline">\(Q\)</span> the noise is centred one shift further, which lowers the loss by <span class="math inline">\(\mu^2\)</span>, so the loss is <span class="math inline">\(\mathcal N(-\mu^2/2, \mu^2)\)</span> and <span class="math inline">\(Q(B) = \Phi(-\frac\mu2 - \frac{\ln\gamma}\mu)\)</span>. This is the closed form of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>, <span class="math inline">\(E_\gamma = \Phi(\frac\mu2 - \frac{\ln\gamma}\mu) - \gamma\Phi(-\frac\mu2 - \frac{\ln\gamma}\mu)\)</span>. Set <span class="math inline">\(\gamma = e^\varepsilon\)</span> and <span class="math inline">\(s = \|v\|\)</span>.</li>
+<li><strong>The worst pair has the largest shift.</strong> Intuitively, a smaller shift is harder to detect. To prove it, show that the pair with a smaller shift can be produced from the pair with a larger shift by adding noise, which cannot help anyone tell them apart. Let <span class="math inline">\(\mu' &lt; \mu\)</span>. Take <span class="math inline">\(Y\)</span> from the pair with shift <span class="math inline">\(\mu\)</span> and unit variance, and output <span class="math inline">\(Y' = \frac{\mu'}{\mu}Y + W\)</span> with independent <span class="math inline">\(W \sim \mathcal N(0, 1 - \mu'^2/\mu^2)\)</span>. If <span class="math inline">\(Y \sim \mathcal N(0, 1)\)</span>, then <span class="math inline">\(Y'\)</span> has mean 0 and variance <span class="math inline">\(\mu'^2/\mu^2 + (1 - \mu'^2/\mu^2) = 1\)</span>, so <span class="math inline">\(Y' \sim \mathcal N(0, 1)\)</span>; if <span class="math inline">\(Y \sim \mathcal N(\mu, 1)\)</span>, the mean becomes <span class="math inline">\(\mu'\)</span> and the variance is still 1, so <span class="math inline">\(Y' \sim \mathcal N(\mu', 1)\)</span>. So the pair with shift <span class="math inline">\(\mu'\)</span> is a post-processing of the pair with shift <span class="math inline">\(\mu\)</span>. By the data-processing inequality (whatever you can detect from <span class="math inline">\(Y'\)</span>, you can detect from <span class="math inline">\(Y\)</span> by computing <span class="math inline">\(Y'\)</span> yourself), its hockey-stick is no larger. Hence <span class="math inline">\(\delta_\mu(\varepsilon)\)</span> is non-decreasing in <span class="math inline">\(\mu\)</span>, and the maximum over neighbours is at <span class="math inline">\(\|v\| = \Delta_2f\)</span>.</li>
+<li><strong>“If and only if.”</strong> The hockey-stick at <span class="math inline">\(\gamma = e^\varepsilon\)</span> is the smallest <span class="math inline">\(\delta\)</span> that works for one pair, as shown in the Notation paragraph above, and steps 1–4 show that the pair at shift <span class="math inline">\(\Delta_2f\)</span> is the worst. So <span class="math inline">\(\delta \ge \delta_\mu(\varepsilon)\)</span> is sufficient (it covers the worst pair, hence all) and necessary (any smaller <span class="math inline">\(\delta\)</span> fails on that pair).</li>
+<li><strong>Monotone in <span class="math inline">\(\varepsilon\)</span>.</strong> Each <span class="math inline">\(E_\gamma\)</span> is non-increasing in <span class="math inline">\(\gamma\)</span> (<a href="../part01-prerequisites/03-divergences.html">Divergences</a>): raising <span class="math inline">\(\gamma\)</span> lowers <span class="math inline">\(p - \gamma q\)</span> at every point. <a href="../../book-exercises/part03-dp-foundations/03-laplace-gaussian.html#sec-sol-lapgauss-3">Exercise 3</a> computes the derivative exactly: <span class="math inline">\(\frac{d}{d\varepsilon}\delta_\mu(\varepsilon) = -e^\varepsilon\Phi(-\frac\mu2 - \frac\varepsilon\mu) &lt; 0\)</span>.</li>
+<li><strong>The calibration is well defined.</strong> To be sure the equation <span class="math inline">\(\delta_\mu(\varepsilon) = \delta\)</span> has exactly one root in <span class="math inline">\(\mu\)</span>, check that <span class="math inline">\(\delta_\mu\)</span> runs continuously from 0 to 1 and is strictly increasing. It is continuous in <span class="math inline">\(\mu\)</span>. It tends to 0 as <span class="math inline">\(\mu \to 0\)</span> (no signal; both arguments of <span class="math inline">\(\Phi\)</span> go to <span class="math inline">\(-\infty\)</span>) and to 1 as <span class="math inline">\(\mu \to \infty\)</span> (the first <span class="math inline">\(\Phi\)</span> goes to 1 and the second to 0). Step 4 shows it is non-decreasing, and the derivative <span class="math inline">\(\frac{d}{d\mu}\delta_\mu(\varepsilon) = \varphi(\frac\mu2 - \frac\varepsilon\mu) &gt; 0\)</span> (<a href="../../book-exercises/part03-dp-foundations/03-laplace-gaussian.html#sec-sol-lapgauss-3">Exercise 3</a>) shows it is strictly increasing. So for <span class="math inline">\(0 &lt; \delta &lt; 1\)</span> the equation has exactly one root <span class="math inline">\(\mu^*\)</span>.</li>
+</ol>
+<p><strong>Solving it by bisection.</strong> Bisection finds the crossing point of an increasing function by repeatedly halving an interval that contains it. Start with an interval <span class="math inline">\([\mu_{\mathrm{lo}}, \mu_{\mathrm{hi}}]\)</span> with <span class="math inline">\(\delta_{\mu_{\mathrm{lo}}}(\varepsilon) &lt; \delta &lt; \delta_{\mu_{\mathrm{hi}}}(\varepsilon)\)</span>; the script uses <span class="math inline">\([e^{-12}, e^8]\)</span>. Evaluate at the midpoint and keep the half where the sign of <span class="math inline">\(\delta_\mu(\varepsilon) - \delta\)</span> changes. The midpoint is taken in <span class="math inline">\(\ln\mu\)</span>, because <span class="math inline">\(\mu^*\)</span> ranges over several orders of magnitude. Each step halves the interval, so 60 steps pin <span class="math inline">\(\mu^*\)</span> to machine precision. Monotonicity is what makes this safe: there is exactly one crossing to find. At <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span> the script finds <span class="math inline">\(\sigma^* = 3.7306\,\Delta_2f\)</span>, and evaluating <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a> there gives back <span class="math inline">\(\delta = 1.000\times10^{-5}\)</span>.</p>
+<p><strong>Checking the closed form by direct integration.</strong> As an independent check that uses no tail formula, the script also computes <span class="math inline">\(\int(p - e^\varepsilon q)_+\,dy\)</span> by Simpson’s rule on a grid of step <span class="math inline">\(10^{-3}\)</span> over <span class="math inline">\([-40, 40]\)</span>, using only the two normal densities. Over the 30-point grid <span class="math inline">\(\varepsilon \in \{0, 0.5, 1, 2, 4, 8\}\)</span>, <span class="math inline">\(\mu \in \{0.25, 0.5, 1, 2, 4\}\)</span>, keeping the 24 pairs <span class="math inline">\((\varepsilon, \mu)\)</span> with <span class="math inline">\(\delta &gt; 10^{-12}\)</span> (below that the relative error of a grid sum is no longer meaningful), the largest relative difference from <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a> is <span class="math inline">\(3.1\times10^{-6}\)</span>. That is the discretization error of the grid at the kink where <span class="math inline">\(p = e^\varepsilon q\)</span>, where the integrand has a corner. The crosses on <a href="#fig-lg-delta-curves" class="quarto-xref">Figure&nbsp;<span>20.2</span></a>, at <span class="math inline">\(\varepsilon = 0, 1, \dots, 7\)</span> on each curve, are integrals computed the same way.</p>
+<p><strong>Concretely, at <span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>.</strong> <a href="#tbl-lg-bad-event" class="quarto-xref">Table&nbsp;<span>20.6</span></a> evaluates the two terms of <a href="#eq-lg-bad-event" class="quarto-xref">Equation&nbsp;<span>20.5</span></a>. Measure the noise <span class="math inline">\(z\)</span> in units of <span class="math inline">\(\sigma\)</span>. With <span class="math inline">\(\mu = 1\)</span> the loss is <span class="math inline">\(L = \frac12 - z\)</span>, so the bad event <span class="math inline">\(B = \{L &gt; 1\}\)</span> is <span class="math inline">\(\{z &lt; -\frac12\}\)</span>. Under <span class="math inline">\(M(D)\)</span>, <span class="math inline">\(z\)</span> is standard normal, so <span class="math inline">\(P(B) = \Phi(-0.5)\)</span>. Under <span class="math inline">\(M(D')\)</span> the output is centred one unit higher, so in the same coordinates <span class="math inline">\(z\)</span> is <span class="math inline">\(\mathcal N(1, 1)\)</span>, and <span class="math inline">\(Q(B) = \Pr[z &lt; -\frac12] = \Phi(-\frac12 - 1) = \Phi(-1.5)\)</span>.</p>
+<div id="tbl-lg-bad-event" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-bad-event-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.6: The exact <span class="math inline">\(\delta\)</span> at <span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(\varepsilon = 1\)</span> as the bad-event probability minus its correction.
+</figcaption>
+<div aria-describedby="tbl-lg-bad-event-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Formula</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(P(B)\)</span>, the bad-event bound</td>
+<td><span class="math inline">\(\Phi(\frac\mu2 - \frac\varepsilon\mu) = \Phi(-0.5)\)</span></td>
+<td>0.3085</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(e^\varepsilon Q(B)\)</span>, the correction</td>
+<td><span class="math inline">\(e\,\Phi(-\frac\mu2 - \frac\varepsilon\mu) = e\,\Phi(-1.5)\)</span></td>
+<td>0.1816</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\delta_1(1)\)</span>, the exact <span class="math inline">\(\delta\)</span></td>
+<td>difference</td>
+<td>0.1269</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Simpson’s rule gives 0.1269 as well. A Monte Carlo average of <span class="math inline">\((1 - e^{\varepsilon - L})_+\)</span>, the expectation form of Fact 3, over a million draws of <span class="math inline">\(L \sim \mathcal N(\frac12, 1)\)</span> gives 0.1270.</p>
+</section>
+<section id="interpretation-2" class="level3" data-number="20.6.4">
+<h3 data-number="20.6.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">20.6.4</span> Interpretation</h3>
+<p>One Gaussian mechanism gives a whole curve of guarantees, not one. It is not “<span class="math inline">\((\varepsilon, \delta)\)</span>-DP” for a single pair; it is <span class="math inline">\((\varepsilon, \delta_\mu(\varepsilon))\)</span>-DP for every <span class="math inline">\(\varepsilon \ge 0\)</span> simultaneously, trading a larger <span class="math inline">\(\varepsilon\)</span> for a smaller <span class="math inline">\(\delta\)</span> (<a href="#fig-lg-delta-curves" class="quarto-xref">Figure&nbsp;<span>20.2</span></a>). At <span class="math inline">\(\sigma = \Delta_2f\)</span> (<span class="math inline">\(\mu = 1\)</span>) the curve passes through <span class="math inline">\(\delta = 0.3829\)</span> at <span class="math inline">\(\varepsilon = 0\)</span> (the TV distance, <span class="math inline">\(2\Phi(\frac12) - 1\)</span>), 0.1269 at <span class="math inline">\(\varepsilon = 1\)</span>, 0.0209 at <span class="math inline">\(\varepsilon = 2\)</span> and <span class="math inline">\(4.71\times10^{-5}\)</span> at <span class="math inline">\(\varepsilon = 4\)</span>, and reaches <span class="math inline">\(10^{-5}\)</span> at <span class="math inline">\(\varepsilon = 4.3772\)</span>. The whole curve, not a single point, is what composes tightly in <a href="../part04-privacy-accounting/00-introduction.html">Part 4</a>.</p>
+<p>Only the ratio <span class="math inline">\(\mu = \Delta_2f/\sigma\)</span> matters. Doubling the sensitivity and doubling the noise give the same curve, because <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a> depends on <span class="math inline">\(\Delta_2f\)</span> and <span class="math inline">\(\sigma\)</span> only through their ratio. You can read <span class="math inline">\(\mu\)</span> as a signal-to-noise ratio: how many noise standard deviations apart the two answers are. It is exactly the parameter of the Gaussian trade-off curve in <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, the curve of the smallest miss rate any test can have at each false alarm rate when telling <span class="math inline">\(\mathcal N(0, 1)\)</span> from <span class="math inline">\(\mathcal N(\mu, 1)\)</span>.</p>
+<p>The exact <span class="math inline">\(\sigma\)</span> is 1.3 to 1.7 times smaller than the classic one. <a href="#tbl-lg-calibration" class="quarto-xref">Table&nbsp;<span>20.7</span></a> compares the two calibrations at <span class="math inline">\(\delta = 10^{-5}\)</span>. Over the rows with <span class="math inline">\(\varepsilon \le 1\)</span>, the classic formula uses between 1.30 and 1.68 times the necessary noise, and the gap grows as <span class="math inline">\(\varepsilon\)</span> shrinks. Since variance is <span class="math inline">\(\sigma^2\)</span>, the factor 1.30 at <span class="math inline">\(\varepsilon = 1\)</span> is <span class="math inline">\(1.299^2 \approx 1.69\)</span> times the variance, 69% more than needed, which you could instead spend on a smaller <span class="math inline">\(\varepsilon\)</span>.</p>
+<p>For large <span class="math inline">\(\varepsilon\)</span> the classic formula is wrong, not just loose. The classic <span class="math inline">\(\sigma\)</span> shrinks like <span class="math inline">\(1/\varepsilon\)</span>. The exact one shrinks more slowly, so the two cross. At <span class="math inline">\(\delta = 10^{-5}\)</span> they cross at <span class="math inline">\(\varepsilon = 8.42\)</span>, and beyond it the classic <span class="math inline">\(\sigma\)</span> is below the necessary noise.</p>
+<div id="tbl-lg-calibration" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-calibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.7: Classic against analytic calibration of the Gaussian mechanism at <span class="math inline">\(\delta = 10^{-5}\)</span>. The last column is <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a> evaluated at the classic <span class="math inline">\(\sigma\)</span>.
+</figcaption>
+<div aria-describedby="tbl-lg-calibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th>Classic <span class="math inline">\(\sigma/\Delta_2f\)</span></th>
+<th>Analytic <span class="math inline">\(\sigma^*/\Delta_2f\)</span></th>
+<th>Ratio</th>
+<th>True <span class="math inline">\(\delta\)</span> at the classic <span class="math inline">\(\sigma\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.05</td>
+<td>96.8961</td>
+<td>57.7707</td>
+<td>1.677</td>
+<td><span class="math inline">\(1.29\times10^{-9}\)</span></td>
+</tr>
+<tr class="even">
+<td>0.1</td>
+<td>48.4481</td>
+<td>30.7496</td>
+<td>1.576</td>
+<td><span class="math inline">\(2.64\times10^{-9}\)</span></td>
+</tr>
+<tr class="odd">
+<td>0.25</td>
+<td>19.3792</td>
+<td>13.2855</td>
+<td>1.459</td>
+<td><span class="math inline">\(7.10\times10^{-9}\)</span></td>
+</tr>
+<tr class="even">
+<td>0.5</td>
+<td>9.6896</td>
+<td>7.0318</td>
+<td>1.378</td>
+<td><span class="math inline">\(1.61\times10^{-8}\)</span></td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>4.8448</td>
+<td>3.7306</td>
+<td>1.299</td>
+<td><span class="math inline">\(4.11\times10^{-8}\)</span></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>2.4224</td>
+<td>1.9938</td>
+<td>1.215</td>
+<td><span class="math inline">\(1.34\times10^{-7}\)</span></td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>1.2112</td>
+<td>1.0812</td>
+<td>1.120</td>
+<td><span class="math inline">\(6.84\times10^{-7}\)</span></td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>0.6056</td>
+<td>0.6002</td>
+<td>1.009</td>
+<td><span class="math inline">\(7.97\times10^{-6}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-lg-delta-curves" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lg-delta-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/lapgauss_delta_curves.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lg-delta-curves-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20.2: The privacy curve <span class="math inline">\(\delta(\varepsilon)\)</span> of the Gaussian mechanism for four noise levels <span class="math inline">\(\sigma/\Delta_2f\)</span>, on a log scale, and of the Laplace mechanism with <span class="math inline">\(b = \Delta_1f\)</span> (dashed). Crosses are the hockey-stick divergence computed by numerical integration. The Laplace curve drops to zero at <span class="math inline">\(\varepsilon = 1\)</span>, its pure-DP level; every Gaussian curve stays positive but falls faster than exponentially. The dotted line marks <span class="math inline">\(\delta = 10^{-5}\)</span>.
+</figcaption>
+</figure>
+</div>
+<div id="fig-lg-calibration" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lg-calibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/lapgauss_calibration.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lg-calibration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20.3: Left: the noise needed for <span class="math inline">\((\varepsilon, 10^{-5})\)</span>-DP by the classic formula and by the analytic calibration. Right: the true <span class="math inline">\(\delta\)</span> that the classic <span class="math inline">\(\sigma\)</span> delivers, from <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a>. It is orders of magnitude below the target for small <span class="math inline">\(\varepsilon\)</span> and crosses the target at <span class="math inline">\(\varepsilon = 8.42\)</span>, in the shaded region where the classic theorem makes no claim.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-diabetes-count-again" class="level3" data-number="20.6.5">
+<h3 data-number="20.6.5" class="anchored" data-anchor-id="example-the-diabetes-count-again"><span class="header-section-number">20.6.5</span> Example: the diabetes count again</h3>
+<p>Release the count of <a href="#sec-lg-laplace" class="quarto-xref"><span>Section 20.4</span></a> with the Gaussian mechanism at <span class="math inline">\(\varepsilon = 0.1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>. The sensitivity is 1, so the analytic calibration gives <span class="math inline">\(\sigma^* = 30.75\)</span> (the row <span class="math inline">\(\varepsilon = 0.1\)</span> of <a href="#tbl-lg-calibration" class="quarto-xref">Table&nbsp;<span>20.7</span></a>). A normal variable stays within 1.96 standard deviations of its mean with probability 0.95, so the 95% error is <span class="math inline">\(1.96\sigma^* = 60.27\)</span>, against 29.96 for Laplace noise with <span class="math inline">\(\delta = 0\)</span>. For a single count, the Laplace mechanism is better on both counts: smaller error and a stronger guarantee. The Gaussian mechanism earns its place only when many numbers are released together, as <a href="#sec-lg-high-dim" class="quarto-xref"><span>Section 20.7</span></a> shows.</p>
+</section>
+<section id="check-yourself-3" class="level3" data-number="20.6.6">
+<h3 data-number="20.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">20.6.6</span> Check yourself</h3>
+<ul>
+<li>Why is <span class="math inline">\(\delta_\mu(0)\)</span> the TV distance between <span class="math inline">\(\mathcal N(0, 1)\)</span> and <span class="math inline">\(\mathcal N(\mu, 1)\)</span>? <em>(At <span class="math inline">\(\varepsilon = 0\)</span>, <span class="math inline">\(\gamma = e^0 = 1\)</span>, and the hockey-stick <span class="math inline">\(E_1 = \max_S[P(S) - Q(S)]\)</span> is the definition of the TV distance, its first property in <a href="../part01-prerequisites/03-divergences.html">Divergences</a>.)</em></li>
+<li>You have a Gaussian mechanism with <span class="math inline">\(\sigma = \Delta_2f\)</span> and someone asks for its guarantee at <span class="math inline">\(\delta = 10^{-5}\)</span>. What do you answer, and how would you compute it? <em>(<span class="math inline">\(\varepsilon = 4.3772\)</span>: here <span class="math inline">\(\mu = 1\)</span>, so solve <span class="math inline">\(\delta_1(\varepsilon) = 10^{-5}\)</span> for <span class="math inline">\(\varepsilon\)</span> by bisection, using that <span class="math inline">\(\delta_\mu(\varepsilon)\)</span> is decreasing in <span class="math inline">\(\varepsilon\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-lg-high-dim" class="level2" data-number="20.7">
+<h2 data-number="20.7" class="anchored" data-anchor-id="sec-lg-high-dim"><span class="header-section-number">20.7</span> Laplace against Gaussian in many dimensions</h2>
+<section id="context-4" class="level3" data-number="20.7.1">
+<h3 data-number="20.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">20.7.1</span> Context</h3>
+<p>Real releases are vectors: a histogram over many bins, all the marginals of a table, a gradient with millions of coordinates. The Laplace mechanism scales with <span class="math inline">\(\Delta_1f\)</span> and the Gaussian mechanism with <span class="math inline">\(\Delta_2f\)</span>, and by <a href="#eq-lg-norms" class="quarto-xref">Equation&nbsp;<span>20.8</span></a> these can differ by a factor of up to <span class="math inline">\(\sqrt d\)</span>. Which noise is better depends on how one record spreads across the coordinates.</p>
+</section>
+<section id="statement-3" class="level3" data-number="20.7.2">
+<h3 data-number="20.7.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">20.7.2</span> Statement</h3>
+<p>To compare the two, look at the typical error in each released number, the root-mean-square error per coordinate, at the same <span class="math inline">\(\varepsilon\)</span>. For Laplace noise it is the standard deviation of <span class="math inline">\(\mathrm{Lap}(\Delta_1f/\varepsilon)\)</span>, and for Gaussian noise it is <span class="math inline">\(\sigma^*\)</span>. Because the exact Gaussian calibration depends only on <span class="math inline">\(\mu = \Delta_2f/\sigma\)</span>, it is enough to solve it once for unit sensitivity: let <span class="math inline">\(\sigma_1(\varepsilon, \delta)\)</span> be the analytic <span class="math inline">\(\sigma\)</span> for unit <span class="math inline">\(\ell_2\)</span> sensitivity, so that <span class="math inline">\(\sigma^* = \Delta_2f\,\sigma_1(\varepsilon, \delta)\)</span>. Then the errors per coordinate are <span id="eq-auto-03laplacegaussian-14"><span class="math display">\[\text{Laplace: } \frac{\sqrt2\,\Delta_1f}{\varepsilon}, \qquad \text{Gaussian: } \Delta_2f\,\sigma_1(\varepsilon, \delta). \tag{20.19}\]</span></span></p>
+<p>Two cases matter. For <strong>sparse queries</strong>, where one record moves one coordinate, <span class="math inline">\(\Delta_1f = \Delta_2f\)</span> (for example a histogram under add/remove). The ratio of the two errors does not depend on <span class="math inline">\(d\)</span>, and Laplace wins whenever <span class="math inline">\(\sqrt2 &lt; \varepsilon\,\sigma_1(\varepsilon, \delta)\)</span>. For <strong>dense queries</strong>, where one record moves every coordinate, <span class="math inline">\(\Delta_1f = d\)</span> and <span class="math inline">\(\Delta_2f = \sqrt d\)</span> (for example the threshold counts). The Laplace error grows like <span class="math inline">\(d\)</span> and the Gaussian error like <span class="math inline">\(\sqrt d\)</span>, and Laplace is more accurate only while <span id="eq-auto-03laplacegaussian-15"><span class="math display">\[d &lt; \frac{\big(\varepsilon\,\sigma_1(\varepsilon, \delta)\big)^2}2. \tag{20.20}\]</span></span></p>
+</section>
+<section id="derivation-3" class="level3" data-number="20.7.3">
+<h3 data-number="20.7.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">20.7.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Laplace error.</strong> A <span class="math inline">\(\mathrm{Lap}(b)\)</span> coordinate has mean 0 and variance <span class="math inline">\(2b^2\)</span>, so its root-mean-square error is <span class="math inline">\(\sqrt{2b^2} = \sqrt2\,b\)</span>, which with <span class="math inline">\(b = \Delta_1f/\varepsilon\)</span> is <span class="math inline">\(\sqrt2\,\Delta_1f/\varepsilon\)</span>.</li>
+<li><strong>Gaussian error.</strong> A Gaussian coordinate has variance <span class="math inline">\(\sigma^2\)</span>, so its root-mean-square error is <span class="math inline">\(\sigma\)</span>. The analytic calibration gives <span class="math inline">\(\sigma^* = \Delta_2f\,\sigma_1(\varepsilon, \delta)\)</span>, because only <span class="math inline">\(\mu = \Delta_2f/\sigma\)</span> enters <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a>: scaling the sensitivity scales the solution by the same factor.</li>
+<li><strong>Sparse queries.</strong> With <span class="math inline">\(\Delta_1f = \Delta_2f\)</span>, Laplace is better when <span class="math inline">\(\sqrt2\,\Delta_2f/\varepsilon &lt; \Delta_2f\,\sigma_1\)</span>; dividing by <span class="math inline">\(\Delta_2f\)</span> and multiplying by <span class="math inline">\(\varepsilon\)</span> leaves <span class="math inline">\(\sqrt2 &lt; \varepsilon\sigma_1\)</span>, with no <span class="math inline">\(d\)</span>.</li>
+<li><strong>Dense queries.</strong> Substitute <span class="math inline">\(\Delta_1f = d\)</span> and <span class="math inline">\(\Delta_2f = \sqrt d\)</span>: Laplace is better when <span class="math inline">\(\sqrt2\,d/\varepsilon &lt; \sqrt d\,\sigma_1\)</span>. Dividing both sides by <span class="math inline">\(\sqrt d\)</span> and rearranging gives <span class="math inline">\(\sqrt d &lt; \varepsilon\sigma_1/\sqrt2\)</span>. Square both sides.</li>
+</ol>
+</section>
+<section id="interpretation-3" class="level3" data-number="20.7.4">
+<h3 data-number="20.7.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">20.7.4</span> Interpretation</h3>
+<p>Use Laplace noise for sparse queries and Gaussian noise for dense ones. When a record touches one coordinate, the two sensitivities agree, and the stronger guarantee of Laplace (<span class="math inline">\(\delta = 0\)</span>) comes with less noise too. When a record touches all coordinates, <span class="math inline">\(\Delta_1f\)</span> pays <span class="math inline">\(d\)</span> while <span class="math inline">\(\Delta_2f\)</span> pays <span class="math inline">\(\sqrt d\)</span>, and the Gaussian wins by a factor that grows like <span class="math inline">\(\sqrt d\)</span> (<a href="#fig-lg-high-dim" class="quarto-xref">Figure&nbsp;<span>20.4</span></a>).</p>
+<p>This is why private training of neural networks uses Gaussian noise. One example’s gradient moves every coordinate of a model with millions of parameters, the densest query there is. Clipping bounds its <span class="math inline">\(\ell_2\)</span> norm, not its <span class="math inline">\(\ell_1\)</span> norm, and the Gaussian mechanism is calibrated to exactly that.</p>
+<p>Keep in mind that the comparison is at equal <span class="math inline">\(\varepsilon\)</span> but unequal guarantees. The Laplace release is <span class="math inline">\(\varepsilon\)</span>-DP; the Gaussian release has an extra <span class="math inline">\(\delta\)</span>. The Gaussian mechanism also has a second advantage that this comparison does not show: many Gaussian releases compose into another Gaussian mechanism, exactly, because stacking independent Gaussian answers gives one Gaussian answer whose <span class="math inline">\(\ell_2\)</span> sensitivity is the root-sum-of-squares of theirs (<a href="../../book-exercises/part03-dp-foundations/03-laplace-gaussian.html#sec-sol-lapgauss-5">Exercise 5</a>).</p>
+<div id="fig-lg-high-dim" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lg-high-dim-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/lapgauss_high_dim.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lg-high-dim-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;20.4: Root-mean-square error per count at <span class="math inline">\(\varepsilon = 1\)</span> for the Laplace mechanism (calibrated to <span class="math inline">\(\Delta_1\)</span>) and the Gaussian mechanism (analytic calibration to <span class="math inline">\(\Delta_2\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>), as the number of released counts <span class="math inline">\(d\)</span> grows; dots are simulations. Left: a histogram, where each record falls in one bin, so neither error depends on <span class="math inline">\(d\)</span> and Laplace noise is smaller. Right: threshold counts, where a record can move all <span class="math inline">\(d\)</span> counts; the Laplace error grows like <span class="math inline">\(d\)</span>, the Gaussian like <span class="math inline">\(\sqrt d\)</span>, and they cross near <span class="math inline">\(d = 7\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-releasing-an-empirical-cdf" class="level3" data-number="20.7.5">
+<h3 data-number="20.7.5" class="anchored" data-anchor-id="example-releasing-an-empirical-cdf"><span class="header-section-number">20.7.5</span> Example: releasing an empirical CDF</h3>
+<p>At <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>, <span class="math inline">\(\sigma_1 = 3.7306\)</span>, the value found by bisection in <a href="#sec-lg-analytic" class="quarto-xref"><span>Section 20.6</span></a>. For one count, Laplace noise has root-mean-square error <span class="math inline">\(\sqrt2 = 1.4142\)</span> against 3.7306 for Gaussian noise, so Laplace wins. For threshold counts the crossover is at <span class="math inline">\(d = (3.7306)^2/2 = 6.96\)</span>. <a href="#tbl-lg-high-dim" class="quarto-xref">Table&nbsp;<span>20.8</span></a> shows the errors, exactly (from <span class="math inline">\(\sqrt2\,d\)</span> and <span class="math inline">\(3.7306\sqrt d\)</span>) and by simulation.</p>
+<div id="tbl-lg-high-dim" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-high-dim-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.8: Root-mean-square error per count for <span class="math inline">\(d\)</span> threshold counts at <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-lg-high-dim-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(d\)</span></th>
+<th>Laplace, exact</th>
+<th>Laplace, simulated</th>
+<th>Gaussian, exact</th>
+<th>Gaussian, simulated</th>
+<th>Laplace / Gaussian</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1.41</td>
+<td>1.42</td>
+<td>3.73</td>
+<td>3.73</td>
+<td>0.38</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>14.14</td>
+<td>14.09</td>
+<td>11.80</td>
+<td>11.78</td>
+<td>1.20</td>
+</tr>
+<tr class="odd">
+<td>100</td>
+<td>141.42</td>
+<td>141.07</td>
+<td>37.31</td>
+<td>37.28</td>
+<td>3.79</td>
+</tr>
+<tr class="even">
+<td>1000</td>
+<td>1414.21</td>
+<td>1412.90</td>
+<td>117.97</td>
+<td>118.11</td>
+<td>11.99</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>An empirical CDF of ages read off at 100 thresholds is 3.79 times more accurate with Gaussian noise; at 1,000 thresholds, 11.99 times.</p>
+</section>
+<section id="check-yourself-4" class="level3" data-number="20.7.6">
+<h3 data-number="20.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">20.7.6</span> Check yourself</h3>
+<ul>
+<li>For a histogram under <em>replace</em> neighbours, <span class="math inline">\(\Delta_1 = 2\)</span> and <span class="math inline">\(\Delta_2 = \sqrt2\)</span>. Does that change which mechanism wins at <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>? <em>(Laplace error <span class="math inline">\(\sqrt2 \times 2 = 2\sqrt2 = 2.83\)</span>, Gaussian <span class="math inline">\(\sqrt2 \times 3.73 = 5.28\)</span>: Laplace still wins.)</em></li>
+<li>Why does the Gaussian advantage for dense queries grow like <span class="math inline">\(\sqrt d\)</span> and not like <span class="math inline">\(d\)</span>? <em>(Both errors are per coordinate. The Laplace one is proportional to <span class="math inline">\(\Delta_1 = d\)</span>, the Gaussian one to <span class="math inline">\(\Delta_2 = \sqrt d\)</span>; their ratio is <span class="math inline">\(d/\sqrt d = \sqrt d\)</span> up to constants.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-every-mechanism-by-computation-and-simulation" class="level2" data-number="20.8">
+<h2 data-number="20.8" class="anchored" data-anchor-id="code-check-every-mechanism-by-computation-and-simulation"><span class="header-section-number">20.8</span> Code: check every mechanism by computation and simulation</h2>
+<p>The script <a href="../../../code/part03-dp-foundations/laplace_gaussian.py">code/laplace_gaussian.py</a> computes every number in this chapter and draws every figure. Sensitivities are found by brute force over small datasets. The Laplace mechanism’s privacy and accuracy are checked by simulation. For the Gaussian mechanism, the closed form <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a> is checked against direct numerical integration of the hockey-stick and against a Monte Carlo average of the privacy loss, and the analytic calibration is solved by bisection. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/laplace_gaussian.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-lg-code" class="quarto-xref">Table&nbsp;<span>20.9</span></a>:</p>
+<div id="tbl-lg-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.9: The script’s output with the default seed.
+</figcaption>
+<div aria-describedby="tbl-lg-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sensitivities, brute force over all datasets of up to 3 records</td>
+<td>Every row of <a href="#tbl-lg-sensitivity" class="quarto-xref">Table&nbsp;<span>20.3</span></a>: e.g.&nbsp;histogram under replace <span class="math inline">\(\ell_1 = 2\)</span>, <span class="math inline">\(\ell_2 = 1.4142\)</span>; threshold counts <span class="math inline">\(\ell_1 = 3\)</span>, <span class="math inline">\(\ell_2 = 1.7321\)</span></td>
+</tr>
+<tr class="even">
+<td>Laplace privacy loss, count, <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td>Ranges over exactly <span class="math inline">\([-1, 1]\)</span></td>
+</tr>
+<tr class="odd">
+<td>Laplace tight event</td>
+<td><span class="math inline">\(\Pr[M(D) \le 0] = 0.5002\)</span>, <span class="math inline">\(\Pr[M(D') \le 0] = 0.1838\)</span>, ratio 2.7221 against <span class="math inline">\(e = 2.7183\)</span></td>
+</tr>
+<tr class="even">
+<td>Laplace count, <span class="math inline">\(\varepsilon = 0.1\)</span></td>
+<td>Mean absolute error 9.978 (exact 10); 95th percentile 29.85 (bound 29.96)</td>
+</tr>
+<tr class="odd">
+<td>Laplace histogram, 20 bins</td>
+<td>Maximum error above 5.99 in a fraction 0.0464 of releases (<span class="math inline">\(\beta = 0.05\)</span>)</td>
+</tr>
+<tr class="even">
+<td>Classic proof chain, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span></td>
+<td>Exact <span class="math inline">\(\delta\)</span> <span class="math inline">\(4.11\times10^{-8}\)</span>; <span class="math inline">\(\Pr[L &gt; \varepsilon]\)</span> <span class="math inline">\(1.06\times10^{-6}\)</span>; Mills bound <span class="math inline">\(1.10\times10^{-6}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Gaussian closed form vs integration</td>
+<td>Largest relative difference <span class="math inline">\(3.1\times10^{-6}\)</span> over 24 pairs <span class="math inline">\((\varepsilon, \mu)\)</span> with <span class="math inline">\(\delta &gt; 10^{-12}\)</span></td>
+</tr>
+<tr class="even">
+<td>Gaussian, <span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td><span class="math inline">\(\delta = 0.1269\)</span> (integrated 0.1269, Monte Carlo 0.1270)</td>
+</tr>
+<tr class="odd">
+<td>Analytic calibration, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span></td>
+<td><span class="math inline">\(\sigma^* = 3.7306\)</span>, classic 4.8448; <a href="#tbl-lg-calibration" class="quarto-xref">Table&nbsp;<span>20.7</span></a> for other <span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="even">
+<td>Classic <span class="math inline">\(\sigma\)</span> fails at <span class="math inline">\(\delta = 10^{-5}\)</span></td>
+<td>For <span class="math inline">\(\varepsilon &gt; 8.42\)</span></td>
+</tr>
+<tr class="odd">
+<td>Laplace vs Gaussian, threshold counts</td>
+<td>Crossover at <span class="math inline">\(d = 6.96\)</span>; <a href="#tbl-lg-high-dim" class="quarto-xref">Table&nbsp;<span>20.8</span></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_laplace_gaussian.py">tests/test_laplace_gaussian.py</a> checks that the output still matches.</p>
+<p>Four things stand out. First, the formulas are right: the closed form of the Gaussian privacy curve agrees with direct integration to six digits, and the simulated errors and event probabilities agree with their formulas to within sampling error. Second, the Laplace guarantee is tight: the simulated ratio on the event <span class="math inline">\(\{y \le 0\}\)</span> is <span class="math inline">\(e^\varepsilon\)</span>, not something smaller, so no smaller noise scale could work. Third, the classic Gaussian calibration over-delivers: at <span class="math inline">\(\varepsilon = 1\)</span> it gives a <span class="math inline">\(\delta\)</span> about 240 times smaller than requested, which is the same as saying that it adds 30% more noise than necessary. Fourth, dimension decides the noise: for sparse queries use Laplace noise, and for dense ones the Gaussian error is smaller by a factor that grows like <span class="math inline">\(\sqrt d\)</span>.</p>
+</section>
+<section id="references" class="level2" data-number="20.9">
+<h2 data-number="20.9" class="anchored" data-anchor-id="references"><span class="header-section-number">20.9</span> References</h2>
+<ul>
+<li>Dwork, McSherry, Nissim &amp; Smith, “Calibrating Noise to Sensitivity in Private Data Analysis” (TCC 2006): the paper that introduced global sensitivity and the Laplace mechanism.</li>
+<li>Dwork, Kenthapadi, McSherry, Mironov &amp; Naor, “Our Data, Ourselves: Privacy via Distributed Noise Generation” (EUROCRYPT 2006): approximate <span class="math inline">\((\varepsilon, \delta)\)</span>-DP and Gaussian noise.</li>
+<li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014), §3.3 for the Laplace mechanism and its accuracy, and Appendix A for the classic Gaussian calibration (Theorem A.1) with its two-sided proof.</li>
+<li>Balle &amp; Wang, “Improving the Gaussian Mechanism for Differential Privacy: Analytical Calibration and Optimal Denoising” (ICML 2018): the exact privacy curve <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a>, the bisection calibration, and why the classic formula fails for large <span class="math inline">\(\varepsilon\)</span>.</li>
+<li>Near &amp; Abuah, <em>Programming Differential Privacy</em>, the chapters on sensitivity and on the Laplace and Gaussian mechanisms: the same material with code, and the practical pitfalls of computing sensitivity.</li>
+<li>Geng &amp; Viswanath, “The Optimal Noise-Adding Mechanism in Differential Privacy” (IEEE Transactions on Information Theory, 2016): the staircase mechanism, optimal for pure DP, and how close the Laplace mechanism comes to it.</li>
+<li>Dong, Roth &amp; Su, “Gaussian Differential Privacy” (JRSS-B 2022): the Gaussian mechanism as a trade-off curve, which is where <a href="../part04-privacy-accounting/04-gaussian-dp.html">Gaussian differential privacy</a> takes <span class="math inline">\(\mu = \Delta_2f/\sigma\)</span> next.</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="20.10">
+<h2 data-number="20.10" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">20.10</span> Cheat sheet</h2>
+<p><span class="math inline">\(f\)</span> has values in <span class="math inline">\(\mathbb R^d\)</span>; <span class="math inline">\(\Delta_1f\)</span>, <span class="math inline">\(\Delta_2f\)</span> are its <span class="math inline">\(\ell_1\)</span>, <span class="math inline">\(\ell_2\)</span> sensitivities; <span class="math inline">\(\mu = \Delta_2f/\sigma\)</span>. <a href="#tbl-lg-cheat" class="quarto-xref">Table&nbsp;<span>20.10</span></a> collects the results.</p>
+<div id="tbl-lg-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lg-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;20.10: Every result in this chapter.
+</figcaption>
+<div aria-describedby="tbl-lg-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Formula</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sensitivity</td>
+<td><span class="math inline">\(\Delta_pf = \max_{D \simeq D'}\lVert f(D) - f(D')\rVert_p\)</span></td>
+<td><span class="math inline">\(\Delta_2 \le \Delta_1 \le \sqrt d\,\Delta_2\)</span>; depends on the neighbouring relation</td>
+</tr>
+<tr class="even">
+<td>Count, sum in <span class="math inline">\([0, B]\)</span>, mean with public <span class="math inline">\(n\)</span></td>
+<td><span class="math inline">\(1\)</span>; <span class="math inline">\(B\)</span>; <span class="math inline">\(B/n\)</span></td>
+<td>Add/remove, add/remove or replace, replace</td>
+</tr>
+<tr class="odd">
+<td>Histogram</td>
+<td><span class="math inline">\(\Delta_1 = \Delta_2 = 1\)</span> (add/remove); <span class="math inline">\(2\)</span>, <span class="math inline">\(\sqrt2\)</span> (replace)</td>
+<td>One record, one bin</td>
+</tr>
+<tr class="even">
+<td>Laplace mechanism (<a href="#eq-lg-laplace" class="quarto-xref">Equation&nbsp;<span>20.9</span></a>)</td>
+<td><span class="math inline">\(f(D) + \mathrm{Lap}(\Delta_1f/\varepsilon)^{\otimes d}\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP</td>
+<td>Tight: <span class="math inline">\(L = \varepsilon\)</span> on half the mass</td>
+</tr>
+<tr class="odd">
+<td>Laplace accuracy</td>
+<td><span class="math inline">\(\Pr[\max_i\lvert Z_i\rvert &gt; b\ln(d/\beta)] \le \beta\)</span>; <span class="math inline">\(\mathbb E\lvert Z_i\rvert = b\)</span></td>
+<td>Error independent of <span class="math inline">\(n\)</span></td>
+</tr>
+<tr class="even">
+<td>Privacy loss of Gaussian noise</td>
+<td><span class="math inline">\(L \sim \mathcal N(\mu^2/2, \mu^2)\)</span> under <span class="math inline">\(M(D)\)</span></td>
+<td>Unbounded, so no pure DP</td>
+</tr>
+<tr class="odd">
+<td>Bad-event bound</td>
+<td><span class="math inline">\(\delta \le \Pr[L &gt; \varepsilon] = \Phi(\frac\mu2 - \frac\varepsilon\mu)\)</span></td>
+<td>Loose by the term <span class="math inline">\(e^\varepsilon Q(L &gt; \varepsilon)\)</span></td>
+</tr>
+<tr class="even">
+<td>Classic calibration (<a href="#eq-lg-classic" class="quarto-xref">Equation&nbsp;<span>20.13</span></a>)</td>
+<td><span class="math inline">\(\sigma = \Delta_2f\sqrt{2\ln(1.25/\delta)}/\varepsilon\)</span>, <span class="math inline">\(\varepsilon &lt; 1\)</span></td>
+<td>1.3–1.7 times too much noise; wrong for large <span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="odd">
+<td>Exact privacy curve</td>
+<td><span class="math inline">\(\delta_\mu(\varepsilon) = \Phi(\frac\mu2 - \frac\varepsilon\mu) - e^\varepsilon\Phi(-\frac\mu2 - \frac\varepsilon\mu)\)</span></td>
+<td>If and only if; $_(0) = $ TV</td>
+</tr>
+<tr class="even">
+<td>Analytic calibration</td>
+<td><span class="math inline">\(\sigma^* = \Delta_2f/\mu^*\)</span> with <span class="math inline">\(\delta_{\mu^*}(\varepsilon) = \delta\)</span>, by bisection</td>
+<td><span class="math inline">\(\delta_\mu\)</span> is increasing in <span class="math inline">\(\mu\)</span>, so one root</td>
+</tr>
+<tr class="odd">
+<td>Laplace vs Gaussian, per coordinate</td>
+<td><span class="math inline">\(\sqrt2\,\Delta_1f/\varepsilon\)</span> vs <span class="math inline">\(\Delta_2f\,\sigma_1(\varepsilon, \delta)\)</span></td>
+<td>Dense queries: Laplace wins only for <span class="math inline">\(d &lt; (\varepsilon\sigma_1)^2/2\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>First compute the sensitivity, and say which neighbouring relation it is for.</li>
+<li>One number or a sparse vector: Laplace noise, pure DP. A dense vector: Gaussian noise, calibrated to <span class="math inline">\(\Delta_2\)</span>.</li>
+<li>Never use the classic Gaussian formula when you can solve <a href="#eq-lg-analytic" class="quarto-xref">Equation&nbsp;<span>20.17</span></a>. Solving it costs one bisection, and the classic formula adds 30–70% more noise than needed.</li>
+<li>At <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span> the Gaussian mechanism needs <span class="math inline">\(\sigma \approx 3.73\,\Delta_2f\)</span>; Laplace needs <span class="math inline">\(b = \Delta_1f\)</span>.</li>
+<li>A Gaussian mechanism has a whole privacy curve; quote the curve (or <span class="math inline">\(\mu\)</span>), not just one <span class="math inline">\((\varepsilon, \delta)\)</span> pair.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part03-dp-foundations/03-laplace-gaussian.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part03-dp-foundations/02-properties.html" class="pagination-link" aria-label="Post-processing, group privacy and composition">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part03-dp-foundations/04-composition.html" class="pagination-link" aria-label="Advanced and optimal composition">
+        <span class="nav-page-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

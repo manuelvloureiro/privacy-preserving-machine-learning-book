@@ -1,0 +1,1962 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>32&nbsp; Numerical accounting with privacy loss distributions – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part04-privacy-accounting/07-shuffling-iteration.html" rel="next">
+<link href="../part04-privacy-accounting/05-subsampling.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/06-numerical-accounting.html"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">32.1</span> Why this matters</a>
+  <ul class="collapse">
+  <li><a href="#the-one-idea-δ-is-an-average-over-the-privacy-loss-and-composition-adds-losses" id="toc-the-one-idea-δ-is-an-average-over-the-privacy-loss-and-composition-adds-losses" class="nav-link" data-scroll-target="#the-one-idea-δ-is-an-average-over-the-privacy-loss-and-composition-adds-losses"><span class="header-section-number">32.1.1</span> The one idea: δ is an average over the privacy loss, and composition adds losses</a></li>
+  </ul></li>
+  <li><a href="#toolkit-three-facts-the-derivations-reuse" id="toc-toolkit-three-facts-the-derivations-reuse" class="nav-link" data-scroll-target="#toolkit-three-facts-the-derivations-reuse"><span class="header-section-number">32.2</span> Toolkit: three facts the derivations reuse</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-change-of-measure-qy-e-lypy" id="toc-fact-1-change-of-measure-qy-e-lypy" class="nav-link" data-scroll-target="#fact-1-change-of-measure-qy-e-lypy"><span class="header-section-number">32.2.1</span> Fact 1 — Change of measure: <span class="math inline">\(Q(y) = e^{-L(y)}P(y)\)</span></a></li>
+  <li><a href="#fact-2-monotone-coupling" id="toc-fact-2-monotone-coupling" class="nav-link" data-scroll-target="#fact-2-monotone-coupling"><span class="header-section-number">32.2.2</span> Fact 2 — Monotone coupling</a></li>
+  <li><a href="#fact-3-the-discrete-convolution-theorem" id="toc-fact-3-the-discrete-convolution-theorem" class="nav-link" data-scroll-target="#fact-3-the-discrete-convolution-theorem"><span class="header-section-number">32.2.3</span> Fact 3 — The discrete convolution theorem</a></li>
+  </ul></li>
+  <li><a href="#sec-num-pld" id="toc-sec-num-pld" class="nav-link" data-scroll-target="#sec-num-pld"><span class="header-section-number">32.3</span> The privacy loss distribution</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">32.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">32.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">32.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">32.3.4</span> Interpretation</a></li>
+  <li><a href="#example-the-gaussian-mechanism-with-sigma-1" id="toc-example-the-gaussian-mechanism-with-sigma-1" class="nav-link" data-scroll-target="#example-the-gaussian-mechanism-with-sigma-1"><span class="header-section-number">32.3.5</span> Example: the Gaussian mechanism with <span class="math inline">\(\sigma = 1\)</span></a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">32.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-num-convolution" id="toc-sec-num-convolution" class="nav-link" data-scroll-target="#sec-num-convolution"><span class="header-section-number">32.4</span> Composition is convolution</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">32.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">32.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">32.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">32.4.4</span> Interpretation</a></li>
+  <li><a href="#example-ten-gaussian-steps" id="toc-example-ten-gaussian-steps" class="nav-link" data-scroll-target="#example-ten-gaussian-steps"><span class="header-section-number">32.4.5</span> Example: ten Gaussian steps</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">32.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-num-discretize" id="toc-sec-num-discretize" class="nav-link" data-scroll-target="#sec-num-discretize"><span class="header-section-number">32.5</span> Discretization: pessimistic and optimistic</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">32.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">32.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">32.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">32.5.4</span> Interpretation</a></li>
+  <li><a href="#example-randomized-response-composed-three-times" id="toc-example-randomized-response-composed-three-times" class="nav-link" data-scroll-target="#example-randomized-response-composed-three-times"><span class="header-section-number">32.5.5</span> Example: randomized response composed three times</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">32.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-num-fft" id="toc-sec-num-fft" class="nav-link" data-scroll-target="#sec-num-fft"><span class="header-section-number">32.6</span> Composition by FFT</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">32.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">32.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">32.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">32.6.4</span> Interpretation</a></li>
+  <li><a href="#example-gaussian-steps-on-a-grid" id="toc-example-gaussian-steps-on-a-grid" class="nav-link" data-scroll-target="#example-gaussian-steps-on-a-grid"><span class="header-section-number">32.6.5</span> Example: Gaussian steps on a grid</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">32.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-num-subsampled" id="toc-sec-num-subsampled" class="nav-link" data-scroll-target="#sec-num-subsampled"><span class="header-section-number">32.7</span> The subsampled Gaussian</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">32.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">32.7.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">32.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">32.7.4</span> Interpretation</a></li>
+  <li><a href="#example-one-dp-sgd-step" id="toc-example-one-dp-sgd-step" class="nav-link" data-scroll-target="#example-one-dp-sgd-step"><span class="header-section-number">32.7.5</span> Example: one DP-SGD step</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">32.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-num-dpsgd" id="toc-sec-num-dpsgd" class="nav-link" data-scroll-target="#sec-num-dpsgd"><span class="header-section-number">32.8</span> The running example: DP-SGD</a>
+  <ul class="collapse">
+  <li><a href="#context-5" id="toc-context-5" class="nav-link" data-scroll-target="#context-5"><span class="header-section-number">32.8.1</span> Context</a></li>
+  <li><a href="#statement-5" id="toc-statement-5" class="nav-link" data-scroll-target="#statement-5"><span class="header-section-number">32.8.2</span> Statement</a></li>
+  <li><a href="#derivation-5" id="toc-derivation-5" class="nav-link" data-scroll-target="#derivation-5"><span class="header-section-number">32.8.3</span> Derivation</a></li>
+  <li><a href="#interpretation-5" id="toc-interpretation-5" class="nav-link" data-scroll-target="#interpretation-5"><span class="header-section-number">32.8.4</span> Interpretation</a></li>
+  <li><a href="#example-sandwich-width-against-grid-size" id="toc-example-sandwich-width-against-grid-size" class="nav-link" data-scroll-target="#example-sandwich-width-against-grid-size"><span class="header-section-number">32.8.5</span> Example: sandwich width against grid size</a></li>
+  <li><a href="#check-yourself-5" id="toc-check-yourself-5" class="nav-link" data-scroll-target="#check-yourself-5"><span class="header-section-number">32.8.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">32.9</span> Code</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">32.10</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">32.11</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/06-numerical-accounting.html"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="32.1">
+<h2 data-number="32.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">32.1</span> Why this matters</h2>
+<p>You trained a model with differential privacy (DP): 10,000 steps of stochastic gradient descent (SGD), each on a Poisson sample of the data with rate <span class="math inline">\(q = 0.01\)</span>, each with clipped gradients and Gaussian noise of multiplier <span class="math inline">\(\sigma = 1\)</span>. This is DP-SGD. You need one number: the smallest <span class="math inline">\(\varepsilon\)</span> such that the whole run is <span class="math inline">\((\varepsilon, 10^{-5})\)</span>-DP, which means that for any two datasets that differ in one person’s record, the probability of any set of outcomes of the run changes by at most a factor <span class="math inline">\(e^\varepsilon\)</span>, plus a slack of <span class="math inline">\(10^{-5}\)</span>. Rényi differential privacy (RDP), from <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>, gives an upper bound: it tracks one Rényi divergence per order and adds them up over the steps, but converting that Rényi curve to <span class="math inline">\((\varepsilon, \delta)\)</span> loses something you cannot see. The Gaussian central limit theorem (CLT) of <a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian DP</a> says that many composed steps look like one Gaussian mechanism, which gives an approximation, but not a bound. Neither tells you how far it is from the truth. This chapter computes the truth itself, to any precision you are willing to pay for, together with a lower and an upper bound that bracket it.</p>
+<section id="the-one-idea-δ-is-an-average-over-the-privacy-loss-and-composition-adds-losses" class="level3" data-number="32.1.1">
+<h3 data-number="32.1.1" class="anchored" data-anchor-id="the-one-idea-δ-is-an-average-over-the-privacy-loss-and-composition-adds-losses"><span class="header-section-number">32.1.1</span> The one idea: δ is an average over the privacy loss, and composition adds losses</h3>
+<p>Let <span class="math inline">\(P\)</span> be the distribution of the output when the run uses your dataset <span class="math inline">\(D\)</span>, and <span class="math inline">\(Q\)</span> the distribution when it uses the neighbour <span class="math inline">\(D'\)</span>. <a href="../part03-dp-foundations/04-composition.html">Composition</a> measured how much one output <span class="math inline">\(y\)</span> gives the two datasets away by the log of the ratio of its two probabilities, the <strong>privacy loss</strong> <span class="math inline">\(L(y) = \ln\frac{P(y)}{Q(y)}\)</span>. It is positive when <span class="math inline">\(y\)</span> is more likely under <span class="math inline">\(D\)</span>, negative when it is more likely under <span class="math inline">\(D'\)</span>, and zero when <span class="math inline">\(y\)</span> says nothing. With the output drawn as <span class="math inline">\(Y \sim P\)</span>, the loss <span class="math inline">\(L(Y)\)</span> is a random variable, the privacy loss random variable (PRV). Two facts make it the right object to track.</p>
+<p>The first is that the guarantee <span class="math inline">\(\delta(\varepsilon)\)</span>, the smallest <span class="math inline">\(\delta\)</span> that works for a given <span class="math inline">\(\varepsilon\)</span>, depends on the pair <span class="math inline">\((P, Q)\)</span> only through the distribution of <span class="math inline">\(L(Y)\)</span>. Each output contributes to <span class="math inline">\(\delta(\varepsilon)\)</span> an amount that depends only on its own loss: nothing if its loss is at most <span class="math inline">\(\varepsilon\)</span>, a fraction <span class="math inline">\((1 - e^{\varepsilon - \ell})_+\)</span> of its probability if its loss <span class="math inline">\(\ell\)</span> is larger. So <span class="math inline">\(\delta(\varepsilon)\)</span> is the average of that fixed function of the loss. We call the distribution of <span class="math inline">\(L(Y)\)</span> the <strong>privacy loss distribution (PLD)</strong>.</p>
+<p>The second is that the privacy loss of a composition is the sum of the per-step losses, because the probability of a sequence of independent outputs is a product and the logarithm turns the product into a sum. For independently run steps the terms are independent, and the distribution of a sum of independent variables is the convolution of their distributions. So the PLD of <span class="math inline">\(k\)</span> steps is the <span class="math inline">\(k\)</span>-fold convolution of the per-step PLDs (<a href="#sec-num-convolution" class="quarto-xref"><span>Section 32.4</span></a> handles steps chosen adaptively).</p>
+<p>Everything in this chapter follows from these two facts. Discretize the per-step loss on a grid of width <span class="math inline">\(h\)</span>, convolve with a fast Fourier transform (FFT), and read <span class="math inline">\(\delta(\varepsilon)\)</span> off the result. Since a larger loss never contributes less to δ, rounding moves δ in a known direction. If you <strong>round each loss up</strong> to the grid, the δ you compute is an upper bound on the true δ for every composition. If you <strong>round down</strong>, it is a lower bound. The true value is sandwiched, and the width of the sandwich is known in advance: each step’s two roundings are at most <span class="math inline">\(h\)</span> apart, so after <span class="math inline">\(k\)</span> steps the two totals are at most <span class="math inline">\(kh\)</span> apart, which makes the sandwich at most <span class="math inline">\(kh\)</span> wide in <span class="math inline">\(\varepsilon\)</span>, and exactly <span class="math inline">\(kh\)</span> for a continuous PLD without truncation.</p>
+<p><a href="#tbl-num-overview" class="quarto-xref">Table&nbsp;<span>32.1</span></a> lists the results and where each is used.</p>
+<div id="tbl-num-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.1: The results of this chapter and where each is used.
+</figcaption>
+<div aria-describedby="tbl-num-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\delta(\varepsilon) = \mathbb E_{Y\sim P}[(1 - e^{\varepsilon - L(Y)})_+]\)</span> (<a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a>)</td>
+<td>Every accountant in this chapter; reading <span class="math inline">\((\varepsilon, \delta)\)</span> off any PLD</td>
+</tr>
+<tr class="even">
+<td>The Gaussian PLD <span class="math inline">\(\mathcal N(\mu^2/2, \mu^2)\)</span></td>
+<td>Checking the code; the Gaussian mechanism; Gaussian DP</td>
+</tr>
+<tr class="odd">
+<td>Composition is convolution (<a href="#eq-num-conv" class="quarto-xref">Equation&nbsp;<span>32.5</span></a>), dominating pairs</td>
+<td>Accounting for <span class="math inline">\(k\)</span> steps, adaptive or not</td>
+</tr>
+<tr class="even">
+<td>Pessimistic and optimistic rounding (<a href="#eq-num-sandwich" class="quarto-xref">Equation&nbsp;<span>32.6</span></a>)</td>
+<td>Turning a numerical answer into a certified upper bound and a lower bound</td>
+</tr>
+<tr class="odd">
+<td>FFT convolution, padding, repeated squaring</td>
+<td>Fast accountants: the PLD accountant, the PRV accountant</td>
+</tr>
+<tr class="even">
+<td>PLD of the Poisson-subsampled Gaussian, two directions</td>
+<td>DP-SGD accounting</td>
+</tr>
+<tr class="odd">
+<td>The running example</td>
+<td>Comparing PLD against RDP and the CLT in <a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Conventions.</strong> In this chapter <span class="math inline">\(q\)</span> is the sampling rate. Since the lowercase letter is taken, the densities of the two output distributions are written with the same letter as the distribution, <span class="math inline">\(P(y)\)</span> and <span class="math inline">\(Q(y)\)</span>. <span class="math inline">\(\sigma\)</span> is the noise multiplier and the sensitivity is 1: one record moves the quantity being noised by at most 1. A <strong>PLD</strong> <span class="math inline">\(\omega\)</span> is the law of <span class="math inline">\(L(Y)\)</span> under <span class="math inline">\(Y \sim P\)</span>. It may have an atom at <span class="math inline">\(+\infty\)</span>, which is the <span class="math inline">\(P\)</span>-mass of the outputs where <span class="math inline">\(Q(y) = 0\)</span>: those outputs are impossible under <span class="math inline">\(D'\)</span>, so seeing one proves the dataset was <span class="math inline">\(D\)</span>. <span class="math inline">\(\Phi\)</span> is the standard normal distribution function, <span class="math inline">\(\Phi(x) = \Pr[Z \le x]\)</span> for <span class="math inline">\(Z \sim \mathcal N(0, 1)\)</span>. Logs are natural. The running example is DP-SGD with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span> and up to <span class="math inline">\(k = 10{,}000\)</span> steps. The RDP accountant of <a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a> and the CLT approximation of Gaussian differential privacy (GDP) serve as comparisons.</p>
+</section>
+</section>
+<section id="toolkit-three-facts-the-derivations-reuse" class="level2" data-number="32.2">
+<h2 data-number="32.2" class="anchored" data-anchor-id="toolkit-three-facts-the-derivations-reuse"><span class="header-section-number">32.2</span> Toolkit: three facts the derivations reuse</h2>
+<section id="fact-1-change-of-measure-qy-e-lypy" class="level3" data-number="32.2.1">
+<h3 data-number="32.2.1" class="anchored" data-anchor-id="fact-1-change-of-measure-qy-e-lypy"><span class="header-section-number">32.2.1</span> Fact 1 — Change of measure: <span class="math inline">\(Q(y) = e^{-L(y)}P(y)\)</span></h3>
+<p>You often need a probability under <span class="math inline">\(Q\)</span> but only know the distribution of the loss under <span class="math inline">\(P\)</span>. The way across is to reweight: an output’s <span class="math inline">\(Q\)</span>-probability is its <span class="math inline">\(P\)</span>-probability times the ratio <span class="math inline">\(Q(y)/P(y)\)</span>, and that ratio is <span class="math inline">\(e^{-L(y)}\)</span> by the definition of the loss. Wherever <span class="math inline">\(P(y) &gt; 0\)</span> and <span class="math inline">\(Q(y) &gt; 0\)</span>, <span class="math inline">\(Q(y) = P(y)\,\frac{Q(y)}{P(y)} = e^{-L(y)}P(y)\)</span>. Summing any function <span class="math inline">\(f\)</span> of the loss against both sides gives, for any <span class="math inline">\(f\)</span>, <span id="eq-auto-06numericalaccounting-1"><span class="math display">\[\mathbb E_Q[f(L)\,\mathbf 1\{P &gt; 0\}] = \mathbb E_P\big[f(L)\,e^{-L}\big]. \tag{32.1}\]</span></span> The indicator <span class="math inline">\(\mathbf 1\{P &gt; 0\}\)</span> is there because the reweighting only reaches outputs that <span class="math inline">\(P\)</span> can produce; the outputs with <span class="math inline">\(P(y) = 0\)</span> are invisible from the <span class="math inline">\(P\)</span> side. With <span class="math inline">\(f = 1\)</span> the left side is the total <span class="math inline">\(Q\)</span>-mass on outputs that <span class="math inline">\(P\)</span> can produce: <span class="math inline">\(\mathbb E_P[e^{-L}] = Q(P &gt; 0) \le 1\)</span>, with equality when <span class="math inline">\(Q\)</span> puts no mass where <span class="math inline">\(P\)</span> puts none. This is Fact 1 of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>, read with the likelihood ratio <span class="math inline">\(r = e^{L}\)</span>.</p>
+<p>Two things follow that the chapter uses. The law of <span class="math inline">\(L\)</span> under <span class="math inline">\(Q\)</span> is determined by the PLD, because every <span class="math inline">\(Q\)</span>-probability of a loss event is a reweighted <span class="math inline">\(P\)</span>-probability. And a distribution <span class="math inline">\(\omega\)</span> can only be a PLD if <span class="math inline">\(\mathbb E_\omega[e^{-L}] \le 1\)</span>.</p>
+</section>
+<section id="fact-2-monotone-coupling" class="level3" data-number="32.2.2">
+<h3 data-number="32.2.2" class="anchored" data-anchor-id="fact-2-monotone-coupling"><span class="header-section-number">32.2.2</span> Fact 2 — Monotone coupling</h3>
+<p>If you move every value of a random variable up, any non-decreasing function of it can only go up too, and so can its average. Formally, let <span class="math inline">\(g\)</span> be non-decreasing. If two random variables, built on the same random draw, satisfy <span class="math inline">\(X \le X'\)</span> for every outcome, then <span class="math inline">\(\mathbb E[g(X)] \le \mathbb E[g(X')]\)</span>. This is just <span class="math inline">\(g(X) \le g(X')\)</span> outcome by outcome, averaged. Building two variables from one draw like this, so that they can be compared outcome by outcome, is called a <strong>coupling</strong>. The chapter uses it to show that moving privacy loss upward can only increase δ (<a href="#sec-num-discretize" class="quarto-xref"><span>Section 32.5</span></a>).</p>
+</section>
+<section id="fact-3-the-discrete-convolution-theorem" class="level3" data-number="32.2.3">
+<h3 data-number="32.2.3" class="anchored" data-anchor-id="fact-3-the-discrete-convolution-theorem"><span class="header-section-number">32.2.3</span> Fact 3 — The discrete convolution theorem</h3>
+<p>Convolving two sequences directly means summing <span class="math inline">\(a_ib_j\)</span> over every pair <span class="math inline">\((i, j)\)</span> with the same <span class="math inline">\(i + j\)</span>, which costs a number of operations proportional to the product of their lengths. The Fourier transform turns this into a pointwise product. The reason is that the transform attaches to index <span class="math inline">\(i\)</span> the power <span class="math inline">\(\zeta^{i}\)</span> of a fixed complex number, and powers multiply by adding exponents, <span class="math inline">\(\zeta^i\zeta^j = \zeta^{i+j}\)</span>: indices add exactly the way losses add. For sequences <span class="math inline">\(a_0, \dots, a_{N-1}\)</span>, the discrete Fourier transform of length <span class="math inline">\(N\)</span> is <span class="math inline">\(\hat a_m = \sum_{i=0}^{N-1}a_i\,\zeta^{im}\)</span> with <span class="math inline">\(\zeta = e^{-2\pi\mathrm i/N}\)</span>, an <span class="math inline">\(N\)</span>-th root of unity. Multiplying two transforms and grouping the terms by <span class="math inline">\(i + j\)</span> gives, since <span class="math inline">\(\zeta^N = 1\)</span> means exponents only matter modulo <span class="math inline">\(N\)</span>, <span id="eq-auto-06numericalaccounting-2"><span class="math display">\[\hat a_m\,\hat b_m = \sum_{i,j}a_ib_j\,\zeta^{(i+j)m} = \sum_{n=0}^{N-1}\Big(\sum_{i + j \equiv n \bmod N}a_ib_j\Big)\zeta^{nm}. \tag{32.2}\]</span></span> The bracket is the coefficient at index <span class="math inline">\(n\)</span>, so the inverse transform of <span class="math inline">\(\hat a\hat b\)</span> is the <strong>circular</strong> convolution: index sums are taken modulo <span class="math inline">\(N\)</span>, and a sum that reaches <span class="math inline">\(N\)</span> or more folds back to the start. To get the ordinary convolution you make the window long enough that nothing folds back. If <span class="math inline">\(a\)</span> has <span class="math inline">\(n_a\)</span> nonzero entries at the start, <span class="math inline">\(b\)</span> has <span class="math inline">\(n_b\)</span>, and <span class="math inline">\(N \ge n_a + n_b - 1\)</span>, then <span class="math inline">\(i + j \le n_a + n_b - 2 &lt; N\)</span> always, no index wraps around, and the circular convolution equals the ordinary one. The FFT computes such a transform in <span class="math inline">\(O(N\log N)\)</span> operations instead of <span class="math inline">\(O(N^2)\)</span>. The chapter uses it to convolve PLDs (<a href="#sec-num-fft" class="quarto-xref"><span>Section 32.6</span></a>).</p>
+</section>
+</section>
+<section id="sec-num-pld" class="level2" data-number="32.3">
+<h2 data-number="32.3" class="anchored" data-anchor-id="sec-num-pld"><span class="header-section-number">32.3</span> The privacy loss distribution</h2>
+<section id="context" class="level3" data-number="32.3.1">
+<h3 data-number="32.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">32.3.1</span> Context</h3>
+<p>The guarantee you report is <span class="math inline">\(\delta(\varepsilon) = E_{e^\varepsilon}(P\|Q)\)</span>, the <strong>hockey-stick divergence</strong> between the output distributions on two neighbouring datasets (see <a href="../part01-prerequisites/03-divergences.html">Divergences</a> and <a href="../part03-dp-foundations/01-definition.html">Definition</a>). It is the smallest <span class="math inline">\(\delta\)</span> for which <span class="math inline">\(P(S) \le e^\varepsilon Q(S) + \delta\)</span> holds for every set <span class="math inline">\(S\)</span> of outputs. The largest gap <span class="math inline">\(P(S) - e^\varepsilon Q(S)\)</span> comes from the set that holds exactly the outputs with <span class="math inline">\(P(y) &gt; e^\varepsilon Q(y)\)</span>, since each of them adds a positive amount and any other output would subtract, so the divergence is the sum <span class="math inline">\(\sum_y\big(P(y) - e^\varepsilon Q(y)\big)_+\)</span>, where <span class="math inline">\((x)_+ = \max\{x, 0\}\)</span>. That is a sum over outputs, and the output space of a training run is enormous. This section shows that you never need the output space: the one-dimensional distribution of the privacy loss carries all of <span class="math inline">\(\delta(\varepsilon)\)</span>.</p>
+</section>
+<section id="statement" class="level3" data-number="32.3.2">
+<h3 data-number="32.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">32.3.2</span> Statement</h3>
+<p>Each output adds to δ only if its loss exceeds <span class="math inline">\(\varepsilon\)</span>, and then it adds the fraction <span class="math inline">\(1 - e^{\varepsilon - \ell}\)</span> of its probability, which grows from 0 at <span class="math inline">\(\ell = \varepsilon\)</span> towards 1 for a very large loss. So δ is an average of that weight over the PLD. Equivalently, it is the chance under <span class="math inline">\(P\)</span> that the loss exceeds <span class="math inline">\(\varepsilon\)</span>, minus <span class="math inline">\(e^\varepsilon\)</span> times the same chance under <span class="math inline">\(Q\)</span>: the second form is the hockey-stick gap of the best set <span class="math inline">\(S = \{L &gt; \varepsilon\}\)</span>. Let <span class="math inline">\(\omega\)</span> be the PLD of <span class="math inline">\((P, Q)\)</span>, the law of <span class="math inline">\(L(Y)\)</span> with <span class="math inline">\(Y \sim P\)</span>, including its atom <span class="math inline">\(\omega(\{+\infty\})\)</span>. Then for every <span class="math inline">\(\varepsilon\)</span>, <span id="eq-num-delta"><span class="math display">\[\delta(\varepsilon) = \mathbb E_{L\sim\omega}\big[(1 - e^{\varepsilon - L})_+\big] = P[L &gt; \varepsilon] - e^{\varepsilon}\,Q[L &gt; \varepsilon], \tag{32.3}\]</span></span> with the convention <span class="math inline">\((1 - e^{\varepsilon - \infty})_+ = 1\)</span>: an output impossible under <span class="math inline">\(D'\)</span> counts fully. The right side also needs the law of <span class="math inline">\(L\)</span> under <span class="math inline">\(Q\)</span>, but that is no extra information. By Fact 1 it is the PLD reweighted by <span class="math inline">\(e^{-\ell}\)</span>, namely <span class="math inline">\(e^{-\ell}\,\omega(d\ell)\)</span> on finite <span class="math inline">\(\ell\)</span>, plus an atom at <span class="math inline">\(-\infty\)</span> of size <span class="math inline">\(1 - \mathbb E_\omega[e^{-L}]\)</span> for the <span class="math inline">\(Q\)</span>-mass that sits where <span class="math inline">\(P\)</span> is zero. So <span class="math inline">\(\omega\)</span> alone determines both sides.</p>
+<p>For the <strong>Gaussian pair</strong> <span class="math inline">\(P = \mathcal N(0, \sigma^2)\)</span>, <span class="math inline">\(Q = \mathcal N(s, \sigma^2)\)</span>, the two outputs of a Gaussian mechanism whose query moves by <span class="math inline">\(s\)</span>, write <span class="math inline">\(\mu = s/\sigma\)</span> for the shift measured in noise standard deviations. The privacy loss turns out to be a linear function of the output, so it is itself Gaussian, with mean <span class="math inline">\(\mu^2/2\)</span> and variance <span class="math inline">\(\mu^2\)</span>. Plugging its two tails into <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a> gives δ in closed form: <span id="eq-num-gauss"><span class="math display">\[L \sim \mathcal N\big(\tfrac{\mu^2}2, \mu^2\big)\ \text{under } P, \qquad \delta(\varepsilon) = \Phi\Big(\frac\mu2 - \frac\varepsilon\mu\Big) - e^{\varepsilon}\,\Phi\Big(-\frac\mu2 - \frac\varepsilon\mu\Big). \tag{32.4}\]</span></span></p>
+</section>
+<section id="derivation" class="level3" data-number="32.3.3">
+<h3 data-number="32.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">32.3.3</span> Derivation</h3>
+<p><strong>δ as an average over the PLD.</strong> The plan is to start from the hockey-stick sum, factor each output’s probability out of its term so that what remains depends only on its loss, and then recognize an average.</p>
+<ol type="1">
+<li><strong>Write the hockey-stick divergence as a sum over outputs.</strong> As the Context explains (Fact 3 of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>), the best set of outputs is the one where <span class="math inline">\(P &gt; e^\varepsilon Q\)</span>, so <span class="math inline">\(\delta(\varepsilon) = \sum_y\big(P(y) - e^\varepsilon Q(y)\big)_+\)</span>.</li>
+<li><strong>Sort the outputs into three kinds, because the loss behaves differently on each.</strong> Where <span class="math inline">\(P(y) = 0\)</span> the term is <span class="math inline">\((-e^\varepsilon Q(y))_+ = 0\)</span>, so these outputs drop out. Where <span class="math inline">\(Q(y) = 0 &lt; P(y)\)</span> the term is <span class="math inline">\(P(y)\)</span>, and <span class="math inline">\(L(y) = +\infty\)</span>. Elsewhere both are positive and the loss is finite.</li>
+<li><strong>Factor out <span class="math inline">\(P(y)\)</span> on the third kind,</strong> using <span class="math inline">\(Q(y)/P(y) = e^{-L(y)}\)</span>: <span class="math inline">\(P(y)\big(1 - e^\varepsilon\frac{Q(y)}{P(y)}\big)_+ = P(y)\big(1 - e^{\varepsilon - L(y)}\big)_+\)</span>.</li>
+<li><strong>Recognize an expectation under <span class="math inline">\(P\)</span>.</strong> A sum of <span class="math inline">\(P(y)\)</span> times something is the average of that something with <span class="math inline">\(Y \sim P\)</span>. Adding up the second and third kinds gives <span class="math inline">\(\mathbb E_P[(1 - e^{\varepsilon - L(Y)})_+]\)</span>, where an infinite loss gets the value 1, as step 2 requires. The thing being averaged depends on <span class="math inline">\(y\)</span> only through <span class="math inline">\(L(y)\)</span>, so the expectation is an average over <span class="math inline">\(\omega\)</span>. This is the first form of <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a>.</li>
+<li><strong>Split the positive part into two terms.</strong> When <span class="math inline">\(L &gt; \varepsilon\)</span> the bracket <span class="math inline">\(1 - e^{\varepsilon - L}\)</span> is positive and the positive part keeps it; when <span class="math inline">\(L \le \varepsilon\)</span> it is zero. So <span class="math inline">\((1 - e^{\varepsilon - L})_+ = \mathbf 1\{L &gt; \varepsilon\} - e^\varepsilon e^{-L}\mathbf 1\{L &gt; \varepsilon\}\)</span>. The first term averages to <span class="math inline">\(P[L &gt; \varepsilon]\)</span>.</li>
+<li><strong>Change measure in the second term.</strong> Fact 1 with <span class="math inline">\(f = \mathbf 1\{\cdot &gt; \varepsilon\}\)</span> turns the <span class="math inline">\(P\)</span>-average reweighted by <span class="math inline">\(e^{-L}\)</span> into a <span class="math inline">\(Q\)</span>-probability: <span class="math inline">\(\mathbb E_P[e^{-L}\mathbf 1\{L &gt; \varepsilon\}] = Q[L &gt; \varepsilon]\)</span>. The outputs where <span class="math inline">\(P = 0\)</span>, which Fact 1 cannot reach, have <span class="math inline">\(L = -\infty\)</span> and are not in the event anyway. This gives the second form of <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a>.</li>
+<li><strong>Find the law of <span class="math inline">\(L\)</span> under <span class="math inline">\(Q\)</span> the same way.</strong> Fact 1 with <span class="math inline">\(f = \mathbf 1\{L \in A\}\)</span> gives <span class="math inline">\(Q[L \in A] = \int_A e^{-\ell}\omega(d\ell)\)</span> for sets <span class="math inline">\(A\)</span> of finite losses. The remaining <span class="math inline">\(Q\)</span>-mass sits where <span class="math inline">\(P = 0\)</span>, at <span class="math inline">\(L = -\infty\)</span>.</li>
+</ol>
+<p><strong>The Gaussian PLD.</strong> The point is that for two Gaussians with the same variance the log-ratio of the densities is linear in the output, because the quadratic terms cancel.</p>
+<ol type="1">
+<li><strong>The loss is linear in <span class="math inline">\(y\)</span>.</strong> The normalizing constants are the same and cancel: <span class="math inline">\(L(y) = \ln\frac{e^{-y^2/2\sigma^2}}{e^{-(y - s)^2/2\sigma^2}} = \frac{(y - s)^2 - y^2}{2\sigma^2} = \frac{s^2 - 2sy}{2\sigma^2}\)</span>.</li>
+<li><strong>A linear function of a Gaussian is Gaussian.</strong> With <span class="math inline">\(Y \sim \mathcal N(0, \sigma^2)\)</span>, the mean of <span class="math inline">\(L\)</span> is the constant term <span class="math inline">\(\frac{s^2}{2\sigma^2} = \frac{\mu^2}2\)</span>, and the variance is the squared slope times the variance of <span class="math inline">\(Y\)</span>, <span class="math inline">\(\frac{4s^2}{4\sigma^4}\sigma^2 = \mu^2\)</span>.</li>
+<li><strong>Under <span class="math inline">\(Q\)</span></strong>, <span class="math inline">\(Y \sim \mathcal N(s, \sigma^2)\)</span> has mean <span class="math inline">\(s\)</span> instead of 0, which moves the mean of <span class="math inline">\(L\)</span> by the slope times <span class="math inline">\(s\)</span>, <span class="math inline">\(-\frac{2s\cdot s}{2\sigma^2} = -\mu^2\)</span>, so <span class="math inline">\(L \sim \mathcal N(-\frac{\mu^2}2, \mu^2)\)</span>. Step 7 above predicts the same. Multiplying the density of <span class="math inline">\(\mathcal N(m, v)\)</span> by <span class="math inline">\(e^{-\ell}\)</span> and completing the square, <span class="math inline">\(-\frac{(\ell - m)^2}{2v} - \ell = -\frac{(\ell - (m - v))^2}{2v} + \text{const}\)</span>, gives <span class="math inline">\(\mathcal N(m - v, v)\)</span>; here <span class="math inline">\(\frac{\mu^2}2 - \mu^2 = -\frac{\mu^2}2\)</span>.</li>
+<li><strong>Read off the tails.</strong> For <span class="math inline">\(L \sim \mathcal N(m, \mu^2)\)</span>, standardizing gives <span class="math inline">\(\Pr[L &gt; \varepsilon] = \Pr\big[Z &gt; \frac{\varepsilon - m}{\mu}\big] = \Phi\big(\frac{m - \varepsilon}{\mu}\big)\)</span>, because the standard normal is symmetric about 0. So <span class="math inline">\(P[L &gt; \varepsilon] = \Phi\big(\frac{\mu^2/2 - \varepsilon}{\mu}\big) = \Phi(\frac\mu2 - \frac\varepsilon\mu)\)</span>, and <span class="math inline">\(Q[L &gt; \varepsilon] = \Phi\big(\frac{-\mu^2/2 - \varepsilon}{\mu}\big) = \Phi(-\frac\mu2 - \frac\varepsilon\mu)\)</span>. Insert them in <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a>. This is the exact <span class="math inline">\(\delta(\varepsilon)\)</span> of the <a href="../part03-dp-foundations/03-laplace-gaussian.html">Gaussian mechanism</a>, and the <span class="math inline">\((\varepsilon, \delta)\)</span> curve of <span class="math inline">\(\mu\)</span>-GDP in <a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian DP</a>, where a mechanism is <span class="math inline">\(\mu\)</span>-GDP if telling its two outputs apart is never easier than telling <span class="math inline">\(\mathcal N(0, 1)\)</span> from <span class="math inline">\(\mathcal N(\mu, 1)\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation" class="level3" data-number="32.3.4">
+<h3 data-number="32.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">32.3.4</span> Interpretation</h3>
+<p>The PLD is a complete summary for <span class="math inline">\((\varepsilon, \delta)\)</span>. Two pairs with the same PLD have the same <span class="math inline">\(\delta(\varepsilon)\)</span> at every <span class="math inline">\(\varepsilon\)</span>, whatever their output spaces, because <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a> reads δ off the PLD and nothing else. A DP-SGD run with millions of parameters and a one-dimensional Gaussian pair can have the same PLD.</p>
+<p>Not every distribution is a PLD, though. Fact 1 requires <span class="math inline">\(\mathbb E_\omega[e^{-L}] \le 1\)</span>, since that average is the <span class="math inline">\(Q\)</span>-mass where <span class="math inline">\(P\)</span> is positive. The converse holds too: any <span class="math inline">\(\omega\)</span> with <span class="math inline">\(\mathbb E_\omega[e^{-L}] \le 1\)</span> is the PLD of some pair, and you can build the pair directly. Take <span class="math inline">\(P = \omega\)</span> on the real line, except that its atom at <span class="math inline">\(+\infty\)</span>, if any, goes on an extra point <span class="math inline">\(y_+\)</span> where <span class="math inline">\(Q\)</span> is zero. Take <span class="math inline">\(Q(d\ell) = e^{-\ell}\omega(d\ell)\)</span> on the finite losses, which has total mass at most 1 by assumption, and put the missing <span class="math inline">\(Q\)</span>-mass <span class="math inline">\(1 - \mathbb E_\omega[e^{-L}]\)</span> on a second extra point <span class="math inline">\(y_-\)</span> where <span class="math inline">\(P\)</span> is zero. Then <span class="math inline">\(\ln\frac{P}{Q}\)</span> is <span class="math inline">\(\ell\)</span> at each finite <span class="math inline">\(\ell\)</span> and <span class="math inline">\(+\infty\)</span> at <span class="math inline">\(y_+\)</span>, so the PLD is <span class="math inline">\(\omega\)</span>. <a href="#sec-num-discretize" class="quarto-xref"><span>Section 32.5</span></a> uses this to show that a rounded PLD still belongs to a real pair of distributions.</p>
+<p>The weight <span class="math inline">\((1 - e^{\varepsilon - \ell})_+\)</span> is non-decreasing in <span class="math inline">\(\ell\)</span>: it is 0 up to <span class="math inline">\(\ell = \varepsilon\)</span> and rises to 1. So <span class="math inline">\(\delta(\varepsilon)\)</span> is the PLD’s upper tail beyond <span class="math inline">\(\varepsilon\)</span>, down-weighted near <span class="math inline">\(\varepsilon\)</span> (<a href="#fig-num-pld-weight" class="quarto-xref">Figure&nbsp;<span>32.1</span></a>). Because the weight is at most 1, <span class="math inline">\(\delta(\varepsilon) \le P[L &gt; \varepsilon]\)</span>, and because losses just above <span class="math inline">\(\varepsilon\)</span> get a weight close to 0, that tail bound is loose (<a href="../../book-exercises/part04-privacy-accounting/06-numerical-accounting.html#sec-sol-num-2">Exercise 2</a>).</p>
+<div id="fig-num-pld-weight" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-num-pld-weight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/numerical_accounting_pld_weight.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-num-pld-weight-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;32.1: The Gaussian PLD for <span class="math inline">\(\mu = 1\)</span> (blue), the weight <span class="math inline">\((1 - e^{\varepsilon - \ell})_+\)</span> at <span class="math inline">\(\varepsilon = 1\)</span> (orange, scaled by 0.4 to fit), and their product (green). The green area is <span class="math inline">\(\delta(1) = 0.1269\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-gaussian-mechanism-with-sigma-1" class="level3" data-number="32.3.5">
+<h3 data-number="32.3.5" class="anchored" data-anchor-id="example-the-gaussian-mechanism-with-sigma-1"><span class="header-section-number">32.3.5</span> Example: the Gaussian mechanism with <span class="math inline">\(\sigma = 1\)</span></h3>
+<p>With sensitivity 1 and <span class="math inline">\(\sigma = 1\)</span>, the shift is one noise standard deviation, <span class="math inline">\(\mu = 1/1 = 1\)</span>, and the PLD is <span class="math inline">\(\mathcal N(\frac12, 1) = \mathcal N(0.5, 1)\)</span>. From a million samples of <span class="math inline">\(Y\)</span>, the script finds a mean loss of 0.4990, a variance of 1.0013 and <span class="math inline">\(\mathbb E[e^{-L}] = 1.0015\)</span>, against the exact 0.5, 1 and 1. The green area of <a href="#fig-num-pld-weight" class="quarto-xref">Figure&nbsp;<span>32.1</span></a> comes from <a href="#eq-num-gauss" class="quarto-xref">Equation&nbsp;<span>32.4</span></a> at <span class="math inline">\(\varepsilon = 1\)</span>: <span class="math inline">\(\Phi(\frac12 - 1) - e\,\Phi(-\frac12 - 1) = \Phi(-0.5) - e\,\Phi(-1.5) = 0.3085 - 2.7183 \times 0.0668 = 0.3085 - 0.1816 = 0.1269\)</span>. At <span class="math inline">\(\varepsilon = 0\)</span> the second term has no factor <span class="math inline">\(e^\varepsilon\)</span> and the formula is <span class="math inline">\(\Phi(0.5) - \Phi(-0.5) = 0.6915 - 0.3085 = 0.3829\)</span>. <a href="#tbl-num-gauss-delta" class="quarto-xref">Table&nbsp;<span>32.2</span></a> checks <a href="#eq-num-gauss" class="quarto-xref">Equation&nbsp;<span>32.4</span></a> against numerical integration of <span class="math inline">\((1 - e^{\varepsilon - \ell})_+\)</span> over the PLD density and against Monte Carlo.</p>
+<div id="tbl-num-gauss-delta" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-gauss-delta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.2: δ(ε) of the Gaussian pair with <span class="math inline">\(\mu = 1\)</span>, computed three ways.
+</figcaption>
+<div aria-describedby="tbl-num-gauss-delta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th>Closed form <a href="#eq-num-gauss" class="quarto-xref">Equation&nbsp;<span>32.4</span></a></th>
+<th>Quadrature over the PLD</th>
+<th>Monte Carlo (<span class="math inline">\(10^6\)</span> draws)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.382925</td>
+<td>0.382925</td>
+<td>0.382644</td>
+</tr>
+<tr class="even">
+<td>0.5</td>
+<td>0.238422</td>
+<td>0.238422</td>
+<td>0.238748</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>0.126937</td>
+<td>0.126937</td>
+<td>0.126967</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>0.020924</td>
+<td>0.020924</td>
+<td>0.020922</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The quadrature agrees to all six digits and Monte Carlo to within its sampling error. Since δ falls as <span class="math inline">\(\varepsilon\)</span> grows, you can also go the other way and solve <span class="math inline">\(\delta(\varepsilon) = 10^{-5}\)</span> for <span class="math inline">\(\varepsilon\)</span>: the mechanism is <span class="math inline">\((4.3772, 10^{-5})\)</span>-DP.</p>
+<p>For a finite pair the two forms of <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a> can be checked by hand. Take <span class="math inline">\(P = (0.1, 0.2, 0.3, 0.4)\)</span> and <span class="math inline">\(Q = (0.4, 0.3, 0.2, 0.1)\)</span> at <span class="math inline">\(\varepsilon = 0.5\)</span>, where <span class="math inline">\(e^{0.5} = 1.6487\)</span>. Only the last output has <span class="math inline">\(P &gt; e^{0.5}Q\)</span>, so the sum is <span class="math inline">\(\sum(P - e^{0.5}Q)_+ = 0.4 - 1.6487 \times 0.1 = 0.2351\)</span>. The losses are <span class="math inline">\(\ln\frac{0.1}{0.4}\)</span>, <span class="math inline">\(\ln\frac{0.2}{0.3}\)</span>, <span class="math inline">\(\ln\frac{0.3}{0.2} = 0.405\)</span> and <span class="math inline">\(\ln\frac{0.4}{0.1} = 1.386\)</span>, so only the last exceeds 0.5, and <span class="math inline">\(P[L &gt; 0.5] - e^{0.5}Q[L &gt; 0.5] = 0.4 - 1.6487 \times 0.1 = 0.2351\)</span> as well.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="32.3.6">
+<h3 data-number="32.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">32.3.6</span> Check yourself</h3>
+<ul>
+<li>Why does an output with <span class="math inline">\(Q(y) = 0\)</span> count fully in δ, whatever <span class="math inline">\(\varepsilon\)</span> is? <em>(Seeing it proves the dataset was <span class="math inline">\(D\)</span>, not <span class="math inline">\(D'\)</span>. No <span class="math inline">\(e^\varepsilon\)</span> factor can cover a ratio of <span class="math inline">\(P(y)/0\)</span>, so its whole probability goes into δ.)</em></li>
+<li>A Gaussian mechanism with noise standard deviation 2 on a count (sensitivity 1), and a 1000-dimensional Gaussian mechanism with noise standard deviation 4 on a query of <span class="math inline">\(\ell_2\)</span> sensitivity 2: do they have the same <span class="math inline">\((\varepsilon, \delta)\)</span> curve? <em>(Yes. Both shift by half a noise standard deviation, <span class="math inline">\(\mu = 1/2 = 2/4 = 0.5\)</span>, so both have PLD <span class="math inline">\(\mathcal N(\frac{0.25}2, 0.25) = \mathcal N(0.125, 0.25)\)</span>, and by <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a> δ depends only on the PLD.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-num-convolution" class="level2" data-number="32.4">
+<h2 data-number="32.4" class="anchored" data-anchor-id="sec-num-convolution"><span class="header-section-number">32.4</span> Composition is convolution</h2>
+<section id="context-1" class="level3" data-number="32.4.1">
+<h3 data-number="32.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">32.4.1</span> Context</h3>
+<p>DP-SGD releases <span class="math inline">\(k\)</span> noisy gradients. The output is the tuple <span class="math inline">\((y_1, \dots, y_k)\)</span>, and you want its <span class="math inline">\(\delta(\varepsilon)\)</span>. The bounds of <a href="../part03-dp-foundations/04-composition.html">Composition</a> (basic, advanced, and the optimal composition theorem of Kairouz, Oh and Viswanath, which is the best bound possible for steps known only by their <span class="math inline">\((\varepsilon_i, \delta_i)\)</span>) start from per-step <span class="math inline">\((\varepsilon_i, \delta_i)\)</span> pairs, and so throw away the shape of each step’s PLD. With PLDs, composition is exact.</p>
+</section>
+<section id="statement-1" class="level3" data-number="32.4.2">
+<h3 data-number="32.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">32.4.2</span> Statement</h3>
+<p>Run <span class="math inline">\(k\)</span> steps independently. The probability of the whole tuple of outputs is the product of the per-step probabilities, so the log-ratio of the whole tuple is the sum of the per-step log-ratios: the total privacy loss is the sum of the step losses. Those step losses are independent, and the distribution of a sum of independent variables is the <strong>convolution</strong> of their distributions. For independent steps with pairs <span class="math inline">\((P_i, Q_i)\)</span> and PLDs <span class="math inline">\(\omega_i\)</span>, the product pair <span class="math inline">\((P_1 \times \dots \times P_k,\ Q_1 \times \dots \times Q_k)\)</span> therefore has PLD <span id="eq-num-conv"><span class="math display">\[\omega_{1..k} = \omega_1 * \omega_2 * \dots * \omega_k, \qquad \omega^{*k} \text{ for } k \text{ identical steps}, \tag{32.5}\]</span></span> where <span class="math inline">\(*\)</span> is convolution of distributions (the law of a sum of independent variables), and the atom at <span class="math inline">\(+\infty\)</span> absorbs any sum that contains <span class="math inline">\(+\infty\)</span>: once one step gives the dataset away completely, the whole run does. For <span class="math inline">\(k\)</span> Gaussian steps, means and variances add, so <span class="math inline">\(\mathcal N(\frac{\mu^2}2, \mu^2)^{*k} = \mathcal N(\frac{k\mu^2}2, k\mu^2)\)</span>, which is the PLD of a single Gaussian with <span class="math inline">\(\mu_k = \sqrt k\,\mu\)</span>.</p>
+<p><strong>Adaptive composition.</strong> In DP-SGD each step’s gradient depends on the model, which depends on the earlier outputs, so the steps are not independent. The way around this is to replace each step by a fixed pair that is at least as easy to tell apart, whatever happened before. To compare pairs at every level of strictness, use the hockey-stick divergence with a general weight <span class="math inline">\(\gamma\)</span> in place of <span class="math inline">\(e^\varepsilon\)</span>, <span class="math inline">\(E_\gamma(P\|Q) = \sum_y\big(P(y) - \gamma Q(y)\big)_+\)</span>. A pair <span class="math inline">\((P, Q)\)</span> <strong>dominates</strong> a mechanism <span class="math inline">\(M\)</span> if <span class="math inline">\(E_\gamma(M(D)\|M(D')) \le E_\gamma(P\|Q)\)</span> for all neighbours <span class="math inline">\(D \simeq D'\)</span> and all <span class="math inline">\(\gamma \ge 0\)</span> (Zhu, Dong &amp; Wang 2022, Definition 7). If <span class="math inline">\((P_i, Q_i)\)</span> dominates step <span class="math inline">\(i\)</span> for every value of the earlier outputs, then <span class="math inline">\((P_1 \times \dots \times P_k, Q_1 \times \dots \times Q_k)\)</span> dominates the adaptive composition (their Theorem 10). So the convolution of the dominating PLDs gives a valid <span class="math inline">\(\delta(\varepsilon)\)</span> for the adaptive run.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="32.4.3">
+<h3 data-number="32.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">32.4.3</span> Derivation</h3>
+<p>The derivation follows the probability of the tuple from a product, to a sum of losses, to a convolution.</p>
+<ol type="1">
+<li><strong>Densities multiply.</strong> For independent steps the probability of a tuple is the product of the probabilities of its entries: <span class="math inline">\(P(y_1, \dots, y_k) = \prod_iP_i(y_i)\)</span>, and likewise for <span class="math inline">\(Q\)</span>.</li>
+<li><strong>Losses add.</strong> The ratio of two products is the product of the ratios, and the logarithm of a product is the sum of logarithms: <span class="math inline">\(L(y_1, \dots, y_k) = \sum_iL_i(y_i)\)</span>, with <span class="math inline">\(L_i = \ln(P_i/Q_i)\)</span>.</li>
+<li><strong>The terms are independent.</strong> Under <span class="math inline">\(P\)</span>, the <span class="math inline">\(Y_i\)</span> are independent with <span class="math inline">\(Y_i \sim P_i\)</span>. Each <span class="math inline">\(L_i(Y_i)\)</span> is a function of its own <span class="math inline">\(Y_i\)</span> only, so the <span class="math inline">\(L_i(Y_i)\)</span> are independent too, with laws <span class="math inline">\(\omega_i\)</span>.</li>
+<li><strong>The law of a sum of independent variables is the convolution of their laws.</strong> For two discrete variables, the chance that the sum is <span class="math inline">\(\ell\)</span> adds up, over all ways of splitting <span class="math inline">\(\ell = a + b\)</span>, the chance of <span class="math inline">\(a\)</span> times the chance of <span class="math inline">\(b\)</span>, and that is what convolution computes. This is <a href="#eq-num-conv" class="quarto-xref">Equation&nbsp;<span>32.5</span></a>.</li>
+<li><strong>Gaussian check.</strong> A sum of independent Gaussians is Gaussian, and means and variances add: <span class="math inline">\(k\frac{\mu^2}2\)</span> and <span class="math inline">\(k\mu^2\)</span>. This is <span class="math inline">\(\mathcal N(\frac{\mu_k^2}2, \mu_k^2)\)</span> with <span class="math inline">\(\mu_k^2 = k\mu^2\)</span>.</li>
+<li><strong>Adaptivity breaks step 3, and domination repairs it.</strong> If the second mechanism is chosen after seeing <span class="math inline">\(y_1\)</span>, its pair depends on <span class="math inline">\(y_1\)</span>, so its loss depends on the first output and the losses are no longer independent. The dominating-pair theorem bounds every pair the second mechanism could have by one fixed pair, and shows that the hockey-stick curves of the product of the fixed pairs still lie above those of the adaptive run. Its proof is in Zhu, Dong &amp; Wang (2022, Theorem 10). It uses <span class="math inline">\(E_\gamma\)</span> for all <span class="math inline">\(\gamma \ge 0\)</span>, not only <span class="math inline">\(\gamma \ge 1\)</span> (which corresponds to <span class="math inline">\(\varepsilon \ge 0\)</span>), which is why Definition 7 asks for all <span class="math inline">\(\gamma \ge 0\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="32.4.4">
+<h3 data-number="32.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">32.4.4</span> Interpretation</h3>
+<p><a href="#eq-num-conv" class="quarto-xref">Equation&nbsp;<span>32.5</span></a> has no slack at all. It is exact, so the only errors in a PLD accountant are the ones you introduce to compute the convolution: discretization (<a href="#sec-num-discretize" class="quarto-xref"><span>Section 32.5</span></a>) and floating point (<a href="#sec-num-fft" class="quarto-xref"><span>Section 32.6</span></a>).</p>
+<p>It also shows why the CLT is plausible. A <span class="math inline">\(k\)</span>-fold convolution is the law of a sum of <span class="math inline">\(k\)</span> independent terms, and the ordinary central limit theorem says that such a sum of anything with finite variance looks Gaussian for large <span class="math inline">\(k\)</span>. That is the GDP central limit theorem of <a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian DP</a>. The PLD accountant does not need that approximation; it computes the convolution.</p>
+<p>The dominating pair is a choice, and the bound is only as tight as that choice. For the Gaussian mechanism with <span class="math inline">\(\ell_2\)</span> sensitivity 1, the pair <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span>, <span class="math inline">\(\mathcal N(1, \sigma^2)\)</span> dominates and is attained by some neighbouring datasets, so the result is tight. For subsampled mechanisms you need one pair per direction (<a href="#sec-num-subsampled" class="quarto-xref"><span>Section 32.7</span></a>).</p>
+</section>
+<section id="example-ten-gaussian-steps" class="level3" data-number="32.4.5">
+<h3 data-number="32.4.5" class="anchored" data-anchor-id="example-ten-gaussian-steps"><span class="header-section-number">32.4.5</span> Example: ten Gaussian steps</h3>
+<p>One Gaussian step with <span class="math inline">\(\sigma = 1\)</span> has <span class="math inline">\(\mu = 1\)</span> and PLD <span class="math inline">\(\mathcal N(0.5, 1)\)</span>. Ten steps add ten means and ten variances, so their PLD is <span class="math inline">\(\mathcal N(5, 10)\)</span>, which is a single Gaussian with <span class="math inline">\(\mu = \sqrt{10}\)</span>. Solving <a href="#eq-num-gauss" class="quarto-xref">Equation&nbsp;<span>32.4</span></a> with that <span class="math inline">\(\mu\)</span> for <span class="math inline">\(\delta = 10^{-5}\)</span>, the composition is <span class="math inline">\((17.8566, 10^{-5})\)</span>-DP. For 100 steps, <span class="math inline">\(\mu = \sqrt{100} = 10\)</span> and <span class="math inline">\(\varepsilon = 91.8173\)</span>. <a href="#sec-num-fft" class="quarto-xref"><span>Section 32.6</span></a> recovers both numbers from a discretized PLD.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="32.4.6">
+<h3 data-number="32.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">32.4.6</span> Check yourself</h3>
+<ul>
+<li>You compose a Gaussian step with <span class="math inline">\(\mu = 1\)</span> and one with <span class="math inline">\(\mu = 2\)</span>. What is the PLD? <em>(Means <span class="math inline">\(\frac{\mu^2}2\)</span> and variances <span class="math inline">\(\mu^2\)</span> add: <span class="math inline">\(\mathcal N(\frac12 + 2, 1 + 4) = \mathcal N(2.5, 5)\)</span>, a single Gaussian with <span class="math inline">\(\mu = \sqrt5\)</span>.)</em></li>
+<li>Why is the convolution of PLDs exact while advanced composition is not? <em>(Advanced composition, and even optimal composition, see each step only through <span class="math inline">\((\varepsilon_i, \delta_i)\)</span>, so they must cover the worst PLD with those values. Convolution uses the actual PLDs.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-num-discretize" class="level2" data-number="32.5">
+<h2 data-number="32.5" class="anchored" data-anchor-id="sec-num-discretize"><span class="header-section-number">32.5</span> Discretization: pessimistic and optimistic</h2>
+<section id="context-2" class="level3" data-number="32.5.1">
+<h3 data-number="32.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">32.5.1</span> Context</h3>
+<p>A computer cannot convolve continuous distributions. You must put the loss on a finite grid <span class="math inline">\(\{ih : i \in \mathbb Z\}\)</span> of spacing <span class="math inline">\(h\)</span>. Any rounding changes <span class="math inline">\(\delta\)</span>. The question is whether you can round so that the error has a known sign, for every number of compositions, so that the answer is still a guarantee.</p>
+</section>
+<section id="statement-2" class="level3" data-number="32.5.2">
+<h3 data-number="32.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">32.5.2</span> Statement</h3>
+<p>The weight <span class="math inline">\((1 - e^{\varepsilon - \ell})_+\)</span> that turns a loss into δ never decreases as the loss grows. So if you move every loss up, δ can only grow, and if you move every loss down, it can only shrink. That gives two ways to round, one for each direction. Given a PLD <span class="math inline">\(\omega\)</span> and a grid width <span class="math inline">\(h\)</span>, define two discretizations.</p>
+<ul>
+<li><strong>Pessimistic</strong> <span class="math inline">\(\omega^\uparrow\)</span>: move every loss <span class="math inline">\(\ell \in ((i-1)h, ih]\)</span> up to <span class="math inline">\(ih\)</span>. Truncate the top tail by moving its mass (at most a tiny <span class="math inline">\(\tau\)</span>) to <span class="math inline">\(+\infty\)</span>, and the bottom tail by moving it up to the lowest kept grid point. Every move is upward.</li>
+<li><strong>Optimistic</strong> <span class="math inline">\(\omega^\downarrow\)</span>: move every loss <span class="math inline">\(\ell \in [ih, (i+1)h)\)</span> down to <span class="math inline">\(ih\)</span>. Truncate the top tail by moving it down to the highest kept grid point, and drop the bottom tail. Every move is downward or removes mass.</li>
+</ul>
+<p>Write <span class="math inline">\(\delta_\omega(\varepsilon)\)</span> for <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a> evaluated on <span class="math inline">\(\omega\)</span>. Rounding each step before convolving keeps the direction of every move in the total, so for every <span class="math inline">\(k\)</span> and every <span class="math inline">\(\varepsilon\)</span>, <span id="eq-num-sandwich"><span class="math display">\[\delta_{(\omega^\downarrow)^{*k}}(\varepsilon) \;\le\; \delta_{\omega^{*k}}(\varepsilon) \;\le\; \delta_{(\omega^\uparrow)^{*k}}(\varepsilon), \tag{32.6}\]</span></span> and the same holds for convolutions of different PLDs, each rounded the same way.</p>
+<p>Two more things hold. First, the upper bound is not just a number but a real guarantee: <span class="math inline">\(\omega^\uparrow\)</span> is a valid PLD, <span class="math inline">\(\mathbb E_{\omega^\uparrow}[e^{-L}] \le 1\)</span>, of a pair that dominates <span class="math inline">\((P, Q)\)</span>, so the upper bound also holds for adaptive composition. Second, the sandwich is narrow. Write <span class="math inline">\(\varepsilon^\uparrow(\delta)\)</span> and <span class="math inline">\(\varepsilon^\downarrow(\delta)\)</span> for the values of <span class="math inline">\(\varepsilon\)</span> at which the pessimistic and optimistic curves reach <span class="math inline">\(\delta\)</span>. Without truncation the two are at most <span class="math inline">\(kh\)</span> apart, because each step’s two roundings differ by at most <span class="math inline">\(h\)</span>: <span class="math inline">\(\varepsilon^\uparrow(\delta) \le \varepsilon^\downarrow(\delta) + kh\)</span>.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="32.5.3">
+<h3 data-number="32.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">32.5.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Build both roundings of one step from the same draw.</strong> Draw <span class="math inline">\(L \sim \omega\)</span> and set <span class="math inline">\(L^\uparrow = h\lceil L/h\rceil\)</span> (round up) and <span class="math inline">\(L^\downarrow = h\lfloor L/h\rfloor\)</span> (round down). Then <span class="math inline">\(L^\uparrow\)</span> has law <span class="math inline">\(\omega^\uparrow\)</span>, <span class="math inline">\(L^\downarrow\)</span> has law <span class="math inline">\(\omega^\downarrow\)</span>, and, since a number lies between its two roundings and they are at most one grid step apart, <span class="math inline">\(L^\downarrow \le L \le L^\uparrow \le L^\downarrow + h\)</span> for every outcome. This is a coupling in the sense of Fact 2.</li>
+<li><strong>Add up <span class="math inline">\(k\)</span> steps.</strong> Draw the <span class="math inline">\(k\)</span> steps independently and apply step 1 to each. Adding the <span class="math inline">\(k\)</span> inequalities gives <span class="math inline">\(\sum L_i^\downarrow \le \sum L_i \le \sum L_i^\uparrow \le \sum L_i^\downarrow + kh\)</span>, and each sum has the convolved law of its rounded PLDs (<a href="#eq-num-conv" class="quarto-xref">Equation&nbsp;<span>32.5</span></a>).</li>
+<li><strong>Use that δ grows with the loss.</strong> By <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a>, <span class="math inline">\(\delta(\varepsilon) = \mathbb E[g_\varepsilon(\text{total loss})]\)</span> with <span class="math inline">\(g_\varepsilon(\ell) = (1 - e^{\varepsilon - \ell})_+\)</span>, a non-decreasing function. Fact 2 applied to the inequalities of step 2 gives <a href="#eq-num-sandwich" class="quarto-xref">Equation&nbsp;<span>32.6</span></a>.</li>
+<li><strong>Truncation keeps the sign.</strong> The pessimistic truncation moves mass up (to a higher grid point, or to <span class="math inline">\(+\infty\)</span> where <span class="math inline">\(g_\varepsilon = 1\)</span>), so Fact 2 still applies. The optimistic truncation moves mass down, which Fact 2 covers in the other direction, or deletes it, which removes a non-negative term from δ. Both can be repeated after every convolution without breaking the inequality.</li>
+<li><strong>The pessimistic PLD belongs to a real pair.</strong> Rounding up raises every loss, so it lowers <span class="math inline">\(e^{-L}\)</span>: <span class="math inline">\(\mathbb E_{\omega^\uparrow}[e^{-L}] \le \mathbb E_\omega[e^{-L}] \le 1\)</span> (mass moved to <span class="math inline">\(+\infty\)</span> contributes <span class="math inline">\(e^{-\infty} = 0\)</span>). The Interpretation in <a href="#sec-num-pld" class="quarto-xref"><span>Section 32.3</span></a> showed that any distribution with <span class="math inline">\(\mathbb E[e^{-L}] \le 1\)</span> is the PLD of some pair, by building the pair from it. So there is a pair <span class="math inline">\((P^\uparrow, Q^\uparrow)\)</span> with PLD <span class="math inline">\(\omega^\uparrow\)</span> (Doroshenko et al.&nbsp;2022, Lemma 4.2, prove it for this rounding).</li>
+<li><strong>That pair dominates the original.</strong> Step 3 with <span class="math inline">\(k = 1\)</span> says <span class="math inline">\(E_{e^\varepsilon}(P\|Q) \le E_{e^\varepsilon}(P^\uparrow\|Q^\uparrow)\)</span> for every real <span class="math inline">\(\varepsilon\)</span>, that is, for every <span class="math inline">\(\gamma = e^\varepsilon &gt; 0\)</span>. At <span class="math inline">\(\gamma = 0\)</span> the divergence is <span class="math inline">\(\sum_y P(y) = 1\)</span> for both pairs. So <span class="math inline">\((P^\uparrow, Q^\uparrow)\)</span> dominates <span class="math inline">\((P, Q)\)</span> at every <span class="math inline">\(\gamma \ge 0\)</span>, and by the dominating-pair theorem of <a href="#sec-num-convolution" class="quarto-xref"><span>Section 32.4</span></a> the convolution of rounded-up PLDs bounds adaptive compositions too.</li>
+<li><strong>The width.</strong> By step 2, the pessimistic total is the optimistic total plus at most <span class="math inline">\(kh\)</span>. Adding a constant <span class="math inline">\(c\)</span> to the loss shifts its δ curve by <span class="math inline">\(c\)</span> to the right, because <span class="math inline">\(g_\varepsilon\)</span> only sees the difference <span class="math inline">\(\varepsilon - \ell\)</span>: <span class="math inline">\(\mathbb E[g_\varepsilon(X + c)] = \mathbb E[g_{\varepsilon - c}(X)]\)</span>. With Fact 2 this gives <span class="math inline">\(\delta^\uparrow(\varepsilon) \le \delta^\downarrow(\varepsilon - kh)\)</span>. So wherever the optimistic curve has dropped to a given <span class="math inline">\(\delta\)</span>, the pessimistic curve has dropped to it at most <span class="math inline">\(kh\)</span> further right, and the <span class="math inline">\(\varepsilon\)</span> at which each crosses <span class="math inline">\(\delta\)</span> differ by at most <span class="math inline">\(kh\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-2" class="level3" data-number="32.5.4">
+<h3 data-number="32.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">32.5.4</span> Interpretation</h3>
+<p>The lower bound needs care about what it bounds. Rounding down lowers losses, which raises <span class="math inline">\(e^{-L}\)</span>, so it can push <span class="math inline">\(\mathbb E[e^{-L}]\)</span> above 1, and then <span class="math inline">\(\omega^\downarrow\)</span> is not the PLD of any pair. That does not matter for a lower bound: <span class="math inline">\(\delta^\downarrow\)</span> is still below the δ of <span class="math inline">\(k\)</span> non-adaptive copies of <span class="math inline">\((P, Q)\)</span>, by the sandwich. It bounds the mechanism’s δ from below only if some neighbouring datasets actually produce <span class="math inline">\((P, Q)\)</span>. That holds for the Gaussian and the subsampled Gaussian.</p>
+<p>The width is almost exactly <span class="math inline">\(kh\)</span>, not just at most. A loss that is not on the grid is moved by exactly <span class="math inline">\(h\)</span> between its two roundings, and a continuous PLD puts no mass on the grid points, so <span class="math inline">\(L^\uparrow = L^\downarrow + h\)</span> almost surely and the totals differ by exactly <span class="math inline">\(kh\)</span>. The error therefore grows linearly in <span class="math inline">\(k\)</span>. To keep the sandwich width fixed at <span class="math inline">\(10^4\)</span> steps, you need a grid <span class="math inline">\(10^4\)</span> times finer than for one step.</p>
+<p>The midpoint of the two sides is a good estimate, but not a bound. A loss spread evenly inside a grid cell is moved up by about <span class="math inline">\(h/2\)</span> on average when rounded up, and down by the same amount when rounded down. So the pessimistic total is biased up by about <span class="math inline">\(h/2\)</span> per step and the optimistic one down by the same amount, and their midpoint is nearly unbiased. Only the two sides are guarantees.</p>
+<p>Mass at <span class="math inline">\(+\infty\)</span> is cheap but not free. Each truncation of <span class="math inline">\(\tau\)</span> moves at most <span class="math inline">\(\tau\)</span> of mass to a place where its weight is 1, so it adds at most <span class="math inline">\(\tau\)</span> to δ. With <span class="math inline">\(\tau = 10^{-15}\)</span> and a few dozen truncations, this is far below any δ you would report.</p>
+</section>
+<section id="example-randomized-response-composed-three-times" class="level3" data-number="32.5.5">
+<h3 data-number="32.5.5" class="anchored" data-anchor-id="example-randomized-response-composed-three-times"><span class="header-section-number">32.5.5</span> Example: randomized response composed three times</h3>
+<p>Randomized response with <span class="math inline">\(\varepsilon_0 = \ln 3\)</span> reports the true bit with probability <span class="math inline">\(\frac34\)</span> and the flipped bit with probability <span class="math inline">\(\frac14\)</span> (see <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-rr">Randomized response</a>). The true report is <span class="math inline">\(\frac{3/4}{1/4} = 3\)</span> times likelier under <span class="math inline">\(D\)</span> than under <span class="math inline">\(D'\)</span>, so its loss is <span class="math inline">\(\ln 3\)</span>, and the flipped one has loss <span class="math inline">\(-\ln 3\)</span>. Its PLD therefore has two points: loss <span class="math inline">\(+1.0986\)</span> with probability 0.7500 and <span class="math inline">\(-1.0986\)</span> with probability 0.2500. On the grid <span class="math inline">\(h = 0.5\)</span>, the loss 1.0986 lies between 1 and 1.5 and <span class="math inline">\(-1.0986\)</span> between <span class="math inline">\(-1.5\)</span> and <span class="math inline">\(-1\)</span>, so rounding up gives <span class="math inline">\(\{-1, 1.5\}\)</span> and rounding down gives <span class="math inline">\(\{-1.5, 1\}\)</span>, with the same probabilities. The rounded-up PLD has <span class="math inline">\(\mathbb E[e^{-L}] = 0.75\,e^{-1.5} + 0.25\,e^{1} = 0.1673 + 0.6796 = 0.8469 \le 1\)</span>, a valid PLD. The rounded-down PLD has <span class="math inline">\(\mathbb E[e^{-L}] = 0.75\,e^{-1} + 0.25\,e^{1.5} = 0.2759 + 1.1204 = 1.3963 &gt; 1\)</span>, which no pair of distributions can have.</p>
+<p><a href="#tbl-num-rr" class="quarto-xref">Table&nbsp;<span>32.3</span></a> follows the four outcomes of three steps, indexed by the number <span class="math inline">\(j\)</span> of steps with a positive loss. The probability of <span class="math inline">\(j\)</span> is binomial, for instance <span class="math inline">\((\frac14)^3 = 0.0156\)</span> for <span class="math inline">\(j = 0\)</span> and <span class="math inline">\(3 \times \frac34 \times (\frac14)^2 = 0.1406\)</span> for <span class="math inline">\(j = 1\)</span>. The exact total is <span class="math inline">\(j\ln 3 - (3 - j)\ln 3 = (2j - 3)\ln 3\)</span>, the rounded-up total is <span class="math inline">\(1.5j - (3 - j)\)</span>, and the rounded-down total is <span class="math inline">\(j - 1.5(3 - j)\)</span>.</p>
+<div id="tbl-num-rr" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-rr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.3: Three-fold randomized response with <span class="math inline">\(\varepsilon_0 = \ln 3\)</span>. Each outcome’s total loss, exactly and after rounding each step’s loss to the grid <span class="math inline">\(h = 0.5\)</span>.
+</figcaption>
+<div aria-describedby="tbl-num-rr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(j\)</span></th>
+<th>Probability</th>
+<th>Exact total loss</th>
+<th>Rounded up</th>
+<th>Rounded down</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.0156</td>
+<td>−3.2958</td>
+<td>−3</td>
+<td>−4.5</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.1406</td>
+<td>−1.0986</td>
+<td>−0.5</td>
+<td>−2</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.4219</td>
+<td>1.0986</td>
+<td>2</td>
+<td>0.5</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0.4219</td>
+<td>3.2958</td>
+<td>4.5</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Every rounded-up total sits above the exact total, and every rounded-down total below it. The gap between the two is <span class="math inline">\(3 \times 0.5 = 1.5\)</span> in every row, as derivation step 7 predicts. Feeding each column into <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a> gives the three δ curves. At <span class="math inline">\(\varepsilon = 0\)</span>, for instance, only the two positive exact totals count, with weights <span class="math inline">\(1 - e^{-3.2958} = 1 - \frac1{27}\)</span> and <span class="math inline">\(1 - e^{-1.0986} = 1 - \frac13\)</span>, and each of them has probability <span class="math inline">\(\frac{27}{64} = 0.4219\)</span>, so the exact <span class="math inline">\(\delta(0) = \frac{27}{64} \times \frac{26}{27} + \frac{27}{64} \times \frac23 = \frac{26}{64} + \frac{18}{64} = \frac{44}{64} = 0.6875\)</span>. The resulting values of δ are bracketed accordingly (<a href="#tbl-num-rr-delta" class="quarto-xref">Table&nbsp;<span>32.4</span></a> and <a href="#fig-num-rounding" class="quarto-xref">Figure&nbsp;<span>32.2</span></a>).</p>
+<div id="tbl-num-rr-delta" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-rr-delta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.4: δ(ε) of three-fold randomized response, exact and from the rounded PLDs on the grid <span class="math inline">\(h = 0.5\)</span>.
+</figcaption>
+<div aria-describedby="tbl-num-rr-delta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th>Exact δ</th>
+<th>Pessimistic</th>
+<th>Optimistic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.6875</td>
+<td>0.7820</td>
+<td>0.5669</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.4190</td>
+<td>0.6758</td>
+<td>0.3648</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.3064</td>
+<td>0.3872</td>
+<td>0.2667</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-num-rounding" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-num-rounding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/numerical_accounting_rounding.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-num-rounding-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;32.2: Left: the PLD of three-fold randomized response with <span class="math inline">\(\varepsilon_0 = \ln 3\)</span> (black), rounded up (red) and rounded down (blue) on the grid <span class="math inline">\(h = 0.5\)</span>; the rounded atoms are offset slightly sideways so that they do not overlap. Right: the three δ(ε) curves. The pessimistic curve lies above the exact one and the optimistic curve below it at every <span class="math inline">\(\varepsilon\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-2" class="level3" data-number="32.5.6">
+<h3 data-number="32.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">32.5.6</span> Check yourself</h3>
+<ul>
+<li>Would it be safe to round each loss to the <em>nearest</em> grid point? <em>(Not as a guarantee. Some losses move down, so neither side of <a href="#eq-num-sandwich" class="quarto-xref">Equation&nbsp;<span>32.6</span></a> holds in general. Nearest rounding is a good estimate. The PRV accountant starts from it and then shifts the whole grid so that the mean loss is preserved (<a href="#sec-num-fft" class="quarto-xref"><span>Section 32.6</span></a>).)</em></li>
+<li>If the grid happens to contain every possible loss, how wide is the sandwich? <em>(Zero. With <span class="math inline">\(h = \ln 3/2\)</span> every loss of randomized response, <span class="math inline">\(\pm\ln 3 = \pm 2h\)</span>, is on the grid, and both roundings return the exact PLD; <a href="../../book-exercises/part04-privacy-accounting/06-numerical-accounting.html#sec-sol-num-3">Exercise 3</a> checks it.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-num-fft" class="level2" data-number="32.6">
+<h2 data-number="32.6" class="anchored" data-anchor-id="sec-num-fft"><span class="header-section-number">32.6</span> Composition by FFT</h2>
+<section id="context-3" class="level3" data-number="32.6.1">
+<h3 data-number="32.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">32.6.1</span> Context</h3>
+<p>A discretized PLD is a vector of masses <span class="math inline">\(m_0, \dots, m_{n-1}\)</span> at losses <span class="math inline">\((o + i)h\)</span>, where the integer offset <span class="math inline">\(o\)</span> says where the vector starts on the grid, plus an atom at <span class="math inline">\(+\infty\)</span>. Convolving two of them directly costs <span class="math inline">\(O(n_an_b)\)</span> operations for vectors of lengths <span class="math inline">\(n_a\)</span> and <span class="math inline">\(n_b\)</span>. With a grid of <span class="math inline">\(h = 10^{-5}\)</span>, a single DP-SGD step of the running example already has hundreds of thousands of bins (329590, <a href="#sec-num-subsampled" class="quarto-xref"><span>Section 32.7</span></a>), and after 10,000 steps the composed PLD has 2103251, a count the script prints along with the bins at every <span class="math inline">\(k\)</span> it composes. The FFT makes this cheap. Koskela, Jälkö and Honkela (2020) introduced FFT-based PLD accounting.</p>
+</section>
+<section id="statement-3" class="level3" data-number="32.6.2">
+<h3 data-number="32.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">32.6.2</span> Statement</h3>
+<p>On a common grid, adding two losses adds their grid indices, so the masses of the sum are the discrete convolution of the two mass vectors, and Fact 3 computes that convolution as a product of transforms, provided the window is long enough not to wrap. Let <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> be the mass vectors of two discretized PLDs with offsets <span class="math inline">\(o_a\)</span>, <span class="math inline">\(o_b\)</span> and atoms <span class="math inline">\(a_\infty\)</span>, <span class="math inline">\(b_\infty\)</span> at <span class="math inline">\(+\infty\)</span>, on the same grid. Their convolution has offset <span class="math inline">\(o_a + o_b\)</span>, atom <span class="math inline">\(a_\infty + b_\infty - a_\infty b_\infty\)</span>, and masses <span id="eq-auto-06numericalaccounting-3"><span class="math display">\[c = \mathrm{IDFT}_N\big(\mathrm{DFT}_N(a)\cdot\mathrm{DFT}_N(b)\big), \qquad N \ge n_a + n_b - 1, \tag{32.7}\]</span></span> where <span class="math inline">\(\mathrm{DFT}_N\)</span> is the discrete Fourier transform of length <span class="math inline">\(N\)</span>, <span class="math inline">\(\mathrm{IDFT}_N\)</span> its inverse, and the transforms are of the zero-padded vectors. For <span class="math inline">\(k\)</span> identical steps, the transform of <span class="math inline">\(\omega^{*k}\)</span> is the <span class="math inline">\(k\)</span>-th power of the transform, since each convolution multiplies by one more copy. The composed vector reaches index <span class="math inline">\(k(n - 1)\)</span>, so with <span class="math inline">\(N \ge k(n - 1) + 1\)</span>, <span id="eq-auto-06numericalaccounting-4"><span class="math display">\[\omega^{*k} = \mathrm{IDFT}_N\big(\mathrm{DFT}_N(m)^k\big). \tag{32.8}\]</span></span> If <span class="math inline">\(N\)</span> is smaller, the result is the PLD of the total loss <strong>modulo <span class="math inline">\(Nh\)</span></strong>: mass that falls beyond the window wraps around to the other end.</p>
+</section>
+<section id="derivation-3" class="level3" data-number="32.6.3">
+<h3 data-number="32.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">32.6.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Grid losses add as indices.</strong> A loss <span class="math inline">\((o_a + i)h\)</span> plus a loss <span class="math inline">\((o_b + j)h\)</span> is <span class="math inline">\((o_a + o_b + i + j)h\)</span>. So the mass at index <span class="math inline">\(n\)</span> of the sum collects every pair with <span class="math inline">\(i + j = n\)</span>, <span class="math inline">\(c_n = \sum_{i + j = n}a_ib_j\)</span>, which is the discrete convolution.</li>
+<li><strong>The atom at <span class="math inline">\(+\infty\)</span>.</strong> The sum is finite only when both terms are finite, which has probability <span class="math inline">\((1 - a_\infty)(1 - b_\infty)\)</span>. The sum is <span class="math inline">\(+\infty\)</span> otherwise, with probability <span class="math inline">\(1 - (1 - a_\infty)(1 - b_\infty) = a_\infty + b_\infty - a_\infty b_\infty\)</span>.</li>
+<li><strong>Padding removes wraparound.</strong> Pad <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> with zeros to length <span class="math inline">\(N \ge n_a + n_b - 1\)</span> and apply Fact 3. Since <span class="math inline">\(i + j \le n_a + n_b - 2 &lt; N\)</span>, no index wraps, and the circular convolution is <span class="math inline">\(c\)</span>.</li>
+<li><strong>Powers.</strong> Applying step 3 <span class="math inline">\(k - 1\)</span> times multiplies the transform by itself each time and gives <span class="math inline">\(\mathrm{DFT}(m)^k\)</span>. The composed vector has <span class="math inline">\(k(n - 1) + 1\)</span> entries, because its largest index is <span class="math inline">\(k\)</span> times the largest index <span class="math inline">\(n - 1\)</span>, so that is the padding needed.</li>
+<li><strong>Wraparound.</strong> With <span class="math inline">\(N\)</span> too small, Fact 3 still holds but indices add modulo <span class="math inline">\(N\)</span>. Mass at total index <span class="math inline">\(n \ge N\)</span> lands at <span class="math inline">\(n - N\)</span>: the total loss is reduced modulo <span class="math inline">\(Nh\)</span>.</li>
+</ol>
+<p><strong>Repeated squaring.</strong> Taking the <span class="math inline">\(k\)</span>-th power in one shot needs the full padded window, which is <span class="math inline">\(k\)</span> times wider than one step. The script instead builds the power by squaring. It forms <span class="math inline">\(\omega^{*2}, \omega^{*4}, \omega^{*8}, \dots\)</span> by convolving each with itself, and multiplies together the powers in the binary expansion of <span class="math inline">\(k\)</span>; for <span class="math inline">\(k = 10 = 8 + 2\)</span>, <span class="math inline">\(\omega^{*10} = \omega^{*8} * \omega^{*2}\)</span>. After every convolution it truncates both tails at mass <span class="math inline">\(\tau = 10^{-15}\)</span>, moving the mass in the safe direction of <a href="#sec-num-discretize" class="quarto-xref"><span>Section 32.5</span></a>. The vector then grows like the spread of the composed PLD, not like the worst-case range <span class="math inline">\(k(n-1)\)</span>. The spread is the standard deviation of a sum of <span class="math inline">\(k\)</span> independent losses, which grows like <span class="math inline">\(\sqrt k\)</span>, and truncation at a fixed <span class="math inline">\(\tau\)</span> keeps a window of a roughly fixed number of standard deviations. Each convolution is padded to its two inputs, so nothing can wrap. In the example below, ten Gaussian steps take the vector from 15884 to 50257 bins, a ratio of <span class="math inline">\(50257/15884 = 3.16\)</span>, which is <span class="math inline">\(\sqrt{10}\)</span>. The script also cuts every loss below <span class="math inline">\(-100\)</span> or above <span class="math inline">\(200\)</span> in the same safe direction, whatever its mass, because of floating-point noise (next paragraph): for a sharply peaked PLD, the noise in millions of bins can add up to more than <span class="math inline">\(\tau\)</span>, and then truncation by mass alone never trims the ends.</p>
+</section>
+<section id="interpretation-3" class="level3" data-number="32.6.4">
+<h3 data-number="32.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">32.6.4</span> Interpretation</h3>
+<p>One FFT convolution of vectors of length <span class="math inline">\(N\)</span> costs <span class="math inline">\(O(N\log N)\)</span>. Repeated squaring needs at most <span class="math inline">\(2\log_2k\)</span> of them: about <span class="math inline">\(\log_2 k\)</span> squarings, and at most one multiplication for each binary digit of <span class="math inline">\(k\)</span>.</p>
+<p>The FFT is not exact in floating point. It computes each mass with an absolute error of order <span class="math inline">\(10^{-16}\)</span> times the largest mass, so tiny masses far in the tails come out as noise, sometimes negative. The script sets negative masses to zero. Summed over the two million bins of the 10,000-step PLD, this noise is many orders of magnitude below a δ of <span class="math inline">\(10^{-5}\)</span>, but it is not part of the certified bound. The PRV accountant of Gopi, Lee and Wutschitz (2021) also leaves it out of its error analysis, arguing that it is negligible for δ above <span class="math inline">\(10^{-10}\)</span>, the smallest δ its implementation accepts (their Section 6 and Appendix A).</p>
+<p>To choose the grid, pick <span class="math inline">\(h\)</span> from the sandwich width you can accept, which is <span class="math inline">\(kh\)</span> (<a href="#sec-num-discretize" class="quarto-xref"><span>Section 32.5</span></a>). Pick the range from the tails. The composed PLD has mean and variance <span class="math inline">\(k\)</span> times those of one step, so a window of many standard deviations around the mean holds all but <span class="math inline">\(\tau\)</span> of the mass. Chebyshev’s inequality, which says that a variable lands at least <span class="math inline">\(t\)</span> away from its mean with probability at most its variance divided by <span class="math inline">\(t^2\)</span>, bounds the mass outside a window from the variance alone. It is loose but needs nothing else (<a href="../../book-exercises/part04-privacy-accounting/06-numerical-accounting.html#sec-sol-num-4">Exercise 4</a>).</p>
+<p>Three variants of the same idea are in use. The <strong>PRV accountant</strong> (Gopi, Lee &amp; Wutschitz 2021) also discretizes the privacy loss random variable and convolves with the FFT. It truncates the loss to a window chosen with tail bounds, rounds each loss to the nearest grid point, and then shifts the whole grid by one constant so that the discretized loss has the same mean as the truncated one. Rounding to the nearest point moves some losses up and some down; once the means match, the per-step errors have mean zero, so over <span class="math inline">\(k\)</span> steps they partly cancel and their sum grows like <span class="math inline">\(\sqrt k\,h\)</span> instead of <span class="math inline">\(kh\)</span> (their Lemma 5.3). That is why a mesh <span class="math inline">\(h \approx 1/\sqrt k\)</span> suffices instead of <span class="math inline">\(h \approx 1/k\)</span>. It proves explicit error bounds on <span class="math inline">\(\varepsilon\)</span>, and for <span class="math inline">\(k\)</span> identical steps its running time is of order <span class="math inline">\(\sqrt k\)</span> up to logarithmic factors, against <span class="math inline">\(k^{1.5}\)</span> for the earlier FFT accountant of Koskela et al.</p>
+<p><strong>Connect the dots</strong> (Doroshenko, Ghazi, Kamath, Kumar &amp; Manurangsi 2022) builds the pessimistic PLD on a given grid differently: from the values of <span class="math inline">\(\delta(\varepsilon)\)</span> at the grid points, interpolating the hockey-stick curve between them, instead of rounding each loss. They prove it is the best pessimistic PLD supported on that grid, and it allows much coarser grids than rounding up.</p>
+<p><strong>Characteristic-function accounting</strong> (Zhu, Dong &amp; Wang 2022) skips the grid of masses and works with the Fourier transform of the PLD directly. The characteristic function <span class="math inline">\(\mathbb E[e^{\mathrm itL}]\)</span> of a sum of independent losses is the product of the per-step ones, for the same reason as in Fact 3, and δ is recovered by numerical integration in the frequency domain. Google’s <code>dp_accounting</code> library implements PLD accounting with pessimistic and optimistic rounding and connect-the-dots.</p>
+</section>
+<section id="example-gaussian-steps-on-a-grid" class="level3" data-number="32.6.5">
+<h3 data-number="32.6.5" class="anchored" data-anchor-id="example-gaussian-steps-on-a-grid"><span class="header-section-number">32.6.5</span> Example: Gaussian steps on a grid</h3>
+<p>Discretize the Gaussian PLD of <span class="math inline">\(\mu = 1\)</span>, which is <span class="math inline">\(\mathcal N(0.5, 1)\)</span>, on the grid <span class="math inline">\(h = 10^{-3}\)</span>, truncated at <span class="math inline">\(\tau = 10^{-15}\)</span> per tail. It has 15884 bins. After ten steps by repeated squaring, the truncated vector has 50257 bins, while the one-shot <span class="math inline">\(k\)</span>-th power needs a padded window of <span class="math inline">\(10 \times (15884 - 1) + 1 = 158831\)</span>. Both give the same pessimistic <span class="math inline">\(\delta(1) = 0.81891018\)</span>, against the exact 0.81851782 from <a href="#eq-num-gauss" class="quarto-xref">Equation&nbsp;<span>32.4</span></a> with <span class="math inline">\(\mu = \sqrt{10}\)</span>. Turning this into <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, <a href="#tbl-num-gauss-grid" class="quarto-xref">Table&nbsp;<span>32.5</span></a> compares with the exact values from <a href="#sec-num-convolution" class="quarto-xref"><span>Section 32.4</span></a>.</p>
+<div id="tbl-num-gauss-grid" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-gauss-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.5: Composed Gaussian steps with <span class="math inline">\(\mu = 1\)</span> on the grid <span class="math inline">\(h = 10^{-3}\)</span>: <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> from the pessimistic and optimistic PLDs against the exact value.
+</figcaption>
+<div aria-describedby="tbl-num-gauss-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(k\)</span></th>
+<th>Exact <span class="math inline">\(\varepsilon\)</span></th>
+<th>Pessimistic</th>
+<th>Optimistic</th>
+<th>Mean of the pessimistic PLD</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>17.8566</td>
+<td>17.8616</td>
+<td>17.8516</td>
+<td>5.0050 (exact 5)</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td>91.8173</td>
+<td>91.8673</td>
+<td>91.7673</td>
+<td>50.0500 (exact 50)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The sandwich width is <span class="math inline">\(kh\)</span>: <span class="math inline">\(10 \times 10^{-3} = 0.01\)</span> at <span class="math inline">\(k = 10\)</span> and <span class="math inline">\(100 \times 10^{-3} = 0.1\)</span> at <span class="math inline">\(k = 100\)</span>. The exact value sits in the middle, <span class="math inline">\(17.8616 - 17.8566 = 0.005 = kh/2\)</span> at <span class="math inline">\(k = 10\)</span>, because rounding up moves each step’s loss up by <span class="math inline">\(h/2\)</span> on average and rounding down moves it down by as much. The pessimistic means show the shift: <span class="math inline">\(5 + 10 \times 0.0005\)</span> and <span class="math inline">\(50 + 100 \times 0.0005\)</span>.</p>
+<p>Without padding, wraparound appears. Compute the tenth power on a circular window centred at the mean 5. A window of width 10, from loss 0 to 10, gives <span class="math inline">\(\delta(1) = 0.83478562\)</span>, wrong in the second decimal, because losses below 0 wrap to the top of the window and losses above 10 wrap to the bottom. Width 20 gives 0.81890091, and width 40 gives 0.81891018, the padded value.</p>
+</section>
+<section id="check-yourself-3" class="level3" data-number="32.6.6">
+<h3 data-number="32.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">32.6.6</span> Check yourself</h3>
+<ul>
+<li>Why does the circular window of width 10 <em>overestimate</em> δ(1)? <em>(The two tails hold the same mass, 0.0569 each, because the window is centred on the mean: the composed PLD has standard deviation <span class="math inline">\(\sqrt{10}\)</span>, so each tail beyond 5 from the mean has mass <span class="math inline">\(\Phi(-5/\sqrt{10}) = \Phi(-1.581) = 0.0569\)</span>. Negative totals, which count nothing towards δ(1), wrap to just below 10, where they count almost fully. Totals above 10 wrap to between 0 and 10. Those that land below <span class="math inline">\(\varepsilon = 1\)</span> lose their weight, but about half of them (a share of 0.51) land above 1 and keep part of it. So the window gains more than it loses. In general the sign of the wraparound error is unknown, so it cannot be part of a certified bound.)</em></li>
+<li>You double <span class="math inline">\(k\)</span>. How much longer does one squaring step take, roughly? <em>(The composed PLD’s spread grows like <span class="math inline">\(\sqrt k\)</span>, so the vectors grow by about <span class="math inline">\(\sqrt2\)</span> and the FFT cost by a bit more than that, because of the <span class="math inline">\(\log N\)</span> factor.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-num-subsampled" class="level2" data-number="32.7">
+<h2 data-number="32.7" class="anchored" data-anchor-id="sec-num-subsampled"><span class="header-section-number">32.7</span> The subsampled Gaussian</h2>
+<section id="context-4" class="level3" data-number="32.7.1">
+<h3 data-number="32.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">32.7.1</span> Context</h3>
+<p>One DP-SGD step with Poisson sampling at rate <span class="math inline">\(q\)</span> and noise multiplier <span class="math inline">\(\sigma\)</span> includes each record independently with probability <span class="math inline">\(q\)</span>, sums the clipped gradients of the sampled records, and adds Gaussian noise. Look at it from the point of view of one record, the one that may or may not be in the dataset. Without it, the noisy sum (in the worst-case direction, scaled by the clipping norm) is a Gaussian centred at 0. With it, the record is sampled with probability <span class="math inline">\(q\)</span> and then shifts the centre by 1, the sensitivity; otherwise it changes nothing. So the output is a mixture: centred at 1 with probability <span class="math inline">\(q\)</span>, at 0 with probability <span class="math inline">\(1 - q\)</span>. <a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a> derives this reduction and computes its RDP. Here you need its PLD, in closed form, so that the discretization can be exact up to rounding.</p>
+</section>
+<section id="statement-4" class="level3" data-number="32.7.2">
+<h3 data-number="32.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">32.7.2</span> Statement</h3>
+<p>Under the add/remove relation, neighbouring datasets differ by removing one record or by adding one, and each direction gives its own pair. Write <span class="math inline">\(D' = D \cup \{x\}\)</span> for the dataset that holds the record, as in the rest of the part; a guarantee must cover both orders of the pair. The <strong>remove</strong> direction puts the dataset with the record first, <span class="math inline">\(P = M(D')\)</span> and <span class="math inline">\(Q = M(D)\)</span>, so <span class="math inline">\(P\)</span> is the mixture and <span class="math inline">\(Q\)</span> the plain Gaussian; its neighbour is obtained by removing <span class="math inline">\(x\)</span>. The <strong>add</strong> direction is the order <span class="math inline">\(P = M(D)\)</span>, <span class="math inline">\(Q = M(D')\)</span>, and the roles swap. The two pairs that matter are (Zhu, Dong &amp; Wang 2022, Theorem 11 and the paragraph after it) <span id="eq-auto-06numericalaccounting-5"><span class="math display">\[\text{remove: } P = (1 - q)\,\mathcal N(0, \sigma^2) + q\,\mathcal N(1, \sigma^2),\ \ Q = \mathcal N(0, \sigma^2); \qquad \text{add: } P = \mathcal N(0, \sigma^2),\ \ Q = (1 - q)\,\mathcal N(0, \sigma^2) + q\,\mathcal N(1, \sigma^2). \tag{32.9}\]</span></span> Each dominates one direction of neighbouring datasets (Theorem 11 states the remove pair with the mixture component at 0 and the base at 1; the reflection <span class="math inline">\(y \mapsto 1 - y\)</span> turns it into the form above and changes no divergence), and the <span class="math inline">\(k\)</span>-step guarantee is the larger of the two δ curves, each composed <span class="math inline">\(k\)</span> times.</p>
+<p>The privacy loss of the remove pair is the log of the mixture density over the base density. The mixture over the base is <span class="math inline">\((1 - q)\)</span> plus <span class="math inline">\(q\)</span> times the ratio of the shifted Gaussian to the base, and that ratio is an exponential in <span class="math inline">\(y\)</span>, as in the Gaussian PLD of <a href="#sec-num-pld" class="quarto-xref"><span>Section 32.3</span></a>. The add pair is the remove pair with <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> swapped, which flips the sign of the log-ratio. So <span id="eq-auto-06numericalaccounting-6"><span class="math display">\[L_{\mathrm{rem}}(y) = \ln\Big((1 - q) + q\,e^{(2y - 1)/(2\sigma^2)}\Big), \qquad L_{\mathrm{add}}(y) = -L_{\mathrm{rem}}(y), \tag{32.10}\]</span></span> with <span class="math inline">\(Y \sim P\)</span> of the respective pair. <span class="math inline">\(L_{\mathrm{rem}}\)</span> is increasing in <span class="math inline">\(y\)</span>, ranges over <span class="math inline">\((\ln(1 - q), \infty)\)</span>, and so can be inverted: the output that produces loss <span class="math inline">\(\ell\)</span> is <span id="eq-auto-06numericalaccounting-7"><span class="math display">\[y(\ell) = \sigma^2\ln\frac{e^\ell - 1 + q}{q} + \frac12. \tag{32.11}\]</span></span> Because the loss is increasing in the output, a bin of losses is an interval of outputs, and its mass is the probability of that interval under the mixture, a weighted difference of normal distribution functions: <span id="eq-auto-06numericalaccounting-8"><span class="math display">\[P\big[L_{\mathrm{rem}} \in (a, b]\big] = (1 - q)\Big[\Phi\Big(\tfrac{y(b)}\sigma\Big) - \Phi\Big(\tfrac{y(a)}\sigma\Big)\Big] + q\Big[\Phi\Big(\tfrac{y(b) - 1}\sigma\Big) - \Phi\Big(\tfrac{y(a) - 1}\sigma\Big)\Big], \tag{32.12}\]</span></span> and <span class="math inline">\(P[L_{\mathrm{add}} \in (a, b]] = \Phi(y(-a)/\sigma) - \Phi(y(-b)/\sigma)\)</span> with <span class="math inline">\(Y \sim \mathcal N(0, \sigma^2)\)</span>.</p>
+</section>
+<section id="derivation-4" class="level3" data-number="32.7.3">
+<h3 data-number="32.7.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">32.7.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Divide the mixture by the base.</strong> Write <span class="math inline">\(\varphi\)</span> for the standard normal density, so that <span class="math inline">\(\mathcal N(c, \sigma^2)\)</span> has density proportional to <span class="math inline">\(\varphi((y - c)/\sigma)\)</span> with the same constant for both centres. Dividing each part of the mixture by the base gives <span class="math inline">\(\frac{(1-q)\varphi(y/\sigma) + q\varphi((y-1)/\sigma)}{\varphi(y/\sigma)} = (1 - q) + q\,\frac{\varphi((y-1)/\sigma)}{\varphi(y/\sigma)}\)</span>.</li>
+<li><strong>Compute the ratio of two Gaussians.</strong> The densities are exponentials of minus a square, so their ratio is the exponential of the difference of the squares: <span class="math inline">\(\frac{\varphi((y-1)/\sigma)}{\varphi(y/\sigma)} = \exp\big(\frac{y^2 - (y - 1)^2}{2\sigma^2}\big) = e^{(2y - 1)/(2\sigma^2)}\)</span>. Taking logs of step 1 gives <span class="math inline">\(L_{\mathrm{rem}}\)</span>. Swapping <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> flips the sign of the log-ratio, which gives <span class="math inline">\(L_{\mathrm{add}}\)</span>.</li>
+<li><strong>The loss is increasing.</strong> <span class="math inline">\(e^{(2y-1)/(2\sigma^2)}\)</span> is increasing in <span class="math inline">\(y\)</span> and positive, so <span class="math inline">\(L_{\mathrm{rem}}\)</span> is increasing. As <span class="math inline">\(y \to -\infty\)</span> the exponential vanishes and the loss tends to <span class="math inline">\(\ln(1 - q)\)</span>; as <span class="math inline">\(y \to \infty\)</span> it tends to <span class="math inline">\(\infty\)</span>.</li>
+<li><strong>Invert it.</strong> Solve <span class="math inline">\(e^\ell = (1 - q) + q\,e^{(2y - 1)/(2\sigma^2)}\)</span> for <span class="math inline">\(y\)</span>: subtract <span class="math inline">\(1 - q\)</span>, divide by <span class="math inline">\(q\)</span>, take logs, multiply by <span class="math inline">\(\sigma^2\)</span> and add <span class="math inline">\(\frac12\)</span>.</li>
+<li><strong>Turn loss bins into output intervals.</strong> Because the map is increasing, <span class="math inline">\(\{L_{\mathrm{rem}} \in (a, b]\} = \{Y \in (y(a), y(b)]\}\)</span>. Its probability under the mixture is <span class="math inline">\(1 - q\)</span> times the probability under <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> plus <span class="math inline">\(q\)</span> times that under <span class="math inline">\(\mathcal N(1, \sigma^2)\)</span>, which is the stated sum. For the add pair, <span class="math inline">\(L_{\mathrm{add}} \in (a, b]\)</span> exactly when <span class="math inline">\(L_{\mathrm{rem}} \in [-b, -a)\)</span>, that is, exactly when <span class="math inline">\(Y \in [y(-b), y(-a))\)</span>, with <span class="math inline">\(Y \sim \mathcal N(0, \sigma^2)\)</span>. Where <span class="math inline">\(-b \le \ln(1 - q)\)</span>, no output has that loss, and <span class="math inline">\(y(-b) = -\infty\)</span>.</li>
+<li><strong>Single-step δ in closed form, as a check.</strong> For the remove pair, <span class="math inline">\(L &gt; \varepsilon\)</span> exactly when <span class="math inline">\(Y &gt; y(\varepsilon)\)</span>, so by <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a>, <span class="math inline">\(\delta(\varepsilon) = P[Y &gt; y(\varepsilon)] - e^\varepsilon\,Q[Y &gt; y(\varepsilon)]\)</span>, two normal tail probabilities. The add pair is the same with <span class="math inline">\(Y &lt; y(-\varepsilon)\)</span>.</li>
+<li><strong>Why two directions.</strong> Under add/remove, the neighbour of a dataset can be that dataset with one record removed or with one added, so both orders of the pair, <span class="math inline">\((M(D'), M(D))\)</span> and <span class="math inline">\((M(D), M(D'))\)</span>, must be covered. The two cases give different pairs, and neither one’s PLD is a rounding of the other, so bounding one does not bound the other. Zhu, Dong &amp; Wang (2022) prove each pair dominates its case. A <span class="math inline">\(k\)</span>-step run’s guarantee is <span class="math inline">\(\max\{\delta_{\mathrm{rem}, k}(\varepsilon), \delta_{\mathrm{add}, k}(\varepsilon)\}\)</span>, and the corresponding <span class="math inline">\(\varepsilon\)</span> is the larger of the two values of <span class="math inline">\(\varepsilon\)</span>.</li>
+</ol>
+<p>The script computes the bin masses in step 5 from whichever of <span class="math inline">\(\Phi\)</span> and <span class="math inline">\(1 - \Phi\)</span> is smaller, so masses deep in either tail keep their relative precision.</p>
+</section>
+<section id="interpretation-4" class="level3" data-number="32.7.4">
+<h3 data-number="32.7.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">32.7.4</span> Interpretation</h3>
+<p>The two directions have very different losses (<a href="#fig-num-subsampled-loss" class="quarto-xref">Figure&nbsp;<span>32.3</span></a>). The remove loss is bounded below by <span class="math inline">\(\ln(1 - q)\)</span> and has an unbounded upper tail: a rare large output betrays that the record was used. The add loss is its mirror image, bounded above by <span class="math inline">\(-\ln(1 - q)\)</span>. Since δ only counts losses above <span class="math inline">\(\varepsilon\)</span>, a single add step has <span class="math inline">\(\delta(\varepsilon) = 0\)</span> once <span class="math inline">\(\varepsilon \ge -\ln(1 - q)\)</span>.</p>
+<p>Which direction dominates? In the running example the remove direction gives the larger <span class="math inline">\(\varepsilon\)</span> at every <span class="math inline">\(k\)</span> in <a href="#tbl-num-dpsgd" class="quarto-xref">Table&nbsp;<span>32.7</span></a>: the add direction’s upper bound is only 0.0091 at <span class="math inline">\(k = 1\)</span> and 5.6615 at <span class="math inline">\(k = 10{,}000\)</span>. That is an observation, not a theorem; the accountant computes both and takes the larger, as <code>pld_epsilon_subsampled_gaussian</code> does. The remove pair alone is not enough in general: Zhu, Dong &amp; Wang (2022) point out that PLD accountants that use only the remove pair cover only the “remove” half of the add/remove relation.</p>
+<div id="fig-num-subsampled-loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-num-subsampled-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/numerical_accounting_subsampled_loss.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-num-subsampled-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;32.3: Left: the densities of <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> and of the mixture <span class="math inline">\((1 - q)\mathcal N(0, \sigma^2) + q\mathcal N(1, \sigma^2)\)</span> for <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, on a log scale. They differ only in the far right tail. Right: the privacy loss as a function of the output for the remove pair (red) and the add pair (blue). Both are nearly flat near zero and steep in the right tail.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-one-dp-sgd-step" class="level3" data-number="32.7.5">
+<h3 data-number="32.7.5" class="anchored" data-anchor-id="example-one-dp-sgd-step"><span class="header-section-number">32.7.5</span> Example: one DP-SGD step</h3>
+<p>For <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>, the lowest possible remove loss is <span class="math inline">\(\ln(0.99) = -0.0101\)</span>. The remove loss is in <span class="math inline">\([-0.0101, 3.2858]\)</span> except for <span class="math inline">\(10^{-15}\)</span> of mass, and the add loss is in <span class="math inline">\([-2.8926, 0.0101]\)</span>. On the grid <span class="math inline">\(h = 10^{-5}\)</span>, that is 329590 and 290268 bins; for the remove direction, <span class="math inline">\(3.2858 - (-0.0101) = 3.2959\)</span> divided by <span class="math inline">\(10^{-5}\)</span>. The rounded-up remove PLD has <span class="math inline">\(\mathbb E[e^{-L}] = 0.999995\)</span>, below 1 and so a valid PLD, as derivation step 5 of <a href="#sec-num-discretize" class="quarto-xref"><span>Section 32.5</span></a> requires. <a href="#tbl-num-onestep" class="quarto-xref">Table&nbsp;<span>32.6</span></a> compares the pessimistic PLD’s δ with the closed form of step 6.</p>
+<div id="tbl-num-onestep" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-onestep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.6: One subsampled-Gaussian step (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>): δ(ε) in closed form and from the pessimistic PLD on the grid <span class="math inline">\(h = 10^{-5}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-num-onestep-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th>Remove: exact δ</th>
+<th>Remove: pessimistic</th>
+<th>Add: exact δ</th>
+<th>Add: pessimistic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>3.829249e-03</td>
+<td>3.830792e-03</td>
+<td>3.829249e-03</td>
+<td>3.832688e-03</td>
+</tr>
+<tr class="even">
+<td>0.5</td>
+<td>2.214519e-07</td>
+<td>2.214633e-07</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>1</td>
+<td>2.732009e-09</td>
+<td>2.732117e-09</td>
+<td>0</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The pessimistic values are slightly above the exact ones, as they must be. At <span class="math inline">\(\varepsilon = 0\)</span> both directions have the same δ, and the reason is a symmetry. At <span class="math inline">\(\varepsilon = 0\)</span>, δ is <span class="math inline">\(\sum_y(P(y) - Q(y))_+\)</span>, the total variation distance. Since <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> both sum to 1, the total amount by which <span class="math inline">\(P\)</span> exceeds <span class="math inline">\(Q\)</span> equals the total amount by which <span class="math inline">\(Q\)</span> exceeds <span class="math inline">\(P\)</span>, so the value does not change when the two are swapped, and the add pair is the remove pair swapped. Beyond <span class="math inline">\(\varepsilon = 0.0101\)</span> the add direction’s δ is 0, as the Interpretation explains. At <span class="math inline">\(\delta = 10^{-5}\)</span>, one step has <span class="math inline">\(\varepsilon = 0.1995\)</span> in the remove direction and 0.0091 in the add direction (exact, by bisection on the closed form).</p>
+</section>
+<section id="check-yourself-4" class="level3" data-number="32.7.6">
+<h3 data-number="32.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">32.7.6</span> Check yourself</h3>
+<ul>
+<li>What is <span class="math inline">\(\delta(\varepsilon)\)</span> of one add step at <span class="math inline">\(\varepsilon = 0.02\)</span>? <em>(Zero, since the add loss never exceeds <span class="math inline">\(-\ln(0.99) = 0.0101\)</span>, and δ only counts losses above <span class="math inline">\(\varepsilon\)</span>.)</em></li>
+<li>Why is the closed-form δ of one step not enough for <span class="math inline">\(k\)</span> steps? <em>(The composed PLD is a <span class="math inline">\(k\)</span>-fold convolution of a non-Gaussian distribution, which has no closed form. Only the per-step PLD is explicit.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-num-dpsgd" class="level2" data-number="32.8">
+<h2 data-number="32.8" class="anchored" data-anchor-id="sec-num-dpsgd"><span class="header-section-number">32.8</span> The running example: DP-SGD</h2>
+<section id="context-5" class="level3" data-number="32.8.1">
+<h3 data-number="32.8.1" class="anchored" data-anchor-id="context-5"><span class="header-section-number">32.8.1</span> Context</h3>
+<p>The question from the start of the chapter: DP-SGD with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, at <span class="math inline">\(\delta = 10^{-5}\)</span>, after <span class="math inline">\(k\)</span> steps. Every other chapter of this part gives its own number for the same run. This section gives the PLD bounds and compares them with two accountants from earlier chapters.</p>
+</section>
+<section id="statement-5" class="level3" data-number="32.8.2">
+<h3 data-number="32.8.2" class="anchored" data-anchor-id="statement-5"><span class="header-section-number">32.8.2</span> Statement</h3>
+<p>Putting the pieces together, discretize each direction’s subsampled-Gaussian PLD up and down, compose it <span class="math inline">\(k\)</span> times by FFT, and read off <span class="math inline">\(\varepsilon\)</span>; the true value lies between the optimistic and the pessimistic answer. On the grid <span class="math inline">\(h = 10^{-5}\)</span> with tails truncated at <span class="math inline">\(10^{-15}\)</span>, <a href="#tbl-num-dpsgd" class="quarto-xref">Table&nbsp;<span>32.7</span></a> gives <span class="math inline">\(\varepsilon\)</span> from the pessimistic PLD (an upper bound, valid for adaptive composition) and the optimistic PLD (a lower bound for the non-adaptive run), each the larger over the two directions. It compares them with the RDP accountant with the improved conversion and with the GDP central-limit approximation.</p>
+<div id="tbl-num-dpsgd" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-dpsgd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.7: DP-SGD with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>: <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> after <span class="math inline">\(k\)</span> steps, from the pessimistic and optimistic PLDs on the grid <span class="math inline">\(h = 10^{-5}\)</span> (the larger of the two directions; the width is their difference, <span class="math inline">\(kh\)</span>), the pessimistic PLD of the add direction alone, the RDP accountant, and the GDP central-limit approximation.
+</figcaption>
+<div aria-describedby="tbl-num-dpsgd-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(k\)</span></th>
+<th>PLD upper</th>
+<th>PLD lower</th>
+<th>Width</th>
+<th>Add direction, upper</th>
+<th>RDP</th>
+<th>GDP CLT</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>0.1995</td>
+<td>0.1994</td>
+<td>1.0e-05</td>
+<td>0.0091</td>
+<td>0.9555</td>
+<td>0.0368</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>0.3800</td>
+<td>0.3799</td>
+<td>1.0e-04</td>
+<td>0.0655</td>
+<td>1.0353</td>
+<td>0.1304</td>
+</tr>
+<tr class="odd">
+<td>100</td>
+<td>0.7185</td>
+<td>0.7175</td>
+<td>1.0e-03</td>
+<td>0.3387</td>
+<td>1.2141</td>
+<td>0.4575</td>
+</tr>
+<tr class="even">
+<td>1000</td>
+<td>1.8332</td>
+<td>1.8232</td>
+<td>1.0e-02</td>
+<td>1.4217</td>
+<td>2.1014</td>
+<td>1.6177</td>
+</tr>
+<tr class="odd">
+<td>10000</td>
+<td>6.2377</td>
+<td>6.1377</td>
+<td>1.0e-01</td>
+<td>5.6615</td>
+<td>6.7127</td>
+<td>6.0071</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="derivation-5" class="level3" data-number="32.8.3">
+<h3 data-number="32.8.3" class="anchored" data-anchor-id="derivation-5"><span class="header-section-number">32.8.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>PLD columns.</strong> Discretize each direction’s PLD (<a href="#sec-num-subsampled" class="quarto-xref"><span>Section 32.7</span></a>) up and down, compose <span class="math inline">\(k\)</span> times by FFT (<a href="#sec-num-fft" class="quarto-xref"><span>Section 32.6</span></a>), and solve <span class="math inline">\(\delta(\varepsilon) = 10^{-5}\)</span> on each result. The solve can be exact. For <span class="math inline">\(\varepsilon\)</span> between two grid points, the set of grid losses above <span class="math inline">\(\varepsilon\)</span> does not change, so by <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a> <span class="math inline">\(\delta(\varepsilon) = m_\infty + A - e^\varepsilon B\)</span>, where <span class="math inline">\(m_\infty\)</span> is the atom at <span class="math inline">\(+\infty\)</span>, <span class="math inline">\(A\)</span> the total mass of the grid points above <span class="math inline">\(\varepsilon\)</span>, and <span class="math inline">\(B\)</span> the sum of those masses times <span class="math inline">\(e^{-\ell}\)</span>. Setting this equal to <span class="math inline">\(10^{-5}\)</span> and solving for <span class="math inline">\(e^\varepsilon\)</span> gives the root directly. Take the larger <span class="math inline">\(\varepsilon\)</span> of the two directions.</li>
+<li><strong>RDP column.</strong> RDP tracks, for each order <span class="math inline">\(\alpha &gt; 1\)</span>, the Rényi divergence <span class="math inline">\(\frac1{\alpha - 1}\ln\mathbb E_Q\big[(P/Q)^\alpha\big]\)</span>, a log-moment of the likelihood ratio; these divergences add up over composed steps, and a conversion turns the total into <span class="math inline">\((\varepsilon, \delta)\)</span>. As in <a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, for the remove pair the moment is <span class="math inline">\(A_\alpha = \mathbb E_{y\sim\mathcal N(0,\sigma^2)}\big[\big((1 - q) + q\,e^{(2y-1)/(2\sigma^2)}\big)^\alpha\big]\)</span>, the likelihood ratio of step 1 of <a href="#sec-num-subsampled" class="quarto-xref"><span>Section 32.7</span></a> raised to the power <span class="math inline">\(\alpha\)</span> and averaged under the base <span class="math inline">\(Q = \mathcal N(0, \sigma^2)\)</span>. The RDP of one step at order <span class="math inline">\(\alpha\)</span> is <span class="math inline">\(\frac1{\alpha - 1}\ln A_\alpha\)</span>. For integer <span class="math inline">\(\alpha\)</span>, expanding the power with the binomial theorem and using <span class="math inline">\(\mathbb E_Q[e^{j(2y-1)/(2\sigma^2)}] = e^{(j^2 - j)/(2\sigma^2)}\)</span> (the Gaussian moment generating function at <span class="math inline">\(j/\sigma^2\)</span>) gives <span class="math inline">\(A_\alpha = \sum_{j=0}^{\alpha}\binom\alpha j(1 - q)^{\alpha - j}q^je^{(j^2 - j)/(2\sigma^2)}\)</span>. For fractional <span class="math inline">\(\alpha\)</span> the script computes the expectation by numerical integration. Multiply by <span class="math inline">\(k\)</span>, convert with <span class="math inline">\(\varepsilon = \varepsilon(\alpha) + \ln\frac{\alpha - 1}\alpha - \frac{\ln\delta + \ln\alpha}{\alpha - 1}\)</span> (<a href="../part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>), where <span class="math inline">\(\varepsilon(\alpha)\)</span> is the composed RDP at order <span class="math inline">\(\alpha\)</span>, and minimize over the part’s grid of orders. As a check, integration and the binomial sum agree at <span class="math inline">\(\alpha = 2\)</span> (<span class="math inline">\(\ln A_2 = 0.00017181\)</span>) and <span class="math inline">\(\alpha = 10\)</span> (<span class="math inline">\(\ln A_{10} = 0.34443377\)</span>).</li>
+<li><strong>CLT column.</strong> The GDP central limit theorem replaces the <span class="math inline">\(k\)</span> composed steps by one Gaussian pair with shift <span class="math inline">\(\mu = q\sqrt{k(e^{1/\sigma^2} - 1)}\)</span> (<a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian DP</a>). One way to see where the formula comes from: one Gaussian step with shift 1 has <span class="math inline">\(\chi^2\)</span>-divergence <span class="math inline">\(e^{1/\sigma^2} - 1\)</span> (the average squared deviation of the likelihood ratio from 1), subsampling at rate <span class="math inline">\(q\)</span> scales the ratio’s deviation from 1 by <span class="math inline">\(q\)</span> and so this divergence by <span class="math inline">\(q^2\)</span>, and for Gaussians <span class="math inline">\(\mu^2\)</span> adds over composed steps, which gives the factor <span class="math inline">\(k\)</span>. Then <span class="math inline">\(\varepsilon\)</span> comes from <a href="#eq-num-gauss" class="quarto-xref">Equation&nbsp;<span>32.4</span></a>. At <span class="math inline">\(k = 10{,}000\)</span>, <span class="math inline">\(\mu = 0.01 \times \sqrt{10^4 \times (e - 1)} = 0.01 \times 100 \times 1.3108 = 1.3108\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-5" class="level3" data-number="32.8.4">
+<h3 data-number="32.8.4" class="anchored" data-anchor-id="interpretation-5"><span class="header-section-number">32.8.4</span> Interpretation</h3>
+<p>The PLD pins down the truth (<a href="#fig-num-eps-k" class="quarto-xref">Figure&nbsp;<span>32.4</span></a>). At <span class="math inline">\(k = 1000\)</span> the true <span class="math inline">\(\varepsilon\)</span> is between 1.8232 and 1.8332. At <span class="math inline">\(k = 10{,}000\)</span> the bracket is <span class="math inline">\([6.1377, 6.2377]\)</span>, wider because the width is <span class="math inline">\(kh\)</span>.</p>
+<p>RDP is a valid bound, but loose. It exceeds the PLD upper bound by <span class="math inline">\(0.9555 - 0.1995 = 0.7560\)</span> at <span class="math inline">\(k = 1\)</span>, <span class="math inline">\(2.1014 - 1.8332 = 0.2682\)</span> at <span class="math inline">\(k = 1000\)</span> and <span class="math inline">\(6.7127 - 6.2377 = 0.4750\)</span> at <span class="math inline">\(k = 10{,}000\)</span>. The single step shows why most clearly: it gives 0.9555 against 0.1995, because the conversion from RDP pays a term of about <span class="math inline">\(\frac{\ln(1/\delta)}{\alpha - 1}\)</span> whatever the curve, the price of turning one moment of the loss into a tail bound.</p>
+<p>The CLT is not a bound, and here it is too optimistic. It falls below the PLD <em>lower</em> bound at every <span class="math inline">\(k\)</span>, by <span class="math inline">\(1.8232 - 1.6177 = 0.2055\)</span> at <span class="math inline">\(k = 1000\)</span> and <span class="math inline">\(6.1377 - 6.0071 = 0.1306\)</span> at <span class="math inline">\(k = 10{,}000\)</span>. The subsampled PLD has a heavy right tail (<a href="#fig-num-histograms" class="quarto-xref">Figure&nbsp;<span>32.5</span></a>), and at <span class="math inline">\(\delta = 10^{-5}\)</span> you are reading exactly that tail, where the Gaussian approximation is worst. Reporting the CLT number would understate the privacy loss.</p>
+<p>Pick <span class="math inline">\(h\)</span> for the largest <span class="math inline">\(k\)</span> you will run. The width is <span class="math inline">\(kh\)</span>, and <span class="math inline">\(h = 10^{-5}\)</span> makes it <span class="math inline">\(10^4 \times 10^{-5} = 0.1\)</span> at <span class="math inline">\(k = 10{,}000\)</span>. Each tenfold refinement of <span class="math inline">\(h\)</span> makes the vectors ten times longer, because the same range of losses is cut into ten times as many bins: after 1000 steps the pessimistic remove PLD has 7687, 76894 and 767721 bins for <span class="math inline">\(h = 10^{-3}\)</span>, <span class="math inline">\(10^{-4}\)</span> and <span class="math inline">\(10^{-5}\)</span>. Time and memory grow at least as fast.</p>
+<div id="fig-num-eps-k" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-num-eps-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/numerical_accounting_epsilon_vs_k.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-num-eps-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;32.4: <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> against the number of steps <span class="math inline">\(k\)</span> for DP-SGD with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>: the RDP accountant (green), the GDP central-limit approximation (orange), and the pessimistic (red) and optimistic (blue) PLD bounds on the grid <span class="math inline">\(h = 10^{-5}\)</span>. The two PLD curves overlap at this scale; RDP lies above them and the CLT below them.
+</figcaption>
+</figure>
+</div>
+<div id="fig-num-histograms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-num-histograms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/numerical_accounting_histograms.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-num-histograms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;32.5: The pessimistic remove-direction PLD of DP-SGD with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span> after 1, 10 and 100 steps (grid <span class="math inline">\(h = 10^{-4}\)</span>, re-binned for display; log scale). The dotted line is the mean. One step piles its mass just above its lower limit <span class="math inline">\(\ln(1 - q) = -0.0101\)</span> and has a long right tail; convolution moves the bulk towards a bell shape, but the right tail stays heavier than the left.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-sandwich-width-against-grid-size" class="level3" data-number="32.8.5">
+<h3 data-number="32.8.5" class="anchored" data-anchor-id="example-sandwich-width-against-grid-size"><span class="header-section-number">32.8.5</span> Example: sandwich width against grid size</h3>
+<p>The sandwich width should be <span class="math inline">\(kh\)</span>, so at a fixed <span class="math inline">\(k\)</span> it should shrink tenfold with each tenfold finer grid. <a href="#tbl-num-width" class="quarto-xref">Table&nbsp;<span>32.8</span></a> repeats <span class="math inline">\(k = 1000\)</span> on three grids.</p>
+<div id="tbl-num-width" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-width-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.8: DP-SGD after <span class="math inline">\(k = 1000\)</span> steps: the PLD bounds on <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> for three grid widths.
+</figcaption>
+<div aria-describedby="tbl-num-width-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(h\)</span></th>
+<th>Upper</th>
+<th>Lower</th>
+<th>Width</th>
+<th><span class="math inline">\(kh\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(10^{-3}\)</span></td>
+<td>2.3279</td>
+<td>1.3279</td>
+<td>1.0000</td>
+<td>1.0000</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(10^{-4}\)</span></td>
+<td>1.8782</td>
+<td>1.7782</td>
+<td>0.1000</td>
+<td>0.1000</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(10^{-5}\)</span></td>
+<td>1.8332</td>
+<td>1.8232</td>
+<td>0.0100</td>
+<td>0.0100</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The width equals <span class="math inline">\(kh\)</span> to four decimals, as derivation step 7 of <a href="#sec-num-discretize" class="quarto-xref"><span>Section 32.5</span></a> predicts. On the coarsest grid the upper bound 2.3279 is worse than RDP’s 2.1014. A PLD accountant is only as good as its grid.</p>
+</section>
+<section id="check-yourself-5" class="level3" data-number="32.8.6">
+<h3 data-number="32.8.6" class="anchored" data-anchor-id="check-yourself-5"><span class="header-section-number">32.8.6</span> Check yourself</h3>
+<ul>
+<li>A colleague reports <span class="math inline">\(\varepsilon = 1.62\)</span> for 1000 steps from the CLT. What do you tell them? <em>(That is below the PLD lower bound 1.8232, so the run is not <span class="math inline">\((1.62, 10^{-5})\)</span>-DP. The CLT is an approximation and underestimates here.)</em></li>
+<li>You need the upper bound at <span class="math inline">\(k = 10{,}000\)</span> within 0.01 of the truth. What grid do you need? <em>(A width of at most 0.01 needs <span class="math inline">\(kh \le 0.01\)</span>, so <span class="math inline">\(h \le 0.01/10^4 = 10^{-6}\)</span>, ten times finer than the script’s grid.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code" class="level2" data-number="32.9">
+<h2 data-number="32.9" class="anchored" data-anchor-id="code"><span class="header-section-number">32.9</span> Code</h2>
+<p>The script <a href="../../../code/part04-privacy-accounting/numerical_accounting.py">code/numerical_accounting.py</a> implements the whole accountant in NumPy: the PLD dataclass, pessimistic and optimistic discretization, FFT convolution with padding and truncation, repeated squaring, the exact solve for <span class="math inline">\(\varepsilon\)</span>, the subsampled-Gaussian PLD in both directions, and, for comparison, the RDP accountant and the CLT. The public functions are <code>gaussian_pld_delta</code>, <code>discretize_subsampled_gaussian_pld</code>, <code>compose_pld</code>, <code>pld_delta</code>, <code>pld_epsilon</code> and <code>pld_epsilon_subsampled_gaussian</code>. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part04-privacy-accounting/numerical_accounting.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>It takes from half a minute to a few minutes, depending on the machine. Nearly all of that is the four <span class="math inline">\(k = 10{,}000\)</span> compositions on the grid <span class="math inline">\(h = 10^{-5}\)</span>. <strong>Output</strong> (seed 0), summarized in <a href="#tbl-num-code" class="quarto-xref">Table&nbsp;<span>32.9</span></a>:</p>
+<div id="tbl-num-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.9: The script’s output with the default seed.
+</figcaption>
+<div aria-describedby="tbl-num-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gaussian PLD, <span class="math inline">\(\mu = 1\)</span></td>
+<td>Monte Carlo mean 0.4990, variance 1.0013, <span class="math inline">\(\mathbb E[e^{-L}]\)</span> 1.0015; δ(ε) in <a href="#tbl-num-gauss-delta" class="quarto-xref">Table&nbsp;<span>32.2</span></a>; <span class="math inline">\(\varepsilon = 4.3772\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span></td>
+</tr>
+<tr class="even">
+<td>Finite pair, <span class="math inline">\(\varepsilon = 0.5\)</span></td>
+<td>Both forms of <a href="#eq-num-delta" class="quarto-xref">Equation&nbsp;<span>32.3</span></a> give 0.2351</td>
+</tr>
+<tr class="odd">
+<td>Randomized response, three steps, <span class="math inline">\(h = 0.5\)</span></td>
+<td><a href="#tbl-num-rr" class="quarto-xref">Table&nbsp;<span>32.3</span></a> and <a href="#tbl-num-rr-delta" class="quarto-xref">Table&nbsp;<span>32.4</span></a>; <span class="math inline">\(\mathbb E[e^{-L}]\)</span> 0.8469 (up), 1.3963 (down)</td>
+</tr>
+<tr class="even">
+<td>Gaussian steps on <span class="math inline">\(h = 10^{-3}\)</span></td>
+<td><a href="#tbl-num-gauss-grid" class="quarto-xref">Table&nbsp;<span>32.5</span></a>; squaring and one-shot power agree, <span class="math inline">\(\delta(1) = 0.81891018\)</span></td>
+</tr>
+<tr class="odd">
+<td>Wraparound, <span class="math inline">\(k = 10\)</span></td>
+<td>Window 10: 0.83478562; window 20: 0.81890091; window 40: 0.81891018</td>
+</tr>
+<tr class="even">
+<td>One subsampled step</td>
+<td><a href="#tbl-num-onestep" class="quarto-xref">Table&nbsp;<span>32.6</span></a>; exact <span class="math inline">\(\varepsilon\)</span> 0.1995 (remove) and 0.0091 (add)</td>
+</tr>
+<tr class="odd">
+<td>RDP check</td>
+<td><span class="math inline">\(\ln A_2 = 0.00017181\)</span> and <span class="math inline">\(\ln A_{10} = 0.34443377\)</span> by both methods</td>
+</tr>
+<tr class="even">
+<td>DP-SGD</td>
+<td><a href="#tbl-num-dpsgd" class="quarto-xref">Table&nbsp;<span>32.7</span></a> and <a href="#tbl-num-width" class="quarto-xref">Table&nbsp;<span>32.8</span></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_numerical_accounting.py">tests/test_numerical_accounting.py</a> checks that the output still matches.</p>
+<p><strong>What to take from it.</strong> First, the pieces are right: the Gaussian PLD reproduces the closed form, the FFT squaring reproduces the one-shot power to eight digits, and the subsampled discretization brackets the closed-form single-step δ. Because each piece is checked against something exact, you can trust the composed numbers where nothing exact exists. Second, the sandwich is certified and its width is at most <span class="math inline">\(kh\)</span>: nothing else in the accountant introduces a one-sided error you cannot see, so the two PLD columns of <a href="#tbl-num-dpsgd" class="quarto-xref">Table&nbsp;<span>32.7</span></a> are an honest error bar. Third, RDP is safe but loose, and the CLT is neither safe nor, here, accurate in the tail. The gap between them and the PLD bounds is what a loose accountant costs you.</p>
+</section>
+<section id="references" class="level2" data-number="32.10">
+<h2 data-number="32.10" class="anchored" data-anchor-id="references"><span class="header-section-number">32.10</span> References</h2>
+<ul>
+<li>Sommer, Meiser &amp; Mohammadi, “Privacy Loss Classes: The Central Limit Theorem in Differential Privacy” (Proceedings on Privacy Enhancing Technologies, PoPETs 2019). Defines the privacy loss distribution, proves that composition convolves PLDs, and shows that composed PLDs tend to Gaussians. Read it for the PLD formalism of <a href="#sec-num-pld" class="quarto-xref"><span>Section 32.3</span></a> and <a href="#sec-num-convolution" class="quarto-xref"><span>Section 32.4</span></a>.</li>
+<li>Meiser &amp; Mohammadi, “Tight on Budget? Tight Bounds for r-Fold Approximate Differential Privacy” (CCS 2018). The privacy buckets: discretize the loss into buckets, round up for a certified upper bound and down for a lower bound. The origin of <a href="#sec-num-discretize" class="quarto-xref"><span>Section 32.5</span></a>.</li>
+<li>Koskela, Jälkö &amp; Honkela, “Computing Tight Differential Privacy Guarantees Using FFT” (AISTATS 2020). FFT-based PLD accounting on a fixed window, with error analysis for the truncation and wraparound. Read it for <a href="#sec-num-fft" class="quarto-xref"><span>Section 32.6</span></a>.</li>
+<li>Koskela, Jälkö, Prediger &amp; Honkela, “Tight Differential Privacy for Discrete-Valued Mechanisms and for the Subsampled Gaussian Mechanism Using FFT” (AISTATS 2021). Rigorous upper and lower bounds with the FFT accountant, applied to the subsampled Gaussian; the source for the setting of <a href="#sec-num-subsampled" class="quarto-xref"><span>Section 32.7</span></a> and <a href="#sec-num-dpsgd" class="quarto-xref"><span>Section 32.8</span></a>.</li>
+<li>Gopi, Lee &amp; Wutschitz, “Numerical Composition of Differential Privacy” (NeurIPS 2021). The PRV accountant: nearest-point discretization with a mean-matching shift, explicit error bounds, and a running time of order <span class="math inline">\(\sqrt k\)</span> (up to logarithmic factors) for <span class="math inline">\(k\)</span> identical steps. Read it when you need certified error bars on a fast accountant.</li>
+<li>Doroshenko, Ghazi, Kamath, Kumar &amp; Manurangsi, “Connect the Dots: Tighter Discrete Approximations of Privacy Loss Distributions” (PoPETs 2022). Frames discretization with dominating pairs, proves rounding up gives a valid PLD (Lemma 4.2) and builds the optimal pessimistic PLD on a grid. Read it for the cleanest account of why the pessimistic bound is valid.</li>
+<li>Zhu, Dong &amp; Wang, “Optimal Accounting of Differential Privacy via Characteristic Function” (AISTATS 2022). Dominating pairs (Definition 7), their adaptive composition (Theorem 10), the two directions of Poisson subsampling (Theorem 11), and accounting through the characteristic function of the privacy loss.</li>
+<li>Google, <code>dp_accounting</code> library documentation (the <code>pld</code> module). A production PLD accountant with pessimistic and optimistic estimates and connect-the-dots discretization; use it to check the numbers here.</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="32.11">
+<h2 data-number="32.11" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">32.11</span> Cheat sheet</h2>
+<p><span class="math inline">\(L(y) = \ln\frac{P(y)}{Q(y)}\)</span>; the PLD <span class="math inline">\(\omega\)</span> is the law of <span class="math inline">\(L(Y)\)</span> with <span class="math inline">\(Y \sim P\)</span>; <span class="math inline">\(q\)</span> is the sampling rate; <span class="math inline">\(h\)</span> the grid width; <span class="math inline">\(k\)</span> the number of steps. <a href="#tbl-num-cheat" class="quarto-xref">Table&nbsp;<span>32.10</span></a> collects the results.</p>
+<div id="tbl-num-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-num-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;32.10: The results of this chapter.
+</figcaption>
+<div aria-describedby="tbl-num-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Formula</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>δ from the PLD</td>
+<td><span class="math inline">\(\delta(\varepsilon) = \mathbb E_\omega[(1 - e^{\varepsilon - L})_+] = P[L &gt; \varepsilon] - e^\varepsilon Q[L &gt; \varepsilon]\)</span></td>
+<td>Atom at <span class="math inline">\(+\infty\)</span> counts fully</td>
+</tr>
+<tr class="even">
+<td>Law under <span class="math inline">\(Q\)</span></td>
+<td><span class="math inline">\(e^{-\ell}\omega(d\ell)\)</span>, rest at <span class="math inline">\(-\infty\)</span></td>
+<td>A PLD needs <span class="math inline">\(\mathbb E_\omega[e^{-L}] \le 1\)</span></td>
+</tr>
+<tr class="odd">
+<td>Gaussian PLD</td>
+<td><span class="math inline">\(\mathcal N(\mu^2/2, \mu^2)\)</span>; <span class="math inline">\(\delta = \Phi(\frac\mu2 - \frac\varepsilon\mu) - e^\varepsilon\Phi(-\frac\mu2 - \frac\varepsilon\mu)\)</span></td>
+<td><span class="math inline">\(k\)</span> steps: <span class="math inline">\(\mu \to \sqrt k\mu\)</span></td>
+</tr>
+<tr class="even">
+<td>Composition</td>
+<td><span class="math inline">\(\omega_1 * \dots * \omega_k\)</span></td>
+<td>Adaptive: convolve dominating pairs</td>
+</tr>
+<tr class="odd">
+<td>Pessimistic / optimistic</td>
+<td>Round losses up (tail to <span class="math inline">\(+\infty\)</span>) / down (bottom tail dropped)</td>
+<td><span class="math inline">\(\delta^\downarrow \le \delta \le \delta^\uparrow\)</span> for every <span class="math inline">\(k\)</span></td>
+</tr>
+<tr class="even">
+<td>Sandwich width</td>
+<td><span class="math inline">\(\varepsilon^\uparrow - \varepsilon^\downarrow \le kh\)</span></td>
+<td>Equality for continuous PLDs without truncation</td>
+</tr>
+<tr class="odd">
+<td>FFT</td>
+<td><span class="math inline">\(\mathrm{IDFT}(\mathrm{DFT}(a)\,\mathrm{DFT}(b))\)</span>, pad to <span class="math inline">\(n_a + n_b - 1\)</span></td>
+<td>Too short a window wraps losses modulo <span class="math inline">\(Nh\)</span></td>
+</tr>
+<tr class="even">
+<td>Subsampled Gaussian loss</td>
+<td><span class="math inline">\(\pm\ln\big((1 - q) + q e^{(2y-1)/(2\sigma^2)}\big)\)</span></td>
+<td>Remove: <span class="math inline">\(+\)</span>, <span class="math inline">\(Y \sim\)</span> mixture; add: <span class="math inline">\(-\)</span>, <span class="math inline">\(Y \sim \mathcal N(0, \sigma^2)\)</span>; take the max</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>Report the pessimistic <span class="math inline">\(\varepsilon\)</span>, and the optimistic one next to it as the error bar.</li>
+<li>Choose <span class="math inline">\(h\)</span> so that <span class="math inline">\(kh\)</span> is the error you can accept; check the sandwich width rather than trusting the grid.</li>
+<li>Compute both directions of add/remove for subsampled mechanisms; do not assume one dominates.</li>
+<li>Pad or truncate; never let an FFT wrap around silently.</li>
+<li>Use RDP and the CLT as quick estimates. RDP over-reports; the CLT can under-report in the tail that <span class="math inline">\(\delta = 10^{-5}\)</span> looks at.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part04-privacy-accounting/06-numerical-accounting.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part04-privacy-accounting/05-subsampling.html" class="pagination-link" aria-label="Amplification by subsampling">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="pagination-link" aria-label="Amplification by shuffling and by iteration">
+        <span class="nav-page-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

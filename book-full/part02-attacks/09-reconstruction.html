@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>17&nbsp; Reconstruction attacks – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part03-dp-foundations/00-introduction.html" rel="next">
+<link href="../part02-attacks/08-syntactic-anonymity.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/09-reconstruction.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">17.1</span> Why this matters</a></li>
+  <li><a href="#toolkit-three-facts-every-derivation-uses" id="toc-toolkit-three-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-three-facts-every-derivation-uses"><span class="header-section-number">17.2</span> Toolkit: three facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-subset-sums-are-inner-products" id="toc-fact-1-subset-sums-are-inner-products" class="nav-link" data-scroll-target="#fact-1-subset-sums-are-inner-products"><span class="header-section-number">17.2.1</span> Fact 1 — Subset sums are inner products</a></li>
+  <li><a href="#fact-2-moments-of-a-random-sign-sum" id="toc-fact-2-moments-of-a-random-sign-sum" class="nav-link" data-scroll-target="#fact-2-moments-of-a-random-sign-sum"><span class="header-section-number">17.2.2</span> Fact 2 — Moments of a random-sign sum</a></li>
+  <li><a href="#fact-3-paleyzygmund-a-variable-with-a-light-fourth-moment-is-not-concentrated-near-0" id="toc-fact-3-paleyzygmund-a-variable-with-a-light-fourth-moment-is-not-concentrated-near-0" class="nav-link" data-scroll-target="#fact-3-paleyzygmund-a-variable-with-a-light-fourth-moment-is-not-concentrated-near-0"><span class="header-section-number">17.2.3</span> Fact 3 — Paley–Zygmund: a variable with a light fourth moment is not concentrated near 0</a></li>
+  </ul></li>
+  <li><a href="#sec-recon-exponential" id="toc-sec-recon-exponential" class="nav-link" data-scroll-target="#sec-recon-exponential"><span class="header-section-number">17.3</span> The exponential attack</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">17.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">17.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">17.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">17.3.4</span> Interpretation</a></li>
+  <li><a href="#example-ten-people-all-1024-subsets" id="toc-example-ten-people-all-1024-subsets" class="nav-link" data-scroll-target="#example-ten-people-all-1024-subsets"><span class="header-section-number">17.3.5</span> Example: ten people, all 1024 subsets</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">17.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-recon-lp" id="toc-sec-recon-lp" class="nav-link" data-scroll-target="#sec-recon-lp"><span class="header-section-number">17.4</span> The linear-programming decoder</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">17.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">17.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">17.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">17.4.4</span> Interpretation</a></li>
+  <li><a href="#example-what-the-theorem-promises-at-n-1000" id="toc-example-what-the-theorem-promises-at-n-1000" class="nav-link" data-scroll-target="#example-what-the-theorem-promises-at-n-1000"><span class="header-section-number">17.4.5</span> Example: what the theorem promises at <span class="math inline">\(n = 1000\)</span></a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">17.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-recon-ls" id="toc-sec-recon-ls" class="nav-link" data-scroll-target="#sec-recon-ls"><span class="header-section-number">17.5</span> Least squares under worst-case and random error</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">17.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">17.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">17.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">17.5.4</span> Interpretation</a></li>
+  <li><a href="#example-n-500-people-m-2000-queries" id="toc-example-n-500-people-m-2000-queries" class="nav-link" data-scroll-target="#example-n-500-people-m-2000-queries"><span class="header-section-number">17.5.5</span> Example: <span class="math inline">\(n = 500\)</span> people, <span class="math inline">\(m = 2000\)</span> queries</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">17.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-recon-law" id="toc-sec-recon-law" class="nav-link" data-scroll-target="#sec-recon-law"><span class="header-section-number">17.6</span> The Fundamental Law of Information Recovery</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">17.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">17.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">17.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">17.6.4</span> Interpretation</a></li>
+  <li><a href="#example-three-curators" id="toc-example-three-curators" class="nav-link" data-scroll-target="#example-three-curators"><span class="header-section-number">17.6.5</span> Example: three curators</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">17.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-recon-census" id="toc-sec-recon-census" class="nav-link" data-scroll-target="#sec-recon-census"><span class="header-section-number">17.7</span> Reconstructing a census block</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">17.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">17.7.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">17.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">17.7.4</span> Interpretation</a></li>
+  <li><a href="#example-what-each-withheld-statistic-leaves" id="toc-example-what-each-withheld-statistic-leaves" class="nav-link" data-scroll-target="#example-what-each-withheld-statistic-leaves"><span class="header-section-number">17.7.5</span> Example: what each withheld statistic leaves</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">17.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-every-attack-by-computation-and-simulation" id="toc-code-check-every-attack-by-computation-and-simulation" class="nav-link" data-scroll-target="#code-check-every-attack-by-computation-and-simulation"><span class="header-section-number">17.8</span> Code: check every attack by computation and simulation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">17.9</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">17.10</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/09-reconstruction.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="17.1">
+<h2 data-number="17.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">17.1</span> Why this matters</h2>
+<p>A hospital keeps one sensitive bit per patient: whether they tested positive. It never releases the bits. It only answers counting questions: “how many of patients 3, 17, 42, … tested positive?” To be safe, it adds a little noise to every answer. Is that enough? The answer, due to Dinur and Nissim (2003), is a hard no unless the noise is large. If every answer is within <span class="math inline">\(o(\sqrt n)\)</span> of the truth, where <span class="math inline">\(n\)</span> is the number of patients, an attacker who asks a number of random questions only slightly larger than <span class="math inline">\(n\)</span> can recover almost every bit by solving a linear program. If the attacker may ask all <span class="math inline">\(2^n\)</span> questions, an error of <span class="math inline">\(o(n)\)</span> is already too small. (Here <span class="math inline">\(o(\sqrt n)\)</span> means an amount that grows more slowly than <span class="math inline">\(\sqrt n\)</span>, so that its ratio to <span class="math inline">\(\sqrt n\)</span> goes to 0 as <span class="math inline">\(n\)</span> grows; <span class="math inline">\(O(\cdot)\)</span>, used below, means “at most a constant times”.) A table of aggregates is a system of equations whose unknowns are the people in it, and enough equations determine the unknowns.</p>
+<p>This is the <strong>reconstruction game</strong> of <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a>. In that game the secret is the whole dataset (or one column of it), and the adversary is scored by the fraction of entries it recovers, compared with the baseline of guessing from the population, which for fair bits is <span class="math inline">\(\frac12\)</span>. That chapter showed that one exact count of <span class="math inline">\(n\)</span> fair bits lets the adversary recover only about <span class="math inline">\(\frac12 + 1/\sqrt{2\pi n}\)</span> of them: knowing the total tells you which value is the majority, and nothing about who holds it. This chapter shows what happens with many counts.</p>
+<p>The one idea that organizes the chapter is this. <strong>Every answer is a linear equation in the secret bits, and the error of the answers is the only thing standing between the attacker and the solution.</strong> To hide a wrong guess, the curator’s error has to be as large as the amount by which that guess changes the answers. For a random query that amount is about <span class="math inline">\(\sqrt n\)</span> when the guess is wrong on a constant fraction of the bits, and for the query aimed at exactly the wrong bits it is about <span class="math inline">\(n\)</span>; errors well below those scales cannot hide the solution. Errors that are independent from answer to answer, and do not grow with the number of queries, are averaged away by asking more. Dwork and Roth call this the <strong>Fundamental Law of Information Recovery</strong>: overly accurate answers to too many questions destroy privacy.</p>
+<p><a href="#tbl-recon-uses" class="quarto-xref">Table&nbsp;<span>17.1</span></a> lists the results and where they are used.</p>
+<div id="tbl-recon-uses" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.1: The results of this chapter and where each is used.
+</figcaption>
+<div aria-describedby="tbl-recon-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exponential attack: error <span class="math inline">\(E\)</span> on all <span class="math inline">\(2^n\)</span> subset sums leaves at most <span class="math inline">\(4E\)</span> wrong bits</td>
+<td>Why per-answer error must be of order <span class="math inline">\(n\)</span> when queries are unlimited</td>
+</tr>
+<tr class="even">
+<td>Anti-concentration of a random subset sum (Paley–Zygmund)</td>
+<td>The step that makes a random query informative about every bad candidate</td>
+</tr>
+<tr class="odd">
+<td>Linear-programming decoder: error <span class="math inline">\(o(\sqrt n)\)</span> on <span class="math inline">\(O(n\log n)\)</span> random queries leaves <span class="math inline">\(o(n)\)</span> wrong bits</td>
+<td>The Dinur–Nissim attack; the <span class="math inline">\(\sqrt n\)</span> threshold</td>
+</tr>
+<tr class="even">
+<td>Least squares under worst-case and random error</td>
+<td>The attack you would actually run; how noise and the number of queries trade off</td>
+</tr>
+<tr class="odd">
+<td>Sampling curator, via Hoeffding and the union bound</td>
+<td>Error of order <span class="math inline">\(\sqrt{n\log m}\)</span> can stop reconstruction, yet still be far from private</td>
+</tr>
+<tr class="even">
+<td>Information bound, via Fano</td>
+<td>No attack can succeed with much fewer than <span class="math inline">\(n/\log n\)</span> queries</td>
+</tr>
+<tr class="odd">
+<td>Census block reconstruction by constraint search</td>
+<td>Why publishing many overlapping tables reveals the microdata</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>How to read this chapter.</strong> Read the toolkit, then the exponential attack, which is short and exact. The linear-programming section is the heart of the chapter; on a first pass read its statement, the lemma and the figure, and come back for the union-bound steps. The least-squares section is what the script runs. The Fundamental Law section puts the results together with two converses, and the census section shows the same idea on real-looking tables.</p>
+<p>The concentration tools (Hoeffding’s inequality, the union bound) are in <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>. Entropy, mutual information, the data processing inequality (DPI) and Fano’s inequality are in <a href="../part01-prerequisites/05-information-theory.html">Information theory</a>. Each is restated below where it is used. No privacy definition is used: <a href="../part03-dp-foundations/01-definition.html">Part 3</a> introduces the one that defends against these attacks, and <a href="../part03-dp-foundations/09-lower-bounds.html">Lower bounds</a> reads this chapter’s results as lower bounds on the error any defence must add.</p>
+<p><strong>Conventions.</strong> The secret database is a bit vector <span class="math inline">\(d = (d_1, \dots, d_n) \in \{0, 1\}^n\)</span>, one bit per person. A <strong>subset-sum query</strong> is a set <span class="math inline">\(S \subseteq [n] = \{1, \dots, n\}\)</span> of people, and it asks how many of them have bit 1. It is written as its 0/1 indicator vector <span class="math inline">\(q\)</span>, with <span class="math inline">\(q_i = 1\)</span> when person <span class="math inline">\(i\)</span> is in <span class="math inline">\(S\)</span>; its true answer is <span class="math inline">\(\sum_{i \in S}d_i = \langle q, d\rangle\)</span>. The attacker asks <span class="math inline">\(m\)</span> queries, the rows of an <span class="math inline">\(m \times n\)</span> matrix <span class="math inline">\(A\)</span>. The <strong>curator</strong> (the party holding <span class="math inline">\(d\)</span>) returns <span class="math inline">\(a = Ad + e\)</span>, where <span class="math inline">\(e\)</span> is its error, one entry per query. “Error at most <span class="math inline">\(E\)</span>” means <span class="math inline">\(|e_j| \le E\)</span> for every query <span class="math inline">\(j\)</span>. <span class="math inline">\(\beta\)</span> is a fraction of wrong bits, <span class="math inline">\(\eta\)</span> a failure probability and <span class="math inline">\(\sigma\)</span> the standard deviation of random noise. Logarithms are natural unless written <span class="math inline">\(\log_2\)</span>. <a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a> wrote <span class="math inline">\(m\)</span> for the number of bits; here <span class="math inline">\(n\)</span> is the number of bits and <span class="math inline">\(m\)</span> the number of queries.</p>
+</section>
+<section id="toolkit-three-facts-every-derivation-uses" class="level2" data-number="17.2">
+<h2 data-number="17.2" class="anchored" data-anchor-id="toolkit-three-facts-every-derivation-uses"><span class="header-section-number">17.2</span> Toolkit: three facts every derivation uses</h2>
+<section id="fact-1-subset-sums-are-inner-products" class="level3" data-number="17.2.1">
+<h3 data-number="17.2.1" class="anchored" data-anchor-id="fact-1-subset-sums-are-inner-products"><span class="header-section-number">17.2.1</span> Fact 1 — Subset sums are inner products</h3>
+<p>A subset sum adds up the bits of the people in the subset, so it is the inner product of the subset’s indicator vector with the database: <span class="math inline">\(\langle q, d\rangle = \sum_i q_id_i\)</span>, which is linear in <span class="math inline">\(d\)</span>. Stacking <span class="math inline">\(m\)</span> queries as the rows of <span class="math inline">\(A\)</span> gives <span class="math inline">\(a = Ad + e\)</span>: a linear system with <span class="math inline">\(n\)</span> unknowns (the bits) and <span class="math inline">\(m\)</span> equations, each off by its error. <a href="#tbl-recon-subsets" class="quarto-xref">Table&nbsp;<span>17.2</span></a> shows a few of the <span class="math inline">\(2^4 = 16\)</span> subset sums of the database <span class="math inline">\(d = (1, 0, 1, 1)\)</span>.</p>
+<div id="tbl-recon-subsets" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-subsets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.2: Six subset sums of <span class="math inline">\(d = (1, 0, 1, 1)\)</span>. Each is a linear equation in the four secret bits.
+</figcaption>
+<div aria-describedby="tbl-recon-subsets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Subset <span class="math inline">\(S\)</span></th>
+<th><span class="math inline">\(\{1\}\)</span></th>
+<th><span class="math inline">\(\{2\}\)</span></th>
+<th><span class="math inline">\(\{1, 2\}\)</span></th>
+<th><span class="math inline">\(\{3, 4\}\)</span></th>
+<th><span class="math inline">\(\{2, 3, 4\}\)</span></th>
+<th><span class="math inline">\(\{1, 2, 3, 4\}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Indicator <span class="math inline">\(q\)</span></td>
+<td>1000</td>
+<td>0100</td>
+<td>1100</td>
+<td>0011</td>
+<td>0111</td>
+<td>1111</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\langle q, d\rangle\)</span></td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>With exact answers there is nothing to attack. The singletons <span class="math inline">\(\{1\}, \dots, \{4\}\)</span> alone reveal <span class="math inline">\(d\)</span> exactly, one bit per answer, and any <span class="math inline">\(n\)</span> queries whose indicator vectors are linearly independent do the same, because Gaussian elimination solves the system. Everything interesting in this chapter is about answers with error.</p>
+<p>Linearity also tells you how an attacker rules out a wrong guess. If the attacker considers a candidate database <span class="math inline">\(c\)</span>, the answers <span class="math inline">\(c\)</span> would produce differ from the true ones by <span class="math inline">\(\langle q, c\rangle - \langle q, d\rangle = \langle q, c - d\rangle\)</span>, the subset sum of the difference vector <span class="math inline">\(c - d\)</span>. If, for some query, that difference is larger than the curator’s error could explain, the candidate is ruled out. Every attack below is a way of finding such a query for every bad candidate.</p>
+</section>
+<section id="fact-2-moments-of-a-random-sign-sum" class="level3" data-number="17.2.2">
+<h3 data-number="17.2.2" class="anchored" data-anchor-id="fact-2-moments-of-a-random-sign-sum"><span class="header-section-number">17.2.2</span> Fact 2 — Moments of a random-sign sum</h3>
+<p>A random query includes each person with probability <span class="math inline">\(\frac12\)</span>, so its answer behaves like a sum of terms that are switched on or off by fair coins. The cleanest form of such a sum uses signs instead of on/off switches. Let <span class="math inline">\(s_1, \dots, s_n\)</span> be independent fair signs (<span class="math inline">\(+1\)</span> or <span class="math inline">\(-1\)</span> with probability <span class="math inline">\(\frac12\)</span> each) and <span class="math inline">\(X = \sum_is_ia_i\)</span> for fixed numbers <span class="math inline">\(a_i\)</span>. The sum is centred at 0, and its spread is set by <span class="math inline">\(\sum_ia_i^2\)</span>, because the variances of independent terms add. What the later proofs need is that <span class="math inline">\(X\)</span> has no heavy tails: its fourth moment is at most 3 times the square of its second moment, the same ratio as for a normal variable. In symbols, <span id="eq-auto-09reconstruction-1"><span class="math display">\[\mathbb E X = 0, \qquad \mathbb E X^2 = \sum_ia_i^2, \qquad \mathbb E X^4 = 3\Big(\sum_ia_i^2\Big)^2 - 2\sum_ia_i^4 \le 3\Big(\sum_ia_i^2\Big)^2. \tag{17.1}\]</span></span></p>
+<p>The proof is a count of which terms survive when you take expectations. Expand <span class="math inline">\(X^4 = \sum_{i,j,k,l}s_is_js_ks_la_ia_ja_ka_l\)</span>. A term in which some index appears an odd number of times (once or three times) contains a factor <span class="math inline">\(\mathbb E s_i = 0\)</span> or <span class="math inline">\(\mathbb E s_i^3 = 0\)</span>, and vanishes, because the signs are independent and <span class="math inline">\(s_i^3 = s_i\)</span> has mean 0. Two kinds of terms survive. If all four indices are equal, <span class="math inline">\(s_i^4 = 1\)</span>, and these terms add up to <span class="math inline">\(\sum_ia_i^4\)</span>. If the indices form two distinct pairs, each <span class="math inline">\(s_i^2 = 1\)</span>; the pairs can be matched as <span class="math inline">\(i = j \ne k = l\)</span> or in two other ways, so these terms add up to <span class="math inline">\(3\sum_{i \ne k}a_i^2a_k^2 = 3\big((\sum_ia_i^2)^2 - \sum_ia_i^4\big)\)</span>. Adding the two kinds gives the formula, and dropping the negative term <span class="math inline">\(-2\sum_ia_i^4\)</span> gives the bound. The second moment is the same computation with two indices: only the terms with <span class="math inline">\(i = j\)</span> survive. The mean is 0, and every odd moment is 0, because flipping all the signs turns <span class="math inline">\(X\)</span> into <span class="math inline">\(-X\)</span> without changing its distribution.</p>
+<p><em>A concrete case.</em> Take <span class="math inline">\(a = (1, 1, 1)\)</span>. Of the eight sign patterns, two give <span class="math inline">\(X = \pm3\)</span> (all signs equal) and six give <span class="math inline">\(X = \pm1\)</span>, so <span class="math inline">\(\mathbb E X^4 = (2 \cdot 81 + 6 \cdot 1)/8 = 21\)</span>. The formula gives <span class="math inline">\(3 \cdot 9 - 2 \cdot 3 = 21\)</span>, and the bound <span class="math inline">\(3 \cdot 9 = 27\)</span>.</p>
+<p>This is how the fact is used. A random subset has <span class="math inline">\(q_i = (1 + s_i)/2\)</span>: the person is in when the sign is <span class="math inline">\(+1\)</span> and out when it is <span class="math inline">\(-1\)</span>. So a random subset sum <span class="math inline">\(\sum_iq_iz_i\)</span> is the constant <span class="math inline">\(\frac12\sum_iz_i\)</span> plus half a random-sign sum, and its fourth moment is at most 3 times its squared second moment. That ratio is what Fact 3 needs.</p>
+</section>
+<section id="fact-3-paleyzygmund-a-variable-with-a-light-fourth-moment-is-not-concentrated-near-0" class="level3" data-number="17.2.3">
+<h3 data-number="17.2.3" class="anchored" data-anchor-id="fact-3-paleyzygmund-a-variable-with-a-light-fourth-moment-is-not-concentrated-near-0"><span class="header-section-number">17.2.3</span> Fact 3 — Paley–Zygmund: a variable with a light fourth moment is not concentrated near 0</h3>
+<p>Markov’s inequality (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>) says that a non-negative variable is rarely <em>far above</em> its mean. The attacks need the opposite: that a variable is not too often <em>far below</em> its mean, so that a random query does not usually give a tiny answer. That cannot hold for every variable. A variable that is 0 most of the time and huge once in a while has a large mean and is still usually 0. What rules this out is a second moment that is not much larger than the squared mean, since a rare huge value makes <span class="math inline">\(\mathbb E[W^2]\)</span> enormous. The <strong>Paley–Zygmund inequality</strong> makes this precise. For a random variable <span class="math inline">\(W \ge 0\)</span> with finite second moment and <span class="math inline">\(0 \le \theta &lt; 1\)</span>, <span id="eq-recon-pz"><span class="math display">\[\Pr\big[W &gt; \theta\,\mathbb E W\big] \ge (1 - \theta)^2\frac{(\mathbb E W)^2}{\mathbb E[W^2]}. \tag{17.2}\]</span></span> A lower bound on how often a variable is not close to zero is called <strong>anti-concentration</strong>.</p>
+<p>The proof splits the mean <span class="math inline">\(\mathbb E W\)</span> into the part that comes from the event <span class="math inline">\(B = \{W &gt; \theta\,\mathbb E W\}\)</span> and the part that comes from its complement: <span class="math inline">\(\mathbb E W = \mathbb E[W\mathbf 1_{B^c}] + \mathbb E[W\mathbf 1_B]\)</span>. On the complement <span class="math inline">\(W \le \theta\,\mathbb E W\)</span>, so the first part is at most <span class="math inline">\(\theta\,\mathbb E W\)</span>. For the second part, use the Cauchy–Schwarz inequality <span class="math inline">\(\mathbb E[UV] \le \sqrt{\mathbb E[U^2]\,\mathbb E[V^2]}\)</span> with <span class="math inline">\(U = W\)</span> and <span class="math inline">\(V = \mathbf 1_B\)</span>; since <span class="math inline">\(\mathbf 1_B^2 = \mathbf 1_B\)</span> has mean <span class="math inline">\(\Pr[B]\)</span>, this gives <span class="math inline">\(\mathbb E[W\mathbf 1_B] \le \sqrt{\mathbb E[W^2]\Pr[B]}\)</span>. Together, <span class="math inline">\(\mathbb E W \le \theta\,\mathbb E W + \sqrt{\mathbb E[W^2]\Pr[B]}\)</span>, that is, <span class="math inline">\((1 - \theta)\mathbb E W \le \sqrt{\mathbb E[W^2]\Pr[B]}\)</span>. Squaring both sides and dividing by <span class="math inline">\(\mathbb E[W^2]\)</span> gives <a href="#eq-recon-pz" class="quarto-xref">Equation&nbsp;<span>17.2</span></a>.</p>
+<p>The linear-programming decoder uses this with <span class="math inline">\(W\)</span> the square of a random subset sum: it needs a random query to move a bad candidate’s answer by a lot with constant probability, and Fact 2 supplies the light fourth moment.</p>
+</section>
+</section>
+<section id="sec-recon-exponential" class="level2" data-number="17.3">
+<h2 data-number="17.3" class="anchored" data-anchor-id="sec-recon-exponential"><span class="header-section-number">17.3</span> The exponential attack</h2>
+<section id="context" class="level3" data-number="17.3.1">
+<h3 data-number="17.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">17.3.1</span> Context</h3>
+<p>Start with the strongest attacker: it may ask every one of the <span class="math inline">\(2^n\)</span> subset sums. How large must the curator’s error be before the attacker cannot pin <span class="math inline">\(d\)</span> down? The answer is linear in <span class="math inline">\(n\)</span>, and the proof is three lines.</p>
+</section>
+<section id="statement" class="level3" data-number="17.3.2">
+<h3 data-number="17.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">17.3.2</span> Statement</h3>
+<p>The attacker cannot know <span class="math inline">\(d\)</span>, but it can throw away every candidate that contradicts an answer. Call a candidate <span class="math inline">\(c \in \{0, 1\}^n\)</span> <strong>consistent</strong> if each of its subset sums is within <span class="math inline">\(E\)</span> of the published answer, <span class="math inline">\(\big|a_S - \sum_{i \in S}c_i\big| \le E\)</span> for every <span class="math inline">\(S\)</span>; the true <span class="math inline">\(d\)</span> is always consistent. The attacker outputs any consistent candidate. The reason it cannot be far from <span class="math inline">\(d\)</span> is that the bits where <span class="math inline">\(c\)</span> is wrong form two subsets, the ones it missed and the ones it invented, and the attacker has asked about both. On each of them <span class="math inline">\(c\)</span> and <span class="math inline">\(d\)</span> disagree by the size of the subset, while both have to be within <span class="math inline">\(E\)</span> of the same answer, so each subset has at most <span class="math inline">\(2E\)</span> people. The number of wrong bits, the <strong>Hamming distance</strong> between <span class="math inline">\(c\)</span> and <span class="math inline">\(d\)</span>, therefore satisfies <span id="eq-recon-exp"><span class="math display">\[\mathrm{dist}(c, d) = \#\{i : c_i \ne d_i\} \le 4E. \tag{17.3}\]</span></span> The bound is tight: if <span class="math inline">\(d\)</span> has at least <span class="math inline">\(\lfloor 2E\rfloor\)</span> ones and <span class="math inline">\(\lfloor 2E\rfloor\)</span> zeros, some curator with error at most <span class="math inline">\(E\)</span> makes a candidate at distance <span class="math inline">\(2\lfloor 2E\rfloor\)</span> consistent.</p>
+<p>So a curator with error <span class="math inline">\(E = o(n)\)</span> is <strong>blatantly non-private</strong> in the sense of Dinur and Nissim: the attacker recovers all but <span class="math inline">\(o(n)\)</span> of the bits.</p>
+</section>
+<section id="derivation" class="level3" data-number="17.3.3">
+<h3 data-number="17.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">17.3.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>A consistent candidate exists</strong>, because <span class="math inline">\(d\)</span> itself is one: the true answers are within <span class="math inline">\(E\)</span> of <span class="math inline">\(d\)</span>’s sums by assumption.</li>
+<li><strong>Count the ones that the candidate missed.</strong> Let <span class="math inline">\(S_0 = \{i : d_i = 1, c_i = 0\}\)</span>. On <span class="math inline">\(S_0\)</span>, <span class="math inline">\(d\)</span> sums to <span class="math inline">\(|S_0|\)</span> and <span class="math inline">\(c\)</span> sums to 0. Both sums are within <span class="math inline">\(E\)</span> of the one answer <span class="math inline">\(a_{S_0}\)</span>, so by the triangle inequality they are within <span class="math inline">\(2E\)</span> of each other: <span class="math inline">\(|S_0| = |S_0| - 0 \le 2E\)</span>.</li>
+<li><strong>Count the zeros that the candidate invented.</strong> Let <span class="math inline">\(S_1 = \{i : d_i = 0, c_i = 1\}\)</span>. Now <span class="math inline">\(c\)</span> sums to <span class="math inline">\(|S_1|\)</span> and <span class="math inline">\(d\)</span> to 0 on <span class="math inline">\(S_1\)</span>, and the same argument gives <span class="math inline">\(|S_1| \le 2E\)</span>.</li>
+<li><strong>Add.</strong> Every disagreement is in <span class="math inline">\(S_0\)</span> or in <span class="math inline">\(S_1\)</span>, so <span class="math inline">\(\mathrm{dist}(c, d) = |S_0| + |S_1| \le 4E\)</span>.</li>
+</ol>
+<p><strong>Tightness.</strong> To show a curator can really be this misleading, build a bad candidate and a curator that covers for it. Let <span class="math inline">\(k = \lfloor 2E\rfloor\)</span> and let <span class="math inline">\(c\)</span> flip <span class="math inline">\(k\)</span> of the ones of <span class="math inline">\(d\)</span> to 0 and <span class="math inline">\(k\)</span> of the zeros to 1, so <span class="math inline">\(c\)</span> is at distance <span class="math inline">\(2k\)</span>. For any <span class="math inline">\(S\)</span>, <span class="math inline">\(\sum_S(c_i - d_i)\)</span> is the number of flipped zeros in <span class="math inline">\(S\)</span> minus the number of flipped ones in <span class="math inline">\(S\)</span>, so it lies in <span class="math inline">\([-k, k]\)</span>: the two databases’ sums are never more than <span class="math inline">\(k\)</span> apart. A curator that answers the midpoint <span class="math inline">\(a_S = \frac12\big(\sum_Sc_i + \sum_Sd_i\big)\)</span> is then within <span class="math inline">\(k/2 \le E\)</span> of both, so its error is at most <span class="math inline">\(E\)</span> and <span class="math inline">\(c\)</span> is consistent.</p>
+</section>
+<section id="interpretation" class="level3" data-number="17.3.4">
+<h3 data-number="17.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">17.3.4</span> Interpretation</h3>
+<p>The proof uses only two queries, <span class="math inline">\(S_0\)</span> and <span class="math inline">\(S_1\)</span>: the people the candidate got wrong in each direction. Small, well-aimed subsets do all the work. But the attacker does not know which people it got wrong, so it does not know these two subsets in advance, and that is why it needs all <span class="math inline">\(2^n\)</span> answers.</p>
+<p>This is not an efficient attack. The attacker checks <span class="math inline">\(2^n\)</span> candidates against <span class="math inline">\(2^n\)</span> answers. The next section replaces “all subsets” by a few times <span class="math inline">\(n\)</span> random ones and “check every candidate” by a linear program. The price is that a random subset cannot aim at the wrong bits the way <span class="math inline">\(S_0\)</span> and <span class="math inline">\(S_1\)</span> do, so the error must be <span class="math inline">\(o(\sqrt n)\)</span> instead of <span class="math inline">\(o(n)\)</span>.</p>
+<p>The bound is a worst case over curators. It holds for every curator, including one that picks its errors to fool this attacker. A specific curator can be much weaker than the bound suggests. One that rounds every answer to a multiple of 4 has error at most 2, but its rounding is a known function of the true sum, and an attacker who simulates the rounding on each candidate recovers <span class="math inline">\(d\)</span> exactly (<a href="../../book-exercises/part02-attacks/09-reconstruction.html#sec-sol-reconstruction-1">Exercise 1</a>).</p>
+</section>
+<section id="example-ten-people-all-1024-subsets" class="level3" data-number="17.3.5">
+<h3 data-number="17.3.5" class="anchored" data-anchor-id="example-ten-people-all-1024-subsets"><span class="header-section-number">17.3.5</span> Example: ten people, all 1024 subsets</h3>
+<p>The script draws <span class="math inline">\(d = (1, 1, 1, 0, 0, 0, 0, 0, 0, 1)\)</span>, with four ones, and checks all <span class="math inline">\(2^{10}\)</span> candidates against all <span class="math inline">\(2^{10}\)</span> subsets. It needs a test for whether a candidate <span class="math inline">\(c\)</span> can be made consistent by <em>some</em> curator with error at most <span class="math inline">\(E\)</span>. The tightness argument gives it: if every subset sum of <span class="math inline">\(c - d\)</span> is at most <span class="math inline">\(2E\)</span> in absolute value, the midpoint curator has error at most <span class="math inline">\(E\)</span> and keeps <span class="math inline">\(c\)</span>; if some subset sum of <span class="math inline">\(c - d\)</span> exceeds <span class="math inline">\(2E\)</span>, no single answer can be within <span class="math inline">\(E\)</span> of both <span class="math inline">\(c\)</span>’s sum and <span class="math inline">\(d\)</span>’s, so no curator keeps <span class="math inline">\(c\)</span>. The script counts the candidates that pass the test (<a href="#tbl-recon-exp" class="quarto-xref">Table&nbsp;<span>17.3</span></a>).</p>
+<div id="tbl-recon-exp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-exp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.3: The exponential attack on <span class="math inline">\(n = 10\)</span> bits. Every surviving candidate is within <span class="math inline">\(4E\)</span> of <span class="math inline">\(d\)</span>, and the bound is attained.
+</figcaption>
+<div aria-describedby="tbl-recon-exp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Error <span class="math inline">\(E\)</span></th>
+<th>0</th>
+<th>0.5</th>
+<th>1</th>
+<th>1.5</th>
+<th>2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Candidates that survive</td>
+<td>1</td>
+<td>35</td>
+<td>242</td>
+<td>630</td>
+<td>912</td>
+</tr>
+<tr class="even">
+<td>Largest distance to <span class="math inline">\(d\)</span></td>
+<td>0</td>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<td>Bound <span class="math inline">\(4E\)</span></td>
+<td>0</td>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The bound is attained at every <span class="math inline">\(E\)</span>, as the tightness argument predicts: that argument needs <span class="math inline">\(\lfloor 2E\rfloor\)</span> ones and <span class="math inline">\(\lfloor 2E\rfloor\)</span> zeros to flip, at most 4 of each here, and <span class="math inline">\(d\)</span> has four ones and six zeros. At <span class="math inline">\(E = 2\)</span>, 912 of the 1024 candidates survive, so the attacker learns little: the bound <span class="math inline">\(4E = 8\)</span> is close to <span class="math inline">\(n = 10\)</span>, and a guarantee of at most 8 wrong bits out of 10 says almost nothing. <a href="#fig-recon-exponential" class="quarto-xref">Figure&nbsp;<span>17.1</span></a> draws both rows over a finer grid of <span class="math inline">\(E\)</span>, for another random database of ten bits, so its counts can differ from those of <a href="#tbl-recon-exp" class="quarto-xref">Table&nbsp;<span>17.3</span></a>.</p>
+<div id="fig-recon-exponential" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_exponential.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.1: The exponential attack on ten bits. Left: the largest Hamming distance between the true database and a candidate that some curator with error <span class="math inline">\(E\)</span> can make consistent with all 1024 subset sums, against the bound <span class="math inline">\(4E\)</span>. Right: the number of surviving candidates (log scale); at <span class="math inline">\(E = 0\)</span> only <span class="math inline">\(d\)</span> survives.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself" class="level3" data-number="17.3.6">
+<h3 data-number="17.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">17.3.6</span> Check yourself</h3>
+<ul>
+<li>Why does the derivation not need the curator’s errors to be random? <em>(It only uses <span class="math inline">\(|e_S| \le E\)</span> for the two subsets <span class="math inline">\(S_0\)</span> and <span class="math inline">\(S_1\)</span>. The errors can be chosen by an adversarial curator, even after seeing the attacker’s candidate.)</em></li>
+<li>With <span class="math inline">\(n = 10^6\)</span> people and every subset sum answered with error at most 1000, how many bits can the attacker get wrong? <em>(At most <span class="math inline">\(4E = 4000\)</span>, or 0.4% of the bits, although each answer has error up to 1000.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-recon-lp" class="level2" data-number="17.4">
+<h2 data-number="17.4" class="anchored" data-anchor-id="sec-recon-lp"><span class="header-section-number">17.4</span> The linear-programming decoder</h2>
+<section id="context-1" class="level3" data-number="17.4.1">
+<h3 data-number="17.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">17.4.1</span> Context</h3>
+<p>Asking <span class="math inline">\(2^n\)</span> questions is not realistic. Dinur and Nissim showed that a number of <em>random</em> subsets only a polylogarithmic factor above <span class="math inline">\(n\)</span> suffices, with an efficient decoder: their proof asks <span class="math inline">\(n(\log n)^2\)</span> of them, and the version proved below needs <span class="math inline">\(O(n\log n)\)</span>. Instead of checking every bit vector, the decoder lets each unknown be any number between 0 and 1, finds a fractional vector consistent with the answers by linear programming (LP), and rounds it. A linear program finds a point that satisfies a list of linear inequalities, and it can be solved in time polynomial in the number of unknowns and inequalities.</p>
+<p>The price is that the error must now be <span class="math inline">\(o(\sqrt n)\)</span> instead of <span class="math inline">\(o(n)\)</span>, and the reason is that a random query cannot aim at the wrong coordinates. Suppose a candidate differs from <span class="math inline">\(d\)</span> by a vector with <span class="math inline">\(k\)</span> entries of constant size. A random subset picks up each of those entries with probability <span class="math inline">\(\frac12\)</span>, so its sum of the difference behaves like a sum of <span class="math inline">\(k\)</span> coin-flip terms, which fluctuates by about <span class="math inline">\(\sqrt k\)</span>, not <span class="math inline">\(k\)</span>. An error below <span class="math inline">\(\sqrt k\)</span> cannot hide that fluctuation. The key step is to show that the sum does fluctuate this much with constant probability, whatever the signs of the entries, and that is where the anti-concentration of Fact 3 comes in.</p>
+</section>
+<section id="statement-1" class="level3" data-number="17.4.2">
+<h3 data-number="17.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">17.4.2</span> Statement</h3>
+<p>Let the <span class="math inline">\(m\)</span> queries be independent uniformly random subsets (each person included with probability <span class="math inline">\(\frac12\)</span>). The true <span class="math inline">\(d\)</span> satisfies every answer to within <span class="math inline">\(E\)</span>, so the set of vectors that do so is not empty. The <strong>linear-programming decoder</strong> searches that set, after relaxing each bit to the interval <span class="math inline">\([0, 1]\)</span> so that the search becomes a linear program. It solves the feasibility problem <span id="eq-auto-09reconstruction-2"><span class="math display">\[\text{find } c \in [0, 1]^n \text{ with } \big|\langle q_j, c\rangle - a_j\big| \le E \text{ for } j = 1, \dots, m, \tag{17.4}\]</span></span> which is a linear program: each absolute value is two linear inequalities, which makes <span class="math inline">\(2m\)</span> of them, and each <span class="math inline">\(0 \le c_i \le 1\)</span> is a box constraint, one per person. The decoder then rounds each <span class="math inline">\(c_i\)</span> to the nearest bit.</p>
+<p>The analysis rests on one lemma about a single random query. Think of <span class="math inline">\(z\)</span> as the difference between a bad candidate and <span class="math inline">\(d\)</span>. If <span class="math inline">\(z\)</span> has many coordinates of at least a constant size (here <span class="math inline">\(\frac13\)</span>, the size left after a rounding step in the proof), then a random subset sum of <span class="math inline">\(z\)</span> lands far from 0 with probability at least a constant, whatever the signs of the coordinates. “Far” means on the scale <span class="math inline">\(\sqrt{\beta n}\)</span>, the square root of the number of large coordinates, as the coin-flip picture above predicts.</p>
+<p><strong>Lemma (one random query catches a bad difference).</strong> Let <span class="math inline">\(z \in \mathbb R^n\)</span> have at least <span class="math inline">\(\beta n\)</span> coordinates with <span class="math inline">\(|z_i| \ge \frac13\)</span>, and let <span class="math inline">\(q\)</span> be a uniformly random subset. Then <span id="eq-recon-anti"><span class="math display">\[\Pr\left[|\langle q, z\rangle| &gt; \frac{\sqrt{\beta n}}{12}\right] \ge \frac{3}{16}. \tag{17.5}\]</span></span></p>
+<p>The theorem turns this into a guarantee for the decoder. A bad candidate survives the linear program only if every one of the <span class="math inline">\(m\)</span> queries fails to catch it. Each query catches it with probability at least <span class="math inline">\(\frac3{16}\)</span>, so it survives all <span class="math inline">\(m\)</span> independent queries with probability at most <span class="math inline">\((13/16)^m\)</span>, which shrinks exponentially in <span class="math inline">\(m\)</span>. There are many bad candidates, but after rounding them to a grid there are only finitely many, about <span class="math inline">\((n + 1)^n\)</span>. Taking <span class="math inline">\(m\)</span> large enough that <span class="math inline">\((n + 1)^n(13/16)^m\)</span> falls below a chosen failure probability <span class="math inline">\(\eta\)</span> makes every bad candidate fail at once.</p>
+<p><strong>Theorem (Dinur–Nissim, in the form proved here).</strong> Fix <span class="math inline">\(d\)</span>, <span class="math inline">\(\beta\)</span> and a failure probability <span class="math inline">\(\eta\)</span>. If the curator’s error is at most <span class="math inline">\(E\)</span> with <span class="math inline">\(2E + \frac12 \le \sqrt{\beta n}/12\)</span>, and <span id="eq-recon-lp"><span class="math display">\[m \ge \frac{n\ln(n + 1) + \ln(1/\eta)}{\ln(16/13)}, \tag{17.6}\]</span></span> then with probability at least <span class="math inline">\(1 - \eta\)</span> over the queries, every solution of the linear program rounds to a vector with at most <span class="math inline">\(\beta n\)</span> wrong bits, whatever errors the curator chose.</p>
+<p>In words: error <span class="math inline">\(o(\sqrt n)\)</span> on <span class="math inline">\(O(n\log n)\)</span> random subset sums lets the attacker recover all but <span class="math inline">\(o(n)\)</span> bits in polynomial time.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="17.4.3">
+<h3 data-number="17.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">17.4.3</span> Derivation</h3>
+<p><strong>The lemma.</strong> The plan is to apply Paley–Zygmund (<a href="#eq-recon-pz" class="quarto-xref">Equation&nbsp;<span>17.2</span></a>) to <span class="math inline">\(W = Y^2\)</span>, where <span class="math inline">\(Y = \langle q, z\rangle\)</span> is the random subset sum. That needs the second and fourth moments of <span class="math inline">\(Y\)</span>, and Fact 2 provides them once <span class="math inline">\(Y\)</span> is written as a constant plus a random-sign sum. So write the random subset as <span class="math inline">\(q_i = (1 + s_i)/2\)</span> with independent fair signs <span class="math inline">\(s_i\)</span>.</p>
+<ol type="1">
+<li><strong>Split the sum into a constant and a random-sign part.</strong> <span class="math inline">\(Y = \langle q, z\rangle = \mu + X\)</span>, with the constant <span class="math inline">\(\mu = \frac12\sum_iz_i\)</span> and <span class="math inline">\(X = \frac12\sum_is_iz_i\)</span>, a random-sign sum with coefficients <span class="math inline">\(a_i = z_i/2\)</span>.</li>
+<li><strong>Compute the second moment.</strong> By Fact 2, <span class="math inline">\(\mathbb E X = 0\)</span>, and the variance of the random-sign part, written <span class="math inline">\(\tau^2\)</span> so that <span class="math inline">\(\tau\)</span> is its standard deviation, is <span class="math inline">\(\tau^2 := \mathbb E X^2 = \sum_ia_i^2 = \frac14\sum_iz_i^2\)</span>. Expanding <span class="math inline">\((\mu + X)^2\)</span>, the cross term <span class="math inline">\(2\mu\,\mathbb E X\)</span> vanishes, so <span class="math inline">\(\mathbb E Y^2 = \mu^2 + \tau^2\)</span>.</li>
+<li><strong>Bound the fourth moment by 3 times the squared second moment.</strong> Expand <span class="math inline">\((\mu + X)^4 = \mu^4 + 4\mu^3X + 6\mu^2X^2 + 4\mu X^3 + X^4\)</span>. The terms with <span class="math inline">\(\mathbb E X\)</span> and <span class="math inline">\(\mathbb E X^3\)</span> vanish, since odd moments of a random-sign sum are 0. Fact 2 gives <span class="math inline">\(\mathbb E X^4 \le 3(\sum_ia_i^2)^2 = \frac{3}{16}(\sum_iz_i^2)^2 = 3\tau^4\)</span>. So <span id="eq-auto-09reconstruction-3"><span class="math display">\[\mathbb E Y^4 = \mu^4 + 6\mu^2\tau^2 + \mathbb E X^4 \le \mu^4 + 6\mu^2\tau^2 + 3\tau^4 \le 3(\mu^2 + \tau^2)^2, \tag{17.7}\]</span></span> where the last step holds because <span class="math inline">\(3(\mu^2 + \tau^2)^2 = 3\mu^4 + 6\mu^2\tau^2 + 3\tau^4\)</span> is larger by <span class="math inline">\(2\mu^4 \ge 0\)</span>.</li>
+<li><strong>Apply Paley–Zygmund</strong> (<a href="#eq-recon-pz" class="quarto-xref">Equation&nbsp;<span>17.2</span></a>) with <span class="math inline">\(W = Y^2\)</span>, whose mean is <span class="math inline">\(\mu^2 + \tau^2\)</span>. Step 3 says <span class="math inline">\((\mathbb E Y^2)^2/\mathbb E Y^4 \ge \frac13\)</span>, so <span class="math inline">\(\Pr[Y^2 &gt; \theta(\mu^2 + \tau^2)] \ge (1 - \theta)^2(\mathbb E Y^2)^2/\mathbb E Y^4 \ge (1 - \theta)^2/3\)</span>.</li>
+<li><strong>Drop the mean.</strong> Since <span class="math inline">\(\mu^2 + \tau^2 \ge \tau^2\)</span>, the event <span class="math inline">\(Y^2 &gt; \theta(\mu^2 + \tau^2)\)</span> implies <span class="math inline">\(Y^2 &gt; \theta\tau^2\)</span>, that is <span class="math inline">\(|Y| &gt; \sqrt\theta\,\tau\)</span>. So <span class="math inline">\(\Pr[|Y| &gt; \sqrt\theta\,\tau] \ge (1 - \theta)^2/3\)</span>. A non-zero mean only helps: it pushes <span class="math inline">\(Y\)</span> away from 0.</li>
+<li><strong>Use the large coordinates to bound <span class="math inline">\(\tau\)</span> from below.</strong> At least <span class="math inline">\(\beta n\)</span> coordinates have <span class="math inline">\(z_i^2 \ge \frac19\)</span>, and the others contribute <span class="math inline">\(z_i^2 \ge 0\)</span>, so <span class="math inline">\(\tau^2 = \frac14\sum_iz_i^2 \ge \frac14\cdot\frac{\beta n}{9}\)</span> and <span class="math inline">\(\tau \ge \sqrt{\beta n}/6\)</span>.</li>
+<li><strong>Choose <span class="math inline">\(\theta = \frac14\)</span>.</strong> Then <span class="math inline">\(\sqrt\theta\,\tau \ge \frac12\cdot\sqrt{\beta n}/6 = \sqrt{\beta n}/12\)</span>, and the probability is at least <span class="math inline">\((3/4)^2/3 = (9/16)/3 = 3/16\)</span>. This gives <a href="#eq-recon-anti" class="quarto-xref">Equation&nbsp;<span>17.5</span></a>.</li>
+</ol>
+<p><strong>The theorem.</strong> The idea is to show that a solution with many wrong bits would give a difference vector that no random query catches, and that, with enough queries, no such vector exists.</p>
+<ol type="1">
+<li><strong>Consistent candidates differ from <span class="math inline">\(d\)</span> by little on every query.</strong> Both <span class="math inline">\(c\)</span> and <span class="math inline">\(d\)</span> are within <span class="math inline">\(E\)</span> of every answer, so by the triangle inequality <span class="math inline">\(|\langle q_j, c - d\rangle| \le 2E\)</span> for all <span class="math inline">\(j\)</span>, as in the exponential attack.</li>
+<li><strong>A wrong bit is a large coordinate.</strong> Rounding <span class="math inline">\(c_i\)</span> gives the wrong bit only if <span class="math inline">\(c_i\)</span> is on the far side of <span class="math inline">\(\frac12\)</span> from <span class="math inline">\(d_i\)</span>, that is, if <span class="math inline">\(|c_i - d_i| \ge \frac12\)</span>. So if the rounding has more than <span class="math inline">\(\beta n\)</span> wrong bits, <span class="math inline">\(z = c - d\)</span> has more than <span class="math inline">\(\beta n\)</span> coordinates of size at least <span class="math inline">\(\frac12\)</span>.</li>
+<li><strong>Move to a finite set.</strong> The linear program can return any point of the cube, and the union bound below needs a finite list of candidates. Round each <span class="math inline">\(c_i\)</span> to the nearest multiple of <span class="math inline">\(1/n\)</span>, giving <span class="math inline">\(c'\)</span>. Each coordinate moves by at most <span class="math inline">\(\frac1{2n}\)</span>, and a subset sum adds at most <span class="math inline">\(n\)</span> coordinates, so <span class="math inline">\(|\langle q, c - c'\rangle| \le n \cdot \frac{1}{2n} = \frac12\)</span> for every subset <span class="math inline">\(q\)</span>. Hence <span class="math inline">\(z' = c' - d\)</span> satisfies <span class="math inline">\(|\langle q_j, z'\rangle| \le 2E + \frac12\)</span> for all <span class="math inline">\(j\)</span>, and still has more than <span class="math inline">\(\beta n\)</span> coordinates of size at least <span class="math inline">\(\frac12 - \frac1{2n} \ge \frac13\)</span> (for <span class="math inline">\(n \ge 3\)</span>, since <span class="math inline">\(\frac12 - \frac16 = \frac13\)</span>).</li>
+<li><strong>One grid point survives all queries only with small probability.</strong> Fix one grid point <span class="math inline">\(c'\)</span> whose <span class="math inline">\(z'\)</span> has more than <span class="math inline">\(\beta n\)</span> large coordinates. By the lemma (<a href="#eq-recon-anti" class="quarto-xref">Equation&nbsp;<span>17.5</span></a>), each random query has <span class="math inline">\(|\langle q_j, z'\rangle| &gt; \sqrt{\beta n}/12\)</span> with probability at least <span class="math inline">\(\frac3{16}\)</span>, and by the assumption <span class="math inline">\(2E + \frac12 \le \sqrt{\beta n}/12\)</span> such a query violates the bound of step 3. So each query lets <span class="math inline">\(z'\)</span> pass with probability at most <span class="math inline">\(1 - \frac3{16} = \frac{13}{16}\)</span>. The queries are independent, so <span class="math inline">\(z'\)</span> passes all <span class="math inline">\(m\)</span> of them with probability at most <span class="math inline">\((13/16)^m\)</span>.</li>
+<li><strong>Union bound over the grid.</strong> The union bound (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>, Fact 2) says that the probability that at least one of several events happens is at most the sum of their probabilities. Each coordinate of a grid point takes one of the <span class="math inline">\(n + 1\)</span> values <span class="math inline">\(0, \frac1n, \dots, 1\)</span>, so there are at most <span class="math inline">\((n + 1)^n\)</span> grid points, and the probability that <em>some</em> bad grid point passes every query is at most <span class="math inline">\((n + 1)^n(13/16)^m\)</span>. Taking logarithms, this is at most <span class="math inline">\(\eta\)</span> exactly when <span class="math inline">\(n\ln(n + 1) - m\ln(16/13) \le \ln\eta\)</span>, that is, when <span class="math inline">\(m\ln(16/13) \ge n\ln(n + 1) + \ln(1/\eta)\)</span>, which is <a href="#eq-recon-lp" class="quarto-xref">Equation&nbsp;<span>17.6</span></a>.</li>
+<li><strong>Conclude.</strong> Outside that event, no bad grid point passes, so by step 3 no linear-program solution with more than <span class="math inline">\(\beta n\)</span> wrong bits exists. The event depends only on the queries, not on the curator’s errors, so the guarantee holds for every curator at once.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="17.4.4">
+<h3 data-number="17.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">17.4.4</span> Interpretation</h3>
+<p>The threshold is <span class="math inline">\(\sqrt n\)</span> because a random query cannot aim at the wrong coordinates. Its inner product with a difference vector that has <span class="math inline">\(k\)</span> coordinates of constant size fluctuates on the scale <span class="math inline">\(\sqrt k\)</span>, as step 2 of the lemma computes. An error below that scale cannot hide <span class="math inline">\(k = \beta n\)</span> wrong bits. An error of order <span class="math inline">\(\sqrt n\)</span> can, and <a href="#sec-recon-law" class="quarto-xref"><span>Section 17.6</span></a> constructs a curator that does.</p>
+<p>Among difference vectors, the balanced ones are the hard case. If the wrong coordinates of <span class="math inline">\(z\)</span> all have the same sign, <span class="math inline">\(\langle q, z\rangle\)</span> has a large mean and escapes any small band almost surely. If they cancel, the mean is near 0 and only the fluctuation helps. Step 5 of the lemma covers both cases, because it drops the mean and relies on the fluctuation alone. <a href="#fig-recon-anticoncentration" class="quarto-xref">Figure&nbsp;<span>17.2</span></a> shows the two cases.</p>
+<p>The constants are poor, but the scaling is right. The theorem asks for <span class="math inline">\(E\)</span> below about <span class="math inline">\(\sqrt{\beta n}/24\)</span>, which is what <span class="math inline">\(2E + \frac12 \le \sqrt{\beta n}/12\)</span> gives after dividing by 2, and for <span class="math inline">\(m \approx 33n\)</span> at <span class="math inline">\(n = 1000\)</span> (the example below). The union bound over <span class="math inline">\((n + 1)^n\)</span> grid points costs the <span class="math inline">\(\ln(n + 1)\)</span> factor. Sharper analyses need only <span class="math inline">\(m = O(n)\)</span> queries. Dwork, McSherry and Talwar (2007) go further with a variant of the decoder: instead of requiring every answer to be within <span class="math inline">\(E\)</span>, which a single wildly wrong answer makes impossible, it minimises the total absolute error <span class="math inline">\(\lVert Ac - a\rVert_1\)</span>, and it tolerates a constant fraction of answers with arbitrarily large error. In practice, the least-squares decoder of the next section with <span class="math inline">\(m = 4n\)</span> already works at errors of about <span class="math inline">\(0.2\sqrt n\)</span>.</p>
+<p>Random queries are not essential either. Dinur and Nissim’s queries were random to make the proof work. Real attacks use whatever queries the system answers. Cohen and Nissim (2020) ran a linear-programming reconstruction against a commercial query system that added noise to its answers, and recovered most of a secret column.</p>
+<div id="fig-recon-anticoncentration" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-anticoncentration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_anticoncentration.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-anticoncentration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.2: A random subset sum of a difference vector <span class="math inline">\(z\)</span> with <span class="math inline">\(\beta n = 100\)</span> entries of size <span class="math inline">\(\frac13\)</span> (<span class="math inline">\(n = 1000\)</span>), over 20 000 random subsets, against the band <span class="math inline">\(|\langle q, z\rangle| \le \sqrt{\beta n}/12 = 0.83\)</span> (red). Left: half the entries <span class="math inline">\(+\frac13\)</span> and half <span class="math inline">\(-\frac13\)</span>, so the sum is centred at 0, yet it still leaves the band most of the time. Right: all entries <span class="math inline">\(+\frac13\)</span>, so the sum is centred far from the band. The lemma guarantees at least <span class="math inline">\(\frac3{16} = 0.1875\)</span> in both cases.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-what-the-theorem-promises-at-n-1000" class="level3" data-number="17.4.5">
+<h3 data-number="17.4.5" class="anchored" data-anchor-id="example-what-the-theorem-promises-at-n-1000"><span class="header-section-number">17.4.5</span> Example: what the theorem promises at <span class="math inline">\(n = 1000\)</span></h3>
+<p>Take <span class="math inline">\(n = 1000\)</span> people and target <span class="math inline">\(\beta = 0.1\)</span>, so at most <span class="math inline">\(0.1 \times 1000 = 100\)</span> wrong bits. The lemma’s threshold is <span class="math inline">\(\sqrt{\beta n}/12 = \sqrt{100}/12 = 0.8333\)</span>. The script estimates the escape probability, the chance that a random subset sum lands outside the band <span class="math inline">\(\pm0.8333\)</span>, over 100 000 random subsets for the two difference vectors of <a href="#fig-recon-anticoncentration" class="quarto-xref">Figure&nbsp;<span>17.2</span></a>: 0.6161 for the balanced one and 1.0000 for the aligned one, against the guaranteed 0.1875. The lemma is far from tight for both.</p>
+<p>The theorem’s condition <span class="math inline">\(2E + \frac12 \le \sqrt{\beta n}/12\)</span> then allows an error of <span class="math inline">\(E \le \sqrt{\beta n}/24 - \frac14 = 0.4167 - 0.25 = 0.1667\)</span>. With failure probability <span class="math inline">\(\eta = 0.01\)</span>, so that <span class="math inline">\(\ln(1/\eta) = \ln 100\)</span>, <a href="#eq-recon-lp" class="quarto-xref">Equation&nbsp;<span>17.6</span></a> asks for <span id="eq-auto-09reconstruction-4"><span class="math display">\[m \ge \frac{1000\ln1001 + \ln100}{\ln(16/13)} = 33\,295.04, \tag{17.8}\]</span></span> so at least 33 296 queries, about <span class="math inline">\(33n\)</span>. Both constants are far from what the attack needs in practice, but they come with a complete proof.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="17.4.6">
+<h3 data-number="17.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">17.4.6</span> Check yourself</h3>
+<ul>
+<li>Why does the derivation round the linear program’s solution to a grid before using the union bound? <em>(The solution can be any point in the cube, an infinite set. The union bound needs a finite list of candidates; the grid of step <span class="math inline">\(1/n\)</span> has <span class="math inline">\((n + 1)^n\)</span> points and moves every answer by at most <span class="math inline">\(\frac12\)</span>.)</em></li>
+<li>If the curator could see the queries before choosing <span class="math inline">\(d\)</span>, would the theorem still hold? <em>(The proof fixes <span class="math inline">\(d\)</span> before the queries. With <span class="math inline">\(d\)</span> chosen after the queries, add a union bound over the <span class="math inline">\(2^n\)</span> databases: the count of bad grid points grows to at most <span class="math inline">\(2^n(n + 1)^n\)</span>, which only adds <span class="math inline">\(n\ln2\)</span> to the numerator of <a href="#eq-recon-lp" class="quarto-xref">Equation&nbsp;<span>17.6</span></a>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-recon-ls" class="level2" data-number="17.5">
+<h2 data-number="17.5" class="anchored" data-anchor-id="sec-recon-ls"><span class="header-section-number">17.5</span> Least squares under worst-case and random error</h2>
+<section id="context-2" class="level3" data-number="17.5.1">
+<h3 data-number="17.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">17.5.1</span> Context</h3>
+<p>The linear program needs a solver and a value of <span class="math inline">\(E\)</span>. A simpler decoder needs neither. <strong>Least squares</strong> picks the vector whose answers come closest to the published ones, measured by the sum of squared differences, <span class="math inline">\(\hat x = \arg\min_x\|Ax - a\|^2\)</span>. Setting the gradient <span class="math inline">\(2A^\top(Ax - a)\)</span> to zero gives the closed form <span class="math inline">\(\hat x = (A^\top A)^{-1}A^\top a\)</span>. The decoder clips each coordinate to <span class="math inline">\([0, 1]\)</span> and rounds it. Because <span class="math inline">\(\hat x\)</span> is a linear function of the answers, its error is a linear function of the curator’s error, so you can analyse it exactly in two cases: errors chosen by an adversary, and independent random noise.</p>
+</section>
+<section id="statement-2" class="level3" data-number="17.5.2">
+<h3 data-number="17.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">17.5.2</span> Statement</h3>
+<p>How much least squares amplifies the curator’s error depends on how much <span class="math inline">\(A\)</span> can shrink a vector. The <strong>smallest singular value</strong> <span class="math inline">\(s_{\min}(A)\)</span> is the smallest length <span class="math inline">\(\|Ax\|\)</span> over unit vectors <span class="math inline">\(x\)</span>: the factor by which <span class="math inline">\(A\)</span> shrinks the direction it shrinks most. Assume <span class="math inline">\(m \ge n\)</span> and that <span class="math inline">\(A\)</span> has full column rank, so that <span class="math inline">\(s_{\min}(A) &gt; 0\)</span>.</p>
+<p><strong>Worst-case error.</strong> The decoder’s error vector has length at most <span class="math inline">\(\|e\|/s_{\min}(A)\)</span>, because undoing <span class="math inline">\(A\)</span> can stretch a vector by at most <span class="math inline">\(1/s_{\min}\)</span>. Each wrong bit is off by at least <span class="math inline">\(\frac12\)</span>, so it uses up at least <span class="math inline">\(\frac14\)</span> of the squared length. If <span class="math inline">\(|e_j| \le E\)</span> for every <span class="math inline">\(j\)</span>, so that <span class="math inline">\(\|e\|^2 \le mE^2\)</span>, the least-squares decoder therefore gets at most <span id="eq-recon-ls-worst"><span class="math display">\[\frac{4\|e\|^2}{s_{\min}(A)^2} \le \frac{4mE^2}{s_{\min}(A)^2} \tag{17.9}\]</span></span> bits wrong. For random subsets, <span class="math inline">\(s_{\min}(A) \approx \frac12(\sqrt m - \sqrt n)\)</span>, so <span class="math inline">\(s_{\min}^2 \approx \frac m4(1 - \sqrt{n/m})^2\)</span> and the bound becomes <span class="math inline">\(16E^2/(1 - \sqrt{n/m})^2\)</span>; at <span class="math inline">\(m = 4n\)</span>, <span class="math inline">\(1 - \sqrt{1/4} = \frac12\)</span> and it is <span class="math inline">\(64E^2\)</span>. So error <span class="math inline">\(E = o(\sqrt n)\)</span> gives <span class="math inline">\(o(n)\)</span> wrong bits with only <span class="math inline">\(m = 4n\)</span> queries.</p>
+<p><strong>Random error.</strong> Now let the curator’s errors be independent <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span>, normal with mean 0 and standard deviation <span class="math inline">\(\sigma\)</span>. Each coordinate of the decoder’s error is then also normal, and, as the derivation shows, its variance is about <span class="math inline">\(\frac{4\sigma^2}{m - n}\)</span>: the noise <span class="math inline">\(\sigma^2\)</span> divided by roughly the number of equations beyond the <span class="math inline">\(n\)</span> needed to determine <span class="math inline">\(d\)</span>, times 4 because a random query includes each person only half the time. A bit is recovered when its error does not push it across <span class="math inline">\(\frac12\)</span>. Write <span class="math inline">\(\Phi\)</span> for the standard normal cumulative distribution function, so <span class="math inline">\(\Phi(t)\)</span> is the probability that a standard normal variable is below <span class="math inline">\(t\)</span>. Each coordinate of <span class="math inline">\(\hat x - d\)</span> is approximately <span class="math inline">\(\mathcal N\big(0, \frac{4\sigma^2}{m - n}\big)\)</span>, and the expected fraction of bits recovered is approximately <span id="eq-recon-ls-random"><span class="math display">\[\Phi\left(\frac{\sqrt{m - n}}{4\sigma}\right). \tag{17.10}\]</span></span> The argument of <span class="math inline">\(\Phi\)</span> is the distance <span class="math inline">\(\frac12\)</span> to the wrong side, measured in standard deviations <span class="math inline">\(2\sigma/\sqrt{m - n}\)</span>.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="17.5.3">
+<h3 data-number="17.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">17.5.3</span> Derivation</h3>
+<p><strong>Worst case.</strong></p>
+<ol type="1">
+<li><strong>The decoder’s error is linear in the curator’s.</strong> Substituting <span class="math inline">\(a = Ad + e\)</span>, <span class="math inline">\(\hat x = (A^\top A)^{-1}A^\top(Ad + e) = d + A^+e\)</span>, with <span class="math inline">\(A^+ = (A^\top A)^{-1}A^\top\)</span> the pseudo-inverse. The <span class="math inline">\(d\)</span> comes back exactly, because <span class="math inline">\((A^\top A)^{-1}A^\top A = I\)</span>.</li>
+<li><strong>Bound its size.</strong> Write <span class="math inline">\(A\)</span> in its singular value decomposition, <span class="math inline">\(A = U\,\mathrm{diag}(s_1, \dots, s_n)\,V^\top\)</span> with <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> having orthonormal columns. Then <span class="math inline">\(A^+ = V\,\mathrm{diag}(1/s_1, \dots, 1/s_n)\,U^\top\)</span>, whose largest singular value is <span class="math inline">\(1/s_{\min}(A)\)</span>. So <span class="math inline">\(\|\hat x - d\| = \|A^+e\| \le \|e\|/s_{\min}(A)\)</span>.</li>
+<li><strong>Clipping only helps.</strong> Each <span class="math inline">\(d_i\)</span> is in <span class="math inline">\([0, 1]\)</span>, and moving <span class="math inline">\(\hat x_i\)</span> to the nearest point of <span class="math inline">\([0, 1]\)</span> cannot move it away from <span class="math inline">\(d_i\)</span>.</li>
+<li><strong>Count the wrong bits.</strong> A wrong bit has <span class="math inline">\(|\hat x_i - d_i| \ge \frac12\)</span>, so it contributes at least <span class="math inline">\(\frac14\)</span> to <span class="math inline">\(\|\hat x - d\|^2\)</span>. Hence the number of wrong bits is at most <span class="math inline">\(4\|\hat x - d\|^2 \le 4\|e\|^2/s_{\min}^2\)</span>, and <span class="math inline">\(\|e\|^2 \le mE^2\)</span> because each of the <span class="math inline">\(m\)</span> errors is at most <span class="math inline">\(E\)</span> in size. This is <a href="#eq-recon-ls-worst" class="quarto-xref">Equation&nbsp;<span>17.9</span></a>.</li>
+<li><strong>Estimate the singular value.</strong> For a random matrix with <span class="math inline">\(m\)</span> independent rows, <span class="math inline">\(s_{\min}\)</span> concentrates near <span class="math inline">\(\sqrt m - \sqrt n\)</span> times the scale of the rows (Vershynin, <em>High-Dimensional Probability</em>, ch.&nbsp;4, for the general statement). Here the rows are <span class="math inline">\(\frac12(\mathbf 1 + s)\)</span> with a random-sign vector <span class="math inline">\(s\)</span>. The all-ones part sends every vector orthogonal to <span class="math inline">\(\mathbf 1\)</span> to 0, so on those directions <span class="math inline">\(A\)</span> acts as <span class="math inline">\(\frac12\)</span> times a random-sign matrix, which gives the approximation <span class="math inline">\(\frac12(\sqrt m - \sqrt n)\)</span>. The script checks it: at <span class="math inline">\(n = 500\)</span>, <span class="math inline">\(m = 2000\)</span>, <span class="math inline">\(s_{\min} = 11.43\)</span> against <span class="math inline">\(\frac12(\sqrt{2000} - \sqrt{500}) = \frac12(44.72 - 22.36) = 11.18\)</span>. Substituting gives <span class="math inline">\(4mE^2/\big(\frac14(\sqrt m - \sqrt n)^2\big) = 16E^2/(1 - \sqrt{n/m})^2\)</span>.</li>
+</ol>
+<p><strong>Random noise.</strong> The plan is to find the variance of each coordinate of <span class="math inline">\(\hat x - d\)</span>, then ask how often that normal error crosses <span class="math inline">\(\frac12\)</span>.</p>
+<ol type="1">
+<li><strong>The error is Gaussian.</strong> <span class="math inline">\(\hat x - d = A^+e\)</span> is a linear map of a Gaussian vector, so given <span class="math inline">\(A\)</span> it is Gaussian. A linear map <span class="math inline">\(M\)</span> turns covariance <span class="math inline">\(\sigma^2I\)</span> into <span class="math inline">\(\sigma^2MM^\top\)</span>, so its covariance is <span class="math inline">\(\sigma^2A^+(A^+)^\top = \sigma^2(A^\top A)^{-1}A^\top A(A^\top A)^{-1} = \sigma^2(A^\top A)^{-1}\)</span>.</li>
+<li><strong>Compute the average Gram matrix.</strong> <span class="math inline">\(A^\top A = \sum_jq_jq_j^\top\)</span> is a sum over the <span class="math inline">\(m\)</span> queries. For a random subset <span class="math inline">\(q\)</span>, <span class="math inline">\(q_i^2 = q_i\)</span> because <span class="math inline">\(q_i\)</span> is 0 or 1, so <span class="math inline">\(\mathbb E q_i^2 = \frac12\)</span>; and for <span class="math inline">\(i \ne k\)</span> the two memberships are independent, so <span class="math inline">\(\mathbb E q_iq_k = \frac14\)</span>. Hence <span class="math inline">\(\mathbb E[qq^\top] = \frac14(I + \mathbf 1\mathbf 1^\top)\)</span> and <span class="math inline">\(\mathbb E[A^\top A] = \frac m4(I + \mathbf 1\mathbf 1^\top)\)</span>.</li>
+<li><strong>Invert it.</strong> <span class="math inline">\((I + \mathbf 1\mathbf 1^\top)^{-1} = I - \frac{1}{n + 1}\mathbf 1\mathbf 1^\top\)</span>. To check, multiply out and use <span class="math inline">\(\mathbf 1^\top\mathbf 1 = n\)</span>: the product is <span class="math inline">\(I + \mathbf 1\mathbf 1^\top - \frac{1}{n + 1}\mathbf 1\mathbf 1^\top - \frac{n}{n + 1}\mathbf 1\mathbf 1^\top = I\)</span> (<a href="../../book-exercises/part02-attacks/09-reconstruction.html#sec-sol-reconstruction-4">Exercise 4</a>). Its diagonal is <span class="math inline">\(1 - \frac1{n + 1} = \frac{n}{n + 1} \approx 1\)</span>, so replacing <span class="math inline">\(A^\top A\)</span> by its mean gives a per-coordinate variance of about <span class="math inline">\(\sigma^2 \cdot \frac4m = 4\sigma^2/m\)</span>.</li>
+<li><strong>Correct for finite <span class="math inline">\(m\)</span>.</strong> <span class="math inline">\(A^\top A\)</span> fluctuates around its mean, and the inverse of a fluctuating matrix is on average larger than the inverse of its mean, just as <span class="math inline">\(\mathbb E[1/Z] \ge 1/\mathbb E Z\)</span> for a positive number <span class="math inline">\(Z\)</span>. For Gaussian rows the exact mean is known. A sum of outer products of <span class="math inline">\(m\)</span> independent Gaussian rows with covariance <span class="math inline">\(\Sigma\)</span> is called a Wishart matrix, and if <span class="math inline">\(A^\top A\)</span> is Wishart with <span class="math inline">\(m\)</span> rows and scale <span class="math inline">\(\Sigma\)</span>, then <span class="math inline">\(\mathbb E[(A^\top A)^{-1}] = \Sigma^{-1}/(m - n - 1)\)</span> (the inverse-Wishart mean; Muirhead 1982, ch.&nbsp;3). Using it with <span class="math inline">\(\Sigma = \mathbb E[qq^\top]\)</span> replaces <span class="math inline">\(m\)</span> by <span class="math inline">\(m - n - 1\)</span>: the variance is <span class="math inline">\(4\sigma^2\frac{n}{n + 1}\cdot\frac{1}{m - n - 1} \approx \frac{4\sigma^2}{m - n}\)</span>. The rows here are 0/1, not Gaussian, so this is an approximation; the simulations below check it.</li>
+<li><strong>Find when a bit goes wrong.</strong> A 0 rounds to 1 when its error exceeds <span class="math inline">\(+\frac12\)</span>; a 1 rounds to 0 when its error is below <span class="math inline">\(-\frac12\)</span>. Either way only one tail counts. The error has standard deviation <span class="math inline">\(\frac{2\sigma}{\sqrt{m - n}}\)</span>, so the probability is <span class="math inline">\(\Phi\big(-\frac12\big/\frac{2\sigma}{\sqrt{m - n}}\big) = \Phi\big(-\frac{\sqrt{m - n}}{4\sigma}\big)\)</span>. The fraction recovered is one minus that, which by the symmetry <span class="math inline">\(1 - \Phi(-t) = \Phi(t)\)</span> of the normal curve is <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-2" class="level3" data-number="17.5.4">
+<h3 data-number="17.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">17.5.4</span> Interpretation</h3>
+<p>At a fixed ratio of queries to people, only <span class="math inline">\(\sigma/\sqrt n\)</span> matters. With <span class="math inline">\(m = \kappa n\)</span>, <span class="math inline">\(\sqrt{m - n} = \sqrt{\kappa - 1}\sqrt n\)</span>, so <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a> is <span class="math inline">\(\Phi\big(\sqrt{\kappa - 1}/(4\sigma/\sqrt n)\big)\)</span>. Plotted against <span class="math inline">\(\sigma/\sqrt n\)</span>, the curves for <span class="math inline">\(n = 100\)</span>, 300 and 900 fall on top of each other (<a href="#fig-recon-ls-noise" class="quarto-xref">Figure&nbsp;<span>17.3</span></a>). The scale of the threat is <span class="math inline">\(\sqrt n\)</span>, as in the theorem.</p>
+<p>Noise of order <span class="math inline">\(\sqrt n\)</span> is not automatically safe. At <span class="math inline">\(\sigma = 0.25\sqrt n\)</span> and <span class="math inline">\(m = 4n\)</span>, the argument of <span class="math inline">\(\Phi\)</span> is <span class="math inline">\(\sqrt 3/(4 \times 0.25) = \sqrt3 \approx 1.73\)</span>, and least squares recovers about 96% of the bits. Recovery degrades smoothly as <span class="math inline">\(\sigma/\sqrt n\)</span> grows; it does not switch off at a threshold.</p>
+<p>More queries average independent noise away. At a fixed <span class="math inline">\(\sigma\)</span>, <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a> tends to 1 as <span class="math inline">\(m\)</span> grows, because <span class="math inline">\(m - n\)</span> independent noisy equations average to an error of order <span class="math inline">\(\sigma/\sqrt{m - n}\)</span> per coordinate. To keep the attack at a fixed accuracy, the argument <span class="math inline">\(\sqrt{m - n}/(4\sigma)\)</span> must stay fixed, so the noise must grow like <span class="math inline">\(\sqrt m\)</span> (<a href="#fig-recon-ls-queries" class="quarto-xref">Figure&nbsp;<span>17.4</span></a>). This is the second half of the Fundamental Law: a bound on the error of <em>each</em> answer is not enough when the number of answers is not bounded.</p>
+<p>Worst-case errors hurt more than random ones of the same size. A curator that chooses its errors along the decoder’s weakest direction, the right singular vector of <span class="math inline">\(s_{\min}\)</span>, which least squares amplifies the most, does much more damage than Gaussian noise with the same scale, whose errors point in all directions equally. The bound <a href="#eq-recon-ls-worst" class="quarto-xref">Equation&nbsp;<span>17.9</span></a> is loose by more than a factor of 10 in the example below, but it is the only statement that holds for every curator.</p>
+<div id="fig-recon-ls-noise" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-ls-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_ls_noise.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-ls-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.3: Fraction of bits recovered by least squares from <span class="math inline">\(m = 4n\)</span> noisy random subset sums, against the noise scale in units of <span class="math inline">\(\sqrt n\)</span>, for three database sizes. The black curve is <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a>. The curves for different <span class="math inline">\(n\)</span> coincide: the attack’s success depends on <span class="math inline">\(\sigma/\sqrt n\)</span> only.
+</figcaption>
+</figure>
+</div>
+<div id="fig-recon-ls-queries" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-ls-queries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_ls_queries.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-ls-queries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.4: Fraction of bits recovered by least squares at <span class="math inline">\(n = 200\)</span> as the number of queries grows, for three noise levels. Lines are <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a>; dots are simulations. Near <span class="math inline">\(m = n\)</span> the system is barely determined and the noise is amplified; beyond that, more queries average the noise away, and even at <span class="math inline">\(\sigma = 2\sqrt n\)</span> the attack recovers most bits with <span class="math inline">\(64n = 12\,800\)</span> queries.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-n-500-people-m-2000-queries" class="level3" data-number="17.5.5">
+<h3 data-number="17.5.5" class="anchored" data-anchor-id="example-n-500-people-m-2000-queries"><span class="header-section-number">17.5.5</span> Example: <span class="math inline">\(n = 500\)</span> people, <span class="math inline">\(m = 2000\)</span> queries</h3>
+<p>The script averages over four random databases and query matrices (<a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.4</span></a>). Here <span class="math inline">\(\sqrt n = \sqrt{500} = 22.36\)</span>, which gives the second row.</p>
+<div id="tbl-recon-ls" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-ls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.4: Least-squares reconstruction of <span class="math inline">\(n = 500\)</span> bits from <span class="math inline">\(m = 2000\)</span> random subset sums with Gaussian noise.
+</figcaption>
+<div aria-describedby="tbl-recon-ls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\sigma/\sqrt n\)</span></th>
+<th>0.1</th>
+<th>0.25</th>
+<th>0.5</th>
+<th>1</th>
+<th>2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span></td>
+<td>2.24</td>
+<td>5.59</td>
+<td>11.18</td>
+<td>22.36</td>
+<td>44.72</td>
+</tr>
+<tr class="even">
+<td>Recovered, simulated</td>
+<td>1.0000</td>
+<td>0.9655</td>
+<td>0.8130</td>
+<td>0.6550</td>
+<td>0.5875</td>
+</tr>
+<tr class="odd">
+<td>Recovered, <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a></td>
+<td>1.0000</td>
+<td>0.9585</td>
+<td>0.8069</td>
+<td>0.6676</td>
+<td>0.5858</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The prediction is within 0.013 of every simulated value. By hand at <span class="math inline">\(\sigma = 0.5\sqrt n\)</span>: <span class="math inline">\(\sqrt{m - n}/(4\sigma) = \sqrt{1500}/44.72 = 0.866\)</span>, and <span class="math inline">\(\Phi(0.866) = 0.807\)</span>.</p>
+<p>For worst-case errors, the script measures <span class="math inline">\(s_{\min}(A) = 11.43\)</span> and runs a curator that adds <span class="math inline">\(E\cdot\mathrm{sign}(Av)\)</span>, with <span class="math inline">\(v\)</span> the weakest right singular vector. That curator pushes every answer by the full <span class="math inline">\(E\)</span> in the direction that least squares turns into the largest error along <span class="math inline">\(v\)</span>. At <span class="math inline">\(E = 1\)</span>, the bound <a href="#eq-recon-ls-worst" class="quarto-xref">Equation&nbsp;<span>17.9</span></a> allows <span class="math inline">\(4 \times 2000 \times 1/11.43^2 = 61.2\)</span> wrong bits, and this curator causes 0. At <span class="math inline">\(E = 2\)</span>, the bound is four times larger, 245.0, and this curator causes 20. At <span class="math inline">\(E = 0.25\sqrt n = 5.59\)</span>, the bound (1914.0) exceeds <span class="math inline">\(n\)</span> and says nothing, while this curator causes 143 wrong bits, against about 17 for Gaussian noise with <span class="math inline">\(\sigma = 5.59\)</span> (1 − 0.9655 of 500).</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="17.5.6">
+<h3 data-number="17.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">17.5.6</span> Check yourself</h3>
+<ul>
+<li>At <span class="math inline">\(m = n\)</span> with exact answers, least squares recovers <span class="math inline">\(d\)</span> exactly. Why does the prediction <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a> fail there with noise? <em>(At <span class="math inline">\(m = n\)</span> the system is square and <span class="math inline">\(s_{\min}\)</span> is close to 0, so tiny errors are amplified enormously. The factor <span class="math inline">\(1/(m - n - 1)\)</span> in the variance blows up; <a href="#fig-recon-ls-queries" class="quarto-xref">Figure&nbsp;<span>17.4</span></a> shows recovery near <span class="math inline">\(\frac12\)</span> there.)</em></li>
+<li>A curator adds independent noise with <span class="math inline">\(\sigma = 2\sqrt n\)</span> to every answer and lets anyone ask as many questions as they want. How many queries per person does least squares need to recover 90% of the bits? <em>(Solve <span class="math inline">\(\Phi(\sqrt{m - n}/(4\sigma)) = 0.9\)</span>. The standard normal is below 1.2816 with probability 0.9, so <span class="math inline">\(\sqrt{m - n}/(4\sigma) = 1.2816\)</span>; dividing through by <span class="math inline">\(\sqrt n\)</span> gives <span class="math inline">\(\sqrt{m/n - 1} = 4 \times 2 \times 1.2816\)</span>, so <span class="math inline">\(m/n = 106.1\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-recon-law" class="level2" data-number="17.6">
+<h2 data-number="17.6" class="anchored" data-anchor-id="sec-recon-law"><span class="header-section-number">17.6</span> The Fundamental Law of Information Recovery</h2>
+<section id="context-3" class="level3" data-number="17.6.1">
+<h3 data-number="17.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">17.6.1</span> Context</h3>
+<p>The attacks so far say when answers are too accurate. Two questions remain. Is error of order <span class="math inline">\(\sqrt n\)</span> really enough to stop reconstruction, or is it just where the proofs stop? And how many queries does <em>any</em> attack need? This section answers both, with one construction and one counting argument, and collects the results in the form Dwork and Roth call the Fundamental Law of Information Recovery: overly accurate answers to too many questions destroy privacy, and they do so spectacularly.</p>
+</section>
+<section id="statement-3" class="level3" data-number="17.6.2">
+<h3 data-number="17.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">17.6.2</span> Statement</h3>
+<p><a href="#tbl-recon-law" class="quarto-xref">Table&nbsp;<span>17.5</span></a> collects the regimes. The first three rows are the attacks of the previous sections; the last two are the converses proved in this section.</p>
+<div id="tbl-recon-law" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-law-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.5: The regimes of reconstruction from subset sums. The first three rows are attacks; the last two are limits on attacks.
+</figcaption>
+<div aria-describedby="tbl-recon-law-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Queries</th>
+<th>Error per answer</th>
+<th>Outcome</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>All <span class="math inline">\(2^n\)</span> subsets</td>
+<td>at most <span class="math inline">\(E\)</span></td>
+<td>at most <span class="math inline">\(4E\)</span> wrong bits; <span class="math inline">\(E = o(n)\)</span> is blatantly non-private</td>
+<td><a href="#eq-recon-exp" class="quarto-xref">Equation&nbsp;<span>17.3</span></a></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(O(n\log n)\)</span> random subsets</td>
+<td>at most <span class="math inline">\(E\)</span>, <span class="math inline">\(E = o(\sqrt n)\)</span></td>
+<td><span class="math inline">\(o(n)\)</span> wrong bits, by a linear program</td>
+<td><a href="#eq-recon-lp" class="quarto-xref">Equation&nbsp;<span>17.6</span></a></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(m\)</span> random subsets</td>
+<td>independent <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span></td>
+<td>fraction recovered <span class="math inline">\(\approx \Phi(\sqrt{m - n}/(4\sigma))\)</span>, tending to 1 as <span class="math inline">\(m\)</span> grows</td>
+<td><a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(m\)</span> arbitrary</td>
+<td><span class="math inline">\(O(\sqrt{n\log m})\)</span>, sampling curator</td>
+<td>no attack recovers more than <span class="math inline">\(\frac34\)</span> of the bits</td>
+<td><a href="#eq-recon-hoeffding" class="quarto-xref">Equation&nbsp;<span>17.11</span></a></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(m\)</span>, each answer one of <span class="math inline">\(V\)</span> values</td>
+<td>any</td>
+<td>at least <span class="math inline">\(n(1 - h(\beta))/\log_2V\)</span> queries are needed for <span class="math inline">\(\beta n\)</span> wrong bits</td>
+<td><a href="#eq-recon-info" class="quarto-xref">Equation&nbsp;<span>17.12</span></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>A sampling curator.</strong> To show that error of order <span class="math inline">\(\sqrt n\)</span> can stop reconstruction, you need a curator whose errors are that small yet hide many bits completely. The idea is to answer from a random sample of the people and scale up. The curator draws a secret set <span class="math inline">\(T\)</span>, keeping each person independently with probability <span class="math inline">\(p\)</span>, and answers every query by <span class="math inline">\(a_j = \frac1p\sum_{i \in S_j \cap T}d_i\)</span>. Dividing by <span class="math inline">\(p\)</span> makes each answer correct on average, and its error is a sum of independent zero-mean terms, one per person, so it is of order <span class="math inline">\(\sqrt n\)</span>. People outside <span class="math inline">\(T\)</span> never affect any answer, so nothing reveals their bits. Then, for a failure probability <span class="math inline">\(\eta\)</span>, with probability at least <span class="math inline">\(1 - \eta\)</span> all <span class="math inline">\(m\)</span> answers have error at most <span id="eq-recon-hoeffding"><span class="math display">\[\max_j|a_j - \langle q_j, d\rangle| \le \sqrt{\frac{n\ln(2m/\eta)}{2p^2}}, \tag{17.11}\]</span></span> and if <span class="math inline">\(d\)</span> is uniform, no attacker recovers an expected fraction of more than <span class="math inline">\(p + \frac{1 - p}{2}\)</span> of the bits; at <span class="math inline">\(p = \frac12\)</span>, <span class="math inline">\(\frac12 + \frac14\)</span>, three quarters.</p>
+<p><strong>An information bound.</strong> To bound the number of queries any attack needs, count bits of information. The secret is <span class="math inline">\(n\)</span> uniform bits, so it carries <span class="math inline">\(n\)</span> bits of information. An answer that takes at most <span class="math inline">\(V\)</span> values can carry at most <span class="math inline">\(\log_2V\)</span> bits. A guess that is wrong on a fraction <span class="math inline">\(\beta\)</span> of the bits still leaves some uncertainty, measured by the <strong>binary entropy</strong> <span class="math inline">\(h(\beta) = -\beta\log_2\beta - (1 - \beta)\log_2(1 - \beta)\)</span>, the uncertainty in bits of a coin that comes up heads with probability <span class="math inline">\(\beta\)</span>. So the answers must carry at least <span class="math inline">\(n(1 - h(\beta))\)</span> bits. Precisely, let <span class="math inline">\(d\)</span> be uniform on <span class="math inline">\(\{0, 1\}^n\)</span>, and let each of the <span class="math inline">\(m\)</span> answers take at most <span class="math inline">\(V\)</span> values (for example, exact counts take <span class="math inline">\(V = n + 1\)</span> values). If an attacker’s guess <span class="math inline">\(\hat d\)</span> has an expected fraction <span class="math inline">\(\beta \le \frac12\)</span> of wrong bits, then <span id="eq-recon-info"><span class="math display">\[m \ge \frac{n\,(1 - h(\beta))}{\log_2V}, \tag{17.12}\]</span></span> where <span class="math inline">\(h\)</span> is the binary entropy function in bits.</p>
+</section>
+<section id="derivation-3" class="level3" data-number="17.6.3">
+<h3 data-number="17.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">17.6.3</span> Derivation</h3>
+<p><strong>The sampling curator’s error (Hoeffding and the union bound).</strong> The plan is to bound one answer’s error with Hoeffding’s inequality, then all <span class="math inline">\(m\)</span> answers at once with the union bound.</p>
+<ol type="1">
+<li><strong>Write the error as a sum.</strong> With <span class="math inline">\(t_i = \mathbf 1[i \in T]\)</span>, the answer is <span class="math inline">\(\sum_{i \in S_j}d_it_i/p\)</span>, so the error of query <span class="math inline">\(j\)</span> is <span class="math inline">\(\sum_{i \in S_j}d_i\big(\frac{t_i}{p} - 1\big)\)</span>. Only the <span class="math inline">\(k \le n\)</span> people with <span class="math inline">\(d_i = 1\)</span> in <span class="math inline">\(S_j\)</span> contribute. Their terms are independent, have mean <span class="math inline">\(p\cdot\frac1p - 1 = 0\)</span>, and lie in <span class="math inline">\([-1, \frac1p - 1]\)</span>, an interval of length <span class="math inline">\(\frac1p\)</span>.</li>
+<li><strong>Apply Hoeffding’s inequality to the sum.</strong> Hoeffding’s inequality (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>) says that the mean of independent bounded terms is unlikely to stray far from its expectation, with a tail that falls like a Gaussian’s. For a mean <span class="math inline">\(\bar X\)</span> of <span class="math inline">\(k\)</span> independent terms with range <span class="math inline">\(\frac1p\)</span> and expectation <span class="math inline">\(\mu\)</span>, it reads <span class="math inline">\(\Pr[\bar X - \mu \ge t] \le \exp(-2kt^2p^2)\)</span>. A sum deviates by <span class="math inline">\(u\)</span> when the mean deviates by <span class="math inline">\(u/k\)</span>, so substituting <span class="math inline">\(t = u/k\)</span> and counting both tails, <span class="math inline">\(\Pr[|\text{error}| \ge u] \le 2\exp(-2p^2u^2/k) \le 2\exp(-2p^2u^2/n)\)</span>, the last step because <span class="math inline">\(k \le n\)</span>.</li>
+<li><strong>Union bound over the <span class="math inline">\(m\)</span> queries.</strong> The probability that some answer has error at least <span class="math inline">\(u\)</span> is at most the sum over the <span class="math inline">\(m\)</span> queries: <span class="math inline">\(\Pr[\text{some error} \ge u] \le 2m\exp(-2p^2u^2/n)\)</span>. Set this equal to <span class="math inline">\(\eta\)</span> and solve: <span class="math inline">\(2p^2u^2/n = \ln(2m/\eta)\)</span>, so <span class="math inline">\(u^2 = n\ln(2m/\eta)/(2p^2)\)</span>, which is <a href="#eq-recon-hoeffding" class="quarto-xref">Equation&nbsp;<span>17.11</span></a>.</li>
+</ol>
+<p><strong>What the attacker can learn.</strong> The idea is that a person outside <span class="math inline">\(T\)</span> is invisible to every answer.</p>
+<ol type="1">
+<li><strong>The answers ignore the people outside <span class="math inline">\(T\)</span>.</strong> They are a function of <span class="math inline">\(T\)</span> and of <span class="math inline">\(d_i\)</span> for <span class="math inline">\(i \in T\)</span> only.</li>
+<li><strong>So a person outside <span class="math inline">\(T\)</span> is a fair coin to the attacker.</strong> Given <span class="math inline">\(i \notin T\)</span>, the answers are independent of <span class="math inline">\(d_i\)</span>, which is a fair bit independent of everything else. Any guess of <span class="math inline">\(d_i\)</span> is right with probability <span class="math inline">\(\frac12\)</span>.</li>
+<li><strong>Average over who is in <span class="math inline">\(T\)</span>.</strong> Each person is in <span class="math inline">\(T\)</span> with probability <span class="math inline">\(p\)</span>, and at best the attacker gets all of those right. Each person is outside with probability <span class="math inline">\(1 - p\)</span>, and then the attacker is right half the time. The expected fraction recovered is at most <span class="math inline">\(p \cdot 1 + (1 - p)\cdot\frac12 = p + \frac{1 - p}2\)</span>.</li>
+</ol>
+<p><strong>The information bound (entropy and Fano).</strong> Let <span class="math inline">\(Y = (a_1, \dots, a_m)\)</span> be the answers, with the queries fixed. The <strong>mutual information</strong> <span class="math inline">\(I(d; Y)\)</span> is the number of bits the answers reveal about <span class="math inline">\(d\)</span>: the uncertainty about <span class="math inline">\(d\)</span> before seeing <span class="math inline">\(Y\)</span> minus the uncertainty after, <span class="math inline">\(H(d) - H(d \mid Y)\)</span>, where <span class="math inline">\(H\)</span> is entropy. The plan is to bound it from above by what the answers can carry and from below by what a good guess requires.</p>
+<ol type="1">
+<li><strong>Bound what the answers can carry.</strong> <span class="math inline">\(I(d; Y) \le H(Y) \le \sum_jH(a_j) \le m\log_2V\)</span>. Mutual information is at most the entropy of the output, because it is <span class="math inline">\(H(Y)\)</span> minus the non-negative <span class="math inline">\(H(Y \mid d)\)</span>. The entropy of a tuple is at most the sum of the entropies, with equality only when the entries are independent. And a variable with <span class="math inline">\(V\)</span> values has entropy at most <span class="math inline">\(\log_2V\)</span> bits, attained when all values are equally likely.</li>
+<li><strong>Processing cannot add information.</strong> <span class="math inline">\(\hat d\)</span> is computed from <span class="math inline">\(Y\)</span>, so <span class="math inline">\(I(d; \hat d) \le I(d; Y)\)</span> by the DPI, which says that no function of <span class="math inline">\(Y\)</span>, random or not, can tell you more about <span class="math inline">\(d\)</span> than <span class="math inline">\(Y\)</span> itself.</li>
+<li><strong>Write what a good guess requires.</strong> <span class="math inline">\(I(d; \hat d) = H(d) - H(d \mid \hat d) = n - H(d \mid \hat d)\)</span>, since <span class="math inline">\(n\)</span> uniform bits have entropy <span class="math inline">\(n\)</span>. To bound the remaining uncertainty bit by bit, use the chain rule, <span class="math inline">\(H(d \mid \hat d) = \sum_iH(d_i \mid \hat d, d_1, \dots, d_{i-1})\)</span>, and the fact that conditioning on less cannot reduce entropy: dropping <span class="math inline">\(d_1, \dots, d_{i-1}\)</span> and then all of <span class="math inline">\(\hat d\)</span> except <span class="math inline">\(\hat d_i\)</span> gives <span class="math inline">\(H(d \mid \hat d) \le \sum_iH(d_i \mid \hat d) \le \sum_iH(d_i \mid \hat d_i)\)</span>.</li>
+<li><strong>Apply Fano for one bit.</strong> With two values, Fano’s inequality reads <span class="math inline">\(H(d_i \mid \hat d_i) \le h(P_i)\)</span>, where <span class="math inline">\(P_i = \Pr[\hat d_i \ne d_i]\)</span>. The reason is short: if you knew both the guess <span class="math inline">\(\hat d_i\)</span> and whether it was wrong, you would know <span class="math inline">\(d_i\)</span>. So the uncertainty about <span class="math inline">\(d_i\)</span> given <span class="math inline">\(\hat d_i\)</span> is at most the uncertainty about “was the guess wrong?”, a coin that comes up “wrong” with probability <span class="math inline">\(P_i\)</span>, whose entropy is at most <span class="math inline">\(h(P_i)\)</span>.</li>
+<li><strong>Average with concavity.</strong> <span class="math inline">\(h\)</span> is concave (its graph bends downward), so by Jensen’s inequality the average of its values is at most its value at the average: <span class="math inline">\(\frac1n\sum_ih(P_i) \le h(\beta)\)</span>, where <span class="math inline">\(\beta = \frac1n\sum_iP_i \le \frac12\)</span> is the expected fraction of wrong bits.</li>
+<li><strong>Combine.</strong> Steps 3 to 5 give <span class="math inline">\(I(d; \hat d) \ge n - nh(\beta)\)</span>, and steps 1 and 2 give <span class="math inline">\(I(d; \hat d) \le m\log_2V\)</span>. So <span class="math inline">\(n - nh(\beta) \le I(d; \hat d) \le m\log_2V\)</span>, which is <a href="#eq-recon-info" class="quarto-xref">Equation&nbsp;<span>17.12</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-3" class="level3" data-number="17.6.4">
+<h3 data-number="17.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">17.6.4</span> Interpretation</h3>
+<p>Error of order <span class="math inline">\(\sqrt n\)</span> is necessary to stop reconstruction, and it can be enough. The sampling curator’s error is <span class="math inline">\(O(\sqrt{n\log m})\)</span>, only a logarithm above the <span class="math inline">\(o(\sqrt n)\)</span> that the attacks need, and it caps every attacker at <span class="math inline">\(\frac34\)</span> of the bits.</p>
+<p>But it is not privacy. The same curator answers exactly for the people in <span class="math inline">\(T\)</span>: an attacker with enough queries learns their bits perfectly, because least squares recovers <span class="math inline">\(d_i/p\)</span> for every <span class="math inline">\(i \in T\)</span>. Half the people are fully exposed so that the other half can be fully hidden. Stopping blatant reconstruction is a much weaker goal than protecting everyone, and <a href="../part03-dp-foundations/01-definition.html">Part 3</a> defines a guarantee that holds for every individual.</p>
+<p>The attacks use about as few queries as possible. With exact counts, <a href="#eq-recon-info" class="quarto-xref">Equation&nbsp;<span>17.12</span></a> asks for at least <span class="math inline">\(n(1 - h(\beta))/\log_2(n + 1)\)</span> queries, of order <span class="math inline">\(n/\log n\)</span>, and least squares with exact answers uses <span class="math inline">\(n\)</span>. Answers with error, published to a coarser precision, take fewer values, carry fewer bits each and need more queries.</p>
+<p>The law has two halves, and a defence must control both. “Overly accurate” is the error scale: below <span class="math inline">\(\sqrt n\)</span> for random queries, below <span class="math inline">\(n\)</span> for all queries. “Too many” is the count: independent noise per answer is averaged away unless it grows with the number of answers. That is why Part 3 tracks a budget that is spent across queries.</p>
+</section>
+<section id="example-three-curators" class="level3" data-number="17.6.5">
+<h3 data-number="17.6.5" class="anchored" data-anchor-id="example-three-curators"><span class="header-section-number">17.6.5</span> Example: three curators</h3>
+<p><strong>The sampling curator at <span class="math inline">\(n = 500\)</span>, <span class="math inline">\(m = 2000\)</span>.</strong> With <span class="math inline">\(p = \frac12\)</span> the script keeps 250 of the 500 people. The largest error over the 2000 queries is 28.00, or <span class="math inline">\(28.00/\sqrt{500} = 1.25\sqrt n\)</span>. That is well under the Hoeffding bound at <span class="math inline">\(\eta = 0.05\)</span>: with <span class="math inline">\(p = \frac12\)</span>, <span class="math inline">\(2p^2 = \frac12\)</span>, so <a href="#eq-recon-hoeffding" class="quarto-xref">Equation&nbsp;<span>17.11</span></a> is <span class="math inline">\(\sqrt{2 \cdot 500\ln(4000/0.05)} = 106.25\)</span>. (Hoeffding assumes the worst-case spread of each term; the actual terms have a smaller variance.) Least squares on these answers recovers 0.7560 of the bits, right at the ceiling of <span class="math inline">\(\frac34\)</span>.</p>
+<p><strong>The information bound at <span class="math inline">\(n = 1000\)</span>.</strong> For at most 5% wrong bits, <span class="math inline">\(h(0.05) = 0.2864\)</span>, so each person still needs <span class="math inline">\(1 - 0.2864 = 0.7136\)</span> bits. Exact answers (<span class="math inline">\(V = 1001\)</span>) carry at most <span class="math inline">\(\log_21001 \approx 9.97\)</span> bits each and need <span class="math inline">\(m \ge 1000 \times 0.7136/\log_21001 = 71.6\)</span> queries, so at least 72. If the curator rounds every count to a multiple of 10, an answer takes at most <span class="math inline">\(\lfloor1000/10\rfloor + 2 = 102\)</span> values (the 101 multiples of 10 from 0 to 1000, plus one to be safe; the script uses <span class="math inline">\(\lfloor n/w\rfloor + 2\)</span> for every width <span class="math inline">\(w\)</span>), and the bound rises to 106.9. Rounding to multiples of 32 leaves <span class="math inline">\(\lfloor 1000/32\rfloor + 2 = 33\)</span> values and a bound of 141.5. These are lower bounds for any attack, whatever its running time.</p>
+<p><strong>Independent noise with unlimited queries.</strong> From <a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.4</span></a>, a curator with <span class="math inline">\(\sigma = 2\sqrt n\)</span> lets least squares recover 0.5875 of the bits at <span class="math inline">\(m = 4n\)</span>. If it answers any number of queries with the same noise level, an attacker who asks <span class="math inline">\(m = 106.1\,n\)</span> queries recovers 90% (the second Check yourself question of <a href="#sec-recon-ls" class="quarto-xref"><span>Section 17.5</span></a>).</p>
+</section>
+<section id="check-yourself-3" class="level3" data-number="17.6.6">
+<h3 data-number="17.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">17.6.6</span> Check yourself</h3>
+<ul>
+<li>Why does the information bound need the answers to take finitely many values? <em>(Step 1 bounds <span class="math inline">\(H(a_j)\)</span> by <span class="math inline">\(\log_2V\)</span>. A real-valued answer can carry unbounded information in its low-order digits, so the count of values is what limits it. Any published table has finite precision.)</em></li>
+<li>A curator answers each query with an independent error of size <span class="math inline">\(\sqrt{n\log m}\)</span> chosen at random. Is it as safe as the sampling curator? <em>(No.&nbsp;Its errors are independent across queries, so least squares averages them away as <span class="math inline">\(m\)</span> grows. The sampling curator’s errors come from one secret set <span class="math inline">\(T\)</span> shared by all answers, so asking more never reveals the people outside <span class="math inline">\(T\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-recon-census" class="level2" data-number="17.7">
+<h2 data-number="17.7" class="anchored" data-anchor-id="sec-recon-census"><span class="header-section-number">17.7</span> Reconstructing a census block</h2>
+<section id="context-4" class="level3" data-number="17.7.1">
+<h3 data-number="17.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">17.7.1</span> Context</h3>
+<p>National statistical offices publish many tables computed from the same confidential records: counts by age, sex and race for every block, the same counts by household type, medians and means, and so on. Each table cell is a query. Garfinkel, Abowd and Martindale (2019) showed with a toy block of seven people that a modest set of published statistics can determine every person’s age, sex, race and marital status, and that a constraint solver finds the solution in seconds. By then the US Census Bureau had already run the attack on its own 2010 publications at national scale, an experiment Abowd (2021) later described in detail.</p>
+<p>This section repeats the toy experiment with a block of our own. It is a reconstruction game where the queries are not random subsets but the tables an agency actually publishes, and where the decoder is a search over all databases consistent with them.</p>
+</section>
+<section id="statement-4" class="level3" data-number="17.7.2">
+<h3 data-number="17.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">17.7.2</span> Statement</h3>
+<p>A fictional block has seven people, each with an age (a whole number from 0 to 99), a sex, a race (Black or White) and a marital status, and nobody under 18 is married. <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.6</span></a> is everything the agency publishes about the block. Means are given to two decimals, which is enough to recover the sum of ages in each group exactly: the sum is a whole number, and <span class="math inline">\(34.29 \times 7 = 240.03\)</span>, so the total is 240.</p>
+<div id="tbl-recon-census-published" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-census-published-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.6: The published statistics for a fictional census block of seven people. A median over an even count is the average of the two middle ages.
+</figcaption>
+<div aria-describedby="tbl-recon-census-published-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Group</th>
+<th>Count</th>
+<th>Median age</th>
+<th>Mean age</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Total</td>
+<td>7</td>
+<td>33</td>
+<td>34.29</td>
+</tr>
+<tr class="even">
+<td>Female</td>
+<td>4</td>
+<td>31</td>
+<td>30.25</td>
+</tr>
+<tr class="odd">
+<td>Male</td>
+<td>3</td>
+<td>33</td>
+<td>39.67</td>
+</tr>
+<tr class="even">
+<td>Black</td>
+<td>4</td>
+<td>33.5</td>
+<td>36.25</td>
+</tr>
+<tr class="odd">
+<td>White</td>
+<td>3</td>
+<td>33</td>
+<td>31.67</td>
+</tr>
+<tr class="even">
+<td>Married</td>
+<td>4</td>
+<td>43.5</td>
+<td>47.75</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Each statistic is a constraint on the unknown ages and labels, and the claim is that together they leave no freedom at all.</p>
+<p><strong>Claim.</strong> Exactly one block of seven people is consistent with <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.6</span></a>, and it is the true one (<a href="#tbl-recon-census-block" class="quarto-xref">Table&nbsp;<span>17.7</span></a>).</p>
+<div id="tbl-recon-census-block" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-census-block-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.7: The block reconstructed from <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.6</span></a>, which is the true block.
+</figcaption>
+<div aria-describedby="tbl-recon-census-block-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Person</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>7</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Age</td>
+<td>7</td>
+<td>15</td>
+<td>27</td>
+<td>33</td>
+<td>35</td>
+<td>52</td>
+<td>71</td>
+</tr>
+<tr class="even">
+<td>Sex</td>
+<td>F</td>
+<td>M</td>
+<td>F</td>
+<td>M</td>
+<td>F</td>
+<td>F</td>
+<td>M</td>
+</tr>
+<tr class="odd">
+<td>Race</td>
+<td>B</td>
+<td>B</td>
+<td>W</td>
+<td>W</td>
+<td>W</td>
+<td>B</td>
+<td>B</td>
+</tr>
+<tr class="even">
+<td>Married</td>
+<td>no</td>
+<td>no</td>
+<td>no</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+<td>yes</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="derivation-4" class="level3" data-number="17.7.3">
+<h3 data-number="17.7.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">17.7.3</span> Derivation</h3>
+<p>The decoder enumerates candidate blocks and discards those that contradict a published number. Each step uses the statistics in a way you can check by hand.</p>
+<ol type="1">
+<li><strong>Turn means into sums.</strong> Mean × count gives the sum of ages: total 240, female 121, male 119, Black 145, White 95, married 191. The sums for female and male add to 240, so the male mean is implied by the other two; the same holds for Black and White. Single people number <span class="math inline">\(7 - 4 = 3\)</span> and their ages sum to <span class="math inline">\(240 - 191 = 49\)</span>.</li>
+<li><strong>Enumerate the women’s ages.</strong> Sort them <span class="math inline">\(a \le b \le c \le d\)</span>. With four women the median is the average of the two middle ages, so <span class="math inline">\(b + c = 2 \times 31 = 62\)</span>, and the sum gives <span class="math inline">\(a + d = 121 - 62 = 59\)</span>. Choose <span class="math inline">\(b \le 31\)</span> (so that <span class="math inline">\(c = 62 - b \ge b\)</span>) and <span class="math inline">\(a \le b\)</span>; then <span class="math inline">\(d = 59 - a\)</span> must be at least <span class="math inline">\(c = 62 - b\)</span>, that is <span class="math inline">\(a \le b - 3\)</span>. For each <span class="math inline">\(b\)</span> from 3 to 31 that leaves <span class="math inline">\(a = 0, \dots, b - 3\)</span>, which is <span class="math inline">\(b - 2\)</span> choices, so there are <span class="math inline">\(1 + 2 + \dots + 29 = \sum_{k=1}^{29}k = 435\)</span> age lists in all.</li>
+<li><strong>Enumerate the men’s ages.</strong> Three sorted ages with median 33 and sum 119: the middle one is 33, so <span class="math inline">\(x_1 + x_3 = 119 - 33 = 86\)</span> with <span class="math inline">\(x_1 \le 33 \le x_3 \le 99\)</span>. Every <span class="math inline">\(x_1\)</span> from 0 to 33 gives <span class="math inline">\(x_3 = 86 - x_1\)</span> between 53 and 86, which is allowed, so <span class="math inline">\(x_1\)</span> ranges over <span class="math inline">\(0, \dots, 33\)</span>: 34 lists.</li>
+<li><strong>Combine and check the total median.</strong> The <span class="math inline">\(435 \times 34 = 14\,790\)</span> combined age vectors are all distinct; 12 906 have overall median 33.</li>
+<li><strong>Check the race split.</strong> For each age vector, try every way of choosing 4 of the 7 people as Black (<span class="math inline">\(\binom74 = 35\)</span> ways), and keep it if the Black ages have median 33.5 and sum 145 and the White ages have median 33 and sum 95. Only 387 age vectors admit such a split.</li>
+<li><strong>Check the marital split</strong> in the same way (married median 43.5, sum 191, everyone married at least 18): 33 age vectors admit one.</li>
+<li><strong>Require all three at once.</strong> Exactly one age vector admits a valid sex split, race split and marital split, and its splits are unique. Assigning each person the labels of the splits gives <a href="#tbl-recon-census-block" class="quarto-xref">Table&nbsp;<span>17.7</span></a>.</li>
+</ol>
+<p>Each published statistic removes most of the remaining candidates. The block is not determined by any one table, but by their intersection.</p>
+</section>
+<section id="interpretation-4" class="level3" data-number="17.7.4">
+<h3 data-number="17.7.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">17.7.4</span> Interpretation</h3>
+<p>Withholding one number rarely helps. <a href="#fig-recon-census" class="quarto-xref">Figure&nbsp;<span>17.5</span></a> repeats the search with each of the twelve medians and means withheld in turn. Eight of the twelve leave the block uniquely determined, because the remaining statistics imply the missing one or pin the block down without it (<a href="../../book-exercises/part02-attacks/09-reconstruction.html#sec-sol-reconstruction-8">Exercise 8</a>). The worst case for the attacker, withholding the married mean, still leaves only 45 consistent blocks, and 51% of them have the true sex, race and marital pattern of all seven people.</p>
+<p>Real publications are far more exposed than this toy, because published tables overlap. Real tables cross-classify many variables at many geographic levels, so the same people appear in thousands of cells. That is exactly the “many queries” condition of the Fundamental Law. The main protection of the 2010 Census, swapping a small fraction of households between blocks, changes some answers but leaves most constraints exact. Coarsening (age bands instead of single years) and suppressing small cells, common in other tables, have the same weakness: they remove some constraints and leave the rest exact.</p>
+<p>The attack also works at scale. The Census Bureau’s own reconstruction of the 2010 Census, described by Abowd (2021), rebuilt a record for each of the 308,745,538 people counted, with block, sex, age, race and ethnicity. About 46% of the reconstructed records matched a real person exactly on all five fields, and linking them to commercial data confirmed the identity of about 17% of the population. The Bureau’s response was to change its disclosure-avoidance method for the 2020 Census to one based on the privacy definition of <a href="../part03-dp-foundations/01-definition.html">Part 3</a>.</p>
+<div id="fig-recon-census" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-census-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_census.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-census-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.5: Number of seven-person blocks consistent with <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.6</span></a> when one median or mean is withheld (log scale). Blue bars: the block is still unique. Red bars: a few candidates remain, still far fewer than the possible blocks.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-what-each-withheld-statistic-leaves" class="level3" data-number="17.7.5">
+<h3 data-number="17.7.5" class="anchored" data-anchor-id="example-what-each-withheld-statistic-leaves"><span class="header-section-number">17.7.5</span> Example: what each withheld statistic leaves</h3>
+<p><a href="#tbl-recon-census-withheld" class="quarto-xref">Table&nbsp;<span>17.8</span></a> lists, for each statistic whose removal leaves more than one block, how many blocks remain, how many different sex/race/marital patterns they show, and what share of them has the true pattern.</p>
+<div id="tbl-recon-census-withheld" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-census-withheld-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.8: Blocks consistent with the published table when one statistic is withheld.
+</figcaption>
+<div aria-describedby="tbl-recon-census-withheld-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Withheld</th>
+<th>Consistent blocks</th>
+<th>Distinct sex/race/marital patterns</th>
+<th>Share with the true pattern</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Female median</td>
+<td>7</td>
+<td>6</td>
+<td>0.14</td>
+</tr>
+<tr class="even">
+<td>Black median</td>
+<td>36</td>
+<td>3</td>
+<td>0.64</td>
+</tr>
+<tr class="odd">
+<td>Married median</td>
+<td>26</td>
+<td>4</td>
+<td>0.46</td>
+</tr>
+<tr class="even">
+<td>Married mean</td>
+<td>45</td>
+<td>7</td>
+<td>0.51</td>
+</tr>
+<tr class="odd">
+<td>Any of the other eight</td>
+<td>1</td>
+<td>1</td>
+<td>1.00</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Withholding the married mean hurts the attacker most, because it is the only statistic about the single people’s ages: without it, the married and single sums are no longer known. Withholding the female mean changes nothing, because the total and male sums imply it: it equals <span class="math inline">\((240 - 119)/4\)</span>.</p>
+</section>
+<section id="check-yourself-4" class="level3" data-number="17.7.6">
+<h3 data-number="17.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">17.7.6</span> Check yourself</h3>
+<ul>
+<li>Why can the attacker turn a mean published to two decimals into an exact sum? <em>(The sum is a whole number and the mean is the sum over a count of at most 7. Two decimals locate the sum to within <span class="math inline">\(7 \times 0.005 = 0.035\)</span>, which leaves one whole number.)</em></li>
+<li>If the agency published only counts and no ages, could the attacker still reconstruct something? <em>(Yes: counts of every cross-classification by sex, race and marital status fix how many people fall in each combination, which is the attribute pattern. Ages need age statistics, which real tables publish in single years for small groups.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-every-attack-by-computation-and-simulation" class="level2" data-number="17.8">
+<h2 data-number="17.8" class="anchored" data-anchor-id="code-check-every-attack-by-computation-and-simulation"><span class="header-section-number">17.8</span> Code: check every attack by computation and simulation</h2>
+<p>The script <a href="../../../code/part02-attacks/reconstruction.py">code/reconstruction.py</a> computes every number in this chapter and draws every figure. Each attack, bound and curator is a small typed function, and the figures loop over them. It uses NumPy only and runs in well under a minute. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/reconstruction.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-recon-code" class="quarto-xref">Table&nbsp;<span>17.9</span></a>:</p>
+<div id="tbl-recon-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.9: The script’s output with the default seed.
+</figcaption>
+<div aria-describedby="tbl-recon-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Fact 1, <span class="math inline">\(d = (1, 0, 1, 1)\)</span></td>
+<td>The 16 subset sums, in binary order: 0, 1, 0, 1, 1, 2, 1, 2, 1, 2, 1, 2, 2, 3, 2, 3</td>
+</tr>
+<tr class="even">
+<td>Exponential attack, <span class="math inline">\(n = 10\)</span></td>
+<td>Survivors 1, 35, 242, 630, 912 and largest distance 0, 2, 4, 6, 8 for <span class="math inline">\(E = 0, 0.5, 1, 1.5, 2\)</span>; rounding to multiples of 2 or 4: one survivor</td>
+</tr>
+<tr class="odd">
+<td>Fact 2</td>
+<td><span class="math inline">\(\mathbb E(s_1 + s_2 + s_3)^4 = 21\)</span> by enumeration and by formula</td>
+</tr>
+<tr class="even">
+<td>Lemma, <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\beta = 0.1\)</span></td>
+<td>Threshold 0.8333; escape probability 0.6161 (balanced), 1.0000 (aligned), bound 0.1875</td>
+</tr>
+<tr class="odd">
+<td>Theorem, <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\beta = 0.1\)</span>, <span class="math inline">\(\eta = 0.01\)</span></td>
+<td><span class="math inline">\(E \le 0.1667\)</span>; <span class="math inline">\(m \ge 33\,296\)</span> (<span class="math inline">\(33.3n\)</span>)</td>
+</tr>
+<tr class="even">
+<td>Least squares, Gaussian noise, <span class="math inline">\(n = 500\)</span>, <span class="math inline">\(m = 2000\)</span></td>
+<td><a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.4</span></a>; <span class="math inline">\(m/n\)</span> for 90% recovery: 106.1 at <span class="math inline">\(\sigma = 2\sqrt n\)</span>, 657.9 at <span class="math inline">\(5\sqrt n\)</span></td>
+</tr>
+<tr class="odd">
+<td>Least squares, worst case, <span class="math inline">\(n = 500\)</span>, <span class="math inline">\(m = 2000\)</span></td>
+<td><span class="math inline">\(s_{\min} = 11.43\)</span> (approximation 11.18); wrong bits 0, 20, 143 for <span class="math inline">\(E = 1, 2, 5.59\)</span>, bounds 61.2, 245.0, 1914.0</td>
+</tr>
+<tr class="even">
+<td>Sampling curator, <span class="math inline">\(p = \frac12\)</span></td>
+<td>Kept 250 of 500; max error 28.00 (<span class="math inline">\(1.25\sqrt n\)</span>); Hoeffding bound 106.25; recovered 0.7560</td>
+</tr>
+<tr class="odd">
+<td>Information bound, <span class="math inline">\(n = 1000\)</span></td>
+<td><span class="math inline">\(\beta = 0.05\)</span>: 71.6 (exact), 106.9 (rounded to 10), 141.5 (rounded to 32); <span class="math inline">\(\beta = 0.01\)</span>: 92.2 (exact)</td>
+</tr>
+<tr class="even">
+<td>Census block</td>
+<td>435 female and 34 male age lists; 14 790 age vectors; 12 906 after the total median; 387 with a race split; 33 with a marital split; 1 block; <a href="#tbl-recon-census-withheld" class="quarto-xref">Table&nbsp;<span>17.8</span></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_reconstruction.py">tests/test_reconstruction.py</a> checks that the output still matches.</p>
+<p><strong>What to take from it.</strong> Five things stand out. First, the exponential attack’s bound is exact: every surviving candidate is within <span class="math inline">\(4E\)</span> of <span class="math inline">\(d\)</span>, and some candidate is at exactly <span class="math inline">\(4E\)</span>, so no better guarantee is possible for that attack. Second, the proved constants are pessimistic, but the scaling is not. The theorem tolerates only <span class="math inline">\(E \le 0.17\)</span> at <span class="math inline">\(n = 1000\)</span>, yet least squares with <span class="math inline">\(m = 4n\)</span> recovers 96.55% of 500 bits at <span class="math inline">\(\sigma = 5.59\)</span>, because both are governed by the same <span class="math inline">\(\sqrt n\)</span> scale and only the proof’s constants differ. Third, the least-squares prediction is accurate: <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.10</span></a> is within 0.013 of the simulation at every noise level, once the <span class="math inline">\(m - n\)</span> correction is included. Fourth, the sampling curator meets its ceiling: its answers have error <span class="math inline">\(1.25\sqrt n\)</span>, and the best decoder gets exactly the people in its sample, plus half of the rest by chance. Fifth, published tables are systems of equations: eighteen numbers determine seven people’s ages, sexes, races and marital statuses.</p>
+</section>
+<section id="references" class="level2" data-number="17.9">
+<h2 data-number="17.9" class="anchored" data-anchor-id="references"><span class="header-section-number">17.9</span> References</h2>
+<ul>
+<li>Dinur &amp; Nissim, “Revealing Information while Preserving Privacy” (PODS 2003). The original attacks: all subset sums with error <span class="math inline">\(o(n)\)</span>, and polynomially many random subset sums with error <span class="math inline">\(o(\sqrt n)\)</span> decoded by a linear program. The “blatantly non-private” definition is theirs.</li>
+<li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014), ch.&nbsp;8. The reconstruction attacks as lower bounds, and the Fundamental Law of Information Recovery.</li>
+<li>Dwork, McSherry &amp; Talwar, “The Price of Privacy and the Limits of LP Decoding” (STOC 2007). The linear-programming decoder tolerates a constant fraction of arbitrarily wrong answers, with <span class="math inline">\(O(n)\)</span> queries.</li>
+<li>Dwork &amp; Yekhanin, “New Efficient Attacks on Statistical Disclosure Control Mechanisms” (CRYPTO 2008). Attacks with structured queries and fast decoders.</li>
+<li>Kasiviswanathan, Rudelson &amp; Smith, “The Power of Linear Reconstruction Attacks” (SODA 2013). Least-squares and linear-programming reconstruction from released statistics such as marginal tables, with the role of the smallest singular value made precise.</li>
+<li>Dwork, Smith, Steinke &amp; Ullman, “Exposed! A Survey of Attacks on Private Data” (Annual Review of Statistics and Its Application, 2017). A readable survey of reconstruction and tracing attacks; the best next step after this chapter.</li>
+<li>Cohen &amp; Nissim, “Linear Program Reconstruction in Practice” (Journal of Privacy and Confidentiality, 2020). A linear-programming reconstruction against a deployed query system that added noise to its answers.</li>
+<li>Garfinkel, Abowd &amp; Martindale, “Understanding Database Reconstruction Attacks on Public Data” (CACM 2019). The seven-person block reconstructed with a solver; the model for <a href="#sec-recon-census" class="quarto-xref"><span>Section 17.7</span></a>.</li>
+<li>Abowd, declaration in <em>State of Alabama v. US Department of Commerce</em> (2021), Appendix B. The Census Bureau’s reconstruction and re-identification experiment on the 2010 Census.</li>
+<li>Vershynin, <em>High-Dimensional Probability</em> (2018), ch.&nbsp;4. Singular values of random matrices, used in the worst-case least-squares bound. Muirhead, <em>Aspects of Multivariate Statistical Theory</em> (1982), ch.&nbsp;3, for the inverse-Wishart mean.</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="17.10">
+<h2 data-number="17.10" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">17.10</span> Cheat sheet</h2>
+<p><span class="math inline">\(d \in \{0, 1\}^n\)</span> is the secret, <span class="math inline">\(A\)</span> the <span class="math inline">\(m \times n\)</span> 0/1 query matrix, <span class="math inline">\(a = Ad + e\)</span> the answers, <span class="math inline">\(E\)</span> a bound on every <span class="math inline">\(|e_j|\)</span>, <span class="math inline">\(\sigma\)</span> the scale of random noise, <span class="math inline">\(\beta\)</span> a fraction of wrong bits, <span class="math inline">\(\eta\)</span> a failure probability. <a href="#tbl-recon-cheat" class="quarto-xref">Table&nbsp;<span>17.10</span></a> collects the results.</p>
+<div id="tbl-recon-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.10: Every result in this chapter.
+</figcaption>
+<div aria-describedby="tbl-recon-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+<th>Proof idea</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exponential attack</td>
+<td>All <span class="math inline">\(2^n\)</span> subsets, error <span class="math inline">\(E\)</span>: any consistent <span class="math inline">\(c\)</span> has <span class="math inline">\(\mathrm{dist}(c, d) \le 4E\)</span>; tight</td>
+<td>Triangle inequality on <span class="math inline">\(S_0\)</span> and <span class="math inline">\(S_1\)</span></td>
+</tr>
+<tr class="even">
+<td>Paley–Zygmund</td>
+<td><span class="math inline">\(\Pr[W &gt; \theta\,\mathbb E W] \ge (1 - \theta)^2(\mathbb E W)^2/\mathbb E W^2\)</span></td>
+<td>Split <span class="math inline">\(\mathbb E W\)</span>; Cauchy–Schwarz</td>
+</tr>
+<tr class="odd">
+<td>Anti-concentration lemma</td>
+<td><span class="math inline">\(\beta n\)</span> entries of <span class="math inline">\(z\)</span> at least <span class="math inline">\(\frac13\)</span>: <span class="math inline">\(\Pr[\lvert\langle q, z\rangle\rvert &gt; \sqrt{\beta n}/12] \ge \frac3{16}\)</span></td>
+<td>Fourth moment <span class="math inline">\(\le 3\times\)</span> squared second moment</td>
+</tr>
+<tr class="even">
+<td>Linear-programming decoder</td>
+<td><span class="math inline">\(2E + \frac12 \le \sqrt{\beta n}/12\)</span> and <span class="math inline">\(m \ge \frac{n\ln(n+1) + \ln(1/\eta)}{\ln(16/13)}\)</span>: at most <span class="math inline">\(\beta n\)</span> wrong bits</td>
+<td>Grid of step <span class="math inline">\(1/n\)</span>, lemma, union bound</td>
+</tr>
+<tr class="odd">
+<td>Least squares, worst case</td>
+<td>Wrong bits <span class="math inline">\(\le 4mE^2/s_{\min}^2 \approx 16E^2/(1 - \sqrt{n/m})^2\)</span></td>
+<td><span class="math inline">\(\lVert A^+e\rVert \le \lVert e\rVert/s_{\min}\)</span></td>
+</tr>
+<tr class="even">
+<td>Least squares, Gaussian noise</td>
+<td>Fraction recovered <span class="math inline">\(\approx \Phi(\sqrt{m - n}/(4\sigma))\)</span></td>
+<td>Covariance <span class="math inline">\(\sigma^2(A^\top A)^{-1}\)</span>; inverse-Wishart mean</td>
+</tr>
+<tr class="odd">
+<td>Sampling curator</td>
+<td>Error <span class="math inline">\(\le \sqrt{n\ln(2m/\eta)/(2p^2)}\)</span>; recovery <span class="math inline">\(\le p + \frac{1 - p}2\)</span></td>
+<td>Hoeffding, union bound; unsampled bits are independent of the answers</td>
+</tr>
+<tr class="even">
+<td>Information bound</td>
+<td><span class="math inline">\(m \ge n(1 - h(\beta))/\log_2V\)</span></td>
+<td>DPI, chain rule, Fano for one bit, concavity of <span class="math inline">\(h\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>The threat scale of a random subset-sum query is <span class="math inline">\(\sqrt n\)</span>; of the worst query, <span class="math inline">\(n\)</span>. Errors well below that scale reveal the database.</li>
+<li>Independent noise per answer is averaged away by more answers: to keep reconstruction at bay, the noise must grow like <span class="math inline">\(\sqrt m\)</span>.</li>
+<li>A curator that stops blatant reconstruction can still expose many individuals completely; stopping reconstruction is not the same as privacy.</li>
+<li>Exact counts carry at most <span class="math inline">\(\log_2(n + 1)\)</span> bits each, so about <span class="math inline">\(n/\log n\)</span> of them can already determine <span class="math inline">\(n\)</span> bits.</li>
+<li>Every published table cell is a constraint. Many overlapping tables of exact or nearly exact statistics are a solvable system.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part02-attacks/09-reconstruction.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-attacks/08-syntactic-anonymity.html" class="pagination-link" aria-label="Syntactic anonymity and how it breaks">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part03-dp-foundations/00-introduction.html" class="pagination-link" aria-label="Differential privacy foundations">
+        <span class="nav-page-text">Differential privacy foundations</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

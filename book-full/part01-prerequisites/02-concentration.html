@@ -1,0 +1,1765 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>2&nbsp; Concentration inequalities – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part01-prerequisites/03-divergences.html" rel="next">
+<link href="../part01-prerequisites/01-distributions.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-prerequisites/00-introduction.html">Prerequisites</a></li><li class="breadcrumb-item"><a href="../part01-prerequisites/02-concentration.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">2.1</span> Why this matters</a></li>
+  <li><a href="#toolkit-five-facts-every-derivation-uses" id="toc-toolkit-five-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-five-facts-every-derivation-uses"><span class="header-section-number">2.2</span> Toolkit: five facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-probability-is-the-expectation-of-an-indicator" id="toc-fact-1-probability-is-the-expectation-of-an-indicator" class="nav-link" data-scroll-target="#fact-1-probability-is-the-expectation-of-an-indicator"><span class="header-section-number">2.2.1</span> Fact 1 — Probability is the expectation of an indicator</a></li>
+  <li><a href="#fact-2-union-bound" id="toc-fact-2-union-bound" class="nav-link" data-scroll-target="#fact-2-union-bound"><span class="header-section-number">2.2.2</span> Fact 2 — Union bound</a></li>
+  <li><a href="#fact-3-1-x-le-ex-for-every-real-x" id="toc-fact-3-1-x-le-ex-for-every-real-x" class="nav-link" data-scroll-target="#fact-3-1-x-le-ex-for-every-real-x"><span class="header-section-number">2.2.3</span> Fact 3 — <span class="math inline">\(1 + x \le e^x\)</span> for every real <span class="math inline">\(x\)</span></a></li>
+  <li><a href="#fact-4-mgfs-multiply-under-independence" id="toc-fact-4-mgfs-multiply-under-independence" class="nav-link" data-scroll-target="#fact-4-mgfs-multiply-under-independence"><span class="header-section-number">2.2.4</span> Fact 4 — MGFs multiply under independence</a></li>
+  <li><a href="#fact-5-inverting-a-tail-bound" id="toc-fact-5-inverting-a-tail-bound" class="nav-link" data-scroll-target="#fact-5-inverting-a-tail-bound"><span class="header-section-number">2.2.5</span> Fact 5 — Inverting a tail bound</a></li>
+  </ul></li>
+  <li><a href="#markov-and-chebyshev" id="toc-markov-and-chebyshev" class="nav-link" data-scroll-target="#markov-and-chebyshev"><span class="header-section-number">2.3</span> Markov and Chebyshev</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">2.3.1</span> Context</a></li>
+  <li><a href="#markovs-inequality" id="toc-markovs-inequality" class="nav-link" data-scroll-target="#markovs-inequality"><span class="header-section-number">2.3.2</span> Markov’s inequality</a></li>
+  <li><a href="#generalized-markov" id="toc-generalized-markov" class="nav-link" data-scroll-target="#generalized-markov"><span class="header-section-number">2.3.3</span> Generalized Markov</a></li>
+  <li><a href="#chebyshevs-inequality" id="toc-chebyshevs-inequality" class="nav-link" data-scroll-target="#chebyshevs-inequality"><span class="header-section-number">2.3.4</span> Chebyshev’s inequality</a></li>
+  <li><a href="#interpretation-the-price-of-knowing-only-the-variance" id="toc-interpretation-the-price-of-knowing-only-the-variance" class="nav-link" data-scroll-target="#interpretation-the-price-of-knowing-only-the-variance"><span class="header-section-number">2.3.5</span> Interpretation: the price of knowing only the variance</a></li>
+  <li><a href="#example-the-error-of-laplace-noise" id="toc-example-the-error-of-laplace-noise" class="nav-link" data-scroll-target="#example-the-error-of-laplace-noise"><span class="header-section-number">2.3.6</span> Example: the error of Laplace noise</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">2.3.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#the-chernoff-method" id="toc-the-chernoff-method" class="nav-link" data-scroll-target="#the-chernoff-method"><span class="header-section-number">2.4</span> The Chernoff method</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">2.4.1</span> Context</a></li>
+  <li><a href="#the-recipe" id="toc-the-recipe" class="nav-link" data-scroll-target="#the-recipe"><span class="header-section-number">2.4.2</span> The recipe</a></li>
+  <li><a href="#warm-up-the-gaussian" id="toc-warm-up-the-gaussian" class="nav-link" data-scroll-target="#warm-up-the-gaussian"><span class="header-section-number">2.4.3</span> Warm-up: the Gaussian</a></li>
+  <li><a href="#main-case-sums-of-bernoullis" id="toc-main-case-sums-of-bernoullis" class="nav-link" data-scroll-target="#main-case-sums-of-bernoullis"><span class="header-section-number">2.4.4</span> Main case: sums of Bernoullis</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">2.4.5</span> Interpretation</a></li>
+  <li><a href="#example-sampled-minibatch-sizes" id="toc-example-sampled-minibatch-sizes" class="nav-link" data-scroll-target="#example-sampled-minibatch-sizes"><span class="header-section-number">2.4.6</span> Example: sampled minibatch sizes</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">2.4.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sub-gaussian-variables-and-hoeffding" id="toc-sub-gaussian-variables-and-hoeffding" class="nav-link" data-scroll-target="#sub-gaussian-variables-and-hoeffding"><span class="header-section-number">2.5</span> Sub-Gaussian variables and Hoeffding</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">2.5.1</span> Context</a></li>
+  <li><a href="#definition" id="toc-definition" class="nav-link" data-scroll-target="#definition"><span class="header-section-number">2.5.2</span> Definition</a></li>
+  <li><a href="#three-properties-each-one-line" id="toc-three-properties-each-one-line" class="nav-link" data-scroll-target="#three-properties-each-one-line"><span class="header-section-number">2.5.3</span> Three properties, each one line</a></li>
+  <li><a href="#hoeffdings-lemma-bounded-variables-are-sub-gaussian" id="toc-hoeffdings-lemma-bounded-variables-are-sub-gaussian" class="nav-link" data-scroll-target="#hoeffdings-lemma-bounded-variables-are-sub-gaussian"><span class="header-section-number">2.5.4</span> Hoeffding’s lemma: bounded variables are sub-Gaussian</a></li>
+  <li><a href="#hoeffdings-inequality" id="toc-hoeffdings-inequality" class="nav-link" data-scroll-target="#hoeffdings-inequality"><span class="header-section-number">2.5.5</span> Hoeffding’s inequality</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">2.5.6</span> Interpretation</a></li>
+  <li><a href="#example-generalization-for-a-finite-class" id="toc-example-generalization-for-a-finite-class" class="nav-link" data-scroll-target="#example-generalization-for-a-finite-class"><span class="header-section-number">2.5.7</span> Example: generalization for a finite class</a></li>
+  <li><a href="#example-estimating-a-small-error-rate" id="toc-example-estimating-a-small-error-rate" class="nav-link" data-scroll-target="#example-estimating-a-small-error-rate"><span class="header-section-number">2.5.8</span> Example: estimating a small error rate</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">2.5.9</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#gaussian-and-laplace-tails" id="toc-gaussian-and-laplace-tails" class="nav-link" data-scroll-target="#gaussian-and-laplace-tails"><span class="header-section-number">2.6</span> Gaussian and Laplace tails</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">2.6.1</span> Context</a></li>
+  <li><a href="#gaussian-tails" id="toc-gaussian-tails" class="nav-link" data-scroll-target="#gaussian-tails"><span class="header-section-number">2.6.2</span> Gaussian tails</a></li>
+  <li><a href="#laplace-tails" id="toc-laplace-tails" class="nav-link" data-scroll-target="#laplace-tails"><span class="header-section-number">2.6.3</span> Laplace tails</a></li>
+  <li><a href="#laplace-is-sub-exponential-not-sub-gaussian" id="toc-laplace-is-sub-exponential-not-sub-gaussian" class="nav-link" data-scroll-target="#laplace-is-sub-exponential-not-sub-gaussian"><span class="header-section-number">2.6.4</span> Laplace is sub-exponential, not sub-Gaussian</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">2.6.5</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#mcdiarmid-and-azuma" id="toc-mcdiarmid-and-azuma" class="nav-link" data-scroll-target="#mcdiarmid-and-azuma"><span class="header-section-number">2.7</span> McDiarmid and Azuma</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">2.7.1</span> Context</a></li>
+  <li><a href="#azumahoeffding" id="toc-azumahoeffding" class="nav-link" data-scroll-target="#azumahoeffding"><span class="header-section-number">2.7.2</span> Azuma–Hoeffding</a></li>
+  <li><a href="#example-an-adaptive-coin-game" id="toc-example-an-adaptive-coin-game" class="nav-link" data-scroll-target="#example-an-adaptive-coin-game"><span class="header-section-number">2.7.3</span> Example: an adaptive coin game</a></li>
+  <li><a href="#mcdiarmid-bounded-differences" id="toc-mcdiarmid-bounded-differences" class="nav-link" data-scroll-target="#mcdiarmid-bounded-differences"><span class="header-section-number">2.7.4</span> McDiarmid (bounded differences)</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">2.7.5</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-every-bound-by-simulation" id="toc-code-check-every-bound-by-simulation" class="nav-link" data-scroll-target="#code-check-every-bound-by-simulation"><span class="header-section-number">2.8</span> Code: check every bound by simulation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">2.9</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">2.10</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-prerequisites/00-introduction.html">Prerequisites</a></li><li class="breadcrumb-item"><a href="../part01-prerequisites/02-concentration.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">2.1</span> Why this matters</h2>
+<p>Randomness enters machine learning everywhere: the sample you trained on, the minibatches you drew, the test set you evaluated on, and later in this book, noise that is added on purpose. In every case the question is the same: <strong>how far can a random quantity be from what you expect, and with what probability?</strong> Concentration inequalities answer it. Treat them as tools for that one job, not as a list to memorize.</p>
+<p>The whole subject is one idea, applied with more and more information about the random variable. To bound the chance that a variable lands far out, you compare it with something whose average you know, and the more you know, the sharper the comparison. If you know only the mean, you get Markov’s inequality, and the tail can only be shown to decay like <span class="math inline">\(1/t\)</span>, where <span class="math inline">\(t\)</span> is how far out you look. If you also know the variance, the average squared distance from the mean, you get Chebyshev’s inequality and a decay like <span class="math inline">\(1/t^2\)</span>. If you know the <strong>moment generating function (MGF)</strong> <span class="math inline">\(\mathbb E[e^{\lambda X}]\)</span>, which averages an exponential of the variable and so feels every moment at once, you get the Chernoff bound, which decays exponentially in <span class="math inline">\(t\)</span>. When that MGF is no larger than a normal distribution’s, the variable is called <strong>sub-Gaussian</strong> and its tail decays like a normal’s, as <span class="math inline">\(e^{-t^2}\)</span>; Hoeffding’s inequality is the special case of bounded variables, which are always sub-Gaussian. Finally, when the quantity is not a sum of independent terms but a function of many inputs, or a running total whose steps depend on the past (a martingale), McDiarmid’s and Azuma’s inequalities give the same exponential bounds as long as each input or step can move the result only a bounded amount.</p>
+<p><a href="#tbl-inequality-uses" class="quarto-xref">Table&nbsp;<span>2.1</span></a> lists where each one shows up:</p>
+<div id="tbl-inequality-uses" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-inequality-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.1: The inequalities in this chapter and where each is typically used.
+</figcaption>
+<div aria-describedby="tbl-inequality-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Inequality</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Markov</td>
+<td>The base step inside every other proof</td>
+</tr>
+<tr class="even">
+<td>Chebyshev</td>
+<td>Quick variance-based error bars</td>
+</tr>
+<tr class="odd">
+<td>Chernoff</td>
+<td>Counts of events: error counts, sampled batch sizes, rare outcomes</td>
+</tr>
+<tr class="even">
+<td>Hoeffding</td>
+<td>Confidence intervals for averages of bounded quantities; generalization bounds</td>
+</tr>
+<tr class="odd">
+<td>Gaussian tail</td>
+<td>How large normal noise can be</td>
+</tr>
+<tr class="even">
+<td>Laplace tail</td>
+<td>How large Laplace noise can be; maxima over many draws</td>
+</tr>
+<tr class="odd">
+<td>McDiarmid</td>
+<td>Functions of many independent inputs, such as an empirical risk; stability</td>
+</tr>
+<tr class="even">
+<td>Azuma</td>
+<td>Sums whose terms are chosen adaptively, based on the past</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The distributions used here (binomial, Poisson, Laplace, normal) and their MGFs are derived in <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>. This chapter restates each fact where it uses it, so you do not need that chapter open.</p>
+</section>
+<section id="toolkit-five-facts-every-derivation-uses" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="toolkit-five-facts-every-derivation-uses"><span class="header-section-number">2.2</span> Toolkit: five facts every derivation uses</h2>
+<p>Each section below follows the same arc: the question the bound answers, the statement, a derivation, an interpretation, an example, and a self-check. The derivations reuse five facts. We prove them once here.</p>
+<section id="fact-1-probability-is-the-expectation-of-an-indicator" class="level3" data-number="2.2.1">
+<h3 data-number="2.2.1" class="anchored" data-anchor-id="fact-1-probability-is-the-expectation-of-an-indicator"><span class="header-section-number">2.2.1</span> Fact 1 — Probability is the expectation of an indicator</h3>
+<p>The probability of an event is the average of a variable that is 1 when the event happens and 0 when it does not. Write <span class="math inline">\(\mathbf 1_A\)</span> for that 0/1 variable, the <strong>indicator</strong> of the event <span class="math inline">\(A\)</span>, and <span class="math inline">\(\mathbb E\)</span> for the expectation (the probability-weighted average). Then <span id="eq-auto-02concentration-1"><span class="math display">\[\Pr[A] = \mathbb E[\mathbf 1_A]. \tag{2.1}\]</span></span> This matters because it turns probabilities into averages, and averages respect inequalities: any pointwise inequality between a random variable and an indicator becomes a probability bound after taking expectations. Markov’s inequality and the union bound are both this move. Because everything later depends on it, here it is slowly, with a die.</p>
+<p><strong>Step 1: an indicator is a 0/1 random variable.</strong> For an event <span class="math inline">\(A\)</span>, <span class="math inline">\(\mathbf 1_A\)</span> equals 1 on outcomes where <span class="math inline">\(A\)</span> happens and 0 elsewhere. Roll a fair die and let <span class="math inline">\(A\)</span> = “the roll is at least 5” (<a href="#tbl-die-indicator" class="quarto-xref">Table&nbsp;<span>2.2</span></a>):</p>
+<div id="tbl-die-indicator" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-die-indicator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.2: The indicator of the event “roll at least 5” on each outcome of a fair die.
+</figcaption>
+<div aria-describedby="tbl-die-indicator-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Roll</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathbf 1_A\)</span></td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The average of that row is <span class="math inline">\(2/6\)</span>, which is exactly <span class="math inline">\(\Pr[A]\)</span>. Averaging a 0/1 variable counts the fraction of outcomes where the event happens.</p>
+<p><strong>Step 2: if one variable is never larger, its average is never larger.</strong> If <span class="math inline">\(Y \le Z\)</span> on <em>every</em> outcome, then <span class="math inline">\(\mathbb E[Y] \le \mathbb E[Z]\)</span>: you are averaging two rows of numbers where each entry of the first is at most the matching entry of the second.</p>
+<p><strong>Step 3: put them together.</strong> Take <span class="math inline">\(X\)</span> = the roll and compare <span class="math inline">\(5\cdot\mathbf 1[X \ge 5]\)</span> with <span class="math inline">\(X\)</span> itself, outcome by outcome (<a href="#tbl-die-markov" class="quarto-xref">Table&nbsp;<span>2.3</span></a>):</p>
+<div id="tbl-die-markov" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-die-markov-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.3: Outcome-by-outcome comparison of <span class="math inline">\(5\cdot\mathbf 1[X \ge 5]\)</span> with the die roll <span class="math inline">\(X\)</span>.
+</figcaption>
+<div aria-describedby="tbl-die-markov-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Roll</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+<th>5</th>
+<th>6</th>
+<th>Average</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(5\cdot\mathbf 1[X \ge 5]\)</span></td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>5</td>
+<td>5</td>
+<td><span class="math inline">\(5\Pr[X \ge 5]\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(X\)</span></td>
+<td>1</td>
+<td>2</td>
+<td>3</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td><span class="math inline">\(3.5\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Every entry in the top row is at most the one below it. Where the event fails, the top is 0 and <span class="math inline">\(X \ge 0\)</span>. Where it holds, the top is 5 and <span class="math inline">\(X \ge 5\)</span> by definition of the event. So the averages are ordered: <span class="math inline">\(5\Pr[X \ge 5] \le 3.5\)</span>, and dividing by 5 gives <span class="math inline">\(\Pr[X \ge 5] \le 0.7\)</span>. The true value is <span class="math inline">\(2/6 = 1/3\)</span>; the bound is weak, but it is correct and used nothing except the mean. <a href="#fig-markov-die" class="quarto-xref">Figure&nbsp;<span>2.1</span></a> shows the comparison.</p>
+<div id="fig-markov-die" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-markov-die-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/markov_die.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-markov-die-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.1: The scaled indicator <span class="math inline">\(5\cdot\mathbf 1[X \ge 5]\)</span> never exceeds the die roll <span class="math inline">\(X\)</span>, so its average never exceeds 3.5.
+</figcaption>
+</figure>
+</div>
+<p>The pattern for bounding <span class="math inline">\(\Pr[\text{event}]\)</span>: write it as the average of an indicator, find a variable that is at least as large as that indicator on every outcome and whose average you know, and average both sides.</p>
+</section>
+<section id="fact-2-union-bound" class="level3" data-number="2.2.2">
+<h3 data-number="2.2.2" class="anchored" data-anchor-id="fact-2-union-bound"><span class="header-section-number">2.2.2</span> Fact 2 — Union bound</h3>
+<p>The chance that at least one of several events happens is at most the sum of their separate chances. Adding the chances can only overcount, never undercount, because an outcome that lies in several events gets counted several times. In symbols, for events <span class="math inline">\(A_1, \dots, A_k\)</span>, <span id="eq-auto-02concentration-2"><span class="math display">\[\Pr[A_1 \cup \dots \cup A_k] \le \sum_i \Pr[A_i]. \tag{2.2}\]</span></span></p>
+<p>To prove it, use Fact 1 and compare indicators outcome by outcome: <span class="math inline">\(\mathbf 1[\cup_i A_i] \le \sum_i \mathbf 1[A_i]\)</span>. On an outcome where none of the events happens, both sides are 0. On an outcome where at least one happens, the left side is 1 and the right side counts how many of the events happen, which is at least 1. The right side can be larger than 1 on outcomes that lie in several events at once: that double counting is the only slack. Taking expectations of both sides turns each indicator into a probability and gives the bound.</p>
+<p>You will use it whenever you need <span class="math inline">\(k\)</span> estimates, <span class="math inline">\(k\)</span> steps or <span class="math inline">\(k\)</span> hypotheses to all behave at once. If each one fails with probability at most <span class="math inline">\(\beta/k\)</span>, all of them succeed together except with probability at most <span class="math inline">\(k \cdot \beta/k = \beta\)</span>. In the exponential bounds of this chapter, asking for failure probability <span class="math inline">\(\beta/k\)</span> instead of <span class="math inline">\(\beta\)</span> replaces <span class="math inline">\(\ln(1/\beta)\)</span> by <span class="math inline">\(\ln(k/\beta) = \ln k + \ln(1/\beta)\)</span>, so the cost of controlling <span class="math inline">\(k\)</span> things is an extra <span class="math inline">\(\ln k\)</span> inside every exponential bound.</p>
+</section>
+<section id="fact-3-1-x-le-ex-for-every-real-x" class="level3" data-number="2.2.3">
+<h3 data-number="2.2.3" class="anchored" data-anchor-id="fact-3-1-x-le-ex-for-every-real-x"><span class="header-section-number">2.2.3</span> Fact 3 — <span class="math inline">\(1 + x \le e^x\)</span> for every real <span class="math inline">\(x\)</span></h3>
+<p>The straight line <span class="math inline">\(1 + x\)</span> touches the curve <span class="math inline">\(e^x\)</span> at <span class="math inline">\(x = 0\)</span> (both equal 1 there and both have slope 1) and stays below it everywhere else. The reason is that <span class="math inline">\(e^x\)</span> is <strong>convex</strong>: its second derivative <span class="math inline">\(e^x\)</span> is positive, so the curve bends upward, away from any tangent line, on both sides of the point of contact. A convex function therefore lies above all its tangents, and <span class="math inline">\(1 + x\)</span> is its tangent at 0.</p>
+<p>You will use it to turn a sum into an exponential. In the Chernoff bound it turns <span class="math inline">\(1 + p(e^\lambda - 1)\)</span> into <span class="math inline">\(\exp(p(e^\lambda - 1))\)</span>, by taking <span class="math inline">\(x = p(e^\lambda - 1)\)</span>. A product of such factors then becomes a single exponential whose exponent is a sum, which is far easier to optimize.</p>
+</section>
+<section id="fact-4-mgfs-multiply-under-independence" class="level3" data-number="2.2.4">
+<h3 data-number="2.2.4" class="anchored" data-anchor-id="fact-4-mgfs-multiply-under-independence"><span class="header-section-number">2.2.4</span> Fact 4 — MGFs multiply under independence</h3>
+<p>The moment generating function of a random variable <span class="math inline">\(X\)</span> is the average of <span class="math inline">\(e^{\lambda X}\)</span>, viewed as a function of a number <span class="math inline">\(\lambda\)</span> that you choose: <span id="eq-auto-02concentration-3"><span class="math display">\[M_X(\lambda) = \mathbb E[e^{\lambda X}]. \tag{2.3}\]</span></span> With <span class="math inline">\(\lambda &gt; 0\)</span> the weight <span class="math inline">\(e^{\lambda X}\)</span> grows exponentially in <span class="math inline">\(X\)</span>, so large values of <span class="math inline">\(X\)</span> dominate the average, and the larger <span class="math inline">\(\lambda\)</span>, the further into the right tail it looks. That is why the MGF is the right object for tail bounds.</p>
+<p>The MGF of a sum of independent variables is the product of their MGFs. The reason is that <span class="math inline">\(e^{\lambda(X+Y)} = e^{\lambda X}e^{\lambda Y}\)</span>, and when <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent so are <span class="math inline">\(e^{\lambda X}\)</span> and <span class="math inline">\(e^{\lambda Y}\)</span>; the average of a product of independent variables is the product of their averages, so <span id="eq-auto-02concentration-4"><span class="math display">\[\mathbb E[e^{\lambda(X+Y)}] = \mathbb E[e^{\lambda X}]\,\mathbb E[e^{\lambda Y}]. \tag{2.4}\]</span></span> Scaling is just as simple. Multiplying <span class="math inline">\(X\)</span> by a constant <span class="math inline">\(c\)</span> is the same as multiplying the dial <span class="math inline">\(\lambda\)</span> by <span class="math inline">\(c\)</span>, because <span class="math inline">\(\mathbb E[e^{\lambda (cX)}] = \mathbb E[e^{(c\lambda)X}]\)</span>, so <span class="math inline">\(M_{cX}(\lambda) = M_X(c\lambda)\)</span>.</p>
+<p>You will use it to reduce a sum of <span class="math inline">\(n\)</span> variables to <span class="math inline">\(n\)</span> one-variable calculations, one MGF per term.</p>
+</section>
+<section id="fact-5-inverting-a-tail-bound" class="level3" data-number="2.2.5">
+<h3 data-number="2.2.5" class="anchored" data-anchor-id="fact-5-inverting-a-tail-bound"><span class="header-section-number">2.2.5</span> Fact 5 — Inverting a tail bound</h3>
+<p>A tail bound answers “how likely is a deviation of size <span class="math inline">\(t\)</span>?”. In practice you usually want the reverse: “how large a deviation must I allow so that it is exceeded with probability at most <span class="math inline">\(\beta\)</span>?”. That number is the <strong>width</strong> at failure probability <span class="math inline">\(\beta\)</span>, and you get it by setting the bound equal to <span class="math inline">\(\beta\)</span> and solving for <span class="math inline">\(t\)</span>.</p>
+<p>Concretely, suppose the deviation <span class="math inline">\(D\)</span> satisfies <span class="math inline">\(\Pr[D \ge t] \le e^{-g(t)}\)</span> for an increasing function <span class="math inline">\(g\)</span>. The bound is at most <span class="math inline">\(\beta\)</span> exactly when <span class="math inline">\(g(t) \ge \ln(1/\beta)\)</span>, that is, when <span class="math inline">\(t \ge g^{-1}(\ln(1/\beta))\)</span>. So with probability at least <span class="math inline">\(1 - \beta\)</span>, <span id="eq-auto-02concentration-5"><span class="math display">\[D &lt; g^{-1}(\ln(1/\beta)). \tag{2.5}\]</span></span> For example, the Gaussian-shaped bound with <span class="math inline">\(g(t) = t^2/(2\sigma^2)\)</span> gives <span class="math inline">\(t^2/(2\sigma^2) = \ln(1/\beta)\)</span>, so <span class="math inline">\(D &lt; \sigma\sqrt{2\ln(1/\beta)}\)</span>. Every “width at failure probability <span class="math inline">\(\beta\)</span>” in this chapter is this step.</p>
+</section>
+</section>
+<section id="markov-and-chebyshev" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="markov-and-chebyshev"><span class="header-section-number">2.3</span> Markov and Chebyshev</h2>
+<section id="context" class="level3" data-number="2.3.1">
+<h3 data-number="2.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">2.3.1</span> Context</h3>
+<p>You have a random estimate and want the crudest answer to “how far can it be from the truth?”, using as little as possible about its distribution. Markov uses only the mean, and Chebyshev uses only the variance. Both are weak. But every stronger bound in this chapter is Markov applied to a better function, so the derivation pattern matters more than the bounds themselves.</p>
+</section>
+<section id="markovs-inequality" class="level3" data-number="2.3.2">
+<h3 data-number="2.3.2" class="anchored" data-anchor-id="markovs-inequality"><span class="header-section-number">2.3.2</span> Markov’s inequality</h3>
+<p>A non-negative variable cannot often be much larger than its mean, because those large values alone would already pull the average up. If <span class="math inline">\(X \ge 0\)</span> were at least <span class="math inline">\(a\)</span> with probability <span class="math inline">\(p\)</span>, those outcomes would contribute at least <span class="math inline">\(a p\)</span> to the mean, so <span class="math inline">\(ap \le \mathbb E[X]\)</span>. For <span class="math inline">\(X \ge 0\)</span> and <span class="math inline">\(a &gt; 0\)</span>: <span id="eq-auto-02concentration-6"><span class="math display">\[\Pr[X \ge a] \le \frac{\mathbb E[X]}{a}. \tag{2.6}\]</span></span></p>
+<p><strong>Derivation.</strong> This is the die argument of Fact 1, with a general <span class="math inline">\(a\)</span> in place of 5.</p>
+<ol type="1">
+<li>Compare <span class="math inline">\(X\)</span> with a scaled indicator: <span class="math inline">\(a\,\mathbf 1[X \ge a] \le X\)</span> pointwise. If <span class="math inline">\(X \ge a\)</span>, the left side is <span class="math inline">\(a\)</span>, which is at most <span class="math inline">\(X\)</span>. If <span class="math inline">\(X &lt; a\)</span>, the left side is <span class="math inline">\(0\)</span>, which is at most <span class="math inline">\(X\)</span> because <span class="math inline">\(X \ge 0\)</span>. This is the only place non-negativity is used.</li>
+<li>Take expectations, which preserve <span class="math inline">\(\le\)</span> (Fact 1, Step 2). The average of the indicator is a probability (Fact 1), so <span class="math inline">\(a \Pr[X \ge a] \le \mathbb E[X]\)</span>.</li>
+<li>Divide both sides by <span class="math inline">\(a &gt; 0\)</span>.</li>
+</ol>
+<p><strong>Tightness.</strong> You cannot do better with only the mean. Write <span class="math inline">\(\mu\)</span> for the mean and take the variable that puts all its mass on two points: <span class="math inline">\(X = a\)</span> with probability <span class="math inline">\(\mu/a\)</span> and <span class="math inline">\(0\)</span> otherwise. Its mean is <span class="math inline">\(a \cdot \mu/a = \mu\)</span>, and <span class="math inline">\(\Pr[X \ge a] = \mu/a\)</span> exactly, so Markov’s bound holds with equality.</p>
+</section>
+<section id="generalized-markov" class="level3" data-number="2.3.3">
+<h3 data-number="2.3.3" class="anchored" data-anchor-id="generalized-markov"><span class="header-section-number">2.3.3</span> Generalized Markov</h3>
+<p>Markov’s inequality applies to any non-negative variable, so you can apply it to a transformed version of <span class="math inline">\(X\)</span> instead of <span class="math inline">\(X\)</span> itself. If <span class="math inline">\(g\)</span> is non-negative and strictly increasing, then <span class="math inline">\(X \ge t\)</span> and <span class="math inline">\(g(X) \ge g(t)\)</span> are the same event, because an increasing function keeps the order. Applying Markov to the non-negative variable <span class="math inline">\(g(X)\)</span> at the level <span class="math inline">\(a = g(t)\)</span> gives <span id="eq-auto-02concentration-7"><span class="math display">\[\Pr[X \ge t] = \Pr[g(X) \ge g(t)] \le \frac{\mathbb E[g(X)]}{g(t)}. \tag{2.7}\]</span></span> The rest of this chapter is a search for good <span class="math inline">\(g\)</span>. A fast-growing <span class="math inline">\(g\)</span> makes the threshold <span class="math inline">\(g(t)\)</span> in the denominator huge compared with typical values of <span class="math inline">\(g(X)\)</span>, so the bound gets small; the price is that <span class="math inline">\(\mathbb E[g(X)]\)</span> also grows, and you must be able to compute or bound it. <span class="math inline">\(g(x) = x^2\)</span> gives Chebyshev, and <span class="math inline">\(g(x) = e^{\lambda x}\)</span> gives Chernoff.</p>
+</section>
+<section id="chebyshevs-inequality" class="level3" data-number="2.3.4">
+<h3 data-number="2.3.4" class="anchored" data-anchor-id="chebyshevs-inequality"><span class="header-section-number">2.3.4</span> Chebyshev’s inequality</h3>
+<p>The variance <span class="math inline">\(\sigma^2\)</span> is the average squared distance from the mean <span class="math inline">\(\mu\)</span>. A large deviation <span class="math inline">\(|X - \mu| \ge t\)</span> makes the squared distance at least <span class="math inline">\(t^2\)</span>, and if that happened often, the average squared distance would exceed <span class="math inline">\(\sigma^2\)</span>. So the probability of a deviation of <span class="math inline">\(t\)</span> or more is at most <span class="math inline">\(\sigma^2/t^2\)</span>. For <span class="math inline">\(X\)</span> with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span>: <span id="eq-auto-02concentration-8"><span class="math display">\[\Pr[|X - \mu| \ge t] \le \frac{\sigma^2}{t^2}. \tag{2.8}\]</span></span></p>
+<p><strong>Derivation.</strong></p>
+<ol type="1">
+<li>Turn the two-sided event into an event about a non-negative variable: <span class="math inline">\(|X - \mu| \ge t\)</span> holds exactly when <span class="math inline">\((X - \mu)^2 \ge t^2\)</span>, since squaring preserves the order of non-negative numbers.</li>
+<li>Apply Markov to <span class="math inline">\(Y = (X-\mu)^2\)</span>, which is non-negative and has mean <span class="math inline">\(\sigma^2\)</span> by the definition of the variance, at the level <span class="math inline">\(a = t^2\)</span>: <span class="math inline">\(\Pr[Y \ge t^2] \le \mathbb E[Y]/t^2 = \sigma^2/t^2\)</span>.</li>
+</ol>
+<p><strong>Means of samples.</strong> Averaging <span class="math inline">\(n\)</span> independent samples shrinks the variance by a factor of <span class="math inline">\(n\)</span>. Two rules give this. Variances add for independent terms, because the cross terms (covariances) in the expansion of the square vanish, so a sum of <span class="math inline">\(n\)</span> terms has variance <span class="math inline">\(n\sigma^2\)</span>. And <span class="math inline">\(\operatorname{Var}(cX) = c^2\operatorname{Var}X\)</span>, because every deviation is multiplied by <span class="math inline">\(c\)</span> and then squared, so dividing the sum by <span class="math inline">\(n\)</span> divides its variance by <span class="math inline">\(n^2\)</span>. Together, the mean <span class="math inline">\(\bar X\)</span> has <span class="math inline">\(\operatorname{Var}(\bar X) = n\sigma^2/n^2 = \sigma^2/n\)</span>. Chebyshev then gives <span class="math inline">\(\Pr[|\bar X - \mu| \ge t] \le \sigma^2/(nt^2)\)</span>. To turn this into a width, set the bound equal to <span class="math inline">\(\beta\)</span> and solve for <span class="math inline">\(t\)</span>, as in Fact 5: <span class="math inline">\(\sigma^2/(nt^2) = \beta\)</span> gives <span class="math inline">\(t = \sigma/\sqrt{n\beta}\)</span>. So with probability at least <span class="math inline">\(1-\beta\)</span>, <span class="math inline">\(|\bar X - \mu| &lt; \sigma/\sqrt{n\beta}\)</span>.</p>
+</section>
+<section id="interpretation-the-price-of-knowing-only-the-variance" class="level3" data-number="2.3.5">
+<h3 data-number="2.3.5" class="anchored" data-anchor-id="interpretation-the-price-of-knowing-only-the-variance"><span class="header-section-number">2.3.5</span> Interpretation: the price of knowing only the variance</h3>
+<p>How wide must an error bar be to fail with probability at most <span class="math inline">\(\beta\)</span>? With only the variance known, solving <span class="math inline">\(\sigma^2/t^2 = \beta\)</span> gives <span class="math inline">\(t = \sigma/\sqrt\beta\)</span>. With a Gaussian-type tail <span class="math inline">\(e^{-t^2/(2\sigma^2)}\)</span>, Fact 5 gives <span class="math inline">\(t = \sigma\sqrt{2\ln(1/\beta)}\)</span>. <a href="#tbl-width-price" class="quarto-xref">Table&nbsp;<span>2.4</span></a> compares the two, in units of <span class="math inline">\(\sigma\)</span>. For instance, at <span class="math inline">\(\beta = 0.05\)</span>, <span class="math inline">\(1/\sqrt{0.05} = 4.5\)</span>, while <span class="math inline">\(\ln(1/0.05) = \ln 20 \approx 3.0\)</span> gives <span class="math inline">\(\sqrt{2 \times 3.0} = 2.4\)</span>.</p>
+<div id="tbl-width-price" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-width-price-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.4: Width needed to reach failure probability <span class="math inline">\(\beta\)</span>, in units of <span class="math inline">\(\sigma\)</span>, with only the variance known (Chebyshev) and with a Gaussian-type tail.
+</figcaption>
+<div aria-describedby="tbl-width-price-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\beta\)</span></th>
+<th>Chebyshev, <span class="math inline">\(1/\sqrt\beta\)</span></th>
+<th>Gaussian-type, <span class="math inline">\(\sqrt{2\ln(1/\beta)}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(0.05\)</span></td>
+<td>4.5</td>
+<td>2.4</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(10^{-3}\)</span></td>
+<td>31.6</td>
+<td>3.7</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(10^{-6}\)</span></td>
+<td>1,000</td>
+<td>5.3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The Chebyshev width grows like a power of <span class="math inline">\(1/\beta\)</span>, the Gaussian-type width only like the square root of a logarithm. Polynomial bounds are fine for a quick 95% error bar. They are useless when the failure probability must be tiny, as it usually must be in security and in the later parts of this book, often <span class="math inline">\(10^{-5}\)</span> or smaller.</p>
+</section>
+<section id="example-the-error-of-laplace-noise" class="level3" data-number="2.3.6">
+<h3 data-number="2.3.6" class="anchored" data-anchor-id="example-the-error-of-laplace-noise"><span class="header-section-number">2.3.6</span> Example: the error of Laplace noise</h3>
+<p>A measurement is corrupted by additive noise from the <strong>Laplace distribution</strong> <span class="math inline">\(\mathrm{Lap}(b)\)</span>, which has density <span class="math inline">\(\frac{1}{2b}e^{-|x|/b}\)</span>: symmetric around 0, with scale <span class="math inline">\(b\)</span>. Its variance is <span class="math inline">\(2b^2\)</span>; you can check this by integrating, since <span class="math inline">\(\mathbb E[X^2] = 2\int_0^\infty x^2 \frac{1}{2b}e^{-x/b}\,dx = 2b^2\)</span> (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). Chebyshev with <span class="math inline">\(\sigma^2 = 2b^2\)</span> gives <span class="math inline">\(\Pr[|\text{error}| \ge t] \le 2b^2/t^2\)</span>, and setting this to <span class="math inline">\(\beta\)</span> gives the <span class="math inline">\(1-\beta\)</span> width <span class="math inline">\(b\sqrt{2/\beta}\)</span>. With <span class="math inline">\(b = 1\)</span> and <span class="math inline">\(\beta = 0.05\)</span> that is <span class="math inline">\(\sqrt{2/0.05} = \sqrt{40} \approx 6.3\)</span>.</p>
+<p>Now use the shape of the noise. Integrating the density gives the exact tail <span class="math inline">\(\Pr[|X| \ge t] = e^{-t/b}\)</span>, and setting <span class="math inline">\(e^{-t/b} = \beta\)</span> gives the width <span class="math inline">\(b\ln(1/\beta) = \ln 20 \approx 3.0\)</span>. At <span class="math inline">\(\beta = 10^{-6}\)</span> the two widths are 1,414 (that is, <span class="math inline">\(\sqrt{2 \times 10^6}\)</span>) and 13.8 (that is, <span class="math inline">\(\ln(10^6)\)</span>): ignoring the shape of the noise costs a factor of 100.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="2.3.7">
+<h3 data-number="2.3.7" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">2.3.7</span> Check yourself</h3>
+<ul>
+<li>Why can’t you apply Markov directly to <span class="math inline">\(X - \mu\)</span>? <em>(It can be negative, so step 1 of the Markov derivation fails.)</em></li>
+<li>Which step of the sample-mean argument used independence, and is it more than you need? <em>(Only the vanishing of covariances. Pairwise uncorrelated samples suffice.)</em></li>
+</ul>
+</section>
+</section>
+<section id="the-chernoff-method" class="level2" data-number="2.4">
+<h2 data-number="2.4" class="anchored" data-anchor-id="the-chernoff-method"><span class="header-section-number">2.4</span> The Chernoff method</h2>
+<section id="context-1" class="level3" data-number="2.4.1">
+<h3 data-number="2.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">2.4.1</span> Context</h3>
+<p>Small failure probabilities like <span class="math inline">\(10^{-5}\)</span> are out of reach for polynomial bounds at sensible widths. The fix is to apply generalized Markov with <span class="math inline">\(g(x) = e^{\lambda x}\)</span>. Its average is the MGF, which contains every moment of <span class="math inline">\(X\)</span> at once, so the bound uses everything about the distribution, not just the mean or the variance. The resulting Chernoff bound is exponentially tight: Cramér’s theorem says that for a sum of <span class="math inline">\(n\)</span> independent copies of a variable, the probability of a large deviation decays exponentially in <span class="math inline">\(n\)</span> with exactly the rate the optimized Chernoff bound gives, so no method can improve its exponent for large sums.</p>
+</section>
+<section id="the-recipe" class="level3" data-number="2.4.2">
+<h3 data-number="2.4.2" class="anchored" data-anchor-id="the-recipe"><span class="header-section-number">2.4.2</span> The recipe</h3>
+<p><strong>The master bound.</strong> For any <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(e^{\lambda x}\)</span> is positive and increasing, so generalized Markov applies with <span class="math inline">\(g(x) = e^{\lambda x}\)</span>. Dividing <span class="math inline">\(\mathbb E[e^{\lambda X}]\)</span> by <span class="math inline">\(e^{\lambda t}\)</span> gives the first form below. Writing the MGF as <span class="math inline">\(e^{\psi(\lambda)}\)</span>, where <span class="math inline">\(\psi\)</span> is the logarithm of the MGF (the <strong>log-MGF</strong>), puts the whole bound into one exponent: <span id="eq-auto-02concentration-9"><span class="math display">\[\Pr[X \ge t] \le e^{-\lambda t}\,\mathbb E[e^{\lambda X}] = \exp\big(-(\lambda t - \psi(\lambda))\big), \qquad \psi(\lambda) = \ln\mathbb E[e^{\lambda X}]. \tag{2.9}\]</span></span> This holds for every <span class="math inline">\(\lambda &gt; 0\)</span>, so you are free to pick the <span class="math inline">\(\lambda\)</span> that makes the bound smallest, which is the one that makes <span class="math inline">\(\lambda t - \psi(\lambda)\)</span> largest. The best exponent, <span class="math inline">\(\sup_\lambda(\lambda t - \psi(\lambda))\)</span>, viewed as a function of <span class="math inline">\(t\)</span>, has a name: the <strong>Legendre transform</strong> <span class="math inline">\(\psi^*(t)\)</span> of the log-MGF. It is the exponent Cramér’s theorem says is exact.</p>
+<p>In practice every Chernoff bound in this chapter is computed by the same five steps:</p>
+<ol type="1">
+<li>Write down the MGF of <span class="math inline">\(X\)</span>.</li>
+<li>If <span class="math inline">\(X\)</span> is a sum of independent terms, factorize the MGF (Fact 4).</li>
+<li>Bound each factor by something simple, usually with Fact 3.</li>
+<li>Minimize the exponent over <span class="math inline">\(\lambda\)</span> by setting its derivative to zero.</li>
+<li>Simplify the result into a usable form.</li>
+</ol>
+<p>Think of <span class="math inline">\(e^{\lambda X}\)</span> as a lens on the tail. A large <span class="math inline">\(\lambda\)</span> magnifies the far tail but inflates <span class="math inline">\(\mathbb E[e^{\lambda X}]\)</span>. A small <span class="math inline">\(\lambda\)</span> keeps the expectation tame but magnifies little. <a href="#fig-chernoff-lambda" class="quarto-xref">Figure&nbsp;<span>2.2</span></a> shows the trade-off for a binomial: the bound as a function of <span class="math inline">\(\lambda\)</span> has a clear minimum, and the relaxation of step 3 costs a little but moves the optimum to a closed form.</p>
+<div id="fig-chernoff-lambda" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-chernoff-lambda-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/chernoff_lambda.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-chernoff-lambda-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.2: The Chernoff bound <span class="math inline">\(e^{-\lambda t}\mathbb E[e^{\lambda S}]\)</span> for <span class="math inline">\(S \sim \mathrm{Binomial}(100, 0.1)\)</span> and <span class="math inline">\(t = 20\)</span>, as a function of <span class="math inline">\(\lambda\)</span>, before and after the relaxation <span class="math inline">\(1 + x \le e^x\)</span>. Both stay above the exact tail.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="warm-up-the-gaussian" class="level3" data-number="2.4.3">
+<h3 data-number="2.4.3" class="anchored" data-anchor-id="warm-up-the-gaussian"><span class="header-section-number">2.4.3</span> Warm-up: the Gaussian</h3>
+<p>Start with the case where every step is exact, a normal variable <span class="math inline">\(X \sim \mathcal N(0, \sigma^2)\)</span> with mean 0 and variance <span class="math inline">\(\sigma^2\)</span>. Its MGF is <span class="math inline">\(\mathbb E[e^{\lambda X}] = e^{\lambda^2\sigma^2/2}\)</span> (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). To see why, multiply the density, which is proportional to <span class="math inline">\(e^{-x^2/(2\sigma^2)}\)</span>, by <span class="math inline">\(e^{\lambda x}\)</span> and complete the square in the exponent: <span class="math inline">\(\lambda x - x^2/(2\sigma^2) = -(x - \lambda\sigma^2)^2/(2\sigma^2) + \lambda^2\sigma^2/2\)</span>. The first term is a normal density shifted to mean <span class="math inline">\(\lambda\sigma^2\)</span>, which still integrates to 1, and the constant <span class="math inline">\(e^{\lambda^2\sigma^2/2}\)</span> is left over. So the log-MGF is the quadratic <span class="math inline">\(\psi(\lambda) = \lambda^2\sigma^2/2\)</span>.</p>
+<ol type="1">
+<li><strong>Master bound.</strong> Substitute the MGF: <span class="math inline">\(\Pr[X \ge t] \le \exp(-\lambda t + \lambda^2\sigma^2/2)\)</span>.</li>
+<li><strong>Minimize.</strong> The exponent is a parabola in <span class="math inline">\(\lambda\)</span>. Its derivative <span class="math inline">\(-t + \lambda\sigma^2\)</span> vanishes at <span class="math inline">\(\lambda = t/\sigma^2\)</span>. Substituting this <span class="math inline">\(\lambda\)</span> gives the exponent <span class="math inline">\(-t^2/\sigma^2 + t^2/(2\sigma^2) = -t^2/(2\sigma^2)\)</span>, so <span id="eq-auto-02concentration-10"><span class="math display">\[\Pr[X \ge t] \le e^{-t^2/(2\sigma^2)}. \tag{2.10}\]</span></span></li>
+</ol>
+<p>Remember the shape of this calculation: a quadratic log-MGF gives a quadratic exponent. The sub-Gaussian section reuses it verbatim.</p>
+</section>
+<section id="main-case-sums-of-bernoullis" class="level3" data-number="2.4.4">
+<h3 data-number="2.4.4" class="anchored" data-anchor-id="main-case-sums-of-bernoullis"><span class="header-section-number">2.4.4</span> Main case: sums of Bernoullis</h3>
+<p>Now the case the method is most used for: counting how many of many independent yes/no events happen. Let <span class="math inline">\(X_i \sim \mathrm{Bernoulli}(p_i)\)</span> be independent, each equal to 1 with probability <span class="math inline">\(p_i\)</span> and 0 otherwise, let <span class="math inline">\(S = \sum_i X_i\)</span> be the count, and let <span class="math inline">\(\mu = \mathbb E[S] = \sum_i p_i\)</span> be its mean. The question is how likely <span class="math inline">\(S\)</span> is to land a fraction <span class="math inline">\(\delta\)</span> above or below <span class="math inline">\(\mu\)</span>.</p>
+<p><strong>Upper tail</strong>, <span class="math inline">\(\Pr[S \ge (1+\delta)\mu]\)</span> for <span class="math inline">\(\delta &gt; 0\)</span>. Follow the recipe.</p>
+<ol type="1">
+<li><strong>One factor.</strong> <span class="math inline">\(X_i\)</span> is 1 with probability <span class="math inline">\(p_i\)</span> and 0 otherwise, so <span class="math inline">\(\mathbb E[e^{\lambda X_i}] = p_ie^\lambda + (1 - p_i) = 1 + p_i(e^\lambda - 1)\)</span>. Fact 3 with <span class="math inline">\(x = p_i(e^\lambda - 1)\)</span> bounds this by <span class="math inline">\(\exp(p_i(e^\lambda - 1))\)</span>. The right side is the MGF of a Poisson variable with mean <span class="math inline">\(p_i\)</span>, since a <span class="math inline">\(\mathrm{Poisson}(\mu)\)</span> variable has MGF <span class="math inline">\(\exp(\mu(e^\lambda - 1))\)</span> (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). In words: as far as the MGF can tell, a Bernoulli sum is dominated by a Poisson count with the same mean.</li>
+<li><strong>Product.</strong> By Fact 4 the MGF of the sum is the product of the factors, and the exponents add: <span class="math inline">\(\mathbb E[e^{\lambda S}] \le \exp\big(\sum_i p_i(e^\lambda - 1)\big) = \exp(\mu(e^\lambda - 1))\)</span>.</li>
+<li><strong>Master bound</strong> with <span class="math inline">\(t = (1+\delta)\mu\)</span>: <span class="math inline">\(\Pr[S \ge (1+\delta)\mu] \le \exp(\mu(e^\lambda - 1) - \lambda(1+\delta)\mu)\)</span>.</li>
+<li><strong>Minimize.</strong> The derivative of the exponent, <span class="math inline">\(\mu e^\lambda - (1+\delta)\mu\)</span>, vanishes at <span class="math inline">\(e^\lambda = 1 + \delta\)</span>, so <span class="math inline">\(\lambda = \ln(1+\delta)\)</span>, which is positive as required. Substituting, the exponent becomes <span class="math inline">\(\mu\delta - (1+\delta)\mu\ln(1+\delta)\)</span>, so <span id="eq-auto-02concentration-11"><span class="math display">\[\Pr[S \ge (1+\delta)\mu] \le \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^\mu = \exp\big(-\mu[(1+\delta)\ln(1+\delta) - \delta]\big). \tag{2.11}\]</span></span></li>
+<li><strong>Simplify.</strong> The bracket is awkward to invert, so replace the logarithm by a simpler lower bound, <span class="math inline">\(\ln(1+\delta) \ge \frac{2\delta}{2+\delta}\)</span> for <span class="math inline">\(\delta \ge 0\)</span>. To see that this holds, let <span class="math inline">\(f(\delta) = \ln(1+\delta) - \frac{2\delta}{2+\delta}\)</span>. It starts at <span class="math inline">\(f(0) = 0\)</span> and never decreases, because its derivative is <span class="math inline">\(f'(\delta) = \frac{1}{1+\delta} - \frac{4}{(2+\delta)^2} = \frac{\delta^2}{(1+\delta)(2+\delta)^2} \ge 0\)</span>; so <span class="math inline">\(f(\delta) \ge 0\)</span>. Putting the lower bound into the bracket gives <span class="math inline">\((1+\delta)\frac{2\delta}{2+\delta} - \delta = \frac{\delta^2}{2+\delta}\)</span>, so <span id="eq-auto-02concentration-12"><span class="math display">\[\Pr[S \ge (1+\delta)\mu] \le \exp\left(-\frac{\delta^2\mu}{2+\delta}\right). \tag{2.12}\]</span></span></li>
+</ol>
+<p><strong>Lower tail</strong>, <span class="math inline">\(\Pr[S \le (1-\delta)\mu]\)</span> for <span class="math inline">\(0 &lt; \delta &lt; 1\)</span>. The same recipe works if you look at <span class="math inline">\(-S\)</span> instead of <span class="math inline">\(S\)</span>, because a small <span class="math inline">\(S\)</span> is a large <span class="math inline">\(-S\)</span>.</p>
+<ol type="1">
+<li><strong>Master bound for the lower tail.</strong> For <span class="math inline">\(\lambda &gt; 0\)</span>, <span class="math inline">\(S \le s\)</span> holds exactly when <span class="math inline">\(e^{-\lambda S} \ge e^{-\lambda s}\)</span>, since <span class="math inline">\(e^{-\lambda x}\)</span> is decreasing. Markov applied to <span class="math inline">\(e^{-\lambda S}\)</span>, and the same per-factor bound as before with <span class="math inline">\(-\lambda\)</span> in place of <span class="math inline">\(\lambda\)</span>, give <span class="math inline">\(\Pr[S \le s] \le e^{\lambda s}\,\mathbb E[e^{-\lambda S}] \le \exp(\lambda s + \mu(e^{-\lambda} - 1))\)</span>.</li>
+<li><strong>Minimize.</strong> With <span class="math inline">\(s = (1-\delta)\mu\)</span>, the derivative <span class="math inline">\(s - \mu e^{-\lambda}\)</span> vanishes at <span class="math inline">\(e^{-\lambda} = 1 - \delta\)</span>, that is, <span class="math inline">\(\lambda = -\ln(1-\delta) &gt; 0\)</span>. Substituting gives <span class="math inline">\(\exp\big(-\mu[\delta + (1-\delta)\ln(1-\delta)]\big)\)</span>.</li>
+<li><strong>Simplify.</strong> Expand the logarithm in its Taylor series, <span class="math inline">\(\ln(1-\delta) = -\sum_{k \ge 1}\delta^k/k\)</span>, multiply by <span class="math inline">\(1-\delta\)</span> and collect powers of <span class="math inline">\(\delta\)</span>: <span class="math inline">\((1-\delta)\ln(1-\delta) = -\delta + \sum_{k\ge2}\frac{\delta^k}{k(k-1)}\)</span>. Every term of the sum is non-negative, so keeping only the first one (<span class="math inline">\(k = 2\)</span>, which is <span class="math inline">\(\delta^2/2\)</span>) gives the lower bound <span class="math inline">\(-\delta + \frac{\delta^2}{2}\)</span>. The bracket is then at least <span class="math inline">\(\delta^2/2\)</span>, so <span id="eq-auto-02concentration-13"><span class="math display">\[\Pr[S \le (1-\delta)\mu] \le \exp\left(-\frac{\delta^2\mu}{2}\right). \tag{2.13}\]</span></span></li>
+</ol>
+</section>
+<section id="interpretation" class="level3" data-number="2.4.5">
+<h3 data-number="2.4.5" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">2.4.5</span> Interpretation</h3>
+<p>The bounds depend on the expected count <span class="math inline">\(\mu\)</span>, not on the number of trials <span class="math inline">\(n\)</span>. A million trials with <span class="math inline">\(p = 10^{-6}\)</span> expect a single event, and the count is far from concentrated. Rare events concentrate in relative terms only once you expect enough of them, because the exponent <span class="math inline">\(\delta^2\mu\)</span> grows with <span class="math inline">\(\mu\)</span>.</p>
+<p>Chernoff also beats Hoeffding (the range-only bound of the next section) when <span class="math inline">\(p\)</span> is small, and the reason is in step 1. That step keeps each <span class="math inline">\(p_i\)</span> in the bound instead of replacing it by the worst case, so the bound implicitly knows the variance of the count, <span class="math inline">\(\mu(1-p) \approx \mu\)</span>, which is small when <span class="math inline">\(p\)</span> is small. A bound that only knows the range has to assume the largest variance the range allows. <a href="#fig-bernoulli-tails" class="quarto-xref">Figure&nbsp;<span>2.3</span></a> shows the gap.</p>
+<p>Finally, the two tails differ. For large <span class="math inline">\(\delta\)</span>, the upper-tail exponent <span class="math inline">\(\delta^2\mu/(2+\delta)\)</span> behaves like <span class="math inline">\(\delta\mu\)</span>, so the tail decays like <span class="math inline">\(\exp(-\delta\mu)\)</span>, not like <span class="math inline">\(\exp(-\delta^2)\)</span>. Counts have Poisson-like right tails, not Gaussian ones: they can overshoot their mean by a lot more easily than they can undershoot it.</p>
+</section>
+<section id="example-sampled-minibatch-sizes" class="level3" data-number="2.4.6">
+<h3 data-number="2.4.6" class="anchored" data-anchor-id="example-sampled-minibatch-sizes"><span class="header-section-number">2.4.6</span> Example: sampled minibatch sizes</h3>
+<p>A training loop forms each minibatch by including each of <span class="math inline">\(n = 60{,}000\)</span> examples independently with probability <span class="math inline">\(q = 0.01\)</span>. The batch size <span class="math inline">\(B\)</span> is a sum of <span class="math inline">\(\mathrm{Bernoulli}(q)\)</span> variables, so the bounds above apply with <span class="math inline">\(\mu = 60{,}000 \times 0.01 = 600\)</span>. How likely is the batch to be more than 20% off, that is, <span class="math inline">\(\delta = 0.2\)</span>, so that <span class="math inline">\(\delta^2 = 0.04\)</span>?</p>
+<p>The upper-tail bound is <span class="math inline">\(\exp(-0.04 \times 600/2.2) = e^{-10.9} \approx 1.8\times10^{-5}\)</span>, and the lower-tail bound is <span class="math inline">\(\exp(-0.04 \times 600/2) = e^{-12} \approx 6.1\times10^{-6}\)</span>. The two events cannot happen together, so adding them gives the chance of either: <span class="math inline">\(B\)</span> stays within <span class="math inline">\(600 \pm 20\%\)</span> except with probability about <span class="math inline">\(2.4\times10^{-5}\)</span> per step. Over 1,000 steps, the union bound (Fact 2) adds the 1,000 per-step failure probabilities, <span class="math inline">\(1{,}000 \times 2.4\times10^{-5}\)</span>, so every batch stays in that range except with probability about <span class="math inline">\(0.024\)</span>.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="2.4.7">
+<h3 data-number="2.4.7" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">2.4.7</span> Check yourself</h3>
+<ul>
+<li>Why must <span class="math inline">\(\lambda\)</span> be positive for the upper tail? <em>(For <span class="math inline">\(\lambda &lt; 0\)</span>, <span class="math inline">\(e^{\lambda x}\)</span> is decreasing, so <span class="math inline">\(X \ge t\)</span> no longer implies <span class="math inline">\(e^{\lambda X} \ge e^{\lambda t}\)</span>.)</em></li>
+<li>Where exactly did independence enter? <em>(Only in factorizing the MGF in step 2.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sub-gaussian-variables-and-hoeffding" class="level2" data-number="2.5">
+<h2 data-number="2.5" class="anchored" data-anchor-id="sub-gaussian-variables-and-hoeffding"><span class="header-section-number">2.5</span> Sub-Gaussian variables and Hoeffding</h2>
+<section id="context-2" class="level3" data-number="2.5.1">
+<h3 data-number="2.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">2.5.1</span> Context</h3>
+<p>Redoing the Chernoff calculation for every new distribution is tedious. The Gaussian warm-up showed that a quadratic log-MGF alone produces a Gaussian-shaped tail: nothing else about the normal distribution was used. So define a class by that one property, prove tail and sum bounds for the class once, and from then on only check membership. Hoeffding’s inequality is the result for the most common member: bounded variables.</p>
+</section>
+<section id="definition" class="level3" data-number="2.5.2">
+<h3 data-number="2.5.2" class="anchored" data-anchor-id="definition"><span class="header-section-number">2.5.2</span> Definition</h3>
+<p>The idea is to call a variable sub-Gaussian when its MGF, centred at its mean <span class="math inline">\(\mu\)</span>, is never larger than the MGF of a normal variable, because then the Chernoff argument for the normal goes through with “<span class="math inline">\(\le\)</span>” in place of “<span class="math inline">\(=\)</span>”. Formally, <span class="math inline">\(X\)</span> is <strong><span class="math inline">\(\sigma\)</span>-sub-Gaussian</strong> if its centred MGF is dominated by that of <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span>: <span id="eq-auto-02concentration-14"><span class="math display">\[\mathbb E\big[e^{\lambda(X - \mu)}\big] \le e^{\lambda^2\sigma^2/2} \quad\text{for all } \lambda \in \mathbb R. \tag{2.14}\]</span></span> The parameter <span class="math inline">\(\sigma\)</span>, called the <strong>variance proxy</strong> when squared, is the effective standard deviation for tail purposes. It is at least the true standard deviation. To see why, expand both sides around <span class="math inline">\(\lambda = 0\)</span>: the left side is <span class="math inline">\(1 + \lambda^2\operatorname{Var}(X)/2 + \dots\)</span> (the linear term vanishes because <span class="math inline">\(X - \mu\)</span> has mean 0) and the right side is <span class="math inline">\(1 + \lambda^2\sigma^2/2 + \dots\)</span>, so for small <span class="math inline">\(\lambda\)</span> the inequality forces <span class="math inline">\(\operatorname{Var}(X) \le \sigma^2\)</span>. It can be much larger than the true standard deviation, and that slack is where these bounds lose accuracy.</p>
+</section>
+<section id="three-properties-each-one-line" class="level3" data-number="2.5.3">
+<h3 data-number="2.5.3" class="anchored" data-anchor-id="three-properties-each-one-line"><span class="header-section-number">2.5.3</span> Three properties, each one line</h3>
+<p><strong>Tail.</strong> A sub-Gaussian variable has a tail no heavier than the normal’s. The Gaussian warm-up used the MGF only through the inequality in the master bound, so repeating it with the sub-Gaussian inequality in place of the equality gives the same result: <span id="eq-auto-02concentration-15"><span class="math display">\[\Pr[X - \mu \ge t] \le e^{-t^2/(2\sigma^2)}. \tag{2.15}\]</span></span> The same holds for the lower tail, because <span class="math inline">\(-X\)</span> is also <span class="math inline">\(\sigma\)</span>-sub-Gaussian (replace <span class="math inline">\(\lambda\)</span> by <span class="math inline">\(-\lambda\)</span> in the definition). Adding the two one-sided bounds, the two-sided bound <span class="math inline">\(\Pr[|X - \mu| \ge t]\)</span> carries a factor of 2.</p>
+<p><strong>Sums.</strong> Variance proxies add under independence, like variances. The reason is Fact 4: the centred MGF of a sum of independent terms is the product of their centred MGFs, and each factor is bounded by a Gaussian MGF, whose exponents add. For independent <span class="math inline">\(X_i\)</span>, each <span class="math inline">\(\sigma_i\)</span>-sub-Gaussian with mean <span class="math inline">\(\mu_i\)</span>, <span id="eq-auto-02concentration-16"><span class="math display">\[\mathbb E\big[e^{\lambda\sum_i(X_i - \mu_i)}\big] = \prod_i \mathbb E\big[e^{\lambda(X_i - \mu_i)}\big] \le \prod_i e^{\lambda^2\sigma_i^2/2} = e^{\lambda^2(\sum_i\sigma_i^2)/2}, \tag{2.16}\]</span></span> so the sum is <span class="math inline">\(\sqrt{\sum_i\sigma_i^2}\)</span>-sub-Gaussian.</p>
+<p><strong>Scaling and means.</strong> By Fact 4, <span class="math inline">\(M_{cX}(\lambda) = M_X(c\lambda)\)</span>, so substituting <span class="math inline">\(c\lambda\)</span> for <span class="math inline">\(\lambda\)</span> in the definition gives <span class="math inline">\(e^{c^2\lambda^2\sigma^2/2}\)</span>: <span class="math inline">\(cX\)</span> is <span class="math inline">\(|c|\sigma\)</span>-sub-Gaussian. Now take the mean of <span class="math inline">\(n\)</span> independent <span class="math inline">\(\sigma\)</span>-sub-Gaussian variables. Their sum is <span class="math inline">\(\sqrt{n\sigma^2} = \sigma\sqrt n\)</span>-sub-Gaussian by the sum rule, and dividing by <span class="math inline">\(n\)</span> makes the mean <span class="math inline">\((\sigma\sqrt n/n) = (\sigma/\sqrt n)\)</span>-sub-Gaussian. That is where the <span class="math inline">\(1/\sqrt n\)</span> rate comes from.</p>
+</section>
+<section id="hoeffdings-lemma-bounded-variables-are-sub-gaussian" class="level3" data-number="2.5.4">
+<h3 data-number="2.5.4" class="anchored" data-anchor-id="hoeffdings-lemma-bounded-variables-are-sub-gaussian"><span class="header-section-number">2.5.4</span> Hoeffding’s lemma: bounded variables are sub-Gaussian</h3>
+<p><strong>Statement.</strong> A variable trapped in an interval <span class="math inline">\([a, b]\)</span> cannot have a heavy tail, since it cannot go beyond <span class="math inline">\(b\)</span> at all. The lemma makes this quantitative: its MGF is bounded as if it were normal with standard deviation half the width of the interval. If <span class="math inline">\(X \in [a, b]\)</span>, then <span class="math inline">\(X\)</span> is <span class="math inline">\(\frac{b-a}{2}\)</span>-sub-Gaussian: <span id="eq-auto-02concentration-17"><span class="math display">\[\mathbb E[e^{\lambda(X-\mu)}] \le \exp\big(\lambda^2(b-a)^2/8\big). \tag{2.17}\]</span></span></p>
+<p><strong>Derivation.</strong> Centre <span class="math inline">\(X\)</span> so that <span class="math inline">\(\mathbb E[X] = 0\)</span> (shifting <span class="math inline">\(X\)</span> and the interval by <span class="math inline">\(\mu\)</span> changes nothing on either side). A mean-zero variable must take values on both sides of 0, so <span class="math inline">\(a \le 0 \le b\)</span>. The plan is to bound <span class="math inline">\(e^{\lambda X}\)</span> by something linear in <span class="math inline">\(X\)</span>, whose average depends only on the mean, and then show that the resulting expression has a quadratic logarithm.</p>
+<ol type="1">
+<li><strong>Use convexity.</strong> On <span class="math inline">\([a, b]\)</span>, the convex curve <span class="math inline">\(e^{\lambda x}\)</span> lies below the straight line (the chord) joining its values at the two endpoints. That line is the weighted average of the endpoint values, with weights that say how close <span class="math inline">\(x\)</span> is to each end: <span id="eq-auto-02concentration-18"><span class="math display">\[e^{\lambda x} \le \frac{b - x}{b - a}e^{\lambda a} + \frac{x - a}{b - a}e^{\lambda b}. \tag{2.18}\]</span></span></li>
+<li><strong>Take expectations.</strong> The right side is linear in <span class="math inline">\(x\)</span>, so its average only needs <span class="math inline">\(\mathbb E[X] = 0\)</span>: <span class="math inline">\(\mathbb E[e^{\lambda X}] \le \frac{b}{b-a}e^{\lambda a} - \frac{a}{b-a}e^{\lambda b}\)</span>. This is exactly the MGF of the two-point variable that sits at <span class="math inline">\(a\)</span> or <span class="math inline">\(b\)</span> with mean 0.</li>
+<li><strong>Reparametrize</strong> to make the bound a function of one variable. Let <span class="math inline">\(p = -a/(b-a) \in [0,1]\)</span>, so that <span class="math inline">\(\frac{b}{b-a} = 1 - p\)</span> and <span class="math inline">\(\lambda a = -hp\)</span>, where <span class="math inline">\(h = \lambda(b - a)\)</span>; then <span class="math inline">\(e^{\lambda b} = e^{\lambda a}e^{h}\)</span>. The right side becomes <span class="math inline">\(e^{-hp}(1 - p + pe^h) = e^{\varphi(h)}\)</span>, where <span id="eq-auto-02concentration-19"><span class="math display">\[\varphi(h) = -hp + \ln\big(1 - p + pe^h\big). \tag{2.19}\]</span></span> It remains to show <span class="math inline">\(\varphi(h) \le h^2/8\)</span>, by a Taylor expansion around <span class="math inline">\(h = 0\)</span>.</li>
+<li><strong>Value and slope at 0.</strong> <span class="math inline">\(\varphi(0) = 0 + \ln 1 = 0\)</span>. The derivative is <span class="math inline">\(\varphi'(h) = -p + \frac{pe^h}{1 - p + pe^h}\)</span>, so <span class="math inline">\(\varphi'(0) = -p + p = 0\)</span>.</li>
+<li><strong>Bound the curvature.</strong> Write <span class="math inline">\(u = \frac{pe^h}{1 - p + pe^h}\)</span>, a number in <span class="math inline">\([0,1]\)</span>, so that <span class="math inline">\(\varphi'(h) = -p + u\)</span>. Differentiating again gives <span class="math inline">\(\varphi''(h) = u(1-u)\)</span>. A product of two non-negative numbers that add up to 1 is largest when both are <span class="math inline">\(\frac12\)</span>, so <span class="math inline">\(\varphi''(h) \le 1/4\)</span>.</li>
+<li><strong>Taylor with remainder.</strong> Taylor’s theorem says <span class="math inline">\(\varphi(h) = \varphi(0) + h\varphi'(0) + \frac{h^2}{2}\varphi''(\xi)\)</span> for some <span class="math inline">\(\xi\)</span> between 0 and <span class="math inline">\(h\)</span>. With the value and slope 0 and the curvature at most <span class="math inline">\(\frac14\)</span>, <span class="math inline">\(\varphi(h) \le h^2/8 = \lambda^2(b-a)^2/8\)</span>.</li>
+</ol>
+<p>The worst case is a fair coin on the two endpoints, whose variance is exactly <span class="math inline">\(((b-a)/2)^2\)</span>: it puts all its mass as far from the mean as the interval allows.</p>
+</section>
+<section id="hoeffdings-inequality" class="level3" data-number="2.5.5">
+<h3 data-number="2.5.5" class="anchored" data-anchor-id="hoeffdings-inequality"><span class="header-section-number">2.5.5</span> Hoeffding’s inequality</h3>
+<p>The average of <span class="math inline">\(n\)</span> bounded independent variables is sub-Gaussian with a variance proxy that shrinks like <span class="math inline">\(1/n\)</span>, so its tail is Gaussian-shaped with that proxy. Concretely, combine the lemma with the rule for means: the mean of <span class="math inline">\(n\)</span> independent variables in <span class="math inline">\([a, b]\)</span> is <span class="math inline">\(\frac{b-a}{2\sqrt n}\)</span>-sub-Gaussian, so <span class="math inline">\(\sigma^2 = (b-a)^2/(4n)\)</span>. Putting this into the tail bound <span class="math inline">\(e^{-t^2/(2\sigma^2)}\)</span> gives <span id="eq-auto-02concentration-20"><span class="math display">\[\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{2nt^2}{(b-a)^2}\right). \tag{2.20}\]</span></span> As a two-sided confidence interval, add the matching lower tail to get <span class="math inline">\(2\exp(-2nt^2/(b-a)^2)\)</span>, set it equal to <span class="math inline">\(\beta\)</span> and solve for <span class="math inline">\(t\)</span> (Fact 5): with probability at least <span class="math inline">\(1-\beta\)</span>, <span class="math inline">\(|\bar X_n - \mu| &lt; (b-a)\sqrt{\ln(2/\beta)/(2n)}\)</span>.</p>
+</section>
+<section id="interpretation-1" class="level3" data-number="2.5.6">
+<h3 data-number="2.5.6" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">2.5.6</span> Interpretation</h3>
+<p>Hoeffding needs only the range, not the variance. That is its strength, since there is nothing to estimate, and its weakness, since it assumes the worst-case variance <span class="math inline">\((b-a)^2/4\)</span>, the variance of the fair coin on the endpoints.</p>
+<p>When the true variance <span class="math inline">\(\sigma^2\)</span> is much smaller than that, use <strong>Bernstein’s inequality</strong>, which keeps the variance in the bound. It is proved by the same Chernoff recipe, with a sharper bound on each factor’s MGF that uses the variance and the size of the largest deviation (Boucheron, Lugosi &amp; Massart, ch.&nbsp;2, give the derivation). For <span class="math inline">\(|X_i - \mu| \le M\)</span>: <span id="eq-auto-02concentration-21"><span class="math display">\[\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{nt^2}{2\sigma^2 + \frac23 Mt}\right). \tag{2.21}\]</span></span> The denominator shows the two regimes. For small <span class="math inline">\(t\)</span> the <span class="math inline">\(2\sigma^2\)</span> term dominates and the bound looks Gaussian with the true variance; for large <span class="math inline">\(t\)</span> the <span class="math inline">\(\frac23 Mt\)</span> term dominates and the bound decays only exponentially in <span class="math inline">\(t\)</span>. Setting the bound equal to <span class="math inline">\(\beta\)</span> and solving the quadratic in <span class="math inline">\(t\)</span> shows that its width is about <span class="math inline">\(\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)\)</span>: driven by the variance for moderate deviations, and by the range only at the far end.</p>
+<p><a href="#fig-bernoulli-tails" class="quarto-xref">Figure&nbsp;<span>2.3</span></a> puts all the bounds so far side by side for the mean of 200 Bernoulli(0.1) variables. Hoeffding even loses to Chebyshev at small deviations here, because the true variance <span class="math inline">\(0.1 \times 0.9 = 0.09\)</span> is far below Hoeffding’s worst case of <span class="math inline">\(1/4 = 0.25\)</span> for variables in <span class="math inline">\([0, 1]\)</span>.</p>
+<div id="fig-bernoulli-tails" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bernoulli-tails-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/bernoulli_tails.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bernoulli-tails-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.3: Empirical tail of the mean of 200 Bernoulli(0.1) variables against the Markov, Chebyshev, Hoeffding and Chernoff bounds.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-generalization-for-a-finite-class" class="level3" data-number="2.5.7">
+<h3 data-number="2.5.7" class="anchored" data-anchor-id="example-generalization-for-a-finite-class"><span class="header-section-number">2.5.7</span> Example: generalization for a finite class</h3>
+<p>How far can a model’s error on the training sample be from its error on the whole population? For one fixed model <span class="math inline">\(h\)</span> with loss in <span class="math inline">\([0,1]\)</span>, the <strong>empirical risk</strong> <span class="math inline">\(\hat R(h)\)</span>, its average loss on <span class="math inline">\(n\)</span> independent examples, is a mean of <span class="math inline">\(n\)</span> bounded terms whose expectation is the <strong>true risk</strong> <span class="math inline">\(R(h)\)</span>, the average loss on the population. Two-sided Hoeffding with <span class="math inline">\(b - a = 1\)</span> gives <span class="math inline">\(\Pr[|\hat R(h) - R(h)| \ge t] \le 2e^{-2nt^2}\)</span>.</p>
+<p>But a learner picks the model after seeing the data, so you need the bound for every model in the class at once. For a finite class <span class="math inline">\(H\)</span>, apply the union bound (Fact 2) over its <span class="math inline">\(|H|\)</span> models: the chance that any one of them is off by <span class="math inline">\(t\)</span> or more is at most <span class="math inline">\(2|H|e^{-2nt^2}\)</span>. Setting this to <span class="math inline">\(\beta\)</span> and solving for <span class="math inline">\(t\)</span> gives <span class="math inline">\(t = \sqrt{\ln(2|H|/\beta)/(2n)}\)</span>, so with probability at least <span class="math inline">\(1-\beta\)</span>, <span id="eq-auto-02concentration-22"><span class="math display">\[|\hat R(h) - R(h)| \le \sqrt{\frac{\ln(2|H|/\beta)}{2n}} \quad\text{for all } h \in H. \tag{2.22}\]</span></span> The size of the class enters only through <span class="math inline">\(\ln|H|\)</span>, which is the <span class="math inline">\(\ln k\)</span> cost of Fact 2.</p>
+</section>
+<section id="example-estimating-a-small-error-rate" class="level3" data-number="2.5.8">
+<h3 data-number="2.5.8" class="anchored" data-anchor-id="example-estimating-a-small-error-rate"><span class="header-section-number">2.5.8</span> Example: estimating a small error rate</h3>
+<p>A classifier is tested on 1,000 negative examples and makes 1 false positive. You want a 95% upper bound on its true false-positive rate, so the failure probability is <span class="math inline">\(\beta = 0.05\)</span> and <span class="math inline">\(\ln(1/\beta) = \ln 20 \approx 3.0\)</span>. Three methods give very different answers.</p>
+<p>Hoeffding, one-sided, adds the half-width <span class="math inline">\(\sqrt{\ln(1/\beta)/(2n)} = \sqrt{\ln 20/2000} \approx 0.039\)</span> to the measured rate of <span class="math inline">\(1/1{,}000\)</span>. That is about 40 times the rate you measured: the range <span class="math inline">\([0, 1]\)</span> forces it to assume a variance of <span class="math inline">\(0.25\)</span>, when the true variance of a rate near <span class="math inline">\(0.001\)</span> is about <span class="math inline">\(0.001\)</span>.</p>
+<p>Bernstein uses that small variance. Plugging <span class="math inline">\(\sigma^2 \approx 0.001\)</span>, <span class="math inline">\(M = 1\)</span> and <span class="math inline">\(n = 1{,}000\)</span> into its width gives <span class="math inline">\(\sqrt{2\times0.001\times3.0/1000} + 2\times3.0/3000 \approx 0.0045\)</span>, almost ten times tighter. This is a heuristic: <span class="math inline">\(\sigma^2\)</span> was estimated from the same data, and a rigorous version (empirical Bernstein) is wider.</p>
+<p>The exact answer comes from the binomial distribution itself. The <strong>Clopper–Pearson</strong> upper bound is the largest true rate <span class="math inline">\(p\)</span> under which seeing 1 or fewer false positives in 1,000 trials still has probability at least <span class="math inline">\(0.05\)</span>; it is <span class="math inline">\(0.0047\)</span>.</p>
+<p>Measuring rare rates is expensive: range-based bounds are useless near zero, and even exact intervals need many trials. This returns in later parts, wherever a small rate has to be certified empirically.</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="2.5.9">
+<h3 data-number="2.5.9" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">2.5.9</span> Check yourself</h3>
+<ul>
+<li>Is a Laplace variable sub-Gaussian? <em>(No.&nbsp;Its MGF is infinite for <span class="math inline">\(|\lambda| \ge 1/b\)</span>, so no quadratic bound holds for all <span class="math inline">\(\lambda\)</span>. See the next section.)</em></li>
+<li>Why is the fair coin on <span class="math inline">\(\{a, b\}\)</span> the worst case in Hoeffding’s lemma? <em>(It maximizes the variance among variables on <span class="math inline">\([a, b]\)</span>, and step 5 is tight at <span class="math inline">\(u = 1/2\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="gaussian-and-laplace-tails" class="level2" data-number="2.6">
+<h2 data-number="2.6" class="anchored" data-anchor-id="gaussian-and-laplace-tails"><span class="header-section-number">2.6</span> Gaussian and Laplace tails</h2>
+<section id="context-3" class="level3" data-number="2.6.1">
+<h3 data-number="2.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">2.6.1</span> Context</h3>
+<p>The normal and Laplace distributions are the two standard models of additive noise, and their tails behave very differently: the normal tail decays like <span class="math inline">\(e^{-t^2/2}\)</span>, the Laplace tail only like <span class="math inline">\(e^{-t}\)</span>. This section gives sharp tail bounds for each, rules for the maximum of many draws, and the two-regime behaviour of sums of Laplace variables.</p>
+</section>
+<section id="gaussian-tails" class="level3" data-number="2.6.2">
+<h3 data-number="2.6.2" class="anchored" data-anchor-id="gaussian-tails"><span class="header-section-number">2.6.2</span> Gaussian tails</h3>
+<p>For the normal distribution you know the density exactly, so you can bound the tail integral directly instead of going through the MGF, and do better than Chernoff. Write <span class="math inline">\(Z \sim \mathcal N(0,1)\)</span> for a standard normal variable, with density <span class="math inline">\(\varphi(z) = e^{-z^2/2}/\sqrt{2\pi}\)</span>. Two bounds hold for <span class="math inline">\(t \ge 0\)</span>: the first is the Chernoff bound with an extra factor <span class="math inline">\(\frac12\)</span>, and the second, the <strong>Mills ratio</strong> bound, replaces the exponential by the density at <span class="math inline">\(t\)</span> divided by <span class="math inline">\(t\)</span>: <span id="eq-auto-02concentration-23"><span class="math display">\[\Pr[Z \ge t] \le \tfrac12 e^{-t^2/2}, \qquad \Pr[Z \ge t] \le \frac{\varphi(t)}{t}. \tag{2.23}\]</span></span></p>
+<p><strong>Derivation of the first bound.</strong> The idea is to slide the tail back to start at 0 and compare it with the right half of the whole distribution, which has probability exactly <span class="math inline">\(\frac12\)</span>. Substitute <span class="math inline">\(u = z - t\)</span>, so that the tail integral runs over <span class="math inline">\(u \ge 0\)</span>. Expanding <span class="math inline">\((t+u)^2 = t^2 + 2tu + u^2\)</span> splits the density into the factor <span class="math inline">\(e^{-t^2/2}\)</span>, a factor <span class="math inline">\(e^{-tu}\)</span>, and the standard normal density in <span class="math inline">\(u\)</span>: <span id="eq-auto-02concentration-24"><span class="math display">\[\Pr[Z \ge t] = \int_0^\infty \varphi(t+u)\,du = e^{-t^2/2}\int_0^\infty \frac{e^{-tu - u^2/2}}{\sqrt{2\pi}}\,du \le e^{-t^2/2}\int_0^\infty \varphi(u)\,du = \tfrac12 e^{-t^2/2}. \tag{2.24}\]</span></span> The inequality drops the factor <span class="math inline">\(e^{-tu}\)</span>, which is at most 1 for <span class="math inline">\(t, u \ge 0\)</span>, and the last integral is <span class="math inline">\(\frac12\)</span> because the normal density is symmetric around 0. This beats the Chernoff bound <span class="math inline">\(e^{-t^2/2}\)</span> of the warm-up by a factor of <span class="math inline">\(\frac12\)</span>.</p>
+<p><strong>Derivation of the second (Mills ratio).</strong> The idea is to multiply the density by a factor that is at least 1 on the tail and makes the integral easy. On <span class="math inline">\(z \ge t\)</span> the factor <span class="math inline">\(z/t\)</span> is at least 1, and <span class="math inline">\(z\varphi(z)\)</span> has the simple antiderivative <span class="math inline">\(-\varphi(z)\)</span>, because differentiating the density gives <span class="math inline">\(\varphi'(z) = -z\varphi(z)\)</span>. So <span id="eq-auto-02concentration-25"><span class="math display">\[\Pr[Z \ge t] = \int_t^\infty \varphi(z)\,dz \le \int_t^\infty \frac zt\varphi(z)\,dz = \frac1t\big[-\varphi(z)\big]_t^\infty = \frac{\varphi(t)}{t}. \tag{2.25}\]</span></span> This bound is asymptotically exact as <span class="math inline">\(t\)</span> grows, because the tail mass sits ever closer to <span class="math inline">\(t\)</span>, where the factor <span class="math inline">\(z/t\)</span> is close to 1. <a href="#fig-gaussian-tails" class="quarto-xref">Figure&nbsp;<span>2.4</span></a> compares the bounds with the exact tail. At <span class="math inline">\(t = 3\)</span> the exact tail is <span class="math inline">\(1.35\times10^{-3}\)</span>. Chebyshev gives <span class="math inline">\(1/3^2 = 0.111\)</span>, Chernoff <span class="math inline">\(e^{-9/2} = 0.0111\)</span>, the halved bound <span class="math inline">\(0.0056\)</span>, and Mills <span class="math inline">\(\varphi(3)/3 = 0.00148\)</span>.</p>
+<div id="fig-gaussian-tails" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gaussian-tails-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/gaussian_tails.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gaussian-tails-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.4: The exact standard normal tail against the Chebyshev, Chernoff, halved Chernoff and Mills-ratio bounds.
+</figcaption>
+</figure>
+</div>
+<p><strong>Working rules.</strong> These are the two widths you will use most for a normal variable <span class="math inline">\(X \sim \mathcal N(0,\sigma^2)\)</span>; a normal with standard deviation <span class="math inline">\(\sigma\)</span> is <span class="math inline">\(\sigma Z\)</span>, so every threshold scales by <span class="math inline">\(\sigma\)</span>. For one draw, the first bound doubled covers both tails, <span class="math inline">\(\Pr[|X| \ge t] \le e^{-t^2/(2\sigma^2)}\)</span>, and setting this to <span class="math inline">\(\beta\)</span> gives <span class="math inline">\(\Pr[|X| \ge \sigma\sqrt{2\ln(1/\beta)}] \le \beta\)</span>. For the maximum of <span class="math inline">\(k\)</span> draws, ask each draw to fail with probability <span class="math inline">\(\beta/k\)</span> and apply the union bound (Fact 2): every <span class="math inline">\(|X_i| &lt; \sigma\sqrt{2\ln(k/\beta)}\)</span> with probability at least <span class="math inline">\(1-\beta\)</span>. Since <span class="math inline">\(\ln(k/\beta) = \ln k + \ln(1/\beta)\)</span>, controlling <span class="math inline">\(k\)</span> draws costs only a factor of about <span class="math inline">\(\sqrt{\ln k}\)</span> in the width.</p>
+</section>
+<section id="laplace-tails" class="level3" data-number="2.6.3">
+<h3 data-number="2.6.3" class="anchored" data-anchor-id="laplace-tails"><span class="header-section-number">2.6.3</span> Laplace tails</h3>
+<p>For the Laplace distribution the tail is exactly computable, so no bound is needed. <span class="math inline">\(\mathrm{Lap}(b)\)</span> has density <span class="math inline">\(\frac{1}{2b}e^{-|x|/b}\)</span>, and integrating it from <span class="math inline">\(t \ge 0\)</span> to infinity gives <span id="eq-auto-02concentration-26"><span class="math display">\[\Pr[X \ge t] = \tfrac12 e^{-t/b}, \qquad \Pr[|X| \ge t] = e^{-t/b}, \tag{2.26}\]</span></span> where the second form doubles the first because the density is symmetric.</p>
+<p><strong>Working rules.</strong> Setting <span class="math inline">\(e^{-t/b} = \beta\)</span> and solving gives the width for one draw: with probability at least <span class="math inline">\(1-\beta\)</span>, <span class="math inline">\(|X| \le b\ln(1/\beta)\)</span>. For the maximum of <span class="math inline">\(k\)</span> independent draws, ask each to fail with probability <span class="math inline">\(\beta/k\)</span> and use the union bound: with probability at least <span class="math inline">\(1-\beta\)</span>, every <span class="math inline">\(|X_i| \le b\ln(k/\beta)\)</span>.</p>
+<p>The union bound is nearly exact here. All <span class="math inline">\(k\)</span> independent draws stay below <span class="math inline">\(t\)</span> with probability <span class="math inline">\((1 - e^{-t/b})^k\)</span>, so <span class="math inline">\(\Pr[\max_i|X_i| &gt; t] = 1 - (1 - e^{-t/b})^k\)</span>, and when the per-draw tail <span class="math inline">\(x = e^{-t/b}\)</span> is small, <span class="math inline">\((1 - x)^k \approx 1 - kx\)</span>, so this is <span class="math inline">\(\approx ke^{-t/b}\)</span>, exactly the union bound’s sum. <a href="#fig-laplace-max" class="quarto-xref">Figure&nbsp;<span>2.5</span></a> confirms it: the empirical failure rate sits at <span class="math inline">\(\beta\)</span> for every <span class="math inline">\(k\)</span> from 1 to 1,000.</p>
+<div id="fig-laplace-max" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-laplace-max-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/laplace_max.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laplace-max-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.5: Left: the bound <span class="math inline">\(b\ln(k/\beta)\)</span> grows like <span class="math inline">\(\ln k\)</span>. Right: the empirical probability that the maximum of <span class="math inline">\(k\)</span> Laplace draws exceeds it stays at <span class="math inline">\(\beta = 0.05\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="laplace-is-sub-exponential-not-sub-gaussian" class="level3" data-number="2.6.4">
+<h3 data-number="2.6.4" class="anchored" data-anchor-id="laplace-is-sub-exponential-not-sub-gaussian"><span class="header-section-number">2.6.4</span> Laplace is sub-exponential, not sub-Gaussian</h3>
+<p><strong>MGF.</strong> The Laplace MGF is finite only for small <span class="math inline">\(\lambda\)</span>, which rules out the sub-Gaussian definition (it must hold for every <span class="math inline">\(\lambda\)</span>). Integrating <span class="math inline">\(e^{\lambda x}\)</span> against the density, the right half gives <span class="math inline">\(\int_0^\infty \frac{1}{2b}e^{\lambda x - x/b}\,dx = \frac{1}{2(1 - \lambda b)}\)</span>, which is finite only for <span class="math inline">\(\lambda &lt; 1/b\)</span>, and the left half gives <span class="math inline">\(\frac{1}{2(1 + \lambda b)}\)</span>. Adding them, for <span class="math inline">\(|\lambda| &lt; 1/b\)</span>, <span id="eq-auto-02concentration-27"><span class="math display">\[\mathbb E[e^{\lambda X}] = \frac{1}{1 - \lambda^2b^2} \tag{2.27}\]</span></span> (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). It blows up as <span class="math inline">\(|\lambda| \to 1/b\)</span>, so no bound of the form <span class="math inline">\(e^{\lambda^2\sigma^2/2}\)</span> can hold for all <span class="math inline">\(\lambda\)</span>.</p>
+<p><strong>A quadratic bound near zero.</strong> For small <span class="math inline">\(\lambda\)</span>, though, the log-MGF is still at most quadratic, which is all the Chernoff recipe needs as long as you only use those <span class="math inline">\(\lambda\)</span>. The log-MGF is <span class="math inline">\(-\ln(1 - x)\)</span> with <span class="math inline">\(x = \lambda^2b^2\)</span>, and <span class="math inline">\(-\ln(1 - x) = x + x^2/2 + x^3/3 + \dots \le x + x^2 + \dots = \frac{x}{1-x}\)</span>. For <span class="math inline">\(0 \le x \le \frac12\)</span>, <span class="math inline">\(\frac{1}{1-x} \le 2\)</span>, so <span class="math inline">\(-\ln(1-x) \le \frac{x}{1-x} \le 2x\)</span>. For <span class="math inline">\(|\lambda| \le 1/(2b)\)</span> you have <span class="math inline">\(x \le \frac14\)</span>, well inside that range, so <span id="eq-auto-02concentration-28"><span class="math display">\[\mathbb E[e^{\lambda X}] \le e^{2\lambda^2b^2}. \tag{2.28}\]</span></span></p>
+<p><strong>Sum of <span class="math inline">\(k\)</span> independent <span class="math inline">\(\mathrm{Lap}(b)\)</span>.</strong> Let <span class="math inline">\(S\)</span> be the sum of <span class="math inline">\(k\)</span> independent <span class="math inline">\(\mathrm{Lap}(b)\)</span> variables. By Fact 4 the MGF of <span class="math inline">\(S\)</span> is the product of <span class="math inline">\(k\)</span> factors, each at most <span class="math inline">\(e^{2\lambda^2b^2}\)</span>, so <span class="math inline">\(\mathbb E[e^{\lambda S}] \le e^{2k\lambda^2b^2}\)</span> for <span class="math inline">\(|\lambda| \le 1/(2b)\)</span>. Run Chernoff with <span class="math inline">\(\lambda\)</span> restricted to <span class="math inline">\((0, 1/(2b)]\)</span>. The result depends on whether the best <span class="math inline">\(\lambda\)</span> is inside the allowed range.</p>
+<ol type="1">
+<li><strong>Find the unconstrained optimum.</strong> The exponent to minimize is <span class="math inline">\(-\lambda t + 2k\lambda^2b^2\)</span>, a parabola whose derivative <span class="math inline">\(-t + 4k\lambda b^2\)</span> vanishes at <span class="math inline">\(\lambda^* = t/(4kb^2)\)</span>.</li>
+<li><strong>Small deviations.</strong> <span class="math inline">\(\lambda^* \le 1/(2b)\)</span> exactly when <span class="math inline">\(t \le 2kb\)</span>. Then <span class="math inline">\(\lambda^*\)</span> is allowed, and substituting it gives the exponent <span class="math inline">\(-t^2/(4kb^2) + t^2/(8kb^2) = -t^2/(8kb^2)\)</span>, so the bound is <span class="math inline">\(\exp(-t^2/(8kb^2))\)</span>: Gaussian-like.</li>
+<li><strong>Large deviations.</strong> If <span class="math inline">\(t &gt; 2kb\)</span>, the best allowed <span class="math inline">\(\lambda\)</span> is the boundary <span class="math inline">\(\lambda = 1/(2b)\)</span>, which gives <span class="math inline">\(\exp(-t/(2b) + k/2)\)</span>. In this regime <span class="math inline">\(k/2 &lt; t/(4b)\)</span>, so the exponent is at most <span class="math inline">\(-t/(2b) + t/(4b) = -t/(4b)\)</span>, and the bound is at most <span class="math inline">\(\exp(-t/(4b))\)</span>.</li>
+</ol>
+<p>The two cases combine into one formula, because in each regime the smaller of the two expressions inside the minimum is the one that applies: <span id="eq-auto-02concentration-29"><span class="math display">\[\Pr[S \ge t] \le \exp\left(-\min\left(\frac{t^2}{8kb^2},\ \frac{t}{4b}\right)\right). \tag{2.29}\]</span></span> Small deviations look Gaussian, with variance on the order of <span class="math inline">\(kb^2\)</span>. Large deviations decay only exponentially. That two-regime shape is what <em>sub-exponential</em> means.</p>
+<p><a href="#fig-laplace-sum" class="quarto-xref">Figure&nbsp;<span>2.6</span></a> shows why the distinction matters. Take <span class="math inline">\(k = 10\)</span> and <span class="math inline">\(b = 1\)</span>. The central limit theorem (CLT) says a sum of many independent terms is approximately normal with the same mean and variance, here mean 0 and variance <span class="math inline">\(10 \times 2b^2 = 20\)</span>. That normal approximation matches the bulk: <span class="math inline">\(\Pr[S \ge 10]\)</span> is <span class="math inline">\(1.42\times10^{-2}\)</span> empirically and <span class="math inline">\(1.27\times10^{-2}\)</span> from the normal. But it badly underestimates the tail: <span class="math inline">\(\Pr[S \ge 20]\)</span> is <span class="math inline">\(3.4\times10^{-5}\)</span> empirically and only <span class="math inline">\(3.9\times10^{-6}\)</span> from the normal. Both deviations are in the Gaussian regime of the bound, since <span class="math inline">\(t \le 2kb = 20\)</span>, so the bound gives <span class="math inline">\(e^{-100/80} = 0.287\)</span> at <span class="math inline">\(t = 10\)</span> and <span class="math inline">\(e^{-400/80} = e^{-5} = 6.7\times10^{-3}\)</span> at <span class="math inline">\(t = 20\)</span>. The sub-exponential bound is loose, but it is valid everywhere.</p>
+<div id="fig-laplace-sum" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-laplace-sum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/laplace_sum.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laplace-sum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.6: Empirical tail of a sum of 10 Laplace(1) variables, against the sub-exponential bound and the normal approximation.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-3" class="level3" data-number="2.6.5">
+<h3 data-number="2.6.5" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">2.6.5</span> Check yourself</h3>
+<ul>
+<li>Why does the maximum of <span class="math inline">\(k\)</span> normals grow like <span class="math inline">\(\sqrt{\ln k}\)</span> but the maximum of <span class="math inline">\(k\)</span> Laplace draws like <span class="math inline">\(\ln k\)</span>? <em>(Invert the tails: <span class="math inline">\(e^{-t^2/2} = \beta/k\)</span> gives <span class="math inline">\(t = \sqrt{2\ln(k/\beta)}\)</span>, while <span class="math inline">\(e^{-t/b} = \beta/k\)</span> gives <span class="math inline">\(t = b\ln(k/\beta)\)</span>.)</em></li>
+<li>What does dropping the <span class="math inline">\(\frac12\)</span> in the Gaussian tail bound cost in the width? <em>(<span class="math inline">\(\ln(1/(2\beta))\)</span> becomes <span class="math inline">\(\ln(1/\beta)\)</span>: <span class="math inline">\(\ln 2 \approx 0.7\)</span> more inside the square root.)</em></li>
+</ul>
+</section>
+</section>
+<section id="mcdiarmid-and-azuma" class="level2" data-number="2.7">
+<h2 data-number="2.7" class="anchored" data-anchor-id="mcdiarmid-and-azuma"><span class="header-section-number">2.7</span> McDiarmid and Azuma</h2>
+<section id="context-4" class="level3" data-number="2.7.1">
+<h3 data-number="2.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">2.7.1</span> Context</h3>
+<p>So far, everything was a sum of independent terms. Two common situations break that. First, quantities such as a trained model’s empirical risk are complicated functions of the data, not sums, so there is no MGF to factorize. Second, in sequential procedures each step can be chosen after seeing earlier outcomes, so the terms are dependent and Fact 4 no longer applies.</p>
+<p>Azuma’s inequality handles the second situation: dependent sums whose terms are “fresh” given the past, in the sense that each new term averages to zero whatever happened before. Such a running total is called a martingale. McDiarmid’s inequality handles the first: it follows from Azuma by revealing the inputs of the function one at a time, and it applies to any function that no single input can move by much.</p>
+</section>
+<section id="azumahoeffding" class="level3" data-number="2.7.2">
+<h3 data-number="2.7.2" class="anchored" data-anchor-id="azumahoeffding"><span class="header-section-number">2.7.2</span> Azuma–Hoeffding</h3>
+<p><strong>Setup.</strong> A <strong>martingale</strong> is a running total whose next step is zero on average given everything that has happened so far, like your fortune in a sequence of fair bets where you may choose each bet based on the previous ones. Formally, <span class="math inline">\(M_0, M_1, \dots, M_n\)</span> is a martingale if each increment <span class="math inline">\(D_k = M_k - M_{k-1}\)</span> has conditional mean zero given the past, <span class="math inline">\(\mathbb E[D_k \mid \text{past}] = 0\)</span>. Assume each <span class="math inline">\(D_k\)</span> lies in an interval <span class="math inline">\([A_k, A_k + d_k]\)</span>, where the position <span class="math inline">\(A_k\)</span> may depend on the past but the length <span class="math inline">\(d_k\)</span> is fixed in advance.</p>
+<p><strong>Statement.</strong> The total drift <span class="math inline">\(M_n - M_0\)</span> obeys the same tail bound as a sum of independent bounded terms, with the step lengths <span class="math inline">\(d_k\)</span> playing the role of the ranges: <span id="eq-auto-02concentration-30"><span class="math display">\[\Pr[M_n - M_0 \ge t] \le \exp\left(-\frac{2t^2}{\sum_k d_k^2}\right). \tag{2.30}\]</span></span></p>
+<p><strong>Derivation.</strong> The Chernoff recipe needs the MGF of the total. Without independence it does not factorize, but you can still bound it one step at a time, starting from the last step and working back.</p>
+<ol type="1">
+<li><strong>Bound one step given the past.</strong> Given the past, <span class="math inline">\(D_k\)</span> is a mean-zero variable on an interval of length <span class="math inline">\(d_k\)</span>, so Hoeffding’s lemma (previous section) applies to it, with every expectation taken given the past: <span class="math inline">\(\mathbb E[e^{\lambda D_k} \mid \text{past}] \le e^{\lambda^2d_k^2/8}\)</span>. The proof is the one in the previous section, run conditionally.</li>
+<li><strong>Peel off the last increment.</strong> The <strong>tower property</strong> says you can average in two stages: first average over the last step with the past held fixed, then average over the past; the result is the ordinary average. Split <span class="math inline">\(M_n - M_0 = (M_{n-1} - M_0) + D_n\)</span>. With the past held fixed, <span class="math inline">\(e^{\lambda(M_{n-1} - M_0)}\)</span> is a constant and comes out of the inner average, which is then bounded by step 1: <span id="eq-auto-02concentration-31"><span class="math display">\[\mathbb E\big[e^{\lambda(M_n - M_0)}\big] = \mathbb E\Big[e^{\lambda(M_{n-1} - M_0)}\,\mathbb E\big[e^{\lambda D_n} \mid \text{past}\big]\Big] \le e^{\lambda^2d_n^2/8}\,\mathbb E\big[e^{\lambda(M_{n-1} - M_0)}\big]. \tag{2.31}\]</span></span></li>
+<li><strong>Repeat.</strong> Apply the same step to <span class="math inline">\(M_{n-1} - M_0\)</span>, then <span class="math inline">\(M_{n-2} - M_0\)</span>, and so on, <span class="math inline">\(n\)</span> times: <span class="math inline">\(\mathbb E[e^{\lambda(M_n - M_0)}] \le \exp(\lambda^2\sum_k d_k^2/8)\)</span>. Peeling replaces Fact 4, which needed independence.</li>
+<li><strong>Chernoff.</strong> The exponent to minimize is <span class="math inline">\(-\lambda t + \lambda^2\sum_k d_k^2/8\)</span>. Its derivative vanishes at <span class="math inline">\(\lambda = 4t/\sum_k d_k^2\)</span>, and substituting gives <span class="math inline">\(\exp(-2t^2/\sum_k d_k^2)\)</span>.</li>
+</ol>
+<p>Hoeffding is the special case of independent increments: there the past tells you nothing, and the conditional bound of step 1 is the ordinary lemma.</p>
+</section>
+<section id="example-an-adaptive-coin-game" class="level3" data-number="2.7.3">
+<h3 data-number="2.7.3" class="anchored" data-anchor-id="example-an-adaptive-coin-game"><span class="header-section-number">2.7.3</span> Example: an adaptive coin game</h3>
+<p>You have two coins, with heads probabilities 0.3 and 0.7. You flip 200 times; before each flip you pick the 0.7 coin if the previous flip was heads, and the 0.3 coin otherwise. The flips are dependent, and the number of heads is not binomial, so Hoeffding does not apply.</p>
+<p>What you can control is how far the heads count drifts from what your own choices predicted. Let <span class="math inline">\(X_k\)</span> be 1 if flip <span class="math inline">\(k\)</span> is heads, let <span class="math inline">\(p_k\)</span> be the bias of the coin chosen at step <span class="math inline">\(k\)</span>, and let <span class="math inline">\(M_n = \sum_{k\le n}(X_k - p_k)\)</span>: heads minus the heads you “expected” given your choices. Given the past, the coin is fixed, so <span class="math inline">\(X_k - p_k\)</span> has mean <span class="math inline">\(p_k - p_k = 0\)</span> and lies in <span class="math inline">\([-p_k, 1 - p_k]\)</span>, an interval of length 1. So <span class="math inline">\(M_n\)</span> is a martingale with <span class="math inline">\(d_k = 1\)</span>, <span class="math inline">\(\sum_k d_k^2 = 200\)</span>, and Azuma gives <span class="math inline">\(\Pr[M_{200} \ge t] \le e^{-2t^2/200}\)</span>. At <span class="math inline">\(t = 20\)</span> the exponent is <span class="math inline">\(2 \times 400/200 = 4\)</span> and the bound is <span class="math inline">\(e^{-4} = 1.83\times10^{-2}\)</span>, while simulation gives <span class="math inline">\(1.12\times10^{-3}\)</span> (<a href="#fig-azuma-adaptive" class="quarto-xref">Figure&nbsp;<span>2.7</span></a>). The bound pays for assuming the worst-case variance, exactly as Hoeffding does: each step’s true variance is <span class="math inline">\(p_k(1-p_k) = 0.21\)</span>, not the <span class="math inline">\(0.25\)</span> the interval allows.</p>
+<div id="fig-azuma-adaptive" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-azuma-adaptive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/azuma_adaptive.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-azuma-adaptive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2.7: Empirical tail of the martingale in the adaptive coin game against the Azuma bound.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="mcdiarmid-bounded-differences" class="level3" data-number="2.7.4">
+<h3 data-number="2.7.4" class="anchored" data-anchor-id="mcdiarmid-bounded-differences"><span class="header-section-number">2.7.4</span> McDiarmid (bounded differences)</h3>
+<p><strong>Statement.</strong> If a function of many independent inputs cannot be moved much by any single input, it concentrates around its mean as tightly as a sum of bounded terms would. Let <span class="math inline">\(X_1, \dots, X_n\)</span> be independent, and suppose that changing only the <span class="math inline">\(i\)</span>-th input, with all others held fixed, changes <span class="math inline">\(f\)</span> by at most <span class="math inline">\(c_i\)</span>. Then <span id="eq-auto-02concentration-32"><span class="math display">\[\Pr\big[f(X) - \mathbb E f(X) \ge t\big] \le \exp\left(-\frac{2t^2}{\sum_i c_i^2}\right). \tag{2.32}\]</span></span></p>
+<p><strong>Derivation via the Doob martingale.</strong> The idea is to turn <span class="math inline">\(f\)</span> into a martingale by revealing the inputs one at a time and tracking your best guess of <span class="math inline">\(f\)</span> as you go. Each revealed input moves the guess by a bounded amount, and Azuma does the rest.</p>
+<ol type="1">
+<li><strong>Build the martingale.</strong> After seeing <span class="math inline">\(X_1, \dots, X_k\)</span>, your best guess of <span class="math inline">\(f(X)\)</span> is its conditional average, <span class="math inline">\(M_k = \mathbb E[f(X) \mid X_1, \dots, X_k]\)</span>. Before seeing anything, the guess is <span class="math inline">\(M_0 = \mathbb E f\)</span>; after seeing everything, it is <span class="math inline">\(M_n = f(X)\)</span>. So <span class="math inline">\(M_n - M_0\)</span> is exactly the deviation you want to bound. <span class="math inline">\((M_k)\)</span> is a martingale by the tower property: averaging the next guess <span class="math inline">\(M_k\)</span> over the not-yet-seen <span class="math inline">\(X_k\)</span> gives back the current guess <span class="math inline">\(M_{k-1}\)</span>, so each increment has mean zero given the past.</li>
+<li><strong>Bound the range of each increment.</strong> By independence, the unseen inputs do not depend on the seen ones, so <span class="math inline">\(M_k\)</span> is the average of <span class="math inline">\(f\)</span> over fresh copies of <span class="math inline">\(X_{k+1}, \dots, X_n\)</span>, with <span class="math inline">\(X_1, \dots, X_k\)</span> fixed at their observed values. Hold <span class="math inline">\(X_1, \dots, X_{k-1}\)</span> fixed. Then <span class="math inline">\(M_k\)</span> depends only on <span class="math inline">\(X_k\)</span>, and changing <span class="math inline">\(X_k\)</span> changes every term of that average by at most <span class="math inline">\(c_k\)</span>, so it changes the average by at most <span class="math inline">\(c_k\)</span>. As <span class="math inline">\(X_k\)</span> varies, <span class="math inline">\(M_k\)</span> therefore stays in an interval of length at most <span class="math inline">\(c_k\)</span>, and so does <span class="math inline">\(D_k = M_k - M_{k-1}\)</span>, whose position depends on the past through <span class="math inline">\(M_{k-1}\)</span>.</li>
+<li><strong>Apply Azuma</strong> with <span class="math inline">\(d_k = c_k\)</span>.</li>
+</ol>
+<p><strong>Interpretation.</strong> The bounded-difference constant <span class="math inline">\(c_i\)</span> measures how much one input can move the output: a per-record influence. Small per-record influence forces the output to concentrate. The same quantity returns in later parts under the name <em>sensitivity</em>.</p>
+<p><strong>Example: stability.</strong> The empirical risk of a fixed model with loss in <span class="math inline">\([0,1]\)</span> is an average of <span class="math inline">\(n\)</span> losses, so changing one example changes it by at most <span class="math inline">\(1/n\)</span>: <span class="math inline">\(c_i = 1/n\)</span>, <span class="math inline">\(\sum_i c_i^2 = n/n^2 = 1/n\)</span>, and McDiarmid gives concentration <span class="math inline">\(\exp(-2nt^2)\)</span>. That is Hoeffding again, now as a special case. The real power is for functions that are not sums. Bousquet &amp; Elisseeff apply McDiarmid to the risk of a model <em>trained</em> on the data: if retraining after changing one example moves the loss by at most <span class="math inline">\(\beta\)</span> (here a stability constant, not a failure probability), each input has bounded influence on the trained model’s risk, and the generalization gap concentrates (<a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>).</p>
+</section>
+<section id="check-yourself-4" class="level3" data-number="2.7.5">
+<h3 data-number="2.7.5" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">2.7.5</span> Check yourself</h3>
+<ul>
+<li>Why can’t you use Hoeffding in the adaptive coin game? <em>(The coin chosen at each step depends on earlier flips, so the flips are not independent. Only their conditional structure is controlled.)</em></li>
+<li>In the McDiarmid derivation, where is the independence of the <span class="math inline">\(X_i\)</span> used? <em>(In step 2: the average over the unrevealed inputs must not change when <span class="math inline">\(X_k\)</span> changes.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-every-bound-by-simulation" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="code-check-every-bound-by-simulation"><span class="header-section-number">2.8</span> Code: check every bound by simulation</h2>
+<p>The script <a href="../../../code/part01-prerequisites/concentration.py">code/concentration.py</a> draws every figure in this chapter and computes the numbers quoted in it. Each bound and each simulated quantity is a small typed function; the script calls them once for the table and loops them over parameters for the figures. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/concentration.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="#tbl-concentration-results" class="quarto-xref">Table&nbsp;<span>2.5</span></a> shows the output with seed 0.</p>
+<div id="tbl-concentration-results" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-concentration-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.5: Results of the chapter’s script with seed 0.
+</figcaption>
+<div aria-describedby="tbl-concentration-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bernoulli mean, <span class="math inline">\(n = 200\)</span>, <span class="math inline">\(p = 0.1\)</span>, <span class="math inline">\(t = 0.05\)</span></td>
+<td>Empirical <span class="math inline">\(9.6\times10^{-3}\)</span>; Markov 0.67; Chebyshev 0.18; Hoeffding 0.37; Chernoff 0.135</td>
+</tr>
+<tr class="even">
+<td>Maximum of <span class="math inline">\(k = 100\)</span> draws of <span class="math inline">\(\mathrm{Lap}(1)\)</span>, <span class="math inline">\(\beta = 0.05\)</span></td>
+<td>Bound 7.60; empirical failure rate 0.0486</td>
+</tr>
+<tr class="odd">
+<td>Standard normal tail at <span class="math inline">\(t = 3\)</span></td>
+<td>Exact <span class="math inline">\(1.35\times10^{-3}\)</span>; Chebyshev 0.111; Chernoff 0.0111; halved 0.0056; Mills 0.00148</td>
+</tr>
+<tr class="even">
+<td>Sum of <span class="math inline">\(k = 10\)</span> draws of <span class="math inline">\(\mathrm{Lap}(1)\)</span></td>
+<td><span class="math inline">\(t = 10\)</span>: empirical <span class="math inline">\(1.42\times10^{-2}\)</span>, bound 0.287, normal <span class="math inline">\(1.27\times10^{-2}\)</span>. <span class="math inline">\(t = 20\)</span>: empirical <span class="math inline">\(3.4\times10^{-5}\)</span>, bound <span class="math inline">\(6.7\times10^{-3}\)</span>, normal <span class="math inline">\(3.9\times10^{-6}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Adaptive coin game, <span class="math inline">\(n = 200\)</span>, <span class="math inline">\(t = 20\)</span></td>
+<td>Empirical <span class="math inline">\(1.12\times10^{-3}\)</span>; Azuma <span class="math inline">\(1.83\times10^{-2}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_concentration.py">tests/test_concentration.py</a> checks that the output still matches this table.</p>
+<p><strong>What to take from it</strong></p>
+<p>The first row shows that variance matters. The mean of 200 Bernoulli(0.1) variables has mean <span class="math inline">\(0.1\)</span> and variance <span class="math inline">\(0.09/200\)</span>, and the question is how likely it is to reach <span class="math inline">\(0.15\)</span>. Markov gives <span class="math inline">\(0.1/0.15 = 0.67\)</span>, Chebyshev <span class="math inline">\(0.09/(200 \times 0.05^2) = 0.18\)</span>, Hoeffding <span class="math inline">\(e^{-2 \times 200 \times 0.05^2} = e^{-1} = 0.37\)</span>, and Chernoff, with <span class="math inline">\(\mu = 20\)</span> and <span class="math inline">\(\delta = 0.5\)</span>, <span class="math inline">\(e^{-0.25 \times 20/2.5} = e^{-2} = 0.135\)</span>. Hoeffding loses to Chebyshev because <span class="math inline">\(p(1-p) = 0.09\)</span> is far below the worst case <span class="math inline">\(0.25\)</span>: range-based bounds pay for ignoring the variance.</p>
+<p>The second row shows that a union bound can be nearly exact. The bound <span class="math inline">\(\ln(100/0.05) = 7.60\)</span> fails at the empirical rate 0.0486, close to the target 0.05, because for independent draws with small individual tails the chance that any one fails is almost the sum of the individual chances.</p>
+<p>The third row shows that the Mills ratio is the bound to use far out. At <span class="math inline">\(t = 3\)</span> it is within 10% of the exact tail, while the Chernoff bound is 8 times too large.</p>
+<p>The fourth row shows that the CLT is not a tail bound. For the Laplace sum it underestimates <span class="math inline">\(\Pr[S \ge 20]\)</span> by a factor of 9, since <span class="math inline">\(3.4\times10^{-5}\)</span> is about nine times <span class="math inline">\(3.9\times10^{-6}\)</span>. When the answer must be a guarantee, use a bound.</p>
+<p>The last row shows that Azuma handles adaptivity, at the price of the worst-case variance.</p>
+</section>
+<section id="references" class="level2" data-number="2.9">
+<h2 data-number="2.9" class="anchored" data-anchor-id="references"><span class="header-section-number">2.9</span> References</h2>
+<ul>
+<li>Mitzenmacher &amp; Upfal, <em>Probability and Computing</em>, ch.&nbsp;4: the clearest Chernoff chapter, with worked computer-science examples</li>
+<li>Vershynin, <em>High-Dimensional Probability</em> (2018), ch.&nbsp;2: sub-Gaussian and sub-exponential variables in depth. Read it after this chapter rather than before.</li>
+<li>Boucheron, Lugosi &amp; Massart, <em>Concentration Inequalities</em> (2013), ch.&nbsp;2 and 6: reference depth</li>
+<li>Bousquet &amp; Elisseeff, “Stability and Generalization” (JMLR 2002): McDiarmid applied to learning algorithms</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="2.10">
+<h2 data-number="2.10" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">2.10</span> Cheat sheet</h2>
+<p><a href="#tbl-concentration-cheat-sheet" class="quarto-xref">Table&nbsp;<span>2.6</span></a> collects the bounds. Tails are one-sided unless noted, and <span class="math inline">\(\beta\)</span> is the failure probability.</p>
+<div id="tbl-concentration-cheat-sheet" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-concentration-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2.6: Summary of the bounds in this chapter.
+</figcaption>
+<div aria-describedby="tbl-concentration-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Bound</th>
+<th>Assumption</th>
+<th>Tail <span class="math inline">\(\Pr[X - \mu \ge t] \le\)</span></th>
+<th>Width at failure probability <span class="math inline">\(\beta\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Markov</td>
+<td><span class="math inline">\(X \ge 0\)</span></td>
+<td><span class="math inline">\(\mu/t\)</span> (for <span class="math inline">\(\Pr[X \ge t]\)</span>)</td>
+<td><span class="math inline">\(\mu/\beta\)</span></td>
+</tr>
+<tr class="even">
+<td>Chebyshev</td>
+<td>Variance <span class="math inline">\(\sigma^2\)</span></td>
+<td><span class="math inline">\(\sigma^2/t^2\)</span> (two-sided)</td>
+<td><span class="math inline">\(\sigma/\sqrt\beta\)</span></td>
+</tr>
+<tr class="odd">
+<td>Sub-Gaussian</td>
+<td>MGF <span class="math inline">\(\le e^{\lambda^2\sigma^2/2}\)</span></td>
+<td><span class="math inline">\(e^{-t^2/(2\sigma^2)}\)</span></td>
+<td><span class="math inline">\(\sigma\sqrt{2\ln(1/\beta)}\)</span></td>
+</tr>
+<tr class="even">
+<td>Hoeffding</td>
+<td>Mean of <span class="math inline">\(n\)</span> independent variables in <span class="math inline">\([a, b]\)</span></td>
+<td><span class="math inline">\(e^{-2nt^2/(b-a)^2}\)</span></td>
+<td><span class="math inline">\((b-a)\sqrt{\ln(1/\beta)/(2n)}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Chernoff (multiplicative)</td>
+<td>Sum of independent Bernoullis, mean <span class="math inline">\(\mu\)</span></td>
+<td><span class="math inline">\(e^{-\delta^2\mu/(2+\delta)}\)</span> at <span class="math inline">\(t = \delta\mu\)</span></td>
+<td><span class="math inline">\(\approx\sqrt{2\mu\ln(1/\beta)}\)</span> for small <span class="math inline">\(\delta\)</span></td>
+</tr>
+<tr class="even">
+<td>Gaussian <span class="math inline">\(\mathcal N(0,\sigma^2)\)</span></td>
+<td>—</td>
+<td><span class="math inline">\(\frac12 e^{-t^2/(2\sigma^2)}\)</span></td>
+<td><span class="math inline">\(\sigma\sqrt{2\ln(1/\beta)}\)</span>, two-sided</td>
+</tr>
+<tr class="odd">
+<td>Laplace <span class="math inline">\(\mathrm{Lap}(b)\)</span></td>
+<td>—</td>
+<td><span class="math inline">\(\frac12 e^{-t/b}\)</span>; two-sided exactly <span class="math inline">\(e^{-t/b}\)</span></td>
+<td><span class="math inline">\(b\ln(1/\beta)\)</span>, two-sided</td>
+</tr>
+<tr class="even">
+<td>McDiarmid</td>
+<td>Independent inputs, bounded differences <span class="math inline">\(c_i\)</span></td>
+<td><span class="math inline">\(e^{-2t^2/\sum_i c_i^2}\)</span></td>
+<td><span class="math inline">\(\sqrt{\sum_i c_i^2\ln(1/\beta)/2}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Azuma–Hoeffding</td>
+<td>Martingale, increments in intervals of length <span class="math inline">\(d_i\)</span></td>
+<td><span class="math inline">\(e^{-2t^2/\sum_i d_i^2}\)</span></td>
+<td><span class="math inline">\(\sqrt{\sum_i d_i^2\ln(1/\beta)/2}\)</span></td>
+</tr>
+<tr class="even">
+<td>Sum of <span class="math inline">\(k\)</span> Laplace</td>
+<td>Independent <span class="math inline">\(\mathrm{Lap}(b)\)</span></td>
+<td><span class="math inline">\(e^{-\min(t^2/(8kb^2),\ t/(4b))}\)</span></td>
+<td><span class="math inline">\(b\sqrt{8k\ln(1/\beta)}\)</span> while that is <span class="math inline">\(\le 2kb\)</span>; else <span class="math inline">\(4b\ln(1/\beta)\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>Variance-only bounds cost <span class="math inline">\(1/\sqrt\beta\)</span>; exponential bounds cost <span class="math inline">\(\sqrt{\ln(1/\beta)}\)</span>; heavy (sub-exponential) tails cost <span class="math inline">\(\ln(1/\beta)\)</span>.</li>
+<li><span class="math inline">\(k\)</span> estimates add <span class="math inline">\(\ln k\)</span> inside the logarithm, via the union bound.</li>
+<li>If the variance is much smaller than the range allows, use Chernoff or Bernstein, not Hoeffding.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part01-prerequisites/02-concentration.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part01-prerequisites/01-distributions.html" class="pagination-link" aria-label="Probability distributions">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part01-prerequisites/03-divergences.html" class="pagination-link" aria-label="Divergences">
+        <span class="nav-page-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

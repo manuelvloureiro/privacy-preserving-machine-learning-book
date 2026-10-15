@@ -1,0 +1,1827 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>1&nbsp; Probability distributions – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part01-prerequisites/02-concentration.html" rel="next">
+<link href="../part01-prerequisites/00-introduction.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-prerequisites/00-introduction.html">Prerequisites</a></li><li class="breadcrumb-item"><a href="../part01-prerequisites/01-distributions.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">1.1</span> Why this matters</a></li>
+  <li><a href="#toolkit-what-to-know-for-each-distribution" id="toc-toolkit-what-to-know-for-each-distribution" class="nav-link" data-scroll-target="#toolkit-what-to-know-for-each-distribution"><span class="header-section-number">1.2</span> Toolkit: what to know for each distribution</a>
+  <ul class="collapse">
+  <li><a href="#sec-dist-moments" id="toc-sec-dist-moments" class="nav-link" data-scroll-target="#sec-dist-moments"><span class="header-section-number">1.2.1</span> Moments: where the distribution sits and how wide it is</a></li>
+  <li><a href="#sec-dist-mgf" id="toc-sec-dist-mgf" class="nav-link" data-scroll-target="#sec-dist-mgf"><span class="header-section-number">1.2.2</span> The moment generating function</a></li>
+  <li><a href="#sec-dist-tails" id="toc-sec-dist-tails" class="nav-link" data-scroll-target="#sec-dist-tails"><span class="header-section-number">1.2.3</span> Tails: how fast large values become rare</a></li>
+  </ul></li>
+  <li><a href="#bernoulli-and-binomial" id="toc-bernoulli-and-binomial" class="nav-link" data-scroll-target="#bernoulli-and-binomial"><span class="header-section-number">1.3</span> Bernoulli and binomial</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">1.3.1</span> Context</a></li>
+  <li><a href="#definitions" id="toc-definitions" class="nav-link" data-scroll-target="#definitions"><span class="header-section-number">1.3.2</span> Definitions</a></li>
+  <li><a href="#moments" id="toc-moments" class="nav-link" data-scroll-target="#moments"><span class="header-section-number">1.3.3</span> Moments</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">1.3.4</span> Interpretation</a></li>
+  <li><a href="#example-estimating-a-classifiers-error-rate" id="toc-example-estimating-a-classifiers-error-rate" class="nav-link" data-scroll-target="#example-estimating-a-classifiers-error-rate"><span class="header-section-number">1.3.5</span> Example: estimating a classifier’s error rate</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">1.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#poisson" id="toc-poisson" class="nav-link" data-scroll-target="#poisson"><span class="header-section-number">1.4</span> Poisson</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">1.4.1</span> Context</a></li>
+  <li><a href="#definition" id="toc-definition" class="nav-link" data-scroll-target="#definition"><span class="header-section-number">1.4.2</span> Definition</a></li>
+  <li><a href="#the-poisson-limit-of-the-binomial" id="toc-the-poisson-limit-of-the-binomial" class="nav-link" data-scroll-target="#the-poisson-limit-of-the-binomial"><span class="header-section-number">1.4.3</span> The Poisson limit of the binomial</a></li>
+  <li><a href="#moments-via-the-mgf" id="toc-moments-via-the-mgf" class="nav-link" data-scroll-target="#moments-via-the-mgf"><span class="header-section-number">1.4.4</span> Moments via the MGF</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">1.4.5</span> Interpretation</a></li>
+  <li><a href="#example-minibatch-sizes-under-independent-sampling" id="toc-example-minibatch-sizes-under-independent-sampling" class="nav-link" data-scroll-target="#example-minibatch-sizes-under-independent-sampling"><span class="header-section-number">1.4.6</span> Example: minibatch sizes under independent sampling</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">1.4.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#exponential" id="toc-exponential" class="nav-link" data-scroll-target="#exponential"><span class="header-section-number">1.5</span> Exponential</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">1.5.1</span> Context</a></li>
+  <li><a href="#derivation-the-waiting-time-in-the-poisson-limit" id="toc-derivation-the-waiting-time-in-the-poisson-limit" class="nav-link" data-scroll-target="#derivation-the-waiting-time-in-the-poisson-limit"><span class="header-section-number">1.5.2</span> Derivation: the waiting time in the Poisson limit</a></li>
+  <li><a href="#definition-1" id="toc-definition-1" class="nav-link" data-scroll-target="#definition-1"><span class="header-section-number">1.5.3</span> Definition</a></li>
+  <li><a href="#moments-and-tail" id="toc-moments-and-tail" class="nav-link" data-scroll-target="#moments-and-tail"><span class="header-section-number">1.5.4</span> Moments and tail</a></li>
+  <li><a href="#interpretation-memorylessness" id="toc-interpretation-memorylessness" class="nav-link" data-scroll-target="#interpretation-memorylessness"><span class="header-section-number">1.5.5</span> Interpretation: memorylessness</a></li>
+  <li><a href="#example-time-to-a-models-first-error" id="toc-example-time-to-a-models-first-error" class="nav-link" data-scroll-target="#example-time-to-a-models-first-error"><span class="header-section-number">1.5.6</span> Example: time to a model’s first error</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">1.5.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#laplace" id="toc-laplace" class="nav-link" data-scroll-target="#laplace"><span class="header-section-number">1.6</span> Laplace</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">1.6.1</span> Context</a></li>
+  <li><a href="#definition-2" id="toc-definition-2" class="nav-link" data-scroll-target="#definition-2"><span class="header-section-number">1.6.2</span> Definition</a></li>
+  <li><a href="#moments-and-tail-1" id="toc-moments-and-tail-1" class="nav-link" data-scroll-target="#moments-and-tail-1"><span class="header-section-number">1.6.3</span> Moments and tail</a></li>
+  <li><a href="#a-laplace-variable-is-a-difference-of-exponentials" id="toc-a-laplace-variable-is-a-difference-of-exponentials" class="nav-link" data-scroll-target="#a-laplace-variable-is-a-difference-of-exponentials"><span class="header-section-number">1.6.4</span> A Laplace variable is a difference of exponentials</a></li>
+  <li><a href="#interpretation-laplace-against-normal" id="toc-interpretation-laplace-against-normal" class="nav-link" data-scroll-target="#interpretation-laplace-against-normal"><span class="header-section-number">1.6.5</span> Interpretation: Laplace against normal</a></li>
+  <li><a href="#example-absolute-error-regression" id="toc-example-absolute-error-regression" class="nav-link" data-scroll-target="#example-absolute-error-regression"><span class="header-section-number">1.6.6</span> Example: absolute-error regression</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">1.6.7</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#normal" id="toc-normal" class="nav-link" data-scroll-target="#normal"><span class="header-section-number">1.7</span> Normal</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">1.7.1</span> Context</a></li>
+  <li><a href="#definition-3" id="toc-definition-3" class="nav-link" data-scroll-target="#definition-3"><span class="header-section-number">1.7.2</span> Definition</a></li>
+  <li><a href="#mgf-and-moments" id="toc-mgf-and-moments" class="nav-link" data-scroll-target="#mgf-and-moments"><span class="header-section-number">1.7.3</span> MGF and moments</a></li>
+  <li><a href="#sums-and-linear-maps" id="toc-sums-and-linear-maps" class="nav-link" data-scroll-target="#sums-and-linear-maps"><span class="header-section-number">1.7.4</span> Sums and linear maps</a></li>
+  <li><a href="#the-normal-in-many-dimensions" id="toc-the-normal-in-many-dimensions" class="nav-link" data-scroll-target="#the-normal-in-many-dimensions"><span class="header-section-number">1.7.5</span> The normal in many dimensions</a></li>
+  <li><a href="#the-central-limit-theorem" id="toc-the-central-limit-theorem" class="nav-link" data-scroll-target="#the-central-limit-theorem"><span class="header-section-number">1.7.6</span> The central limit theorem</a></li>
+  <li><a href="#example-noise-in-high-dimension" id="toc-example-noise-in-high-dimension" class="nav-link" data-scroll-target="#example-noise-in-high-dimension"><span class="header-section-number">1.7.7</span> Example: noise in high dimension</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">1.7.8</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#comparing-a-density-with-its-shifted-copy" id="toc-comparing-a-density-with-its-shifted-copy" class="nav-link" data-scroll-target="#comparing-a-density-with-its-shifted-copy"><span class="header-section-number">1.8</span> Comparing a density with its shifted copy</a>
+  <ul class="collapse">
+  <li><a href="#context-5" id="toc-context-5" class="nav-link" data-scroll-target="#context-5"><span class="header-section-number">1.8.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">1.8.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">1.8.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">1.8.4</span> Interpretation</a></li>
+  <li><a href="#check-yourself-5" id="toc-check-yourself-5" class="nav-link" data-scroll-target="#check-yourself-5"><span class="header-section-number">1.8.5</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-the-facts-by-simulation" id="toc-code-check-the-facts-by-simulation" class="nav-link" data-scroll-target="#code-check-the-facts-by-simulation"><span class="header-section-number">1.9</span> Code: check the facts by simulation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">1.10</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">1.11</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part01-prerequisites/00-introduction.html">Prerequisites</a></li><li class="breadcrumb-item"><a href="../part01-prerequisites/01-distributions.html"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">1.1</span> Why this matters</h2>
+<p>A handful of distributions do almost all the work in this book. Counts of events (errors, successes, examples drawn into a batch) are binomial, and Poisson when the events are rare. Additive noise is usually normal or Laplace. Every later chapter — concentration, divergences, hypothesis testing — is stated in terms of these few families. So you need to know each one well: its density, mean, variance, moment generating function (MGF), tails, and how it relates to the others.</p>
+<p>The idea that ties the chapter together is that these families are not a zoo of unrelated formulas. They are built from one another. A binomial is a sum of coin flips. A Poisson is a binomial with many trials and a small success probability. An exponential is the waiting time for the first event in that same Poisson setting. A Laplace is two exponentials placed back to back. A normal is what any sum of many small independent pieces looks like. Because each family is built from simpler ones, its mean, variance and MGF can be computed from the pieces, and that is how this chapter derives them.</p>
+<p>This chapter covers five families (<a href="#tbl-families" class="quarto-xref">Table&nbsp;<span>1.1</span></a>):</p>
+<div id="tbl-families" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-families-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.1: The five families in this chapter, what each models, and the fact about it that later chapters use.
+</figcaption>
+<div aria-describedby="tbl-families-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Family</th>
+<th>Models</th>
+<th>Key fact for later</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bernoulli and binomial</td>
+<td>One yes/no outcome; the count of successes in <span class="math inline">\(n\)</span> trials</td>
+<td>Mean and variance add over independent trials</td>
+</tr>
+<tr class="even">
+<td>Poisson</td>
+<td>Counts of rare events</td>
+<td>Its MGF <span class="math inline">\(e^{\mu(e^\lambda - 1)}\)</span> drives the Chernoff bound</td>
+</tr>
+<tr class="odd">
+<td>Exponential</td>
+<td>Waiting times; a building block</td>
+<td>A difference of two exponentials is Laplace</td>
+</tr>
+<tr class="even">
+<td>Laplace</td>
+<td>Symmetric noise with exponential tails</td>
+<td>Its log density is piecewise linear, so shifted copies differ by a bounded factor</td>
+</tr>
+<tr class="odd">
+<td>Normal</td>
+<td>Sums of many small effects; symmetric noise with light tails</td>
+<td>Closed under sums; a <span class="math inline">\(d\)</span>-dimensional normal vector has norm <span class="math inline">\(\approx\sigma\sqrt d\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>A last section puts the normal and the Laplace side by side and asks how different a density is from a copy of itself moved sideways. That comparison is where the next chapters begin.</p>
+<p>Each section follows the same arc: context, definition, derivations of the moments, interpretation, an example from machine learning, and a self-check.</p>
+</section>
+<section id="toolkit-what-to-know-for-each-distribution" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="toolkit-what-to-know-for-each-distribution"><span class="header-section-number">1.2</span> Toolkit: what to know for each distribution</h2>
+<p>For every family below you will meet the same three summaries: its moments, its moment generating function and its tail. This section says what each one is, why it is worth computing, and the few rules for working with it.</p>
+<section id="sec-dist-moments" class="level3" data-number="1.2.1">
+<h3 data-number="1.2.1" class="anchored" data-anchor-id="sec-dist-moments"><span class="header-section-number">1.2.1</span> Moments: where the distribution sits and how wide it is</h3>
+<p>The <strong>mean</strong> <span class="math inline">\(\mathbb E[X]\)</span> is the centre of mass of the distribution: the long-run average of many independent draws. The <strong>variance</strong> measures how far draws typically land from the mean. It squares each draw’s distance from the mean, so that distances on either side count the same, and averages. Expanding the square <span class="math inline">\((X - \mathbb E X)^2 = X^2 - 2X\,\mathbb E X + (\mathbb E X)^2\)</span> and averaging each term gives a second form that is often easier to compute, “mean of the square minus square of the mean”: <span id="eq-auto-01distributions-1"><span class="math display">\[\operatorname{Var}(X) = \mathbb E\big[(X - \mathbb E X)^2\big] = \mathbb E[X^2] - (\mathbb E X)^2. \tag{1.1}\]</span></span> Its square root, the <strong>standard deviation</strong>, is in the same units as <span class="math inline">\(X\)</span>, so it is the number to compare with the mean. For a fair die, <span class="math inline">\(\mathbb E X = (1 + \dots + 6)/6 = 3.5\)</span> and <span class="math inline">\(\mathbb E X^2 = (1 + 4 + \dots + 36)/6 = 91/6\)</span>, so <span class="math inline">\(\operatorname{Var}X = 91/6 - 3.5^2 = 35/12 \approx 2.92\)</span> and the standard deviation is about 1.71.</p>
+<p>Three rules cover almost every calculation in this chapter. The first is that the mean of a sum is the sum of the means, <span class="math inline">\(\mathbb E[X + Y] = \mathbb E X + \mathbb E Y\)</span>, always, even when <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are dependent. The reason is that an expectation is a weighted sum over outcomes, and a weighted sum of <span class="math inline">\(X + Y\)</span> splits into the weighted sum of <span class="math inline">\(X\)</span> plus the weighted sum of <span class="math inline">\(Y\)</span>.</p>
+<p>The second rule says what scaling does to the spread: <span class="math inline">\(\operatorname{Var}(cX) = c^2\operatorname{Var}(X)\)</span>. Multiplying <span class="math inline">\(X\)</span> by <span class="math inline">\(c\)</span> multiplies every deviation <span class="math inline">\(X - \mathbb E X\)</span> by <span class="math inline">\(c\)</span>, and squaring the deviation turns that into <span class="math inline">\(c^2\)</span>.</p>
+<p>The third rule is that variances add when the variables are independent: <span class="math inline">\(\operatorname{Var}(X + Y) = \operatorname{Var}X + \operatorname{Var}Y\)</span>. To see where independence enters, expand the square in the definition. In general <span class="math inline">\(\operatorname{Var}(X + Y) = \operatorname{Var}X + \operatorname{Var}Y + 2\operatorname{Cov}(X, Y)\)</span>, where the cross term is the <strong>covariance</strong> <span class="math inline">\(\operatorname{Cov}(X, Y) = \mathbb E[XY] - \mathbb E X\,\mathbb E Y\)</span>. Independence makes <span class="math inline">\(\mathbb E[XY] = \mathbb E X\,\mathbb E Y\)</span>, so the covariance vanishes and only the two variances remain.</p>
+<p>The second and third rules together give the <span class="math inline">\(1/\sqrt n\)</span> law. The average of <span class="math inline">\(n\)</span> independent copies of <span class="math inline">\(X\)</span> is their sum times <span class="math inline">\(1/n\)</span>. The sum has variance <span class="math inline">\(n\operatorname{Var}(X)\)</span> by the third rule, and multiplying by <span class="math inline">\(1/n\)</span> divides that by <span class="math inline">\(n^2\)</span> by the second, so the average has variance <span class="math inline">\(n\operatorname{Var}(X)/n^2 = \operatorname{Var}(X)/n\)</span>. Its standard deviation is therefore the standard deviation of one draw divided by <span class="math inline">\(\sqrt n\)</span>.</p>
+</section>
+<section id="sec-dist-mgf" class="level3" data-number="1.2.2">
+<h3 data-number="1.2.2" class="anchored" data-anchor-id="sec-dist-mgf"><span class="header-section-number">1.2.2</span> The moment generating function</h3>
+<p>The mean and variance summarize a distribution by two numbers. The moment generating function summarizes it by a whole function, and that function turns out to be the right tool for sums of independent variables and for tails. The idea is to average not <span class="math inline">\(X\)</span> itself but an exponential of it, <span class="math inline">\(e^{\lambda X}\)</span>, for a number <span class="math inline">\(\lambda\)</span> of your choice. The <strong>moment generating function</strong> (MGF) of <span class="math inline">\(X\)</span> is <span id="eq-auto-01distributions-2"><span class="math display">\[M_X(\lambda) = \mathbb E\big[e^{\lambda X}\big]. \tag{1.2}\]</span></span> Here <span class="math inline">\(\lambda\)</span> is a real number that <em>you</em> choose. It is not a parameter of the distribution; it is a dial. For each setting of the dial you get one number, <span class="math inline">\(\mathbb E[e^{\lambda X}]\)</span>, and the MGF is the whole function <span class="math inline">\(\lambda \mapsto M_X(\lambda)\)</span>. With <span class="math inline">\(\lambda &gt; 0\)</span>, the weight <span class="math inline">\(e^{\lambda X}\)</span> grows exponentially in <span class="math inline">\(X\)</span>, so large values of <span class="math inline">\(X\)</span> dominate the average; the larger <span class="math inline">\(\lambda\)</span>, the further into the right tail it looks. With <span class="math inline">\(\lambda &lt; 0\)</span> it looks at the left tail instead. At <span class="math inline">\(\lambda = 0\)</span> every weight is <span class="math inline">\(e^0 = 1\)</span>, so <span class="math inline">\(M_X(0) = 1\)</span> for every distribution.</p>
+<p><strong>A concrete case: where <span class="math inline">\(e^\lambda\)</span> comes from.</strong> Take a coin <span class="math inline">\(X \sim \mathrm{Bernoulli}(p)\)</span>, which is 1 with probability <span class="math inline">\(p\)</span> and 0 otherwise. To compute <span class="math inline">\(\mathbb E[e^{\lambda X}]\)</span>, list each outcome, the value <span class="math inline">\(e^{\lambda X}\)</span> takes there, and its probability (<a href="#tbl-mgf-coin" class="quarto-xref">Table&nbsp;<span>1.2</span></a>).</p>
+<div id="tbl-mgf-coin" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mgf-coin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.2: The MGF of a coin, outcome by outcome. The factor <span class="math inline">\(e^\lambda\)</span> is just <span class="math inline">\(e^{\lambda x}\)</span> evaluated at <span class="math inline">\(x = 1\)</span>.
+</figcaption>
+<div aria-describedby="tbl-mgf-coin-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Outcome <span class="math inline">\(x\)</span></th>
+<th><span class="math inline">\(\Pr[X = x]\)</span></th>
+<th><span class="math inline">\(e^{\lambda x}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td><span class="math inline">\(1 - p\)</span></td>
+<td><span class="math inline">\(e^{\lambda\cdot0} = 1\)</span></td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td><span class="math inline">\(p\)</span></td>
+<td><span class="math inline">\(e^{\lambda\cdot1} = e^\lambda\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>An expectation is the value at each outcome times its probability, added up, so <span id="eq-auto-01distributions-3"><span class="math display">\[M_X(\lambda) = (1 - p)\cdot1 + p\cdot e^\lambda = 1 + p(e^\lambda - 1). \tag{1.3}\]</span></span> So the <span class="math inline">\(e^\lambda\)</span> in the Bernoulli, binomial and Poisson MGFs is nothing mysterious: it is the weight <span class="math inline">\(e^{\lambda x}\)</span> of the outcome <span class="math inline">\(x = 1\)</span>. For a count <span class="math inline">\(k\)</span> the weight is <span class="math inline">\(e^{\lambda k} = (e^\lambda)^k\)</span>, which is why <span class="math inline">\(e^\lambda\)</span> keeps reappearing for the counting distributions. With <span class="math inline">\(p = 0.3\)</span> and <span class="math inline">\(\lambda = 1\)</span>, for instance, <span class="math inline">\(M_X(1) = 0.7 + 0.3e \approx 1.52\)</span>.</p>
+<p><strong>Why it “generates” moments.</strong> The <span class="math inline">\(k\)</span>-th <strong>moment</strong> of <span class="math inline">\(X\)</span> is <span class="math inline">\(\mathbb E X^k\)</span>; the mean is the first. The MGF contains all of them, and the way to see this is to expand the exponential in its power series, <span class="math inline">\(e^u = 1 + u + u^2/2! + u^3/3! + \cdots\)</span>, with <span class="math inline">\(u = \lambda X\)</span>, and take the expectation of each term separately (the first rule of <a href="#sec-dist-moments" class="quarto-xref"><span>Section 1.2.1</span></a>, extended to many terms): <span id="eq-auto-01distributions-4"><span class="math display">\[M_X(\lambda) = \mathbb E\Big[1 + \lambda X + \frac{\lambda^2X^2}{2!} + \frac{\lambda^3X^3}{3!} + \cdots\Big] = 1 + \lambda\,\mathbb E X + \frac{\lambda^2}{2!}\mathbb E X^2 + \cdots. \tag{1.4}\]</span></span> The <span class="math inline">\(k\)</span>-th moment <span class="math inline">\(\mathbb E X^k\)</span> is <span class="math inline">\(k!\)</span> times the coefficient of <span class="math inline">\(\lambda^k\)</span>, and differentiating <span class="math inline">\(k\)</span> times at <span class="math inline">\(\lambda = 0\)</span> picks it out, because differentiation kills the lower powers of <span class="math inline">\(\lambda\)</span> and setting <span class="math inline">\(\lambda = 0\)</span> kills the higher ones: <span class="math inline">\(M_X'(0) = \mathbb E X\)</span>, <span class="math inline">\(M_X''(0) = \mathbb E X^2\)</span>. For the coin, expanding <span class="math inline">\(e^\lambda\)</span> the same way gives <span class="math inline">\(1 + p(e^\lambda - 1) = 1 + p\lambda + p\lambda^2/2! + \cdots\)</span>, so every moment equals <span class="math inline">\(p\)</span>, as it must, since <span class="math inline">\(X^k = X\)</span> when <span class="math inline">\(X \in \{0, 1\}\)</span>.</p>
+<p><strong>The log-MGF gives mean and variance directly.</strong> The derivatives of <span class="math inline">\(M_X\)</span> give the raw moments <span class="math inline">\(\mathbb E X\)</span> and <span class="math inline">\(\mathbb E X^2\)</span>, and the variance then needs a subtraction. Taking the logarithm first does the subtraction for you, and it will also turn products of MGFs into sums. Let <span class="math inline">\(\psi_X(\lambda) = \ln M_X(\lambda)\)</span>. The chain rule gives <span class="math inline">\(\psi' = M'/M\)</span>, and the quotient rule applied to <span class="math inline">\(M'/M\)</span> gives <span class="math inline">\(\psi'' = M''/M - (M'/M)^2\)</span>. At 0, where <span class="math inline">\(M = 1\)</span>, <span class="math inline">\(M' = \mathbb E X\)</span> and <span class="math inline">\(M'' = \mathbb E X^2\)</span>, <span id="eq-auto-01distributions-5"><span class="math display">\[\psi_X'(0) = \mathbb E X, \qquad \psi_X''(0) = \mathbb E X^2 - (\mathbb E X)^2 = \operatorname{Var}X. \tag{1.5}\]</span></span> The derivatives of <span class="math inline">\(\psi_X\)</span> at 0 are called the <strong>cumulants</strong> of <span class="math inline">\(X\)</span>: the first is the mean, the second the variance, and the higher ones measure finer features of the shape. For the Poisson below, <span class="math inline">\(\psi\)</span> turns out so simple that both derivatives can be read off in one line.</p>
+<p><strong>Sums become products.</strong> The main reason to use MGFs is that adding independent variables multiplies their MGFs. The exponential turns the sum into a product, and independence lets the expectation of that product split. If <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span> are independent, then <span id="eq-auto-01distributions-6"><span class="math display">\[M_{X+Y}(\lambda) = \mathbb E\big[e^{\lambda X}e^{\lambda Y}\big] = \mathbb E\big[e^{\lambda X}\big]\,\mathbb E\big[e^{\lambda Y}\big] = M_X(\lambda)M_Y(\lambda). \tag{1.6}\]</span></span> The first step is <span class="math inline">\(e^{a + b} = e^ae^b\)</span>; the second uses independence, which lets the expectation of a product split into a product of expectations. In log form, <span class="math inline">\(\psi_{X+Y} = \psi_X + \psi_Y\)</span>. This is how you get the binomial MGF from the Bernoulli one without touching the probability table, and it is the starting point of every exponential tail bound in <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>.</p>
+<p><strong>The MGF pins down the distribution.</strong> If two distributions have the same MGF on an interval around 0, they are the same distribution. This is a standard theorem of probability (it is proved in Blitzstein &amp; Hwang, listed in the references); its proof needs more analysis than this book uses, so take it as given. We use it to identify sums: compute the MGF of <span class="math inline">\(X + Y\)</span> as a product, recognise it as the MGF of a known family, and conclude that <span class="math inline">\(X + Y\)</span> belongs to that family (“the sum of independent Poissons is Poisson”). The MGF can be infinite for some <span class="math inline">\(\lambda\)</span>, and for heavy-tailed distributions it is infinite for every <span class="math inline">\(\lambda &gt; 0\)</span>; the identification needs it finite near 0.</p>
+</section>
+<section id="sec-dist-tails" class="level3" data-number="1.2.3">
+<h3 data-number="1.2.3" class="anchored" data-anchor-id="sec-dist-tails"><span class="header-section-number">1.2.3</span> Tails: how fast large values become rare</h3>
+<p>The <strong>tail</strong> of <span class="math inline">\(X\)</span> is <span class="math inline">\(\Pr[X \ge t]\)</span> as a function of <span class="math inline">\(t\)</span>, for <span class="math inline">\(t\)</span> well above the mean. The mean and variance describe the bulk of the distribution; the tail describes the rare, large outcomes, which are what a worst-case guarantee has to control. What matters is the <em>shape</em> of the decay, and three shapes recur. Evaluate each at <span class="math inline">\(t = 5\)</span>. A polynomial decay such as <span class="math inline">\(1/t^2\)</span> gives <span class="math inline">\(1/25 = 0.04\)</span>. An exponential decay such as <span class="math inline">\(e^{-t}\)</span> gives <span class="math inline">\(e^{-5}\)</span>, about <span class="math inline">\(6.7 \times 10^{-3}\)</span>. A Gaussian decay such as <span class="math inline">\(e^{-t^2/2}\)</span> gives <span class="math inline">\(e^{-12.5}\)</span>, about <span class="math inline">\(3.7 \times 10^{-6}\)</span>.</p>
+<p>The gap widens quickly as <span class="math inline">\(t\)</span> grows, because the exponent of the Gaussian decay grows like <span class="math inline">\(t^2\)</span> while that of the exponential grows like <span class="math inline">\(t\)</span>. Exponential tails are those of the exponential and Laplace families below; Gaussian tails are those of the normal.</p>
+<p>The tail and the MGF are tied together, and the link is a one-line argument. Fix <span class="math inline">\(\lambda &gt; 0\)</span>. Whenever <span class="math inline">\(X \ge t\)</span>, the weight <span class="math inline">\(e^{\lambda X}\)</span> is at least <span class="math inline">\(e^{\lambda t}\)</span>, and it is never negative, so averaging gives <span class="math inline">\(M_X(\lambda) = \mathbb E[e^{\lambda X}] \ge e^{\lambda t}\Pr[X \ge t]\)</span>. Rearranged, <span class="math inline">\(\Pr[X \ge t] \le M_X(\lambda)e^{-\lambda t}\)</span>. So if <span class="math inline">\(M_X(\lambda)\)</span> is finite for some <span class="math inline">\(\lambda &gt; 0\)</span>, the tail decays at least exponentially in <span class="math inline">\(t\)</span>. <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> turns this into explicit bounds by choosing <span class="math inline">\(\lambda\)</span> well. Which decay a distribution has decides which concentration inequalities apply to it.</p>
+</section>
+</section>
+<section id="bernoulli-and-binomial" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="bernoulli-and-binomial"><span class="header-section-number">1.3</span> Bernoulli and binomial</h2>
+<section id="context" class="level3" data-number="1.3.1">
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">1.3.1</span> Context</h3>
+<p>The simplest random quantity is a yes/no outcome: a test example is misclassified or not, a coin lands heads or not, a record is included in a sample or not. Count the yeses over <span class="math inline">\(n\)</span> independent trials and you get a binomial. Every estimated rate in machine learning — accuracy, error rate, false-positive rate — is a binomial count divided by <span class="math inline">\(n\)</span>.</p>
+</section>
+<section id="definitions" class="level3" data-number="1.3.2">
+<h3 data-number="1.3.2" class="anchored" data-anchor-id="definitions"><span class="header-section-number">1.3.2</span> Definitions</h3>
+<p><span class="math inline">\(X \sim \mathrm{Bernoulli}(p)\)</span> takes value 1 with probability <span class="math inline">\(p\)</span> and 0 with probability <span class="math inline">\(1 - p\)</span>.</p>
+<p><span class="math inline">\(S \sim \mathrm{Binomial}(n, p)\)</span> is the number of ones in <span class="math inline">\(n\)</span> independent <span class="math inline">\(\mathrm{Bernoulli}(p)\)</span> trials. The probability of exactly <span class="math inline">\(k\)</span> ones is the number of ways to place <span class="math inline">\(k\)</span> ones among <span class="math inline">\(n\)</span> trials, times the probability of any one such placement. That gives the probability mass function (PMF), the table of probabilities of each count, <span id="eq-auto-01distributions-7"><span class="math display">\[\Pr[S = k] = \binom nk p^k(1-p)^{n-k}, \qquad k = 0, 1, \dots, n. \tag{1.7}\]</span></span></p>
+<p><strong>Derivation of the PMF.</strong> Any particular sequence with exactly <span class="math inline">\(k\)</span> ones has probability <span class="math inline">\(p^k(1-p)^{n-k}\)</span>, because the trials are independent and the probability of a sequence is the product of the probabilities of its entries: <span class="math inline">\(p\)</span> for each one and <span class="math inline">\(1 - p\)</span> for each zero. There are <span class="math inline">\(\binom nk\)</span> such sequences — choose which <span class="math inline">\(k\)</span> positions hold the ones — and they are disjoint events, so their probabilities add.</p>
+</section>
+<section id="moments" class="level3" data-number="1.3.3">
+<h3 data-number="1.3.3" class="anchored" data-anchor-id="moments"><span class="header-section-number">1.3.3</span> Moments</h3>
+<p><strong>Bernoulli.</strong> <span class="math inline">\(\mathbb E X = 1\cdot p + 0\cdot(1-p) = p\)</span>. Since <span class="math inline">\(X^2 = X\)</span>, <span class="math inline">\(\mathbb E X^2 = p\)</span>, so <span class="math inline">\(\operatorname{Var}X = p - p^2 = p(1-p)\)</span>. The MGF, computed outcome by outcome in <a href="#tbl-mgf-coin" class="quarto-xref">Table&nbsp;<span>1.2</span></a>, is <span class="math inline">\(M_X(\lambda) = (1 - p) + pe^\lambda = 1 + p(e^\lambda - 1)\)</span>.</p>
+<p><strong>Binomial.</strong> Rather than work with the PMF, write the count as a sum of the trials, <span class="math inline">\(S = X_1 + \dots + X_n\)</span> with independent Bernoullis, and apply the rules of the Toolkit to the sum. The mean of a sum is the sum of the <span class="math inline">\(n\)</span> means, each <span class="math inline">\(p\)</span>. The trials are independent, so the variances add, <span class="math inline">\(n\)</span> times <span class="math inline">\(p(1-p)\)</span>. And the MGF of an independent sum is the product of <span class="math inline">\(n\)</span> identical Bernoulli MGFs. Together, <span id="eq-auto-01distributions-8"><span class="math display">\[\mathbb E S = np, \qquad \operatorname{Var}S = np(1-p), \qquad M_S(\lambda) = \big(1 + p(e^\lambda - 1)\big)^n. \tag{1.8}\]</span></span> No sums over the PMF are needed: decomposing into simple pieces is almost always easier than computing with the PMF directly.</p>
+</section>
+<section id="interpretation" class="level3" data-number="1.3.4">
+<h3 data-number="1.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">1.3.4</span> Interpretation</h3>
+<p>The variance <span class="math inline">\(p(1-p)\)</span> is a downward parabola in <span class="math inline">\(p\)</span> that is zero at <span class="math inline">\(p = 0\)</span> and <span class="math inline">\(p = 1\)</span>, so it is largest halfway between, at <span class="math inline">\(p = \frac12\)</span>, where it is <span class="math inline">\(\frac12 \cdot \frac12 = \frac14\)</span>, and small near 0 or 1. A rate near 0 is therefore estimated much more precisely than one near <span class="math inline">\(\frac12\)</span>. Bounds that use only the fact that each trial lies between 0 and 1, such as Hoeffding’s inequality in <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>, cannot see this difference, and it matters later.</p>
+<p>The estimated rate <span class="math inline">\(\hat p = S/n\)</span> is the count scaled by <span class="math inline">\(1/n\)</span>. By the scaling rules of <a href="#sec-dist-moments" class="quarto-xref"><span>Section 1.2.1</span></a> it has mean <span class="math inline">\(np/n = p\)</span> and variance <span class="math inline">\(np(1-p)/n^2 = p(1-p)/n\)</span>, so its standard deviation is <span class="math inline">\(\sqrt{p(1-p)/n}\)</span>. Precision improves like <span class="math inline">\(1/\sqrt n\)</span>: four times the data halves the error, since <span class="math inline">\(\sqrt 4 = 2\)</span>.</p>
+</section>
+<section id="example-estimating-a-classifiers-error-rate" class="level3" data-number="1.3.5">
+<h3 data-number="1.3.5" class="anchored" data-anchor-id="example-estimating-a-classifiers-error-rate"><span class="header-section-number">1.3.5</span> Example: estimating a classifier’s error rate</h3>
+<p>A classifier makes an error on each test example independently with probability <span class="math inline">\(p = 0.05\)</span>. On <span class="math inline">\(n = 2{,}000\)</span> test examples the error count is <span class="math inline">\(\mathrm{Binomial}(2000, 0.05)\)</span>, with mean <span class="math inline">\(2000 \times 0.05 = 100\)</span> and standard deviation <span class="math inline">\(\sqrt{2000 \times 0.05 \times 0.95} \approx 9.7\)</span>. Divided by <span class="math inline">\(n\)</span>, that standard deviation is about <span class="math inline">\(9.7/2000 \approx 0.005\)</span> of the rate, so the measured error rate is typically within about <span class="math inline">\(\pm 0.5\)</span> percentage points of the true 5%. At <span class="math inline">\(p = 0.001\)</span> the count has mean 2 and standard deviation <span class="math inline">\(\sqrt{2000 \times 0.001 \times 0.999} \approx 1.4\)</span>: the <em>relative</em> error, <span class="math inline">\(1.4/2\)</span>, is now about 70%, and a single test set can easily show 0 errors (that happens with probability <span class="math inline">\(0.999^{2000} \approx e^{-2}\)</span>, about one test set in seven).</p>
+</section>
+<section id="check-yourself" class="level3" data-number="1.3.6">
+<h3 data-number="1.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">1.3.6</span> Check yourself</h3>
+<ul>
+<li>Why is <span class="math inline">\(\operatorname{Var}(X_1 + \dots + X_n) = n\operatorname{Var}(X_1)\)</span> wrong if the <span class="math inline">\(X_i\)</span> are copies of the same variable? <em>(Then the sum is <span class="math inline">\(nX_1\)</span>, whose variance is <span class="math inline">\(n^2\operatorname{Var}X_1\)</span>. Independence is what makes variances add.)</em></li>
+<li>What is <span class="math inline">\(\Pr[S = 0]\)</span> for <span class="math inline">\(\mathrm{Binomial}(n, p)\)</span>, and roughly how large must <span class="math inline">\(n\)</span> be before you expect to see at least one success? <em>(<span class="math inline">\((1-p)^n \approx e^{-np}\)</span>, using <span class="math inline">\(1 - p \approx e^{-p}\)</span> for small <span class="math inline">\(p\)</span>; this is small only once <span class="math inline">\(np\)</span> is around 1 or more, so you need <span class="math inline">\(n\)</span> on the order of <span class="math inline">\(1/p\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="poisson" class="level2" data-number="1.4">
+<h2 data-number="1.4" class="anchored" data-anchor-id="poisson"><span class="header-section-number">1.4</span> Poisson</h2>
+<section id="context-1" class="level3" data-number="1.4.1">
+<h3 data-number="1.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">1.4.1</span> Context</h3>
+<p>When <span class="math inline">\(n\)</span> is large and <span class="math inline">\(p\)</span> is small, the binomial depends on <span class="math inline">\(n\)</span> and <span class="math inline">\(p\)</span> only through the mean <span class="math inline">\(\mu = np\)</span>, as the limit below shows. The limit is the Poisson distribution: the law of rare events. It describes the number of errors in a large test set with a tiny error rate, the number of rare tokens in a document, or the size of a minibatch when each of many examples is included independently with small probability.</p>
+</section>
+<section id="definition" class="level3" data-number="1.4.2">
+<h3 data-number="1.4.2" class="anchored" data-anchor-id="definition"><span class="header-section-number">1.4.2</span> Definition</h3>
+<p><span class="math inline">\(N \sim \mathrm{Poisson}(\mu)\)</span> for <span class="math inline">\(\mu &gt; 0\)</span> counts events whose expected number is <span class="math inline">\(\mu\)</span>. It takes values <span class="math inline">\(k = 0, 1, 2, \dots\)</span> with <span id="eq-auto-01distributions-9"><span class="math display">\[\Pr[N = k] = e^{-\mu}\frac{\mu^k}{k!}. \tag{1.9}\]</span></span> The factor <span class="math inline">\(e^{-\mu}\)</span> makes the probabilities add up to 1, since <span class="math inline">\(\sum_k \mu^k/k! = e^\mu\)</span> is the power series of the exponential.</p>
+</section>
+<section id="the-poisson-limit-of-the-binomial" class="level3" data-number="1.4.3">
+<h3 data-number="1.4.3" class="anchored" data-anchor-id="the-poisson-limit-of-the-binomial"><span class="header-section-number">1.4.3</span> The Poisson limit of the binomial</h3>
+<p>Hold the expected count <span class="math inline">\(\mu\)</span> fixed and let the number of trials grow, so each trial has success probability <span class="math inline">\(p = \mu/n\)</span>. Put that into the binomial PMF for a fixed count <span class="math inline">\(k\)</span>, write <span class="math inline">\(\binom nk = n(n-1)\cdots(n-k+1)/k!\)</span>, and group the result into four factors, each of which has a simple limit as <span class="math inline">\(n \to \infty\)</span>: <span id="eq-auto-01distributions-10"><span class="math display">\[\binom nk\left(\frac\mu n\right)^k\left(1 - \frac\mu n\right)^{n-k} = \underbrace{\frac{n(n-1)\cdots(n-k+1)}{n^k}}_{\to\, 1}\cdot\frac{\mu^k}{k!}\cdot\underbrace{\left(1 - \frac\mu n\right)^n}_{\to\, e^{-\mu}}\cdot\underbrace{\left(1 - \frac\mu n\right)^{-k}}_{\to\, 1}. \tag{1.10}\]</span></span> The first factor is a product of <span class="math inline">\(k\)</span> fractions <span class="math inline">\(n/n, (n-1)/n, \dots\)</span>, each tending to 1, and there are only <span class="math inline">\(k\)</span> of them. The middle factor does not depend on <span class="math inline">\(n\)</span>. The third is the classic limit that defines <span class="math inline">\(e\)</span>: its logarithm is <span class="math inline">\(n\ln(1 - \mu/n)\)</span>, and since <span class="math inline">\(\ln(1 - u) \approx -u\)</span> for small <span class="math inline">\(u\)</span>, that is close to <span class="math inline">\(n \cdot (-\mu/n) = -\mu\)</span>. The last factor has a fixed exponent <span class="math inline">\(-k\)</span> and a base tending to 1. The limit is <span class="math inline">\(e^{-\mu}\mu^k/k!\)</span>. <a href="#fig-poisson-limit" class="quarto-xref">Figure&nbsp;<span>1.1</span></a> shows the convergence: at <span class="math inline">\(n = 10\)</span> the binomial is visibly narrower than the Poisson, while at <span class="math inline">\(n = 100\)</span> they almost coincide.</p>
+<div id="fig-poisson-limit" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-poisson-limit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/poisson_limit.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-poisson-limit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.1: <span class="math inline">\(\mathrm{Binomial}(n, 5/n)\)</span> for <span class="math inline">\(n = 10\)</span> and <span class="math inline">\(100\)</span>, against <span class="math inline">\(\mathrm{Poisson}(5)\)</span> and its normal approximation.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="moments-via-the-mgf" class="level3" data-number="1.4.4">
+<h3 data-number="1.4.4" class="anchored" data-anchor-id="moments-via-the-mgf"><span class="header-section-number">1.4.4</span> Moments via the MGF</h3>
+<p>The MGF is the sum, over all counts <span class="math inline">\(k\)</span>, of the weight <span class="math inline">\(e^{\lambda k}\)</span> times the probability of <span class="math inline">\(k\)</span>. Gathering the powers of <span class="math inline">\(k\)</span> into <span class="math inline">\((\mu e^\lambda)^k\)</span> leaves the power series of the exponential, evaluated at <span class="math inline">\(\mu e^\lambda\)</span>: <span id="eq-auto-01distributions-11"><span class="math display">\[M_N(\lambda) = \sum_{k\ge0}e^{\lambda k}e^{-\mu}\frac{\mu^k}{k!} = e^{-\mu}\sum_{k\ge0}\frac{(\mu e^\lambda)^k}{k!} = e^{-\mu}e^{\mu e^\lambda} = \exp\big(\mu(e^\lambda - 1)\big). \tag{1.11}\]</span></span> So the log-MGF is <span class="math inline">\(\psi_N(\lambda) = \mu(e^\lambda - 1)\)</span>. Its derivatives are all <span class="math inline">\(\mu e^\lambda\)</span>, which equals <span class="math inline">\(\mu\)</span> at <span class="math inline">\(\lambda = 0\)</span>. Since <span class="math inline">\(\psi'(0)\)</span> is the mean and <span class="math inline">\(\psi''(0)\)</span> the variance (<a href="#sec-dist-mgf" class="quarto-xref"><span>Section 1.2.2</span></a>), <span id="eq-auto-01distributions-12"><span class="math display">\[\mathbb E N = \operatorname{Var}N = \mu. \tag{1.12}\]</span></span></p>
+<p><strong>Sums.</strong> Take independent <span class="math inline">\(N_1 \sim \mathrm{Poisson}(\mu_1)\)</span> and <span class="math inline">\(N_2 \sim \mathrm{Poisson}(\mu_2)\)</span>. The MGF of the sum is the product of the two MGFs, and multiplying two exponentials adds their exponents, which gives <span class="math inline">\(\exp((\mu_1 + \mu_2)(e^\lambda - 1))\)</span>. That is the Poisson MGF with mean <span class="math inline">\(\mu_1 + \mu_2\)</span>, and since the MGF pins down the distribution, <span class="math inline">\(N_1 + N_2 \sim \mathrm{Poisson}(\mu_1 + \mu_2)\)</span>.</p>
+</section>
+<section id="interpretation-1" class="level3" data-number="1.4.5">
+<h3 data-number="1.4.5" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">1.4.5</span> Interpretation</h3>
+<p><strong>Mean equals variance.</strong> The standard deviation is <span class="math inline">\(\sqrt\mu\)</span>, so the spread relative to the mean, <span class="math inline">\(\sqrt\mu/\mu = 1/\sqrt\mu\)</span>, shrinks only once you expect many events. With <span class="math inline">\(\mu = 4\)</span> the standard deviation is 2, so a count of 0 or 8, two standard deviations from the mean, is unremarkable.</p>
+<p><strong>The Poisson MGF bounds the Bernoulli MGF.</strong> The inequality <span class="math inline">\(1 + x \le e^x\)</span> holds for every <span class="math inline">\(x\)</span>: the exponential is convex, and <span class="math inline">\(1 + x\)</span> is its tangent line at 0, which a convex curve always lies above. Apply it with <span class="math inline">\(x = p(e^\lambda - 1)\)</span>: <span id="eq-auto-01distributions-13"><span class="math display">\[M_{\mathrm{Bern}(p)}(\lambda) = 1 + p(e^\lambda - 1) \le \exp(p(e^\lambda - 1)) = M_{\mathrm{Poisson}(p)}(\lambda). \tag{1.13}\]</span></span> Now take independent Bernoullis with probabilities <span class="math inline">\(p_1, \dots, p_n\)</span> and mean <span class="math inline">\(\mu = p_1 + \dots + p_n\)</span>. The MGF of their sum is the product of their MGFs, each at most <span class="math inline">\(\exp(p_i(e^\lambda - 1))\)</span>, and the product of those is <span class="math inline">\(\exp(\mu(e^\lambda - 1))\)</span>. So the MGF of any sum of independent Bernoullis with mean <span class="math inline">\(\mu\)</span> is at most the Poisson(<span class="math inline">\(\mu\)</span>) MGF. This one-line inequality is the first step of the Chernoff bound in <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>, which bounds the tail of a count through its MGF, as in <a href="#sec-dist-tails" class="quarto-xref"><span>Section 1.2.3</span></a>.</p>
+<p><strong>Right tail.</strong> Count data are right-skewed: the count cannot go below 0 but can run far above the mean. For large <span class="math inline">\(k\)</span>, <span class="math inline">\(\Pr[N = k]\)</span> decays like <span class="math inline">\((e\mu/k)^k\)</span>. To see this, use the bound <span class="math inline">\(k! \ge (k/e)^k\)</span> (it follows from <span class="math inline">\(e^k = \sum_j k^j/j! \ge k^k/k!\)</span>), which gives <span class="math inline">\(\Pr[N = k] \le e^{-\mu}\mu^k(e/k)^k \le (e\mu/k)^k\)</span>. Written as <span class="math inline">\(e^{-k\ln(k/(e\mu))}\)</span>, the exponent grows like <span class="math inline">\(k\ln k\)</span>, so the decay is faster than any exponential <span class="math inline">\(e^{-ck}\)</span>, but slower than the <span class="math inline">\(e^{-k^2/(2\mu)}\)</span> of a normal with the same variance.</p>
+</section>
+<section id="example-minibatch-sizes-under-independent-sampling" class="level3" data-number="1.4.6">
+<h3 data-number="1.4.6" class="anchored" data-anchor-id="example-minibatch-sizes-under-independent-sampling"><span class="header-section-number">1.4.6</span> Example: minibatch sizes under independent sampling</h3>
+<p>Some training procedures form a minibatch by including each of <span class="math inline">\(n = 60{,}000\)</span> examples independently with probability <span class="math inline">\(q = 0.01\)</span>. The batch size is <span class="math inline">\(\mathrm{Binomial}(60000, 0.01)\)</span>: many trials, each unlikely, so it is very close to <span class="math inline">\(\mathrm{Poisson}(600)\)</span>, with mean <span class="math inline">\(60000 \times 0.01 = 600\)</span> and standard deviation <span class="math inline">\(\sqrt{600}\)</span>, about 24.5. Batch sizes between 550 and 650, about two standard deviations either side, are typical; <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> shows how unlikely anything outside <span class="math inline">\(600 \pm 20\%\)</span> is.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="1.4.7">
+<h3 data-number="1.4.7" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">1.4.7</span> Check yourself</h3>
+<ul>
+<li>Using only the MGF, show that <span class="math inline">\(\mathbb E[N(N-1)] = \mu^2\)</span>. <em>(Differentiate <span class="math inline">\(M_N\)</span> twice at 0 to get <span class="math inline">\(\mathbb E N^2 = \mu^2 + \mu\)</span>, then subtract <span class="math inline">\(\mathbb E N\)</span>.)</em></li>
+<li>The binomial variance <span class="math inline">\(np(1-p)\)</span> tends to <span class="math inline">\(\mu\)</span> under the Poisson limit. Which factor disappears, and why? <em>(<span class="math inline">\((1-p) \to 1\)</span> because <span class="math inline">\(p = \mu/n \to 0\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="exponential" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="exponential"><span class="header-section-number">1.5</span> Exponential</h2>
+<section id="context-2" class="level3" data-number="1.5.1">
+<h3 data-number="1.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">1.5.1</span> Context</h3>
+<p>The Poisson counts how many rare events land in a fixed window. Turn the question around: starting now, <em>how long</em> until the first one? A model in production makes a rare error, a cache entry is evicted, a request arrives. The answer is the exponential distribution, and it comes out of the same construction as the Poisson: chop time into many short slots, give each slot a small, independent chance of holding an event, and let the slots shrink. For us it is mainly a building block: the Laplace distribution is two exponentials glued back to back, and the simplest exponential-type tail bounds are calculations with it.</p>
+</section>
+<section id="derivation-the-waiting-time-in-the-poisson-limit" class="level3" data-number="1.5.2">
+<h3 data-number="1.5.2" class="anchored" data-anchor-id="derivation-the-waiting-time-in-the-poisson-limit"><span class="header-section-number">1.5.2</span> Derivation: the waiting time in the Poisson limit</h3>
+<p>Fix a scale <span class="math inline">\(b &gt; 0\)</span>, which will turn out to be the average waiting time. Split each unit of time into <span class="math inline">\(n\)</span> slots of width <span class="math inline">\(1/n\)</span>. As the slots get finer, each one must get less likely to hold an event, or the number of events per unit of time would blow up. So choose the per-slot probability to keep the expected number of events per unit of time at <span class="math inline">\(1/b\)</span>, whatever <span class="math inline">\(n\)</span> is. With <span class="math inline">\(n\)</span> slots per unit of time, that means each slot holds an event independently with probability <span id="eq-auto-01distributions-14"><span class="math display">\[p = \frac{1}{bn}, \tag{1.14}\]</span></span> since then <span class="math inline">\(np = 1/b\)</span>. This is the Poisson setup: in the Poisson limit we held the mean <span class="math inline">\(\mu = np\)</span> fixed and let <span class="math inline">\(n \to \infty\)</span>, and here we hold the mean <em>rate</em> <span class="math inline">\(1/b\)</span> fixed in the same way.</p>
+<ol type="1">
+<li><strong>The wait in slots is geometric.</strong> Let <span class="math inline">\(G\)</span> be the index of the first slot that holds an event. <span class="math inline">\(G &gt; j\)</span> means the first <span class="math inline">\(j\)</span> slots are all empty, each with probability <span class="math inline">\(1 - p\)</span>. The slots are independent, so these probabilities multiply: <span id="eq-auto-01distributions-15"><span class="math display">\[\Pr[G &gt; j] = (1 - p)^j, \qquad j = 0, 1, 2, \dots \tag{1.15}\]</span></span> <a href="#tbl-geometric-wait" class="quarto-xref">Table&nbsp;<span>1.3</span></a> lists the first few outcomes. This is the <strong>geometric distribution</strong>: the number of coin flips up to and including the first head.</li>
+</ol>
+<div id="tbl-geometric-wait" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-geometric-wait-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.3: The waiting time <span class="math inline">\(G\)</span>, in slots, until the first event. Each row is one outcome. <span class="math inline">\(G &gt; j\)</span> exactly when the first <span class="math inline">\(j\)</span> slots are empty.
+</figcaption>
+<div aria-describedby="tbl-geometric-wait-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(j\)</span></th>
+<th>Slots <span class="math inline">\(1, \dots, j\)</span> when <span class="math inline">\(G = j\)</span></th>
+<th><span class="math inline">\(\Pr[G = j]\)</span></th>
+<th><span class="math inline">\(\Pr[G &gt; j]\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>event</td>
+<td><span class="math inline">\(p\)</span></td>
+<td><span class="math inline">\(1 - p\)</span></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>empty, event</td>
+<td><span class="math inline">\((1 - p)p\)</span></td>
+<td><span class="math inline">\((1 - p)^2\)</span></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>empty, empty, event</td>
+<td><span class="math inline">\((1 - p)^2p\)</span></td>
+<td><span class="math inline">\((1 - p)^3\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(j\)</span></td>
+<td><span class="math inline">\(j - 1\)</span> empty, then event</td>
+<td><span class="math inline">\((1 - p)^{j-1}p\)</span></td>
+<td><span class="math inline">\((1 - p)^j\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<ol start="2" type="1">
+<li><p><strong>Convert slots to time.</strong> Each slot lasts <span class="math inline">\(1/n\)</span>, so the first event happens at time <span class="math inline">\(T_n = G/n\)</span>. Time <span class="math inline">\(t\)</span> covers <span class="math inline">\(\lfloor nt\rfloor\)</span> whole slots (the floor <span class="math inline">\(\lfloor\cdot\rfloor\)</span> rounds down to a whole number), so <span class="math inline">\(T_n &gt; t\)</span> means those slots are all empty: <span id="eq-auto-01distributions-16"><span class="math display">\[\Pr[T_n &gt; t] = \Pr[G &gt; \lfloor nt\rfloor] = \left(1 - \frac{1}{bn}\right)^{\lfloor nt\rfloor}. \tag{1.16}\]</span></span></p></li>
+<li><p><strong>Let the slots shrink.</strong> The goal is to bring this into the form <span class="math inline">\((1 - \mu/m)^m\)</span>, whose limit <span class="math inline">\(e^{-\mu}\)</span> we already know from the Poisson limit. Two rewrites do it. Write the exponent as <span class="math inline">\(nt - r\)</span>, where <span class="math inline">\(0 \le r &lt; 1\)</span> is the fractional part of <span class="math inline">\(nt\)</span>, and write <span class="math inline">\(\frac{1}{bn}\)</span> as <span class="math inline">\(\frac{t/b}{nt}\)</span>, which is the same number. Then <span id="eq-auto-01distributions-17"><span class="math display">\[\left(1 - \frac{1}{bn}\right)^{\lfloor nt\rfloor} = \underbrace{\left(1 - \frac{t/b}{nt}\right)^{nt}}_{\to\, e^{-t/b}}\cdot\underbrace{\left(1 - \frac{1}{bn}\right)^{-r}}_{\to\, 1}. \tag{1.17}\]</span></span> The first factor is the limit <span class="math inline">\((1 - \mu/m)^m \to e^{-\mu}\)</span> with <span class="math inline">\(\mu = t/b\)</span> and <span class="math inline">\(m = nt\)</span> slots. The second has a bounded exponent and a base tending to 1. So the limiting waiting time <span class="math inline">\(T\)</span> satisfies <span id="eq-exponential-survival"><span class="math display">\[\Pr[T &gt; t] = e^{-t/b}, \qquad t \ge 0. \tag{1.18}\]</span></span></p></li>
+<li><p><strong>Differentiate to get the density.</strong> The probability that the wait is at most <span class="math inline">\(t\)</span> is <span class="math inline">\(\Pr[T \le t] = 1 - e^{-t/b}\)</span>, and a density is the derivative of this function, here <span class="math inline">\(\frac1be^{-t/b}\)</span>.</p></li>
+</ol>
+<p><strong>The same answer from the Poisson count.</strong> The first event comes after <span class="math inline">\(t\)</span> exactly when no event falls in <span class="math inline">\([0, t]\)</span>. The number of events in <span class="math inline">\([0, t]\)</span> is a count over <span class="math inline">\(\lfloor nt\rfloor\)</span> independent slots, <span class="math inline">\(\mathrm{Binomial}(\lfloor nt\rfloor, \frac{1}{bn})\)</span>, with mean about <span class="math inline">\(t/b\)</span>; by the Poisson limit it tends to <span class="math inline">\(\mathrm{Poisson}(t/b)\)</span>, and <span class="math inline">\(\Pr[\mathrm{Poisson}(t/b) = 0] = e^{-t/b}\)</span>. Counting events in a window gives a Poisson count, and waiting for the first event gives an exponential time. Both come from the same slots.</p>
+</section>
+<section id="definition-1" class="level3" data-number="1.5.3">
+<h3 data-number="1.5.3" class="anchored" data-anchor-id="definition-1"><span class="header-section-number">1.5.3</span> Definition</h3>
+<p><span class="math inline">\(Y \sim \mathrm{Exp}(b)\)</span> with <em>scale</em> <span class="math inline">\(b &gt; 0\)</span> has the density just derived, <span id="eq-auto-01distributions-18"><span class="math display">\[f(y) = \frac1b e^{-y/b}, \qquad y \ge 0. \tag{1.19}\]</span></span> (Some texts use the rate <span class="math inline">\(1/b\)</span> instead. NumPy’s <code>rng.exponential(b)</code> uses the scale.)</p>
+<p><a href="#fig-exponential-limit" class="quarto-xref">Figure&nbsp;<span>1.2</span></a> shows the limit for <span class="math inline">\(b = 2\)</span>. With one slot per unit of time, each slot holds an event with probability <span class="math inline">\(p = 1/(2 \cdot 1) = \frac12\)</span>, so <span class="math inline">\(\Pr[T_n &gt; t] = (\frac12)^{\lfloor t\rfloor}\)</span> is a staircase that halves at every integer. With five slots it already hugs <span class="math inline">\(e^{-t/2}\)</span>. At <span class="math inline">\(t = 4\)</span> the script gives <span class="math inline">\(\Pr[T_n &gt; 4] = 0.0625\)</span>, <span class="math inline">\(0.1216\)</span> and <span class="math inline">\(0.1347\)</span> for <span class="math inline">\(n = 1, 5, 100\)</span>, against <span class="math inline">\(e^{-2} = 0.1353\)</span>. The first two follow from the formula of step 2: <span class="math inline">\((\frac12)^4 = 0.0625\)</span>, and with <span class="math inline">\(n = 5\)</span>, <span class="math inline">\(p = 0.1\)</span> and <span class="math inline">\((0.9)^{20} = 0.1216\)</span>.</p>
+<div id="fig-exponential-limit" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-exponential-limit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/exponential_limit.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-exponential-limit-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.2: <span class="math inline">\(\Pr[T_n &gt; t]\)</span> for the slotted waiting time with <span class="math inline">\(b = 2\)</span> and <span class="math inline">\(n = 1\)</span> or <span class="math inline">\(5\)</span> slots per unit of time, against the exponential tail <span class="math inline">\(e^{-t/2}\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="moments-and-tail" class="level3" data-number="1.5.4">
+<h3 data-number="1.5.4" class="anchored" data-anchor-id="moments-and-tail"><span class="header-section-number">1.5.4</span> Moments and tail</h3>
+<p>Everything about the exponential follows from its density by short integrals.</p>
+<p>The <strong>tail</strong> is the area under the density to the right of <span class="math inline">\(t\)</span>: <span class="math inline">\(\Pr[Y \ge t] = \int_t^\infty \frac1be^{-y/b}\,dy = e^{-t/b}\)</span>, which is <a href="#eq-exponential-survival" class="quarto-xref">Equation&nbsp;<span>1.18</span></a> again.</p>
+<p>The <strong>mean</strong> is easiest from the tail. A non-negative variable can be written as <span class="math inline">\(Y = \int_0^\infty \mathbf 1[Y \ge t]\,dt\)</span>, where <span class="math inline">\(\mathbf 1[\cdot]\)</span> is 1 when the condition holds and 0 otherwise: the integrand is 1 for <span class="math inline">\(t\)</span> from 0 up to <span class="math inline">\(Y\)</span>, so the integral is the length <span class="math inline">\(Y\)</span>. Taking expectations turns each indicator into a probability, <span class="math inline">\(\mathbb E Y = \int_0^\infty\Pr[Y \ge t]\,dt = \int_0^\infty e^{-t/b}\,dt = b\)</span>. So <span class="math inline">\(b\)</span> is indeed the average wait.</p>
+<p>The <strong>second moment</strong> uses the Gamma integral <span class="math inline">\(\int_0^\infty y^k e^{-y/b}\,dy = k!\,b^{k+1}\)</span>. Substituting <span class="math inline">\(u = y/b\)</span> turns it into <span class="math inline">\(b^{k+1}\int_0^\infty u^ke^{-u}\,du\)</span>, and integrating by parts <span class="math inline">\(k\)</span> times reduces the last integral to <span class="math inline">\(k!\)</span>. With <span class="math inline">\(k = 2\)</span> and the factor <span class="math inline">\(\frac1b\)</span> from the density, <span class="math inline">\(\mathbb E Y^2 = 2b^2\)</span>, so <span class="math inline">\(\operatorname{Var}Y = 2b^2 - b^2 = b^2\)</span>.</p>
+<p>The <strong>MGF</strong> multiplies the density by <span class="math inline">\(e^{\lambda y}\)</span>, which combines the two exponents into <span class="math inline">\(-(1/b - \lambda)y\)</span>. As long as <span class="math inline">\(\lambda &lt; 1/b\)</span> that exponent is negative and the integral converges: <span id="eq-auto-01distributions-19"><span class="math display">\[M_Y(\lambda) = \frac1b\int_0^\infty e^{-(1/b - \lambda)y}\,dy = \frac{1}{1 - b\lambda}. \tag{1.20}\]</span></span> For <span class="math inline">\(\lambda \ge 1/b\)</span> the exponent is zero or positive, the integrand does not shrink, and the integral diverges. The MGF exists only on part of the line: the hallmark of an exponential, rather than Gaussian, tail.</p>
+</section>
+<section id="interpretation-memorylessness" class="level3" data-number="1.5.5">
+<h3 data-number="1.5.5" class="anchored" data-anchor-id="interpretation-memorylessness"><span class="header-section-number">1.5.5</span> Interpretation: memorylessness</h3>
+<p>The exponential forgets how long you have waited. Given that you have already waited <span class="math inline">\(s\)</span> without an event, the chance of waiting at least <span class="math inline">\(t\)</span> more is the same as the chance of waiting <span class="math inline">\(t\)</span> from scratch. In symbols, the conditional probability is the ratio of the two tails, <span id="eq-auto-01distributions-20"><span class="math display">\[\Pr[Y \ge s + t \mid Y \ge s] = e^{-(s+t)/b}/e^{-s/b} = e^{-t/b} = \Pr[Y \ge t]. \tag{1.21}\]</span></span> Having already waited <span class="math inline">\(s\)</span> tells you nothing about the remaining wait. The derivation explains why: the slots after time <span class="math inline">\(s\)</span> are independent of the empty slots before it, so the wait starts afresh. The geometric distribution is memoryless for the same reason. The exponential is also the only continuous distribution with this property: memorylessness says the tail <span class="math inline">\(g(t) = \Pr[Y \ge t]\)</span> satisfies <span class="math inline">\(g(s + t) = g(s)g(t)\)</span>, and the only decreasing functions with that property are exponentials <span class="math inline">\(e^{-t/b}\)</span>.</p>
+</section>
+<section id="example-time-to-a-models-first-error" class="level3" data-number="1.5.6">
+<h3 data-number="1.5.6" class="anchored" data-anchor-id="example-time-to-a-models-first-error"><span class="header-section-number">1.5.6</span> Example: time to a model’s first error</h3>
+<p>A deployed classifier serves 50 requests per second and misclassifies each one independently with probability <span class="math inline">\(10^{-4}\)</span>. Each request is a slot, so errors arrive at rate <span class="math inline">\(50 \times 10^{-4} = 0.005\)</span> per second, and the time to the first error is approximately <span class="math inline">\(\mathrm{Exp}(b)\)</span> with <span class="math inline">\(b = 1/0.005 = 200\)</span> seconds. A 10-minute window is 600 seconds, so the probability of a clean window is <span class="math inline">\(e^{-600/200} = e^{-3} \approx 0.050\)</span>. The exact slotted answer is <span class="math inline">\((1 - 10^{-4})^{30000}\)</span>, one factor for each of the <span class="math inline">\(50 \times 600 = 30{,}000\)</span> requests, which agrees to three decimals because <span class="math inline">\(p\)</span> is tiny. Memorylessness says that after 10 error-free minutes, the expected wait for the first error is still 200 seconds.</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="1.5.7">
+<h3 data-number="1.5.7" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">1.5.7</span> Check yourself</h3>
+<ul>
+<li>Show that <span class="math inline">\(\mathbb E Y^k = k!\,b^k\)</span> by differentiating the MGF <span class="math inline">\(k\)</span> times. <em>(<span class="math inline">\(M^{(k)}(\lambda) = k!\,b^k(1 - b\lambda)^{-k-1}\)</span>, which is <span class="math inline">\(k!\,b^k\)</span> at <span class="math inline">\(\lambda = 0\)</span>.)</em></li>
+<li>The slotted wait has <span class="math inline">\(\mathbb E T_n = \mathbb E G/n = b\)</span> for every <span class="math inline">\(n\)</span>, and <span class="math inline">\(\operatorname{Var}T_n = (1 - p)b^2\)</span>. Which factor disappears in the limit, and why? <em>(<span class="math inline">\((1 - p) \to 1\)</span> because <span class="math inline">\(p = 1/(bn) \to 0\)</span>, just as for the binomial variance under the Poisson limit. The script’s samples give variances 2.001, 3.596 and 3.984 for <span class="math inline">\(n = 1, 5, 100\)</span>, against <span class="math inline">\(b^2 = 4\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="laplace" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="laplace"><span class="header-section-number">1.6</span> Laplace</h2>
+<section id="context-3" class="level3" data-number="1.6.1">
+<h3 data-number="1.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">1.6.1</span> Context</h3>
+<p>The Laplace distribution is symmetric noise with exponential tails. Compared with a normal of the same variance it puts more mass near zero <em>and</em> more mass far out. In machine learning it appears as the noise model behind absolute-error loss: assuming Laplace noise and maximizing the likelihood gives least-absolute-deviation regression, just as normal noise gives least squares. In later parts it is one of the two standard noise distributions.</p>
+</section>
+<section id="definition-2" class="level3" data-number="1.6.2">
+<h3 data-number="1.6.2" class="anchored" data-anchor-id="definition-2"><span class="header-section-number">1.6.2</span> Definition</h3>
+<p>The Laplace density is an exponential density on each side of a centre <span class="math inline">\(\mu\)</span>, mirrored, with each side carrying half the probability. <span class="math inline">\(X \sim \mathrm{Lap}(\mu, b)\)</span> with location <span class="math inline">\(\mu\)</span> and scale <span class="math inline">\(b &gt; 0\)</span> has density <span id="eq-auto-01distributions-21"><span class="math display">\[f(x) = \frac{1}{2b}e^{-|x - \mu|/b}. \tag{1.22}\]</span></span> We write <span class="math inline">\(\mathrm{Lap}(b)\)</span> for <span class="math inline">\(\mathrm{Lap}(0, b)\)</span>. The cumulative distribution function (CDF), the probability <span class="math inline">\(\Pr[X \le x]\)</span>, comes from integrating the density up to <span class="math inline">\(x\)</span>. Left of the centre only the left half contributes, and right of it you subtract the remaining right tail from 1: the CDF is <span class="math inline">\(\frac12e^{(x-\mu)/b}\)</span> for <span class="math inline">\(x &lt; \mu\)</span> and <span class="math inline">\(1 - \frac12e^{-(x-\mu)/b}\)</span> for <span class="math inline">\(x \ge \mu\)</span>.</p>
+</section>
+<section id="moments-and-tail-1" class="level3" data-number="1.6.3">
+<h3 data-number="1.6.3" class="anchored" data-anchor-id="moments-and-tail-1"><span class="header-section-number">1.6.3</span> Moments and tail</h3>
+<p>Take <span class="math inline">\(\mu = 0\)</span>. The density takes the same value at <span class="math inline">\(x\)</span> and <span class="math inline">\(-x\)</span>, so the size <span class="math inline">\(|X|\)</span> collects the density from both sides: its density is <span class="math inline">\(2\cdot\frac{1}{2b}e^{-x/b} = \frac1be^{-x/b}\)</span> on <span class="math inline">\(x \ge 0\)</span>, which is the <span class="math inline">\(\mathrm{Exp}(b)\)</span> density. So <span class="math inline">\(|X| \sim \mathrm{Exp}(b)\)</span>, and everything follows from the exponential.</p>
+<p>The tail of <span class="math inline">\(|X|\)</span> is the exponential tail, <span class="math inline">\(\Pr[|X| \ge t] = e^{-t/b}\)</span>. The event <span class="math inline">\(|X| \ge t\)</span> is made of two equally likely pieces, <span class="math inline">\(X \ge t\)</span> and <span class="math inline">\(X \le -t\)</span>, because the density is mirror-symmetric about 0, so one side alone has half of it: <span class="math inline">\(\Pr[X \ge t] = \frac12e^{-t/b}\)</span>. The mean absolute deviation is the exponential mean, <span class="math inline">\(\mathbb E|X| = b\)</span>.</p>
+<p>For the variance, note that <span class="math inline">\(X^2 = |X|^2\)</span>, so <span class="math inline">\(\mathbb E X^2\)</span> is the exponential second moment <span class="math inline">\(2b^2\)</span>. The mean is 0 by symmetry, so <span class="math inline">\(\operatorname{Var}X = 2b^2\)</span>. Turned around, a Laplace variable with variance <span class="math inline">\(\sigma^2\)</span> has scale <span class="math inline">\(b = \sigma/\sqrt2\)</span>.</p>
+<p>For the MGF, split the integral at 0 into the two exponential halves. On the right, <span class="math inline">\(\frac{1}{2b}\int_0^\infty e^{\lambda x - x/b}\,dx = \frac{1}{2b}\cdot\frac{1}{1/b - \lambda}\)</span>, which needs <span class="math inline">\(\lambda &lt; 1/b\)</span>; the left half is the same with <span class="math inline">\(-\lambda\)</span> in place of <span class="math inline">\(\lambda\)</span>, which needs <span class="math inline">\(\lambda &gt; -1/b\)</span>. So for <span class="math inline">\(|\lambda| &lt; 1/b\)</span>, putting the two fractions over the common denominator <span class="math inline">\(1/b^2 - \lambda^2\)</span>, <span id="eq-auto-01distributions-22"><span class="math display">\[M_X(\lambda) = \frac{1}{2b}\left(\frac{1}{1/b - \lambda} + \frac{1}{1/b + \lambda}\right) = \frac{1}{1 - b^2\lambda^2}. \tag{1.23}\]</span></span></p>
+</section>
+<section id="a-laplace-variable-is-a-difference-of-exponentials" class="level3" data-number="1.6.4">
+<h3 data-number="1.6.4" class="anchored" data-anchor-id="a-laplace-variable-is-a-difference-of-exponentials"><span class="header-section-number">1.6.4</span> A Laplace variable is a difference of exponentials</h3>
+<p>The Laplace is two exponentials back to back, which suggests building it by subtracting one exponential from another: the positive one supplies the right half, the negated one the left half. The MGF confirms it. Let <span class="math inline">\(Y_1, Y_2 \sim \mathrm{Exp}(b)\)</span> be independent. Negating a variable flips the dial, <span class="math inline">\(\mathbb E[e^{\lambda(-Y_2)}] = M_{Y_2}(-\lambda)\)</span>, and the MGF of an independent sum is the product, so the MGF of <span class="math inline">\(Y_1 - Y_2\)</span> is <span id="eq-auto-01distributions-23"><span class="math display">\[M_{Y_1}(\lambda)\,M_{Y_2}(-\lambda) = \frac{1}{1 - b\lambda}\cdot\frac{1}{1 + b\lambda} = \frac{1}{1 - b^2\lambda^2}, \tag{1.24}\]</span></span> which is the Laplace MGF. Since the MGF pins down the distribution, <span class="math inline">\(Y_1 - Y_2 \sim \mathrm{Lap}(b)\)</span>. The script checks this numerically: over a million samples, the empirical CDF of <span class="math inline">\(\mathrm{Exp}(1) - \mathrm{Exp}(1)\)</span> is within 0.0006 of the <span class="math inline">\(\mathrm{Lap}(1)\)</span> CDF everywhere on <span class="math inline">\([-5, 5]\)</span> (<a href="#fig-difference-of-exponentials" class="quarto-xref">Figure&nbsp;<span>1.3</span></a>).</p>
+<div id="fig-difference-of-exponentials" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-difference-of-exponentials-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/difference_of_exponentials.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-difference-of-exponentials-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.3: Histogram of <span class="math inline">\(\mathrm{Exp}(1) - \mathrm{Exp}(1)\)</span> samples against the <span class="math inline">\(\mathrm{Lap}(0, 1)\)</span> density.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="interpretation-laplace-against-normal" class="level3" data-number="1.6.5">
+<h3 data-number="1.6.5" class="anchored" data-anchor-id="interpretation-laplace-against-normal"><span class="header-section-number">1.6.5</span> Interpretation: Laplace against normal</h3>
+<p>Put a Laplace and a normal side by side with the same variance, here 2, which means a normal with <span class="math inline">\(\sigma = \sqrt2\)</span> and a Laplace with <span class="math inline">\(b = 1\)</span> (<a href="#fig-laplace-vs-normal" class="quarto-xref">Figure&nbsp;<span>1.4</span></a>, left). The Laplace has a sharp peak at 0 and fatter tails. On a log scale (right) the difference is structural. Taking the logarithm of each density removes the exponential and leaves its exponent, plus a constant: the normal log density is a parabola, <span class="math inline">\(-x^2/(2\sigma^2)\)</span>, while the Laplace log density is two straight lines, <span class="math inline">\(-|x|/b\)</span>. Far out, a parabola always falls below a line, so the normal’s tails are much lighter.</p>
+<div id="fig-laplace-vs-normal" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-laplace-vs-normal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/laplace_vs_normal.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laplace-vs-normal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.4: Normal and Laplace densities with variance 2, on linear and log scales.
+</figcaption>
+</figure>
+</div>
+<p>The same fact explains why the Laplace MGF exists only for <span class="math inline">\(|\lambda| &lt; 1/b\)</span>. Inside the MGF integral the weight <span class="math inline">\(e^{\lambda x}\)</span> multiplies the density, so the exponents add: <span class="math inline">\(\lambda x - |x|/b\)</span>. For large positive <span class="math inline">\(x\)</span> that is <span class="math inline">\((\lambda - 1/b)x\)</span>, which goes to <span class="math inline">\(-\infty\)</span>, and keeps the integral finite, only when <span class="math inline">\(\lambda &lt; 1/b\)</span>; the left side needs <span class="math inline">\(\lambda &gt; -1/b\)</span>. A quadratic decay <span class="math inline">\(-x^2/(2\sigma^2)\)</span> beats the linear term <span class="math inline">\(\lambda x\)</span> for every <span class="math inline">\(\lambda\)</span>, which is why the normal MGF is finite everywhere.</p>
+</section>
+<section id="example-absolute-error-regression" class="level3" data-number="1.6.6">
+<h3 data-number="1.6.6" class="anchored" data-anchor-id="example-absolute-error-regression"><span class="header-section-number">1.6.6</span> Example: absolute-error regression</h3>
+<p>Suppose <span class="math inline">\(y_i = w^\top x_i + \varepsilon_i\)</span> with <span class="math inline">\(\varepsilon_i \sim \mathrm{Lap}(b)\)</span> independent. The likelihood of the data is the product of the <span class="math inline">\(n\)</span> Laplace densities of the residuals <span class="math inline">\(y_i - w^\top x_i\)</span>, and its logarithm is the sum of their log densities, <span class="math inline">\(-n\ln(2b) - \frac1b\sum_i|y_i - w^\top x_i|\)</span>. Only the second term depends on <span class="math inline">\(w\)</span>, and it enters with a minus sign, so the maximum-likelihood <span class="math inline">\(w\)</span> minimizes the sum of absolute errors. With no features this estimates the location by the <em>median</em>: moving a candidate location <span class="math inline">\(m\)</span> to the right lowers the absolute error of every point above <span class="math inline">\(m\)</span> and raises it for every point below, so the sum stops decreasing exactly when half the points are on each side. The median is far less sensitive to outliers than the mean, because moving one extreme point further out does not change which point is in the middle. That insensitivity is the same heavy-tail property seen in the figure: under a Laplace model, large residuals are not surprising enough to dominate the fit.</p>
+</section>
+<section id="check-yourself-3" class="level3" data-number="1.6.7">
+<h3 data-number="1.6.7" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">1.6.7</span> Check yourself</h3>
+<ul>
+<li>If <span class="math inline">\(X \sim \mathrm{Lap}(b)\)</span>, what is <span class="math inline">\(\Pr[|X| \ge 3b]\)</span>, and what is the corresponding probability for a normal with the same variance? <em>(<span class="math inline">\(e^{-3b/b} = e^{-3} \approx 0.050\)</span>; for the normal, <span class="math inline">\(\sigma = \sqrt2 b\)</span>, so <span class="math inline">\(3b\)</span> is <span class="math inline">\(3/\sqrt2\)</span> standard deviations and <span class="math inline">\(\Pr[|Z| \ge 3/\sqrt2] \approx 0.034\)</span>. The Laplace wins this far out, and the gap grows quickly.)</em></li>
+<li>Derive <span class="math inline">\(\mathbb E|X| = b\)</span> from the exponential. <em>(<span class="math inline">\(|X| \sim \mathrm{Exp}(b)\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="normal" class="level2" data-number="1.7">
+<h2 data-number="1.7" class="anchored" data-anchor-id="normal"><span class="header-section-number">1.7</span> Normal</h2>
+<section id="context-4" class="level3" data-number="1.7.1">
+<h3 data-number="1.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">1.7.1</span> Context</h3>
+<p>The normal distribution appears whenever many small independent effects add up — that is the central limit theorem (CLT) — and it is the default model for measurement noise, weight initialization and random projections. It is the light-tailed counterpart of the Laplace: closed under sums and scalings, with an MGF that is finite everywhere and a tail that decays like <span class="math inline">\(e^{-t^2/2}\)</span>.</p>
+</section>
+<section id="definition-3" class="level3" data-number="1.7.2">
+<h3 data-number="1.7.2" class="anchored" data-anchor-id="definition-3"><span class="header-section-number">1.7.2</span> Definition</h3>
+<p>The normal density is the bell curve: its logarithm is a downward parabola centred at the mean <span class="math inline">\(\mu\)</span>, with width set by the standard deviation <span class="math inline">\(\sigma\)</span>. <span class="math inline">\(X \sim \mathcal N(\mu, \sigma^2)\)</span> has density <span id="eq-auto-01distributions-24"><span class="math display">\[f(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}. \tag{1.25}\]</span></span> <strong>Standardization:</strong> subtracting the mean and dividing by the standard deviation gives <span class="math inline">\(Z = (X - \mu)/\sigma \sim \mathcal N(0, 1)\)</span>, the standard normal, with density <span class="math inline">\(\varphi\)</span> and CDF <span class="math inline">\(\Phi\)</span>. So <span class="math inline">\(\Phi(t)\)</span> is the probability that a standard normal is below <span class="math inline">\(t\)</span>, and every normal probability reduces to it: <span class="math inline">\(\Pr[X \le x] = \Phi((x - \mu)/\sigma)\)</span>. There is no closed form for <span class="math inline">\(\Phi\)</span>. In code, use the complementary error function <span class="math inline">\(\operatorname{erfc}\)</span> that every maths library provides, through <span class="math inline">\(\Phi(x) = \frac12\operatorname{erfc}(-x/\sqrt2)\)</span>. It stays accurate far into the tail, where computing a small tail as <span class="math inline">\(1 - \Phi\)</span> by subtraction would lose all its digits.</p>
+</section>
+<section id="mgf-and-moments" class="level3" data-number="1.7.3">
+<h3 data-number="1.7.3" class="anchored" data-anchor-id="mgf-and-moments"><span class="header-section-number">1.7.3</span> MGF and moments</h3>
+<p>The MGF integrates <span class="math inline">\(e^{\lambda x}\)</span> against the density, so the two exponents add, and the trick is to recognize the sum as another normal density. Take <span class="math inline">\(\mu = 0\)</span> first. Completing the square in the combined exponent gives <span class="math inline">\(\lambda x - \frac{x^2}{2\sigma^2} = -\frac{(x - \lambda\sigma^2)^2}{2\sigma^2} + \frac{\lambda^2\sigma^2}{2}\)</span>. The first term is the exponent of a normal density centred at <span class="math inline">\(\lambda\sigma^2\)</span>, which integrates to 1 against the normalizer <span class="math inline">\(\frac{1}{\sigma\sqrt{2\pi}}\)</span>, so only the factor <span class="math inline">\(e^{\lambda^2\sigma^2/2}\)</span> survives. A mean <span class="math inline">\(\mu\)</span> adds the constant <span class="math inline">\(\mu\)</span> to <span class="math inline">\(X\)</span>, which multiplies <span class="math inline">\(e^{\lambda X}\)</span> by <span class="math inline">\(e^{\lambda\mu}\)</span>. So <span id="eq-auto-01distributions-25"><span class="math display">\[M_X(\lambda) = e^{\mu\lambda + \sigma^2\lambda^2/2}. \tag{1.26}\]</span></span> Then <span class="math inline">\(\psi(\lambda) = \mu\lambda + \sigma^2\lambda^2/2\)</span> gives <span class="math inline">\(\psi'(0) = \mu\)</span> and <span class="math inline">\(\psi''(0) = \sigma^2\)</span>. Because <span class="math inline">\(\psi\)</span> is a quadratic, its third and higher derivatives are zero, so all higher cumulants (the higher derivatives of the log-MGF at 0, <a href="#sec-dist-mgf" class="quarto-xref"><span>Section 1.2.2</span></a>) are zero.</p>
+</section>
+<section id="sums-and-linear-maps" class="level3" data-number="1.7.4">
+<h3 data-number="1.7.4" class="anchored" data-anchor-id="sums-and-linear-maps"><span class="header-section-number">1.7.4</span> Sums and linear maps</h3>
+<p>Scaling and adding independent normals gives another normal. The MGF shows it: scaling <span class="math inline">\(X_i\)</span> by <span class="math inline">\(a_i\)</span> evaluates its MGF at <span class="math inline">\(a_i\lambda\)</span>, and adding independent variables multiplies MGFs, which adds the exponents. For independent <span class="math inline">\(X_i \sim \mathcal N(\mu_i, \sigma_i^2)\)</span>, the MGF of <span class="math inline">\(\sum_i a_iX_i\)</span> is therefore <span class="math inline">\(\exp\big(\lambda\sum_i a_i\mu_i + \frac{\lambda^2}2\sum_i a_i^2\sigma_i^2\big)\)</span>. That is the normal MGF with mean <span class="math inline">\(\sum_i a_i\mu_i\)</span> and variance <span class="math inline">\(\sum_i a_i^2\sigma_i^2\)</span>, and since the MGF pins down the distribution, <span id="eq-auto-01distributions-26"><span class="math display">\[\sum_i a_iX_i \sim \mathcal N\Big(\sum_i a_i\mu_i,\ \sum_i a_i^2\sigma_i^2\Big). \tag{1.27}\]</span></span> Among distributions with finite variance, the normal is the only one for which every linear combination of independent copies stays in the same family, up to location and scale (a classical result of Lévy on what are called stable distributions). The Laplace, for instance, fails: the sum of two independent <span class="math inline">\(\mathrm{Lap}(b)\)</span> variables has MGF <span class="math inline">\(1/(1 - b^2\lambda^2)^2\)</span>, which is not a Laplace MGF.</p>
+</section>
+<section id="the-normal-in-many-dimensions" class="level3" data-number="1.7.5">
+<h3 data-number="1.7.5" class="anchored" data-anchor-id="the-normal-in-many-dimensions"><span class="header-section-number">1.7.5</span> The normal in many dimensions</h3>
+<p><span class="math inline">\(X \sim \mathcal N(0, \sigma^2I_d)\)</span> means the <span class="math inline">\(d\)</span> coordinates are independent <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span>; <span class="math inline">\(I_d\)</span> is the <span class="math inline">\(d \times d\)</span> identity matrix. Two facts are used constantly.</p>
+<p><strong>Rotation invariance.</strong> The noise looks the same in every direction, so a question about one direction is a one-dimensional question. To see it, project <span class="math inline">\(X\)</span> onto a unit vector <span class="math inline">\(u\)</span>, one with <span class="math inline">\(\sum_i u_i^2 = 1\)</span>. The projection <span class="math inline">\(\langle u, X\rangle = \sum_i u_iX_i\)</span> is a linear combination of independent normals, so by the rule above <span class="math inline">\(\langle u, X\rangle \sim \mathcal N(0, \sigma^2\sum_i u_i^2) = \mathcal N(0, \sigma^2)\)</span>, whatever the direction <span class="math inline">\(u\)</span>.</p>
+<p><strong>The norm concentrates at <span class="math inline">\(\sigma\sqrt d\)</span>.</strong> The squared length <span class="math inline">\(\|X\|^2 = \sum_i X_i^2\)</span> is a sum of <span class="math inline">\(d\)</span> independent terms, so its mean and variance are <span class="math inline">\(d\)</span> times those of one term. Write <span class="math inline">\(X_i = \sigma Z\)</span> with <span class="math inline">\(Z\)</span> standard normal. Then <span class="math inline">\(\mathbb E X_i^2 = \sigma^2\)</span>, and <span class="math inline">\(\operatorname{Var}X_i^2 = \sigma^4(\mathbb E Z^4 - (\mathbb E Z^2)^2) = \sigma^4(3 - 1) = 2\sigma^4\)</span>. The value <span class="math inline">\(\mathbb E Z^4 = 3\)</span> comes from the MGF: <span class="math inline">\(e^{\lambda^2/2} = 1 + \lambda^2/2 + \lambda^4/8 + \cdots\)</span>, and the coefficient of <span class="math inline">\(\lambda^4\)</span> times <span class="math inline">\(4!\)</span> is <span class="math inline">\(24/8 = 3\)</span>. So <span id="eq-auto-01distributions-27"><span class="math display">\[\mathbb E\|X\|^2 = d\sigma^2, \qquad \operatorname{Var}\|X\|^2 = 2d\sigma^4, \qquad \frac{\|X\|^2}{d\sigma^2} = 1 \pm O\!\left(\frac{1}{\sqrt d}\right). \tag{1.28}\]</span></span> The last statement divides by the mean: the ratio has mean 1 and standard deviation <span class="math inline">\(\sqrt{2d\sigma^4}/(d\sigma^2) = \sqrt{2/d}\)</span>, and <span class="math inline">\(O(1/\sqrt d)\)</span> means “at most a constant times <span class="math inline">\(1/\sqrt d\)</span>”. In high dimension a normal vector is almost never near the origin: it lives on a thin shell of radius <span class="math inline">\(\sigma\sqrt d\)</span>. The script measures <span class="math inline">\(\|X\|/\sqrt d\)</span> for <span class="math inline">\(\sigma = 1\)</span> (<a href="#tbl-gaussian-norms" class="quarto-xref">Table&nbsp;<span>1.4</span></a> and <a href="#fig-gaussian-norms" class="quarto-xref">Figure&nbsp;<span>1.5</span></a>):</p>
+<div id="tbl-gaussian-norms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-gaussian-norms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.4: Mean and standard deviation of <span class="math inline">\(\|X\|/\sqrt d\)</span> over 2,000 draws of <span class="math inline">\(X \sim \mathcal N(0, I_d)\)</span>.
+</figcaption>
+<div aria-describedby="tbl-gaussian-norms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(d\)</span></th>
+<th>1</th>
+<th>10</th>
+<th>100</th>
+<th>1,000</th>
+<th>10,000</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mean of <span class="math inline">\(\|X\|/\sqrt d\)</span></td>
+<td>0.802</td>
+<td>0.977</td>
+<td>0.998</td>
+<td>1.000</td>
+<td>1.000</td>
+</tr>
+<tr class="even">
+<td>std of <span class="math inline">\(\|X\|/\sqrt d\)</span></td>
+<td>0.611</td>
+<td>0.220</td>
+<td>0.069</td>
+<td>0.022</td>
+<td>0.007</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The standard deviation falls like <span class="math inline">\(1/\sqrt{2d}\)</span>. That is half the <span class="math inline">\(\sqrt{2/d}\)</span> found for the squared norm, because taking a square root halves small relative deviations: <span class="math inline">\(\sqrt{1 + e} \approx 1 + e/2\)</span>. At <span class="math inline">\(d = 10{,}000\)</span>, for instance, <span class="math inline">\(1/\sqrt{20000} \approx 0.007\)</span>. At <span class="math inline">\(d = 1\)</span> the mean is <span class="math inline">\(\mathbb E|Z| = 2\int_0^\infty z\varphi(z)\,dz = 2/\sqrt{2\pi} = \sqrt{2/\pi} \approx 0.798\)</span>.</p>
+<div id="fig-gaussian-norms" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-gaussian-norms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/gaussian_norms.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-gaussian-norms-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.5: Histograms of <span class="math inline">\(\|X\|/\sqrt d\)</span> for <span class="math inline">\(X \sim \mathcal N(0, I_d)\)</span> and <span class="math inline">\(d\)</span> from 1 to 10,000.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="the-central-limit-theorem" class="level3" data-number="1.7.6">
+<h3 data-number="1.7.6" class="anchored" data-anchor-id="the-central-limit-theorem"><span class="header-section-number">1.7.6</span> The central limit theorem</h3>
+<p>Take a sum of <span class="math inline">\(n\)</span> independent draws from the same distribution, with mean <span class="math inline">\(\mu\)</span> and finite variance <span class="math inline">\(\sigma^2\)</span>. By the rules of <a href="#sec-dist-moments" class="quarto-xref"><span>Section 1.2.1</span></a> the sum has mean <span class="math inline">\(n\mu\)</span> and standard deviation <span class="math inline">\(\sigma\sqrt n\)</span>. Subtract the first and divide by the second, and the result always has mean 0 and variance 1. The central limit theorem says more: whatever the distribution of each draw, the <em>shape</em> of this standardized sum approaches the standard normal. In symbols, if <span class="math inline">\(X_1, X_2, \dots\)</span> are independent and identically distributed with mean <span class="math inline">\(\mu\)</span> and finite variance <span class="math inline">\(\sigma^2\)</span>, then <span id="eq-auto-01distributions-28"><span class="math display">\[\frac{X_1 + \dots + X_n - n\mu}{\sigma\sqrt n} \to \mathcal N(0, 1) \quad\text{in distribution,} \tag{1.29}\]</span></span> which means that its CDF approaches <span class="math inline">\(\Phi\)</span> at every point. The theorem holds whatever the shape of the <span class="math inline">\(X_i\)</span>, and the best way to see this is to start from a distribution that looks nothing like a normal. Take <span class="math inline">\(X_i \sim \mathrm{Exp}(1)\)</span>, so <span class="math inline">\(\mu = \sigma^2 = 1\)</span>. One draw is badly skewed: it can’t go below 0, its density is highest at 0, and it has a long right tail. The sum <span class="math inline">\(S_n = X_1 + \dots + X_n\)</span> has a known density, the <span class="math inline">\(\mathrm{Gamma}(n, 1)\)</span> density <span class="math inline">\(x^{n-1}e^{-x}/(n-1)!\)</span> (its MGF is <span class="math inline">\((1 - \lambda)^{-n}\)</span>, the product of <span class="math inline">\(n\)</span> exponential MGFs), so you can watch the standardized sum <span class="math inline">\((S_n - n)/\sqrt n\)</span> change shape as <span class="math inline">\(n\)</span> grows (<a href="#fig-clt-exponential" class="quarto-xref">Figure&nbsp;<span>1.6</span></a>).</p>
+<p>At <span class="math inline">\(n = 1\)</span> it is the exponential itself, shifted to mean 0. The hard wall at <span class="math inline">\(z = (0 - 1)/1 = -1\)</span> is the constraint <span class="math inline">\(X \ge 0\)</span>. At <span class="math inline">\(n = 2\)</span> the wall moves to <span class="math inline">\((0 - 2)/\sqrt 2 = -\sqrt 2\)</span>, and the peak rounds off, because two draws are rarely both near 0. At <span class="math inline">\(n = 5\)</span> the bump is in the right place but leans left, with a longer right tail. At <span class="math inline">\(n = 30\)</span> the curve is close to <span class="math inline">\(\mathcal N(0, 1)\)</span>, though a small lean to the left remains.</p>
+<div id="fig-clt-exponential" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-clt-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/clt_exponential.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-clt-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.6: The standardized sum of <span class="math inline">\(n\)</span> independent <span class="math inline">\(\mathrm{Exp}(1)\)</span> variables for <span class="math inline">\(n = 1, 2, 5, 30\)</span>: histogram of 50,000 simulated sums, the exact density from <span class="math inline">\(\mathrm{Gamma}(n, 1)\)</span>, and the <span class="math inline">\(\mathcal N(0, 1)\)</span> density. The skewed exponential becomes a normal step by step.
+</figcaption>
+</figure>
+</div>
+<p>The leftover lean is measured by the <strong>skewness</strong> <span class="math inline">\(\mathbb E[(X - \mu)^3]/\sigma^3\)</span>, the average cubed deviation in units of the standard deviation. Cubing keeps the sign, so a long right tail makes it positive; it is 0 for every normal, which is symmetric. The third central moment, like the variance, adds over independent terms: expand <span class="math inline">\(\mathbb E[(\sum_i (X_i - \mu))^3]\)</span>, and every cross term contains some <span class="math inline">\(\mathbb E[X_i - \mu] = 0\)</span> as a factor. For <span class="math inline">\(\mathrm{Exp}(1)\)</span> the third central moment is 2: with <span class="math inline">\(\mathbb E Y^k = k!\)</span>, it is <span class="math inline">\(\mathbb E Y^3 - 3\mathbb E Y^2 + 3\mathbb E Y - 1 = 6 - 6 + 3 - 1 = 2\)</span>. So <span class="math inline">\(S_n\)</span> has third central moment <span class="math inline">\(2n\)</span> and standard deviation <span class="math inline">\(\sqrt n\)</span>, and its skewness is <span class="math inline">\(2n/n^{3/2} = 2/\sqrt n\)</span>. The skewness falls, but only like <span class="math inline">\(1/\sqrt n\)</span>. The largest gap between the CDF of the standardized sum and the normal CDF, which the script computes exactly from the Gamma CDF, falls at the same rate (<a href="#tbl-clt-exponential" class="quarto-xref">Table&nbsp;<span>1.5</span></a>).</p>
+<div id="tbl-clt-exponential" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-clt-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.5: How far the standardized sum of <span class="math inline">\(n\)</span> <span class="math inline">\(\mathrm{Exp}(1)\)</span> variables is from <span class="math inline">\(\mathcal N(0, 1)\)</span>. The CDF gap is the maximum of <span class="math inline">\(|F_n(z) - \Phi(z)|\)</span> over <span class="math inline">\(z \in [-5, 5]\)</span> in steps of 0.01.
+</figcaption>
+<div aria-describedby="tbl-clt-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(n\)</span></th>
+<th>Skewness <span class="math inline">\(2/\sqrt n\)</span></th>
+<th>Largest CDF gap to <span class="math inline">\(\mathcal N(0, 1)\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>2.000</td>
+<td>0.1587</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1.414</td>
+<td>0.0945</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>0.894</td>
+<td>0.0596</td>
+</tr>
+<tr class="even">
+<td>30</td>
+<td>0.365</td>
+<td>0.0243</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Multiply each gap by <span class="math inline">\(\sqrt n\)</span> and you get 0.159, 0.134, 0.133 and 0.133: the product settles to a constant, so the error decays like <span class="math inline">\(1/\sqrt n\)</span>. This rate holds in general. The Berry–Esseen theorem bounds the gap by <span class="math inline">\(C\,\mathbb E|X - \mu|^3/(\sigma^3\sqrt n)\)</span> for a universal constant <span class="math inline">\(C &lt; 0.48\)</span> (Shevtsova, 2011). The numerator is a third moment, like the skewness, so the more skewed the summands, the more terms you need.</p>
+<p>This is also why the normal curve in <a href="#fig-poisson-limit" class="quarto-xref">Figure&nbsp;<span>1.1</span></a> fits so well: <span class="math inline">\(\mathrm{Poisson}(5)\)</span> is a sum of five independent <span class="math inline">\(\mathrm{Poisson}(1)\)</span> variables, since Poisson means add, so the CLT already applies to it. A common rule of thumb is that the normal approximation to a binomial is reasonable once <span class="math inline">\(np(1-p) \gtrsim 10\)</span>. The CLT is a statement about the <em>bulk</em>. In the far tails, where worst-case guarantees operate, it can be badly wrong, because the gap it controls is an absolute error of order <span class="math inline">\(1/\sqrt n\)</span>, far larger than the tiny tail probabilities themselves; that is the job of the concentration inequalities in the next chapter.</p>
+</section>
+<section id="example-noise-in-high-dimension" class="level3" data-number="1.7.7">
+<h3 data-number="1.7.7" class="anchored" data-anchor-id="example-noise-in-high-dimension"><span class="header-section-number">1.7.7</span> Example: noise in high dimension</h3>
+<p>Add <span class="math inline">\(\mathcal N(0, \sigma^2I_d)\)</span> noise to a model with <span class="math inline">\(d = 10^6\)</span> parameters and <span class="math inline">\(\sigma = 0.01\)</span>. The noise vector has norm about <span class="math inline">\(\sigma\sqrt d = 0.01 \times 1000 = 10\)</span>, almost surely within a fraction of a percent of that: the relative standard deviation is <span class="math inline">\(1/\sqrt{2d} = 1/\sqrt{2 \times 10^6}\)</span>, under 0.1%. Yet by rotation invariance its projection onto any fixed unit vector is only <span class="math inline">\(\mathcal N(0, 0.01^2)\)</span>. Large in norm, small in every direction: both facts come from rotation invariance and norm concentration.</p>
+</section>
+<section id="check-yourself-4" class="level3" data-number="1.7.8">
+<h3 data-number="1.7.8" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">1.7.8</span> Check yourself</h3>
+<ul>
+<li>If <span class="math inline">\(X \sim \mathcal N(0, \sigma^2I_d)\)</span> and <span class="math inline">\(u, v\)</span> are orthogonal unit vectors, are <span class="math inline">\(\langle u, X\rangle\)</span> and <span class="math inline">\(\langle v, X\rangle\)</span> independent? <em>(Yes. They are jointly normal with covariance <span class="math inline">\(\sigma^2\langle u, v\rangle = 0\)</span>, and for jointly normal variables zero covariance means independence.)</em></li>
+<li>Why does the mean of <span class="math inline">\(\|X\|/\sqrt d\)</span> approach 1 from below? <em>(Jensen’s inequality says that for a concave function <span class="math inline">\(g\)</span>, such as the square root, <span class="math inline">\(\mathbb E g(Y) \le g(\mathbb E Y)\)</span>. With <span class="math inline">\(Y = \|X\|^2\)</span> this gives <span class="math inline">\(\mathbb E\|X\| \le \sqrt{\mathbb E\|X\|^2} = \sqrt d\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="comparing-a-density-with-its-shifted-copy" class="level2" data-number="1.8">
+<h2 data-number="1.8" class="anchored" data-anchor-id="comparing-a-density-with-its-shifted-copy"><span class="header-section-number">1.8</span> Comparing a density with its shifted copy</h2>
+<section id="context-5" class="level3" data-number="1.8.1">
+<h3 data-number="1.8.1" class="anchored" data-anchor-id="context-5"><span class="header-section-number">1.8.1</span> Context</h3>
+<p>You take a noisy measurement <span class="math inline">\(x = \mu + X\)</span> of an unknown value <span class="math inline">\(\mu\)</span>: a sensor reading, a timing measurement, or a statistic computed from a random sample. The noise <span class="math inline">\(X\)</span> has density <span class="math inline">\(f\)</span> centred at 0. Suppose <span class="math inline">\(\mu\)</span> can only be one of two values, <span class="math inline">\(0\)</span> or <span class="math inline">\(s\)</span>. The number <span class="math inline">\(s \in \mathbb R\)</span> is the <strong>shift</strong>, the distance between the two candidate values. It is fixed and known, and it may be positive or negative.</p>
+<p>Each candidate gives <span class="math inline">\(x\)</span> its own density. If <span class="math inline">\(\mu = 0\)</span>, then <span class="math inline">\(x = X\)</span>, with density <span class="math inline">\(f(x)\)</span>. If <span class="math inline">\(\mu = s\)</span>, then <span class="math inline">\(x = s + X\)</span>, with density <span class="math inline">\(f(x - s)\)</span>: the same curve, moved sideways by <span class="math inline">\(s\)</span>.</p>
+<p>The second claim is the step to check. The CDF of <span class="math inline">\(s + X\)</span> at a point <span class="math inline">\(t\)</span> is <span class="math inline">\(\Pr[s + X \le t] = \Pr[X \le t - s] = F(t - s)\)</span>, where <span class="math inline">\(F\)</span> is the CDF of <span class="math inline">\(X\)</span>, and differentiating in <span class="math inline">\(t\)</span> gives the density <span class="math inline">\(f(t - s)\)</span>. So <span class="math inline">\(f(x - s)\)</span> is the graph of <span class="math inline">\(f\)</span> moved right by <span class="math inline">\(s\)</span>: its value at <span class="math inline">\(x\)</span> is the value <span class="math inline">\(f\)</span> had at <span class="math inline">\(x - s\)</span>. With <span class="math inline">\(s = 1\)</span>, for instance, <span class="math inline">\(f(x - 1)\)</span> at <span class="math inline">\(x = 1\)</span> equals <span class="math inline">\(f(0)\)</span>, so the shifted copy has its peak at 1.</p>
+<p>To decide between the two candidates from one observation <span class="math inline">\(x\)</span>, compare the two densities at <span class="math inline">\(x\)</span>. Their ratio <span class="math inline">\(f(x)/f(x - s)\)</span> says how many times more likely <span class="math inline">\(x\)</span> is under <span class="math inline">\(\mu = 0\)</span> than under <span class="math inline">\(\mu = s\)</span>. Taking its logarithm turns the ratio into a difference, and since both densities below are exponentials of something, it leaves just the difference of the exponents. That logarithm is the <strong>log ratio</strong> <span id="eq-auto-01distributions-29"><span class="math display">\[L(x) = \ln\frac{f(x)}{f(x - s)} = \ln f(x) - \ln f(x - s). \tag{1.30}\]</span></span> It is positive when <span class="math inline">\(x\)</span> favours <span class="math inline">\(\mu = 0\)</span>, negative when <span class="math inline">\(x\)</span> favours <span class="math inline">\(\mu = s\)</span>, and zero when <span class="math inline">\(x\)</span> says nothing.</p>
+<p>The question this section answers is: <strong>how large can <span class="math inline">\(|L(x)|\)</span> get?</strong> If it is bounded, no single observation can make one candidate much more likely than the other. If it is unbounded, some observations settle the question almost for certain. The normal and the Laplace give opposite answers. Later parts compare distributions in exactly this way, and the next chapters build on it: <a href="../part01-prerequisites/03-divergences.html">divergences</a> average the log ratio over <span class="math inline">\(x\)</span>, and <a href="../part01-prerequisites/04-hypothesis-testing.html">hypothesis testing</a> uses it to decide.</p>
+</section>
+<section id="statement" class="level3" data-number="1.8.2">
+<h3 data-number="1.8.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">1.8.2</span> Statement</h3>
+<p>The answer follows from the shapes of the two log densities. A normal log density is a parabola, and the difference of a parabola and the same parabola shifted is a straight line, which grows without bound. A Laplace log density is a pair of straight lines with slopes <span class="math inline">\(\pm 1/b\)</span>, and the difference of two such shapes can never exceed what the shift moves it, <span class="math inline">\(|s|/b\)</span>. For any shift <span class="math inline">\(s \in \mathbb R\)</span>, if <span class="math inline">\(f\)</span> is the <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> density, then <span id="eq-auto-01distributions-30"><span class="math display">\[L(x) = \frac{s^2 - 2sx}{2\sigma^2}, \tag{1.31}\]</span></span> which is linear in <span class="math inline">\(x\)</span> and unbounded. If <span class="math inline">\(f\)</span> is the <span class="math inline">\(\mathrm{Lap}(b)\)</span> density, then <span id="eq-auto-01distributions-31"><span class="math display">\[L(x) = \frac{|x - s| - |x|}{b}, \qquad |L(x)| \le \frac{|s|}{b} \quad\text{for every } x. \tag{1.32}\]</span></span></p>
+</section>
+<section id="derivation" class="level3" data-number="1.8.3">
+<h3 data-number="1.8.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">1.8.3</span> Derivation</h3>
+<p><strong>Normal.</strong> Start from the normal density with <span class="math inline">\(\mu = 0\)</span>, <span class="math inline">\(f(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{-x^2/(2\sigma^2)}\)</span>.</p>
+<ol type="1">
+<li><em>Write the shifted density.</em> Replace <span class="math inline">\(x\)</span> by <span class="math inline">\(x - s\)</span>: <span class="math inline">\(f(x - s) = \frac{1}{\sigma\sqrt{2\pi}}e^{-(x - s)^2/(2\sigma^2)}\)</span>. The constant in front is the same; only the exponent changes.</li>
+<li><em>Take the ratio.</em> The constants cancel, and <span class="math inline">\(e^a/e^c = e^{a - c}\)</span>: <span id="eq-auto-01distributions-32"><span class="math display">\[\frac{f(x)}{f(x - s)} = \frac{e^{-x^2/(2\sigma^2)}}{e^{-(x - s)^2/(2\sigma^2)}} = \exp\!\left(\frac{(x - s)^2 - x^2}{2\sigma^2}\right). \tag{1.33}\]</span></span></li>
+<li><em>Take the logarithm.</em> Since <span class="math inline">\(\ln e^c = c\)</span>, the log ratio is the exponent: <span class="math inline">\(L(x) = \dfrac{(x - s)^2 - x^2}{2\sigma^2}\)</span>.</li>
+<li><em>Expand the square.</em> <span class="math inline">\((x - s)^2 = x^2 - 2sx + s^2\)</span>, and the <span class="math inline">\(x^2\)</span> cancels against <span class="math inline">\(-x^2\)</span>, leaving <span class="math inline">\(L(x) = \dfrac{s^2 - 2sx}{2\sigma^2}\)</span>.</li>
+</ol>
+<p>The <span class="math inline">\(x^2\)</span> terms cancel because both densities have the same curvature; what is left is linear in <span class="math inline">\(x\)</span>, with slope <span class="math inline">\(-s/\sigma^2\)</span>. A line with nonzero slope has no bound, so <span class="math inline">\(|L(x)| \to \infty\)</span> as <span class="math inline">\(|x| \to \infty\)</span>.</p>
+<p><strong>Laplace.</strong> Start from <span class="math inline">\(f(x) = \frac{1}{2b}e^{-|x|/b}\)</span>.</p>
+<ol type="1">
+<li><em>Write the shifted density.</em> <span class="math inline">\(f(x - s) = \frac{1}{2b}e^{-|x - s|/b}\)</span>.</li>
+<li><em>Take the ratio and the logarithm,</em> as for the normal: the constants cancel and the log leaves the difference of exponents, <span class="math inline">\(L(x) = -\dfrac{|x|}{b} + \dfrac{|x - s|}{b} = \dfrac{|x - s| - |x|}{b}\)</span>.</li>
+<li><em>Bound it from above.</em> The triangle inequality <span class="math inline">\(|a + c| \le |a| + |c|\)</span> says that the size of a sum is at most the sum of the sizes. With <span class="math inline">\(a = x\)</span>, <span class="math inline">\(c = -s\)</span> it gives <span class="math inline">\(|x - s| \le |x| + |s|\)</span>, so <span class="math inline">\(|x - s| - |x| \le |s|\)</span>.</li>
+<li><em>Bound it from below.</em> The same inequality with <span class="math inline">\(a = x - s\)</span>, <span class="math inline">\(c = s\)</span> gives <span class="math inline">\(|x| \le |x - s| + |s|\)</span>, so <span class="math inline">\(|x - s| - |x| \ge -|s|\)</span>.</li>
+<li><em>Combine.</em> <span class="math inline">\(\big||x - s| - |x|\big| \le |s|\)</span>, so <span class="math inline">\(|L(x)| \le |s|/b\)</span> for every <span class="math inline">\(x\)</span>, and the ratio of the two densities never exceeds <span class="math inline">\(e^{|s|/b}\)</span>.</li>
+</ol>
+<p>The bound is reached, not just approached. For <span class="math inline">\(s &gt; 0\)</span> and any <span class="math inline">\(x \le 0\)</span>, <span class="math inline">\(|x - s| - |x| = (s - x) - (-x) = s\)</span>; for any <span class="math inline">\(x \ge s\)</span>, it is <span class="math inline">\((x - s) - x = -s\)</span>. Between 0 and <span class="math inline">\(s\)</span> the log ratio falls linearly from <span class="math inline">\(s/b\)</span> to <span class="math inline">\(-s/b\)</span>.</p>
+<p><a href="#tbl-shifted-log-ratio" class="quarto-xref">Table&nbsp;<span>1.6</span></a> puts numbers on both formulas for <span class="math inline">\(s = 1\)</span>, <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(b = 1\)</span>, where they read <span class="math inline">\(L(x) = (1 - 2x)/2\)</span> and <span class="math inline">\(L(x) = |x - 1| - |x|\)</span>.</p>
+<div id="tbl-shifted-log-ratio" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shifted-log-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.6: The log ratio <span class="math inline">\(L(x)\)</span> of a density and its copy shifted by <span class="math inline">\(s = 1\)</span>, for <span class="math inline">\(\mathcal N(0, 1)\)</span> and <span class="math inline">\(\mathrm{Lap}(1)\)</span>, at a few observations <span class="math inline">\(x\)</span>.
+</figcaption>
+<div aria-describedby="tbl-shifted-log-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(x\)</span></th>
+<th><span class="math inline">\(-2\)</span></th>
+<th><span class="math inline">\(0\)</span></th>
+<th><span class="math inline">\(0.5\)</span></th>
+<th><span class="math inline">\(1\)</span></th>
+<th><span class="math inline">\(3\)</span></th>
+<th><span class="math inline">\(10\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Normal, <span class="math inline">\(L(x) = (1 - 2x)/2\)</span></td>
+<td>2.5</td>
+<td>0.5</td>
+<td>0</td>
+<td><span class="math inline">\(-0.5\)</span></td>
+<td><span class="math inline">\(-2.5\)</span></td>
+<td><span class="math inline">\(-9.5\)</span></td>
+</tr>
+<tr class="even">
+<td>Laplace, <span class="math inline">\(L(x) = \lvert x - 1\rvert - \lvert x\rvert\)</span></td>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td><span class="math inline">\(-1\)</span></td>
+<td><span class="math inline">\(-1\)</span></td>
+<td><span class="math inline">\(-1\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Both vanish at the midpoint <span class="math inline">\(x = 0.5\)</span>, where the two candidates are equally plausible. Far out they part ways. At <span class="math inline">\(x = 10\)</span> the normal log ratio is <span class="math inline">\(-9.5\)</span>, so the observation is <span class="math inline">\(e^{9.5} \approx 13{,}360\)</span> times more likely under <span class="math inline">\(\mu = 1\)</span> than under <span class="math inline">\(\mu = 0\)</span>. The Laplace never says more than <span class="math inline">\(e^1 \approx 2.72\)</span> times, however far out <span class="math inline">\(x\)</span> is (<a href="#fig-shifted-log-ratio" class="quarto-xref">Figure&nbsp;<span>1.7</span></a>).</p>
+<div id="fig-shifted-log-ratio" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-shifted-log-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/shifted_log_ratio.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-shifted-log-ratio-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1.7: Log ratio <span class="math inline">\(L(x)\)</span> of a density and its copy shifted by <span class="math inline">\(s = 1\)</span>, for the standard normal and <span class="math inline">\(\mathrm{Lap}(1)\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="interpretation-2" class="level3" data-number="1.8.4">
+<h3 data-number="1.8.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">1.8.4</span> Interpretation</h3>
+<p>For the Laplace, the two copies are within a fixed factor of each other everywhere. For the normal, they are close in the bulk, but the ratio is unbounded in the tails — where, however, there is very little probability. How to make “very little probability” precise is the subject of the next three chapters: concentration bounds it, divergences summarize it, and hypothesis testing says what an observer can do with it.</p>
+</section>
+<section id="check-yourself-5" class="level3" data-number="1.8.5">
+<h3 data-number="1.8.5" class="anchored" data-anchor-id="check-yourself-5"><span class="header-section-number">1.8.5</span> Check yourself</h3>
+<ul>
+<li>For the normal, at which <span class="math inline">\(x\)</span> is <span class="math inline">\(L(x) = 0\)</span>, and why is that point natural? <em>(<span class="math inline">\(x = s/2\)</span>, the midpoint, where the two densities cross.)</em></li>
+<li>Under <span class="math inline">\(x \sim \mathcal N(0, \sigma^2)\)</span>, what is the distribution of <span class="math inline">\(L(x)\)</span>? <em>(It is linear in a normal, so normal: mean <span class="math inline">\(s^2/(2\sigma^2)\)</span>, variance <span class="math inline">\((s/\sigma^2)^2\sigma^2 = s^2/\sigma^2\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-the-facts-by-simulation" class="level2" data-number="1.9">
+<h2 data-number="1.9" class="anchored" data-anchor-id="code-check-the-facts-by-simulation"><span class="header-section-number">1.9</span> Code: check the facts by simulation</h2>
+<p>The script <a href="../../../code/part01-prerequisites/distributions.py">code/distributions.py</a> draws every figure in this chapter and checks the formulas against simulation. Each probability function and each simulated quantity is a small typed function; the script calls them once for the tables and loops them over parameters for the figures. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part01-prerequisites/distributions.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="#tbl-moments" class="quarto-xref">Table&nbsp;<span>1.7</span></a> compares each formula with 1,000,000 samples:</p>
+<div id="tbl-moments" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-moments-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.7: Mean and variance from the formulas against 1,000,000 samples (seed 0).
+</figcaption>
+<div aria-describedby="tbl-moments-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Distribution</th>
+<th>Mean (formula / sample)</th>
+<th>Variance (formula / sample)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{Bernoulli}(0.3)\)</span></td>
+<td>0.300 / 0.301</td>
+<td>0.210 / 0.210</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{Binomial}(20, 0.3)\)</span></td>
+<td>6.000 / 6.001</td>
+<td>4.200 / 4.198</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{Poisson}(4)\)</span></td>
+<td>4.000 / 3.998</td>
+<td>4.000 / 4.001</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{Exp}(2)\)</span></td>
+<td>2.000 / 2.001</td>
+<td>4.000 / 4.019</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{Lap}(0, 2)\)</span></td>
+<td>0.000 / −0.000</td>
+<td>8.000 / 7.993</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathcal N(1, 3^2)\)</span></td>
+<td>1.000 / 1.002</td>
+<td>9.000 / 8.977</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The formulas in each row are the ones derived above: <span class="math inline">\(p(1-p)\)</span>, <span class="math inline">\(np(1-p)\)</span>, <span class="math inline">\(\mu\)</span>, <span class="math inline">\(b^2\)</span>, <span class="math inline">\(2b^2\)</span> and <span class="math inline">\(\sigma^2\)</span>. Every sample value is within a few thousandths of its formula, which is the sampling error you expect from a million draws. The other four checks are reported in their sections above: the slotted waiting time, the difference of exponentials, the norm of a normal vector, and the convergence of standardized exponential sums to the normal. <a href="../../../tests/test_distributions.py">tests/test_distributions.py</a> checks that the output still matches.</p>
+</section>
+<section id="references" class="level2" data-number="1.10">
+<h2 data-number="1.10" class="anchored" data-anchor-id="references"><span class="header-section-number">1.10</span> References</h2>
+<ul>
+<li>Blitzstein &amp; Hwang, <em>Introduction to Probability</em> (2nd ed., 2019), ch.&nbsp;3–5 and 7: every distribution here, with worked examples</li>
+<li>Wasserman, <em>All of Statistics</em> (2004), ch.&nbsp;2–3: a compact reference</li>
+<li>Vershynin, <em>High-Dimensional Probability</em> (2018), §3.1: concentration of the norm of a normal vector</li>
+<li>Shevtsova, “On the absolute constants in the Berry–Esseen type inequalities for identically distributed summands” (2011): the constant <span class="math inline">\(C \le 0.4748\)</span> in the Berry–Esseen bound</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="1.11">
+<h2 data-number="1.11" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">1.11</span> Cheat sheet</h2>
+<p><a href="#tbl-distributions-cheat-sheet" class="quarto-xref">Table&nbsp;<span>1.8</span></a> collects the facts above.</p>
+<div id="tbl-distributions-cheat-sheet" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-distributions-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1.8: Summary of the five families: density, moments, MGF and tail.
+</figcaption>
+<div aria-describedby="tbl-distributions-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Distribution</th>
+<th>Density or PMF</th>
+<th>Mean</th>
+<th>Variance</th>
+<th>MGF</th>
+<th>Tail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{Bernoulli}(p)\)</span></td>
+<td><span class="math inline">\(p^x(1-p)^{1-x}\)</span>, <span class="math inline">\(x \in \{0, 1\}\)</span></td>
+<td><span class="math inline">\(p\)</span></td>
+<td><span class="math inline">\(p(1-p)\)</span></td>
+<td><span class="math inline">\(1 + p(e^\lambda - 1)\)</span></td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{Binomial}(n, p)\)</span></td>
+<td><span class="math inline">\(\binom nk p^k(1-p)^{n-k}\)</span></td>
+<td><span class="math inline">\(np\)</span></td>
+<td><span class="math inline">\(np(1-p)\)</span></td>
+<td><span class="math inline">\((1 + p(e^\lambda - 1))^n\)</span></td>
+<td>Chernoff, see <a href="../part01-prerequisites/02-concentration.html">chapter 2</a></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{Poisson}(\mu)\)</span></td>
+<td><span class="math inline">\(e^{-\mu}\mu^k/k!\)</span></td>
+<td><span class="math inline">\(\mu\)</span></td>
+<td><span class="math inline">\(\mu\)</span></td>
+<td><span class="math inline">\(e^{\mu(e^\lambda - 1)}\)</span></td>
+<td><span class="math inline">\(\approx(e\mu/k)^k\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{Exp}(b)\)</span></td>
+<td><span class="math inline">\(\frac1be^{-y/b}\)</span>, <span class="math inline">\(y \ge 0\)</span></td>
+<td><span class="math inline">\(b\)</span></td>
+<td><span class="math inline">\(b^2\)</span></td>
+<td><span class="math inline">\(\frac{1}{1 - b\lambda}\)</span>, <span class="math inline">\(\lambda &lt; \frac1b\)</span></td>
+<td><span class="math inline">\(e^{-t/b}\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{Lap}(\mu, b)\)</span></td>
+<td><span class="math inline">\(\frac{1}{2b}e^{-\lvert x-\mu\rvert/b}\)</span></td>
+<td><span class="math inline">\(\mu\)</span></td>
+<td><span class="math inline">\(2b^2\)</span></td>
+<td><span class="math inline">\(\frac{e^{\mu\lambda}}{1 - b^2\lambda^2}\)</span>, <span class="math inline">\(\lvert\lambda\rvert &lt; \frac1b\)</span></td>
+<td><span class="math inline">\(\Pr[\lvert X - \mu\rvert \ge t] = e^{-t/b}\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathcal N(\mu, \sigma^2)\)</span></td>
+<td><span class="math inline">\(\frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}\)</span></td>
+<td><span class="math inline">\(\mu\)</span></td>
+<td><span class="math inline">\(\sigma^2\)</span></td>
+<td><span class="math inline">\(e^{\mu\lambda + \sigma^2\lambda^2/2}\)</span></td>
+<td><span class="math inline">\(\Pr[X - \mu \ge t] \le \frac12e^{-t^2/(2\sigma^2)}\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Relationships</strong></p>
+<ul>
+<li><span class="math inline">\(\mathrm{Binomial}(n, \mu/n) \to \mathrm{Poisson}(\mu)\)</span> as <span class="math inline">\(n \to \infty\)</span>.</li>
+<li><span class="math inline">\(\mathrm{Geometric}(\frac{1}{bn})/n \to \mathrm{Exp}(b)\)</span> as <span class="math inline">\(n \to \infty\)</span>: the waiting time for the first event in the same slots as the Poisson limit.</li>
+<li><span class="math inline">\(\mathrm{Binomial}(n, p) \approx \mathcal N(np, np(1-p))\)</span> in the bulk when <span class="math inline">\(np(1-p) \gtrsim 10\)</span>.</li>
+<li><span class="math inline">\(\mathrm{Exp}(b) - \mathrm{Exp}(b) \sim \mathrm{Lap}(b)\)</span>, and <span class="math inline">\(|\mathrm{Lap}(b)| \sim \mathrm{Exp}(b)\)</span>.</li>
+<li>Independent Poissons add to a Poisson, and independent normals add to a normal.</li>
+<li>CLT: <span class="math inline">\((S_n - n\mu)/(\sigma\sqrt n) \to \mathcal N(0, 1)\)</span> for any i.i.d. summands with finite variance. The CDF error is <span class="math inline">\(O(1/\sqrt n)\)</span> and grows with the skewness (Berry–Esseen).</li>
+<li><span class="math inline">\(\mathcal N(0, \sigma^2I_d)\)</span> has norm <span class="math inline">\(\approx\sigma\sqrt d\)</span> and is <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> along every unit direction.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part01-prerequisites/01-distributions.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part01-prerequisites/00-introduction.html" class="pagination-link" aria-label="Prerequisites">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Prerequisites</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part01-prerequisites/02-concentration.html" class="pagination-link" aria-label="Concentration inequalities">
+        <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

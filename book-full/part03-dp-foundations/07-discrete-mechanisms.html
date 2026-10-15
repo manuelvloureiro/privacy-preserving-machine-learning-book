@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>24&nbsp; Discrete and floating-point-safe mechanisms – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part03-dp-foundations/08-trust-models.html" rel="next">
+<link href="../part03-dp-foundations/06-sensitivity.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/07-discrete-mechanisms.html"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">24.1</span> Why this matters</a></li>
+  <li><a href="#toolkit-exact-randomness-from-uniform-integers" id="toc-toolkit-exact-randomness-from-uniform-integers" class="nav-link" data-scroll-target="#toolkit-exact-randomness-from-uniform-integers"><span class="header-section-number">24.2</span> Toolkit: exact randomness from uniform integers</a>
+  <ul class="collapse">
+  <li><a href="#sec-discrete-fact-coin" id="toc-sec-discrete-fact-coin" class="nav-link" data-scroll-target="#sec-discrete-fact-coin"><span class="header-section-number">24.2.1</span> Fact 1: an exact coin with rational bias</a></li>
+  <li><a href="#sec-discrete-fact-rejection" id="toc-sec-discrete-fact-rejection" class="nav-link" data-scroll-target="#sec-discrete-fact-rejection"><span class="header-section-number">24.2.2</span> Fact 2: rejection sampling</a></li>
+  <li><a href="#sec-discrete-fact-geometric" id="toc-sec-discrete-fact-geometric" class="nav-link" data-scroll-target="#sec-discrete-fact-geometric"><span class="header-section-number">24.2.3</span> Fact 3: counting successes gives a geometric variable</a></li>
+  </ul></li>
+  <li><a href="#sec-discrete-float" id="toc-sec-discrete-float" class="nav-link" data-scroll-target="#sec-discrete-float"><span class="header-section-number">24.3</span> Floating-point Laplace breaks differential privacy</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">24.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">24.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">24.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">24.3.4</span> Interpretation</a></li>
+  <li><a href="#example-a-count-released-with-varepsilon-1" id="toc-example-a-count-released-with-varepsilon-1" class="nav-link" data-scroll-target="#example-a-count-released-with-varepsilon-1"><span class="header-section-number">24.3.5</span> Example: a count released with <span class="math inline">\(\varepsilon = 1\)</span></a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">24.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-discrete-snapping" id="toc-sec-discrete-snapping" class="nav-link" data-scroll-target="#sec-discrete-snapping"><span class="header-section-number">24.4</span> The snapping mechanism</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">24.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">24.4.2</span> Statement</a></li>
+  <li><a href="#derivation-outline" id="toc-derivation-outline" class="nav-link" data-scroll-target="#derivation-outline"><span class="header-section-number">24.4.3</span> Derivation (outline)</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">24.4.4</span> Interpretation</a></li>
+  <li><a href="#example-the-toy-snapped" id="toc-example-the-toy-snapped" class="nav-link" data-scroll-target="#example-the-toy-snapped"><span class="header-section-number">24.4.5</span> Example: the toy, snapped</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">24.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-discrete-bernoulli-exp" id="toc-sec-discrete-bernoulli-exp" class="nav-link" data-scroll-target="#sec-discrete-bernoulli-exp"><span class="header-section-number">24.5</span> Exact <span class="math inline">\(\mathrm{Bernoulli}(e^{-\gamma})\)</span></a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">24.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">24.5.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">24.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">24.5.4</span> Interpretation</a></li>
+  <li><a href="#example-one-coin-per-proposal" id="toc-example-one-coin-per-proposal" class="nav-link" data-scroll-target="#example-one-coin-per-proposal"><span class="header-section-number">24.5.5</span> Example: one coin per proposal</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">24.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-discrete-laplace" id="toc-sec-discrete-laplace" class="nav-link" data-scroll-target="#sec-discrete-laplace"><span class="header-section-number">24.6</span> The discrete Laplace mechanism</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">24.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">24.6.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">24.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">24.6.4</span> Interpretation</a></li>
+  <li><a href="#example-a-count-with-varepsilon-1" id="toc-example-a-count-with-varepsilon-1" class="nav-link" data-scroll-target="#example-a-count-with-varepsilon-1"><span class="header-section-number">24.6.5</span> Example: a count with <span class="math inline">\(\varepsilon = 1\)</span></a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">24.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-discrete-gaussian" id="toc-sec-discrete-gaussian" class="nav-link" data-scroll-target="#sec-discrete-gaussian"><span class="header-section-number">24.7</span> The discrete Gaussian mechanism</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">24.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">24.7.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">24.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">24.7.4</span> Interpretation</a></li>
+  <li><a href="#example-the-rényi-divergence-computed" id="toc-example-the-rényi-divergence-computed" class="nav-link" data-scroll-target="#example-the-rényi-divergence-computed"><span class="header-section-number">24.7.5</span> Example: the Rényi divergence, computed</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">24.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-discrete-gaussian-sampler" id="toc-sec-discrete-gaussian-sampler" class="nav-link" data-scroll-target="#sec-discrete-gaussian-sampler"><span class="header-section-number">24.8</span> Sampling the discrete Gaussian exactly</a>
+  <ul class="collapse">
+  <li><a href="#context-5" id="toc-context-5" class="nav-link" data-scroll-target="#context-5"><span class="header-section-number">24.8.1</span> Context</a></li>
+  <li><a href="#statement-5" id="toc-statement-5" class="nav-link" data-scroll-target="#statement-5"><span class="header-section-number">24.8.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">24.8.3</span> Derivation</a></li>
+  <li><a href="#interpretation-5" id="toc-interpretation-5" class="nav-link" data-scroll-target="#interpretation-5"><span class="header-section-number">24.8.4</span> Interpretation</a></li>
+  <li><a href="#example-a-histogram-over-1000-bins" id="toc-example-a-histogram-over-1000-bins" class="nav-link" data-scroll-target="#example-a-histogram-over-1000-bins"><span class="header-section-number">24.8.5</span> Example: a histogram over 1,000 bins</a></li>
+  <li><a href="#check-yourself-5" id="toc-check-yourself-5" class="nav-link" data-scroll-target="#check-yourself-5"><span class="header-section-number">24.8.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-every-sampler-against-its-exact-distribution" id="toc-code-check-every-sampler-against-its-exact-distribution" class="nav-link" data-scroll-target="#code-check-every-sampler-against-its-exact-distribution"><span class="header-section-number">24.9</span> Code: check every sampler against its exact distribution</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">24.10</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">24.11</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/07-discrete-mechanisms.html"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="24.1">
+<h2 data-number="24.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">24.1</span> Why this matters</h2>
+<p>Every privacy proof so far was a statement about real numbers. The Laplace mechanism adds a real-valued <span class="math inline">\(\mathrm{Lap}(b)\)</span> draw to a real-valued <span class="math inline">\(f(D)\)</span>, and the proof compares two densities on the real line. A computer has neither. It has floating-point numbers, a finite set with uneven gaps, and a source of random bits. The program that “samples <span class="math inline">\(\mathrm{Lap}(b)\)</span>” outputs a distribution on that finite set, and nothing in the proof says anything about it.</p>
+<p>The gap is not a rounding nuisance. Mironov (2012) showed that the textbook Laplace sampler, run in double precision, leaks <span class="math inline">\(f(D)\)</span> through the low-order bits of its output. Some outputs can be produced from <span class="math inline">\(D\)</span> and not from <span class="math inline">\(D'\)</span>, and an observer who sees one knows which dataset was used. No <span class="math inline">\(\varepsilon\)</span> covers that.</p>
+<p>The organizing idea of this chapter is that <strong>differential privacy (DP) is a property of the output distribution the code actually produces</strong>, so the code must produce exactly the distribution the proof is about. There are two ways to get there. You can keep floating point and repair the output: round it to a coarse grid and clamp it, so that every reachable output is reachable from every input. Or you can leave floating point behind: work with integer-valued queries and sample integer noise exactly, using only integer and rational arithmetic and uniform random integers. The second route gives the discrete Laplace and the discrete Gaussian mechanisms. Their privacy proofs are as clean as the continuous ones, and their samplers produce exactly the distribution in the proof. <a href="#tbl-discrete-map" class="quarto-xref">Table&nbsp;<span>24.1</span></a> lists the results.</p>
+<div id="tbl-discrete-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-discrete-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24.1: The results of this chapter, what each says, and where it is used.
+</figcaption>
+<div aria-describedby="tbl-discrete-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>What it says</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>The support argument (<a href="#eq-support-delta" class="quarto-xref">Equation&nbsp;<span>24.4</span></a>)</td>
+<td>Outputs reachable from <span class="math inline">\(D\)</span> but not from <span class="math inline">\(D'\)</span> force <span class="math inline">\(\delta \ge \Pr[M(D) \in S]\)</span></td>
+<td>Auditing any implementation; counterexample tests</td>
+</tr>
+<tr class="even">
+<td>Floating-point Laplace</td>
+<td>The textbook sampler’s outputs depend on <span class="math inline">\(f(D)\)</span> through their low-order bits</td>
+<td>Why libraries don’t ship it</td>
+</tr>
+<tr class="odd">
+<td>The snapping mechanism</td>
+<td>Rounding to a grid <span class="math inline">\(\Lambda \ge b\)</span> and clamping restores a bounded privacy loss</td>
+<td>Laplace noise when the output must be a float</td>
+</tr>
+<tr class="even">
+<td>Exact <span class="math inline">\(\mathrm{Bernoulli}(e^{-\gamma})\)</span></td>
+<td>A coin with probability <span class="math inline">\(e^{-\gamma}\)</span> from uniform integers, for rational <span class="math inline">\(\gamma\)</span></td>
+<td>The building block of both samplers below</td>
+</tr>
+<tr class="odd">
+<td>The discrete Laplace mechanism</td>
+<td><span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span> for integer-valued <span class="math inline">\(f\)</span>, sampled exactly</td>
+<td>Counts and histograms</td>
+</tr>
+<tr class="even">
+<td>The discrete Gaussian mechanism</td>
+<td>Same privacy loss as the continuous Gaussian at integer points; <span class="math inline">\(\delta(\varepsilon)\)</span> close to it; variance below <span class="math inline">\(\sigma^2\)</span></td>
+<td>Census releases; noise added before secure aggregation</td>
+</tr>
+<tr class="odd">
+<td>The exact discrete Gaussian sampler</td>
+<td>Rejection from the discrete Laplace, at most about 2 proposals per draw</td>
+<td>Any deployment of the discrete Gaussian</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>What this chapter assumes, restated.</strong> <span class="math inline">\(M\)</span> is a mechanism: a randomized program that takes a dataset and returns an output. <span class="math inline">\(D \simeq D'\)</span> are neighbouring datasets, which differ in one person’s record. A query <span class="math inline">\(f\)</span> has <span class="math inline">\(\ell_1\)</span> sensitivity <span class="math inline">\(\Delta_1 f\)</span> and <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_2 f\)</span>: the largest change in <span class="math inline">\(f\)</span>, measured as a sum of absolute coordinate changes or as a Euclidean length, when one record changes. <span class="math inline">\(M\)</span> is <strong><span class="math inline">\((\varepsilon, \delta)\)</span>-DP</strong> if, for every pair of neighbours and every set <span class="math inline">\(S\)</span> of outputs, <span class="math inline">\(\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta\)</span>: no event becomes more than <span class="math inline">\(e^\varepsilon\)</span> times more likely when one record changes, except for an additive slack <span class="math inline">\(\delta\)</span>. With <span class="math inline">\(\delta = 0\)</span> this is <strong>pure</strong> <span class="math inline">\(\varepsilon\)</span>-DP. The <strong>privacy loss</strong> of an output <span class="math inline">\(y\)</span> is the log of the ratio of its probabilities under the two neighbours, <span id="eq-auto-07discretemechanisms-1"><span class="math display">\[L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}, \tag{24.1}\]</span></span> which measures how much evidence <span class="math inline">\(y\)</span> gives for <span class="math inline">\(D\)</span> over <span class="math inline">\(D'\)</span>. For a discrete output, <span class="math inline">\(p_{M(D)}\)</span> is a probability mass function (PMF), the probability of each single output. Pure <span class="math inline">\(\varepsilon\)</span>-DP is the statement <span class="math inline">\(|L_{D,D'}(y)| \le \varepsilon\)</span> for every <span class="math inline">\(y\)</span>, because the probability of a set is the sum of its outputs’ probabilities, and if each term grows by at most <span class="math inline">\(e^\varepsilon\)</span> so does the sum. The full treatment is in <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, the Laplace and Gaussian mechanisms are in <a href="../part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>, and the Laplace and geometric distributions are in <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>.</p>
+</section>
+<section id="toolkit-exact-randomness-from-uniform-integers" class="level2" data-number="24.2">
+<h2 data-number="24.2" class="anchored" data-anchor-id="toolkit-exact-randomness-from-uniform-integers"><span class="header-section-number">24.2</span> Toolkit: exact randomness from uniform integers</h2>
+<p>The exact samplers below need only one primitive: a uniform integer in <span class="math inline">\(\{0, 1, \dots, d - 1\}\)</span> for any <span class="math inline">\(d \ge 1\)</span>. Python’s <code>random.Random.randrange(d)</code> provides it exactly: it draws <span class="math inline">\(\lceil\log_2 d\rceil\)</span> random bits and redraws when the result is <span class="math inline">\(d\)</span> or more, so every integer below <span class="math inline">\(d\)</span> comes out with probability exactly <span class="math inline">\(1/d\)</span>. A deployment draws the bits from the operating system with <code>secrets.SystemRandom()</code>, which has the same interface. Three facts turn this primitive into everything else: how to make a coin with a fraction as its bias, how to reshape one distribution into another by throwing some draws away, and how counting coin flips gives a geometric variable.</p>
+<section id="sec-discrete-fact-coin" class="level3" data-number="24.2.1">
+<h3 data-number="24.2.1" class="anchored" data-anchor-id="sec-discrete-fact-coin"><span class="header-section-number">24.2.1</span> Fact 1: an exact coin with rational bias</h3>
+<p>To make a coin that comes up 1 with probability <span class="math inline">\(n/d\)</span>, draw a uniform integer below <span class="math inline">\(d\)</span> and call it a success when it is one of the first <span class="math inline">\(n\)</span> values. For integers <span class="math inline">\(0 \le n \le d\)</span>, let <span class="math inline">\(U\)</span> be uniform on <span class="math inline">\(\{0, \dots, d - 1\}\)</span>. Then <span id="eq-auto-07discretemechanisms-2"><span class="math display">\[\Pr[U &lt; n] = \frac{n}{d}, \tag{24.2}\]</span></span> because there are <span class="math inline">\(n\)</span> favourable values out of <span class="math inline">\(d\)</span> equally likely ones. So <span class="math inline">\(\mathbf 1[U &lt; n]\)</span>, the indicator that is 1 when <span class="math inline">\(U &lt; n\)</span> and 0 otherwise, is an exact <span class="math inline">\(\mathrm{Bernoulli}(n/d)\)</span> draw, with no rounding anywhere. A coin with an <em>irrational</em> bias such as <span class="math inline">\(e^{-1}\)</span> can’t be made this way, because no fraction <span class="math inline">\(n/d\)</span> equals it, which is why Algorithm 1 below exists.</p>
+</section>
+<section id="sec-discrete-fact-rejection" class="level3" data-number="24.2.2">
+<h3 data-number="24.2.2" class="anchored" data-anchor-id="sec-discrete-fact-rejection"><span class="header-section-number">24.2.2</span> Fact 2: rejection sampling</h3>
+<p>Suppose you can sample from a PMF <span class="math inline">\(q\)</span>, the <strong>proposal</strong>, but you want samples from a different PMF <span class="math inline">\(p\)</span>. If <span class="math inline">\(p(x)\)</span> is proportional to <span class="math inline">\(q(x)a(x)\)</span> for some acceptance probability <span class="math inline">\(0 \le a(x) \le 1\)</span>, you can draw from <span class="math inline">\(q\)</span> and keep each draw <span class="math inline">\(x\)</span> only with probability <span class="math inline">\(a(x)\)</span>: values that <span class="math inline">\(p\)</span> favours less than <span class="math inline">\(q\)</span> get thrown away more often. Precisely, let <span class="math inline">\(p(x) = q(x)a(x)/A\)</span>, where <span class="math inline">\(A = \sum_x q(x)a(x)\)</span> is the normalizer. Repeat: draw <span class="math inline">\(Y \sim q\)</span>, then accept it with probability <span class="math inline">\(a(Y)\)</span>; output the first accepted <span class="math inline">\(Y\)</span>. Three steps show that this is exact and what it costs.</p>
+<ol type="1">
+<li><strong>Look at one round.</strong> A round outputs <span class="math inline">\(x\)</span> when it proposes <span class="math inline">\(x\)</span> (probability <span class="math inline">\(q(x)\)</span>) and accepts it (probability <span class="math inline">\(a(x)\)</span>), so with probability <span class="math inline">\(q(x)a(x)\)</span>. Adding over <span class="math inline">\(x\)</span>, a round outputs something with probability <span class="math inline">\(A\)</span> and nothing with probability <span class="math inline">\(1 - A\)</span>.</li>
+<li><strong>Add up the rounds.</strong> The rounds are independent and identical, so the output is <span class="math inline">\(x\)</span> when the first <span class="math inline">\(j\)</span> rounds output nothing and round <span class="math inline">\(j + 1\)</span> outputs <span class="math inline">\(x\)</span>, for some <span class="math inline">\(j \ge 0\)</span>. That has probability <span class="math inline">\(\sum_{j \ge 0}(1 - A)^jq(x)a(x)\)</span>, a geometric series with ratio <span class="math inline">\(1 - A &lt; 1\)</span>, which sums to <span class="math inline">\(q(x)a(x)/A = p(x)\)</span>.</li>
+<li><strong>Count the cost.</strong> Each round succeeds with probability <span class="math inline">\(A\)</span> independently, so the number of rounds is geometric with success probability <span class="math inline">\(A\)</span>, and its mean is <span class="math inline">\(1/A\)</span>.</li>
+</ol>
+<p>The output is exact as long as each acceptance is an exact coin. What matters is that proposal times acceptance is proportional to the target. You never need to compute the normalizer <span class="math inline">\(A\)</span>; it only sets how many rounds you wait.</p>
+</section>
+<section id="sec-discrete-fact-geometric" class="level3" data-number="24.2.3">
+<h3 data-number="24.2.3" class="anchored" data-anchor-id="sec-discrete-fact-geometric"><span class="header-section-number">24.2.3</span> Fact 3: counting successes gives a geometric variable</h3>
+<p>Flip independent coins with success probability <span class="math inline">\(r\)</span> and let <span class="math inline">\(V\)</span> be the number of successes before the first failure. The event <span class="math inline">\(V = v\)</span> means exactly <span class="math inline">\(v\)</span> successes followed by one failure, and independent flips multiply, so <span id="eq-auto-07discretemechanisms-3"><span class="math display">\[\Pr[V = v] = r^v(1 - r), \qquad v = 0, 1, 2, \dots \tag{24.3}\]</span></span> This is the geometric distribution of <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>, counted from 0. Its tail is <span class="math inline">\(\Pr[V \ge v] = r^v\)</span>, since <span class="math inline">\(V \ge v\)</span> just says the first <span class="math inline">\(v\)</span> flips were successes.</p>
+</section>
+</section>
+<section id="sec-discrete-float" class="level2" data-number="24.3">
+<h2 data-number="24.3" class="anchored" data-anchor-id="sec-discrete-float"><span class="header-section-number">24.3</span> Floating-point Laplace breaks differential privacy</h2>
+<section id="context" class="level3" data-number="24.3.1">
+<h3 data-number="24.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">24.3.1</span> Context</h3>
+<p>The textbook way to sample <span class="math inline">\(\mathrm{Lap}(b)\)</span> is inverse cumulative distribution function (CDF) sampling: turn a uniform number into a draw with the right tail by solving for where the tail probability equals it. Draw <span class="math inline">\(U\)</span> uniform on <span class="math inline">\((0, 1)\)</span> and a fair sign <span class="math inline">\(\xi \in \{-1, +1\}\)</span>, and output <span class="math inline">\(\xi\cdot b\ln(1/U)\)</span>. The magnitude <span class="math inline">\(b\ln(1/U)\)</span> is exponential with mean <span class="math inline">\(b\)</span>, written <span class="math inline">\(\mathrm{Exp}(b)\)</span>, because <span class="math inline">\(b\ln(1/U) &gt; t\)</span> exactly when <span class="math inline">\(U &lt; e^{-t/b}\)</span>, so <span class="math inline">\(\Pr[b\ln(1/U) &gt; t] = \Pr[U &lt; e^{-t/b}] = e^{-t/b}\)</span>. A fair sign turns it into <span class="math inline">\(\mathrm{Lap}(b)\)</span>, whose density <span class="math inline">\(\frac1{2b}e^{-|z|/b}\)</span> is the exponential mirrored around 0. The Laplace mechanism then outputs <span class="math inline">\(y = f(D) + \xi\cdot b\ln(1/U)\)</span>. Run in floating point, <span class="math inline">\(U\)</span>, the logarithm and the sum are each rounded. The question is whether the rounded mechanism is still DP.</p>
+</section>
+<section id="statement" class="level3" data-number="24.3.2">
+<h3 data-number="24.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">24.3.2</span> Statement</h3>
+<p>The test is simple: if some outputs can only come from <span class="math inline">\(D\)</span>, seeing one of them reveals <span class="math inline">\(D\)</span> with certainty, and no multiplicative factor <span class="math inline">\(e^\varepsilon\)</span> can account for that, so all of their probability has to be paid for by <span class="math inline">\(\delta\)</span>. Write <span class="math inline">\(\mathcal Y_D\)</span> for the set of outputs <span class="math inline">\(M(D)\)</span> can produce and let <span class="math inline">\(S = \mathcal Y_D \setminus \mathcal Y_{D'}\)</span> be the outputs reachable from <span class="math inline">\(D\)</span> but not from <span class="math inline">\(D'\)</span>. If <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, then for every <span class="math inline">\(\varepsilon\)</span> <span id="eq-support-delta"><span class="math display">\[\delta \;\ge\; \Pr[M(D) \in S].  \tag{24.4}\]</span></span> In particular, if <span class="math inline">\(\Pr[M(D) \in S] &gt; 0\)</span>, then <span class="math inline">\(M\)</span> is not <span class="math inline">\(\varepsilon\)</span>-DP for any finite <span class="math inline">\(\varepsilon\)</span>. The floating-point Laplace sampler has such outputs. In a toy model with a 12-bit significand that can be enumerated exactly, <span class="math inline">\(\Pr[M(D) \in S] = 0.4791\)</span> for <span class="math inline">\(f(D) = 0\)</span>, <span class="math inline">\(f(D') = 1\)</span> and <span class="math inline">\(b = 1\)</span>.</p>
+</section>
+<section id="derivation" class="level3" data-number="24.3.3">
+<h3 data-number="24.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">24.3.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Apply the definition to the event <span class="math inline">\(S\)</span>.</strong> <span class="math inline">\((\varepsilon, \delta)\)</span>-DP says <span class="math inline">\(\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta\)</span> for every event. Here <span class="math inline">\(\Pr[M(D') \in S] = 0\)</span> by the choice of <span class="math inline">\(S\)</span>, so the multiplicative term is <span class="math inline">\(e^\varepsilon \cdot 0 = 0\)</span> however large <span class="math inline">\(e^\varepsilon\)</span> is, and what remains is <span class="math inline">\(\Pr[M(D) \in S] \le \delta\)</span>. That is <a href="#eq-support-delta" class="quarto-xref">Equation&nbsp;<span>24.4</span></a>.</li>
+<li><strong>Read it as an attack.</strong> Use the convention of <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>: a test decides between “the data were <span class="math inline">\(D\)</span>” and “the data were <span class="math inline">\(D'\)</span>”, its false positive rate <span class="math inline">\(\alpha\)</span> is the chance of saying “<span class="math inline">\(D'\)</span>” when the data were <span class="math inline">\(D\)</span>, and its false negative rate <span class="math inline">\(\beta\)</span> is the chance of saying “<span class="math inline">\(D\)</span>” when the data were <span class="math inline">\(D'\)</span>. Consider the test “say <span class="math inline">\(D\)</span> when <span class="math inline">\(y \in S\)</span>, and <span class="math inline">\(D'\)</span> otherwise”. Under <span class="math inline">\(D'\)</span> the output never lands in <span class="math inline">\(S\)</span>, so the test never says “<span class="math inline">\(D\)</span>” and <span class="math inline">\(\beta = 0\)</span>. Under <span class="math inline">\(D\)</span> it says “<span class="math inline">\(D'\)</span>” whenever <span class="math inline">\(y\)</span> misses <span class="math inline">\(S\)</span>, so <span class="math inline">\(\alpha = 1 - \Pr[M(D) \in S]\)</span>. The hypothesis-testing form of DP in that chapter says that every test has <span class="math inline">\(\alpha + e^\varepsilon\beta \ge 1 - \delta\)</span>; this is the definition applied to the event on which the test says “<span class="math inline">\(D\)</span>”. With <span class="math inline">\(\beta = 0\)</span> the factor <span class="math inline">\(e^\varepsilon\)</span> multiplies nothing, and the inequality reads <span class="math inline">\(1 - \Pr[M(D) \in S] \ge 1 - \delta\)</span>, which is again <span class="math inline">\(\Pr[M(D) \in S] \le \delta\)</span>. And whenever this test says “<span class="math inline">\(D\)</span>”, it is right.</li>
+<li><strong>Floating-point outputs form a finite set that depends on <span class="math inline">\(f(D)\)</span>.</strong> A float with a <span class="math inline">\(p\)</span>-bit significand (IEEE 754 doubles have <span class="math inline">\(p = 53\)</span>) is <span class="math inline">\(m\cdot2^e\)</span> with an integer <span class="math inline">\(m &lt; 2^p\)</span> and an integer exponent <span class="math inline">\(e\)</span>. Between <span class="math inline">\(2^e\)</span> and <span class="math inline">\(2^{e+1}\)</span> the floats are spaced <span class="math inline">\(2^{e - p + 1}\)</span> apart, so they are dense near 0 and sparse far from it. The sampler computes <span class="math inline">\(\mathrm{round}(f(D) + \xi\cdot\mathrm{round}(b\ln(1/U)))\)</span>. Its outputs are the rounded sums of <span class="math inline">\(f(D)\)</span> with a fixed, finite set of noise values. Shifting by <span class="math inline">\(f(D') \ne f(D)\)</span> before rounding lands on a different set of floats.</li>
+<li><strong>Why the two sets differ.</strong> Near 0 the noise values are fine-grained: the floats there are spaced far more closely than near 1. <span class="math inline">\(M(D)\)</span> with <span class="math inline">\(f(D) = 0\)</span> outputs those noise values as they are. <span class="math inline">\(M(D')\)</span> with <span class="math inline">\(f(D') = 1\)</span> must produce an output near 0 as <span class="math inline">\(1 - (\text{noise near } 1)\)</span>, which is a multiple of the coarser spacing of the noise near 1. So most of the fine-grained outputs of <span class="math inline">\(M(D)\)</span> near 0 are impossible under <span class="math inline">\(M(D')\)</span>. Away from the inputs the two grids interleave and coincide only in part. <a href="#fig-discrete-float-support" class="quarto-xref">Figure&nbsp;<span>24.1</span></a> (left) shows a narrow window: 3 of the 9 outputs of <span class="math inline">\(M(D)\)</span> there can’t come from <span class="math inline">\(M(D')\)</span>, and 4 of the 10 outputs of <span class="math inline">\(M(D')\)</span> can’t come from <span class="math inline">\(M(D)\)</span>.</li>
+</ol>
+<p><strong>Concretely, in a toy model.</strong> Doubles have too many values to enumerate, so the script uses <span class="math inline">\(p\)</span>-bit floats with <span class="math inline">\(p\)</span> from 6 to 14. <span class="math inline">\(U\)</span> is an ideal uniform <span class="math inline">\(p\)</span>-bit float: a real uniform rounded down to a <span class="math inline">\(p\)</span>-bit float, so each float in <span class="math inline">\([2^{-40}, 1)\)</span> has probability equal to its gap to the next one. The logarithm is computed and rounded to <span class="math inline">\(p\)</span> bits, then the sum is rounded to <span class="math inline">\(p\)</span> bits. Every output and its probability is computed exactly. <a href="#tbl-discrete-float" class="quarto-xref">Table&nbsp;<span>24.2</span></a> lists the results.</p>
+<div id="tbl-discrete-float" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-discrete-float-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24.2: The toy floating-point Laplace sampler with <span class="math inline">\(b = 1\)</span>, <span class="math inline">\(f(D) = 0\)</span> and <span class="math inline">\(f(D') = 1\)</span>. <span class="math inline">\(S\)</span> is the set of outputs of <span class="math inline">\(M(D)\)</span> that <span class="math inline">\(M(D')\)</span> can’t produce, and <span class="math inline">\(S'\)</span> the reverse.
+</figcaption>
+<div aria-describedby="tbl-discrete-float-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Significand bits <span class="math inline">\(p\)</span></th>
+<th>Outputs of <span class="math inline">\(M(D)\)</span></th>
+<th>Outputs of <span class="math inline">\(M(D')\)</span></th>
+<th><span class="math inline">\(\Pr[M(D) \in S]\)</span></th>
+<th><span class="math inline">\(\Pr[M(D') \in S']\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>8</td>
+<td>1,604</td>
+<td>1,409</td>
+<td>0.4795</td>
+<td>0.2070</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>25,646</td>
+<td>22,477</td>
+<td>0.4791</td>
+<td>0.2033</td>
+</tr>
+<tr class="odd">
+<td>14</td>
+<td>102,586</td>
+<td>89,859</td>
+<td>0.4826</td>
+<td>0.2053</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>At <span class="math inline">\(p = 12\)</span>, outputs with <span class="math inline">\(|y| &lt; 0.5\)</span> carry probability 0.3933 under <span class="math inline">\(M(D)\)</span>, and 0.3173 of it lands where <span class="math inline">\(M(D')\)</span> can’t. Most of the leak is near <span class="math inline">\(f(D)\)</span>, as step 4 predicts.</p>
+<div id="fig-discrete-float-support" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-discrete-float-support-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/discrete_float_support.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discrete-float-support-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24.1: The toy 12-bit floating-point Laplace sampler with <span class="math inline">\(b = 1\)</span>. Left: every output that <span class="math inline">\(f(D) = 0\)</span> (top) and <span class="math inline">\(f(D') = 1\)</span> (bottom) can produce in a narrow window, coloured by whether the other input can produce it too. Right: the probability that <span class="math inline">\(M(D)\)</span> produces an output <span class="math inline">\(M(D')\)</span> cannot, as a function of the significand length <span class="math inline">\(p\)</span>, for the textbook sampler and for the snapped one of <a href="#sec-discrete-snapping" class="quarto-xref"><span>Section 24.4</span></a>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="interpretation" class="level3" data-number="24.3.4">
+<h3 data-number="24.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">24.3.4</span> Interpretation</h3>
+<p>More precision does not help. The right panel of <a href="#fig-discrete-float-support" class="quarto-xref">Figure&nbsp;<span>24.1</span></a> is flat: from 6 to 14 bits, about 48% of the mass of <span class="math inline">\(M(D)\)</span> is on outputs <span class="math inline">\(M(D')\)</span> can’t produce. Adding bits refines both grids together, so the mismatch stays. Mironov (2012) found the same effect at <span class="math inline">\(p = 53\)</span> in the samplers of several DP libraries of the time, and showed how to recover <span class="math inline">\(f(D)\)</span> from single outputs.</p>
+<p>The leak sits in the low-order bits. It is not in where the output lands on the real line but in which float it is. Printing the output to a few decimals would hide it, and that is the intuition behind snapping in the next section.</p>
+<p>There is a second, smaller leak: the tails are cut off. A 53-bit uniform <span class="math inline">\(U = k\cdot2^{-53}\)</span>, with <span class="math inline">\(k\)</span> a positive integer, is never below <span class="math inline">\(2^{-53}\)</span>, so the noise magnitude <span class="math inline">\(b\ln(1/U)\)</span> never exceeds <span class="math inline">\(b\ln(2^{53}) = b\cdot53\ln2 \approx 36.74\,b\)</span>. Outputs between <span class="math inline">\(f(D) + 36.74b\)</span> and <span class="math inline">\(f(D') + 36.74b\)</span> are then reachable from only one input. Their probability is about <span class="math inline">\(2^{-53}\)</span>, but by <a href="#eq-support-delta" class="quarto-xref">Equation&nbsp;<span>24.4</span></a> it is still a floor on <span class="math inline">\(\delta\)</span>, and it rules out pure DP.</p>
+<p>Finally, the model is a toy, but the effect is not. Real libraries differ from the toy in how they draw <span class="math inline">\(U\)</span> and round the logarithm. Those details change the numbers, not the conclusion. Jin et al.&nbsp;(2022) found floating-point and timing leaks in DP libraries released after Mironov’s paper.</p>
+</section>
+<section id="example-a-count-released-with-varepsilon-1" class="level3" data-number="24.3.5">
+<h3 data-number="24.3.5" class="anchored" data-anchor-id="example-a-count-released-with-varepsilon-1"><span class="header-section-number">24.3.5</span> Example: a count released with <span class="math inline">\(\varepsilon = 1\)</span></h3>
+<p>A hospital releases the number of patients with a rare diagnosis, a count with <span class="math inline">\(\Delta_1 f = 1\)</span>, using the textbook sampler with <span class="math inline">\(b = 1\)</span>, so that the exact mechanism would have <span class="math inline">\(\varepsilon = \Delta_1 f/b = 1\)</span>. An analyst who knows that the count is either 0 or 1 (say, whether one particular patient is in the data) checks whether the released float can be produced from 1. In the 12-bit toy, the check identifies the count 0 with certainty 47.91% of the time: that is <span class="math inline">\(\Pr[M(D) \in S] = 0.4791\)</span> from <a href="#tbl-discrete-float" class="quarto-xref">Table&nbsp;<span>24.2</span></a>. The proof of the <a href="../part03-dp-foundations/03-laplace-gaussian.html">Laplace mechanism</a> promised that one output could move the analyst’s odds by at most a factor <span class="math inline">\(e\)</span>; the code delivers certainty almost half the time.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="24.3.6">
+<h3 data-number="24.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">24.3.6</span> Check yourself</h3>
+<ul>
+<li>Why doesn’t the support argument need <span class="math inline">\(\varepsilon\)</span> to be small? <em>(Because <span class="math inline">\(\Pr[M(D') \in S] = 0\)</span>, the term <span class="math inline">\(e^\varepsilon\Pr[M(D') \in S]\)</span> vanishes for every <span class="math inline">\(\varepsilon\)</span>, however large.)</em></li>
+<li>Would the problem go away if <span class="math inline">\(f(D)\)</span> and <span class="math inline">\(f(D')\)</span> were both integers and <span class="math inline">\(b\)</span> were a power of 2? <em>(No.&nbsp;The noise values <span class="math inline">\(b\ln(1/U)\)</span> are still rounded differently once added to different integers, because the spacing of floats depends on the magnitude of the sum. The toy uses <span class="math inline">\(b = 1\)</span> and integer <span class="math inline">\(f\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-discrete-snapping" class="level2" data-number="24.4">
+<h2 data-number="24.4" class="anchored" data-anchor-id="sec-discrete-snapping"><span class="header-section-number">24.4</span> The snapping mechanism</h2>
+<section id="context-1" class="level3" data-number="24.4.1">
+<h3 data-number="24.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">24.4.1</span> Context</h3>
+<p>If the output must be a float, the low-order bits have to go. The snapping mechanism of Mironov (2012) removes them by rounding the noisy answer to a coarse grid, and clamps both the input and the output to a bounded range so that floating-point rounding errors stay small relative to the grid. This section gives the mechanism and its guarantee in outline.</p>
+</section>
+<section id="statement-1" class="level3" data-number="24.4.2">
+<h3 data-number="24.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">24.4.2</span> Statement</h3>
+<p>In words: clamp the true answer into <span class="math inline">\([-B, B]\)</span>, add Laplace noise computed in floating point, round the result to the nearest multiple of a power of 2 at least as large as the noise scale, and clamp again. Let <span class="math inline">\(f\)</span> have sensitivity 1, let <span class="math inline">\(\lambda\)</span> be the noise scale, let <span class="math inline">\(\Lambda\)</span> be the smallest power of 2 with <span class="math inline">\(\Lambda \ge \lambda\)</span>, and let <span class="math inline">\(B\)</span> be a clamping bound. The <strong>snapping mechanism</strong> outputs <span id="eq-auto-07discretemechanisms-4"><span class="math display">\[M(D) = \mathrm{clamp}_B\Big(\big\lfloor \mathrm{clamp}_B(f(D)) \oplus \xi\otimes\lambda\otimes\mathrm{LN}(U^*)\big\rceil_\Lambda\Big), \tag{24.5}\]</span></span> where <span class="math inline">\(\oplus\)</span>, <span class="math inline">\(\otimes\)</span> and <span class="math inline">\(\mathrm{LN}\)</span> are floating-point addition, multiplication and logarithm, <span class="math inline">\(\xi\)</span> is a fair sign, <span class="math inline">\(U^*\)</span> is an ideal uniform double, <span class="math inline">\(\lfloor\cdot\rceil_\Lambda\)</span> rounds to the nearest multiple of <span class="math inline">\(\Lambda\)</span>, and <span class="math inline">\(\mathrm{clamp}_B\)</span> maps to <span class="math inline">\([-B, B]\)</span>. (<span class="math inline">\(\mathrm{LN}(U^*)\)</span> is negative, and the fair sign <span class="math inline">\(\xi\)</span> makes the sign of the noise irrelevant.)</p>
+<p>Its guarantee is the exact Laplace mechanism’s <span class="math inline">\(\varepsilon = 1/\lambda\)</span> plus two small terms that pay for floating-point error. The error of one floating-point operation is at most a fraction <span class="math inline">\(\eta = 2^{-53}\)</span> of the number it produces, and clamping keeps every number below <span class="math inline">\(B\)</span> in size, so the terms grow with <span class="math inline">\(B\eta\)</span>. Mironov (2012, Theorem 1) proves that for <span class="math inline">\(\lambda &lt; B &lt; 2^{46}\lambda\)</span> the mechanism is <span class="math inline">\(\varepsilon\)</span>-DP with <span id="eq-auto-07discretemechanisms-5"><span class="math display">\[\varepsilon = \frac{1 + 12B\eta}{\lambda} + \frac{2^{-49}B}{\lambda}, \qquad \eta = 2^{-53}. \tag{24.6}\]</span></span></p>
+</section>
+<section id="derivation-outline" class="level3" data-number="24.4.3">
+<h3 data-number="24.4.3" class="anchored" data-anchor-id="derivation-outline"><span class="header-section-number">24.4.3</span> Derivation (outline)</h3>
+<ol type="1">
+<li><strong>Clamping the input</strong> bounds <span class="math inline">\(|f(D)| \le B\)</span>, so every sum is computed at magnitudes where the float spacing is at most about <span class="math inline">\(B\eta\)</span>.</li>
+<li><strong>Rounding to a multiple of <span class="math inline">\(\Lambda \ge \lambda\)</span></strong> discards every bit finer than <span class="math inline">\(\Lambda\)</span>. The output is one of the multiples of <span class="math inline">\(\Lambda\)</span> in <span class="math inline">\([-B, B]\)</span>, the same finite set for every input, so the support argument of <a href="#sec-discrete-float" class="quarto-xref"><span>Section 24.3</span></a> has nothing to bite on: no output is reachable from one input only.</li>
+<li><strong>Each grid point collects an interval of noise values</strong> of width <span class="math inline">\(\Lambda\)</span>: all noise values that round to that point. In exact arithmetic, its probability under <span class="math inline">\(D\)</span> and under <span class="math inline">\(D'\)</span> is the probability that a Laplace variable lands in one of two intervals shifted by <span class="math inline">\(|f(D) - f(D')| \le 1\)</span>. The Laplace density changes by at most a factor <span class="math inline">\(e^{1/\lambda}\)</span> under a shift of 1, because <span class="math inline">\(e^{-|z|/\lambda}\)</span> and <span class="math inline">\(e^{-|z - 1|/\lambda}\)</span> differ in the exponent by at most <span class="math inline">\(1/\lambda\)</span>, so the ratio of the two interval probabilities is at most <span class="math inline">\(e^{1/\lambda}\)</span>. In other words, rounding exact Laplace noise is post-processing of the exact Laplace mechanism, and post-processing never increases the privacy loss.</li>
+<li><strong>Floating-point error moves each interval’s endpoints</strong> by a relative amount of order <span class="math inline">\(\eta\)</span>, measured against magnitudes up to <span class="math inline">\(B\)</span>. Bounding the effect of those moves on the interval probabilities gives the extra terms proportional to <span class="math inline">\(B\eta/\lambda\)</span>. Mironov (2012, §5) does this bookkeeping.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="24.4.4">
+<h3 data-number="24.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">24.4.4</span> Interpretation</h3>
+<p>The price is accuracy: rounding to <span class="math inline">\(\Lambda\)</span> adds up to <span class="math inline">\(\Lambda/2 \le \lambda\)</span> of error (since <span class="math inline">\(\Lambda\)</span> is the smallest power of 2 at or above <span class="math inline">\(\lambda\)</span>, it is below <span class="math inline">\(2\lambda\)</span>), and clamping biases answers near <span class="math inline">\(\pm B\)</span>. The extra terms in <span class="math inline">\(\varepsilon\)</span> are tiny for doubles. With <span class="math inline">\(\lambda = 1\)</span> and <span class="math inline">\(B = 10\)</span>, the first term exceeds <span class="math inline">\(1/\lambda\)</span> by <span class="math inline">\(12B\eta = 120\cdot2^{-53}\)</span> and the second is <span class="math inline">\(10\cdot2^{-49}\)</span>, so the excess is <span class="math inline">\(120\cdot2^{-53} + 10\cdot2^{-49} \approx 3.1\times10^{-14}\)</span>. The guarantee also assumes a correctly behaved logarithm and an ideal uniform <span class="math inline">\(U^*\)</span>, which a library has to supply.</p>
+</section>
+<section id="example-the-toy-snapped" class="level3" data-number="24.4.5">
+<h3 data-number="24.4.5" class="anchored" data-anchor-id="example-the-toy-snapped"><span class="header-section-number">24.4.5</span> Example: the toy, snapped</h3>
+<p>Snap the toy sampler to integers (<span class="math inline">\(\Lambda = 1\)</span> for <span class="math inline">\(b = 1\)</span>) and clamp to <span class="math inline">\([-10, 10]\)</span>. Both inputs now reach the same 21 outputs, the integers from <span class="math inline">\(-10\)</span> to 10, so <span class="math inline">\(\Pr[M(D) \in S] = 0\)</span> at every precision (<a href="#fig-discrete-float-support" class="quarto-xref">Figure&nbsp;<span>24.1</span></a>, right). The largest privacy loss over those outputs, the largest log-ratio of an output’s probabilities under the two inputs, is <span class="math inline">\(\max_y|L_{D,D'}(y)| = 1.0010\)</span> at <span class="math inline">\(p = 12\)</span> and 1.0002 at <span class="math inline">\(p = 14\)</span>, against <span class="math inline">\(\varepsilon = 1\)</span> for the exact mechanism. The excess shrinks with precision, as the <span class="math inline">\(\eta\)</span> terms predict.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="24.4.6">
+<h3 data-number="24.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">24.4.6</span> Check yourself</h3>
+<ul>
+<li>Why must the grid be at least as coarse as <span class="math inline">\(\lambda\)</span>? <em>(Finer grids keep bits whose pattern still depends on <span class="math inline">\(f(D)\)</span>. The proof needs each grid cell to collect a whole interval of noise values, wide enough that floating-point errors at its edges move only a tiny fraction of its probability.)</em></li>
+<li>Is snapping post-processing of the floating-point Laplace mechanism? <em>(It is post-processing, but post-processing of a mechanism that isn’t DP proves nothing. The proof compares the snapped output with snapped exact Laplace noise and bounds the difference.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-discrete-bernoulli-exp" class="level2" data-number="24.5">
+<h2 data-number="24.5" class="anchored" data-anchor-id="sec-discrete-bernoulli-exp"><span class="header-section-number">24.5</span> Exact <span class="math inline">\(\mathrm{Bernoulli}(e^{-\gamma})\)</span></h2>
+<section id="context-2" class="level3" data-number="24.5.1">
+<h3 data-number="24.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">24.5.1</span> Context</h3>
+<p>Both exact samplers below need a coin that comes up 1 with probability <span class="math inline">\(e^{-\gamma}\)</span> for a rational <span class="math inline">\(\gamma \ge 0\)</span>. The obvious code, <code>random() &lt; exp(-gamma)</code>, is inexact twice over: <code>exp</code> rounds, and <code>random()</code> has only 53 bits. Algorithm 1 of Canonne, Kamath and Steinke (2020), based on a method of von Neumann (1951), makes the coin from rational coins alone.</p>
+</section>
+<section id="statement-2" class="level3" data-number="24.5.2">
+<h3 data-number="24.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">24.5.2</span> Statement</h3>
+<p>The idea is to build <span class="math inline">\(e^{-\gamma}\)</span> from its power series <span class="math inline">\(e^{-\gamma} = 1 - \gamma + \frac{\gamma^2}{2!} - \frac{\gamma^3}{3!} + \cdots\)</span>, whose terms are probabilities you can produce with rational coins. Flip coins whose success probabilities shrink as <span class="math inline">\(\gamma, \gamma/2, \gamma/3, \dots\)</span> until one fails. The chance of surviving <span class="math inline">\(k\)</span> flips is then <span class="math inline">\(\gamma \cdot \frac\gamma2 \cdots \frac\gamma k = \gamma^k/k!\)</span>, the <span class="math inline">\(k\)</span>-th term of the series. The series alternates in sign, and the parity of the stopping time produces exactly that alternation.</p>
+<p>For <span class="math inline">\(0 \le \gamma \le 1\)</span>: draw <span class="math inline">\(A_k \sim \mathrm{Bernoulli}(\gamma/k)\)</span> for <span class="math inline">\(k = 1, 2, \dots\)</span>, and stop at the first <span class="math inline">\(A_K = 0\)</span>, so <span class="math inline">\(K\)</span> is the index of the first failure. Output 1 if <span class="math inline">\(K\)</span> is odd and 0 if <span class="math inline">\(K\)</span> is even. Then the survival probability, the output probability and the mean number of flips are <span id="eq-bern-exp"><span class="math display">\[\Pr[K &gt; k] = \frac{\gamma^k}{k!}, \qquad \Pr[K\ \text{odd}] = e^{-\gamma}, \qquad \mathbb E[K] = e^\gamma. \tag{24.7}\]</span></span> For <span class="math inline">\(\gamma &gt; 1\)</span> the first coin would need a probability above 1, so split <span class="math inline">\(\gamma\)</span> into its integer part <span class="math inline">\(\lfloor\gamma\rfloor\)</span> and a remainder below 1: draw <span class="math inline">\(\lfloor\gamma\rfloor\)</span> coins with probability <span class="math inline">\(e^{-1}\)</span>, stopping at the first 0, and then one coin with probability <span class="math inline">\(e^{-(\gamma - \lfloor\gamma\rfloor)}\)</span>. Output 1 only if all of them are 1.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="24.5.3">
+<h3 data-number="24.5.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">24.5.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>The survival probabilities.</strong> <span class="math inline">\(K &gt; k\)</span> means the first <span class="math inline">\(k\)</span> coins all came up 1. They are independent with probabilities <span class="math inline">\(\gamma/1, \gamma/2, \dots, \gamma/k\)</span>, so <span class="math inline">\(\Pr[K &gt; k]\)</span> is their product, <span class="math inline">\(\gamma^k/k!\)</span>. For <span class="math inline">\(\gamma = n/d\)</span>, each <span class="math inline">\(\gamma/j = n/(dj)\)</span> is a ratio of integers, at most 1 since <span class="math inline">\(\gamma \le 1\)</span>, so each coin is exact by Fact 1.</li>
+<li><strong>The point probabilities.</strong> <span class="math inline">\(K = k\)</span> means the coins survived <span class="math inline">\(k - 1\)</span> flips but not <span class="math inline">\(k\)</span>, so <span class="math inline">\(\Pr[K = k] = \Pr[K &gt; k - 1] - \Pr[K &gt; k] = \frac{\gamma^{k-1}}{(k-1)!} - \frac{\gamma^k}{k!}\)</span>.</li>
+<li><strong>Add over odd <span class="math inline">\(k\)</span>.</strong> With <span class="math inline">\(k = 1, 3, 5, \dots\)</span> the terms are <span class="math inline">\((1 - \gamma) + (\frac{\gamma^2}{2!} - \frac{\gamma^3}{3!}) + (\frac{\gamma^4}{4!} - \frac{\gamma^5}{5!}) + \cdots\)</span>. Every power <span class="math inline">\(\gamma^j\)</span> appears exactly once: with a plus sign when <span class="math inline">\(j = k - 1\)</span> is even and a minus sign when <span class="math inline">\(j = k\)</span> is odd. So the sum is the series <span class="math inline">\(\sum_{j \ge 0}(-\gamma)^j/j! = e^{-\gamma}\)</span>.</li>
+<li><strong>The mean.</strong> A variable <span class="math inline">\(K\)</span> on <span class="math inline">\(\{1, 2, \dots\}\)</span> can be written as a count, <span class="math inline">\(K = \sum_{k \ge 0}\mathbf 1[K &gt; k]\)</span>, since exactly <span class="math inline">\(K\)</span> of the indicators <span class="math inline">\(\mathbf 1[K &gt; 0], \mathbf 1[K &gt; 1], \dots\)</span> are 1. Taking expectations, <span class="math inline">\(\mathbb E[K] = \sum_{k \ge 0}\Pr[K &gt; k] = \sum_k\gamma^k/k! = e^\gamma\)</span>. Each round uses one uniform integer, so a coin costs <span class="math inline">\(e^\gamma \le e\)</span> uniform draws on average.</li>
+<li><strong>Large <span class="math inline">\(\gamma\)</span>.</strong> <span class="math inline">\(e^{-\gamma} = (e^{-1})^{\lfloor\gamma\rfloor}\,e^{-(\gamma - \lfloor\gamma\rfloor)}\)</span>, and a product of probabilities is the probability that independent coins all come up 1. Each coin has an exponent of at most 1, so steps 1–3 cover it. Stopping at the first 0 doesn’t change the output, which is 0 as soon as one coin is 0.</li>
+</ol>
+<p><strong>Concretely, for <span class="math inline">\(\gamma = 0.7\)</span></strong> (<a href="#tbl-discrete-bern-k" class="quarto-xref">Table&nbsp;<span>24.3</span></a>). The odd rows add up to <span class="math inline">\(0.3000 + 0.1878 + 0.0086 + \cdots = 0.4966 = e^{-0.7}\)</span>.</p>
+<div id="tbl-discrete-bern-k" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-discrete-bern-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24.3: Algorithm 1 for <span class="math inline">\(\gamma = 0.7\)</span>, outcome by outcome. The output is the parity of the index of the first 0.
+</figcaption>
+<div aria-describedby="tbl-discrete-bern-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(K\)</span></th>
+<th>Coins seen</th>
+<th><span class="math inline">\(\Pr[K = k]\)</span></th>
+<th>Output</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><span class="math inline">\(A_1 = 0\)</span></td>
+<td><span class="math inline">\(1 - 0.7 = 0.3000\)</span></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><span class="math inline">\(A_1 = 1\)</span>, <span class="math inline">\(A_2 = 0\)</span></td>
+<td><span class="math inline">\(0.7 - 0.7^2/2 = 0.4550\)</span></td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><span class="math inline">\(A_1 = A_2 = 1\)</span>, <span class="math inline">\(A_3 = 0\)</span></td>
+<td><span class="math inline">\(0.245 - 0.0572 = 0.1878\)</span></td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>three 1s, then 0</td>
+<td><span class="math inline">\(0.0472\)</span></td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>four 1s, then 0</td>
+<td><span class="math inline">\(0.0086\)</span></td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>In row 3, <span class="math inline">\(0.245 = 0.7^2/2!\)</span> is the chance of surviving two flips and <span class="math inline">\(0.0572 = 0.7^3/3!\)</span> the chance of surviving three; the difference is the chance of stopping at exactly the third.</p>
+<div id="fig-discrete-bernoulli-exp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-discrete-bernoulli-exp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/discrete_bernoulli_exp.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discrete-bernoulli-exp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24.2: Left: the distribution of <span class="math inline">\(K\)</span> for <span class="math inline">\(\gamma = 0.7\)</span>, exact and from 5,000 runs, with odd <span class="math inline">\(K\)</span> (output 1) and even <span class="math inline">\(K\)</span> (output 0) coloured. Right: the frequency of 1s from Algorithm 1 against <span class="math inline">\(e^{-\gamma}\)</span>, with the expected number of uniform draws per coin on the right axis.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="interpretation-2" class="level3" data-number="24.5.4">
+<h3 data-number="24.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">24.5.4</span> Interpretation</h3>
+<p>The coin is exact: no step rounds, and the only randomness is uniform integers. The cost is small and bounded: at most <span class="math inline">\(e\)</span> draws for <span class="math inline">\(\gamma \le 1\)</span>, and below <span class="math inline">\(\frac{e}{1 - e^{-1}} + 1 \approx 5.3\)</span> for any <span class="math inline">\(\gamma\)</span> (<a href="../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.html#sec-sol-discrete-1">Exercise 1</a>). The cost curve in <a href="#fig-discrete-bernoulli-exp" class="quarto-xref">Figure&nbsp;<span>24.2</span></a> jumps at each integer. At <span class="math inline">\(\gamma = 1\)</span> the algorithm runs one full <span class="math inline">\(e^{-1}\)</span> coin and then a coin for the fractional part 0, which costs one extra draw when the first coin comes up 1 (probability <span class="math inline">\(e^{-1}\)</span>), so the cost goes from <span class="math inline">\(e = 2.7183\)</span> just below 1 to <span class="math inline">\(e + e^{-1} = 3.0862\)</span> at 1. Splitting <span class="math inline">\(\gamma\)</span> differently would smooth this out; it doesn’t matter for exactness.</p>
+</section>
+<section id="example-one-coin-per-proposal" class="level3" data-number="24.5.5">
+<h3 data-number="24.5.5" class="anchored" data-anchor-id="example-one-coin-per-proposal"><span class="header-section-number">24.5.5</span> Example: one coin per proposal</h3>
+<p>Algorithm 3 below accepts a proposal <span class="math inline">\(y\)</span> with probability <span class="math inline">\(e^{-\gamma}\)</span> for a rational <span class="math inline">\(\gamma = (|y| - \sigma^2/t)^2/(2\sigma^2)\)</span>, where <span class="math inline">\(\sigma^2\)</span> is the target variance and <span class="math inline">\(t\)</span> an integer scale. With <span class="math inline">\(\sigma^2 = 4\)</span>, <span class="math inline">\(t = 3\)</span> and <span class="math inline">\(y = 4\)</span>, that is <span class="math inline">\(\gamma = (4 - 4/3)^2/8 = (8/3)^2/8 = 8/9\)</span>, so the coin is 1 with probability <span class="math inline">\(e^{-8/9} = 0.4111\)</span> and costs <span class="math inline">\(e^{8/9} \approx 2.43\)</span> draws on average. Everything stays a fraction: <span class="math inline">\(\gamma\)</span> is computed with <code>fractions.Fraction</code>, and each <span class="math inline">\(\gamma/k\)</span> is a ratio of integers.</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="24.5.6">
+<h3 data-number="24.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">24.5.6</span> Check yourself</h3>
+<ul>
+<li>Why does the algorithm use <span class="math inline">\(\gamma/k\)</span> rather than a fixed probability <span class="math inline">\(\gamma\)</span> at every step? <em>(The decreasing probabilities make <span class="math inline">\(\Pr[K &gt; k] = \gamma^k/k!\)</span>, the terms of the exponential series. A fixed <span class="math inline">\(\gamma\)</span> would give <span class="math inline">\(\gamma^k\)</span>, a geometric series, and the alternating sum would be <span class="math inline">\(1/(1 + \gamma)\)</span>.)</em></li>
+<li>What does the algorithm output for <span class="math inline">\(\gamma = 0\)</span>? <em>(The first coin is <span class="math inline">\(\mathrm{Bernoulli}(0)\)</span>, so <span class="math inline">\(K = 1\)</span>, which is odd, and the output is 1 = <span class="math inline">\(e^0\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-discrete-laplace" class="level2" data-number="24.6">
+<h2 data-number="24.6" class="anchored" data-anchor-id="sec-discrete-laplace"><span class="header-section-number">24.6</span> The discrete Laplace mechanism</h2>
+<section id="context-3" class="level3" data-number="24.6.1">
+<h3 data-number="24.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">24.6.1</span> Context</h3>
+<p>Most queries in DP are counts or histograms: integer-valued, with sensitivity 1. For them the natural noise is integer-valued too. Then the output is an integer, there are no low-order bits to leak, and the noise can be sampled exactly. The discrete Laplace distribution is the integer analogue of the Laplace, and adding it is the <strong>geometric mechanism</strong> of Ghosh, Roughgarden and Sundararajan (2009).</p>
+</section>
+<section id="statement-3" class="level3" data-number="24.6.2">
+<h3 data-number="24.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">24.6.2</span> Statement</h3>
+<p>Take the Laplace density <span class="math inline">\(e^{-|z|/b}\)</span>, keep only its values at the integers, and divide by their sum so they add up to 1. Each step away from 0 multiplies the probability by the same factor <span class="math inline">\(r = e^{-1/b}\)</span>, just as the continuous density drops by <span class="math inline">\(e^{-1/b}\)</span> per unit. The <strong>discrete Laplace</strong> distribution with scale <span class="math inline">\(b &gt; 0\)</span>, written <span class="math inline">\(\mathrm{Lap}_{\mathbb Z}(b)\)</span>, has PMF <span id="eq-dlap-pmf"><span class="math display">\[\Pr[Z = z] = \frac{1 - r}{1 + r}\,r^{|z|}, \qquad z \in \mathbb Z, \qquad r = e^{-1/b}. \tag{24.8}\]</span></span> Its variance is <span class="math inline">\(2r/(1 - r)^2\)</span>, slightly below the <span class="math inline">\(2b^2\)</span> of <span class="math inline">\(\mathrm{Lap}(b)\)</span>. Because shifting the input by one unit changes each output’s probability by at most the factor <span class="math inline">\(r^{-1} = e^{1/b}\)</span>, as for the continuous Laplace, the privacy guarantee is the same. For an integer-valued <span class="math inline">\(f\)</span> with sensitivity <span class="math inline">\(\Delta_1 f\)</span>, the mechanism <span class="math inline">\(M(D) = f(D) + Z\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP with <span id="eq-dlap-eps"><span class="math display">\[\varepsilon = \frac{\Delta_1 f}{b}. \tag{24.9}\]</span></span> For rational <span class="math inline">\(b = t/s\)</span>, Algorithm 2 of Canonne, Kamath and Steinke (2020) samples <span class="math inline">\(\mathrm{Lap}_{\mathbb Z}(b)\)</span> exactly.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="24.6.3">
+<h3 data-number="24.6.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">24.6.3</span> Derivation</h3>
+<p><strong>The PMF and variance.</strong> Both come from sums of geometric series.</p>
+<ol type="1">
+<li><strong>Normalize.</strong> The weights <span class="math inline">\(r^{|z|}\)</span> are 1 at <span class="math inline">\(z = 0\)</span> and appear twice, at <span class="math inline">\(\pm z\)</span>, for each <span class="math inline">\(z \ge 1\)</span>. So <span class="math inline">\(\sum_{z \in \mathbb Z}r^{|z|} = 1 + 2\sum_{z \ge 1}r^z = 1 + \frac{2r}{1 - r} = \frac{1 + r}{1 - r}\)</span>, and dividing by it gives the constant in <a href="#eq-dlap-pmf" class="quarto-xref">Equation&nbsp;<span>24.8</span></a>.</li>
+<li><strong>Variance.</strong> The PMF gives <span class="math inline">\(z\)</span> and <span class="math inline">\(-z\)</span> the same probability, so their contributions <span class="math inline">\(z\Pr[Z = z]\)</span> and <span class="math inline">\(-z\Pr[Z = -z]\)</span> cancel and the mean is 0. The variance is then <span class="math inline">\(\mathbb E Z^2\)</span>. Differentiating <span class="math inline">\(\sum_{z \ge 0}r^z = \frac1{1 - r}\)</span> and multiplying by <span class="math inline">\(r\)</span> gives <span class="math inline">\(\sum_{z \ge 1}zr^z = \frac{r}{(1 - r)^2}\)</span>; doing it once more gives <span class="math inline">\(\sum_{z \ge 1}z^2r^z = \frac{r(1 + r)}{(1 - r)^3}\)</span>. Counting <span class="math inline">\(\pm z\)</span> twice, <span class="math inline">\(\mathbb E Z^2 = \frac{1 - r}{1 + r}\cdot2\cdot\frac{r(1 + r)}{(1 - r)^3} = \frac{2r}{(1 - r)^2}\)</span>.</li>
+</ol>
+<p><strong>Privacy.</strong> The plan is to compute the privacy loss of each output and bound it by <span class="math inline">\(\varepsilon\)</span>, which is pure <span class="math inline">\(\varepsilon\)</span>-DP.</p>
+<ol type="1">
+<li><strong>The privacy loss.</strong> For neighbours with <span class="math inline">\(f(D) = a\)</span> and <span class="math inline">\(f(D') = a'\)</span>, an output <span class="math inline">\(y\)</span> requires noise <span class="math inline">\(y - a\)</span> under <span class="math inline">\(D\)</span> and <span class="math inline">\(y - a'\)</span> under <span class="math inline">\(D'\)</span>. The normalizing constant is the same for both, so it cancels in the ratio: <span id="eq-auto-07discretemechanisms-6"><span class="math display">\[L_{D,D'}(y) = \ln\frac{r^{|y - a|}}{r^{|y - a'|}} = \frac{|y - a'| - |y - a|}{b}, \tag{24.10}\]</span></span> using <span class="math inline">\(\ln r = -1/b\)</span>.</li>
+<li><strong>Bound it.</strong> The triangle inequality says that two numbers’ distances to <span class="math inline">\(y\)</span> differ by at most their distance to each other: <span class="math inline">\(|y - a'| - |y - a| \le |a - a'| \le \Delta_1 f\)</span>. So <span class="math inline">\(|L_{D,D'}(y)| \le \Delta_1 f/b\)</span> for every integer <span class="math inline">\(y\)</span>, which is pure DP with <a href="#eq-dlap-eps" class="quarto-xref">Equation&nbsp;<span>24.9</span></a>. The bound is reached for every <span class="math inline">\(y \ge \max(a, a')\)</span>, so it is tight.</li>
+<li><strong>Vectors.</strong> For <span class="math inline">\(f \in \mathbb Z^d\)</span> with independent noise per coordinate, the probability of an output vector is a product over coordinates, so its log, the privacy loss, is a sum of per-coordinate losses. Each is at most <span class="math inline">\(|a_i - a'_i|/b\)</span>, and <span class="math inline">\(\sum_i|a_i - a'_i| \le \Delta_1 f\)</span> gives the same <span class="math inline">\(\varepsilon\)</span> with the <span class="math inline">\(\ell_1\)</span> sensitivity.</li>
+</ol>
+<p>Step 1 is where integers matter. The constant cancels because <span class="math inline">\(\sum_z r^{|z - a|}\)</span> is the same for every <em>integer</em> <span class="math inline">\(a\)</span>: shifting by an integer only relabels the terms. Shifting by a non-integer would move the noise off the lattice, and the mechanism would have different supports for different inputs: the floating-point failure again.</p>
+<p><strong>The exact sampler (Algorithm 2).</strong> The plan is to build a one-sided geometric variable with ratio <span class="math inline">\(e^{-1/b}\)</span> out of exact pieces, then attach a random sign. A geometric with ratio <span class="math inline">\(e^{-1/t}\)</span> is assembled from a remainder <span class="math inline">\(U\)</span> below <span class="math inline">\(t\)</span> and a quotient <span class="math inline">\(V\)</span>, the way an integer <span class="math inline">\(x\)</span> is <span class="math inline">\(u + tv\)</span>; dividing by <span class="math inline">\(s\)</span> then turns ratio <span class="math inline">\(e^{-1/t}\)</span> into <span class="math inline">\(e^{-s/t} = e^{-1/b}\)</span>. Input integers <span class="math inline">\(s, t \ge 1\)</span>, so <span class="math inline">\(b = t/s\)</span>. Repeat until a value is returned:</p>
+<ol type="1">
+<li>Draw <span class="math inline">\(U\)</span> uniform on <span class="math inline">\(\{0, \dots, t - 1\}\)</span> and accept it with probability <span class="math inline">\(e^{-U/t}\)</span> (Algorithm 1); on rejection, start over.</li>
+<li>Count the successes <span class="math inline">\(V\)</span> of independent <span class="math inline">\(e^{-1}\)</span> coins before the first failure (Algorithm 1 with <span class="math inline">\(\gamma = 1\)</span>).</li>
+<li>Set <span class="math inline">\(X = U + tV\)</span> and <span class="math inline">\(Y = \lfloor X/s\rfloor\)</span>.</li>
+<li>Draw a fair sign bit <span class="math inline">\(B\)</span>. If <span class="math inline">\(B = 1\)</span> and <span class="math inline">\(Y = 0\)</span>, start over. Otherwise return <span class="math inline">\((1 - 2B)Y\)</span>.</li>
+</ol>
+<p>Five steps show that the output is exactly <span class="math inline">\(\mathrm{Lap}_{\mathbb Z}(b)\)</span>, following the algorithm’s own order.</p>
+<ol type="1">
+<li><strong><span class="math inline">\(U\)</span> given acceptance</strong> has <span class="math inline">\(\Pr[U = u] \propto e^{-u/t}\)</span> on <span class="math inline">\(\{0, \dots, t - 1\}\)</span>, by Fact 2 with a uniform proposal and acceptance <span class="math inline">\(e^{-u/t}\)</span>.</li>
+<li><strong><span class="math inline">\(V\)</span> is geometric</strong> with <span class="math inline">\(\Pr[V = v] = (1 - e^{-1})e^{-v}\)</span>, by Fact 3 with <span class="math inline">\(r = e^{-1}\)</span>.</li>
+<li><strong><span class="math inline">\(X = U + tV\)</span> is geometric with ratio <span class="math inline">\(e^{-1/t}\)</span>.</strong> Each <span class="math inline">\(x \ge 0\)</span> is <span class="math inline">\(u + tv\)</span> for exactly one pair (<span class="math inline">\(u = x \bmod t\)</span>, <span class="math inline">\(v = \lfloor x/t\rfloor\)</span>), and the independent weights multiply to <span class="math inline">\(e^{-u/t}e^{-v} = e^{-(u + tv)/t} = e^{-x/t}\)</span>. So <span class="math inline">\(\Pr[X = x] \propto e^{-x/t}\)</span>.</li>
+<li><strong><span class="math inline">\(Y = \lfloor X/s\rfloor\)</span> is geometric with ratio <span class="math inline">\(e^{-s/t} = e^{-1/b}\)</span>.</strong> <span class="math inline">\(Y = y\)</span> collects <span class="math inline">\(x = sy, \dots, sy + s - 1\)</span>, with total weight <span class="math inline">\(e^{-sy/t}(1 + e^{-1/t} + \dots + e^{-(s-1)/t})\)</span>. The bracket does not depend on <span class="math inline">\(y\)</span>, so the weight is <span class="math inline">\(\propto e^{-sy/t} = r^y\)</span>.</li>
+<li><strong>The sign.</strong> <span class="math inline">\(\pm Y\)</span> with a fair sign gives <span class="math inline">\(\pm y\)</span> with probability <span class="math inline">\(\frac12\Pr[Y = y]\)</span> each, but 0 would get both halves, since <span class="math inline">\(+0\)</span> and <span class="math inline">\(-0\)</span> are the same output. Rejecting <span class="math inline">\((B = 1, Y = 0)\)</span> leaves <span class="math inline">\(\frac12\Pr[Y = y]\)</span> for every <span class="math inline">\(z = \pm y\)</span>, including 0. After renormalizing (Fact 2), <span class="math inline">\(\Pr[Z = z] \propto r^{|z|}\)</span>.</li>
+</ol>
+<p><strong>Concretely, for <span class="math inline">\(t = 3\)</span> and <span class="math inline">\(s = 2\)</span></strong> (<span class="math inline">\(b = 1.5\)</span>). <a href="#tbl-discrete-dlap-walk" class="quarto-xref">Table&nbsp;<span>24.4</span></a> follows steps 3 and 4.</p>
+<div id="tbl-discrete-dlap-walk" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-discrete-dlap-walk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24.4: Algorithm 2 with <span class="math inline">\(t = 3\)</span>, <span class="math inline">\(s = 2\)</span>. Each <span class="math inline">\(x\)</span> is one pair <span class="math inline">\((u, v)\)</span>; pairs of consecutive <span class="math inline">\(x\)</span> merge into one <span class="math inline">\(y\)</span>.
+</figcaption>
+<div aria-describedby="tbl-discrete-dlap-walk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(x\)</span></th>
+<th><span class="math inline">\(u = x \bmod 3\)</span></th>
+<th><span class="math inline">\(v = \lfloor x/3\rfloor\)</span></th>
+<th><span class="math inline">\(\Pr[X = x] = (1 - e^{-1/3})e^{-x/3}\)</span></th>
+<th><span class="math inline">\(y = \lfloor x/2\rfloor\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.2835</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1</td>
+<td>0</td>
+<td>0.2031</td>
+<td>0</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>2</td>
+<td>0</td>
+<td>0.1455</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0</td>
+<td>1</td>
+<td>0.1043</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>1</td>
+<td>1</td>
+<td>0.0747</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>2</td>
+<td>1</td>
+<td>0.0535</td>
+<td>2</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><span class="math inline">\(\Pr[Y = 0] = 0.2835 + 0.2031 = 0.4866\)</span> and <span class="math inline">\(\Pr[Y = 1] = 0.1455 + 0.1043 = 0.2498\)</span>. Their ratio is <span class="math inline">\(0.5134 = e^{-2/3}\)</span>, a geometric with ratio <span class="math inline">\(e^{-s/t}\)</span>, as step 4 says.</p>
+<div id="fig-discrete-laplace" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-discrete-laplace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/discrete_laplace.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discrete-laplace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24.3: Left: the PMF of <span class="math inline">\(\mathrm{Lap}_{\mathbb Z}(1.5)\)</span> on a log scale, exact and from 10,000 draws of Algorithm 2, with the <span class="math inline">\(\mathrm{Lap}(1.5)\)</span> density for comparison. Right: the privacy loss between counts 0 and 1, a step function bounded by <span class="math inline">\(\varepsilon = s/t = 2/3\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="interpretation-3" class="level3" data-number="24.6.4">
+<h3 data-number="24.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">24.6.4</span> Interpretation</h3>
+<p>The discrete Laplace gives the same guarantee with less noise. It has the same <span class="math inline">\(\varepsilon\)</span> as the continuous one at the same scale and a slightly smaller variance: 1.8413 against 2 at <span class="math inline">\(b = 1\)</span>. <a href="../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.html#sec-sol-discrete-3">Exercise 3</a> shows the gap tends to <span class="math inline">\(1/6\)</span> as <span class="math inline">\(b\)</span> grows. Rounding <span class="math inline">\(f(D) + \mathrm{Lap}(b)\)</span> to the nearest integer would also be <span class="math inline">\(\varepsilon\)</span>-DP in exact arithmetic, as post-processing, but it is not the same distribution, and it needs a floating-point sampler.</p>
+<p>It is also the best possible mechanism for one count. Ghosh, Roughgarden and Sundararajan (2009) show that for a single count, the geometric mechanism is universally utility-maximizing: every user, whatever their loss function and prior, can post-process its output to do as well as with any other <span class="math inline">\(\varepsilon\)</span>-DP mechanism.</p>
+<p>The cost follows from Fact 2. A pass of Algorithm 2 survives step 1 with probability <span class="math inline">\(A_U = \frac1t\sum_{u &lt; t}e^{-u/t}\)</span>, the average acceptance over the <span class="math inline">\(t\)</span> uniform values. It then survives step 4 unless <span class="math inline">\(B = 1\)</span> and <span class="math inline">\(Y = 0\)</span>; since <span class="math inline">\(Y\)</span> is geometric with ratio <span class="math inline">\(e^{-s/t}\)</span>, <span class="math inline">\(\Pr[Y = 0] = 1 - e^{-s/t}\)</span>, so that happens with probability <span class="math inline">\(\frac12(1 - e^{-s/t})\)</span>. The mean number of passes is one over the product of the two survival probabilities, <span class="math inline">\(1/\big(A_U(1 - \frac12(1 - e^{-s/t}))\big)\)</span>. That is 1.462 passes at <span class="math inline">\(b = 1\)</span>, and about 10 to 12 uniform draws per sample over the scales in <a href="#tbl-discrete-code" class="quarto-xref">Table&nbsp;<span>24.7</span></a>.</p>
+</section>
+<section id="example-a-count-with-varepsilon-1" class="level3" data-number="24.6.5">
+<h3 data-number="24.6.5" class="anchored" data-anchor-id="example-a-count-with-varepsilon-1"><span class="header-section-number">24.6.5</span> Example: a count with <span class="math inline">\(\varepsilon = 1\)</span></h3>
+<p>Release a count with sensitivity 1 at <span class="math inline">\(\varepsilon = 1\)</span>, so <span class="math inline">\(b = \Delta_1 f/\varepsilon = 1\)</span> and <span class="math inline">\(r = e^{-1} = 0.3679\)</span>. The exact count is released when the noise is 0, which happens with probability <span class="math inline">\(\Pr[Z = 0] = \frac{1 - r}{1 + r} = \frac{0.6321}{1.3679} = 0.4621\)</span>. The noise has variance <span class="math inline">\(\frac{2r}{(1 - r)^2} = 1.8413\)</span>, so its standard deviation is <span class="math inline">\(\sqrt{1.8413} = 1.357\)</span>. The output is an integer, sampled exactly, so the analysis in this section is the analysis of the code.</p>
+</section>
+<section id="check-yourself-3" class="level3" data-number="24.6.6">
+<h3 data-number="24.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">24.6.6</span> Check yourself</h3>
+<ul>
+<li>Why is the bound in step 2 of the privacy proof reached for <span class="math inline">\(y \ge \max(a, a')\)</span>? <em>(There both <span class="math inline">\(|y - a|\)</span> and <span class="math inline">\(|y - a'|\)</span> are <span class="math inline">\(y\)</span> minus the input, so their difference is exactly <span class="math inline">\(|a - a'|\)</span>.)</em></li>
+<li>In Algorithm 2, why can’t you skip the rejection of <span class="math inline">\((B = 1, Y = 0)\)</span>? <em>(Then <span class="math inline">\(\Pr[Z = 0] = \Pr[Y = 0]\)</span> while <span class="math inline">\(\Pr[Z = \pm y] = \frac12\Pr[Y = y]\)</span>: zero would get double weight, and the PMF would not be <a href="#eq-dlap-pmf" class="quarto-xref">Equation&nbsp;<span>24.8</span></a>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-discrete-gaussian" class="level2" data-number="24.7">
+<h2 data-number="24.7" class="anchored" data-anchor-id="sec-discrete-gaussian"><span class="header-section-number">24.7</span> The discrete Gaussian mechanism</h2>
+<section id="context-4" class="level3" data-number="24.7.1">
+<h3 data-number="24.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">24.7.1</span> Context</h3>
+<p>The Gaussian mechanism is the workhorse of private machine learning, because its noise grows with the <span class="math inline">\(\ell_2\)</span> sensitivity rather than the <span class="math inline">\(\ell_1\)</span> sensitivity, and because sums of Gaussians stay Gaussian. Canonne, Kamath and Steinke (2020) define its integer analogue and show that it keeps the privacy of the continuous Gaussian. The US Census Bureau used it for the 2020 Census redistricting data (Abowd et al., 2022), and it is the noise of choice when clients add noise before secure aggregation, which works with integers modulo a fixed number (Kairouz, Liu &amp; Steinke, 2021).</p>
+</section>
+<section id="statement-4" class="level3" data-number="24.7.2">
+<h3 data-number="24.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">24.7.2</span> Statement</h3>
+<p>As with the discrete Laplace, take the Gaussian bell curve, keep its values at the integers and normalize. The <strong>discrete Gaussian</strong> with parameter <span class="math inline">\(\sigma &gt; 0\)</span> and integer location <span class="math inline">\(\mu\)</span>, written <span class="math inline">\(\mathcal N_{\mathbb Z}(\mu, \sigma^2)\)</span>, has PMF <span id="eq-auto-07discretemechanisms-7"><span class="math display">\[\Pr[X = x] = \frac{e^{-(x - \mu)^2/(2\sigma^2)}}{\sum_{y \in \mathbb Z}e^{-y^2/(2\sigma^2)}}, \qquad x \in \mathbb Z. \tag{24.11}\]</span></span> The parameter <span class="math inline">\(\sigma^2\)</span> is the variance of the continuous bell curve, not quite the variance of <span class="math inline">\(X\)</span>, as the last claim below shows. For an integer-valued <span class="math inline">\(f\)</span>, consider <span class="math inline">\(M(D) = f(D) + X\)</span> with <span class="math inline">\(X \sim \mathcal N_{\mathbb Z}(0, \sigma^2)\)</span>, and neighbours with <span class="math inline">\(f(D) - f(D') = \Delta\)</span>. Four claims describe how it compares with the continuous Gaussian mechanism.</p>
+<p>First, <strong>the privacy loss is the continuous Gaussian’s</strong>, evaluated at integers. The reason is that the normalizer is the same for every integer location, so the log-ratio of two PMFs is the log-ratio of the two bell curves: <span id="eq-auto-07discretemechanisms-8"><span class="math display">\[L_{D,D'}(y) = \frac{(y - f(D'))^2 - (y - f(D))^2}{2\sigma^2}, \qquad y \in \mathbb Z. \tag{24.12}\]</span></span></p>
+<p>Second, the smallest <span class="math inline">\(\delta\)</span> at each <span class="math inline">\(\varepsilon\)</span> has the same formula as for the continuous Gaussian. That smallest <span class="math inline">\(\delta\)</span> is the probability mass by which <span class="math inline">\(M(D)\)</span> exceeds <span class="math inline">\(e^\varepsilon\)</span> times <span class="math inline">\(M(D')\)</span>, summed over outputs, and since the privacy loss is linear in <span class="math inline">\(y\)</span> the outputs that contribute form a tail. The <strong>exact <span class="math inline">\(\delta(\varepsilon)\)</span></strong> (Canonne, Kamath &amp; Steinke 2020, Theorem 7) is <span id="eq-dgauss-delta"><span class="math display">\[\delta(\varepsilon) = \Pr\Big[X &gt; \frac{\varepsilon\sigma^2}{\Delta} - \frac\Delta2\Big] - e^\varepsilon\Pr\Big[X &gt; \frac{\varepsilon\sigma^2}{\Delta} + \frac\Delta2\Big], \qquad X \sim \mathcal N_{\mathbb Z}(0, \sigma^2), \tag{24.13}\]</span></span> the same expression as the continuous Gaussian’s analytic curve with <span class="math inline">\(X \sim \mathcal N(0, \sigma^2)\)</span>, only with the tails of the discrete distribution in place of the continuous ones.</p>
+<p>Third, the discrete Gaussian is never worse than the continuous one in Rényi divergence. The <strong>Rényi divergence</strong> of order <span class="math inline">\(\alpha &gt; 1\)</span>, <span class="math inline">\(D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\sum_xp(x)^\alpha q(x)^{1 - \alpha}\)</span>, is a way of averaging the privacy loss that weights large losses more as <span class="math inline">\(\alpha\)</span> grows; for continuous Gaussians with means <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\nu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> it equals <span class="math inline">\(\alpha(\mu - \nu)^2/(2\sigma^2)\)</span>. For every <span class="math inline">\(\alpha &gt; 1\)</span>, <span id="eq-dgauss-renyi"><span class="math display">\[D_\alpha\big(\mathcal N_{\mathbb Z}(\mu, \sigma^2)\,\|\,\mathcal N_{\mathbb Z}(\nu, \sigma^2)\big) \le \frac{\alpha(\mu - \nu)^2}{2\sigma^2}, \tag{24.14}\]</span></span> with equality for integer <span class="math inline">\(\alpha\)</span>.</p>
+<p>Fourth, <strong>the variance is below <span class="math inline">\(\sigma^2\)</span></strong>. Restricting the bell curve to integers pulls a little mass towards 0, by an amount that the Poisson summation lemma in the derivation computes exactly: <span id="eq-dgauss-var"><span class="math display">\[\operatorname{Var}X = \sigma^2 - \frac{\sum_{k \ne 0}4\pi^2\sigma^4k^2e^{-2\pi^2\sigma^2k^2}}{1 + \sum_{k \ne 0}e^{-2\pi^2\sigma^2k^2}} &lt; \sigma^2. \tag{24.15}\]</span></span></p>
+</section>
+<section id="derivation-3" class="level3" data-number="24.7.3">
+<h3 data-number="24.7.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">24.7.3</span> Derivation</h3>
+<p><strong>Privacy loss and <span class="math inline">\(\delta(\varepsilon)\)</span>.</strong> Take <span class="math inline">\(f(D) = 0\)</span> and <span class="math inline">\(f(D') = \Delta\)</span>; the general case shifts everything by an integer, which changes nothing.</p>
+<ol type="1">
+<li><strong>The normalizer cancels.</strong> Under <span class="math inline">\(D\)</span> the output <span class="math inline">\(y\)</span> has probability <span class="math inline">\(e^{-y^2/(2\sigma^2)}/Z\)</span>, and under <span class="math inline">\(D'\)</span> it has <span class="math inline">\(e^{-(y - \Delta)^2/(2\sigma^2)}/Z\)</span>, with the same <span class="math inline">\(Z = \sum_ye^{-y^2/(2\sigma^2)}\)</span>, because shifting the sum by the integer <span class="math inline">\(\Delta\)</span> only relabels its terms. So the ratio is the ratio of the two exponentials, and <span id="eq-auto-07discretemechanisms-9"><span class="math display">\[L_{D,D'}(y) = \frac{(y - \Delta)^2 - y^2}{2\sigma^2} = \frac{\Delta^2 - 2\Delta y}{2\sigma^2}, \tag{24.16}\]</span></span> the formula of the continuous Gaussian, now only at integers <span class="math inline">\(y\)</span>.</li>
+<li><strong><span class="math inline">\(\delta\)</span> as an excess.</strong> <span class="math inline">\((\varepsilon, \delta)\)</span>-DP asks <span class="math inline">\(\Pr[M(D) \in S] - e^\varepsilon\Pr[M(D') \in S] \le \delta\)</span> for every set <span class="math inline">\(S\)</span>. The left side is a sum of <span class="math inline">\(p(y) - e^\varepsilon q(y)\)</span> over <span class="math inline">\(y \in S\)</span>, where <span class="math inline">\(p\)</span> is the PMF under <span class="math inline">\(D\)</span> and <span class="math inline">\(q\)</span> under <span class="math inline">\(D'\)</span>, so it is largest when <span class="math inline">\(S\)</span> holds exactly the outputs with a positive term. The smallest valid <span class="math inline">\(\delta\)</span> is therefore <span class="math inline">\(\delta(\varepsilon) = \sum_y\big(p(y) - e^\varepsilon q(y)\big)_+\)</span>, where <span class="math inline">\((\cdot)_+\)</span> keeps positive values and replaces negative ones by 0. This is the hockey-stick divergence of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>. The summand is positive exactly when <span class="math inline">\(p(y)/q(y) &gt; e^\varepsilon\)</span>, that is when <span class="math inline">\(L_{D,D'}(y) &gt; \varepsilon\)</span>, which by step 1 means <span class="math inline">\(\Delta^2 - 2\Delta y &gt; 2\sigma^2\varepsilon\)</span>, or <span class="math inline">\(y &lt; \frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}\)</span>.</li>
+<li><strong>The first sum.</strong> <span class="math inline">\(\sum_{y &lt; \Delta/2 - \varepsilon\sigma^2/\Delta}p(y) = \Pr[X &lt; \frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}]\)</span>. The PMF of <span class="math inline">\(X\)</span> gives <span class="math inline">\(x\)</span> and <span class="math inline">\(-x\)</span> the same probability, so <span class="math inline">\(X\)</span> and <span class="math inline">\(-X\)</span> have the same distribution, and <span class="math inline">\(\Pr[X &lt; c] = \Pr[-X &lt; c] = \Pr[X &gt; -c]\)</span>. With <span class="math inline">\(c = \frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}\)</span> this is <span class="math inline">\(\Pr[X &gt; \frac{\varepsilon\sigma^2}{\Delta} - \frac\Delta2]\)</span>.</li>
+<li><strong>The second sum.</strong> Under <span class="math inline">\(D'\)</span> the output is <span class="math inline">\(X + \Delta\)</span>, so <span class="math inline">\(q(y) = p(y - \Delta)\)</span> and <span class="math inline">\(\sum_{y &lt; \Delta/2 - \varepsilon\sigma^2/\Delta}q(y) = \Pr[X + \Delta &lt; \frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}] = \Pr[X &lt; -\frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}] = \Pr[X &gt; \frac{\varepsilon\sigma^2}{\Delta} + \frac\Delta2]\)</span>, by the same symmetry. Subtracting <span class="math inline">\(e^\varepsilon\)</span> times step 4 from step 3 gives <a href="#eq-dgauss-delta" class="quarto-xref">Equation&nbsp;<span>24.13</span></a>.</li>
+</ol>
+<p><strong>A lemma from Poisson summation.</strong> The remaining two claims rest on one question: if you sum a Gaussian bump over the integers, how does the sum depend on where the bump is centred? The answer is that it is largest when the centre is an integer. The tool is the Poisson summation formula, which turns a sum of a function over the integers into a sum of its Fourier transform over the integers: <span class="math inline">\(\sum_{x \in \mathbb Z}g(x) = \sum_{k \in \mathbb Z}\hat g(k)\)</span> for a smooth, fast-decaying <span class="math inline">\(g\)</span> with Fourier transform <span class="math inline">\(\hat g(k) = \int g(x)e^{-2\pi ikx}dx\)</span> (Stein &amp; Shakarchi 2003, ch.&nbsp;5). The Fourier transform of a Gaussian is again a Gaussian, and shifting <span class="math inline">\(g\)</span> by <span class="math inline">\(c\)</span> multiplies the transform by the phase <span class="math inline">\(e^{-2\pi ikc}\)</span>: for <span class="math inline">\(g(x) = e^{-(x - c)^2/(2\sigma^2)}\)</span>, <span class="math inline">\(\hat g(k) = \sqrt{2\pi}\sigma e^{-2\pi^2\sigma^2k^2}e^{-2\pi ikc}\)</span>. Pairing <span class="math inline">\(k\)</span> with <span class="math inline">\(-k\)</span> adds <span class="math inline">\(e^{-2\pi ikc} + e^{2\pi ikc} = 2\cos(2\pi kc)\)</span>, which gives <span id="eq-poisson-theta"><span class="math display">\[\sum_{x \in \mathbb Z}e^{-(x - c)^2/(2\sigma^2)} = \sqrt{2\pi}\,\sigma\sum_{k \in \mathbb Z}e^{-2\pi^2\sigma^2k^2}\cos(2\pi kc). \tag{24.17}\]</span></span> Every coefficient is positive and <span class="math inline">\(\cos \le 1\)</span>, with <span class="math inline">\(\cos(2\pi kc) = 1\)</span> for all <span class="math inline">\(k\)</span> exactly when <span class="math inline">\(c\)</span> is an integer. So the left side is largest at integer <span class="math inline">\(c\)</span>: <strong>shifting the lattice off the integers can only lower the sum.</strong> At <span class="math inline">\(\sigma = 0.5\)</span> the script finds 1.271342 at <span class="math inline">\(c = 0\)</span> and 1.235287 at <span class="math inline">\(c = 0.5\)</span>. At <span class="math inline">\(\sigma = 1\)</span> both are 2.506628, which is <span class="math inline">\(\sqrt{2\pi}\)</span> to six decimals: the <span class="math inline">\(k \ne 0\)</span> terms are below <span class="math inline">\(10^{-8}\)</span>.</p>
+<p><strong>Rényi divergences.</strong> The idea is that the sum defining <span class="math inline">\(D_\alpha\)</span> is, after completing a square, a Gaussian bump summed over the integers with centre <span class="math inline">\(c\)</span>, and the lemma says that sum is at most its value at an integer centre. Write <span class="math inline">\(p_\mu(x) = e^{-(x - \mu)^2/(2\sigma^2)}/Z\)</span>, with <span class="math inline">\(Z\)</span> the same for every integer <span class="math inline">\(\mu\)</span>.</p>
+<ol type="1">
+<li><strong>Write out the summand.</strong> <span class="math inline">\(D_\alpha = \frac{1}{\alpha - 1}\ln\sum_xp_\mu(x)^\alpha p_\nu(x)^{1 - \alpha}\)</span>. The powers of <span class="math inline">\(Z\)</span> combine to <span class="math inline">\(Z^{-\alpha}Z^{\alpha - 1} = 1/Z\)</span>, and the exponent is <span class="math inline">\(-\frac{1}{2\sigma^2}\big(\alpha(x - \mu)^2 + (1 - \alpha)(x - \nu)^2\big)\)</span>.</li>
+<li><strong>Complete the square.</strong> <span class="math inline">\(\alpha(x - \mu)^2 + (1 - \alpha)(x - \nu)^2 = (x - c)^2 - \alpha(\alpha - 1)(\mu - \nu)^2\)</span> with <span class="math inline">\(c = \alpha\mu + (1 - \alpha)\nu\)</span>. (Expand: the <span class="math inline">\(x^2\)</span> and <span class="math inline">\(x\)</span> terms match by the choice of <span class="math inline">\(c\)</span>, and the constant is what is left.)</li>
+<li><strong>So</strong> <span class="math inline">\(\sum_xp_\mu^\alpha p_\nu^{1 - \alpha} = e^{\alpha(\alpha - 1)(\mu - \nu)^2/(2\sigma^2)}\cdot\frac1Z\sum_xe^{-(x - c)^2/(2\sigma^2)}\)</span>.</li>
+<li><strong>Apply the lemma.</strong> <span class="math inline">\(Z\)</span> is the same sum centred at 0, so the last factor is the sum centred at <span class="math inline">\(c\)</span> divided by the sum centred at an integer. By the lemma it is at most 1, with equality when <span class="math inline">\(c\)</span> is an integer, which it is for integer <span class="math inline">\(\alpha\)</span> because <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\nu\)</span> are integers. Taking <span class="math inline">\(\frac{1}{\alpha - 1}\ln\)</span> gives <a href="#eq-dgauss-renyi" class="quarto-xref">Equation&nbsp;<span>24.14</span></a>. The continuous Gaussian has exactly <span class="math inline">\(\alpha(\mu - \nu)^2/(2\sigma^2)\)</span> (<a href="../part01-prerequisites/03-divergences.html">Divergences</a>), so the discrete Gaussian is never worse in Rényi divergence. In the language of <a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a>, where zero-concentrated DP is the guarantee that every Rényi divergence of order <span class="math inline">\(\alpha\)</span> is at most a constant times <span class="math inline">\(\alpha\)</span>, this is the statement that the discrete Gaussian satisfies the same zero-concentrated DP as the continuous one (Canonne, Kamath &amp; Steinke 2020, Theorem 4).</li>
+</ol>
+<p><strong>Variance.</strong> The idea is that the normalizer, seen as a function of <span class="math inline">\(1/(2\sigma^2)\)</span>, encodes the variance in its derivative, and the lemma gives the normalizer in closed form. Let <span class="math inline">\(\tau = 1/(2\sigma^2)\)</span> and <span class="math inline">\(Z(\tau) = \sum_xe^{-\tau x^2}\)</span>.</p>
+<ol type="1">
+<li><strong>Variance from the normalizer.</strong> The mean is 0 because <span class="math inline">\(x\)</span> and <span class="math inline">\(-x\)</span> have the same probability, so <span class="math inline">\(\operatorname{Var}X = \mathbb E X^2 = \sum_xx^2e^{-\tau x^2}/Z\)</span>. Differentiating <span class="math inline">\(e^{-\tau x^2}\)</span> in <span class="math inline">\(\tau\)</span> brings down a factor <span class="math inline">\(-x^2\)</span>, so <span class="math inline">\(\frac{d}{d\tau}Z = -\sum_xx^2e^{-\tau x^2}\)</span>, and <span class="math inline">\(\mathbb E X^2 = -\frac{Z'(\tau)}{Z(\tau)} = -\frac{d}{d\tau}\ln Z(\tau)\)</span>.</li>
+<li><strong>Poisson summation at <span class="math inline">\(c = 0\)</span>.</strong> <a href="#eq-poisson-theta" class="quarto-xref">Equation&nbsp;<span>24.17</span></a>, with <span class="math inline">\(\sigma = 1/\sqrt{2\tau}\)</span>, gives <span class="math inline">\(Z(\tau) = \sqrt{\pi/\tau}\,(1 + \theta(\tau))\)</span> with <span class="math inline">\(\theta(\tau) = \sum_{k \ne 0}e^{-\pi^2k^2/\tau}\)</span>.</li>
+<li><strong>Differentiate.</strong> The log splits into <span class="math inline">\(\frac12\ln\pi - \frac12\ln\tau + \ln(1 + \theta(\tau))\)</span>, so <span class="math inline">\(-\frac{d}{d\tau}\ln Z = \frac{1}{2\tau} - \frac{\theta'(\tau)}{1 + \theta(\tau)}\)</span>, where <span class="math inline">\(\theta'(\tau) = \sum_{k \ne 0}\frac{\pi^2k^2}{\tau^2}e^{-\pi^2k^2/\tau} &gt; 0\)</span>.</li>
+<li><strong>Substitute <span class="math inline">\(\tau = 1/(2\sigma^2)\)</span>:</strong> <span class="math inline">\(\frac{1}{2\tau} = \sigma^2\)</span>, <span class="math inline">\(\frac{\pi^2k^2}{\tau} = 2\pi^2\sigma^2k^2\)</span> and <span class="math inline">\(\frac{\pi^2k^2}{\tau^2} = 4\pi^2\sigma^4k^2\)</span>. This is <a href="#eq-dgauss-var" class="quarto-xref">Equation&nbsp;<span>24.15</span></a>. The correction is positive, so <span class="math inline">\(\operatorname{Var}X &lt; \sigma^2\)</span>, and its leading term, from <span class="math inline">\(k = \pm1\)</span> with the denominator close to 1, is <span class="math inline">\(8\pi^2\sigma^4e^{-2\pi^2\sigma^2}\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-4" class="level3" data-number="24.7.4">
+<h3 data-number="24.7.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">24.7.4</span> Interpretation</h3>
+<p>The privacy proof is the continuous one. The privacy loss is the same linear function, so every statement about it carries over, restricted to integer points. The only new ingredient is that integer shifts don’t change the normalizer. That is why the query must be integer-valued. To use the discrete Gaussian for a real-valued query, scale it by <span class="math inline">\(1/\gamma\)</span> for a small step <span class="math inline">\(\gamma\)</span> and round it to an integer first. Randomized rounding, which rounds up with probability equal to the fractional part, keeps it unbiased. Then account for the sensitivity of the rounded query, which can be slightly larger than the scaled original.</p>
+<p><span class="math inline">\(\delta(\varepsilon)\)</span> is close to the continuous curve, not equal to it. The privacy loss takes only the values <span class="math inline">\((\Delta^2 - 2\Delta y)/(2\sigma^2)\)</span> for integer <span class="math inline">\(y\)</span>; moving <span class="math inline">\(y\)</span> by one changes the loss by <span class="math inline">\(2\Delta/(2\sigma^2) = \Delta/\sigma^2\)</span>, so these values form a lattice with spacing <span class="math inline">\(\Delta/\sigma^2\)</span> (<span class="math inline">\(1/\sigma^2\)</span> for <span class="math inline">\(\Delta = 1\)</span>). As <span class="math inline">\(\varepsilon\)</span> crosses one of these values, a whole output enters or leaves the sum for <span class="math inline">\(\delta\)</span>, so <span class="math inline">\(\delta(\varepsilon)\)</span> has a kink at each lattice value and oscillates around the continuous curve (<a href="#fig-discrete-gaussian-delta" class="quarto-xref">Figure&nbsp;<span>24.4</span></a>). At <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\Delta = 1\)</span> the script finds <span class="math inline">\(\delta = 0.6032\)</span> against 0.5099 at <span class="math inline">\(\sigma = 0.5\)</span>, 0.1414 against 0.1269 at <span class="math inline">\(\sigma = 1\)</span>, and 0.0072 against 0.0068 at <span class="math inline">\(\sigma = 2\)</span>. At other <span class="math inline">\(\varepsilon\)</span>, such as just past a kink, the discrete curve is below. Neither dominates, and the gap closes as <span class="math inline">\(\sigma\)</span> grows. In Rényi divergence, by contrast, the discrete Gaussian is never worse: at <span class="math inline">\(\sigma = 0.5\)</span>, <span class="math inline">\(D_{2.5} = 4.9808\)</span> against 5.</p>
+<p>The variance deficit is invisible in practice. Its relative size <span class="math inline">\(1 - \operatorname{Var}X/\sigma^2\)</span> has leading term <span class="math inline">\(8\pi^2\sigma^2e^{-2\pi^2\sigma^2}\)</span>, the leading term of <a href="#eq-dgauss-var" class="quarto-xref">Equation&nbsp;<span>24.15</span></a> divided by <span class="math inline">\(\sigma^2\)</span>. At <span class="math inline">\(\sigma = 1\)</span> that is <span class="math inline">\(8\pi^2e^{-2\pi^2} = 78.96 \times 2.67\times10^{-9}\)</span>, so <span class="math inline">\(1 - \operatorname{Var}X/\sigma^2 = 2.11\times10^{-7}\)</span>; at <span class="math inline">\(\sigma = 2\)</span> it is at the level of rounding error. Only below <span class="math inline">\(\sigma \approx 0.6\)</span> does the discrete Gaussian concentrate visibly more than <span class="math inline">\(\sigma^2\)</span> suggests: at <span class="math inline">\(\sigma = 0.5\)</span>, <span class="math inline">\(\operatorname{Var}X = 0.8601\,\sigma^2\)</span>, and at <span class="math inline">\(\sigma = 0.25\)</span> almost all the mass is at 0 (<a href="#fig-discrete-gaussian-variance" class="quarto-xref">Figure&nbsp;<span>24.5</span></a>).</p>
+<p>Sums are not discrete Gaussians. Unlike the continuous case, the sum of two independent discrete Gaussians is not exactly a discrete Gaussian. For <span class="math inline">\(\sigma \ge 1\)</span> it is very close (<a href="../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.html#sec-sol-discrete-6">Exercise 6</a>), which is what distributed noise addition, where each client adds its own share of the noise, relies on.</p>
+<div id="fig-discrete-gaussian-delta" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-discrete-gaussian-delta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/discrete_gaussian_delta.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discrete-gaussian-delta-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24.4: Discrete against continuous Gaussian for sensitivity 1: <span class="math inline">\(\delta(\varepsilon)\)</span> from <a href="#eq-dgauss-delta" class="quarto-xref">Equation&nbsp;<span>24.13</span></a> (solid) and the analytic curve of the continuous Gaussian (dashed), for <span class="math inline">\(\sigma = 0.5\)</span>, 1 and 2. The discrete curve has a kink at each value of the lattice-valued privacy loss.
+</figcaption>
+</figure>
+</div>
+<div id="fig-discrete-gaussian-variance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-discrete-gaussian-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/discrete_gaussian_variance.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discrete-gaussian-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24.5: Left: <span class="math inline">\(\operatorname{Var}X/\sigma^2\)</span> for <span class="math inline">\(X \sim \mathcal N_{\mathbb Z}(0, \sigma^2)\)</span>, by direct summation and from <a href="#eq-dgauss-var" class="quarto-xref">Equation&nbsp;<span>24.15</span></a>, against 1 for the continuous Gaussian. Right: the relative deficit <span class="math inline">\(1 - \operatorname{Var}X/\sigma^2\)</span> on a log scale, with its leading term <span class="math inline">\(8\pi^2\sigma^2e^{-2\pi^2\sigma^2}\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-rényi-divergence-computed" class="level3" data-number="24.7.5">
+<h3 data-number="24.7.5" class="anchored" data-anchor-id="example-the-rényi-divergence-computed"><span class="header-section-number">24.7.5</span> Example: the Rényi divergence, computed</h3>
+<p>The script sums the PMFs directly to get <span class="math inline">\(D_\alpha(\mathcal N_{\mathbb Z}(0, \sigma^2)\|\mathcal N_{\mathbb Z}(1, \sigma^2))\)</span> (<a href="#tbl-discrete-renyi" class="quarto-xref">Table&nbsp;<span>24.5</span></a>). Integer orders match <span class="math inline">\(\alpha/(2\sigma^2)\)</span> exactly, because then the centre <span class="math inline">\(c\)</span> of the completed square is an integer and the lemma holds with equality. The order 2.5 at <span class="math inline">\(\sigma = 0.5\)</span> has <span class="math inline">\(c = 2.5 \cdot 0 + (1 - 2.5) \cdot 1 = -1.5\)</span>, half-way between integers, and falls below the continuous value. At <span class="math inline">\(\sigma = 1\)</span> the lemma’s slack is too small to show.</p>
+<div id="tbl-discrete-renyi" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-discrete-renyi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24.5: Rényi divergences between discrete Gaussians shifted by 1, by direct summation, with the continuous value <span class="math inline">\(\alpha/(2\sigma^2)\)</span> in parentheses.
+</figcaption>
+<div aria-describedby="tbl-discrete-renyi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\sigma\)</span></th>
+<th><span class="math inline">\(D_2\)</span> (continuous)</th>
+<th><span class="math inline">\(D_{2.5}\)</span> (continuous)</th>
+<th><span class="math inline">\(D_5\)</span> (continuous)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0.5</td>
+<td>4.0000 (4.0000)</td>
+<td>4.9808 (5.0000)</td>
+<td>10.0000 (10.0000)</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>1.0000 (1.0000)</td>
+<td>1.2500 (1.2500)</td>
+<td>2.5000 (2.5000)</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.2500 (0.2500)</td>
+<td>0.3125 (0.3125)</td>
+<td>0.6250 (0.6250)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="check-yourself-4" class="level3" data-number="24.7.6">
+<h3 data-number="24.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">24.7.6</span> Check yourself</h3>
+<ul>
+<li>Where does the proof of <a href="#eq-dgauss-renyi" class="quarto-xref">Equation&nbsp;<span>24.14</span></a> use that <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\nu\)</span> are integers? <em>(In writing both PMFs with the same normalizer <span class="math inline">\(Z\)</span>. For non-integer locations, the normalizers differ by the lemma, and the clean formula breaks.)</em></li>
+<li>At <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(\Delta = 1\)</span>, where are the kinks of the discrete <span class="math inline">\(\delta(\varepsilon)\)</span> curve? <em>(At the values <span class="math inline">\((1 - 2y)/2\)</span> of the privacy loss that are positive: <span class="math inline">\(\varepsilon = 0.5, 1.5, 2.5, \dots\)</span>, as in <a href="#fig-discrete-gaussian-delta" class="quarto-xref">Figure&nbsp;<span>24.4</span></a>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-discrete-gaussian-sampler" class="level2" data-number="24.8">
+<h2 data-number="24.8" class="anchored" data-anchor-id="sec-discrete-gaussian-sampler"><span class="header-section-number">24.8</span> Sampling the discrete Gaussian exactly</h2>
+<section id="context-5" class="level3" data-number="24.8.1">
+<h3 data-number="24.8.1" class="anchored" data-anchor-id="context-5"><span class="header-section-number">24.8.1</span> Context</h3>
+<p>The privacy analysis is only as good as the sampler. Inverse-CDF sampling of <span class="math inline">\(\mathcal N_{\mathbb Z}(0, \sigma^2)\)</span> needs the normalizer, which is irrational, and a floating-point uniform, which brings back the problems of <a href="#sec-discrete-float" class="quarto-xref"><span>Section 24.3</span></a>. Algorithm 3 of Canonne, Kamath and Steinke (2020) instead proposes from the discrete Laplace and thins with an exact <span class="math inline">\(e^{-\gamma}\)</span> coin.</p>
+</section>
+<section id="statement-5" class="level3" data-number="24.8.2">
+<h3 data-number="24.8.2" class="anchored" data-anchor-id="statement-5"><span class="header-section-number">24.8.2</span> Statement</h3>
+<p>The discrete Laplace has heavier tails than the discrete Gaussian, so it can serve as the proposal of rejection sampling (Fact 2): draw from it, and throw draws away with a probability chosen so that proposal times acceptance is proportional to <span class="math inline">\(e^{-y^2/(2\sigma^2)}\)</span>. The acceptance probability is a Gaussian factor in <span class="math inline">\(|y|\)</span>, shifted so that it cancels the Laplace factor exactly.</p>
+<p>Input a rational <span class="math inline">\(\sigma^2 &gt; 0\)</span>. Let <span class="math inline">\(t = \lfloor\sigma\rfloor + 1\)</span>. Repeat: draw <span class="math inline">\(Y \sim \mathrm{Lap}_{\mathbb Z}(t)\)</span> with Algorithm 2 (<span class="math inline">\(s = 1\)</span>), and accept it with probability <span id="eq-auto-07discretemechanisms-10"><span class="math display">\[\exp\Big(-\frac{(|Y| - \sigma^2/t)^2}{2\sigma^2}\Big) \tag{24.18}\]</span></span> using Algorithm 1. Output the first accepted <span class="math inline">\(Y\)</span>. The output is exactly <span class="math inline">\(\mathcal N_{\mathbb Z}(0, \sigma^2)\)</span>. The acceptance probability per proposal is the proposal’s normalizing constant times the constant left over from the cancellation times the discrete Gaussian’s unnormalized total mass: <span id="eq-dgauss-accept"><span class="math display">\[A = \frac{1 - r}{1 + r}\,e^{-\sigma^2/(2t^2)}\sum_{y \in \mathbb Z}e^{-y^2/(2\sigma^2)}, \qquad r = e^{-1/t}, \tag{24.19}\]</span></span> which tends to <span class="math inline">\(\sqrt{\pi/2}\,e^{-1/2} = 0.7602\)</span> as <span class="math inline">\(\sigma\)</span> grows.</p>
+</section>
+<section id="derivation-4" class="level3" data-number="24.8.3">
+<h3 data-number="24.8.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">24.8.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Proposal times acceptance.</strong> By Fact 2, the output is the target if proposal times acceptance is proportional to <span class="math inline">\(e^{-y^2/(2\sigma^2)}\)</span>. The proposal has <span class="math inline">\(\Pr[Y = y] \propto e^{-|y|/t}\)</span>. Multiply by the acceptance probability, add the exponents and expand the square: <span id="eq-auto-07discretemechanisms-11"><span class="math display">\[-\frac{|y|}{t} - \frac{(|y| - \sigma^2/t)^2}{2\sigma^2} = -\frac{|y|}{t} - \frac{y^2}{2\sigma^2} + \frac{|y|}{t} - \frac{\sigma^2}{2t^2} = -\frac{y^2}{2\sigma^2} - \frac{\sigma^2}{2t^2}. \tag{24.20}\]</span></span> The <span class="math inline">\(|y|/t\)</span> terms cancel, and what is left is <span class="math inline">\(e^{-y^2/(2\sigma^2)}\)</span> times a constant. By Fact 2 the output is <span class="math inline">\(\mathcal N_{\mathbb Z}(0, \sigma^2)\)</span>.</li>
+<li><strong>The acceptance probability is valid.</strong> The exponent <span class="math inline">\(-(|y| - \sigma^2/t)^2/(2\sigma^2)\)</span> is at most 0, so its exponential is at most 1 and is a probability.</li>
+<li><strong>Everything is rational.</strong> <span class="math inline">\(t\)</span> is an integer, computed as <span class="math inline">\(\lfloor\sqrt{\lfloor\sigma^2\rfloor}\rfloor + 1\)</span> with integer square roots (an integer <span class="math inline">\(n\)</span> has <span class="math inline">\(n^2 \le \sigma^2\)</span> exactly when <span class="math inline">\(n^2 \le \lfloor\sigma^2\rfloor\)</span>, so this equals <span class="math inline">\(\lfloor\sigma\rfloor + 1\)</span> without computing <span class="math inline">\(\sigma\)</span>). So <span class="math inline">\(\gamma = (|y| - \sigma^2/t)^2/(2\sigma^2)\)</span> is a ratio of integers, and Algorithm 1 applies.</li>
+<li><strong>The acceptance rate.</strong> <span class="math inline">\(A = \sum_y\Pr[Y = y]\,e^{-(|y| - \sigma^2/t)^2/(2\sigma^2)}\)</span>, the average acceptance over proposals. With <span class="math inline">\(\Pr[Y = y] = \frac{1 - r}{1 + r}r^{|y|}\)</span>, step 1 turns each term into <span class="math inline">\(\frac{1 - r}{1 + r}e^{-\sigma^2/(2t^2)}e^{-y^2/(2\sigma^2)}\)</span>, and summing over <span class="math inline">\(y\)</span> gives <a href="#eq-dgauss-accept" class="quarto-xref">Equation&nbsp;<span>24.19</span></a>. <a href="../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.html#sec-sol-discrete-5">Exercise 5</a> derives the limit.</li>
+</ol>
+<p><strong>Concretely, for <span class="math inline">\(\sigma^2 = 4\)</span></strong> (<span class="math inline">\(t = \lfloor 2\rfloor + 1 = 3\)</span>, <span class="math inline">\(r = e^{-1/3}\)</span>, <span class="math inline">\(\frac{1 - r}{1 + r} = 0.1651\)</span>). <a href="#tbl-discrete-dgauss-walk" class="quarto-xref">Table&nbsp;<span>24.6</span></a> computes a few rows by hand.</p>
+<div id="tbl-discrete-dgauss-walk" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-discrete-dgauss-walk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24.6: Algorithm 3 for <span class="math inline">\(\sigma^2 = 4\)</span>, by hand. The product is <span class="math inline">\(\propto e^{-y^2/8}\)</span>: divide each row by the first and you get <span class="math inline">\(e^{-y^2/8}\)</span>, for instance <span class="math inline">\(0.1167/0.1322 = 0.883 = e^{-1/8}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-discrete-dgauss-walk-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(y\)</span></th>
+<th>Proposal <span class="math inline">\(0.1651\,r^{\lvert y\rvert}\)</span></th>
+<th><span class="math inline">\(\gamma = (\lvert y\rvert - 4/3)^2/8\)</span></th>
+<th>Acceptance <span class="math inline">\(e^{-\gamma}\)</span></th>
+<th>Product</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.1651</td>
+<td>2/9</td>
+<td>0.8007</td>
+<td>0.1322</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.1183</td>
+<td>1/72</td>
+<td>0.9862</td>
+<td>0.1167</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.0848</td>
+<td>1/18</td>
+<td>0.9460</td>
+<td>0.0802</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>0.0435</td>
+<td>8/9</td>
+<td>0.4111</td>
+<td>0.0179</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>0.0223</td>
+<td>49/18</td>
+<td>0.0657</td>
+<td>0.0015</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-discrete-gaussian-sampler" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-discrete-gaussian-sampler-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/discrete_gaussian_sampler.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-discrete-gaussian-sampler-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;24.6: Algorithm 3 for <span class="math inline">\(\sigma^2 = 4\)</span>. Left: the discrete Laplace proposal with <span class="math inline">\(t = 3\)</span> and the part of it that is accepted, which is <span class="math inline">\(A\)</span> times the discrete Gaussian PMF. Right: 10,000 draws of Algorithm 3 against the exact PMF on a log scale, with the <span class="math inline">\(\mathcal N(0, 4)\)</span> density for comparison.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="interpretation-5" class="level3" data-number="24.8.4">
+<h3 data-number="24.8.4" class="anchored" data-anchor-id="interpretation-5"><span class="header-section-number">24.8.4</span> Interpretation</h3>
+<p>The sampler is exact and cheap. Every step is integer or rational arithmetic. The acceptance rate is 0.5185 at <span class="math inline">\(\sigma^2 = \frac14\)</span>, 0.6629 at <span class="math inline">\(\sigma^2 = 4\)</span> and 0.7532 at <span class="math inline">\(\sigma^2 = 100\)</span>, so a draw takes fewer than two proposals on average (<span class="math inline">\(1/A\)</span> by Fact 2, at most <span class="math inline">\(1/0.5185 &lt; 2\)</span> here), and between 15 and 27 uniform integers in the script’s runs (<a href="#tbl-discrete-code" class="quarto-xref">Table&nbsp;<span>24.7</span></a>).</p>
+<p>The choice <span class="math inline">\(t = \lfloor\sigma\rfloor + 1\)</span> only affects cost. Any integer <span class="math inline">\(t \ge 1\)</span> gives an exact sampler, because step 1 of the derivation works for every <span class="math inline">\(t\)</span>. For large <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(\frac{1 - r}{1 + r} \approx \frac{1}{2t}\)</span> (since <span class="math inline">\(r = e^{-1/t} \approx 1 - 1/t\)</span>) and the sum in <a href="#eq-dgauss-accept" class="quarto-xref">Equation&nbsp;<span>24.19</span></a> is about <span class="math inline">\(\sqrt{2\pi}\sigma\)</span> by <a href="#eq-poisson-theta" class="quarto-xref">Equation&nbsp;<span>24.17</span></a>, so <span class="math inline">\(A \approx \frac{\sqrt{2\pi}\sigma}{2t}e^{-\sigma^2/(2t^2)}\)</span>. The derivative of <span class="math inline">\(\ln A\)</span> in <span class="math inline">\(t\)</span> is <span class="math inline">\(-\frac1t + \frac{\sigma^2}{t^3}\)</span>, which is zero at <span class="math inline">\(t = \sigma\)</span>, and <span class="math inline">\(\lfloor\sigma\rfloor + 1\)</span> is the nearest integer above it.</p>
+<p>Exactness is not timing safety. The number of rounds depends on the output, so the running time leaks information about the noise. Jin et al.&nbsp;(2022) show such leaks are exploitable; a deployment pads the running time or runs a fixed number of rounds.</p>
+</section>
+<section id="example-a-histogram-over-1000-bins" class="level3" data-number="24.8.5">
+<h3 data-number="24.8.5" class="anchored" data-anchor-id="example-a-histogram-over-1000-bins"><span class="header-section-number">24.8.5</span> Example: a histogram over 1,000 bins</h3>
+<p>Release a histogram of 1,000 bins under add/remove neighbours, where one record changes one bin by 1, so <span class="math inline">\(\Delta_2 f = 1\)</span>. Add <span class="math inline">\(\mathcal N_{\mathbb Z}(0, 100)\)</span> to each bin. The noise in the 999 unchanged bins has the same distribution under both neighbours, so those bins add nothing to the privacy loss, and the privacy loss is that of one bin. <a href="#eq-dgauss-delta" class="quarto-xref">Equation&nbsp;<span>24.13</span></a> with <span class="math inline">\(\Delta = 1\)</span> and <span class="math inline">\(\sigma = 10\)</span> gives its <span class="math inline">\(\delta(\varepsilon)\)</span>, essentially the continuous Gaussian’s at <span class="math inline">\(\sigma = 10\)</span>. The script’s sampler at <span class="math inline">\(\sigma^2 = 100\)</span> uses about 15.6 uniform integers per bin, so the whole histogram needs about 15.6 × 1,000 = 15,600 uniform integers and no floating-point operation.</p>
+</section>
+<section id="check-yourself-5" class="level3" data-number="24.8.6">
+<h3 data-number="24.8.6" class="anchored" data-anchor-id="check-yourself-5"><span class="header-section-number">24.8.6</span> Check yourself</h3>
+<ul>
+<li>If you dropped the <span class="math inline">\(\sigma^2/t\)</span> inside the acceptance probability, accepting with <span class="math inline">\(e^{-y^2/(2\sigma^2)}\)</span> instead, what would the output be? <em>(Proposal times acceptance would be <span class="math inline">\(\propto e^{-|y|/t - y^2/(2\sigma^2)}\)</span>, a discrete Gaussian tilted by a Laplace factor, not <span class="math inline">\(\mathcal N_{\mathbb Z}(0, \sigma^2)\)</span>.)</em></li>
+<li>Why does the sampler not need the normalizer <span class="math inline">\(\sum_ye^{-y^2/(2\sigma^2)}\)</span>? <em>(Rejection sampling only needs proposal times acceptance to be proportional to the target, Fact 2. The normalizer sets the acceptance rate, not the output.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-every-sampler-against-its-exact-distribution" class="level2" data-number="24.9">
+<h2 data-number="24.9" class="anchored" data-anchor-id="code-check-every-sampler-against-its-exact-distribution"><span class="header-section-number">24.9</span> Code: check every sampler against its exact distribution</h2>
+<p>The script <a href="../../../code/part03-dp-foundations/discrete_mechanisms.py">code/discrete_mechanisms.py</a> implements Algorithms 1–3 with <code>fractions.Fraction</code> and integers, drawing uniform integers from a seeded <code>random.Random</code> (swap in <code>secrets.SystemRandom()</code> to deploy). It also enumerates the toy floating-point sampler exactly, and computes the discrete Gaussian’s PMF, variance, Rényi divergences and <span class="math inline">\(\delta(\varepsilon)\)</span> by summation. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/discrete_mechanisms.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Output</strong> (seed 0, 10,000 draws per sampler), summarized in <a href="#tbl-discrete-code" class="quarto-xref">Table&nbsp;<span>24.7</span></a>. To compare a sampler with its exact distribution, the script uses the total variation (TV) distance: half the sum, over outputs, of the absolute difference between the exact probability and the observed frequency, which is the largest difference the two can show on any event. Even a perfect sampler shows some TV distance after 10,000 draws, from sampling noise alone. The “noise floor” measures how much: it is the TV distance between the exact PMF and the empirical PMF of 10,000 draws from it made with NumPy’s sampler.</p>
+<div id="tbl-discrete-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-discrete-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24.7: The script’s output with the default seed.
+</figcaption>
+<div aria-describedby="tbl-discrete-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Float Laplace, <span class="math inline">\(p = 12\)</span></td>
+<td><span class="math inline">\(\Pr[M(D) \in S] = 0.4791\)</span>; snapped to integers: 0, with <span class="math inline">\(\max\lvert L\rvert = 1.0010\)</span></td>
+</tr>
+<tr class="even">
+<td>Algorithm 1, <span class="math inline">\(\gamma = \frac12, 1, \frac52, 4\)</span></td>
+<td>Frequencies 0.6024, 0.3709, 0.0869, 0.0168 against 0.6065, 0.3679, 0.0821, 0.0183; draws per coin 1.662, 3.096, 3.976, 4.218 against 1.649, 3.086, 3.941, 4.240</td>
+</tr>
+<tr class="odd">
+<td>Algorithm 2, <span class="math inline">\(b = 1\)</span></td>
+<td>Variance 1.8305 (exact 1.8413); TV to exact 0.0114 (noise floor 0.0074); 11.49 draws per sample</td>
+</tr>
+<tr class="even">
+<td>Algorithm 2, <span class="math inline">\(b = 3/2\)</span></td>
+<td>Variance 4.3834 (exact 4.3370); TV 0.0119 (noise floor 0.0243); 12.08 draws per sample</td>
+</tr>
+<tr class="odd">
+<td>Algorithm 2, <span class="math inline">\(b = 10\)</span></td>
+<td>Variance 195.2985 (exact 199.8334); TV 0.0339 (noise floor 0.0331); 10.25 draws per sample</td>
+</tr>
+<tr class="even">
+<td>Algorithm 3, <span class="math inline">\(\sigma^2 = \frac14\)</span></td>
+<td>Variance 0.2189 (exact 0.2150); TV 0.0028 (noise floor 0.0045); acceptance 0.5185; 26.6 draws</td>
+</tr>
+<tr class="odd">
+<td>Algorithm 3, <span class="math inline">\(\sigma^2 = 1\)</span></td>
+<td>Variance 0.9977 (exact 1.0000); TV 0.0076 (noise floor 0.0042); acceptance 0.5418; 24.8 draws</td>
+</tr>
+<tr class="even">
+<td>Algorithm 3, <span class="math inline">\(\sigma^2 = 4\)</span></td>
+<td>Variance 4.0826 (exact 4.0000); TV 0.0154 (noise floor 0.0142); acceptance 0.6629; 18.9 draws</td>
+</tr>
+<tr class="odd">
+<td>Algorithm 3, <span class="math inline">\(\sigma^2 = 100\)</span></td>
+<td>Variance 99.4386 (exact 100.0000); TV 0.0243 (noise floor 0.0325); acceptance 0.7532; 15.6 draws</td>
+</tr>
+<tr class="even">
+<td>Discrete Gaussian variance</td>
+<td><span class="math inline">\(\operatorname{Var}/\sigma^2\)</span> = 0.010728, 0.860051, 1.000000 at <span class="math inline">\(\sigma = 0.25, 0.5, 1\)</span>, by summation and by <a href="#eq-dgauss-var" class="quarto-xref">Equation&nbsp;<span>24.15</span></a> alike</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_discrete_mechanisms.py">tests/test_discrete_mechanisms.py</a> checks that the output still matches.</p>
+<p><strong>What to take from it</strong></p>
+<p>The samplers are exact, up to sampling noise. Every TV distance is within about a factor 2 of the noise floor, sometimes below it, and every frequency and variance is within a few standard errors of its exact value. To see what a few standard errors means for a variance: a variance estimated from <span class="math inline">\(n\)</span> draws has a relative standard error of about <span class="math inline">\(\sqrt{(\kappa - 1)/n}\)</span>, where <span class="math inline">\(\kappa\)</span> is the kurtosis, the fourth moment divided by the squared variance. The Gaussian has <span class="math inline">\(\kappa = 3\)</span>, which gives <span class="math inline">\(\sqrt{2/10{,}000} \approx\)</span> 1.4%; the Laplace has <span class="math inline">\(\kappa = 6\)</span>, which gives <span class="math inline">\(\sqrt{5/10{,}000} \approx\)</span> 2.2%. The largest deviation, at <span class="math inline">\(b = 10\)</span>, is <span class="math inline">\((199.8334 - 195.2985)/199.8334 \approx\)</span> 2.3% low, about one standard error. The noise floor varies a lot between runs, so only the order of magnitude matters.</p>
+<p>The costs match the formulas. Algorithm 1’s draws per coin match <a href="#eq-bern-exp" class="quarto-xref">Equation&nbsp;<span>24.7</span></a> and its extension to <span class="math inline">\(\gamma &gt; 1\)</span> to within 1%.</p>
+<p>The float leak doesn’t shrink with precision, and snapping removes it: the first row reproduces <a href="#tbl-discrete-float" class="quarto-xref">Table&nbsp;<span>24.2</span></a> and the snapped example.</p>
+<p>The discrete Gaussian behaves like the continuous one for <span class="math inline">\(\sigma \ge 1\)</span>, in privacy and in variance. Below that, its variance is smaller than <span class="math inline">\(\sigma^2\)</span> and its <span class="math inline">\(\delta(\varepsilon)\)</span> oscillates more around the continuous curve.</p>
+</section>
+<section id="references" class="level2" data-number="24.10">
+<h2 data-number="24.10" class="anchored" data-anchor-id="references"><span class="header-section-number">24.10</span> References</h2>
+<ul>
+<li>Mironov, “On Significance of the Least Significant Bits for Differential Privacy” (CCS 2012). The floating-point attack on the textbook Laplace sampler, the snapping mechanism and its proof (Theorem 1 and §5).</li>
+<li>Canonne, Kamath &amp; Steinke, “The Discrete Gaussian for Differential Privacy” (NeurIPS 2020; journal version in the Journal of Privacy and Confidentiality, 2022). Algorithms 1–3, the exact <span class="math inline">\(\delta(\varepsilon)\)</span> (Theorem 7), the Rényi and concentrated-DP guarantee (Theorem 4), the variance and tail bounds via Poisson summation. Read §5 alongside the code here.</li>
+<li>Ghosh, Roughgarden &amp; Sundararajan, “Universally Utility-Maximizing Privacy Mechanisms” (STOC 2009; SIAM Journal on Computing, 2012). The geometric mechanism and its optimality for a single count.</li>
+<li>von Neumann, “Various Techniques Used in Connection with Random Digits” (1951). The original trick behind Algorithm 1: exponential probabilities from comparisons of uniform variables.</li>
+<li>Jin, McMurtry, Rubinstein &amp; Ohrimenko, “Are We There Yet? Timing and Floating-Point Attacks on Differential Privacy Systems” (IEEE S&amp;P 2022). Floating-point and timing attacks on DP libraries released after Mironov’s paper, including attacks on samplers whose running time depends on the output.</li>
+<li>Kairouz, Liu &amp; Steinke, “The Distributed Discrete Gaussian Mechanism for Federated Learning with Secure Aggregation” (ICML 2021). The discrete Gaussian when each client adds its own noise, and how close sums of discrete Gaussians are to a discrete Gaussian.</li>
+<li>Abowd et al., “The 2020 Census Disclosure Avoidance System TopDown Algorithm” (Harvard Data Science Review, 2022). The largest deployment of the discrete Gaussian.</li>
+<li>Stein &amp; Shakarchi, <em>Fourier Analysis: An Introduction</em> (2003), ch.&nbsp;5. The Poisson summation formula and the theta function behind <a href="#eq-poisson-theta" class="quarto-xref">Equation&nbsp;<span>24.17</span></a>.</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="24.11">
+<h2 data-number="24.11" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">24.11</span> Cheat sheet</h2>
+<p><span class="math inline">\(r = e^{-1/b}\)</span> for the discrete Laplace; <span class="math inline">\(X \sim \mathcal N_{\mathbb Z}(0, \sigma^2)\)</span> for the discrete Gaussian; <span class="math inline">\(\Delta\)</span> is the integer change in <span class="math inline">\(f\)</span> between neighbours. <a href="#tbl-discrete-cheat" class="quarto-xref">Table&nbsp;<span>24.8</span></a> collects the results.</p>
+<div id="tbl-discrete-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-discrete-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;24.8: Every result in this chapter.
+</figcaption>
+<div aria-describedby="tbl-discrete-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Object</th>
+<th>Formula</th>
+<th>Fact to remember</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Support argument</td>
+<td><span class="math inline">\(\delta \ge \Pr[M(D) \in \mathcal Y_D \setminus \mathcal Y_{D'}]\)</span></td>
+<td>Outputs reachable from one input only rule out every <span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="even">
+<td>Floating-point Laplace</td>
+<td><span class="math inline">\(\mathrm{round}(f(D) + \xi\,\mathrm{round}(b\ln(1/U)))\)</span></td>
+<td>Not DP: about 48% of the mass identifies <span class="math inline">\(f(D)\)</span> in the toy, at every precision</td>
+</tr>
+<tr class="odd">
+<td>Snapping</td>
+<td><span class="math inline">\(\mathrm{clamp}_B(\lfloor\mathrm{clamp}_B(f) \oplus \xi\otimes\lambda\otimes\mathrm{LN}(U^*)\rceil_\Lambda)\)</span></td>
+<td><span class="math inline">\(\varepsilon = \frac{1 + 12B\eta}{\lambda} + \frac{2^{-49}B}{\lambda}\)</span> for sensitivity 1</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\mathrm{Bernoulli}(e^{-\gamma})\)</span>, <span class="math inline">\(\gamma \le 1\)</span></td>
+<td>Parity of the first 0 among <span class="math inline">\(\mathrm{Bernoulli}(\gamma/k)\)</span></td>
+<td><span class="math inline">\(\Pr[K &gt; k] = \gamma^k/k!\)</span>; <span class="math inline">\(e^\gamma\)</span> draws on average</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathrm{Lap}_{\mathbb Z}(b)\)</span></td>
+<td><span class="math inline">\(\frac{1 - r}{1 + r}r^{\lvert z\rvert}\)</span></td>
+<td>Variance <span class="math inline">\(\frac{2r}{(1 - r)^2} \approx 2b^2 - \frac16\)</span></td>
+</tr>
+<tr class="even">
+<td>Geometric mechanism</td>
+<td><span class="math inline">\(f(D) + \mathrm{Lap}_{\mathbb Z}(b)\)</span></td>
+<td><span class="math inline">\(\varepsilon = \Delta_1 f/b\)</span>, pure DP</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\mathcal N_{\mathbb Z}(0, \sigma^2)\)</span></td>
+<td><span class="math inline">\(\propto e^{-x^2/(2\sigma^2)}\)</span> on <span class="math inline">\(\mathbb Z\)</span></td>
+<td><span class="math inline">\(\operatorname{Var} = \sigma^2 - O(\sigma^4e^{-2\pi^2\sigma^2})\)</span></td>
+</tr>
+<tr class="even">
+<td>Discrete Gaussian mechanism</td>
+<td><span class="math inline">\(L(y) = \frac{\Delta^2 - 2\Delta y}{2\sigma^2}\)</span> at integers</td>
+<td><span class="math inline">\(\delta(\varepsilon)\)</span> by <a href="#eq-dgauss-delta" class="quarto-xref">Equation&nbsp;<span>24.13</span></a>; <span class="math inline">\(D_\alpha \le \frac{\alpha\Delta^2}{2\sigma^2}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Algorithm 3</td>
+<td>Propose <span class="math inline">\(\mathrm{Lap}_{\mathbb Z}(\lfloor\sigma\rfloor + 1)\)</span>, accept w.p. <span class="math inline">\(e^{-(\lvert y\rvert - \sigma^2/t)^2/(2\sigma^2)}\)</span></td>
+<td>Acceptance <span class="math inline">\(\to 0.7602\)</span>; exact</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>Never ship <code>f(D) + laplace(b)</code> in floating point. Either snap the output to a grid at least as coarse as <span class="math inline">\(b\)</span> and clamp it, or make the query integer-valued and use an exact integer sampler.</li>
+<li>An exact sampler uses only integers, rationals and uniform integers from a cryptographic source. Any <code>exp</code>, <code>log</code> or <code>random()</code> in the sampler is a place where the analysed distribution and the real one can part.</li>
+<li>The privacy proofs of the discrete Laplace and Gaussian are the continuous proofs, because integer shifts leave the normalizer unchanged.</li>
+<li>For <span class="math inline">\(\sigma \ge 1\)</span>, treat the discrete Gaussian as the continuous one for both accuracy and privacy; check <span class="math inline">\(\delta(\varepsilon)\)</span> with <a href="#eq-dgauss-delta" class="quarto-xref">Equation&nbsp;<span>24.13</span></a> when it matters.</li>
+<li>Exactness of the distribution is not the end: running time that depends on the output is a separate side channel.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part03-dp-foundations/06-sensitivity.html" class="pagination-link" aria-label="Beyond global sensitivity">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part03-dp-foundations/08-trust-models.html" class="pagination-link" aria-label="Local, shuffle and distributed trust models">
+        <span class="nav-page-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

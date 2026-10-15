@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>16&nbsp; Syntactic anonymity and how it breaks – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-attacks/09-reconstruction.html" rel="next">
+<link href="../part02-attacks/07-linkage-reidentification.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/08-syntactic-anonymity.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">16.1</span> Why this matters</a>
+  <ul class="collapse">
+  <li><a href="#the-one-idea-a-syntactic-definition-fixes-the-adversarys-knowledge" id="toc-the-one-idea-a-syntactic-definition-fixes-the-adversarys-knowledge" class="nav-link" data-scroll-target="#the-one-idea-a-syntactic-definition-fixes-the-adversarys-knowledge"><span class="header-section-number">16.1.1</span> The one idea: a syntactic definition fixes the adversary’s knowledge</a></li>
+  </ul></li>
+  <li><a href="#toolkit-three-facts-every-derivation-uses" id="toc-toolkit-three-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-three-facts-every-derivation-uses"><span class="header-section-number">16.2</span> Toolkit: three facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-within-a-class-the-posterior-is-the-frequency" id="toc-fact-1-within-a-class-the-posterior-is-the-frequency" class="nav-link" data-scroll-target="#fact-1-within-a-class-the-posterior-is-the-frequency"><span class="header-section-number">16.2.1</span> Fact 1 — Within a class, the posterior is the frequency</a></li>
+  <li><a href="#fact-2-total-variation-bounds-every-event" id="toc-fact-2-total-variation-bounds-every-event" class="nav-link" data-scroll-target="#fact-2-total-variation-bounds-every-event"><span class="header-section-number">16.2.2</span> Fact 2 — Total variation bounds every event</a></li>
+  <li><a href="#fact-3-the-number-of-others-in-your-cell-is-nearly-poisson" id="toc-fact-3-the-number-of-others-in-your-cell-is-nearly-poisson" class="nav-link" data-scroll-target="#fact-3-the-number-of-others-in-your-cell-is-nearly-poisson"><span class="header-section-number">16.2.3</span> Fact 3 — The number of others in your cell is nearly Poisson</a></li>
+  </ul></li>
+  <li><a href="#sec-anon-k" id="toc-sec-anon-k" class="nav-link" data-scroll-target="#sec-anon-k"><span class="header-section-number">16.3</span> k-anonymity</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">16.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">16.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">16.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">16.3.4</span> Interpretation</a></li>
+  <li><a href="#example-a-k-anonymous-hospital-table" id="toc-example-a-k-anonymous-hospital-table" class="nav-link" data-scroll-target="#example-a-k-anonymous-hospital-table"><span class="header-section-number">16.3.5</span> Example: a k-anonymous hospital table</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">16.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-anon-l" id="toc-sec-anon-l" class="nav-link" data-scroll-target="#sec-anon-l"><span class="header-section-number">16.4</span> Homogeneity, background knowledge and l-diversity</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">16.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">16.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">16.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">16.4.4</span> Interpretation</a></li>
+  <li><a href="#example-homogeneity-in-the-toy-and-in-the-hospital-table" id="toc-example-homogeneity-in-the-toy-and-in-the-hospital-table" class="nav-link" data-scroll-target="#example-homogeneity-in-the-toy-and-in-the-hospital-table"><span class="header-section-number">16.4.5</span> Example: homogeneity in the toy and in the hospital table</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">16.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-anon-t" id="toc-sec-anon-t" class="nav-link" data-scroll-target="#sec-anon-t"><span class="header-section-number">16.5</span> Skewness, similarity and t-closeness</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">16.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">16.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">16.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">16.5.4</span> Interpretation</a></li>
+  <li><a href="#example-toy-skew-and-hospital" id="toc-example-toy-skew-and-hospital" class="nav-link" data-scroll-target="#example-toy-skew-and-hospital"><span class="header-section-number">16.5.5</span> Example: toy, skew and hospital</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">16.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-anon-composition" id="toc-sec-anon-composition" class="nav-link" data-scroll-target="#sec-anon-composition"><span class="header-section-number">16.6</span> The composition attack</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">16.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">16.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">16.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">16.6.4</span> Interpretation</a></li>
+  <li><a href="#example-two-hospitals" id="toc-example-two-hospitals" class="nav-link" data-scroll-target="#example-two-hospitals"><span class="header-section-number">16.6.5</span> Example: two hospitals</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">16.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-anonymize-then-attack" id="toc-code-anonymize-then-attack" class="nav-link" data-scroll-target="#code-anonymize-then-attack"><span class="header-section-number">16.7</span> Code: anonymize, then attack</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">16.8</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">16.9</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-attacks/00-introduction.html">Threat models and attacks</a></li><li class="breadcrumb-item"><a href="../part02-attacks/08-syntactic-anonymity.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">16.1</span> Why this matters</h2>
+<p><a href="../part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a> showed that deleting names does not anonymize a table. The columns that remain, such as age, ZIP code and sex, are <strong>quasi-identifiers</strong>: none of them names anyone, but together they single out most people, and anyone who holds a list of names with the same columns (a voter roll, say) can join the two tables and put a name back on most rows. Between 1998 and 2008, data custodians and researchers answered with a family of definitions that constrain the released table itself. <strong>k-anonymity</strong> hides every record in a crowd of at least <span class="math inline">\(k\)</span> that look alike. <strong>l-diversity</strong> asks each crowd to hold several different sensitive values. <strong>t-closeness</strong> asks each crowd to look like the whole table. They are called <strong>syntactic</strong> because each one is a property of the published table that you can check by reading it, with no reference to how the table was produced or to what else the adversary knows.</p>
+<p>These definitions are not history. Statistics offices, hospital data-sharing agreements, regulators’ guidance and anonymization tools such as ARX still use them. You need to know what they promise and exactly where the promise ends, for two reasons. You will meet them in practice, and their failures are the specification of the definition the next part introduces.</p>
+<p>The definitions form a chain, each proposed in answer to an attack on the one before it. Removing names falls to <strong>linkage</strong>, and k-anonymity caps linkage at <span class="math inline">\(1/k\)</span> (<a href="#sec-anon-k" class="quarto-xref"><span>Section 16.3</span></a>). But k-anonymity only stops the adversary from picking out the target’s record; it does not stop the adversary from learning the target’s diagnosis. If every record in the target’s crowd has the same diagnosis (<strong>homogeneity</strong>), or if the adversary can rule out the other diagnoses from what it already knows about the target (<strong>background knowledge</strong>), the diagnosis leaks with no record picked out. l-diversity answers these two attacks (<a href="#sec-anon-l" class="quarto-xref"><span>Section 16.4</span></a>). A crowd can be diverse and still move the adversary’s belief a long way, though: half the crowd may have a disease that is rare in the population (<strong>skewness</strong>), or all its different diagnoses may be diseases of the same organ (<strong>similarity</strong>). t-closeness answers these (<a href="#sec-anon-t" class="quarto-xref"><span>Section 16.5</span></a>). Finally, <strong>composition</strong> defeats all three at once: two releases, each satisfying the definition, intersect to reveal what neither reveals alone (<a href="#sec-anon-composition" class="quarto-xref"><span>Section 16.6</span></a>).</p>
+<section id="the-one-idea-a-syntactic-definition-fixes-the-adversarys-knowledge" class="level3" data-number="16.1.1">
+<h3 data-number="16.1.1" class="anchored" data-anchor-id="the-one-idea-a-syntactic-definition-fixes-the-adversarys-knowledge"><span class="header-section-number">16.1.1</span> The one idea: a syntactic definition fixes the adversary’s knowledge</h3>
+<p>Each definition is a property of one table, and it protects against an adversary whose knowledge is fixed in advance. For k-anonymity the adversary knows the quasi-identifiers and nothing else. For l-diversity it knows the quasi-identifiers plus a few facts about the target. For t-closeness it knows the quasi-identifiers plus the table’s overall distribution. Each attack in this chapter gives the adversary one more piece of knowledge that the definition did not anticipate, and the guarantee then says nothing. A second release, the most ordinary auxiliary information there is, breaks all three definitions. A definition that survives has to hold whatever the adversary knows, and has to say what happens when releases are combined.</p>
+<p><a href="#tbl-anon-uses" class="quarto-xref">Table&nbsp;<span>16.1</span></a> lists the results and where each is used.</p>
+<div id="tbl-anon-uses" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.1: The results of this chapter and where each is used.
+</figcaption>
+<div aria-describedby="tbl-anon-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>The posterior within a class is the class’s frequency</td>
+<td>Every attack on the sensitive attribute</td>
+</tr>
+<tr class="even">
+<td>k-anonymity caps linkage success at <span class="math inline">\(1/k\)</span></td>
+<td>What k-anonymity does guarantee</td>
+</tr>
+<tr class="odd">
+<td>Uniform cells: a fraction <span class="math inline">\(\Pr[\mathrm{Poisson}(n/M) \le k - 2]\)</span> violates k-anonymity</td>
+<td>How coarse the quasi-identifiers must be, in bits</td>
+</tr>
+<tr class="even">
+<td>Recursive <span class="math inline">\((c, \ell)\)</span>-diversity caps the posterior at <span class="math inline">\(c/(1 + c)\)</span> after <span class="math inline">\(\ell - 2\)</span> values are ruled out</td>
+<td>What l-diversity guarantees against background knowledge</td>
+</tr>
+<tr class="odd">
+<td>t-closeness in total variation moves every event by at most <span class="math inline">\(t\)</span></td>
+<td>What t-closeness guarantees, and why rare values escape it</td>
+</tr>
+<tr class="even">
+<td>Probability that two releases pin down a value</td>
+<td>The composition attack</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>What this chapter uses from elsewhere.</strong> Every idea below is restated where it is used, and these links are for more detail. The linkage game, <a href="07-linkage-reidentification.html#eq-link-success" class="quarto-xref">Equation&nbsp;<span>15.3</span></a>, and the uniform-cells model are in <a href="../part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a>. The imputation baseline, the best guess of a sensitive attribute from the population alone, is in <a href="../part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a>. Total variation is in <a href="../part01-prerequisites/03-divergences.html">Divergences</a>, the Poisson approximation to the binomial in <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>, and entropy in <a href="../part01-prerequisites/05-information-theory.html">Information theory</a>.</p>
+<p><strong>Notation.</strong> A table has <span class="math inline">\(n\)</span> records. Each has quasi-identifiers and one <strong>sensitive attribute</strong> <span class="math inline">\(S\)</span>, such as a diagnosis, with <span class="math inline">\(m\)</span> possible values. A <strong>generalization</strong> replaces each quasi-identifier by a coarser value: an age by a range, a ZIP code by a prefix. An <strong>equivalence class</strong> <span class="math inline">\(E\)</span> is a set of records with the same generalized quasi-identifiers; <span class="math inline">\(\lvert E\rvert\)</span> is its number of records. Within a class, <span class="math inline">\(n_E(v)\)</span> is the number of records with <span class="math inline">\(S = v\)</span>, and <span class="math inline">\(P_E(v) = n_E(v)/\lvert E\rvert\)</span> is the fraction of the class with that value, the class’s distribution. <span class="math inline">\(P(v)\)</span> is the same fraction over the whole table. <strong>Suppression</strong> deletes records.</p>
+</section>
+</section>
+<section id="toolkit-three-facts-every-derivation-uses" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="toolkit-three-facts-every-derivation-uses"><span class="header-section-number">16.2</span> Toolkit: three facts every derivation uses</h2>
+<section id="fact-1-within-a-class-the-posterior-is-the-frequency" class="level3" data-number="16.2.1">
+<h3 data-number="16.2.1" class="anchored" data-anchor-id="fact-1-within-a-class-the-posterior-is-the-frequency"><span class="header-section-number">16.2.1</span> Fact 1 — Within a class, the posterior is the frequency</h3>
+<p>The adversary’s <strong>posterior</strong> is its belief about the target’s sensitive value after it has seen the release. Here is the situation. The adversary knows the target’s quasi-identifiers and knows the target is in the release, so it can find the target’s class <span class="math inline">\(E\)</span>. But all records in <span class="math inline">\(E\)</span> show the same generalized quasi-identifiers, so it cannot tell which one is the target’s. If it knows nothing else, it has no reason to favour any record, and each of the <span class="math inline">\(\lvert E\rvert\)</span> records is equally likely to be the target’s. (This is step 2 of the derivation of <a href="07-linkage-reidentification.html#eq-link-success" class="quarto-xref">Equation&nbsp;<span>15.3</span></a>: the target was drawn at random, and the records of a class differ only in the sensitive attribute, which the adversary does not know.) The chance that the target has value <span class="math inline">\(v\)</span> is then the number of records with <span class="math inline">\(v\)</span> divided by the number of records: <span id="eq-anon-posterior"><span class="math display">\[\Pr[S_{\text{target}} = v \mid \text{release}] = \frac{n_E(v)}{\lvert E\rvert} = P_E(v). \tag{16.1}\]</span></span> Background knowledge works by elimination. If the adversary also knows that the target’s value is not in some set <span class="math inline">\(B\)</span> of values, the records with values in <span class="math inline">\(B\)</span> cannot be the target’s. It crosses them out and spreads its belief evenly over the records that are left. The number left is <span class="math inline">\(\lvert E\rvert\)</span> minus the records with values in <span class="math inline">\(B\)</span>, so for a value <span class="math inline">\(v\)</span> not in <span class="math inline">\(B\)</span>, <span id="eq-auto-08syntacticanonymity-1"><span class="math display">\[\Pr[S_{\text{target}} = v \mid \text{release}, S_{\text{target}} \notin B] = \frac{n_E(v)}{\lvert E\rvert - \sum_{u \in B}n_E(u)}. \tag{16.2}\]</span></span></p>
+<p>For example, take a class of three records with the diagnoses cancer, cancer, flu. Two of the three records say cancer, so the adversary’s posterior is <span class="math inline">\(\frac23\)</span> for cancer and <span class="math inline">\(\frac13\)</span> for flu. If it knows that the target did not have flu, the flu record is crossed out, two records remain and both say cancer, so cancer has posterior <span class="math inline">\(\frac22 = 1\)</span>. Every attack on the sensitive attribute in this chapter is this calculation.</p>
+</section>
+<section id="fact-2-total-variation-bounds-every-event" class="level3" data-number="16.2.2">
+<h3 data-number="16.2.2" class="anchored" data-anchor-id="fact-2-total-variation-bounds-every-event"><span class="header-section-number">16.2.2</span> Fact 2 — Total variation bounds every event</h3>
+<p>To say that a class “looks like the whole table” you need a distance between two distributions <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> on the same values. The <strong>total variation (TV)</strong> distance is half the total absolute difference between the two probability tables, and it equals the largest difference in probability that any single question about the value can show: <span id="eq-auto-08syntacticanonymity-2"><span class="math display">\[\mathrm{TV}(P, Q) = \frac12\sum_v\lvert P(v) - Q(v)\rvert = \max_A\,\lvert P(A) - Q(A)\rvert, \tag{16.3}\]</span></span> where the maximum is over all sets of values <span class="math inline">\(A\)</span>, and <span class="math inline">\(P(A)\)</span> is the probability that the value lands in <span class="math inline">\(A\)</span> (<a href="../part01-prerequisites/03-divergences.html">Divergences</a>).</p>
+<p>The equality has a short reason. <span class="math inline">\(P(A) - Q(A) = \sum_{v \in A}(P(v) - Q(v))\)</span>, which is largest when <span class="math inline">\(A\)</span> holds exactly the values where <span class="math inline">\(P(v) &gt; Q(v)\)</span>, so the maximum is attained by <span class="math inline">\(A = \{v : P(v) &gt; Q(v)\}\)</span> and equals the total excess of <span class="math inline">\(P\)</span> over <span class="math inline">\(Q\)</span>. Both distributions sum to 1, so the total excess of <span class="math inline">\(P\)</span> over <span class="math inline">\(Q\)</span> equals the total excess of <span class="math inline">\(Q\)</span> over <span class="math inline">\(P\)</span>, and each is half the sum of all absolute differences. (Taking <span class="math inline">\(A\)</span> to be the values where <span class="math inline">\(Q\)</span> is larger gives the same number with the sign flipped, which is why the absolute value does no harm.) This is what t-closeness relies on: a bound on the distance is a bound on every question the adversary can ask.</p>
+</section>
+<section id="fact-3-the-number-of-others-in-your-cell-is-nearly-poisson" class="level3" data-number="16.2.3">
+<h3 data-number="16.2.3" class="anchored" data-anchor-id="fact-3-the-number-of-others-in-your-cell-is-nearly-poisson"><span class="header-section-number">16.2.3</span> Fact 3 — The number of others in your cell is nearly Poisson</h3>
+<p>Fact 3 is the tool for counting how many people share your quasi-identifiers. Model the generalized quasi-identifiers as <span class="math inline">\(M\)</span> cells, and suppose the <span class="math inline">\(n\)</span> people fall into them independently, each cell equally likely. Fix yourself. Each of the other <span class="math inline">\(n - 1\)</span> people lands in your cell with probability <span class="math inline">\(1/M\)</span>, independently, so the number of <em>other</em> people in your cell is <span class="math inline">\(\mathrm{Binomial}(n - 1, 1/M)\)</span>. When there are many trials, each with a small chance, the binomial is close to the <strong>Poisson</strong> distribution with the same mean, <span class="math inline">\(\Pr[N = j] \approx e^{-\lambda}\lambda^j/j!\)</span> (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). Here the mean is <span class="math inline">\(\lambda = (n-1)/M \approx n/M\)</span>, the average number of people per cell. Your class then has <span class="math inline">\(1 + \mathrm{Poisson}(\lambda)\)</span> members: you plus the others. This is how the chapter counts how many records violate k-anonymity at a given coarseness.</p>
+</section>
+</section>
+<section id="sec-anon-k" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="sec-anon-k"><span class="header-section-number">16.3</span> k-anonymity</h2>
+<section id="context" class="level3" data-number="16.3.1">
+<h3 data-number="16.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">16.3.1</span> Context</h3>
+<p>Sweeney and Samarati proposed the first answer to the linkage attack in 1998: make sure that no combination of quasi-identifiers in the release singles out fewer than <span class="math inline">\(k\)</span> people. A custodian gets there by generalizing (age 37 becomes 35–39, ZIP code 02139 becomes 021**) and by suppressing the few records that still stand out. The question is what this buys, and what it costs.</p>
+</section>
+<section id="statement" class="level3" data-number="16.3.2">
+<h3 data-number="16.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">16.3.2</span> Statement</h3>
+<p><strong>Definition.</strong> A release is <strong>k-anonymous</strong> if every equivalence class has at least <span class="math inline">\(k\)</span> records.</p>
+<p><strong>What it guarantees.</strong> Recall the linkage game: a target is drawn uniformly from the release, the adversary is given the target’s quasi-identifiers, and it wins if it picks out the target’s record. <a href="07-linkage-reidentification.html#eq-link-success" class="quarto-xref">Equation&nbsp;<span>15.3</span></a> says the best it can do is <span class="math inline">\(J/n\)</span>, where <span class="math inline">\(J\)</span> is the number of classes. The reason is that in a class of size <span class="math inline">\(\lvert E\rvert\)</span> the best guess is a random record of the class, right with probability <span class="math inline">\(1/\lvert E\rvert\)</span>, and the target lands in that class with probability <span class="math inline">\(\lvert E\rvert/n\)</span>, so each class contributes <span class="math inline">\(1/n\)</span> and the <span class="math inline">\(J\)</span> classes contribute <span class="math inline">\(J/n\)</span>. When every class has at least <span class="math inline">\(k\)</span> records there cannot be many classes, and <span id="eq-anon-k-link"><span class="math display">\[\Pr[\text{win}] = \frac{J}{n} \le \frac1k. \tag{16.4}\]</span></span></p>
+<p><strong>What it costs, for uniform cells.</strong> Coarse quasi-identifiers protect more but say less, so the question is how coarse they must be. Suppose the generalized quasi-identifiers split the population into <span class="math inline">\(M\)</span> equally likely cells. A record violates k-anonymity when its cell holds fewer than <span class="math inline">\(k\)</span> people, and by Fact 3 the expected fraction of such records is <span id="eq-anon-k-violate"><span class="math display">\[\Pr[\mathrm{Poisson}(n/M) \le k - 2]. \tag{16.5}\]</span></span> Keeping that fraction below a target <span class="math inline">\(\alpha\)</span> needs enough people per cell, <span class="math inline">\(n/M \ge \lambda_k\)</span>, where <span class="math inline">\(\lambda_k\)</span> is the mean at which the fraction is exactly <span class="math inline">\(\alpha\)</span>: <span class="math inline">\(\Pr[\mathrm{Poisson}(\lambda_k) \le k - 2] = \alpha\)</span>. A quasi-identifier with <span class="math inline">\(M\)</span> equally likely values carries <span class="math inline">\(\log_2 M\)</span> bits of information about a person, so in bits the quasi-identifiers may carry at most <span class="math inline">\(b = \log_2 M = \log_2 n - \log_2\lambda_k\)</span>.</p>
+</section>
+<section id="derivation" class="level3" data-number="16.3.3">
+<h3 data-number="16.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">16.3.3</span> Derivation</h3>
+<p><strong>The cap on linkage</strong> (<a href="#eq-anon-k-link" class="quarto-xref">Equation&nbsp;<span>16.4</span></a>). The idea is that <span class="math inline">\(n\)</span> records cannot fill more than <span class="math inline">\(n/k\)</span> classes of at least <span class="math inline">\(k\)</span> each.</p>
+<ol type="1">
+<li><strong>Count records by class.</strong> The <span class="math inline">\(J\)</span> classes split the <span class="math inline">\(n\)</span> records between them, each record in exactly one class, so <span class="math inline">\(n = \sum_j\lvert E_j\rvert\)</span>.</li>
+<li><strong>Use the definition.</strong> Every class has at least <span class="math inline">\(k\)</span> records, so the sum is at least <span class="math inline">\(Jk\)</span>: <span class="math inline">\(n \ge Jk\)</span>, that is <span class="math inline">\(J/n \le 1/k\)</span>.</li>
+<li><strong>Read off the linkage success.</strong> <a href="07-linkage-reidentification.html#eq-link-success" class="quarto-xref">Equation&nbsp;<span>15.3</span></a> says the linkage success is <span class="math inline">\(J/n\)</span>, so it is at most <span class="math inline">\(1/k\)</span>.</li>
+</ol>
+<p><strong>The cost</strong> (<a href="#eq-anon-k-violate" class="quarto-xref">Equation&nbsp;<span>16.5</span></a>). The idea is to compute the chance that one person’s class is too small, then note that this chance is also the expected fraction of such people.</p>
+<ol type="1">
+<li><strong>Size of a person’s class.</strong> A person’s class is their cell. By Fact 3 it holds the person plus <span class="math inline">\(N\)</span> others, with <span class="math inline">\(N\)</span> approximately <span class="math inline">\(\mathrm{Poisson}(n/M)\)</span>.</li>
+<li><strong>When it is too small.</strong> The class is smaller than <span class="math inline">\(k\)</span> when <span class="math inline">\(1 + N \le k - 1\)</span>, that is <span class="math inline">\(N \le k - 2\)</span>, which has probability <span class="math inline">\(\Pr[\mathrm{Poisson}(n/M) \le k - 2]\)</span>.</li>
+<li><strong>From one person to the fraction.</strong> The expected number of people in small classes is the sum, over people, of each one’s chance of being in one (linearity of expectation: the expected count of events is the sum of their probabilities). Every person has the same chance, so the sum is <span class="math inline">\(n\)</span> times it, and the expected fraction is that chance.</li>
+<li><strong>Solve for the coarseness.</strong> As <span class="math inline">\(\lambda\)</span> grows, the Poisson count moves up and the chance of a small count, the CDF (cumulative distribution function) at <span class="math inline">\(k - 2\)</span>, falls. So “at most <span class="math inline">\(\alpha\)</span>” is the same as <span class="math inline">\(\lambda \ge \lambda_k\)</span>. Put <span class="math inline">\(M = n/\lambda\)</span> and take <span class="math inline">\(\log_2\)</span>: <span class="math inline">\(\log_2 M = \log_2 n - \log_2 \lambda\)</span>, largest at <span class="math inline">\(\lambda = \lambda_k\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation" class="level3" data-number="16.3.4">
+<h3 data-number="16.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">16.3.4</span> Interpretation</h3>
+<p>The guarantee is about names only. <a href="#eq-anon-k-link" class="quarto-xref">Equation&nbsp;<span>16.4</span></a> bounds the chance of picking out the target’s <em>record</em>. It says nothing about the sensitive attribute, which is the whole point of the release, and the next two sections attack exactly that gap.</p>
+<p>k-anonymity is the mirror image of uniqueness, and the bits make the comparison exact. In the same uniform-cells model, a person is unique when nobody else is in their cell, which by Fact 3 has probability <span class="math inline">\(\Pr[\mathrm{Poisson}(n/M) = 0] = e^{-n/M}\)</span>. For 99% of people to be unique you need <span class="math inline">\(e^{-n/M} = 0.99\)</span>, so <span class="math inline">\(n/M = \ln(1/0.99) \approx 0.01\)</span> and <span class="math inline">\(M \approx 100n\)</span>, which is <span class="math inline">\(\log_2 n + \log_2 100 = \log_2n + 6.64\)</span> bits (<a href="07-linkage-reidentification.html#sec-link-unique" class="quarto-xref"><span>Section 15.4</span></a>). At the other end, <a href="#tbl-anon-bits" class="quarto-xref">Table&nbsp;<span>16.2</span></a> shows that 2-anonymity for 99% of records needs the quasi-identifiers to carry at most <span class="math inline">\(\log_2n - 2.20\)</span> bits. The window between “almost everyone is unique” and “almost everyone is hidden” is <span class="math inline">\(6.64 + 2.20 = 8.84\)</span>, about 9 bits wide, and every attribute you publish uses some of it.</p>
+<p>k costs more than <span class="math inline">\(\log_2 k\)</span> bits. You might expect that hiding everyone in a class of <span class="math inline">\(k\)</span> needs <span class="math inline">\(k\)</span> people per cell, that is <span class="math inline">\(\log_2 k\)</span> bits fewer than <span class="math inline">\(\log_2 n\)</span>. But cells vary in size around their mean, and the unlucky small cells are the ones that violate the definition, so you need <span class="math inline">\(\lambda_k\)</span> people per cell <em>on average</em>, and <span class="math inline">\(\lambda_k\)</span> is larger than <span class="math inline">\(k\)</span>. The margin is largest for small <span class="math inline">\(k\)</span>. For <span class="math inline">\(k = 2\)</span> a person violates the definition when <span class="math inline">\(N = 0\)</span>, which has probability <span class="math inline">\(e^{-\lambda}\)</span>; setting <span class="math inline">\(e^{-\lambda} = 0.01\)</span> gives <span class="math inline">\(\lambda_2 = \ln 100 = 4.61\)</span>, more than twice <span class="math inline">\(k\)</span>.</p>
+<p>Which columns are quasi-identifiers is a judgment, and in sparse data everything is one. <a href="07-linkage-reidentification.html#sec-link-sparse" class="quarto-xref"><span>Section 15.5</span></a> showed that a handful of rare movie ratings single out a subscriber. Making a ratings matrix k-anonymous means generalizing thousands of columns until little is left (Aggarwal, 2005).</p>
+<p>Finally, the guarantee assumes the adversary knows no more than the quasi-identifiers. A neighbour who knows that the target’s record is the only one in the class with a given diagnosis needs no linkage at all.</p>
+</section>
+<section id="example-a-k-anonymous-hospital-table" class="level3" data-number="16.3.5">
+<h3 data-number="16.3.5" class="anchored" data-anchor-id="example-a-k-anonymous-hospital-table"><span class="header-section-number">16.3.5</span> Example: a k-anonymous hospital table</h3>
+<p><a href="#tbl-anon-bits" class="quarto-xref">Table&nbsp;<span>16.2</span></a> applies <a href="#eq-anon-k-violate" class="quarto-xref">Equation&nbsp;<span>16.5</span></a> to a population of <span class="math inline">\(n = 10{,}000\)</span> (<span class="math inline">\(\log_2 n = 13.29\)</span> bits) with <span class="math inline">\(\alpha = 1\%\)</span>. For each <span class="math inline">\(k\)</span> it finds <span class="math inline">\(\lambda_k\)</span>, then subtracts <span class="math inline">\(\log_2 \lambda_k\)</span> from <span class="math inline">\(\log_2 n\)</span>. For <span class="math inline">\(k = 2\)</span>, <span class="math inline">\(\lambda_2 = 4.61\)</span> from the calculation above, <span class="math inline">\(\log_2 4.61 = 2.20\)</span>, and <span class="math inline">\(13.29 - 2.20 = 11.08\)</span> bits are allowed.</p>
+<div id="tbl-anon-bits" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-bits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.2: Uniform cells, <span class="math inline">\(n = 10{,}000\)</span>: how many bits of quasi-identifier k-anonymity allows if at most 1% of records may fall in classes smaller than <span class="math inline">\(k\)</span>.
+</figcaption>
+<div aria-describedby="tbl-anon-bits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(k\)</span></th>
+<th>People per cell <span class="math inline">\(\lambda_k\)</span></th>
+<th>Bits allowed</th>
+<th>Below <span class="math inline">\(\log_2 n\)</span> by</th>
+<th><span class="math inline">\(\log_2 k\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>4.61</td>
+<td>11.08</td>
+<td>2.20</td>
+<td>1.00</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>10.05</td>
+<td>9.96</td>
+<td>3.33</td>
+<td>2.32</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>17.40</td>
+<td>9.17</td>
+<td>4.12</td>
+<td>3.32</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>30.58</td>
+<td>8.35</td>
+<td>4.93</td>
+<td>4.32</td>
+</tr>
+<tr class="odd">
+<td>50</td>
+<td>66.74</td>
+<td>7.23</td>
+<td>6.06</td>
+<td>5.64</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The last two columns compare the true cost with the naive <span class="math inline">\(\log_2 k\)</span>. The gap is about 1.2 bits at <span class="math inline">\(k = 2\)</span> (<span class="math inline">\(2.20 - 1.00\)</span>) and shrinks to about 0.4 bits at <span class="math inline">\(k = 50\)</span> (<span class="math inline">\(6.06 - 5.64\)</span>), because a Poisson count with a large mean varies little relative to its mean. <a href="#fig-anon-bits" class="quarto-xref">Figure&nbsp;<span>16.1</span></a> draws the whole curve for each <span class="math inline">\(k\)</span>.</p>
+<div id="fig-anon-bits" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-anon-bits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/anon_bits.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anon-bits-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.1: The fraction of records in classes smaller than <span class="math inline">\(k\)</span>, against the bits of quasi-identifier beyond <span class="math inline">\(\log_2 n\)</span>, for uniform cells. Each curve is a Poisson CDF; the dotted line is 1% of records.
+</figcaption>
+</figure>
+</div>
+<p>Real tables are not uniform, so real anonymizers search for a generalization that works on the data. The script builds a synthetic hospital table of <span class="math inline">\(n = 10{,}000\)</span> patients with three quasi-identifiers: age in years (0 to 89), a five-digit ZIP code (800 values, a few areas far more common than the rest) and sex. The sensitive attribute is one of eight diagnoses, and it depends on age: asthma peaks in childhood, fractures around 18, depression around 40, diabetes, hypertension and cancer later in life, while flu is equally common at every age and HIV is rare (1.0% of records). With exact quasi-identifiers, the linkage success is 0.933: by <a href="07-linkage-reidentification.html#eq-link-success" class="quarto-xref">Equation&nbsp;<span>15.3</span></a>, the 10,000 patients fall into <span class="math inline">\(0.933 \times 10{,}000 = 9{,}330\)</span> distinct combinations of age, ZIP code and sex, so most of them are alone in theirs.</p>
+<p>The script anonymizes the table with <strong>Mondrian</strong> (LeFevre, DeWitt &amp; Ramakrishnan, 2006). Start with the whole table as one box. Split a box at the median of the quasi-identifier with the widest range (relative to its full range), as long as both halves still have at least <span class="math inline">\(k\)</span> records. Stop when no split is allowed. Each final box is a class, published as a range per quasi-identifier. Mondrian recodes locally: a busy ZIP area gets narrow age ranges and a quiet one wide ranges. Because it keeps splitting until a split would leave fewer than <span class="math inline">\(k\)</span> on one side, its classes stay close to size <span class="math inline">\(k\)</span>, much closer than those of a single global generalization of each column. <a href="#tbl-anon-k" class="quarto-xref">Table&nbsp;<span>16.3</span></a> gives the result.</p>
+<div id="tbl-anon-k" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.3: Mondrian k-anonymization of a synthetic hospital table of 10,000 patients. Mean width is the average, over records and quasi-identifiers, of the class’s range as a fraction of the full range. Certain disclosure is the fraction of records in a class with a single diagnosis. Guess accuracy is the fraction of records whose diagnosis is the most common one in their class.
+</figcaption>
+<div aria-describedby="tbl-anon-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(k\)</span></th>
+<th>Classes</th>
+<th>Sizes</th>
+<th>Mean width</th>
+<th>Linkage <span class="math inline">\(J/n\)</span></th>
+<th>Certain disclosure</th>
+<th>Guess accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2</td>
+<td>4,091</td>
+<td>2–5</td>
+<td>0.005</td>
+<td>0.4091</td>
+<td>0.2797</td>
+<td>0.675</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>1,542</td>
+<td>5–11</td>
+<td>0.016</td>
+<td>0.1542</td>
+<td>0.0232</td>
+<td>0.593</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>748</td>
+<td>10–20</td>
+<td>0.028</td>
+<td>0.0748</td>
+<td>0.0000</td>
+<td>0.562</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>366</td>
+<td>20–41</td>
+<td>0.043</td>
+<td>0.0366</td>
+<td>0.0000</td>
+<td>0.540</td>
+</tr>
+<tr class="odd">
+<td>50</td>
+<td>129</td>
+<td>50–99</td>
+<td>0.075</td>
+<td>0.0129</td>
+<td>0.0000</td>
+<td>0.506</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The linkage success sits between <span class="math inline">\(1/(2k)\)</span> and <span class="math inline">\(1/k\)</span> for every <span class="math inline">\(k\)</span> (<a href="#fig-anon-tradeoff" class="quarto-xref">Figure&nbsp;<span>16.2</span></a>, left). <span class="math inline">\(J/n\)</span> is one over the average class size. No class is smaller than <span class="math inline">\(k\)</span>, so the upper bound <span class="math inline">\(1/k\)</span> is guaranteed. The lower bound is not: Mondrian can leave classes larger than <span class="math inline">\(2k\)</span> (up to 41 records at <span class="math inline">\(k = 20\)</span>), but they are rare enough that the average size stays below <span class="math inline">\(2k\)</span> in every row. At <span class="math inline">\(k = 2\)</span>, for instance, <span class="math inline">\(0.4091\)</span> lies between <span class="math inline">\(0.25\)</span> and <span class="math inline">\(0.5\)</span>. The cost in precision is small. At <span class="math inline">\(k = 5\)</span> the average range covers 1.6% of each quasi-identifier’s span.</p>
+<p>The last two columns are about the diagnosis, and the next section explains them.</p>
+<div id="fig-anon-tradeoff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-anon-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/anon_tradeoff.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anon-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.2: Left: the linkage success of Mondrian releases of the synthetic hospital table against <span class="math inline">\(k\)</span>, between <span class="math inline">\(1/(2k)\)</span> and the bound <span class="math inline">\(1/k\)</span>. Right: how often the diagnosis is the most common one in the record’s class, and how often the class holds a single diagnosis, against two baselines that use no release.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself" class="level3" data-number="16.3.6">
+<h3 data-number="16.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">16.3.6</span> Check yourself</h3>
+<ul>
+<li>A k-anonymous release of 1,000 records has 120 classes. What is the largest <span class="math inline">\(k\)</span> it can satisfy, and what is the linkage success? <em>(At most <span class="math inline">\(\lfloor 1000/120\rfloor = 8\)</span>, since <span class="math inline">\(Jk \le n\)</span>. The success is <span class="math inline">\(120/1000 = 0.12\)</span>, below <span class="math inline">\(1/8 = 0.125\)</span>.)</em></li>
+<li>Why does 2-anonymity need about 4.6 people per cell on average, not 2? <em>(The number of others in your cell is roughly Poisson. With a mean of 1, a fraction <span class="math inline">\(e^{-1} = 0.37\)</span> of people would have nobody else in their cell. To get that down to 1% you need <span class="math inline">\(e^{-\lambda} = 0.01\)</span>, that is <span class="math inline">\(\lambda = 4.61\)</span>.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-anon-l" class="level2" data-number="16.4">
+<h2 data-number="16.4" class="anchored" data-anchor-id="sec-anon-l"><span class="header-section-number">16.4</span> Homogeneity, background knowledge and l-diversity</h2>
+<section id="context-1" class="level3" data-number="16.4.1">
+<h3 data-number="16.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">16.4.1</span> Context</h3>
+<p>Machanavajjhala, Kifer, Gehrke &amp; Venkitasubramaniam (2006) pointed out that k-anonymity hides who a record belongs to but not what it says. <a href="#tbl-anon-toy" class="quarto-xref">Table&nbsp;<span>16.4</span></a> is a 3-anonymous release.</p>
+<div id="tbl-anon-toy" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-toy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.4: A 3-anonymous release with three classes of three records.
+</figcaption>
+<div aria-describedby="tbl-anon-toy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>ZIP code</th>
+<th>Age</th>
+<th>Diagnosis</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>130**</td>
+<td>&lt; 30</td>
+<td>heart disease</td>
+</tr>
+<tr class="even">
+<td>130**</td>
+<td>&lt; 30</td>
+<td>heart disease</td>
+</tr>
+<tr class="odd">
+<td>130**</td>
+<td>&lt; 30</td>
+<td>heart disease</td>
+</tr>
+<tr class="even">
+<td>148**</td>
+<td>4*</td>
+<td>cancer</td>
+</tr>
+<tr class="odd">
+<td>148**</td>
+<td>4*</td>
+<td>flu</td>
+</tr>
+<tr class="even">
+<td>148**</td>
+<td>4*</td>
+<td>heart disease</td>
+</tr>
+<tr class="odd">
+<td>130**</td>
+<td>3*</td>
+<td>cancer</td>
+</tr>
+<tr class="even">
+<td>130**</td>
+<td>3*</td>
+<td>cancer</td>
+</tr>
+<tr class="odd">
+<td>130**</td>
+<td>3*</td>
+<td>flu</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Alice is 26 and lives in ZIP code 13053. Her class is the first, and every record in it says heart disease. By Fact 1 her posterior for heart disease is the fraction of her class that has it, <span class="math inline">\(\frac33 = 1\)</span>. This is the <strong>homogeneity attack</strong>: no re-identification, full disclosure. Bob is 35, lives in 13068, and is in the third class, where two of three records say cancer, so his posterior for cancer is <span class="math inline">\(\frac23\)</span>. His neighbour saw him at work through the whole flu season and rules out flu; crossing out the flu record leaves two cancer records, and cancer then has posterior 1. This is the <strong>background knowledge attack</strong>. The question is what condition on the classes stops both.</p>
+</section>
+<section id="statement-1" class="level3" data-number="16.4.2">
+<h3 data-number="16.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">16.4.2</span> Statement</h3>
+<p>Both attacks work because one value dominates the class, either from the start or after a few values are ruled out. l-diversity asks for enough different values in each class, and its three versions differ in how they measure “enough”. Sort a class’s value counts from largest to smallest as <span class="math inline">\(r_1 \ge r_2 \ge \dots \ge r_m\)</span>, so <span class="math inline">\(r_1\)</span> is the count of the most common value. A class is</p>
+<ul>
+<li><strong>distinct <span class="math inline">\(\ell\)</span>-diverse</strong> if it holds at least <span class="math inline">\(\ell\)</span> different values;</li>
+<li><strong>entropy <span class="math inline">\(\ell\)</span>-diverse</strong> if the entropy of <span class="math inline">\(P_E\)</span> is at least <span class="math inline">\(\log_2\ell\)</span>. The entropy <span class="math inline">\(H(P_E) = -\sum_v P_E(v)\log_2 P_E(v)\)</span> measures in bits how spread out the values are; <span class="math inline">\(\ell\)</span> equally common values have entropy exactly <span class="math inline">\(\log_2 \ell\)</span>, so the condition says the class is at least as spread out as <span class="math inline">\(\ell\)</span> equal values;</li>
+<li><strong>recursive <span class="math inline">\((c, \ell)\)</span>-diverse</strong> if <span class="math inline">\(r_1 &lt; c\,(r_\ell + r_{\ell+1} + \dots + r_m)\)</span>: the most common value is less than <span class="math inline">\(c\)</span> times the total of all but the <span class="math inline">\(\ell - 1\)</span> most common. The right-hand side is the “tail” that is left after the <span class="math inline">\(\ell - 1\)</span> biggest values are set aside, and the condition says the top value cannot swamp that tail.</li>
+</ul>
+<p>A release is <span class="math inline">\(\ell\)</span>-diverse if every class is.</p>
+<p><strong>What recursive diversity guarantees.</strong> The tail is what survives the background knowledge attack. An adversary who rules out <span class="math inline">\(\ell - 2\)</span> values can at worst remove some of the big values, and the remaining ones still include a tail at least as large as the original one. Since the top value is less than <span class="math inline">\(c\)</span> times that tail, it holds less than <span class="math inline">\(c\)</span> parts out of <span class="math inline">\(c + 1\)</span>. Precisely: if a class is recursive <span class="math inline">\((c, \ell)\)</span>-diverse, then after the adversary rules out any <span class="math inline">\(\ell - 2\)</span> values that are not the target’s, every remaining value <span class="math inline">\(v\)</span> has <span id="eq-anon-recursive"><span class="math display">\[\Pr[S_{\text{target}} = v \mid \text{release}, \text{background}] &lt; \frac{c}{1 + c}. \tag{16.6}\]</span></span> For distinct <span class="math inline">\(\ell\)</span>-diversity, the corresponding statement is weaker: the adversary needs to rule out <span class="math inline">\(\ell - 1\)</span> values to be certain, but one value can still hold all but <span class="math inline">\(\ell - 1\)</span> of the records.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="16.4.3">
+<h3 data-number="16.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">16.4.3</span> Derivation</h3>
+<p>The plan is to compare the class after elimination with the original class: its top count cannot be larger, and its tail cannot be smaller, so the defining inequality survives.</p>
+<ol type="1">
+<li><strong>What is left.</strong> Rule out a set <span class="math inline">\(B\)</span> of <span class="math inline">\(\ell - 2\)</span> values. The remaining <span class="math inline">\(m - \ell + 2\)</span> values keep their original counts. Call the largest of them <span class="math inline">\(r'_1\)</span>, and the total of the other <span class="math inline">\(m - \ell + 1\)</span> remaining values <span class="math inline">\(T'\)</span>.</li>
+<li><strong>The top does not grow.</strong> Ruling out values removes records but never adds any, so <span class="math inline">\(r'_1\)</span> is one of the original counts, and no original count exceeds <span class="math inline">\(r_1\)</span>: <span class="math inline">\(r'_1 \le r_1\)</span>.</li>
+<li><strong>The tail does not shrink below the original tail.</strong> <span class="math inline">\(T'\)</span> is a sum of <span class="math inline">\(m - \ell + 1\)</span> of the original counts. The smallest such sum you could possibly get is that of the <span class="math inline">\(m - \ell + 1\)</span> smallest counts, which is <span class="math inline">\(r_\ell + \dots + r_m\)</span>. So <span class="math inline">\(T' \ge r_\ell + \dots + r_m\)</span>.</li>
+<li><strong>Combine with the definition.</strong> Chain the three inequalities: <span class="math inline">\(r'_1 \le r_1 &lt; c\,(r_\ell + \dots + r_m) \le c\,T'\)</span>.</li>
+<li><strong>Turn counts into a posterior.</strong> By Fact 1, after elimination the posterior of a remaining value is its count over the total count left, <span class="math inline">\(r'_1 + T'\)</span>, so it is at most <span class="math inline">\(r'_1/(r'_1 + T')\)</span>. The map <span class="math inline">\(x \mapsto x/(x + T')\)</span> increases in <span class="math inline">\(x\)</span> (a larger share of a pie whose other part is fixed), so with <span class="math inline">\(r'_1 &lt; cT'\)</span> this is below <span class="math inline">\(cT'/(cT' + T') = c/(1 + c)\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="16.4.4">
+<h3 data-number="16.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">16.4.4</span> Interpretation</h3>
+<p>l-diversity protects against certainty, not against likelihood. The bound <span class="math inline">\(c/(1 + c)\)</span> is <span class="math inline">\(\frac12\)</span> at <span class="math inline">\(c = 1\)</span>, <span class="math inline">\(\frac23\)</span> at <span class="math inline">\(c = 2\)</span> and <span class="math inline">\(\frac34\)</span> at <span class="math inline">\(c = 3\)</span>, so even recursive diversity lets the adversary be fairly sure. Distinct and entropy <span class="math inline">\(\ell\)</span>-diversity do not even give that, because neither limits the share of the top value directly: an entropy 3-diverse class over 8 values can have one value in 73% of its records, since the other 27% spread over seven values add enough entropy (<a href="../../book-exercises/part02-attacks/08-syntactic-anonymity.html#sec-sol-anon-2">Exercise 2</a>).</p>
+<p>The adversary’s knowledge is assumed, not bounded. The guarantee covers an adversary who rules out up to <span class="math inline">\(\ell - 2\)</span> values. One who rules out more, or who knows something softer (“probably not flu”), is not covered.</p>
+<p>A posterior also has to be read against what the adversary would believe with no release. A posterior of 0.6 for one diagnosis is not a leak if the population already gives 0.6 to people of the target’s age. The right comparison is the <strong>imputation baseline</strong> of <a href="../part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a>: the most likely value of the sensitive attribute given the target’s own quasi-identifiers, under the true population distribution, computed with no release at all. Whatever the release teaches beyond that is about the individual; up to it, it is about the population.</p>
+<p>Some tables cannot be made diverse at all. The table’s distribution <span class="math inline">\(P\)</span> is the average of its classes’ distributions <span class="math inline">\(P_E\)</span>, each weighted by the class’s share of the records. Entropy is <strong>concave</strong>: mixing distributions can only make the result more spread out, so the entropy of an average is at least the average of the entropies. If every class had entropy at least <span class="math inline">\(\log_2\ell\)</span>, the table would too. So a table dominated by one value, with entropy below <span class="math inline">\(\log_2\ell\)</span>, has no entropy <span class="math inline">\(\ell\)</span>-diverse partition.</p>
+</section>
+<section id="example-homogeneity-in-the-toy-and-in-the-hospital-table" class="level3" data-number="16.4.5">
+<h3 data-number="16.4.5" class="anchored" data-anchor-id="example-homogeneity-in-the-toy-and-in-the-hospital-table"><span class="header-section-number">16.4.5</span> Example: homogeneity in the toy and in the hospital table</h3>
+<p>In <a href="#tbl-anon-toy" class="quarto-xref">Table&nbsp;<span>16.4</span></a> the three classes hold 1, 3 and 2 different values, so they are distinct 1-, 3- and 2-diverse. Their entropy versions are <span class="math inline">\(\ell = 2^{H(P_E)}\)</span>, the number of equally common values with the same entropy. The first class has one value, entropy 0 and <span class="math inline">\(\ell = 1.00\)</span>. The second has three equally common values and <span class="math inline">\(\ell = 3.00\)</span>. The third, <span class="math inline">\(\frac23\)</span> cancer and <span class="math inline">\(\frac13\)</span> flu, has entropy <span class="math inline">\(\frac23\log_2\frac32 + \frac13\log_2 3 = 0.918\)</span> bits and <span class="math inline">\(\ell = 2^{0.918} = 1.89\)</span>: two values, but unevenly spread, so worth fewer than two. The release as a whole is only 1-diverse, because of Alice’s class.</p>
+<p>In the hospital table, the “certain disclosure” column of <a href="#tbl-anon-k" class="quarto-xref">Table&nbsp;<span>16.3</span></a> counts the patients in homogeneous classes. At <span class="math inline">\(k = 2\)</span> it is 28.0% of all patients. At <span class="math inline">\(k = 5\)</span> it is 2.3%, or 232 patients whose diagnosis the release states outright. The population never gives that certainty: at no age does the population law give any diagnosis more than 0.705.</p>
+<p>The guess accuracy column needs the baselines of <a href="#fig-anon-tradeoff" class="quarto-xref">Figure&nbsp;<span>16.2</span></a> (right). Guessing the most common diagnosis of the whole table is right for 18.5% of patients. Imputation, which guesses the most likely diagnosis for each patient’s exact age under the population law, is right for 53.6%, with no release at all. A 5-anonymous release is right for 59.3%. So most of what the release teaches the adversary is the age–diagnosis pattern, which any useful study of this table would report. The excess over imputation, <span class="math inline">\(0.593 - 0.536 = 0.057\)</span> at <span class="math inline">\(k = 5\)</span>, comes from the small classes, and it is down to <span class="math inline">\(0.540 - 0.536 = 0.004\)</span> at <span class="math inline">\(k = 20\)</span>.</p>
+<p><a href="#tbl-anon-l" class="quarto-xref">Table&nbsp;<span>16.5</span></a> adds diversity to <span class="math inline">\(k = 5\)</span>.</p>
+<div id="tbl-anon-l" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-l-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.5: Mondrian with l-diversity on the same hospital table: each split is allowed only if both halves satisfy the criterion.
+</figcaption>
+<div aria-describedby="tbl-anon-l-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Criterion</th>
+<th>Classes</th>
+<th>Sizes</th>
+<th>Mean width</th>
+<th>Linkage <span class="math inline">\(J/n\)</span></th>
+<th>Certain disclosure</th>
+<th>Guess accuracy</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(k = 5\)</span></td>
+<td>1,542</td>
+<td>5–11</td>
+<td>0.016</td>
+<td>0.1542</td>
+<td>0.0232</td>
+<td>0.593</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(k = 5\)</span>, distinct <span class="math inline">\(\ell = 3\)</span></td>
+<td>1,132</td>
+<td>5–33</td>
+<td>0.022</td>
+<td>0.1132</td>
+<td>0.0000</td>
+<td>0.574</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(k = 5\)</span>, recursive <span class="math inline">\((c = 2, \ell = 3)\)</span></td>
+<td>389</td>
+<td>5–641</td>
+<td>0.113</td>
+<td>0.0389</td>
+<td>0.0000</td>
+<td>0.417</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Distinct 3-diversity removes the certain disclosures for little cost. Recursive <span class="math inline">\((2, 3)\)</span>-diversity forces some classes to cover hundreds of patients and pushes the guess accuracy below imputation. The reason is that diagnosis depends on age: to keep any diagnosis from dominating a class, Mondrian must mix ages, and that erases the pattern the data were released to show.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="16.4.6">
+<h3 data-number="16.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">16.4.6</span> Check yourself</h3>
+<ul>
+<li>Is the class {cancer, cancer, cancer, flu, asthma} recursive <span class="math inline">\((2, 3)\)</span>-diverse? <em>(No.&nbsp;The sorted counts are <span class="math inline">\(r_1 = 3\)</span>, <span class="math inline">\(r_2 = 1\)</span>, <span class="math inline">\(r_3 = 1\)</span>, and the tail beyond the two most common values is <span class="math inline">\(r_3 = 1\)</span>, so the condition is <span class="math inline">\(3 &lt; 2 \times 1\)</span>, which fails. It is distinct 3-diverse.)</em></li>
+<li>Why does the derivation of <a href="#eq-anon-recursive" class="quarto-xref">Equation&nbsp;<span>16.6</span></a> allow only <span class="math inline">\(\ell - 2\)</span> ruled-out values, not <span class="math inline">\(\ell - 1\)</span>? <em>(If the class has exactly <span class="math inline">\(\ell\)</span> values, ruling out <span class="math inline">\(\ell - 1\)</span> of them leaves one, with posterior 1, whatever <span class="math inline">\(c\)</span> is. With <span class="math inline">\(\ell - 2\)</span> ruled out, at least two values remain, and step 3 of the derivation still finds the original tail among them.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-anon-t" class="level2" data-number="16.5">
+<h2 data-number="16.5" class="anchored" data-anchor-id="sec-anon-t"><span class="header-section-number">16.5</span> Skewness, similarity and t-closeness</h2>
+<section id="context-2" class="level3" data-number="16.5.1">
+<h3 data-number="16.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">16.5.1</span> Context</h3>
+<p>Li, Li &amp; Venkatasubramanian (2007) found two attacks that l-diversity does not see. In the <strong>skewness attack</strong>, 1% of the table has HIV, and a class that is half HIV, half not, is 2-diverse by every definition, yet by Fact 1 it raises the adversary’s belief that a member has HIV from 1% to 50%, fifty-fold. In the <strong>similarity attack</strong>, a class holds three different diagnoses, gastric ulcer, gastritis and stomach cancer, so it is 3-diverse, and the adversary still learns that the target has a stomach disease. Both say that diversity is the wrong yardstick: what matters is how far a class’s distribution is from what the adversary would believe anyway, which is the distribution of the whole table.</p>
+</section>
+<section id="statement-2" class="level3" data-number="16.5.2">
+<h3 data-number="16.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">16.5.2</span> Statement</h3>
+<p><strong>Definition.</strong> A release is <strong>t-close</strong> if every class’s distribution is within distance <span class="math inline">\(t\)</span> of the whole table’s: <span class="math inline">\(d(P_E, P) \le t\)</span>, for a chosen distance <span class="math inline">\(d\)</span> between distributions.</p>
+<p><strong>With total variation as the distance,</strong> the guarantee is that no question about the target’s value gets an answer more than <span class="math inline">\(t\)</span> away from the answer the whole table gives. By Fact 2, the total variation is the largest such gap, so for every class and every set of values <span class="math inline">\(A\)</span>, <span id="eq-anon-tv"><span class="math display">\[\lvert P_E(A) - P(A)\rvert \le t. \tag{16.7}\]</span></span> In particular, guessing the most common value of the target’s class is right with probability at most <span class="math inline">\(\max_vP(v) + t\)</span>: the best guess from the table alone, plus <span class="math inline">\(t\)</span>.</p>
+<p><strong>With the earth mover’s distance (EMD),</strong> the choice of Li et al., values that are similar are close, which is what the similarity attack needs. Think of each distribution as piles of sand on the values. The EMD is the least work needed to reshape one set of piles into the other, where moving a unit of sand between two values costs their distance apart. For <span class="math inline">\(m\)</span> ordered values (salary bands, age groups), numbered <span class="math inline">\(1\)</span> to <span class="math inline">\(m\)</span> and placed at ground distance <span class="math inline">\(\lvert i - j\rvert/(m - 1)\)</span> so that the two ends are distance 1 apart, the work comes out as a sum over the gaps between neighbouring values of how much sand must cross each one: <span id="eq-anon-emd"><span class="math display">\[\mathrm{EMD}(P_E, P) = \frac{1}{m - 1}\sum_{i=1}^{m-1}\Big\lvert\sum_{j \le i}\big(P_E(j) - P(j)\big)\Big\rvert. \tag{16.8}\]</span></span></p>
+</section>
+<section id="derivation-2" class="level3" data-number="16.5.3">
+<h3 data-number="16.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">16.5.3</span> Derivation</h3>
+<p><strong>Total variation</strong> (<a href="#eq-anon-tv" class="quarto-xref">Equation&nbsp;<span>16.7</span></a>). The idea is that the adversary’s belief is the class distribution, so a bound on how far the class is from the table is a bound on how far the adversary’s belief moves.</p>
+<ol type="1">
+<li><strong>A distance bound is an event bound.</strong> By Fact 2, <span class="math inline">\(\mathrm{TV}(P_E, P) = \max_A\lvert P_E(A) - P(A)\rvert\)</span>, so a bound <span class="math inline">\(t\)</span> on the distance is a bound <span class="math inline">\(t\)</span> on every event.</li>
+<li><strong>The adversary’s belief is the class distribution.</strong> By Fact 1, the adversary’s belief about a target in class <span class="math inline">\(E\)</span> is <span class="math inline">\(P_E\)</span>. So every question it can ask about the target’s value, “is it in <span class="math inline">\(A\)</span>?”, gets an answer within <span class="math inline">\(t\)</span> of the answer from the table as a whole.</li>
+<li><strong>Apply it to the best guess.</strong> Take <span class="math inline">\(A = \{v\}\)</span> for the class’s most common value: <span class="math inline">\(P_E(v) \le P(v) + t \le \max_uP(u) + t\)</span>.</li>
+</ol>
+<p><strong>Earth mover’s distance on ordered values</strong> (<a href="#eq-anon-emd" class="quarto-xref">Equation&nbsp;<span>16.8</span></a>). The idea is that on a line, sand can only get from one side of a gap to the other by crossing it, so you can count the work gap by gap.</p>
+<ol type="1">
+<li><strong>What EMD is.</strong> EMD is the least total cost of moving the mass of <span class="math inline">\(P_E\)</span> until it becomes <span class="math inline">\(P\)</span>, where moving mass <span class="math inline">\(f\)</span> from value <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> costs <span class="math inline">\(f\lvert i - j\rvert/(m - 1)\)</span>. A move from <span class="math inline">\(i\)</span> to <span class="math inline">\(j\)</span> crosses each of the <span class="math inline">\(\lvert i - j\rvert\)</span> gaps between them once, so its cost is <span class="math inline">\(1/(m - 1)\)</span> per unit per gap crossed.</li>
+<li><strong>How much must cross each gap.</strong> Look at the gap between values <span class="math inline">\(i\)</span> and <span class="math inline">\(i + 1\)</span>. The values up to <span class="math inline">\(i\)</span> hold <span class="math inline">\(\sum_{j \le i}P_E(j)\)</span> under the class and must end up holding <span class="math inline">\(\sum_{j \le i}P(j)\)</span>. The difference, <span class="math inline">\(\sum_{j \le i}(P_E(j) - P(j))\)</span>, is their excess (or shortfall), and that net mass has to cross the gap, rightwards if positive and leftwards if negative. Any plan moves at least this much across the gap.</li>
+<li><strong>A plan that does no more.</strong> A plan that only moves mass between neighbours and never in both directions across the same gap moves exactly the net amount across each gap. So the least cost is <span class="math inline">\(1/(m - 1)\)</span> times the sum, over the <span class="math inline">\(m - 1\)</span> gaps, of the absolute net mass crossing it, which is <a href="#eq-anon-emd" class="quarto-xref">Equation&nbsp;<span>16.8</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-2" class="level3" data-number="16.5.4">
+<h3 data-number="16.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">16.5.4</span> Interpretation</h3>
+<p>The bound is additive, and rare values need a ratio. <a href="#eq-anon-tv" class="quarto-xref">Equation&nbsp;<span>16.7</span></a> lets a 1% value rise to <span class="math inline">\(1\% + t\)</span>. At <span class="math inline">\(t = 0.15\)</span> that is 16%, a sixteen-fold increase for the people who most need protection. A difference of 0.15 looks small next to a common value such as 40%, and enormous next to 1%. A guarantee for rare values has to bound the <em>ratio</em> of the adversary’s beliefs with and without the release, not their difference. That is the shape of the definition in the next part.</p>
+<p>t-closeness also fights the purpose of the release. If age predicts diagnosis, a class of similar ages has a different diagnosis distribution from the whole table, so it is not t-close for small <span class="math inline">\(t\)</span>. Making every class t-close means mixing ages until the pattern is gone. But the pattern is a fact about the population, the kind of finding any study is published to report, not a secret about any one patient. <a href="../part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a> draws the same line between population inference and individual leakage.</p>
+<p>The choice of distance is a choice of what is “similar”. EMD with a ground distance from a hierarchy of diagnoses treats gastritis and gastric ulcer as close, so a class full of stomach diseases is far from the table and fails. Total variation treats every pair of values as equally different, so it would not see the similarity attack.</p>
+</section>
+<section id="example-toy-skew-and-hospital" class="level3" data-number="16.5.5">
+<h3 data-number="16.5.5" class="anchored" data-anchor-id="example-toy-skew-and-hospital"><span class="header-section-number">16.5.5</span> Example: toy, skew and hospital</h3>
+<p>In <a href="#tbl-anon-toy" class="quarto-xref">Table&nbsp;<span>16.4</span></a>, the table has four heart disease, three cancer and two flu records, so its distribution is <span class="math inline">\(\frac49\)</span> heart disease, <span class="math inline">\(\frac39\)</span> cancer, <span class="math inline">\(\frac29\)</span> flu. Each class’s total variation from it is the total excess of the class over the table (Fact 2). Alice’s class is all heart disease, an excess of <span class="math inline">\(1 - \frac49 = \frac59 = 0.556\)</span>. The second class is <span class="math inline">\(\frac13 = \frac39\)</span> of each, an excess of <span class="math inline">\(\frac39 - \frac29 = \frac19 = 0.111\)</span> on flu only. Bob’s class, <span class="math inline">\(\frac69\)</span> cancer and <span class="math inline">\(\frac39\)</span> flu, has excesses <span class="math inline">\(\frac39\)</span> and <span class="math inline">\(\frac19\)</span>, together <span class="math inline">\(\frac49 = 0.444\)</span>. So the release is <span class="math inline">\(t\)</span>-close only for <span class="math inline">\(t \ge 0.556\)</span>.</p>
+<p>For the skewness attack (<a href="#fig-anon-skew" class="quarto-xref">Figure&nbsp;<span>16.3</span></a>), the class that is 50% HIV is at total variation <span class="math inline">\(0.50 - 0.01 = 0.49\)</span> from a table with 1% HIV (the excess on HIV). A class with 10% HIV is at <span class="math inline">\(0.10 - 0.01 = 0.09\)</span>, which passes <span class="math inline">\(t = 0.1\)</span>, and still makes HIV ten times as likely for its members.</p>
+<div id="fig-anon-skew" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-anon-skew-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/anon_skew.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anon-skew-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.3: The skewness attack: a table in which 1% of patients have HIV, and a class of it that is half HIV. The class is 2-diverse but at total variation 0.49 from the table.
+</figcaption>
+</figure>
+</div>
+<p><a href="#tbl-anon-t" class="quarto-xref">Table&nbsp;<span>16.6</span></a> adds t-closeness in total variation to <span class="math inline">\(k = 5\)</span> on the hospital table.</p>
+<div id="tbl-anon-t" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-t-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.6: Mondrian with t-closeness (total variation) on the hospital table. The table’s most common diagnosis has frequency 0.185.
+</figcaption>
+<div aria-describedby="tbl-anon-t-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Criterion</th>
+<th>Classes</th>
+<th>Sizes</th>
+<th>Mean width</th>
+<th>Largest TV</th>
+<th>Guess accuracy</th>
+<th>Bound <span class="math inline">\(\max_vP(v) + t\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(k = 5\)</span></td>
+<td>1,542</td>
+<td>5–11</td>
+<td>0.016</td>
+<td>0.937</td>
+<td>0.593</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(k = 5\)</span>, <span class="math inline">\(t = 0.3\)</span></td>
+<td>495</td>
+<td>6–60</td>
+<td>0.291</td>
+<td>0.300</td>
+<td>0.275</td>
+<td>0.485</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(k = 5\)</span>, <span class="math inline">\(t = 0.15\)</span></td>
+<td>136</td>
+<td>14–304</td>
+<td>0.324</td>
+<td>0.149</td>
+<td>0.222</td>
+<td>0.335</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The bound column is <span class="math inline">\(0.185 + t\)</span>: <span class="math inline">\(0.185 + 0.3 = 0.485\)</span> and <span class="math inline">\(0.185 + 0.15 = 0.335\)</span>. The guess accuracy respects this bound of <a href="#eq-anon-tv" class="quarto-xref">Equation&nbsp;<span>16.7</span></a>. But the classes now span about 30% of each quasi-identifier’s range, and the release is worse than no release for learning about the population: its guess accuracy of 0.222 to 0.275 is far below the 0.536 that imputation from age achieves.</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="16.5.6">
+<h3 data-number="16.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">16.5.6</span> Check yourself</h3>
+<ul>
+<li>A table has 2% cancer. A release is <span class="math inline">\(0.05\)</span>-close in total variation. What is the largest possible frequency of cancer in a class? <em>(0.07, from <span class="math inline">\(0.02 + 0.05\)</span> by <a href="#eq-anon-tv" class="quarto-xref">Equation&nbsp;<span>16.7</span></a>: 3.5 times the base rate, within the definition.)</em></li>
+<li>Salaries take the 9 ordered values 3k to 11k, uniformly in the table. A class holds {3k, 4k, 5k}. Is the EMD to the table larger or smaller than for a class {6k, 8k, 11k}? <em>(Larger: 0.375 against 0.167. The first class is bunched at the low end, so mass has to travel far to spread out; the second is already spread out; <a href="../../book-exercises/part02-attacks/08-syntactic-anonymity.html#sec-sol-anon-3">Exercise 3</a> computes both.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-anon-composition" class="level2" data-number="16.6">
+<h2 data-number="16.6" class="anchored" data-anchor-id="sec-anon-composition"><span class="header-section-number">16.6</span> The composition attack</h2>
+<section id="context-3" class="level3" data-number="16.6.1">
+<h3 data-number="16.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">16.6.1</span> Context</h3>
+<p>Every definition so far is about one release. Ganta, Kasiviswanathan &amp; Smith (2008) asked what happens when there are two. Two hospitals in the same city publish their patient tables, each one properly k-anonymous, or <span class="math inline">\(\ell\)</span>-diverse, with no coordination. A patient treated at both appears in a class of each. The adversary takes the diagnoses of the target’s class in one release, those of the class in the other, and intersects: the true diagnosis is in both. Neither hospital did anything wrong, and each release satisfies its definition, yet the combination can reveal the diagnosis outright.</p>
+</section>
+<section id="statement-3" class="level3" data-number="16.6.2">
+<h3 data-number="16.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">16.6.2</span> Statement</h3>
+<p><strong>The attack.</strong> For a target in both releases, with class <span class="math inline">\(E_A\)</span> in release A and <span class="math inline">\(E_B\)</span> in release B, the candidate values are those that appear in both classes, <span id="eq-auto-08syntacticanonymity-3"><span class="math display">\[\{v : n_{E_A}(v) &gt; 0\} \cap \{v : n_{E_B}(v) &gt; 0\}, \tag{16.9}\]</span></span> and the true value is always among them, because the target’s own record carries it in each class. The diagnosis is <strong>pinned down</strong> when one candidate is left.</p>
+<p><strong>How often, in a model.</strong> To see how often this happens, model the classes as random. Suppose the target’s class has <span class="math inline">\(k_A\)</span> records in one release and <span class="math inline">\(k_B\)</span> in the other, and the other members’ values are independent draws from the population distribution <span class="math inline">\(p\)</span>, with <span class="math inline">\(p_v\)</span> the probability of value <span class="math inline">\(v\)</span>. Given that the target’s true value is <span class="math inline">\(v\)</span>, let <span class="math inline">\(A_v\)</span> be the set of values other than <span class="math inline">\(v\)</span> that appear among the <span class="math inline">\(k_A - 1\)</span> other members of the class in release A, and <span class="math inline">\(B_v\)</span> the same for the <span class="math inline">\(k_B - 1\)</span> others in release B. These are the wrong values each release leaves open. The target is pinned exactly when no wrong value is left open by both, that is when <span class="math inline">\(A_v\)</span> and <span class="math inline">\(B_v\)</span> share nothing. So the probability is an average, over the true value <span class="math inline">\(v\)</span> and over what release A leaves open, of the chance that every other member of the second class avoids those values. Writing <span class="math inline">\(p(S) = \sum_{u \in S}p_u\)</span> for the probability of a set of values, <span id="eq-anon-pinned"><span class="math display">\[\Pr[\text{pinned}] = \sum_vp_v\,\mathbb E\big[(1 - p(A_v))^{k_B - 1}\big],\qquad \Pr[A_v = S] = \sum_{T \subseteq S}(-1)^{\lvert S\rvert - \lvert T\rvert}\big(p_v + p(T)\big)^{k_A - 1}, \tag{16.10}\]</span></span> where the expectation is over the random set <span class="math inline">\(A_v\)</span>, whose distribution is the second formula. A simpler lower bound counts, for each wrong value, the chance that both classes contain it, and subtracts the total from 1: <span id="eq-anon-union"><span class="math display">\[\Pr[\text{pinned}] \ge 1 - \sum_vp_v\sum_{u \ne v}\big(1 - (1 - p_u)^{k_A - 1}\big)\big(1 - (1 - p_u)^{k_B - 1}\big). \tag{16.11}\]</span></span></p>
+</section>
+<section id="derivation-3" class="level3" data-number="16.6.3">
+<h3 data-number="16.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">16.6.3</span> Derivation</h3>
+<p><strong>The exact probability</strong> (<a href="#eq-anon-pinned" class="quarto-xref">Equation&nbsp;<span>16.10</span></a>). The idea is to fix the true value and what the first class contains, compute the chance that the second class avoids it, and then average.</p>
+<ol type="1">
+<li><strong>Condition on the true value.</strong> The target’s true value is <span class="math inline">\(v\)</span> with probability <span class="math inline">\(p_v\)</span>. Everything below is for a fixed <span class="math inline">\(v\)</span>, and the outer sum <span class="math inline">\(\sum_v p_v(\cdot)\)</span> averages over it.</li>
+<li><strong>When the value is pinned.</strong> The candidates are <span class="math inline">\(v\)</span> itself together with the wrong values that appear in both classes, <span class="math inline">\(\{v\} \cup (A_v \cap B_v)\)</span>. So the value is pinned exactly when <span class="math inline">\(A_v\)</span> and <span class="math inline">\(B_v\)</span> are disjoint.</li>
+<li><strong>Fix what the first class leaves open.</strong> Condition on <span class="math inline">\(A_v = S\)</span> for a particular set <span class="math inline">\(S\)</span>. The <span class="math inline">\(k_B - 1\)</span> others in the second class are independent draws, and each avoids <span class="math inline">\(S\)</span> with probability <span class="math inline">\(1 - p(S)\)</span>. So <span class="math inline">\(\Pr[B_v \cap S = \emptyset] = (1 - p(S))^{k_B - 1}\)</span>. Averaging over the possible sets <span class="math inline">\(S\)</span>, weighted by <span class="math inline">\(\Pr[A_v = S]\)</span>, gives the expectation in <a href="#eq-anon-pinned" class="quarto-xref">Equation&nbsp;<span>16.10</span></a>.</li>
+<li><strong>The distribution of the first class’s set.</strong> <span class="math inline">\(A_v = S\)</span> means two things: every one of the <span class="math inline">\(k_A - 1\)</span> draws lands in <span class="math inline">\(S \cup \{v\}\)</span>, and each value of <span class="math inline">\(S\)</span> is hit at least once. The first part is easy: “all draws land in <span class="math inline">\(T \cup \{v\}\)</span>” has probability <span class="math inline">\((p_v + p(T))^{k_A - 1}\)</span> for any set <span class="math inline">\(T\)</span>. The second part is handled by <strong>inclusion–exclusion</strong>: start from “all draws land in <span class="math inline">\(S \cup \{v\}\)</span>”, subtract the cases where some value of <span class="math inline">\(S\)</span> is missed (all draws land in a smaller set), add back the cases subtracted twice, and so on. The sets <span class="math inline">\(T \subseteq S\)</span> are the values not missed, and the sign <span class="math inline">\((-1)^{\lvert S\rvert - \lvert T\rvert}\)</span> alternates with the number missed, which gives the alternating sum.</li>
+</ol>
+<p>For a single wrong value, <span class="math inline">\(S = \{u\}\)</span>, the sum has two terms: <span class="math inline">\(\Pr[A_v = \{u\}] = (p_v + p_u)^{k_A - 1} - p_v^{k_A - 1}\)</span>, the probability that every draw is <span class="math inline">\(v\)</span> or <span class="math inline">\(u\)</span>, minus the probability that every draw is <span class="math inline">\(v\)</span> (in which case <span class="math inline">\(u\)</span> was never hit).</p>
+<p><strong>The lower bound</strong> (<a href="#eq-anon-union" class="quarto-xref">Equation&nbsp;<span>16.11</span></a>). The idea is that the target fails to be pinned only if some wrong value turns up in both classes, and the chance of “some” is at most the sum of the chances of each.</p>
+<ol type="1">
+<li><strong>When it fails.</strong> Given <span class="math inline">\(v\)</span>, the value is not pinned when some <span class="math inline">\(u \ne v\)</span> is in both <span class="math inline">\(A_v\)</span> and <span class="math inline">\(B_v\)</span>.</li>
+<li><strong>The chance for one wrong value.</strong> <span class="math inline">\(u\)</span> is missing from the first class when all <span class="math inline">\(k_A - 1\)</span> others avoid it, which has probability <span class="math inline">\((1 - p_u)^{k_A - 1}\)</span>, so <span class="math inline">\(\Pr[u \in A_v] = 1 - (1 - p_u)^{k_A - 1}\)</span>, and likewise for <span class="math inline">\(B_v\)</span>. The two classes are drawn independently, so the probability that <span class="math inline">\(u\)</span> is in both is the product.</li>
+<li><strong>Add over wrong values.</strong> The expected number of wrong values in both sets is the sum of these products, by linearity of expectation (the expected count of events is the sum of their probabilities; Fact 1 of <a href="../part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a>). The chance that there is at least one is at most this expected number, because a count that is at least 1 whenever the event happens has expectation at least the event’s probability (the union bound). Subtract from 1 and average over <span class="math inline">\(v\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-3" class="level3" data-number="16.6.4">
+<h3 data-number="16.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">16.6.4</span> Interpretation</h3>
+<p>None of the three definitions composes. Each is a condition on one table, and the intersection of two tables is not a table that either custodian checked. Ganta et al.&nbsp;showed the attack on k-anonymous and on <span class="math inline">\(\ell\)</span>-diverse releases. A custodian who checks only its own table cannot account for releases it does not know about.</p>
+<p>That points to what is wanted instead. A definition that composes says: if release A leaks at most this much and release B at most that much, together they leak at most a known function of the two. It must also hold whatever the adversary knows, since another release is just auxiliary information. The next part starts from these two requirements.</p>
+<p>The model understates the risk. It draws the other members of a class from the whole population. In real releases a class collects similar people (similar ages, here) who are more likely to share a diagnosis, so each class contains fewer distinct wrong values and the intersection is smaller than the model predicts.</p>
+<p>The union bound is useful only for small classes. It charges every wrong value separately, so it is accurate when two wrong values rarely turn up in both classes at once. At <span class="math inline">\(k = 2\)</span> each class has a single other member, so it holds at most one wrong value, two wrong values can never turn up together, and the bound is exact. At <span class="math inline">\(k = 5\)</span> the expected number of shared wrong values exceeds 1, the bound is negative, and <a href="#eq-anon-pinned" class="quarto-xref">Equation&nbsp;<span>16.10</span></a> is needed.</p>
+</section>
+<section id="example-two-hospitals" class="level3" data-number="16.6.5">
+<h3 data-number="16.6.5" class="anchored" data-anchor-id="example-two-hospitals"><span class="header-section-number">16.6.5</span> Example: two hospitals</h3>
+<p>In the model, with <span class="math inline">\(p\)</span> the population’s diagnosis distribution, from which the hospital table is drawn, the probability that two releases pin down the diagnosis is 0.8734 for classes of 2, 0.1615 for classes of 5, 0.0288 for classes of 7 and 0.0015 for classes of 10. It falls fast because a larger class contains more wrong values, and each one is another chance for the two classes to share one. Simulation agrees to within 0.001 (<a href="#fig-anon-composition" class="quarto-xref">Figure&nbsp;<span>16.4</span></a>, left). The union bound gives 0.8734 at <span class="math inline">\(k = 2\)</span> and is negative from <span class="math inline">\(k = 5\)</span> on.</p>
+<p>The script then runs the attack. A city has 15,000 people drawn from the model of the hospital table. Two hospitals each treat a random 10,000 of them, so 6,649 people are treated at both. Each hospital publishes a 5-anonymous Mondrian release of its own patients. <a href="#tbl-anon-composition" class="quarto-xref">Table&nbsp;<span>16.7</span></a> gives what the adversary learns about the 6,649.</p>
+<div id="tbl-anon-composition" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-composition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.7: The composition attack on two independent hospital releases, for the 6,649 people treated at both. “Pinned” is the fraction left with a single possible diagnosis.
+</figcaption>
+<div aria-describedby="tbl-anon-composition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Releases</th>
+<th>Pinned by A alone</th>
+<th>Pinned by B alone</th>
+<th>Pinned by A and B</th>
+<th>Mean candidates, A alone</th>
+<th>Mean candidates, A and B</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(k = 5\)</span></td>
+<td>0.0289</td>
+<td>0.0262</td>
+<td>0.0985</td>
+<td>2.79</td>
+<td>2.38</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(k = 5\)</span>, distinct <span class="math inline">\(\ell = 3\)</span></td>
+<td>0.0000</td>
+<td>0.0000</td>
+<td>0.0027</td>
+<td>3.22</td>
+<td>2.92</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Two 5-anonymous releases pin down the diagnosis of 9.9% of the shared patients, more than three times either release alone (0.0985 against 0.0289 and 0.0262). For comparison, in the single-table release of <a href="#tbl-anon-k" class="quarto-xref">Table&nbsp;<span>16.3</span></a> at <span class="math inline">\(k = 5\)</span> a patient’s class has 6.8 records on average over patients, and the model at <span class="math inline">\(k = 7\)</span> predicts only 2.9%: real classes, which group patients of similar age, are more alike than random draws, as the interpretation above said. With distinct 3-diversity, no single release pins anyone down, and the two together pin down 18 patients (0.27% of 6,649).</p>
+<div id="fig-anon-composition" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-anon-composition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/anon_composition.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-anon-composition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;16.4: Left: the probability that two releases pin down the diagnosis, against the class size, when the other members of each class are drawn from the population: exact (<a href="#eq-anon-pinned" class="quarto-xref">Equation&nbsp;<span>16.10</span></a>), simulated, and the union bound (<a href="#eq-anon-union" class="quarto-xref">Equation&nbsp;<span>16.11</span></a>). Right: the number of diagnoses still possible for a patient treated at both hospitals, from either 5-anonymous release alone and from their intersection.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-3" class="level3" data-number="16.6.6">
+<h3 data-number="16.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">16.6.6</span> Check yourself</h3>
+<ul>
+<li>Two releases are each 3-diverse in the distinct sense, over 8 possible values. If each class’s two other values were chosen uniformly at random from the 7 wrong ones, how likely is the intersection to pin down the truth? <em>(<span class="math inline">\(\binom52/\binom72 = 10/21 = 0.476\)</span>: the second class must avoid both of the first class’s wrong values, so its two wrong values must come from the other 5. <a href="../../book-exercises/part02-attacks/08-syntactic-anonymity.html#sec-sol-anon-4">Exercise 4</a> derives it.)</em></li>
+<li>Why can’t the second hospital prevent the attack by checking its own release more carefully? <em>(The attack needs only that the two classes share no wrong value. The second hospital would need to know the first hospital’s classes, and every other release the patient appears in.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-anonymize-then-attack" class="level2" data-number="16.7">
+<h2 data-number="16.7" class="anchored" data-anchor-id="code-anonymize-then-attack"><span class="header-section-number">16.7</span> Code: anonymize, then attack</h2>
+<p>The script <a href="../../../code/part02-attacks/syntactic_anonymity.py">code/syntactic_anonymity.py</a> computes every number in this chapter and draws every figure. It implements Mondrian with any criterion on a class (k-anonymity, distinct and recursive l-diversity, t-closeness in total variation), the uniform-cells calculation, the attacks on the sensitive attribute, and the composition attack, exactly by inclusion–exclusion, by simulation and on two synthetic hospital releases. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/syntactic_anonymity.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-anon-code" class="quarto-xref">Table&nbsp;<span>16.8</span></a>:</p>
+<div id="tbl-anon-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.8: The script’s output with the default seed.
+</figcaption>
+<div aria-describedby="tbl-anon-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Toy release</td>
+<td>Posteriors 1 (homogeneous class), <span class="math inline">\(\frac23\)</span> cancer (Bob), 1 after ruling out flu; entropy <span class="math inline">\(\ell\)</span> = 1.00, 3.00, 1.89; TV to the table 0.556, 0.111, 0.444</td>
+</tr>
+<tr class="even">
+<td>Recursive <span class="math inline">\((c, \ell)\)</span> bound</td>
+<td><span class="math inline">\(c/(1 + c)\)</span> = 0.500, 0.667, 0.750 for <span class="math inline">\(c\)</span> = 1, 2, 3</td>
+</tr>
+<tr class="odd">
+<td>Skewness</td>
+<td>50% HIV against 1%: TV 0.49, ratio 50. 10% HIV: TV 0.09, ratio 10</td>
+</tr>
+<tr class="even">
+<td>Uniform cells, <span class="math inline">\(n = 10^4\)</span></td>
+<td><a href="#tbl-anon-bits" class="quarto-xref">Table&nbsp;<span>16.2</span></a></td>
+</tr>
+<tr class="odd">
+<td>Hospital table, <span class="math inline">\(n = 10^4\)</span></td>
+<td>Exact quasi-identifiers: linkage 0.933. Baselines: most common diagnosis 0.185, imputation from age 0.536, largest population posterior 0.705</td>
+</tr>
+<tr class="even">
+<td>Mondrian</td>
+<td><a href="#tbl-anon-k" class="quarto-xref">Table&nbsp;<span>16.3</span></a>, <a href="#tbl-anon-l" class="quarto-xref">Table&nbsp;<span>16.5</span></a>, <a href="#tbl-anon-t" class="quarto-xref">Table&nbsp;<span>16.6</span></a></td>
+</tr>
+<tr class="odd">
+<td>Two hospitals</td>
+<td><a href="#tbl-anon-composition" class="quarto-xref">Table&nbsp;<span>16.7</span></a></td>
+</tr>
+<tr class="even">
+<td>Composition model</td>
+<td>Pinned: 0.8734 (<span class="math inline">\(k = 2\)</span>), 0.1615 (<span class="math inline">\(k = 5\)</span>), 0.0288 (<span class="math inline">\(k = 7\)</span>), 0.0015 (<span class="math inline">\(k = 10\)</span>); simulation within 0.001</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="../../../tests/test_syntactic_anonymity.py">tests/test_syntactic_anonymity.py</a> checks that the output still matches.</p>
+<p>The study plan’s exercise is to k-anonymize a census extract with ARX, a free anonymization tool that implements these criteria, and link it back to a public table. The script’s Mondrian release plays the part of ARX, and its linkage column is that measurement: the re-identification rate against an adversary holding everyone’s quasi-identifiers, the strongest auxiliary table there can be.</p>
+<p><strong>What to take from it.</strong> k-anonymity does what it says: linkage success stays below <span class="math inline">\(1/k\)</span>, and Mondrian keeps it above <span class="math inline">\(1/(2k)\)</span> at little cost in precision. But what it says is not enough, because small classes state diagnoses outright, for 2.3% of patients at <span class="math inline">\(k = 5\)</span>. Even where nothing is stated outright, most of what an anonymized table teaches is about the population, so measure attribute disclosure against imputation, not against guessing the most common value. Each fix costs utility: recursive diversity and t-closeness remove the certain disclosures by erasing the age–diagnosis pattern the data exist to show. And two releases are worse than one, under every definition here. The composition attack more than triples the pinned diagnoses, and it is the attack that a better definition has to survive.</p>
+</section>
+<section id="references" class="level2" data-number="16.8">
+<h2 data-number="16.8" class="anchored" data-anchor-id="references"><span class="header-section-number">16.8</span> References</h2>
+<ul>
+<li>Samarati &amp; Sweeney, “Protecting Privacy when Disclosing Information: k-Anonymity and Its Enforcement through Generalization and Suppression” (SRI technical report, 1998), and Sweeney, “k-Anonymity: A Model for Protecting Privacy” (International Journal of Uncertainty, Fuzziness and Knowledge-Based Systems, 2002): the definition, generalization and suppression, and the linkage attack it answers.</li>
+<li>LeFevre, DeWitt &amp; Ramakrishnan, “Mondrian Multidimensional k-Anonymity” (ICDE, 2006): the median-split algorithm the script uses, and why multidimensional recoding loses less than one generalization per column.</li>
+<li>Machanavajjhala, Kifer, Gehrke &amp; Venkitasubramaniam, “l-Diversity: Privacy Beyond k-Anonymity” (ACM Transactions on Knowledge Discovery from Data, 2007; ICDE 2006): the homogeneity and background knowledge attacks, and the three versions of l-diversity with their Bayesian justification.</li>
+<li>Li, Li &amp; Venkatasubramanian, “t-Closeness: Privacy Beyond k-Anonymity and l-Diversity” (ICDE, 2007): the skewness and similarity attacks, and the earth mover’s distance with ordered and hierarchical ground distances.</li>
+<li>Ganta, Kasiviswanathan &amp; Smith, “Composition Attacks and Auxiliary Information in Data Privacy” (KDD, 2008): the intersection attack on independent releases, experiments on public census data, and the argument that a definition must hold up against auxiliary information such as other releases.</li>
+<li>Aggarwal, “On k-Anonymity and the Curse of Dimensionality” (VLDB, 2005): why high-dimensional data cannot be k-anonymized without destroying it.</li>
+<li>Prasser, Kohlmayer and colleagues, the ARX data anonymization tool (arx.deidentifier.org): an open implementation of these criteria and many more, with risk models and utility measures.</li>
+<li>Article 29 Working Party, “Opinion 05/2014 on Anonymisation Techniques”: how European regulators judge these techniques against singling out, linkability and inference, the three attacks of this chapter.</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="16.9">
+<h2 data-number="16.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">16.9</span> Cheat sheet</h2>
+<p><span class="math inline">\(n\)</span> records, classes <span class="math inline">\(E\)</span> of size <span class="math inline">\(\lvert E\rvert\)</span>, <span class="math inline">\(J\)</span> classes, <span class="math inline">\(P_E\)</span> the class’s distribution of the sensitive attribute and <span class="math inline">\(P\)</span> the table’s, <span class="math inline">\(r_1 \ge r_2 \ge \dots\)</span> a class’s sorted counts. <a href="#tbl-anon-cheat" class="quarto-xref">Table&nbsp;<span>16.9</span></a> collects the results.</p>
+<div id="tbl-anon-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-anon-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;16.9: Every result in this chapter.
+</figcaption>
+<div aria-describedby="tbl-anon-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Formula</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Posterior in a class</td>
+<td><span class="math inline">\(P_E(v) = n_E(v)/\lvert E\rvert\)</span></td>
+<td>Ruling out values renormalizes over the rest</td>
+</tr>
+<tr class="even">
+<td>k-anonymity</td>
+<td>Every <span class="math inline">\(\lvert E\rvert \ge k\)</span>; linkage <span class="math inline">\(J/n \le 1/k\)</span></td>
+<td>Says nothing about the sensitive attribute</td>
+</tr>
+<tr class="odd">
+<td>Uniform cells</td>
+<td>Fraction in classes <span class="math inline">\(&lt; k\)</span>: <span class="math inline">\(\Pr[\mathrm{Poisson}(n/M) \le k - 2]\)</span></td>
+<td>99% 2-anonymous at <span class="math inline">\(\log_2n - 2.20\)</span> bits</td>
+</tr>
+<tr class="even">
+<td>Distinct, entropy l-diversity</td>
+<td><span class="math inline">\(\ge \ell\)</span> values; <span class="math inline">\(H(P_E) \ge \log_2\ell\)</span></td>
+<td>Neither caps the top value’s share near <span class="math inline">\(1/\ell\)</span></td>
+</tr>
+<tr class="odd">
+<td>Recursive <span class="math inline">\((c, \ell)\)</span>-diversity</td>
+<td><span class="math inline">\(r_1 &lt; c(r_\ell + \dots + r_m)\)</span></td>
+<td>Posterior <span class="math inline">\(&lt; c/(1 + c)\)</span> after ruling out <span class="math inline">\(\ell - 2\)</span> values</td>
+</tr>
+<tr class="even">
+<td>t-closeness (TV)</td>
+<td><span class="math inline">\(\lvert P_E(A) - P(A)\rvert \le t\)</span> for every <span class="math inline">\(A\)</span></td>
+<td>Additive: a 1% value may rise to <span class="math inline">\(1\% + t\)</span></td>
+</tr>
+<tr class="odd">
+<td>EMD, ordered values</td>
+<td><span class="math inline">\(\frac{1}{m-1}\sum_i\lvert\sum_{j \le i}(P_E(j) - P(j))\rvert\)</span></td>
+<td>Similar values are close</td>
+</tr>
+<tr class="even">
+<td>Composition</td>
+<td>Candidates $= $ values of <span class="math inline">\(E_A\)</span> <span class="math inline">\(\cap\)</span> values of <span class="math inline">\(E_B\)</span></td>
+<td>Pinned: <a href="#eq-anon-pinned" class="quarto-xref">Equation&nbsp;<span>16.10</span></a>; no syntactic definition prevents it</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>k-anonymity protects names, not attributes. Ask what a class’s sensitive values reveal, not just how big it is.</li>
+<li>Measure attribute disclosure against imputation from the population, or you will count the study’s findings as leaks.</li>
+<li>A rare sensitive value needs a bound on the ratio of beliefs, not on their difference.</li>
+<li>Assume another release exists. A guarantee that is only about one table is not a guarantee about a person.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part02-attacks/08-syntactic-anonymity.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-attacks/07-linkage-reidentification.html" class="pagination-link" aria-label="Linkage and re-identification">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-attacks/09-reconstruction.html" class="pagination-link" aria-label="Reconstruction attacks">
+        <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
