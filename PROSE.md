@@ -13,7 +13,7 @@ The first practitioner edition explained the right things in prose that was hard
 
 : The same chapter in the two editions, measured by `tools/prose.py`. {#tbl-prose-why}
 
-Two lessons follow. Length must follow content: if a page is too long, cut a topic, never the words that make a sentence readable. And readability has to be checked, not assumed, because a page can be correct, complete and well organized and still be hard to read.
+Two lessons follow. Length must follow content: if a page is too long, cut repetition and secondary detail, never a topic and never the words that make a sentence readable. And readability has to be checked, not assumed, because a page can be correct, complete and well organized and still be hard to read.
 
 ## The rules
 

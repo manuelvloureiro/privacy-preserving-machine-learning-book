@@ -95,7 +95,7 @@ make website   # fails on any warning: uncaptioned tables, unresolved @reference
 
 **How much math.** It depends on the chapter. Keep exactly the math a practitioner needs to do the work: the formulas they calibrate, compute or check with (noise scales, composition, conversions, attack scores, error rates), each explained in words. Drop the math that only serves a proof. A chapter about a computation keeps its formulas; a chapter about a concept may need almost none.
 
-**Length.** Length follows the explanation, never the other way round. A chapter keeps every topic of its full-edition chapter and drops only the proofs, which usually leaves a quarter to a third of the full chapter's words (about 2,500–3,500 for a typical chapter, less in Part 1, which keeps only the facts later parts use). A word limit that forces compression is the wrong limit: if a chapter runs long, merge or shorten topics, never the sentences that explain them ([PROSE.md](PROSE.md)).
+**Length.** Length follows the explanation, never the other way round. Every chapter, Part 1 included, keeps every topic of its full-edition chapter and drops only the proofs, which leaves roughly half of the full chapter's words. There is no word limit, because a limit forces compression. If a chapter runs long, cut repetition and secondary detail (worked constants a reader never reuses, experiment set-ups, proof sketches), never a topic and never the words that make a sentence readable ([PROSE.md](PROSE.md)).
 
 **Chapter structure.**
 

@@ -370,7 +370,8 @@ def check_sentence(s: Sentence, limits: dict[str, Any], seen_symbols: set[str]) 
     prose = re.sub(r"⟦\d+⟧", "X", s.text)
     if s.words > limits["max_sentence_words"]:
         s.flags.append(f"long sentence: {s.words} words (limit {limits['max_sentence_words']})")
-    punct = len(re.findall(r"[,;:()]|—| – ", prose))
+    # An acronym's expansion, "gradient descent (GD)", is required by the terms check, not an aside.
+    punct = len(re.findall(r"[,;:()]|—| – ", re.sub(r"\s\([A-Z][A-Za-z0-9-]*\)", "", prose)))
     if punct > limits["max_sentence_punctuation"]:
         s.flags.append(f"overloaded: {punct} commas, colons, semicolons, parentheses or dashes")
     chained = len(re.findall(r"[;:](?=\s)", prose))

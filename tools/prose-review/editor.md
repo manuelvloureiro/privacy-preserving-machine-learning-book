@@ -29,7 +29,8 @@ Rules (PROSE.md explains each, with its source):
    fact about the quantity, and the text says why the result needs it.
 7. **No compression.** Don't drop articles, verbs or connectives to save words. Don't chain clauses
    with colons and semicolons. Don't open with a list that a colon then gathers up. If the page is too
-   long, cut a topic, not the words that make a sentence readable.
+   long, cut repetition and secondary detail, never a topic and never the words that make a sentence
+   readable.
 8. **Plain words.** Prefer the common word. Define jargon once. Keep the book's terms consistent.
 
 For each problem, give:
