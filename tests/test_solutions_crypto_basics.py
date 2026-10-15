@@ -1,10 +1,10 @@
-"""code/solutions_crypto_basics.py runs and reproduces the numbers in solutions/08-crypto-basics.md."""
+"""code/part01-prerequisites/solutions_crypto_basics.py runs and reproduces the numbers in book-exercises/part01-prerequisites/08-crypto-basics.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part01-prerequisites" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part01-prerequisites"
 
 
 def run(script: Path, out: Path) -> str:

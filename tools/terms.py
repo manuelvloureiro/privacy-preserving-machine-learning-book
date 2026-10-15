@@ -4,14 +4,17 @@
     uv run python tools/terms.py candidates      # suggest index terms not yet in terms.toml
     uv run python tools/terms.py check           # exit 1 on any acronym or index problem
     uv run python tools/terms.py build           # write glossary.md, term-index.md, _terms.json
-    uv run python tools/terms.py build --book _build/pdf --profile pdf   # into a staged copy
+    uv run python tools/terms.py check --book book-exercises            # another of the three books
+    uv run python tools/terms.py build --book _build/full-pdf --profile pdf   # into a staged copy
 
-The book's files are read from book/ unless --book names another copy of it; build writes its three
-files into that copy. The make targets build from staged copies in _build/, so generated files never
-land among the sources. --profile picks the Quarto profile (_quarto-<profile>.yml) whose appendices
-count as part of the book; the default is the website profile, which includes the solutions.
+The book's files are read from book-full/ unless --book names another book (book-exercises/,
+book-practitioner/) or a staged copy of one; build writes its three files into that copy. The make
+targets build from staged copies in _build/, so generated files never land among the sources.
+--profile picks the Quarto profile (_quarto-<profile>.yml) whose appendices count as part of the
+book; the default is the website profile. A book whose chapters and appendices don't list
+term-index.md has no index, so check skips the index terms for it.
 
-The curated list is book/terms.toml:
+The curated list, shared by the three books, is terms.toml at the repository's root:
 
     [acronyms]
     MGF = "moment generating function"                      # must be expanded on every page
@@ -23,7 +26,7 @@ The curated list is book/terms.toml:
 
 A "page" is one chapter file, which is one web page. A reader can land on any page, so each
 page has to expand an acronym the first time it uses it, as "moment generating function (MGF)".
-The PDF index uses real page numbers (book/filters/term-index.lua reads _terms.json); the web
+The PDF index uses real page numbers (filters/term-index.lua reads _terms.json); the web
 index links to the section where each term appears.
 """
 
@@ -50,7 +53,7 @@ class Layout:
 
     @property
     def terms(self) -> Path:
-        return self.book / "terms.toml"
+        return ROOT / "terms.toml"
 
     @property
     def glossary(self) -> Path:
@@ -65,7 +68,8 @@ class Layout:
         return self.book / "_terms.json"
 
 
-layout = Layout(Path(__file__).resolve().parent.parent / "book")
+ROOT = Path(__file__).resolve().parent.parent
+layout = Layout(ROOT / "book-full")
 GENERATED = {"glossary.md", "term-index.md"}
 
 # Uppercase tokens that are not acronyms.
@@ -85,17 +89,17 @@ class Section:
 
 @dataclass
 class Page:
-    source: str  # path relative to book/, e.g. part01-prerequisites/02-concentration.md
+    source: str  # path relative to the book's folder, e.g. part01-prerequisites/02-concentration.md
     title: str
     anchor: str = ""  # id of the page's level-1 heading, which starts the page in the combined PDF
-    sections: list[Section] = field(default_factory=list)
+    sections: list[Section] = field(default_factory=list[Section])
 
     @property
     def text(self) -> str:
         return "\n".join(s.text for s in self.sections)
 
 
-def book_files() -> list[str]:
+def book_files(include_generated: bool = False) -> list[str]:
     """Chapters and appendices in reading order, from _quarto.yml and the profile's file."""
     config = cast(dict[str, Any], yaml.safe_load((layout.book / "_quarto.yml").read_text()))
     profile_file = layout.book / f"_quarto-{layout.profile}.yml"
@@ -117,6 +121,8 @@ def book_files() -> list[str]:
     book = cast(dict[str, Any], config["book"])
     collect(cast(list[Any], book.get("chapters", [])))
     collect(cast(list[Any], book.get("appendices", [])))
+    if include_generated:
+        return files
     files = [f for f in files if Path(f).name not in GENERATED]  # written by build, read as output
     missing = [f for f in files if not (layout.book / f).exists()]
     if missing:
@@ -502,7 +508,8 @@ def main() -> None:
     elif command == "candidates":
         candidates(pages, acronyms, index)
     elif command == "check":
-        problems = check_acronyms(pages, acronyms) + check_index(pages, index)
+        has_index = "term-index.md" in book_files(include_generated=True)
+        problems = check_acronyms(pages, acronyms) + (check_index(pages, index) if has_index else [])
         for problem in problems:
             print(problem)
         errors = sum(p.level == "error" for p in problems)

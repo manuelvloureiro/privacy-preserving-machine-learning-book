@@ -1,10 +1,10 @@
-"""code/numerical_accounting.py runs, writes its figures, and reproduces the numbers in 06-numerical-accounting.md."""
+"""code/part04-privacy-accounting/numerical_accounting.py runs, writes its figures, and reproduces the numbers in book-full/part04-privacy-accounting/06-numerical-accounting.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part04-privacy-accounting" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
 # The public functions, called as chapter 35 calls them: a Gaussian δ, and the sandwich for a short DP-SGD run.
 PUBLIC_API_CHECK = """

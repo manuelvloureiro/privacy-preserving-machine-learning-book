@@ -1,10 +1,10 @@
-"""code/laplace_gaussian.py runs, writes its figures, and reproduces the numbers in 03-laplace-gaussian.md."""
+"""code/part03-dp-foundations/laplace_gaussian.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/03-laplace-gaussian.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part03-dp-foundations" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part03-dp-foundations"
 
 
 def run(script: Path, out: Path) -> str:

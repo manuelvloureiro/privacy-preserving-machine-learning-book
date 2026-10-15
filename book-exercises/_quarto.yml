@@ -1,0 +1,77 @@
+# The exercise book: every chapter's exercises of the full edition, with worked solutions, one page
+# per chapter, numbered like the chapter it belongs to. Website only. Build with `make exercises`,
+# after the full edition: its references to the full edition's equations, sections, figures and
+# tables (@eq-name, ...) become links through _xrefs.json, which tools/xrefs.py writes from the
+# rendered full edition into the staged copy (see filters/xrefs.lua).
+project:
+  type: book
+  output-dir: _book  # inside the staged copy; the Makefile copies it to _book/book-exercises/
+  render:
+    - "*.md"
+    - "!README.md"
+    - "!**/README.md"
+
+book:
+  title: "Privacy-Preserving Machine Learning: Exercises"
+  author: "Manuel V. Loureiro"
+  date: today
+  date-format: "[Version] YYYY-MM-DD"
+  chapters:
+    - index.md
+    - part: "Prerequisites"
+      chapters:
+        - part01-prerequisites/01-distributions.md
+        - part01-prerequisites/02-concentration.md
+        - part01-prerequisites/03-divergences.md
+        - part01-prerequisites/04-hypothesis-testing.md
+        - part01-prerequisites/05-information-theory.md
+        - part01-prerequisites/06-optimization.md
+        - part01-prerequisites/07-stability-generalization.md
+        - part01-prerequisites/08-crypto-basics.md
+    - part: "Threat models and attacks"
+      chapters:
+        - part02-attacks/01-threat-models.md
+        - part02-attacks/02-membership-inference.md
+        - part02-attacks/03-attribute-inference.md
+        - part02-attacks/04-property-inference.md
+        - part02-attacks/05-memorization-extraction.md
+        - part02-attacks/06-gradient-inversion.md
+        - part02-attacks/07-linkage-reidentification.md
+        - part02-attacks/08-syntactic-anonymity.md
+        - part02-attacks/09-reconstruction.md
+    - part: "Differential privacy foundations"
+      chapters:
+        - part03-dp-foundations/01-definition.md
+        - part03-dp-foundations/02-properties.md
+        - part03-dp-foundations/03-laplace-gaussian.md
+        - part03-dp-foundations/04-composition.md
+        - part03-dp-foundations/05-selection.md
+        - part03-dp-foundations/06-sensitivity.md
+        - part03-dp-foundations/07-discrete-mechanisms.md
+        - part03-dp-foundations/08-trust-models.md
+        - part03-dp-foundations/09-lower-bounds.md
+    - part: "Privacy accounting"
+      chapters:
+        - part04-privacy-accounting/01-renyi-dp.md
+        - part04-privacy-accounting/02-rdp-conversions.md
+        - part04-privacy-accounting/03-concentrated-dp.md
+        - part04-privacy-accounting/04-gaussian-dp.md
+        - part04-privacy-accounting/05-subsampling.md
+        - part04-privacy-accounting/06-numerical-accounting.md
+        - part04-privacy-accounting/07-shuffling-iteration.md
+        - part04-privacy-accounting/08-adaptive-composition.md
+        - part04-privacy-accounting/09-choosing-an-accountant.md
+
+filters:
+  - filters/xrefs.lua        # @eq-name and friends that point into the full edition
+  - filters/links.lua        # links to code/, tests/ and the other books
+  - filters/book-checks.lua  # numbers every equation, warns on uncaptioned tables and figures
+  - quarto
+
+crossref:
+  chapters: true  # number as 2.1, 2.2, ... per chapter
+
+format:
+  html:
+    theme: cosmo
+    html-math-method: mathjax

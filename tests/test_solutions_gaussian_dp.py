@@ -1,10 +1,10 @@
-"""code/solutions_gaussian_dp.py runs and reproduces the numbers in solutions/04-gaussian-dp.md."""
+"""code/part04-privacy-accounting/solutions_gaussian_dp.py runs and reproduces the numbers in book-exercises/part04-privacy-accounting/04-gaussian-dp.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part04-privacy-accounting" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
 
 def run(script: Path, out: Path) -> str:

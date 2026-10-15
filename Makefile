@@ -1,14 +1,18 @@
 # Common tasks. Everything runs through uv, so `make setup` is the only install step.
 # Run `make` or `make help` for the list.
+#
+# The repository holds three Quarto books, which share code/, filters/ and terms.toml:
+#   book-full/          the full edition, with every derivation (website and PDF)
+#   book-exercises/     the full edition's exercises with worked solutions (website only)
+#   book-practitioner/  the practitioner edition, without proofs (website and PDF)
+# Each website renders to _book/<book>/, so the sites link to each other by relative path.
 
-BOOK      := book
 OUT       := _book
-PDF       := $(OUT)/Privacy-Preserving-Machine-Learning.pdf
-SCRIPTS   := $(wildcard $(BOOK)/*/code/*.py)
-QUARTO    := uv run quarto
 BUILD     := _build
-STAGE_WEB := $(BUILD)/website
-STAGE_PDF := $(BUILD)/pdf
+SCRIPTS   := $(wildcard code/*/*.py)
+QUARTO    := uv run quarto
+PDF_full         := $(OUT)/Privacy-Preserving-Machine-Learning.pdf
+PDF_practitioner := $(OUT)/Privacy-Preserving-Machine-Learning-Practitioner.pdf
 
 # Keep Python's bytecode caches out of the source tree.
 export PYTHONPYCACHEPREFIX := $(CURDIR)/$(BUILD)/pycache
@@ -25,7 +29,8 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
              newcomputermodern dejavu
 
 .DEFAULT_GOAL := help
-.PHONY: help setup hooks tex-deps figures figures-force stage-tests stage-website stage-pdf terms terms-check acronyms index-candidates book website pdf preview check-captions format test typecheck check all clean
+.PHONY: help setup hooks tex-deps figures figures-force full full-pdf exercises practitioner practitioner-pdf \
+        website pdf book preview terms-check acronyms index-candidates format test typecheck check all clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-17s %s\n", $$1, $$2}'
@@ -40,14 +45,15 @@ tex-deps: ## Install the LaTeX packages the PDF needs (also needs rsvg-convert: 
 	$(TLMGR) --repository $(CTAN) install $(TEX_PKGS)
 	@command -v rsvg-convert >/dev/null || echo "rsvg-convert not found: sudo apt install librsvg2-bin"
 
-# Figures are not committed: each chapter script writes its SVGs into its part's figures/ folder,
-# deterministically (seeded, no timestamps). A script is rerun only when a file in its code/ folder
-# changes, since scripts import their siblings; its printed tables go to a log in $(BUILD)/figures/,
-# which doubles as the up-to-date marker. Run with -j to regenerate in parallel.
-FIG_LOGS  := $(patsubst $(BOOK)/%.py,$(BUILD)/figures/%.log,$(SCRIPTS))
+# Figures are not committed: each chapter script in code/<part>/ writes its SVGs into
+# $(BUILD)/figures/<part>/, deterministically (seeded, no timestamps), and staging copies them into
+# each book's <part>/figures/. A script is rerun only when a file in its folder changes, since
+# scripts import their siblings; its printed tables go to a log in $(BUILD)/logs/, which doubles
+# as the up-to-date marker. Run with -j to regenerate in parallel.
+FIG_LOGS  := $(patsubst code/%.py,$(BUILD)/logs/%.log,$(SCRIPTS))
 
 .SECONDEXPANSION:
-$(BUILD)/figures/%.log: $(BOOK)/%.py $$(wildcard $(BOOK)/$$(dir $$*)*.py)
+$(BUILD)/logs/%.log: code/%.py $$(wildcard code/$$(dir $$*)*.py)
 	@mkdir -p $(@D)
 	@echo "== $<"
 	@uv run python $< >$@.tmp || { cat $@.tmp; rm -f $@.tmp; exit 1; }
@@ -56,64 +62,92 @@ $(BUILD)/figures/%.log: $(BOOK)/%.py $$(wildcard $(BOOK)/$$(dir $$*)*.py)
 figures: $(FIG_LOGS) ## Generate the figures, rerunning only the chapter scripts that changed
 
 figures-force: ## Rerun every chapter script, regenerating all the figures
-	@rm -rf $(BUILD)/figures
+	@rm -rf $(BUILD)/logs $(BUILD)/figures
 	@$(MAKE) --no-print-directory figures
 
-terms: stage-website stage-pdf ## Regenerate the glossary and the index of terms in the staged copies
+# A book is rendered from a staged copy in $(BUILD)/<name>-<profile>/, never from its own folder,
+# so Quarto's caches, LaTeX's intermediate files and the generated glossary and index stay out of
+# the source tree. The staged copy sits two levels below the repository, as the rendered site does
+# in $(OUT)/<book>/, so filters/links.lua can rewrite links that leave the book the same way for both.
+# STAGE(book folder, stage name, profile, extra rsync options)
+define STAGE
+	@mkdir -p $(BUILD)/$(2)
+	@rsync -a --delete --exclude .quarto/ --exclude _book/ --exclude __pycache__/ $(4) $(1)/ $(BUILD)/$(2)/
+	@rsync -a filters/ $(BUILD)/$(2)/filters/
+	@for part in $(BUILD)/$(2)/part*/; do \
+	  name=$$(basename $$part); \
+	  if [ -d $(BUILD)/figures/$$name ]; then rsync -a $(BUILD)/figures/$$name/ $$part/figures/; fi; \
+	done
+endef
+
+# RENDER(stage name, profile, format): fails on any Quarto or LaTeX warning or error.
+define RENDER
+	@if ! $(QUARTO) render $(BUILD)/$(1) --profile $(2) --to $(3) >$(BUILD)/$(1).log 2>&1; then \
+	  cat $(BUILD)/$(1).log; exit 1; fi
+	@if grep -E 'WARN|ERROR' $(BUILD)/$(1).log; then echo "$(1): warnings, see $(BUILD)/$(1).log"; exit 1; fi
+endef
+
+full: figures ## Build the full edition's website into _book/book-full/
+	$(call STAGE,book-full,full-website,website)
+	@uv run python tools/terms.py build --book $(BUILD)/full-website --profile website
+	$(call RENDER,full-website,website,html)
+	@mkdir -p $(OUT)/book-full
+	@rsync -a --delete --exclude '*.pdf' $(BUILD)/full-website/_book/ $(OUT)/book-full/
+	@echo "Website: $(OUT)/book-full/index.html"
+
+full-pdf: figures ## Build the full edition's PDF
+	$(call STAGE,book-full,full-pdf,pdf,--exclude _quarto-website.yml)
+	@uv run python tools/terms.py build --book $(BUILD)/full-pdf --profile pdf
+	$(call RENDER,full-pdf,pdf,pdf)
+	@mkdir -p $(OUT)
+	@cp $(BUILD)/full-pdf/_book/$(notdir $(PDF_full)) $(PDF_full)
+	@echo "PDF: $(PDF_full)"
+
+# The exercise book cross-references the full edition's equations, so it needs the rendered full
+# edition: tools/xrefs.py reads its labels and numbers into _xrefs.json for filters/xrefs.lua.
+exercises: full ## Build the exercise book's website into _book/book-exercises/ (builds the full edition first)
+	$(call STAGE,book-exercises,exercises-website,website)
+	@uv run python tools/xrefs.py --site $(OUT)/book-full --book book-full \
+	  --skip-defined-in $(BUILD)/exercises-website --out $(BUILD)/exercises-website/_xrefs.json
+	$(call RENDER,exercises-website,website,html)
+	@mkdir -p $(OUT)/book-exercises
+	@rsync -a --delete $(BUILD)/exercises-website/_book/ $(OUT)/book-exercises/
+	@echo "Website: $(OUT)/book-exercises/index.html"
+
+practitioner: figures ## Build the practitioner edition's website into _book/book-practitioner/
+	$(call STAGE,book-practitioner,practitioner-website,website)
+	@uv run python tools/terms.py build --book $(BUILD)/practitioner-website --profile website
+	$(call RENDER,practitioner-website,website,html)
+	@mkdir -p $(OUT)/book-practitioner
+	@rsync -a --delete --exclude '*.pdf' $(BUILD)/practitioner-website/_book/ $(OUT)/book-practitioner/
+	@echo "Website: $(OUT)/book-practitioner/index.html"
+
+practitioner-pdf: figures ## Build the practitioner edition's PDF
+	$(call STAGE,book-practitioner,practitioner-pdf,pdf,--exclude _quarto-website.yml)
+	@uv run python tools/terms.py build --book $(BUILD)/practitioner-pdf --profile pdf
+	$(call RENDER,practitioner-pdf,pdf,pdf)
+	@mkdir -p $(OUT)
+	@cp $(BUILD)/practitioner-pdf/_book/$(notdir $(PDF_practitioner)) $(PDF_practitioner)
+	@echo "PDF: $(PDF_practitioner)"
+
+website: full exercises $(if $(wildcard book-practitioner),practitioner) ## Build every website into _book/
+
+pdf: full-pdf $(if $(wildcard book-practitioner),practitioner-pdf) ## Build every PDF into _book/
+
+book: website pdf ## Build every website and PDF
+
+preview: full ## Serve the full edition from its staged copy (rerun after editing book-full/)
+	$(QUARTO) preview $(BUILD)/full-website --profile website
 
 terms-check: ## Fail if an acronym isn't expanded at its first use on a page, or isn't in terms.toml
-	uv run python tools/terms.py check
+	@for b in book-full book-exercises $(wildcard book-practitioner); do \
+	  echo "== $$b"; uv run python tools/terms.py check --book $$b || exit 1; done
 
-acronyms: ## Report every acronym, its expansion and the pages that use it
-	uv run python tools/terms.py acronyms
+acronyms: ## Report every acronym, its expansion and the pages that use it (BOOK=book-full)
+	uv run python tools/terms.py acronyms --book $(or $(BOOK),book-full)
 
-index-candidates: ## Suggest index terms (bold phrases) not yet in terms.toml
-	uv run python tools/terms.py candidates
-
-# The book is rendered from staged copies of book/ in _build/<profile>/, never from book/ itself,
-# so Quarto's caches, LaTeX's intermediate files and the generated glossary and index stay out of
-# the source tree. The rendered website and PDF are then copied to _book/. A render fails on any
-# Quarto or LaTeX warning or error.
-RENDER_CHECK = if ! $(QUARTO) render $(1) --profile $(2) --to $(3) >$(BUILD)/$(2).log 2>&1; then \
-	  cat $(BUILD)/$(2).log; exit 1; fi; \
-	if grep -E 'WARN|ERROR' $(BUILD)/$(2).log; then echo "$(2): warnings, see $(BUILD)/$(2).log"; exit 1; fi
-
-# Chapters link to their tests as ../../tests/...; from a staged copy that path is _build/tests.
-stage-tests:
-	@mkdir -p $(BUILD)
-	@ln -sfn ../tests $(BUILD)/tests
-
-stage-website: stage-tests figures
-	@mkdir -p $(STAGE_WEB)
-	@rsync -a --delete --exclude .quarto/ --exclude _book/ --exclude __pycache__/ $(BOOK)/ $(STAGE_WEB)/
-	@uv run python tools/terms.py build --book $(STAGE_WEB) --profile website
-
-stage-pdf: stage-tests figures
-	@mkdir -p $(STAGE_PDF)
-	@rsync -a --delete --exclude .quarto/ --exclude _book/ --exclude __pycache__/ --exclude solutions/ \
-	  --exclude '_quarto-website.yml' $(BOOK)/ $(STAGE_PDF)/
-	@uv run python tools/terms.py build --book $(STAGE_PDF) --profile pdf
-
-book: website pdf ## Build the website and the PDF into _book/
-
-website: stage-website ## Build only the website (HTML, with the solutions) into _book/
-	@$(call RENDER_CHECK,$(STAGE_WEB),website,html)
-	@mkdir -p $(OUT)
-	@rsync -a --delete --exclude '*.pdf' $(STAGE_WEB)/_book/ $(OUT)/
-	@echo "Website: $(OUT)/index.html"
-
-pdf: stage-pdf ## Build only the PDF (without the solutions)
-	@$(call RENDER_CHECK,$(STAGE_PDF),pdf,pdf)
-	@mkdir -p $(OUT)
-	@cp $(STAGE_PDF)/_book/$(notdir $(PDF)) $(PDF)
-	@echo "PDF: $(PDF)"
-
-preview: stage-website ## Serve the website from the staged copy (rerun after editing book/)
-	$(QUARTO) preview $(STAGE_WEB) --profile website
-
-check-captions: stage-website ## Fail if any table or figure lacks a caption (or the book fails to render)
-	@$(call RENDER_CHECK,$(STAGE_WEB),website,html)
-	@echo "All tables and figures have captions."
+index-candidates: ## Suggest index terms (bold phrases) not yet in terms.toml (BOOK=book-full)
+	uv run python tools/terms.py candidates --book $(or $(BOOK),book-full)
 
 format: ## Format all Python with ruff, as VSCode and the pre-commit hook do
 	uv run ruff check --fix --exit-zero --quiet .
@@ -125,9 +159,9 @@ test: ## Run the tests
 typecheck: ## Run strict pyright
 	uv run pyright
 
-check: test typecheck terms-check check-captions ## Tests, type checks, acronym and caption checks
+check: test typecheck terms-check website ## Tests, type checks, the acronym check and a clean render of every website
 
-all: check book ## Check everything, then build the website and the PDF
+all: check pdf ## Check everything, then build the PDFs too
 
 clean: ## Remove build output, staged copies and caches
 	rm -rf $(OUT) $(BUILD)

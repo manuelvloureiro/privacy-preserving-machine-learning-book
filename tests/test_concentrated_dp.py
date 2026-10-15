@@ -1,10 +1,10 @@
-"""code/concentrated_dp.py runs, writes its figures, and reproduces the numbers in 03-concentrated-dp.md."""
+"""code/part04-privacy-accounting/concentrated_dp.py runs, writes its figures, and reproduces the numbers in book-full/part04-privacy-accounting/03-concentrated-dp.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part04-privacy-accounting" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
 # Checks of the public functions, run in a subprocess with the code directory on the path.
 PUBLIC_CHECKS = """

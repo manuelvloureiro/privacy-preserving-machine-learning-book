@@ -1,22 +1,22 @@
 # AGENTS.md
 
-How to write content for this book. For how the book is built (Quarto, `.md` vs `.qmd`, cross-reference syntax, checks), see [CLAUDE.md](CLAUDE.md). The reference chapters are [01-distributions.md](book/part01-prerequisites/01-distributions.md) and [02-concentration.md](book/part01-prerequisites/02-concentration.md): when in doubt, do what they do.
+How to write content for the full edition (`book-full/`) and its exercise book (`book-exercises/`). For how the book is built (Quarto, `.md` vs `.qmd`, cross-reference syntax, checks), see [CLAUDE.md](CLAUDE.md). The reference chapters are [01-distributions.md](book-full/part01-prerequisites/01-distributions.md) and [02-concentration.md](book-full/part01-prerequisites/02-concentration.md): when in doubt, do what they do.
 
 ## What the book is
 
-A book on privacy-preserving machine learning that follows [book/study_plan.md](book/study_plan.md), one phase per part. Chapters build on each other, so each chapter may only use what earlier chapters introduced.
+A book on privacy-preserving machine learning that follows [book-full/study_plan.md](book-full/study_plan.md), one phase per part. Chapters build on each other, so each chapter may only use what earlier chapters introduced.
 
-**Units.** The book uses Quarto's units. A **part** is a folder `book/partNN-<topic>/`. A **chapter** is one file in it; Quarto numbers chapters 1, 2, … across the whole book, so Part 4's fifth file is chapter 31. A **section** is a `##` heading in a chapter, numbered 31.2. Write "Part 3" or "this part" for a folder, "chapter" for a file and "section" for a `##` heading.
+**Units.** The book uses Quarto's units. A **part** is a folder `book-full/partNN-<topic>/`. A **chapter** is one file in it; Quarto numbers chapters 1, 2, … across the whole book, so Part 4's fifth file is chapter 31. A **section** is a `##` heading in a chapter, numbered 31.2. Write "Part 3" or "this part" for a folder, "chapter" for a file and "section" for a `##` heading.
 
 **The prerequisites part teaches mathematics, not privacy.** Do not introduce differential privacy, privacy mechanisms (Laplace, Gaussian, randomized response, ...), privacy definitions, privacy accounting, DP-SGD, privacy attacks (membership inference, reconstruction, ...), secure aggregation, MPC protocols or federated learning there. Motivate each topic with machine learning, statistics or computer-science examples instead. A short forward pointer is fine ("later chapters compare distributions this way"), as long as it names no mechanism or definition. Distributions such as Laplace and normal are fine as distributions, and objects such as per-record influence can be named by what they are.
 
 ## Files
 
-- A part is a folder `book/partNN-<topic>/` with a `README.md` and one file per chapter, `NN-<topic>.md`, numbered in reading order. The `README.md` is the GitHub overview (readings, exit check) and is not part of the rendered book, so anything readers of the book need must live in a chapter file.
-- Each part opens with `00-introduction.md`, listed in `book/_quarto.yml` as the part's `part:` file so it becomes the part page. It is one or two pages: what the part is for and what it assumes, the thread that ties its chapters together, a captioned table mapping each chapter to the question it answers, a reading order, shared notation, and what the reader will be able to do at the end. It does not follow the chapter structure below.
-- A chapter's code lives in `code/<topic>.py` and its figures in `figures/<name>.svg`, both inside the part's folder.
-- A chapter's exercises and their worked solutions live in `solutions/NN-<topic>.md` inside the part's folder, with the same file name as the chapter. These pages form the **exercise book**, an appendix of the website only (not the PDF), listed in `book/_quarto-website.yml` under the "Exercises" part and in `index_skip_pages` in `book/terms.toml`. The chapter pages themselves have no exercises. Numbers the exercise book quotes come from `code/solutions_<script>.py`, named after the chapter's script, and are checked by `tests/test_solutions_<script>.py`, like a chapter's.
-- When you add, remove or renumber a chapter, update every link to it, the part's `README.md`, `book/README.md`, the chapter list in `book/_quarto.yml` and the global chapter numbers quoted in the READMEs and `book/study_plan.md`.
+- A part is a folder `book-full/partNN-<topic>/` with a `README.md` and one file per chapter, `NN-<topic>.md`, numbered in reading order. The `README.md` is the GitHub overview (readings, exit check) and is not part of the rendered book, so anything readers of the book need must live in a chapter file.
+- Each part opens with `00-introduction.md`, listed in `book-full/_quarto.yml` as the part's `part:` file so it becomes the part page. It is one or two pages: what the part is for and what it assumes, the thread that ties its chapters together, a captioned table mapping each chapter to the question it answers, a reading order, shared notation, and what the reader will be able to do at the end. It does not follow the chapter structure below.
+- A chapter's code lives in `code/<part>/<topic>.py` at the repository's root, shared by the three books. Its figures are written to `_build/figures/<part>/` and staged into the part's `figures/` folder, so a chapter references them as `figures/<name>.svg`.
+- A chapter's exercises and their worked solutions live in `book-exercises/<part>/NN-<topic>.md`, with the same file name as the chapter. These pages form the **exercise book**, a separate book (website only) listed in `book-exercises/_quarto.yml`. The chapter pages themselves have no exercises. An exercise page may reference the full edition's equations, sections, figures and tables as `@eq-name` and so on: the build turns them into links to the full edition (`tools/xrefs.py`, `filters/xrefs.lua`). Numbers the exercise book quotes come from `code/<part>/solutions_<script>.py`, named after the chapter's script, and are checked by `tests/test_solutions_<script>.py`, like a chapter's.
+- When you add, remove or renumber a chapter, update every link to it, the part's `README.md`, `book-full/README.md`, the chapter lists in `book-full/_quarto.yml` and `book-exercises/_quarto.yml`, the matching practitioner chapter, and the global chapter numbers quoted in the READMEs and `book-full/study_plan.md`.
 - Each chapter's script has a test in `tests/` that runs it and checks every number the text quotes.
 
 ## Chapter structure
@@ -36,9 +36,9 @@ Every chapter follows the same shape:
 5. **`## Code`**: what the script checks, the command to run it, the table of results, and what to take from them.
 6. **`## References`**: standard textbooks and papers by author, title and year, with what each is good for.
 7. **`## Cheat sheet`**: one table of every result in the chapter, plus a few rules of thumb.
-8. **The pointer to the exercises**, the last line of the page: `**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](solutions/NN-<topic>.md).`
+8. **The pointer to the exercises**, the last line of the page: `**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/<part>/NN-<topic>.md).`
 
-**Exercises** live only in the exercise book, never on the chapter page. They are problems that extend the derivations. Each names the technique it practises in italics and, where possible, gives a check value or a hint. On its exercise-book page, each exercise has a `##` heading with an id (`{#sec-sol-<prefix>-N}`), the statement as a blockquote starting `> **Exercise N.**`, then its solution inside `::: {.callout-tip collapse="true" title="Solution"}`: a derivation in numbered steps that reaches the check value. A chapter that mentions an exercise links to it, as `[Exercise 3](solutions/NN-<topic>.md#sec-sol-<prefix>-3)`. In the PDF the link becomes "Exercise 3 in the web edition".
+**Exercises** live only in the exercise book, never on the chapter page. They are problems that extend the derivations. Each names the technique it practises in italics and, where possible, gives a check value or a hint. On its exercise-book page, each exercise has a `##` heading with an id (`{#sec-sol-<prefix>-N}`), the statement as a blockquote starting `> **Exercise N.**`, then its solution inside `::: {.callout-tip collapse="true" title="Solution"}`: a derivation in numbered steps that reaches the check value. A chapter that mentions an exercise links to it, as `[Exercise 3](../../book-exercises/<part>/NN-<topic>.md#sec-sol-<prefix>-3)`. In the PDF the link becomes "Exercise 3 in the exercise book".
 
 ## Writing
 
@@ -60,7 +60,7 @@ The reader is a person reading one page at a time, not someone who holds the who
 
 - **Fully type hinted.** Every function has annotated parameters and a return type. `uv run pyright` runs in strict mode and must report 0 errors.
 - **Functions compute, loops plot.** Each bound, probability and simulation is a small pure function with typed inputs and outputs. A figure function calls those functions in a loop over a parameter range. It never re-implements the computation.
-- **One script per chapter,** `code/<topic>.py`, with this layout:
+- **One script per chapter,** `code/<part>/<topic>.py`, with this layout:
   - typed pure functions, grouped under comment headers that match the text's sections;
   - `print_table(rng)`, which prints every number the text quotes, using `np.random.default_rng(seed)` with seed 0;
   - `plot_*(...) -> Figure` functions, which use a separate generator seeded with `seed + 1` so the table stays reproducible;
@@ -72,7 +72,7 @@ The reader is a person reading one page at a time, not someone who holds the who
 ## Figures
 
 - **SVG only,** because it stays sharp at any size. Never PNG or JPG.
-- **Generated, never committed.** Every figure is written by its chapter's script, and `book/*/figures/*.svg` is git-ignored: the build regenerates them (`make figures`). A figure that no script produces cannot be in the book.
+- **Generated, never committed.** Every figure is written by its chapter's script, into `_build/figures/`, never into a book's folder: the build regenerates them (`make figures`). A figure that no script produces cannot be in the book.
 - **Deterministic output,** so the same code always draws the same figure. Anything random draws from a generator seeded from `--seed` (seed + 1 for figures), never from global or unseeded state. Set `matplotlib.rcParams["svg.hashsalt"]` to the module name and `svg.fonttype` to `"none"`, use the `Agg` backend, and save with `metadata={"Date": None}`.
 - **Figures illustrate the text.** Draw the concept a section explains, not only the simulation checks: the die behind Markov's inequality, the Chernoff bound as a function of λ, two tails on a log scale. Place each figure in the section it illustrates, and reference it from the text.
 - **Captions** are full sentences that say what is plotted. Use matplotlib mathtext for math in labels (`r"$e^{-t^2/2}$"`), not raw `^{...}`.
@@ -81,7 +81,7 @@ The reader is a person reading one page at a time, not someone who holds the who
 ## Checks before handing over
 
 ```bash
-uv run python book/<part>/code/<topic>.py   # numbers match the text; figures regenerate
+uv run python code/<part>/<topic>.py   # numbers match the text; figures regenerate
 uv run pytest
 uv run pyright
 make website   # fails on any warning: uncaptioned tables, unresolved @references, broken links

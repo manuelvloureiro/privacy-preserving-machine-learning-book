@@ -1,10 +1,10 @@
-"""code/shuffling_iteration.py runs, writes its figures, and reproduces the numbers in 07-shuffling-iteration.md."""
+"""code/part04-privacy-accounting/shuffling_iteration.py runs, writes its figures, and reproduces the numbers in book-full/part04-privacy-accounting/07-shuffling-iteration.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part04-privacy-accounting" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
 # The public functions, called as chapter 35 would call them, plus closed-form checks.
 PUBLIC_API_CHECK = """

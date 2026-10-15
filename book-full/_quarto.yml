@@ -1,0 +1,123 @@
+# The full edition. Build with `make full` or `make full-pdf`: they copy book-full/ to
+# _build/full-<profile>/, add the shared filters/ and the figures, and render there, so build output
+# never lands next to the sources. The appendices differ by format, so they live in the profiles:
+# _quarto-website.yml (with the study plan) and _quarto-pdf.yml (without).
+profile:
+  default: website
+
+project:
+  type: book
+  output-dir: _book  # inside the staged copy; the Makefile copies it to _book/book-full/
+  render:  # README.md files are for browsing the repo, not part of the book
+    - "*.md"
+    - "*.qmd"
+    - "!README.md"
+    - "!**/README.md"
+
+book:
+  title: "Privacy-Preserving Machine Learning"
+  author: "Manuel V. Loureiro"
+  # The version is the date the book was built, shown on the cover of the PDF and the website.
+  date: today
+  date-format: "[Version] YYYY-MM-DD"
+  chapters:
+    - index.md
+    - part: part01-prerequisites/00-introduction.md
+      chapters:
+        - part01-prerequisites/01-distributions.md
+        - part01-prerequisites/02-concentration.md
+        - part01-prerequisites/03-divergences.md
+        - part01-prerequisites/04-hypothesis-testing.md
+        - part01-prerequisites/05-information-theory.md
+        - part01-prerequisites/06-optimization.md
+        - part01-prerequisites/07-stability-generalization.md
+        - part01-prerequisites/08-crypto-basics.md
+    - part: part02-attacks/00-introduction.md
+      chapters:
+        - part02-attacks/01-threat-models.md
+        - part02-attacks/02-membership-inference.md
+        - part02-attacks/03-attribute-inference.md
+        - part02-attacks/04-property-inference.md
+        - part02-attacks/05-memorization-extraction.md
+        - part02-attacks/06-gradient-inversion.md
+        - part02-attacks/07-linkage-reidentification.md
+        - part02-attacks/08-syntactic-anonymity.md
+        - part02-attacks/09-reconstruction.md
+    - part: part03-dp-foundations/00-introduction.md
+      chapters:
+        - part03-dp-foundations/01-definition.md
+        - part03-dp-foundations/02-properties.md
+        - part03-dp-foundations/03-laplace-gaussian.md
+        - part03-dp-foundations/04-composition.md
+        - part03-dp-foundations/05-selection.md
+        - part03-dp-foundations/06-sensitivity.md
+        - part03-dp-foundations/07-discrete-mechanisms.md
+        - part03-dp-foundations/08-trust-models.md
+        - part03-dp-foundations/09-lower-bounds.md
+    - part: part04-privacy-accounting/00-introduction.md
+      chapters:
+        - part04-privacy-accounting/01-renyi-dp.md
+        - part04-privacy-accounting/02-rdp-conversions.md
+        - part04-privacy-accounting/03-concentrated-dp.md
+        - part04-privacy-accounting/04-gaussian-dp.md
+        - part04-privacy-accounting/05-subsampling.md
+        - part04-privacy-accounting/06-numerical-accounting.md
+        - part04-privacy-accounting/07-shuffling-iteration.md
+        - part04-privacy-accounting/08-adaptive-composition.md
+        - part04-privacy-accounting/09-choosing-an-accountant.md
+
+filters:
+  - filters/links.lua        # links to code/, tests/ and the other books; PDF: unlink the part pages
+  - filters/book-checks.lua  # numbers every equation, warns on uncaptioned tables and figures
+  - filters/term-index.lua   # PDF only: index entries with page numbers (from _terms.json)
+  - quarto
+
+crossref:
+  chapters: true  # number as 2.1, 2.2, ... per chapter
+
+execute:
+  freeze: auto  # re-run a .qmd only when its source changes; results live in _freeze/
+
+format:
+  html:
+    theme: cosmo
+    html-math-method: mathjax
+  pdf:
+    documentclass: scrbook
+    pdf-engine: lualatex
+    papersize: a4
+    fontsize: 11pt
+    # Standard KOMA options, set to waste less space: one-sided (no binding margin),
+    # chapters start on the next page instead of the next right-hand page, wider text block.
+    classoption: [oneside, open=any, DIV=13]
+    fig-pos: "htbp"  # let figures float to the top of a page instead of leaving gaps
+    include-in-header:
+      text: |
+        % New Computer Modern: Latin Modern's successor, which also has Greek, so ε and δ in
+        % headings and text render. Symbols it lacks (⇒, ≈, superscript digits) fall back to the
+        % math font, then to DejaVu Sans.
+        \directlua{luaotfload.add_fallback("textfallback", {"NewCMMath-Regular.otf:mode=harf;", "DejaVuSans.ttf:mode=harf;"})}
+        \setmainfont{NewCM10-Regular.otf}[RawFeature={fallback=textfallback}, BoldFont=NewCM10-Bold.otf,
+          ItalicFont=NewCM10-Italic.otf, BoldItalicFont=NewCM10-BoldItalic.otf]
+        \setsansfont{NewCMSans10-Regular.otf}[RawFeature={fallback=textfallback}, BoldFont=NewCMSans10-Bold.otf,
+          ItalicFont=NewCMSans10-Oblique.otf, BoldItalicFont=NewCMSans10-BoldOblique.otf]
+        \setmonofont{NewCMMono10-Regular.otf}[RawFeature={fallback=textfallback}, BoldFont=NewCMMono10-Bold.otf,
+          ItalicFont=NewCMMono10-Italic.otf, BoldItalicFont=NewCMMono10-BoldOblique.otf]
+        \setmathfont{NewCMMath-Regular.otf}
+        \usepackage{imakeidx}
+        \makeindex[title={}]
+        \indexsetup{level=\relax, noclearpage}  % term-index.md supplies the heading
+        \RedeclareSectionCommand[tocnumwidth=3em]{section}  % room in the contents for numbers like 28.10
+        % LuaLaTeX reads a heading's Greek letters (ε, δ) back from the .aux with different
+        % character codes than it writes them, so LaTeX sees those labels as changed on every
+        % run and asks for reruns forever. Compare labels as strings instead.
+        \makeatletter
+        \AtBeginDocument{\def\@testdef#1#2#3{%
+          \edef\reserved@a{\detokenize{#3}}%
+          \expandafter\ifx\csname #1@#2\endcsname\relax\@tempswatrue\else
+            \edef\reserved@b{\expandafter\expandafter\expandafter\detokenize
+              \expandafter\expandafter\expandafter{\csname #1@#2\endcsname}}%
+            \ifx\reserved@a\reserved@b\else\@tempswatrue\fi
+          \fi}}
+        \makeatother
+    toc-depth: 2  # chapters and sections; subsections made the contents five pages long

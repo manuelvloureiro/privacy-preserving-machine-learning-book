@@ -1,10 +1,10 @@
-"""code/solutions_attribute_inference.py runs and reproduces the numbers in solutions/03-attribute-inference.md."""
+"""code/part02-attacks/solutions_attribute_inference.py runs and reproduces the numbers in book-exercises/part02-attacks/03-attribute-inference.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part02-attacks" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part02-attacks"
 
 
 def run(script: Path, out: Path) -> str:

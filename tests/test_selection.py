@@ -1,10 +1,10 @@
-"""code/selection.py runs, writes its figures, and reproduces the numbers in 05-selection.md."""
+"""code/part03-dp-foundations/selection.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/05-selection.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part03-dp-foundations" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part03-dp-foundations"
 
 
 def run(script: Path, out: Path) -> str:

@@ -1,10 +1,10 @@
-"""code/discrete_mechanisms.py runs, writes its figures, and reproduces the numbers in 07-discrete-mechanisms.md."""
+"""code/part03-dp-foundations/discrete_mechanisms.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/07-discrete-mechanisms.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part03-dp-foundations" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part03-dp-foundations"
 
 
 def run(script: Path, out: Path) -> str:

@@ -1,10 +1,10 @@
-"""code/solutions_definition.py runs and reproduces the numbers in solutions/01-definition.md."""
+"""code/part03-dp-foundations/solutions_definition.py runs and reproduces the numbers in book-exercises/part03-dp-foundations/01-definition.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part03-dp-foundations" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part03-dp-foundations"
 
 
 def run(script: Path, out: Path) -> str:

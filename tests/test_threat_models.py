@@ -1,10 +1,10 @@
-"""code/threat_models.py runs, writes its figures, and reproduces the numbers in 01-threat-models.md."""
+"""code/part02-attacks/threat_models.py runs, writes its figures, and reproduces the numbers in book-full/part02-attacks/01-threat-models.md."""
 
 import subprocess
 import sys
 from pathlib import Path
 
-CODE = Path(__file__).resolve().parent.parent / "book" / "part02-attacks" / "code"
+CODE = Path(__file__).resolve().parent.parent / "code" / "part02-attacks"
 
 
 def run(script: Path, out: Path) -> str:
