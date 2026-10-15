@@ -73,7 +73,7 @@ The Hölder exponents are $u = \frac{m\alpha - 1}{\alpha(m - 1)} = \frac32$ and 
 1. **Each stability step.** An $(\varepsilon, \delta)$-DP step is $\delta$-approximately $(\varepsilon^2/2)$-zCDP, so each costs $\rho = 0.25^2/2 = 0.03125$ and fails with probability $10^{-8}$.
 2. **Each Gaussian step** costs $1/(2 \cdot 25) = 0.020$ and never fails.
 3. **Compose.** $\rho = 20 \times 0.03125 + 50 \times 0.020 = 1.6250$ and $\delta_a = 1 - (1 - 10^{-8})^{20} = 2.0000 \times 10^{-7}$.
-4. **Convert.** Spend the rest of the $\delta$ on the conversion: $\delta' = 10^{-5} - \delta_a$. The improved conversion at $\rho = 1.625$ and this $\delta'$ gives $\varepsilon = 9.463$, at total $\delta = \delta_a + \delta' = 10^{-5}$ (property 4 of the approximate zCDP section, which allows $\delta_a + (1 - \delta_a)\delta' \le 10^{-5}$).
+4. **Convert.** Spend the rest of the $\delta$ on the conversion: $\delta' = 10^{-5} - \delta_a$. The improved conversion at $\rho = 1.625$ and this $\delta'$ gives $\varepsilon = 9.463$, at total $\delta = \delta_a + \delta' = 10^{-5}$ (the third property of the approximate zCDP section, its conversion, which allows $\delta_a + (1 - \delta_a)\delta' \le 10^{-5}$).
 5. **Compare.** Treating the two kinds of steps separately, the Gaussians alone ($\rho = 1$) convert to $\varepsilon = 7.084$ at $\delta = 10^{-5} - 2 \times 10^{-7} = 9.8 \times 10^{-6}$, and basic composition of the stability steps adds $20 \times 0.25 = 5$, for $12.084$.
 
 *Twenty steps of $\varepsilon = 0.25$ cost 5 under basic composition but only $\rho = 0.625$ in the zCDP ledger, because they compose like Gaussian steps. That is the point of approximate zCDP.*

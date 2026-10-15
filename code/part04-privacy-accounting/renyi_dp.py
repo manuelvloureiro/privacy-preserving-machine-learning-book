@@ -306,8 +306,9 @@ def advanced_composition_tanh(eps0: float, k: int, delta_prime: float) -> float:
     return eps0 * math.sqrt(2 * k * math.log(1 / delta_prime)) + k * eps0 * math.tanh(eps0 / 2)
 
 
-# Fraction s of δ spent on the k per-step δ0 (the rest is δ'): 0.01, 0.02, ..., 0.99, then down to 1e-10.
-SPLITS: list[float] = [x / 100 for x in range(1, 100)] + [10 ** (-x / 4) for x in range(9, 41)]
+# Fraction s of δ spent on the k per-step δ0 (the rest is δ'): 10^(-1/4), 10^(-2/4), ..., 1e-10, the grid
+# Part 3's composition.py uses, so that the advanced-composition value quoted as Part 3's answer is the same.
+SPLITS: list[float] = [10 ** (-x / 4) for x in range(1, 41)]
 
 
 def gaussian_advanced(sigma: float, k: int, delta: float, tanh: bool = True) -> tuple[float, float]:

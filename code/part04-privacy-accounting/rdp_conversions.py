@@ -283,6 +283,22 @@ def rdp_tradeoff_lower_bound(orders: Sequence[float], rdp: Sequence[float], alph
     return 1 / (1 + math.exp(-s))
 
 
+def single_order_crossing(alpha_lo: float, alpha_hi: float, mu: float) -> float:
+    """The type I error a at which orders alpha_lo and alpha_hi of the Gaussian curve allow the same power.
+
+    Below it the larger order allows less power (it binds), above it the smaller order does.
+    Bisection on ln a over [1e-12, 0.5], where the sign of the difference changes once.
+    """
+
+    def gap(log_a: float) -> float:
+        a = math.exp(log_a)
+        lo = rdp_tradeoff_lower_bound([alpha_lo], [gaussian_rdp(alpha_lo, mu)], a)
+        hi = rdp_tradeoff_lower_bound([alpha_hi], [gaussian_rdp(alpha_hi, mu)], a)
+        return (1 - hi) - (1 - lo)
+
+    return math.exp(bisect(gap, math.log(1e-12), math.log(0.5)))
+
+
 def _log_min_type2_at_power(orders: Array, rdp: Array, log_u: float, directions: int = 2) -> float:
     """ln b_min at type I error a = 1 - u, for u = 1 - a given by its logarithm (u may be tiny)."""
     s = _min_type2_logit(orders, rdp, math.log1p(-math.exp(log_u)), log_u, directions)
@@ -549,6 +565,10 @@ def print_table(rng: np.random.Generator) -> None:
         for alpha in (2.0, 8.0):
             lower = rdp_tradeoff_lower_bound([alpha], [gaussian_rdp(alpha, mu)], a)
             print(f"  only order {alpha:g}: largest power at a={a:g}: {1 - lower:.4e}")
+    print(
+        f"  orders 2 and 8: bound lines cross at a=e^-8={math.exp(-8):.2e}  "
+        f"exact single-order boundaries cross at a={single_order_crossing(2.0, 8.0, mu):.2e}"
+    )
     single = [(1 - rdp_tradeoff_lower_bound([o], [gaussian_rdp(o, mu)], 1e-3), o) for o in ORDERS]
     power, order = min(single)
     print(f"  binding single order at a=1e-3: {order:g}, alone allows {power:.4e}")

@@ -49,6 +49,7 @@ def test_rdp_conversions_matches_section(tmp_path: Path) -> None:
         "only order 8: largest power at a=0.001: 7.8529e-02",
         "only order 2: largest power at a=1e-06: 1.3118e-03",
         "only order 8: largest power at a=1e-06: 1.8622e-04",
+        "orders 2 and 8: bound lines cross at a=e^-8=3.35e-04  exact single-order boundaries cross at a=1.87e-04",
         "binding single order at a=1e-3: 3.7, alone allows 2.4910e-02",
         # Section 28.6
         "sigma=1 k=1: rho=0.5  improved alpha*=5.432 (grid 5.4)  eps continuous=4.728  grid=4.729  Mironov alpha*=5.799",

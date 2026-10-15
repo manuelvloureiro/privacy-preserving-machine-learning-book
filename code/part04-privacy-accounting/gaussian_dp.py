@@ -374,8 +374,9 @@ def drs_fixed_batch_mu(q: float, sigma: float, steps: int) -> float:
 def subsampled_loss_moments(q: float, sigma: float, remove: bool, points: int = 400_001) -> tuple[float, float]:
     """(mean, variance) of one step's privacy loss for the Poisson-subsampled Gaussian, by quadrature.
 
-    The pair is N(0, σ²) and the mixture (1 - q)N(0, σ²) + qN(1, σ²). With remove=False, P is the
-    mixture (the record is present in D); with remove=True, P is N(0, σ²).
+    The pair is N(0, σ²) and the mixture (1 - q)N(0, σ²) + qN(1, σ²). As in numerical_accounting.py,
+    remove=True puts the record-containing dataset first, so P is the mixture; with remove=False
+    (add), P is N(0, σ²).
     """
     y = np.linspace(-40 * sigma, 1 + 40 * sigma, points)
     log_base = -(y**2) / (2 * sigma**2)
@@ -383,9 +384,9 @@ def subsampled_loss_moments(q: float, sigma: float, remove: bool, points: int = 
     log_mix = np.logaddexp(math.log1p(-q) + log_base, math.log(q) + log_shift)
     norm = 1 / (sigma * math.sqrt(2 * math.pi))
     if remove:
-        density, loss = norm * np.exp(log_base), log_base - log_mix
-    else:
         density, loss = norm * np.exp(log_mix), log_mix - log_base
+    else:
+        density, loss = norm * np.exp(log_base), log_base - log_mix
     mean = float(np.trapezoid(density * loss, y))
     var = float(np.trapezoid(density * (loss - mean) ** 2, y))
     return mean, var
@@ -403,7 +404,7 @@ def subsampled_loss_lattice(
     y = np.linspace(-9 * sigma, 1 + 9 * sigma, 1_000_001)
     log_base = -(y**2) / (2 * sigma**2)
     log_mix = np.logaddexp(math.log1p(-q) + log_base, math.log(q) - ((y - 1) ** 2) / (2 * sigma**2))
-    log_p, log_other = (log_base, log_mix) if remove else (log_mix, log_base)
+    log_p, log_other = (log_mix, log_base) if remove else (log_base, log_mix)
     weight = np.exp(log_p - log_p.max())
     weight /= weight.sum()
     scaled = (log_p - log_other) / h
@@ -438,7 +439,7 @@ def subsampled_gaussian_eps_bracket(
     """
     size = int(2 * width / h)
     brackets: list[tuple[float, float]] = [(0.0, 0.0) for _ in steps]
-    for remove in (False, True):
+    for remove in (True, False):
         low = subsampled_loss_lattice(q, sigma, remove, False, h, size)
         high = subsampled_loss_lattice(q, sigma, remove, True, h, size)
         for i, k in enumerate(steps):
@@ -669,12 +670,12 @@ def print_table(rng: np.random.Generator) -> None:
             f"[numerical accountant k={k}] eps(1e-5) in [{lo:.4f}, {hi:.4f}]  CLT eps={clt:.4f}  "
             f"CLT below the lower value: {clt < lo}  CLT/lower={clt / lo:.3f}  width={hi - lo:.4f} = k h={k * 1e-5:.4f}"
         )
-    for remove in (False, True):
+    for remove in (True, False):
         mean, var = subsampled_loss_moments(SGD_Q, SGD_SIGMA, remove)
         k = 10_000
         mu = 2 * k * mean / math.sqrt(k * var)
         print(
-            f"[one step, P={'N(0,1)' if remove else 'mixture'}] mean={mean:.4e}  var={var:.4e}  "
+            f"[one step, P={'mixture' if remove else 'N(0,1)'}] mean={mean:.4e}  var={var:.4e}  "
             f"heuristic q^2(e-1)/2={SGD_Q**2 * math.expm1(1.0) / 2:.4e}, q^2(e-1)={SGD_Q**2 * math.expm1(1.0):.4e}  "
             f"Thm3.4 mu at k=10000={mu:.4f} -> eps(1e-5)={gdp_eps(mu, SGD_DELTA):.4f}"
         )

@@ -122,5 +122,5 @@ The solutions use the chapter's notation. Rényi differential privacy (RDP) is c
 
 : The improved conversion against the optimal conversion from one order, Gaussian at μ = 1. {#tbl-sol-conv-single}
 
-*The best orders in practice are large enough that $c^*$ is negligible, which is why the improved conversion is optimal where it matters, and why searching the whole test region of the chapter gains nothing over it on the Gaussian.*
+*For the plain Gaussian, and for long runs of any mechanism, the best order is large enough that $c^*$ is negligible, so there the improved conversion is optimal and searching the whole test region of the chapter gains nothing over it. Short runs are different: after one step of a subsampled Gaussian the curve is tiny, the conversion's fixed toll $\ln(1/\delta)/(\alpha - 1)$ is most of the answer, and the conversion slack is 0.4656 of the 0.7561 excess over the numerical accountant (the slack table in [choosing an accountant](../09-choosing-an-accountant.md)).*
 :::

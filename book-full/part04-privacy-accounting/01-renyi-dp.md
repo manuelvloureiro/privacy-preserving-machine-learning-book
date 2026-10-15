@@ -4,7 +4,7 @@
 
 You train a model with 1000 steps of full-batch noisy gradient descent. Each step computes a quantity whose **sensitivity** is 1, meaning that changing one person's record moves it by at most 1, and releases it with Gaussian noise whose standard deviation is $\sigma = 20$ times that sensitivity; $\sigma$ is the **noise multiplier**. What is the total differential privacy (DP) guarantee at $\delta = 10^{-5}$? Recall what such a guarantee says: a mechanism is $(\varepsilon, \delta)$-DP if, for any two neighbouring datasets (datasets that differ in one person's record) and any set of outputs, the probability of that set under one dataset is at most $e^\varepsilon$ times its probability under the other, plus a small slack $\delta$.
 
-Part 3 gives one answer. Turn each step into a single guarantee $(\varepsilon_0, \delta_0)$, then apply advanced composition ([Composition](../part03-dp-foundations/04-composition.md)), the theorem that says $k$ such steps cost roughly $\varepsilon_0\sqrt{k}$ rather than $k\varepsilon_0$. With the best split of $\delta$ between the steps and the final tail, that gives $\varepsilon = 67.75$. The true answer is $\varepsilon = 7.51$. You can compute it exactly because 1000 Gaussian steps behave like one Gaussian mechanism with noise $\sigma/\sqrt{1000}$: the 1000 shifts of 1 form a vector of Euclidean length $\sqrt{1000}$, and a Gaussian with shift $\sqrt{1000}$ and noise $\sigma$ is the same as one with shift 1 and noise $\sigma/\sqrt{1000}$. The bound is nine times too large ($67.75/7.51 \approx 9$).
+Part 3 gives one answer. Turn each step into a single guarantee $(\varepsilon_0, \delta_0)$, then apply advanced composition ([Composition](../part03-dp-foundations/04-composition.md)), the theorem that says $k$ such steps cost roughly $\varepsilon_0\sqrt{k}$ rather than $k\varepsilon_0$. With the best split of $\delta$ between the steps and the final tail, over the grid of splits Part 3 searches, that gives $\varepsilon = 68.01$. The true answer is $\varepsilon = 7.51$. You can compute it exactly because 1000 Gaussian steps behave like one Gaussian mechanism with noise $\sigma/\sqrt{1000}$: the 1000 shifts of 1 form a vector of Euclidean length $\sqrt{1000}$, and a Gaussian with shift $\sqrt{1000}$ and noise $\sigma$ is the same as one with shift 1 and noise $\sigma/\sqrt{1000}$. The bound is nine times too large ($68.01/7.51 \approx 9$).
 
 The loss comes from the very first move. A Gaussian step does not have one $(\varepsilon_0, \delta_0)$. For each $\varepsilon_0$ there is a smallest $\delta_0$ that works, so it has a whole curve of valid pairs, its **privacy curve**. Collapsing the curve to a single point throws away the information about how the step behaves at every other point, and that is exactly the information composition needs. After that, no composition theorem can recover it.
 
@@ -421,16 +421,16 @@ $$\delta(\varepsilon) = \Phi\Big(\frac\mu2 - \frac\varepsilon\mu\Big) - e^\varep
 
 **$k$ steps, $\sigma = 20$, $\delta = 10^{-5}$.** @tbl-rdp-compare compares four ways to account for $k$ Gaussian steps. The exact value is available because $k$ steps are one Gaussian with $\mu = \sqrt k/\sigma$. The two generic routes from Part 3 first turn each step into one $(\varepsilon_0, \delta_0)$ point of its exact curve, then compose the points. *Basic composition* adds the per-step guarantees, both the $\varepsilon$s and the $\delta$s, so it spends $\delta/k$ per step and reports $k\varepsilon_0$. *Advanced composition* treats the total privacy loss as a sum of $k$ independent bounded terms and bounds its tail. It spends a fraction $s$ of $\delta$ on the $k$ per-step slacks, $\delta_0 = s\delta/k$ each, and the rest, $\delta' = (1 - s)\delta$, on the tail of the sum, and it gives
 $$\varepsilon_0\sqrt{2k\ln(1/\delta')} + k\varepsilon_0\tanh(\varepsilon_0/2).$$
-The first term is the size of a fluctuation of the summed loss that is exceeded with probability at most $\delta'$, from Azuma's inequality for a sum of $k$ terms each between $-\varepsilon_0$ and $\varepsilon_0$. The second term is a bound on the mean of the summed loss: $k$ times the largest mean loss of one step, $\varepsilon_0\tanh(\varepsilon_0/2)$. The script picks the best $s$ on a grid; it lands between 0.63 and 0.72.
+The first term is the size of a fluctuation of the summed loss that is exceeded with probability at most $\delta'$, from Azuma's inequality for a sum of $k$ terms each between $-\varepsilon_0$ and $\varepsilon_0$. The second term is a bound on the mean of the summed loss: $k$ times the largest mean loss of one step, $\varepsilon_0\tanh(\varepsilon_0/2)$. The script picks the best $s$ on the grid Part 3 uses, the powers $10^{-1/4}, 10^{-2/4}, \dots, 10^{-10}$; at every $k$ in @tbl-rdp-compare it lands on $s = 10^{-1/4} \approx 0.56$.
 
-The second term is the sharper form from Part 3. The textbook form, $k\varepsilon_0(e^{\varepsilon_0} - 1)$ (Dwork & Roth 2014, Theorem 3.20), would give 104.51 at $k = 1000$ instead of 67.75.
+The second term is the sharper form from Part 3. The textbook form, $k\varepsilon_0(e^{\varepsilon_0} - 1)$ (Dwork & Roth 2014, Theorem 3.20), would give 105.86 at $k = 1000$ instead of 68.01.
 
 | $k$ | Basic | Advanced | RDP + Mironov (best order) | Exact | RDP / exact | Advanced / exact |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 0.160 | 0.845 | 0.251 (128) | 0.160 | 1.566 | 5.28 |
-| 10 | 1.892 | 3.267 | 0.771 (31) | 0.561 | 1.374 | 5.82 |
-| 100 | 21.510 | 13.412 | 2.524 (10.6) | 1.993 | 1.267 | 6.73 |
-| 1000 | 238.578 | 67.745 | 8.838 (4) | 7.511 | 1.177 | 9.02 |
+| 1 | 0.160 | 0.847 | 0.251 (128) | 0.160 | 1.566 | 5.29 |
+| 10 | 1.892 | 3.270 | 0.771 (31) | 0.561 | 1.374 | 5.83 |
+| 100 | 21.510 | 13.423 | 2.524 (10.6) | 1.993 | 1.267 | 6.73 |
+| 1000 | 238.578 | 68.008 | 8.838 (4) | 7.511 | 1.177 | 9.05 |
 
 : Total $\varepsilon$ at $\delta = 10^{-5}$ for $k$ Gaussian steps with $\sigma = 20$, four ways. {#tbl-rdp-compare}
 
@@ -468,7 +468,7 @@ uv run python code/part04-privacy-accounting/renyi_dp.py
 | Group privacy, Gaussian, two records, order 2 | Exact 4.0000; weak triangle 4.5000; Proposition 2: 6.0000 |
 | Moments accountant, Gaussian $\mu = 1$ | $K(1) = 1.0000$, $K(2) = 3.0000$; Monte Carlo 1.0000 and 3.0003 |
 | One Gaussian, $\sigma = 1$, $\delta = 10^{-5}$ | RDP 5.2985 at $\alpha = 5.8$; exact 4.3772 |
-| 1000 Gaussians, $\sigma = 20$, $\delta = 10^{-5}$ | Advanced 67.75; RDP 8.84 at $\alpha = 4$; exact 7.51 |
+| 1000 Gaussians, $\sigma = 20$, $\delta = 10^{-5}$ | Advanced 68.01; RDP 8.84 at $\alpha = 4$; exact 7.51 |
 
 : The script's output with the default seed. {#tbl-rdp-code}
 

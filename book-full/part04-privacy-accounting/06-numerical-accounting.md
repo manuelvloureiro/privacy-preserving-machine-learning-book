@@ -114,7 +114,7 @@ For a finite pair the two forms of @eq-num-delta can be checked by hand. Take $P
 ### Check yourself
 
 - Why does an output with $Q(y) = 0$ count fully in δ, whatever $\varepsilon$ is? *(Seeing it proves the dataset was $D$, not $D'$. No $e^\varepsilon$ factor can cover a ratio of $P(y)/0$, so its whole probability goes into δ.)*
-- A Gaussian mechanism with $\sigma = 2$ on a count, and a 1000-dimensional Gaussian mechanism with $\sigma = 4$ on a query of $\ell_2$ sensitivity 2: do they have the same $(\varepsilon, \delta)$ curve? *(Yes. Both shift by half a noise standard deviation, $\mu = 1/2 = 2/4 = 0.5$, so both have PLD $\mathcal N(\frac{0.25}2, 0.25) = \mathcal N(0.125, 0.25)$, and by @eq-num-delta δ depends only on the PLD.)*
+- A Gaussian mechanism with noise standard deviation 2 on a count (sensitivity 1), and a 1000-dimensional Gaussian mechanism with noise standard deviation 4 on a query of $\ell_2$ sensitivity 2: do they have the same $(\varepsilon, \delta)$ curve? *(Yes. Both shift by half a noise standard deviation, $\mu = 1/2 = 2/4 = 0.5$, so both have PLD $\mathcal N(\frac{0.25}2, 0.25) = \mathcal N(0.125, 0.25)$, and by @eq-num-delta δ depends only on the PLD.)*
 
 ## Composition is convolution {#sec-num-convolution}
 
@@ -233,7 +233,7 @@ Every rounded-up total sits above the exact total, and every rounded-down total 
 
 ### Context
 
-A discretized PLD is a vector of masses $m_0, \dots, m_{n-1}$ at losses $(o + i)h$, where the integer offset $o$ says where the vector starts on the grid, plus an atom at $+\infty$. Convolving two of them directly costs $O(n_an_b)$ operations for vectors of lengths $n_a$ and $n_b$. With a grid of $h = 10^{-5}$, a single DP-SGD step already has hundreds of thousands of bins, and after 10,000 steps the composed PLD has 2103251 (@sec-num-dpsgd). The FFT makes this cheap. Koskela, Jälkö and Honkela (2020) introduced FFT-based PLD accounting.
+A discretized PLD is a vector of masses $m_0, \dots, m_{n-1}$ at losses $(o + i)h$, where the integer offset $o$ says where the vector starts on the grid, plus an atom at $+\infty$. Convolving two of them directly costs $O(n_an_b)$ operations for vectors of lengths $n_a$ and $n_b$. With a grid of $h = 10^{-5}$, a single DP-SGD step of the running example already has hundreds of thousands of bins (329590, @sec-num-subsampled), and after 10,000 steps the composed PLD has 2103251, a count the script prints along with the bins at every $k$ it composes. The FFT makes this cheap. Koskela, Jälkö and Honkela (2020) introduced FFT-based PLD accounting.
 
 ### Statement
 
@@ -295,7 +295,7 @@ One DP-SGD step with Poisson sampling at rate $q$ and noise multiplier $\sigma$ 
 
 ### Statement
 
-Under the add/remove relation, neighbouring datasets differ by removing one record or by adding one, and each direction gives its own pair. In the remove direction the dataset $D$ holds the record and $D'$ does not, so $P$ is the mixture and $Q$ the plain Gaussian; in the add direction the roles swap. The two pairs that matter are (Zhu, Dong & Wang 2022, Theorem 11 and the paragraph after it)
+Under the add/remove relation, neighbouring datasets differ by removing one record or by adding one, and each direction gives its own pair. Write $D' = D \cup \{x\}$ for the dataset that holds the record, as in the rest of the part; a guarantee must cover both orders of the pair. The **remove** direction puts the dataset with the record first, $P = M(D')$ and $Q = M(D)$, so $P$ is the mixture and $Q$ the plain Gaussian; its neighbour is obtained by removing $x$. The **add** direction is the order $P = M(D)$, $Q = M(D')$, and the roles swap. The two pairs that matter are (Zhu, Dong & Wang 2022, Theorem 11 and the paragraph after it)
 $$\text{remove: } P = (1 - q)\,\mathcal N(0, \sigma^2) + q\,\mathcal N(1, \sigma^2),\ \ Q = \mathcal N(0, \sigma^2); \qquad \text{add: } P = \mathcal N(0, \sigma^2),\ \ Q = (1 - q)\,\mathcal N(0, \sigma^2) + q\,\mathcal N(1, \sigma^2).$$
 Each dominates one direction of neighbouring datasets (Theorem 11 states the remove pair with the mixture component at 0 and the base at 1; the reflection $y \mapsto 1 - y$ turns it into the form above and changes no divergence), and the $k$-step guarantee is the larger of the two δ curves, each composed $k$ times.
 
@@ -315,7 +315,7 @@ and $P[L_{\mathrm{add}} \in (a, b]] = \Phi(y(-a)/\sigma) - \Phi(y(-b)/\sigma)$ w
 4. **Invert it.** Solve $e^\ell = (1 - q) + q\,e^{(2y - 1)/(2\sigma^2)}$ for $y$: subtract $1 - q$, divide by $q$, take logs, multiply by $\sigma^2$ and add $\frac12$.
 5. **Turn loss bins into output intervals.** Because the map is increasing, $\{L_{\mathrm{rem}} \in (a, b]\} = \{Y \in (y(a), y(b)]\}$. Its probability under the mixture is $1 - q$ times the probability under $\mathcal N(0, \sigma^2)$ plus $q$ times that under $\mathcal N(1, \sigma^2)$, which is the stated sum. For the add pair, $L_{\mathrm{add}} \in (a, b]$ exactly when $L_{\mathrm{rem}} \in [-b, -a)$, that is, exactly when $Y \in [y(-b), y(-a))$, with $Y \sim \mathcal N(0, \sigma^2)$. Where $-b \le \ln(1 - q)$, no output has that loss, and $y(-b) = -\infty$.
 6. **Single-step δ in closed form, as a check.** For the remove pair, $L > \varepsilon$ exactly when $Y > y(\varepsilon)$, so by @eq-num-delta, $\delta(\varepsilon) = P[Y > y(\varepsilon)] - e^\varepsilon\,Q[Y > y(\varepsilon)]$, two normal tail probabilities. The add pair is the same with $Y < y(-\varepsilon)$.
-7. **Why two directions.** Under add/remove, the neighbour $D'$ can be $D$ with one record removed or with one added. The two cases give different pairs, and neither one's PLD is a rounding of the other, so bounding one does not bound the other. Zhu, Dong & Wang (2022) prove each pair dominates its case. A $k$-step run's guarantee is $\max\{\delta_{\mathrm{rem}, k}(\varepsilon), \delta_{\mathrm{add}, k}(\varepsilon)\}$, and the corresponding $\varepsilon$ is the larger of the two values of $\varepsilon$.
+7. **Why two directions.** Under add/remove, the neighbour of a dataset can be that dataset with one record removed or with one added, so both orders of the pair, $(M(D'), M(D))$ and $(M(D), M(D'))$, must be covered. The two cases give different pairs, and neither one's PLD is a rounding of the other, so bounding one does not bound the other. Zhu, Dong & Wang (2022) prove each pair dominates its case. A $k$-step run's guarantee is $\max\{\delta_{\mathrm{rem}, k}(\varepsilon), \delta_{\mathrm{add}, k}(\varepsilon)\}$, and the corresponding $\varepsilon$ is the larger of the two values of $\varepsilon$.
 
 The script computes the bin masses in step 5 from whichever of $\Phi$ and $1 - \Phi$ is smaller, so masses deep in either tail keep their relative precision.
 

@@ -1,4 +1,4 @@
-# Exercises: Adaptive composition
+# Exercises: Adaptive composition: filters, odometers and individual accounting
 
 Exercises for [Adaptive composition: filters, odometers and individual accounting](../../book-full/part04-privacy-accounting/08-adaptive-composition.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part04-privacy-accounting/solutions_adaptive_composition.py` computes every number quoted here; run it with `uv run python code/part04-privacy-accounting/solutions_adaptive_composition.py`.
 

@@ -14,15 +14,15 @@ The summaries differ in how much they keep, and @tbl-acct-map lists them.
 
 | Chapter | The question it answers | Summary it tracks | Builds on |
 | --- | --- | --- | --- |
-| [Rényi DP](01-renyi-dp.md) | Which summary of the privacy loss adds up under composition? | The curve $\varepsilon(\alpha)$ of Rényi divergences | — |
-| [From Rényi DP to (ε, δ) and to tests](02-rdp-conversions.md) | How much does converting an RDP curve to $(\varepsilon, \delta)$ lose, and what is unavoidable? | The same curve, read as a constraint on tests | 27 |
-| [Concentrated differential privacy](03-concentrated-dp.md) | When does one number $\rho$ describe the whole curve, and when not? | A line $\rho\alpha$ above the curve | 27, 28; one formula from 31 |
-| [f-DP and Gaussian differential privacy](04-gaussian-dp.md) | What is the most informative description of a mechanism's privacy? | The full trade-off function; $\mu$ for Gaussian ones | 27, 28 |
-| [Amplification by subsampling](05-subsampling.md) | How much privacy does using each record only with probability $q$ buy? | RDP of the subsampled Gaussian | 27, 28 |
-| [Numerical accounting with privacy loss distributions](06-numerical-accounting.md) | How do you compute the exact $\varepsilon$ of a composition, with error bars? | The discretized distribution of the privacy loss | 27, 28, 30, 31 |
-| [Amplification by shuffling and by iteration](07-shuffling-iteration.md) | What other sources of uncertainty amplify privacy? | Bounds for shuffled reports and hidden iterates | 27, 28, 30, 31 |
-| [Adaptive composition](08-adaptive-composition.md) | What changes when the privacy parameters are chosen on the fly, or differ per record? | Running sums checked by filters and odometers | 27, 29, 31 |
-| [Choosing an accountant](09-choosing-an-accountant.md) | Which accountant should you use for DP-SGD, and what should you report? | All of the above, side by side | 27–34 |
+| [Rényi DP](01-renyi-dp.md) | Which summary of the privacy loss adds up under composition? | The curve $\varepsilon(\alpha)$ of Rényi divergences | 2, 3, 18–21 |
+| [From Rényi DP to (ε, δ) and to tests](02-rdp-conversions.md) | How much does converting an RDP curve to $(\varepsilon, \delta)$ lose, and what is unavoidable? | The same curve, read as a constraint on tests | 3, 4, 18, 21, 27 |
+| [Concentrated differential privacy](03-concentrated-dp.md) | When does one number $\rho$ describe the whole curve, and when not? | A line $\rho\alpha$ above the curve | 2, 3, 19–21, 24, 27, 28; one formula from 31 |
+| [f-DP and Gaussian differential privacy](04-gaussian-dp.md) | What is the most informative description of a mechanism's privacy? | The full trade-off function; $\mu$ for Gaussian ones | 3, 4, 18, 21, 27, 28 |
+| [Amplification by subsampling](05-subsampling.md) | How much privacy does using each record only with probability $q$ buy? | RDP of the subsampled Gaussian | 3, 18–21, 27, 28 |
+| [Numerical accounting with privacy loss distributions](06-numerical-accounting.md) | How do you compute the exact $\varepsilon$ of a composition, with error bars? | The discretized distribution of the privacy loss | 3, 18, 20, 21, 27, 28, 30, 31 |
+| [Amplification by shuffling and by iteration](07-shuffling-iteration.md) | What other sources of uncertainty amplify privacy? | Bounds for shuffled reports and hidden iterates | 3, 6, 7, 18, 25, 27, 28, 30, 31 |
+| [Adaptive composition: filters, odometers and individual accounting](08-adaptive-composition.md) | What changes when the privacy parameters are chosen on the fly, or differ per record? | Running sums checked by filters and odometers | 2, 21, 27, 29, 31 |
+| [Choosing an accountant](09-choosing-an-accountant.md) | Which accountant should you use for DP-SGD, and what should you report? | All of the above, side by side | 3, 21, 27–34 |
 
 : The chapters of this part, the question each one answers, the summary of the privacy loss it tracks, and the earlier chapters it uses. {#tbl-acct-map}
 
@@ -34,11 +34,11 @@ Every chapter that can compute it reports the same number: the $\varepsilon$ at 
 
 ## How to read this part
 
-**Order.** Read chapters 27 and 28 first: every later chapter uses the RDP curve and its conversion. Chapter 28 ends by reading the curve as a constraint on tests, and chapter 30 develops that trade-off view in full, so read it next. Chapters 31 and 32 form the practical core and should be read in order. Chapter 29 can be read any time after chapter 28, but before chapter 34, which uses its conversion. Chapter 33 needs chapter 31. Chapter 34 needs chapters 29 and 31. Chapter 35 closes the part and uses all the others, so read it last.
+**Order.** Read chapters 27 and 28 first: every later chapter uses the RDP curve and its conversion. Chapter 28 ends by reading the curve as a constraint on tests, and chapter 30 develops that trade-off view in full, so read it next. Chapters 31 and 32 form the practical core and should be read in order. Chapter 29 can be read any time after chapter 28, except its section on subsampling, which uses one formula from chapter 31; read it before chapter 34, which uses its conversion. Chapter 33 needs chapter 31. Chapter 34 needs chapters 29 and 31. Chapter 35 closes the part and uses all the others, so read it last.
 
 **Structure.** The chapters follow the shape of the earlier parts: why the topic matters, a toolkit, one section per result with a derivation, interpretation, worked example and two check-yourself questions, then code, references and a cheat sheet. Exercises with worked solutions are collected in the exercise book, a companion website, with a link at the end of each chapter.
 
-**Run the code.** Each chapter has a script in `code/` that prints every number its text quotes and regenerates its figures, for example
+**Run the code.** Each chapter has a script in `code/` that prints every number its text quotes, except values attributed to an external library or paper, and regenerates its figures, for example
 
 ```bash
 uv run python code/part04-privacy-accounting/renyi_dp.py
@@ -54,6 +54,7 @@ The part uses the notation of the DP foundations part, extended in @tbl-acct-not
 | --- | --- |
 | $M$, $D \simeq D'$ | A mechanism; neighbouring datasets (add/remove-one unless replace-one is named) |
 | $y$, $P = M(D)$, $Q = M(D')$ | An output; the two output distributions being compared |
+| $D' = D \cup \{x\}$; $a$, $b$ | As in the DP foundations part, under add/remove $D'$ is the dataset that holds the record $x$ and $D$ the one without it. A test of $P$ against $Q$ has type I error $a$, the false-positive rate of saying $D'$ when the data were $D$, and type II error $b$, the rate of saying $D$ when they were $D'$. A guarantee covers both orders of the pair; a chapter that needs one order says so, as the subsampling chapters do for the remove direction, which puts the dataset with the record first |
 | $L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}$ | The privacy loss of output $y$; $L_{D,D'}(Y)$ with $Y \sim M(D)$ is the privacy loss random variable |
 | $\delta(\varepsilon) = E_{e^\varepsilon}(P\|Q)$ | The smallest $\delta$ for a given $\varepsilon$, as a hockey-stick divergence |
 | $D_\alpha$, $\varepsilon(\alpha)$ | Rényi divergence of order $\alpha > 1$; the RDP curve of a mechanism |

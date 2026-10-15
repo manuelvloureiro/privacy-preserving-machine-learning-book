@@ -17,10 +17,10 @@ This file is the GitHub overview. It is not part of the rendered book.
 | 31 | [Amplification by subsampling](05-subsampling.md) | Poisson and fixed-size sampling; matching the neighbouring relation; RDP of the subsampled Gaussian; the moments accountant; DP-SGD by RDP | [subsampling.py](../../code/part04-privacy-accounting/subsampling.py) |
 | 32 | [Numerical accounting with privacy loss distributions](06-numerical-accounting.md) | PLDs; composition by convolution; pessimistic and optimistic discretization; FFT and PRV accountants; DP-SGD sandwiched | [numerical_accounting.py](../../code/part04-privacy-accounting/numerical_accounting.py) |
 | 33 | [Amplification by shuffling and by iteration](07-shuffling-iteration.md) | Shuffled randomized response exactly; the clones bound; amplification by iteration; hidden-state analysis of noisy SGD | [shuffling_iteration.py](../../code/part04-privacy-accounting/shuffling_iteration.py) |
-| 34 | [Adaptive composition](08-adaptive-composition.md) | Filters and odometers; fully adaptive composition; the Rényi filter; individual privacy accounting in DP-SGD | [adaptive_composition.py](../../code/part04-privacy-accounting/adaptive_composition.py) |
+| 34 | [Adaptive composition: filters, odometers and individual accounting](08-adaptive-composition.md) | Filters and odometers; fully adaptive composition; the Rényi filter; individual privacy accounting in DP-SGD | [adaptive_composition.py](../../code/part04-privacy-accounting/adaptive_composition.py) |
 | 35 | [Choosing an accountant](09-choosing-an-accountant.md) | Every accountant on the same DP-SGD run; which is tight where; what to report | [choosing_an_accountant.py](../../code/part04-privacy-accounting/choosing_an_accountant.py) |
 
-Each script prints the numbers its chapter quotes and regenerates the chapter's figures in `_build/figures/part04-privacy-accounting/` (the build copies them into each book):
+Each script prints the numbers its chapter quotes, except values the text attributes to an external library or paper, and regenerates the chapter's figures in `_build/figures/part04-privacy-accounting/` (the build copies them into each book):
 
 ```bash
 uv run python code/part04-privacy-accounting/<script>.py
@@ -32,7 +32,7 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 
 1. Chapters 27 → 28. Everything else uses the RDP curve and its conversion.
 2. Chapter 30. The trade-off view explains what chapters 28 and 32 are approximating.
-3. Chapters 31 → 32, the practical core. Chapter 29 fits anywhere after chapter 28.
+3. Chapters 31 → 32, the practical core. Chapter 29 fits anywhere after chapter 28, except its section on subsampling, which uses one formula from chapter 31.
 4. Chapters 33 and 34 in either order, then chapter 35.
 
 ## Core readings (from the study plan)
