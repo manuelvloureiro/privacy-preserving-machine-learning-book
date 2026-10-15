@@ -37,7 +37,7 @@ where $L$ is the loss, $(x)_+ = \max\{x, 0\}$, and outputs with loss below $\var
 
 **Result.** For every $\delta' > 0$, $k$ steps that are each $(\varepsilon, \delta)$-DP, chosen adaptively, are together $(\varepsilon', k\delta + \delta')$-DP with
 $$\varepsilon' = \varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\tanh(\varepsilon/2).$$ {#eq-comp-advanced}
-The first term is the fluctuation and the second the drift. The original theorem has $k\varepsilon(e^\varepsilon - 1)$ as the drift, about twice as large for small $\varepsilon$; both are valid. The bound beats basic composition only once $\sqrt k$ outgrows the factor $\sqrt{2\ln(1/\delta')}$, which is 4.80 at $\delta' = 10^{-5}$: at $\varepsilon = 0.1$, from $k = 29$ on. For budgeting, invert the leading term: to be $(\varepsilon_{\text{total}}, \delta')$-DP after $k$ steps, give each step roughly $\varepsilon = \varepsilon_{\text{total}}/\sqrt{2k\ln(1/\delta')}$, much more than the $\varepsilon_{\text{total}}/k$ basic composition allows.
+The first term is the fluctuation and the second the drift. The original theorem has $k\varepsilon(e^\varepsilon - 1)$ as the drift, about twice as large for small $\varepsilon$; both are valid. The bound beats basic composition only once $\sqrt k$ outgrows the factor $\sqrt{2\ln(1/\delta')}$, which is 4.80 at $\delta' = 10^{-5}$: at $\varepsilon = 0.1$, with the original drift, from $k = 29$ on. For budgeting, invert the leading term: to be $(\varepsilon_{\text{total}}, \delta')$-DP after $k$ steps, give each step roughly $\varepsilon = \varepsilon_{\text{total}}/\sqrt{2k\ln(1/\delta')}$, much more than the $\varepsilon_{\text{total}}/k$ basic composition allows.
 
 **Example.** For the 100 counts at $\varepsilon = 0.1$ and $\delta' = 10^{-5}$, the fluctuation term is 4.7985 and the drift $100 \times 0.1\tanh(0.05) = 0.4996$, so $\varepsilon' = 5.2981$; with the original drift, 5.8502. @tbl-comp-vs-k compares the bounds over $k$, and @fig-comp-epsilon-vs-k plots them.
 
@@ -138,7 +138,7 @@ uv run python code/part03-dp-foundations/composition.py
 | $\delta$ from the loss | $\delta(\varepsilon) = \mathbb E[(1 - e^{\varepsilon - L})_+] \le \Pr[L > \varepsilon]$ | Only the tail of $L$ matters |
 | Mean loss of an $\varepsilon$-DP step | $\le \varepsilon\tanh(\varepsilon/2) \approx \varepsilon^2/2$ | Equality for randomized response |
 | Basic composition | $(k\varepsilon, k\delta)$ | Adaptive; parameters may adapt for pure DP |
-| Advanced composition | $\big(\varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\tanh(\varepsilon/2),\ k\delta + \delta'\big)$ | Beats basic from $k = 29$ at $\varepsilon = 0.1$, $\delta' = 10^{-5}$ |
+| Advanced composition | $\big(\varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\tanh(\varepsilon/2),\ k\delta + \delta'\big)$ | Beats basic for large $k$ only (from $k = 29$ with the original drift, at $\varepsilon = 0.1$, $\delta' = 10^{-5}$); take the smaller |
 | Optimal composition | $1 - (1 - \delta)^k(1 - \delta_{\mathrm{RR}}(\varepsilon'))$, @eq-comp-kov | Tight for mechanisms known only by $(\varepsilon, \delta)$; compute in log space |
 | Known mechanism, such as Gaussian | Compose the whole curve | Point summaries can be off by a factor of 8 |
 

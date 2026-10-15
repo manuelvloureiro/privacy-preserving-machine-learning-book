@@ -24,7 +24,7 @@ Throughout, $n$ is the number of records, the error is at most $\alpha$ with pro
 
 **Result.** If an $\varepsilon$-DP mechanism must land in $m$ disjoint regions, each with probability at least $1 - \beta$ on its own dataset, and every such dataset is within $k$ records of one reference dataset, then
 $$k \ge \frac{\ln\big(m(1 - \beta)\big)}{\varepsilon}.$$ {#eq-lower-packing}
-Under add/remove neighbours, reporting the **mode** of $N$ elements reliably needs the top element to lead by $k \ge \ln(N(1 - \beta))/\varepsilon$ records, and any $\varepsilon$-DP histogram over $N$ bins has, with probability $\beta$, an error in some bin of at least
+Under add/remove neighbours, reporting the **mode** of $N$ elements reliably needs the top element to lead by $k \ge \ln(N(1 - \beta))/\varepsilon$ records, and any $\varepsilon$-DP histogram over $N$ bins that is within $\alpha$ in every bin with probability at least $1 - \beta$, on every dataset, has
 $$\alpha \ge \frac12\left(\frac{\ln\big(N(1 - \beta)\big)}{\varepsilon} - 1\right).$$ {#eq-lower-histogram}
 The Laplace histogram's error is at most $\ln(N/\beta)/\varepsilon$, and report-noisy-max ([Selection](05-selection.md)) finds the mode at a lead of the same order: both are optimal within a factor of about 2 (@fig-lower-histogram).
 

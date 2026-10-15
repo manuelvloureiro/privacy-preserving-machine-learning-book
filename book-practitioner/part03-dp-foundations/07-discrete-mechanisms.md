@@ -141,7 +141,7 @@ uv run python code/part03-dp-foundations/discrete_mechanisms.py
 
 - Never ship `f(D) + laplace(b)` in floating point. Snap and clamp, or make the query integer-valued and use an exact integer sampler.
 - Any `exp`, `log` or `random()` inside a sampler is a place where the analysed distribution and the real one can part.
-- For $\sigma \ge 1$, treat the discrete Gaussian as the continuous one; below that, compute its $\delta(\varepsilon)$ exactly.
+- Always compute the discrete Gaussian's $\delta(\varepsilon)$ with @eq-dgauss-delta; the continuous formula can understate it. Its variance and Rényi bound match the continuous Gaussian's from $\sigma = 1$ on.
 - An exact distribution is not enough: running time that depends on the output is a separate side channel.
 
 ## Further reading

@@ -106,7 +106,7 @@ Under replace (one record's value changed), a record that moves between parts ch
 | Second query chosen from the first answer | Yes, budgets add | Adaptive composition, budgets fixed in advance |
 | Two queries sharing one noise draw | **No** | The noise cancels in a difference |
 | "Post-processing" that reads the data again | **No** | It is a new mechanism, often a non-private one |
-| Budgets chosen from earlier outputs | Not by basic composition | Needs privacy filters |
+| Budgets chosen from earlier outputs | For pure DP, the sum of the $\varepsilon_i$ still holds; otherwise not by basic composition | Needs privacy filters for $(\varepsilon, \delta)$ |
 | Mechanisms proved under add/remove, released under replace | Yes, at up to twice the cost | A replacement is a removal plus an addition |
 | A DP release plus an exact statistic of the same data | **No** | The exact statistic is not DP; the pair has no guarantee |
 | Many records of one person | Yes, at $k\varepsilon$ and $\delta_k$ | Group privacy |
