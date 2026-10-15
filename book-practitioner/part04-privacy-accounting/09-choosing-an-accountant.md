@@ -2,23 +2,39 @@
 
 ## Why this matters
 
-You trained a model with differential privacy (DP), using stochastic gradient descent (SGD) with clipping and Gaussian noise, called DP-SGD: each record joined each batch independently with probability $q = 0.01$ (Poisson sampling), gradients were clipped to norm $C$, and noise of standard deviation $\sigma C$ was added to their sum, with **noise multiplier** $\sigma = 1$, for $k = 10{,}000$ steps. Now you must write "the model is $(\varepsilon, 10^{-5})$-DP" in a model card. The procedure that bounds or estimates $\varepsilon$ is an **accountant**. On this run, composing per-step guarantees gives 11296.93, Rényi differential privacy (RDP) gives 7.4287 or 6.7127 depending on the conversion, the Gaussian differential privacy (GDP) central limit theorem (CLT) gives 6.0071, and a privacy loss distribution (PLD) accountant gives the interval $[6.1377, 6.2377]$. Which do you report, and what else must you say?
+You have trained a model with differential privacy (DP), and now you must write one sentence about it in a paper or a model card. The training loop was stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, called DP-SGD ([Amplification by subsampling](05-subsampling.md)). At each step, every record joined the batch independently with a fixed probability, the sampling rate $q$, which is called Poisson sampling. Each record's gradient was then clipped to a norm of at most the clipping norm $C$, and Gaussian noise was added to the sum of the clipped gradients. The noise had standard deviation $\sigma C$, where the **noise multiplier** $\sigma$ says how large the noise is compared with one record's largest possible contribution. Your run used $q = 0.01$ and $\sigma = 1$. This chapter writes $k$ for the number of steps, which here goes up to 10,000.
 
-The numbers differ because they are different kinds of statement. An **upper bound** comes with a proof that the run is $(\varepsilon, \delta)$-DP; it may be loose, but it is true. An **approximation** has no proof, and if it lands below the truth, the claim it supports is false. A certified **lower bound** says the true $\varepsilon$ is at least this large: not a guarantee, but a referee for every other number. Hence the rule this chapter unpacks: **report the tightest upper bound whose assumptions hold for the code you ran, with enough detail that someone else can recompute it.**
+The sentence you must write is "the model is $(\varepsilon, 10^{-5})$-DP", for some privacy level $\varepsilon$. It promises something about any two datasets that differ in one record ([The definition of differential privacy](../part03-dp-foundations/01-definition.md)). Any event about what training released is at most $e^\varepsilon$ times more likely on one dataset than on the other, plus a small slack $\delta$, here $10^{-5}$. A small $\varepsilon$ means that one record barely changes what anyone can see.
+
+For a fixed run, the true $\varepsilon$ is a single number, but nobody can compute it exactly. A procedure that bounds or estimates it is called an **accountant**, and the earlier chapters of this part give you several. On this run they disagree widely. Adding up per-step guarantees with basic composition gives 11296.93 after 10,000 steps. Rényi differential privacy (RDP), a central-limit approximation and a privacy loss distribution (PLD) accountant all land far lower, between 6.0071 and 7.4287. Which number do you report, and what else must you say so that someone else can check it?
+
+The numbers differ because the accountants make different kinds of statement. An **upper bound** comes with a proof that holds for every pair of neighbouring datasets. It may be loose, but the run really is $(\varepsilon, \delta)$-DP with the $\varepsilon$ it reports. An **approximation** has no such proof, so it may land below the truth, and then the claim it supports is false. A certified **lower bound** proves that the true $\varepsilon$ is at least some value. That is not a privacy guarantee, but it exposes any reported $\varepsilon$ that is too small.
+
+So the rule of this chapter is short. **Report the tightest upper bound whose assumptions hold for the code you ran, and report enough that someone else can recompute it.**
 
 ## Every accountant on one run {#sec-choose-compare}
 
-Every accountant starts from what one step reveals about one record. Along that record's clipped gradient, in units of $C$, the output is $\mathcal N(0, \sigma^2)$ without the record. With it, the record is sampled with probability $q$ and then shifts the output by 1, giving the mixture $(1 - q)\mathcal N(0, \sigma^2) + q\mathcal N(1, \sigma^2)$. Accountants differ in how much of this pair they keep before combining $k$ copies, and whatever they throw away must be replaced by a worst case. So the more they keep, the tighter they are.
+All accountants start from what one step of DP-SGD reveals about one record. Look at the noisy gradient sum along the direction of that record's clipped gradient, in units of the clipping norm. [Amplification by subsampling](05-subsampling.md) explains why this one direction is the pair to account for. Write $\mathcal N(m, \sigma^2)$ for a normal distribution with mean $m$ and standard deviation $\sigma$. Without the record, the output is pure noise, $\mathcal N(0, \sigma^2)$. With the record, it is in the batch only with probability $q$, and then its gradient shifts the output by 1. So with the record, the output follows the mixture
+$$(1 - q)\,\mathcal N(0, \sigma^2) + q\,\mathcal N(1, \sigma^2).$$
+The accountants differ in how much of this pair of distributions, without and with the record, they keep, and in how they combine $k$ copies of it. Whatever an accountant throws away has to be filled in with a worst case, so the more it keeps, the tighter its number.
 
-The crudest keeps two numbers per step, an amplified $(\varepsilon, \delta)$ pair ([Amplification by subsampling](05-subsampling.md)), and composes them. That is a valid bound, but composition must assume every step leaks its worst case, while in reality the losses of different steps mostly cancel. It is right at $k = 1$ and over a thousand times too large at $k = 10{,}000$ (@tbl-choose-main); advanced composition is even worse here.
+The **privacy loss** of an output is the logarithm of how much more likely that output is on one of the two datasets than on the other. Over $k$ steps the losses add up, and since each step's loss can be positive or negative, much of the sum cancels. The crudest accountant ignores this. It keeps one $(\varepsilon, \delta)$ pair per step, shrunk for subsampling because the record is missing from most batches, and composes $k$ of them ([Advanced and optimal composition](../part03-dp-foundations/04-composition.md)). Basic composition adds up the $\varepsilon$'s, while advanced composition grows like $\sqrt k$ at the price of a little extra $\delta$. Both are valid upper bounds, even when each step depends on the earlier outputs, but they are very loose, because they assume that every step leaks its worst case.
 
-RDP keeps a whole curve, the Rényi divergence of the pair at every order $\alpha$ ([Rényi DP](01-renyi-dp.md)). Curves add exactly under composition, and a conversion then turns $k$ times the curve into one $(\varepsilon, \delta)$ pair ([From Rényi DP to (ε, δ) and to tests](02-rdp-conversions.md)). Mironov's, the improved and the optimal conversion are each proved for every pair of distributions with that curve, so all three are upper bounds, ordered Mironov $\ge$ improved $\ge$ optimal $\ge$ true $\varepsilon$. The improved conversion beats Mironov's at every order, so never use the older one.
+RDP keeps a whole curve per step ([Rényi differential privacy](01-renyi-dp.md)). At each order $\alpha$ greater than 1, the curve gives the Rényi divergence of the two output distributions. Up to a factor, that is the logarithm of an exponential moment of the privacy loss. Curves of composed steps simply add, so $k$ steps have $k$ times the curve, and for the subsampled Gaussian the curve is exact.
 
-RDP's excess has two sources, and the run's length decides which dominates. One is the conversion's toll, $\ln(1/\delta)/(\alpha - 1)$, about $11.5/(\alpha - 1)$ at $\delta = 10^{-5}$, paid however small the curve is. After one step the curve is tiny, the toll is most of the answer, and RDP with the improved conversion overstates the PLD by 379.1%. In a long run the toll is negligible, but the curve itself keeps only moments of the privacy loss, not its distribution: that costs the last 7.6% at $k = 10{,}000$, and no conversion can remove it.
+At the end, a conversion turns the composed curve into a single guarantee ([From Rényi DP to (ε, δ) and to tests](02-rdp-conversions.md)). Mironov's conversion is the original one, and the improved conversion of Balle et al. (2020) is smaller at every order. The optimal conversion gives the smallest $\varepsilon$ that holds for every pair of distributions with the composed curve. All three are upper bounds, because each is proved for every pair with the curve, and the real pair is one of them. Evaluating the curve on fewer orders can only give a larger $\varepsilon$, so a coarse grid of orders costs tightness, never validity.
 
-The GDP CLT treats the run as $\mu$-GDP with $\mu = q\sqrt{k(e^{1/\sigma^2} - 1)}$ ([f-DP and Gaussian differential privacy](04-gaussian-dp.md)), since a sum of many small losses should be nearly Gaussian. But that is a large-$k$ limit with no error bound, and $\delta = 10^{-5}$ is read far in the tail, where a Gaussian approximation is least reliable. On this run it falls below the certified lower bound at every $k$.
+The central-limit approximation of Gaussian differential privacy (GDP) takes a different route ([f-DP and Gaussian differential privacy](04-gaussian-dp.md)). A mechanism is **$\mu$-GDP** if telling its two output distributions apart is no easier than telling $\mathcal N(0, 1)$ from a normal distribution shifted by $\mu$. The privacy loss of $k$ steps is a sum of $k$ small losses, so by the central limit theorem (CLT) it should be close to Gaussian. The approximation therefore treats the run as $\mu$-GDP with
+$$\mu = q\sqrt{k\,(e^{1/\sigma^2} - 1)}.$$
+It then reads $\varepsilon$ off the exact privacy curve of a mechanism with that $\mu$.
 
-The PLD accountant keeps everything: the whole distribution of the privacy loss on a grid of width $h$, composed numerically ([Numerical accounting with privacy loss distributions](06-numerical-accounting.md)). Rounding every loss up describes a pair that leaks at least as much as the real one, which stays true through composition, so the result is an upper bound; rounding down gives a lower bound. Each step's rounding moves the loss by less than $h$, so after $k$ steps the two are at most $kh$ apart: 0.1 here, with $h = 10^{-5}$.
+That formula is a limit for many steps with a small sampling rate, so it holds only when $q\sqrt k$ stays fixed as $k$ grows. It also keeps only the mean and the variance of each step's loss. Neither simplification comes with an error bound in the tail of the loss distribution, yet a $\delta$ of $10^{-5}$ asks exactly about that tail. So the CLT number is an approximation, not a bound.
+
+The PLD accountant keeps everything ([Numerical accounting with privacy loss distributions](06-numerical-accounting.md)). The PLD is the distribution of the privacy loss over outputs. Under composition the losses add, so the PLD of $k$ steps is that of one step convolved with itself $k$ times. A computer does this quickly with the fast Fourier transform (FFT), after it rounds the losses to a grid of width $h$, here $10^{-5}$. Rounding every loss up can only make the pair easier to tell apart, and that stays true through all $k$ convolutions. So rounding up gives the **pessimistic PLD**, an upper bound. Rounding down gives the **optimistic PLD**, a lower bound.
+
+Each step's rounding moves its loss by less than $h$, so after $k$ steps the two bounds are at most $kh$ apart, which is 0.1 here. That holds as long as the accountant cuts off no tail of the loss distribution, and @sec-choose-report shows where the cut-off starts to matter. Since the guarantee must hold whichever dataset contains the record, the accountant computes the PLD in both directions and keeps the larger $\varepsilon$.
+
+@tbl-choose-main gives every accountant's $\varepsilon$ on the running example.
 
 | $k$ | Basic | Advanced | RDP, Mironov | RDP, improved | RDP, optimal | GDP CLT | PLD upper | PLD lower |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -28,19 +44,34 @@ The PLD accountant keeps everything: the whole distribution of the privacy loss 
 | 1,000 | 839.39 | 1258.64 | 2.5380 | 2.1014 | 2.1009 | 1.6177 | 1.8332 | 1.8232 |
 | 10,000 | 11296.93 | 24379.55 | 7.4287 | 6.7127 | 6.7127 | 6.0071 | 6.2377 | 6.1377 |
 
-: DP-SGD with $q = 0.01$, $\sigma = 1$: $\varepsilon$ at $\delta = 10^{-5}$ after $k$ steps under every accountant. The PLD columns use the grid $h = 10^{-5}$. {#tbl-choose-main}
+: DP-SGD with $q = 0.01$ and $\sigma = 1$: $\varepsilon$ at $\delta = 10^{-5}$ after $k$ steps under every accountant. Basic and advanced are per-step guarantees, amplified by subsampling and then composed. The PLD columns use the grid $h = 10^{-5}$. {#tbl-choose-main}
 
-![Left: $\varepsilon$ at $\delta = 10^{-5}$ against the number of steps for DP-SGD with $q = 0.01$, $\sigma = 1$, under every accountant (the two PLD curves overlap). Right: each divided by the PLD upper bound. Ratios above 1 are valid but loose; the shaded region below 1 is where only the PLD lower bound may lie, and the CLT lies there at every $k$.](figures/choosing_an_accountant_eps_vs_k.svg){#fig-choose-eps-k}
+The proofs put the RDP bounds in a fixed order. Mironov's conversion is the largest, because the improved one is smaller at every order, while the optimal one is by definition the smallest valid value for the curve:
+$$\varepsilon_{\text{RDP, Mironov}} \;\ge\; \varepsilon_{\text{RDP, improved}} \;\ge\; \varepsilon_{\text{RDP, optimal}} \;\ge\; \varepsilon_{\text{true}}.$$ {#eq-choose-order}
+The theory does not order RDP against the pessimistic PLD, which can exceed the truth by up to $kh$. On this run RDP stays above it at every $k$, but that is an observation, not a theorem.
 
-Suppose you ran 1,000 steps. Your paper might say $\varepsilon = 2.54$ (RDP with Mironov's conversion, as in older code), 2.10 (RDP, improved), 1.83 (PLD) or 1.62 (CLT). The first three are true, and 1.83 says the most. The fourth is false: the optimistic PLD proves $\varepsilon \ge 1.8232$, so the run is not $(1.62, 10^{-5})$-DP.
+![Left: $\varepsilon$ at $\delta = 10^{-5}$ against the number of steps $k$ for DP-SGD with $q = 0.01$ and $\sigma = 1$, under every accountant (the two PLD curves overlap). Right: each accountant divided by the PLD upper bound. Ratios above 1 are valid but loose. The shaded region below 1 is where only the PLD lower bound may lie, and the CLT lies there at every $k$.](figures/choosing_an_accountant_eps_vs_k.svg){#fig-choose-eps-k}
 
-## Calibrating the noise for a target ε {#sec-choose-inverse}
+@tbl-choose-main shows that per-step composition is useless beyond a handful of steps. It is right only at $k = 1$, where there is nothing to compose, and at 10,000 steps it is off by a factor of over a thousand. Advanced composition is even worse here, because its second term grows like $k$ and this run's per-step $\varepsilon$ is too large for that term to be negligible.
 
-In practice you fix the budget, the steps and the batch size, and ask how much noise to add. Then a loose accountant costs utility: it overstates $\varepsilon$ at every $\sigma$, so it asks for more noise to meet the same target. The averaged gradient's noise has standard deviation $\sigma C/(qn)$ for $n$ records, so every percent of $\sigma$ is a percent of gradient noise.
+RDP is a safe bound, and its excess over the pessimistic PLD has two sources. The first is the conversion, which at order $\alpha$ pays a toll of about $\ln(1/\delta)/(\alpha - 1)$, however small the curve is. After one step the curve is tiny, so the toll is most of the answer, and the improved conversion overstates the PLD by 379.1%.
 
-The noise accountant $A$ requires for a target $\varepsilon^*$ is the smallest $\sigma$ at which its reported $\varepsilon_A(\sigma)$ meets the target:
+The second source is the curve itself. On this run even the optimal conversion stays above the PLD, because the curve keeps only a family of moments of the privacy loss, not its whole distribution. In a long run the composed curve is large, the best order moves up, and the toll shrinks in comparison. From 1,000 steps on, almost all of the excess is in the curve. At 10,000 steps the excess is 7.6%, and only an accountant that keeps the whole distribution removes it.
+
+The CLT under-reports on this run. It falls below the certified lower bound at every $k$, for example 6.0071 against 6.1377 after the full run. Its ratio to the PLD climbs toward 1 as $k$ grows, as a central limit theorem should, but at no $k$ in the table is it a valid guarantee.
+
+Suppose you ran 1,000 steps. Your paper says $\varepsilon = 2.54$ with Mironov's conversion, or 2.10 with the improved conversion that the Opacus library uses. A PLD accountant says 1.83, and the CLT says 1.62. The first three are true upper bounds, and the PLD's is the most informative because it is the smallest. The CLT's is false, because the optimistic PLD proves that $\varepsilon$ is at least 1.8232.
+
+## The inverse problem: noise for a target ε {#sec-choose-inverse}
+
+Practitioners usually fix a budget, such as $\varepsilon = 3$, together with the number of steps and the batch size, and then ask how much noise they must add. The noise multiplier is then the knob that sets the model's utility. Write $n$ for the number of records. The averaged gradient carries noise with standard deviation $\sigma C/(qn)$, where $qn$ is the expected batch size. A loose accountant overstates $\varepsilon$ at every $\sigma$, so it asks for a larger $\sigma$, and its slack turns directly into extra noise.
+
+For an accountant $A$, write $\varepsilon_A(\sigma)$ for the privacy level it reports when the noise multiplier is $\sigma$. The noise it requires for a target $\varepsilon^*$ is then the smallest noise multiplier at which its reported value meets the target:
 $$\sigma_A(\varepsilon^*) = \min\{\sigma > 0 : \varepsilon_A(\sigma) \le \varepsilon^*\}.$$ {#eq-choose-inverse}
-More noise never raises a correct accountant's $\varepsilon$: a noisier run can be made from a less noisy one by adding independent noise, without looking at the data, and that cannot reveal more. So this is where a decreasing function crosses a level, and bisection finds it. Return the end of the final bracket where $\varepsilon_A \le \varepsilon^*$ was actually checked, never the midpoint, which may miss the target.
+
+This is easy to solve because more noise never raises a correct accountant's $\varepsilon$. A noisier run can be made from a less noisy one by adding independent Gaussian noise, without looking at the data. By the data-processing inequality ([Divergences](../part01-prerequisites/03-divergences.md)), such a map can only make the two output distributions harder to tell apart, so every accountant's $\varepsilon$ can only fall. For the PLD this holds up to grid effects of order $kh$.
+
+So the required $\sigma$ is where a decreasing function crosses a level, and a bracketing search finds it. The search shrinks an interval from a $\sigma$ that misses the target to one that meets it. At the end it returns the upper end, because that is where $\varepsilon_A(\sigma) \le \varepsilon^*$ was actually checked, so for an upper-bound accountant the returned $\sigma$ is safe. The CLT needs no search, because its formula for $\mu$ can be solved for $\sigma$ directly.
 
 | Target $\varepsilon$ | Advanced | RDP, Mironov | RDP, improved | GDP CLT | PLD upper | PLD lower |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -48,63 +79,82 @@ More noise never raises a correct accountant's $\varepsilon$: a noisier run can 
 | 3 | 10.505 | 1.854 | 1.662 | 1.549 | 1.584 | 1.547 |
 | 8 | 5.711 | 0.962 | 0.917 | 0.868 | 0.885 | 0.880 |
 
-: The noise multiplier each accountant requires for a target $\varepsilon$ at $\delta = 10^{-5}$, with $k = 10{,}000$ steps at $q = 0.01$. {#tbl-choose-sigma}
+: The noise multiplier $\sigma$ each accountant requires for a target $\varepsilon$ at $\delta = 10^{-5}$, with $k = 10{,}000$ steps at $q = 0.01$. The PLD uses the grid $h = 10^{-5}$. The PLD lower column is the $\sigma$ at which the optimistic bound reaches the target. {#tbl-choose-sigma}
 
-With $n = 50{,}000$ records the expected batch holds 500. At $\varepsilon = 8$, RDP with the improved conversion sets $\sigma = 0.917$ and the PLD $\sigma = 0.885$: 3.6% more noise for the same certified budget (@tbl-choose-sigma). Across the targets the improved conversion costs 3.4 to 4.9% more noise, less than its 7.6% excess in $\varepsilon$, because in this range a small rise in $\sigma$ buys a larger fall in $\varepsilon$. Mironov's conversion costs 8.6 to 24.7% more, most at the strictest target, where its toll weighs most.
+![For each target $\varepsilon$ at $\delta = 10^{-5}$ ($k = 10{,}000$, $q = 0.01$), the noise multiplier each accountant requires, divided by the one the PLD upper bound requires. RDP with Mironov's conversion asks for up to 25% more noise, and RDP with the improved conversion about 4% more. The CLT and the PLD lower bound fall in the shaded region: they ask for less noise than any certified accountant can justify. Advanced composition (6.19 to 6.63) is off the chart.](figures/choosing_an_accountant_noise.svg){#fig-choose-noise}
 
-![Each accountant's noise multiplier for a target $\varepsilon$ ($k = 10{,}000$, $q = 0.01$, $\delta = 10^{-5}$), divided by the one the PLD upper bound requires. The CLT and the PLD lower bound fall in the shaded region: less noise than any certified accountant can justify.](figures/choosing_an_accountant_noise.svg){#fig-choose-noise}
+@fig-choose-noise divides each accountant's $\sigma$ by the one the pessimistic PLD needs. Advanced composition needs about six times as much, a noise level at which DP-SGD rarely trains a useful model. The RDP conversions cost only a few percent. Mironov's conversion costs 8.6% to 24.7% more noise, most at the strictest target, where its toll is the largest share of a small $\varepsilon$. The improved conversion costs only 3.4% to 4.9% more. That is less than its 7.6% excess in $\varepsilon$, because in this range a small rise in $\sigma$ buys a larger fall in $\varepsilon$. At the target of 8, for example, RDP asks for 3.6% more noise in every averaged gradient than the PLD does.
 
-Calibrate with the accountant you will report, and never with the CLT. It asks for 2.0 to 4.8% less noise than the certified bound needs, and at $\varepsilon = 8$ that is provably too little: at its $\sigma = 0.8676$ the optimistic PLD already gives 8.2594. At small targets the PLD's fixed width $kh$ is a large fraction of $\varepsilon$: at $\varepsilon = 1$ it brackets $\sigma$ only to $[3.654, 3.988]$, so refine $h$.
+The CLT asks for 2.0% to 4.8% less noise than the certified bound needs. At a target of 8 that is provably too little. At the CLT's $\sigma = 0.8676$, the optimistic PLD already gives 8.2594. At targets of 1 and 3 the grid is too coarse to tell, since the PLD bracket at the CLT's $\sigma$ contains the target.
+
+The width of the PLD bracket matters most at small targets, because $kh$ is a fixed amount of $\varepsilon$. At a target of 1 it is 10% of the budget. So the PLD pins $\sigma$ down only to the interval from 3.654 to 3.988. For a tight $\sigma$ at a small target, refine the grid.
 
 ## Where each accountant is tight {#sec-choose-decision}
 
-The ranking changes with the mechanism, by the principle above: an accountant is tight when its summary describes the mechanism's privacy loss exactly.
+DP-SGD is only one mechanism, and you will also use the Gaussian mechanism without subsampling, pure-DP mechanisms, whose $\delta$ is zero, and adaptive training. The ranking of the accountants changes with the mechanism, because an accountant is tight only when its summary describes that mechanism's privacy loss exactly.
 
-For the plain Gaussian mechanism, with no subsampling, the composed pair is exactly Gaussian, and GDP describes it with one number, $\mu$, whose squares add. GDP is then exact. A team that releases 100 noisy counts at $\sigma = 10$ has exactly $\mu = 1$ and $\varepsilon = 4.3772$; an old RDP accountant with Mironov's conversion reports 5.2985, 21.0% too high, and the improved conversion 4.7285, because RDP keeps this curve exactly but still pays in the conversion.
+The summaries form a ladder, from the one that keeps least to the one that keeps most. At the bottom, an $(\varepsilon, \delta)$ pair keeps two numbers per step. Next, zero-concentrated differential privacy (zCDP) keeps a single slope $\rho$ ([Concentrated differential privacy](03-concentrated-dp.md)). It promises that the RDP curve lies below the straight line $\rho\alpha$ through the origin. RDP keeps the whole curve.
 
-For pure-DP steps such as randomized response, the privacy loss takes only a few values, so the PLD needs no rounding and is exact. For 100 steps of randomized response at $\varepsilon_0 = 0.1$, the exact PLD gives 4.3068, RDP 4.6154, zero-concentrated differential privacy (zCDP) 4.7263, advanced composition 5.8502 and basic composition 10.0000: each summary that keeps less pays more.
+GDP keeps more still, the whole trade-off between an attacker's two errors when testing which dataset was used, wrongly accusing and wrongly clearing. It is exact only when that trade-off is Gaussian. At the top, the PLD keeps the entire distribution of the privacy loss. Each rung loses information that the next one keeps, and lost information has to be filled in with a worst case.
 
-For DP-SGD, subsampling makes each step a mixture that no closed form describes exactly, and only the PLD is both certified and tight. zCDP is the wrong tool here: its single line $\rho\alpha$ must lie above the RDP curve at every order, and at high orders the subsampled curve's slope approaches the unsubsampled one, so the line cannot express the gain from subsampling. When the noise, the stopping time or per-record budgets are chosen during training, the per-step pair is no longer fixed in advance as the PLD accountant assumes; an RDP filter at a fixed order loses nothing to that adaptivity ([Adaptive composition](08-adaptive-composition.md)).
+For the Gaussian mechanism without subsampling, the composed pair is exactly Gaussian, so GDP describes it exactly. A Gaussian step with sensitivity 1 is $\mu$-GDP with $\mu = 1/\sigma$, and under composition the squares of $\mu$ add, just as the variances of independent Gaussians do. So a hundred Gaussian releases at $\sigma = 10$ compose to exactly $\mu = 1$, and GDP then gives the exact $\varepsilon$, which is 4.3772. RDP keeps this curve exactly too, but its conversion still costs something. The improved conversion is 8.0% above the truth, and Mironov's is 21.0% above it. Here zCDP gives the same as RDP, because the Gaussian's RDP curve is itself the straight line $\alpha\mu^2/2$.
 
-| Mechanism | Use | Avoid |
-| --- | --- | --- |
-| Gaussian, no subsampling | GDP, or zCDP converted exactly | Per-step $(\varepsilon, \delta)$ composition |
-| Poisson-subsampled Gaussian (DP-SGD) | Pessimistic PLD, optimistic value as error bar | zCDP; the CLT as a guarantee |
-| Pure-DP steps (randomized response, Laplace, exponential mechanism) | PLD (exact for finite outputs), or RDP with the mechanism's own curve | Advanced composition when a tighter accountant is available |
-| Adaptive noise, stopping or per-record budgets | RDP filter at a fixed order | Plugging realized $\varepsilon_t$ into a fixed-parameter theorem |
-| Local randomizers behind a shuffler | Exact computation or a numeric bound ([Amplification by shuffling and by iteration](07-shuffling-iteration.md)) | The Poisson-subsampling accountant |
-| Only the last iterate released | Amplification by iteration, for convex smooth losses with no released checkpoints | Any hidden-state claim for non-convex training |
+For pure-DP steps, the privacy loss takes only a few values. In randomized response with per-step privacy level $\varepsilon_0 = 0.1$, each step's loss is either $+\varepsilon_0$ or $-\varepsilon_0$. The composed loss then takes only a few values, so the PLD needs no rounding and is exact, at 4.3068 for a hundred steps. Every summary that keeps less pays more. For example, RDP with the exact randomized-response curve gives 4.6154, while basic composition gives 10.0000.
+
+For DP-SGD, subsampling makes each step a mixture, which no closed form describes exactly, so only the PLD is both certified and tight. RDP with the improved conversion is 7.6% above it at 10,000 steps, and the CLT falls below it. zCDP is the wrong tool here. Its line $\rho\alpha$ must lie above the subsampled RDP curve at every order. At high orders the ratio of that curve to $\alpha$ approaches $1/(2\sigma^2)$, the slope without subsampling, so $\rho$ must take that unsubsampled value. The line then sits far above the curve at the small orders where subsampling helps, and zCDP throws that gain away.
+
+Adaptivity is the one place where RDP is the natural tool. The PLD accountant assumes that the per-step pair is fixed in advance, which fails when the noise or the stopping time is chosen during training from what has been released. A Rényi **filter** handles this case and loses nothing to the adaptivity ([Adaptive composition: filters, odometers and individual accounting](08-adaptive-composition.md)). It lets a step run only while the composed curve at one fixed order stays within the budget. An odometer, which reports the spending so far, tracks several orders and pays a little for that.
+
+Two other cases change the pair you account for ([Amplification by shuffling and by iteration](07-shuffling-iteration.md)). Reports from local randomizers that pass through a shuffler gain privacy because each report hides among similar reports from others, and that gain needs its own accountant. When only the last model is released, amplification by iteration can give more privacy. But it needs a convex and smooth loss, steps that never push two models apart, and no released checkpoints, so it rarely applies to deep learning. @tbl-choose-decision sums up the choices.
+
+| Mechanism | Use | Why | Avoid |
+| --- | --- | --- | --- |
+| Gaussian, no subsampling | GDP, or zCDP converted exactly | The squares of $\mu$ add, and the Gaussian trade-off is exact | Per-step $(\varepsilon, \delta)$ composition |
+| Poisson-subsampled Gaussian (DP-SGD) | Pessimistic PLD, with the optimistic value as error bar | Certified bracket of width $kh$; RDP is 7.6% to 69% above it here for $k \ge 100$ | zCDP, which cannot express amplification; the CLT as a guarantee |
+| Pure-DP steps (randomized response, Laplace, exponential mechanism) | PLD (exact for finite outputs), or RDP with the mechanism's own curve | The privacy loss takes few values | Advanced composition |
+| Adaptive noise, stopping or per-record budgets | Rényi filter at a fixed order | Free at a fixed order; an odometer pays a union bound over orders | Plugging the $\varepsilon$ spent so far into a theorem that assumes fixed parameters |
+| Local randomizers behind a shuffler | Exact computation for binary randomized response, a numerical bound otherwise | The closed-form bound is 4.47 to 7.55 times the exact value | The Poisson-subsampling accountant |
+| Only the last iterate released | Amplification by iteration | Needs a convex, smooth loss, steps that do not push models apart, and no released checkpoints | Any hidden-state claim for non-convex training |
 
 : Which accountant to use for which mechanism. {#tbl-choose-decision}
 
 ## Matching the accountant to the code {#sec-choose-match}
 
-An accountant takes $q$, $\sigma$ and $k$ and trusts that the code does what its theorem assumes. A mismatch makes the number a statement about a different algorithm.
+Every number in @tbl-choose-main assumes a model of the training run, and the accountant cannot check that model against your code. It takes $q$, $\sigma$ and $k$, and it trusts that the code does what its theorem assumes. Ponomareva et al. (2023) note that many papers reported the Poisson-sampling number while training with shuffled fixed-size batches. The habit goes back to Abadi et al. (2016). Such a mismatch does not make the number a little loose. It makes the number a statement about a different algorithm, so check each item of @tbl-choose-checklist against the code before you report $\varepsilon$.
 
-The sampling scheme is the most expensive mismatch, for a mechanical reason. With fixed-size random batches, adding a record must push another one out, so the batch sum can move by up to $2C$ instead of $C$, and such a run is covered by the Poisson accountant only at noise multiplier $\sigma/2$ (Lebeda et al. 2024). With shuffle and partition, each record is used exactly once per epoch, in a batch fixed by the shuffle, and no amplification theorem holds for every dataset. What remains certain is one unamplified Gaussian step per epoch, for zero-out neighbours (one record's gradient replaced by zero).
-
-In a code review: a script uses a data loader with `shuffle=True` and `batch_size=500` on 50,000 records for 100 epochs, and calls an RDP accountant with `sample_rate=0.01`, which reports 6.71. That sampler is shuffle and partition, so what holds is 100 unamplified steps at $\sigma = 1$: $\mu = 10$ GDP and $\varepsilon = 91.8173$, or 284.39 under replace-one, where the sum moves by $2C$. Fixed-size random batches, accounted correctly, would give 47.42 (RDP) and 43.42 (PLD). Switching to Poisson sampling makes the PLD's 6.24 honest. The factor of 6.96 from fixed-size batches dwarfs the factor of at most 1.19 between RDP and PLD at 10,000 steps: check the sampler before arguing about accountants.
-
-Other assumptions fail quietly. If you tune 10 configurations on the private data and release the best, which one is best depends on all 10 runs, so the release costs all 10 composed: $\varepsilon = 27.23$ with RDP. The guarantee protects whatever differs between neighbours, so example-level DP protects each example, not a person who contributed many. And the theorems assume exact real-valued Gaussian noise; floating-point sampling can break a mechanism that is correct on paper ([Discrete and floating-point-safe mechanisms](../part03-dp-foundations/07-discrete-mechanisms.md)).
-
-| Item | The accountant assumes | Check in the code | If it does not match |
+| Item | What the accountant assumes | What to check in the code | If it does not match |
 | --- | --- | --- | --- |
-| Sampling scheme | Poisson sampling at rate $q$ | Each record included independently, variable batch sizes? | Fixed-size random batches: account with noise multiplier $\sigma/2$. Shuffle and partition: report the guarantee without amplification, for zero-out neighbours |
-| Neighbouring relation | Add/remove one record | Add/remove, replace-one or zero-out? | Under Poisson sampling, replace-one costs more per step: about twice the add/remove cost for a pure-DP step with small $\varepsilon$ |
-| Privacy unit | One example | Can one person contribute several examples? | Clip and sample per user, or pay group privacy |
-| Hyperparameter tuning | Not counted | Was anything chosen from results on the private data? | Account for the tuning runs, or tune on public data |
-| Adaptive parameters | $\sigma$, $q$, $k$ fixed in advance | Early stopping, noise schedules, per-record budgets? | Use a filter |
-| Implementation | Exact Gaussian noise, exact clipping | Floating-point noise, accumulation across devices | Outside the accountant: verify the implementation |
+| Sampling scheme | Poisson sampling at rate $q$ | Is each record included independently, so batch sizes vary? | Fixed-size random batches: account with noise multiplier $\sigma/2$. Shuffle and partition: report the unamplified guarantee for zero-out neighbours (see below) |
+| Neighbouring relation | Add or remove one record | Is the guarantee stated for add/remove, replace-one or zero-out? | Replace-one under Poisson sampling costs more per step, about twice the add/remove cost for a pure-DP step with small $\varepsilon$ |
+| Privacy unit | One example | Can one person contribute several examples? | Clip and sample per user, or pay the group-privacy cost of protecting several records at once |
+| Released outputs | Every noisy gradient | Are checkpoints, logs or gradients exposed? | Nothing to fix: the guarantee covers them all |
+| Hyperparameter tuning | Not counted | Were hyperparameters chosen from results on the private data? | Account for the tuning runs, or tune on public data |
+| Adaptive parameters | $\sigma$, $q$ and $k$ fixed in advance | Early stopping, noise schedules, per-record budgets? | Use a filter |
+| Implementation | Exact real-valued Gaussian noise, exact clipping | Floating-point noise sampling, accumulation across devices | Outside the accountant ([Discrete and floating-point-safe mechanisms](../part03-dp-foundations/07-discrete-mechanisms.md)) |
 
 : A checklist for matching the accountant to the training code. {#tbl-choose-checklist}
 
+The sampling scheme is the most expensive item, for a mechanical reason. Suppose each step draws a fresh random batch of fixed size. Then adding a record has to push another one out. In effect one record is swapped for another, so the batch sum can move by up to $2C$ instead of $C$. Lebeda et al. (2024) show that such a run is covered by the Poisson pair with noise multiplier $\sigma/2$, the same noise measured against a shift twice as large. After the full run, the PLD upper bound then rises from 6.24 to 43.42. RDP rises in the same way, from 6.71 to 47.42. Read the other way, if your code draws fixed-size batches and you want the Poisson accountant's 6.24 to be honest, train with $\sigma = 2$.
+
+Shuffle and partition is worse. Each epoch shuffles the data once and cuts it into batches, so each record is used exactly once per epoch, and no amplification theorem holds for every dataset. What remains certain is one Gaussian step per epoch for the record. It holds for **zero-out neighbours**, two datasets that are identical except that one record's gradient is replaced by zero in one of them. The batch that holds the record then moves by at most $C$, so each epoch is $\mu$-GDP with $\mu = 1/\sigma$. Over a hundred such epochs at $\sigma = 1$, the squares of $\mu$ add up, giving a total $\mu$ of 10. That gives $\varepsilon = 91.8173$. Under add/remove there is no clean bound at all, because inserting a record shifts the partition and changes every later batch. Under replace-one, the batch sum moves by up to $2C$, so $\mu$ doubles and $\varepsilon$ rises to 284.39.
+
+The third mismatch is tuning on the private data. Suppose you train ten configurations on it and release the best. Which one is best depends on all ten runs, so the release costs all ten runs composed, which RDP puts at $\varepsilon = 27.23$. Papernot & Steinke (2022) give much better bounds for tuning procedures that try a random number of configurations.
+
+So the sampler matters far more than the accountant. A one-line change in the data loader moves the PLD bound by a factor of 6.96. At the same number of steps, the choice between RDP and PLD changes $\varepsilon$ only by a factor of 1.19 with Mironov's conversion, and 1.08 with the improved one (@fig-choose-eps-k). The Opacus library, for one, uses Poisson sampling by default when you make a model private.
+
+The privacy unit decides what is protected, because the guarantee is about datasets that differ in one unit. Example-level DP-SGD on a dataset with many examples per user protects each example, not each user.
+
+In a code review, suppose a script uses a data loader with `shuffle=True` and `batch_size=500` on 50,000 records for 100 epochs. Its RDP accountant, called with `sample_rate=0.01`, reports 6.71. But the sampler is shuffle and partition, so the certified guarantee is the unamplified 91.8173. Switching the loader to Poisson sampling takes a few lines and makes the PLD accountant's 6.24 honest.
+
 ## What to report {#sec-choose-report}
 
-An $\varepsilon$ without its assumptions cannot be checked or compared. NIST SP 800-226 (2025) and Ponomareva et al. (2023) ask for the setting (who is trusted), what is covered (one run, or tuning too), the unit of privacy, the neighbouring relation, the accountant and whether its assumptions hold, and, for DP-SGD, everything needed to recompute $\varepsilon$: sampling scheme, $q$, $k$, $\sigma$, $C$, and the accountant's version and discretization.
+An $\varepsilon$ without its assumptions cannot be checked or compared. The same number means different things for one example or one user, with or without tuning, and at different $\delta$. Two guidance documents say what a statement should contain. One is SP 800-226 from the US National Institute of Standards and Technology (NIST). The other is the machine-learning guide of Ponomareva and colleagues. It asks first for the setting, meaning who is trusted with the raw data, and then for what the guarantee covers, such as one training run or the tuning too. It also asks for the unit of privacy, the neighbouring relation, the accountant with its assumptions, and code when possible.
 
-Choose $\delta$ with its meaning in mind: it is the probability with which the promise may fail. A mechanism that publishes one randomly chosen record in full meets a $\delta$ of about $1/n$ with $\varepsilon = 0$, while exposing someone completely. So $\delta$ must be much smaller than $1/n$ for $n$ units of privacy ([The definition of differential privacy](../part03-dp-foundations/01-definition.md)): Ponomareva et al. suggest $n^{-1.1}$, and NIST gives $1/n^2$ as a common recommendation and calls values above $10^{-5}$ suspicious. For $n = 50{,}000$, $1/n = 2.0\times10^{-5}$, so the customary $\delta = 10^{-5}$ is only half of it.
+For DP-SGD, add what an accountant needs to recompute $\varepsilon$. That is the sampling scheme with the sampling rate $q$, the number of steps, the noise multiplier $\sigma$, and the accountant's version and discretization. Report the clipping norm $C$ too, although $\varepsilon$ does not depend on it, because $\sigma C$ is the actual noise level.
 
-Report $\varepsilon$ at several $\delta$, not one pair. Many different mechanisms share a single $(\varepsilon, \delta)$ pair and behave differently at smaller $\delta$, so a reader cannot convert your pair to the $\delta$ they care about. One composed PLD gives the whole profile cheaply (@tbl-choose-profile). For the same reason, give the parameters behind any conversion: the RDP accountant's is its curve, $\varepsilon(4.1) = 3.7336$ at the best order 4.1, which the improved conversion turns into 6.7127.
+Choose $\delta$ with its meaning in mind, since it is the probability with which the promise may fail. For example, take a dataset of $n$ records and a mechanism that publishes one record, chosen at random, in full. When one record changes, the output distribution changes by only about $1/n$, because that record is published only with probability $1/n$. So the mechanism meets a $\delta$ of that size with $\varepsilon = 0$, and yet it exposes someone completely. A $\delta$ near $1/n$ therefore allows guarantees that protect nobody, with $n$ counted in units of privacy. That is why Ponomareva et al. ask for a $\delta$ much smaller than $1/n$, for example $n^{-1.1}$. The NIST guidelines go further, giving $1/n^2$ as a common recommendation and calling values above $10^{-5}$ suspicious.
+
+Take the running example with $n = 50{,}000$ records. Then $1/n$ is $2.0\times10^{-5}$, and the customary $\delta$ is only half of that, not much smaller. Reading $\varepsilon$ off the composed PLD at another $\delta$ is cheap, so @tbl-choose-profile gives several.
 
 | $\delta$ | PLD upper | PLD lower | RDP, improved |
 | --- | --- | --- | --- |
@@ -114,25 +164,49 @@ Report $\varepsilon$ at several $\delta$, not one pair. Many different mechanism
 | $1.0\times10^{-6}$ | 6.9574 | 6.8574 | 7.4140 |
 | $4.0\times10^{-10}$ ($1/n^2$) | 9.0502 | 8.9378 | 9.4540 |
 
-: The running example's privacy profile: $\varepsilon$ at several $\delta$ for $k = 10{,}000$, $q = 0.01$, $\sigma = 1$, $n = 50{,}000$. {#tbl-choose-profile}
+: The running example's privacy profile: $\varepsilon$ at several $\delta$ for $k = 10{,}000$, $q = 0.01$, $\sigma = 1$ and $n = 50{,}000$. {#tbl-choose-profile}
 
-A filled-in statement:
+At $1/n^2$, as NIST suggests, the certified $\varepsilon$ rises to 9.0502. There the bracket widens slightly beyond $kh$, to 0.1124, because the tails the accountant cuts off are no longer negligible next to so small a $\delta$.
 
-> **Privacy guarantee.** The model was trained with DP-SGD in the central model: the training server is trusted to run the code below, and the guarantee covers every intermediate noisy gradient, hence every checkpoint and the final model. **Unit of privacy:** one training example; each person contributes at most one example. **Neighbouring relation:** add or remove one example. **Training:** Poisson sampling with rate $q = 0.01$ ($n = 50{,}000$ examples, expected batch size 500), $k = 10{,}000$ steps (100 epochs), per-example clipping norm $C = 1$, Gaussian noise multiplier $\sigma = 1$. **Accountant:** privacy loss distributions, pessimistic discretization on the grid $h = 10^{-5}$, both add and remove directions. **Guarantee:** $(6.24, 10^{-5})$-DP and $(9.06, 4.0\times10^{-10})$-DP. The optimistic discretization gives 6.1377 and 8.9378, so the accountant's own error is at most 0.1000 and 0.1124. For comparison, the RDP accountant with the improved conversion gives 6.7127 at $\delta = 10^{-5}$. **Not covered:** hyperparameters were tuned on a public proxy dataset; no tuning on the private data was performed. **If the sampling assumption failed** (for example, shuffled fixed-size batches), the guarantee without amplification is $(91.82, 10^{-5})$-DP for zero-out neighbours.
+Report the profile, not a single point. A single $(\varepsilon, \delta)$ pair cannot be converted to a smaller $\delta$, because many different mechanisms share that one pair and behave differently at smaller $\delta$. For the same reason, NIST asks you to report the original parameters of an RDP, zCDP or GDP guarantee alongside any conversion, which for the RDP accountant means its curve. Here the composed curve at the best order, 4.1, is 3.7336. Report the accountant's error bar as well. For a PLD accountant the optimistic value gives it, while an RDP number has no matching lower bound. Finally, if any item of @tbl-choose-checklist is in doubt, also give the guarantee that does not rely on it.
 
-Three habits in it follow from what an upper bound is. It is rounded up: 9.0502 becomes 9.06, because 9.05 would be a claim the accountant has not certified. The optimistic value is its error bar, which an RDP number cannot have, since RDP has no matching lower bound. And where an assumption is in doubt, the statement gives the fallback guarantee that does not rely on it.
+@tbl-choose-statement is a filled-in statement for the running example.
 
-## Checking an accountant {#sec-choose-check}
+| Item | Statement |
+| --- | --- |
+| Setting | DP-SGD in the central model, with the training server trusted to run the code below. The guarantee covers every intermediate noisy gradient, so every checkpoint and the final model. |
+| Unit and neighbours | One training example, and each person contributes at most one. Neighbours differ by adding or removing one example. |
+| Training | Poisson sampling at rate $q = 0.01$ over $n = 50{,}000$ examples, so the expected batch size is 500. Training ran for $k = 10{,}000$ steps (100 epochs), with per-example clipping norm $C = 1$ and Gaussian noise multiplier $\sigma = 1$. |
+| Accountant | Privacy loss distributions, with pessimistic discretization on the grid $h = 10^{-5}$, in both the add and the remove direction. |
+| Guarantee | $(6.24, 10^{-5})$-DP and $(9.06, 4.0\times10^{-10})$-DP. The optimistic discretization gives 6.1377 and 8.9378, so the accountant's own error is at most 0.1000 and 0.1124. |
+| Not covered | Hyperparameters were tuned on a public proxy dataset, not on the private data. |
+| If the sampling assumption failed | If the data were instead shuffled once per epoch and cut into fixed-size batches, the guarantee without amplification is $(91.82, 10^{-5})$-DP, for zero-out neighbours. |
 
-Test an accountant on cases whose answers you know. With $q = 1$ there is no subsampling, so $k$ steps are exactly $\sqrt k/\sigma$-GDP, and every upper bound must lie above that closed form. For $\sigma = 1$ and $k = 10$ the exact $\varepsilon$ is 17.8566, and the RDP accountant gives 19.0536, above it as it must be. The CLT formula at $q = 1$ gives $\mu = 4.1452$ instead of 3.1623 and $\varepsilon = 25.5853$: it fails, because its derivation assumes small $q$. The PLD bracket for the plain Gaussian must contain the same closed form, and it does: $[17.8516, 17.8616]$ at $h = 10^{-3}$.
+: A privacy statement for the running example, with $n = 50{,}000$ examples. {#tbl-choose-statement}
 
-Two properties hold for every correct accountant, so a violation is a bug, not slack. The orderings of @sec-choose-compare must hold at every $k$, with no reported upper bound below the optimistic PLD. And $\varepsilon$ must never decrease with $k$, because what the first $k$ steps release is part of what $k + 1$ steps release.
+Every number in it comes from @tbl-choose-profile or @sec-choose-match. Upper bounds are rounded up, never to the nearest value, so 9.0502 becomes 9.06, because rounding down would claim more than the accountant certified.
 
-Then compare against an independent library: Google's `dp_accounting` (RDP and PLD), Opacus (RDP, GDP, and a privacy loss random variable (PRV) accountant, its default), or Microsoft's `prv_accountant`. When two RDP accountants disagree, the size of the gap says why: the improved conversion beats Mironov's by $\frac{\ln\alpha}{\alpha - 1} + \ln\frac{\alpha}{\alpha - 1}$ at order $\alpha$ (0.3612 at order 10); on the running example it is what separates Mironov's 7.43 from the improved 6.71. Certified PLD and PRV brackets from different libraries each contain the truth, so they must overlap; if they do not, one has a bug.
+## Checking your accountant {#sec-choose-check}
+
+An accountant is code, and code has bugs. So before you trust a number, run checks whose answers you know, either cases where the truth is known exactly or properties that every correct accountant must have.
+
+The first check sets $q = 1$. Without subsampling each step is the plain Gaussian mechanism, which is exactly $\mu$-GDP with $\mu = 1/\sigma$. So $k$ steps are exactly $\sqrt k/\sigma$-GDP, which gives the exact $\varepsilon$, and every upper bound must lie above it. For ten steps at $\sigma = 1$ the exact $\varepsilon$ is 17.8566. The RDP accountant gives 19.0536, above it as it must be. The CLT formula, which is not a bound, misses the exact value, because its derivation assumes that $q$ is small. It gives $\mu = 4.1452$ instead of the exact 3.1623, and so an $\varepsilon$ far from the truth.
+
+The second check runs the PLD machinery on the same plain Gaussian pair, where the closed form is the truth. The bracket must contain it, and with $\mu = 1$ per step, ten steps and a grid of $10^{-3}$ it does. The bracket runs from 17.8516 to 17.8616, so its width is exactly $kh$.
+
+The third check is that the orders of @eq-choose-order hold at every $k$, with no upper bound below the optimistic PLD, since a violation is a bug, not slack. The fourth check is a round trip. Evaluating the composed pessimistic PLD at its own $\varepsilon$ must give back the $\delta$ it was solved at, and it does. Its $\varepsilon$ must also never decrease with the number of steps, because a longer run releases everything a shorter one does.
+
+Production code should use a maintained library and compare it against a second one. Google's `dp_accounting` has RDP and PLD accountants. The default in Opacus is a privacy loss random variable (PRV) accountant, a numerical accountant of the same kind as the PLD. Microsoft's `prv_accountant` returns a lower bound, an estimate and an upper bound.
+
+Two RDP accountants differ only in the orders they try and in the conversion they use. On the running example the best orders lie between 4.1 and 9.9, inside the default grid of Opacus, which also uses the improved conversion, so the results should agree closely. If two RDP accountants differ at each order by a fixed amount, 0.3612 at order 10, one of them uses Mironov's conversion. On the running example, for instance, an RDP accountant that reports 7.43 instead of 6.71 uses Mironov's conversion (@tbl-choose-main).
+
+Fractional orders are a known weak spot. At a fractional order, unlike an integer one, the subsampled Gaussian's RDP needs an infinite series whose terms have both signs. Version 0.6.0 of `dp_accounting` counts the negative terms as positive, so it returns a loose upper bound rather than the exact value. For the fixed-size-batch run, for example, it gives 49.43 where the full edition computes 47.42. So compare at integer orders, or against Opacus, which keeps the signs.
+
+PLD and PRV accountants should agree within their error bars. Every certified upper bound lies above the truth and every certified lower bound below it, so if two libraries' brackets do not overlap, one of them has a bug. In the full edition's cross-check, run outside its scripts, the libraries' tight PLD estimate at 10,000 steps is about 6.19, inside the bracket.
 
 ## Code {#sec-choose-code}
 
-The snippet is a small RDP accountant for DP-SGD (exact subsampled-Gaussian RDP at integer orders, improved conversion), the GDP closed form used by the checks, and the noise calibration of @eq-choose-inverse.
+The snippet below is a small RDP accountant for DP-SGD, with exact subsampled-Gaussian RDP at integer orders and the improved conversion. It also contains the exact GDP conversion that the checks use, and the noise calibration of @eq-choose-inverse.
 
 ```python
 from math import e, erfc, exp, lgamma, log, sqrt
@@ -195,7 +269,9 @@ print(f"{gdp_epsilon(sqrt(10 * (e - 1)), delta):.4f}")  # 25.5853
 print(f"{gdp_epsilon(sqrt(100) / sigma, delta):.4f}")  # 91.8173
 ```
 
-The first three lines are the running example: the RDP bound, the CLT value (below the PLD lower bound, so not a guarantee) and the noise for $\varepsilon = 3$. The rest are checks: the exact $q = 1$ value, the RDP bound above it, the CLT failing it, and the shuffle-and-partition fallback. Integer orders give 6.7194, 1.665 and 19.8017 where the full edition's fractional orders give 6.7127, 1.662 and 19.0536: a coarser grid costs tightness, never validity. The full edition's script, [choosing_an_accountant.py](../../code/part04-privacy-accounting/choosing_an_accountant.py), runs every accountant, PLD included, in about two and a half minutes:
+The first three lines print the running example's RDP bound, CLT value and noise for a target of 3. The rest print the $q = 1$ checks and the shuffle-and-partition fallback.
+
+The snippet searches only integer orders, so its bounds come out a little larger than the full edition's but stay valid. For example, its RDP bound is 6.7194 instead of 6.7127. The full edition's script, [choosing_an_accountant.py](../../code/part04-privacy-accounting/choosing_an_accountant.py), runs every accountant, the PLD included. It takes about two and a half minutes to run from the repository root.
 
 ```bash
 uv run python code/part04-privacy-accounting/choosing_an_accountant.py
@@ -212,19 +288,21 @@ uv run python code/part04-privacy-accounting/choosing_an_accountant.py
 | PLD, optimistic | Lower bound | 6.1377 | 1.547 | The error bar, and the referee for other accountants |
 | GDP CLT | Approximation | 6.0071 | 1.549 | Intuition only; under-reports here |
 
-: The accountants on the running example ($q = 0.01$, $\sigma = 1$, $\delta = 10^{-5}$), what kind of statement each makes, and when to use it. {#tbl-choose-cheat}
+: The accountants on the running example ($q = 0.01$, $\sigma = 1$, $\delta = 10^{-5}$), the kind of statement each makes, and when to use each. {#tbl-choose-cheat}
 
 **Rules of thumb**
 
-- Report the pessimistic PLD with the optimistic value beside it, and calibrate $\sigma$ with the accountant you will report. Never report a CLT number as a guarantee.
-- Check the sampling scheme first: fixed-size or shuffled batches accounted as Poisson is the most expensive error in practice.
-- Report $\varepsilon$ at several $\delta$, including one well below $1/n$, with everything needed to recompute it.
+- Report the pessimistic PLD, with the optimistic value beside it. Use RDP with the improved conversion for adaptivity or a quick bound, and expect it to overstate $\varepsilon$, by 7.6% on this run and far more on short runs.
+- Never report a CLT number as a guarantee. Check any reported number against the PLD lower bound.
+- Calibrate $\sigma$ with the accountant you will report.
+- Check the sampling scheme first. Accounting fixed-size or shuffled batches as Poisson sampling is the most expensive error in practice.
+- Report the privacy unit, the neighbouring relation and the training parameters, with the accountant and its discretization. Give $\varepsilon$ at several $\delta$, including one well below $1/n$, and say what was not accounted for.
 
 ## Further reading
 
-- Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023): matching accounting to the data pipeline, setting $\delta$, and what to report.
+- Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023): matching the accounting to the pipeline, setting $\delta$, and what to report.
 - Near, Darais, Lefkovitz & Howarth, "Guidelines for Evaluating Differential Privacy Guarantees" (NIST SP 800-226, 2025): what an evaluator will ask of your claim.
 - Lebeda, Regehr, Kamath & Steinke, "Avoiding Pitfalls for Privacy Accounting of Subsampled Mechanisms under Composition" (IEEE SaTML 2025): fixed-size batches versus Poisson sampling.
-- Gopi, Lee & Wutschitz, "Numerical Composition of Differential Privacy" (NeurIPS 2021): the PRV accountant with certified error bounds, and where the CLT under-reports.
+- Gopi, Lee & Wutschitz, "Numerical Composition of Differential Privacy" (NeurIPS 2021): the PRV accountant with certified error bounds, and examples where the CLT under-reports.
 
-**Derivations.** Every result in this chapter is derived step by step in [the full edition's chapter](../../book-full/part04-privacy-accounting/09-choosing-an-accountant.md).
+**Derivations.** The ordering of the accountants, the monotonicity behind the noise calibration and the checks are derived step by step in [the full edition's chapter](../../book-full/part04-privacy-accounting/09-choosing-an-accountant.md), and each accountant is derived in the earlier chapter it links to. The full edition cites rather than derives the fixed-size-batch result (Lebeda et al. 2024), the reporting and $\delta$ conventions (Ponomareva et al. 2023, NIST SP 800-226) and the tuning bounds of Papernot & Steinke (2022), and it quotes the library values 49.43 and 6.19 from runs outside its scripts.
