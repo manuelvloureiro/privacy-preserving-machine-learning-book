@@ -9,7 +9,8 @@
 The checks are the measurable half of PROSE.md: long and overloaded sentences, chained clauses,
 formulas and numbers piled into one sentence, symbols used before they are explained in words,
 too many new concepts in one paragraph, long openings before the main clause, nominalizations,
-and the reading grade of each section. Thresholds are per book, in tools/prose.toml. The checks
+runs of short unlinked sentences that read in hiccups, results written as inline formulas, and the
+reading grade of each section. Thresholds are per book, in tools/prose.toml. The checks
 cannot tell whether an explanation is right or whether a paragraph follows from the one before;
 PROSE.md's editorial review does that. They find where to look.
 
@@ -183,6 +184,18 @@ INTRODUCED_BY_NOUN = re.compile(
 OPENERS = re.compile(
     r"^(If|When|Because|Although|Though|Since|While|Unless|Once|Given|As|After|Before|For|In|With|Under|By|To)\b"
 )
+# A sentence that opens with one of these picks up from the one before it.
+LINKED = re.compile(
+    r"^(So|But|And|Or|Nor|Yet|Then|Thus|Hence|Therefore|Still|Also|Even|Instead|However|Otherwise|Now|Again|"
+    r"This|That|These|Those|It|Its|They|Their|Them|Such|Here|There|Both|Either|Neither|"
+    r"For example|For instance|In other words|In short|In that|In this|At that|At this|By contrast|In contrast|"
+    r"The same|The other|The rest|The first|The second|The next|The last|Likewise|Similarly|Unlike|Like|"
+    r"Because|Since|As|If|When|Once|Only|Doing so|Equivalently|Conversely|First|Second|Third|Finally|Next)\b"
+)
+# An inline formula that states a result: a relation between expressions built from probabilities,
+# averages, sums or logarithms, rather than a value or a piece of arithmetic.
+RELATION = re.compile(r"\\(le|ge|leq|geq|approx|propto)\b|(?<![<>!\\])=|<|>")
+RESULT_PARTS = re.compile(r"\\(Pr|mathbb\s*E|exp|sum|prod|int|max|min|log|ln)\b|\b[DH]_")
 NOMINALIZATION = re.compile(r"\b[a-z]{3,}(?:tion|sion|ment|ness|ity|ance|ence|ancy|ency)s?\b")
 TECHNICAL_NOUNS = {
     "probability",
@@ -352,6 +365,15 @@ def analyse(page: str, raw: str, limits: dict[str, Any], allowed: set[str], acro
                 f"{new_concepts} new concepts in one paragraph (limit {limits['max_new_concepts_per_paragraph']}): "
                 + ", ".join(bold + [f.split(" ")[2] for s in sentences for f in s.flags if f.startswith("new symbol")])
             )
+        for formula in math:
+            if inline_result(formula):
+                p.flags.append(f"result in inline math: display ${formula}$ on its own line")
+        run = choppy_run(sentences, limits)
+        if run:
+            p.flags.append(
+                f"choppy: {run} short sentences in a row, none linked to the one before; "
+                "join them with the relation between them (because, so, for example, but)"
+            )
         paragraphs.append(p)
     sentences = [s for p in paragraphs for s in p.sentences]
     by_section: dict[str, list[Sentence]] = {}
@@ -366,6 +388,36 @@ def analyse(page: str, raw: str, limits: dict[str, Any], allowed: set[str], acro
     flagged = sum(1 for s in sentences if any(not f.startswith("note") for f in s.flags))
     mean = sum(s.words for s in sentences) / len(sentences) if sentences else 0.0
     return Report(page, paragraphs, len(sentences), flagged, round(mean, 1), grades, counts)
+
+
+def inline_result(formula: str) -> bool:
+    """Does this inline formula state a result, a relation between probabilities, averages, sums or
+    logarithms, rather than a value or a piece of arithmetic?"""
+    return (
+        formula != "display"
+        and len(formula) >= 18
+        and RELATION.search(formula) is not None
+        and RESULT_PARTS.search(formula) is not None
+        and re.search(r"=\s*[-\d.,{}\\]+$", formula) is None
+    )
+
+
+def choppy_run(sentences: list[Sentence], limits: dict[str, Any]) -> int:
+    """The longest run of short sentences that each start afresh, if it is past the limit, else 0.
+
+    Short sentences are fine one or two at a time. A run of them, each with a new subject and no word
+    that ties it to the last, reads in hiccups: the reader has to supply every relation between them.
+    """
+    longest = run = 0
+    for s in sentences:
+        if s.words > limits["choppy_sentence_words"]:
+            run = 0
+        elif run and LINKED.match(s.text):
+            run = 1  # tied to the last sentence, so a new run can only start here
+        else:
+            run += 1
+        longest = max(longest, run)
+    return longest if longest >= limits["choppy_run"] else 0
 
 
 def check_sentence(s: Sentence, limits: dict[str, Any], seen_symbols: set[str]) -> None:
@@ -464,7 +516,7 @@ def load(book: str) -> tuple[dict[str, Any], set[str]]:
 
 def pages_of(book: str) -> list[str]:
     terms.layout.book = ROOT / book
-    return [f for f in terms.book_files() if Path(f).name not in ("index.md", "study_plan.md")]
+    return [f for f in terms.book_files() if Path(f).name != "index.md"]
 
 
 def show(report: Report, worst: int, limits: dict[str, Any]) -> None:

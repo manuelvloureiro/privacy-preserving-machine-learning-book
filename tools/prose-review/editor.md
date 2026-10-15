@@ -14,7 +14,8 @@ rank worst.
 Rules (PROSE.md explains each, with its source):
 
 1. **One idea per sentence.** A sentence carries one claim and its reason, not a list of claims.
-   Aim for 15–20 words on average; split anything over the book's limit.
+   Aim for 15–20 words on average; split anything over the book's limit. Don't split a claim from
+   its reason, consequence or example (rule 9).
 2. **Old before new.** Start a sentence with what the reader already has (the topic position), and
    end it with what is new and important (the stress position). Each sentence picks up from the last.
 3. **Characters and actions.** Make the subject the thing that acts and the verb the action:
@@ -32,6 +33,13 @@ Rules (PROSE.md explains each, with its source):
    long, cut repetition and secondary detail, never a topic and never the words that make a sentence
    readable.
 8. **Plain words.** Prefer the common word. Define jargon once. Keep the book's terms consistent.
+9. **Connect the sentences.** Each sentence says how it relates to the last. A run of short
+   sentences that each start afresh reads in hiccups: join the ones that are reason, consequence,
+   example or contrast of each other ("because", "so", "but", "for example"), or open with a word
+   that ties back ("That", "So", "Then"). Vary the rhythm.
+10. **Display the results.** A named result, a definition or a formula the reader must take in as a
+    whole goes in display math, introduced by a sentence that names its symbols. Values and short
+    arithmetic stay inline.
 
 For each problem, give:
 

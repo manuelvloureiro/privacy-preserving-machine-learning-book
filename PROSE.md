@@ -13,13 +13,15 @@ The first practitioner edition explained the right things in prose that was hard
 
 : The same chapter in the two editions, measured by `tools/prose.py`. {#tbl-prose-why}
 
-Two lessons follow. Length must follow content: if a page is too long, cut repetition and secondary detail, never a topic and never the words that make a sentence readable. And readability has to be checked, not assumed, because a page can be correct, complete and well organized and still be hard to read.
+The first rewrite then overshot the other way. Its sentences were short and clear one at a time, but they came in runs, each starting afresh with no word to say how it related to the last, and the author found that the page read "in hiccups". Its mean sentence was 15 words, well under the limit. Splitting a long sentence is only half the fix. The other half is saying how the pieces connect.
+
+Three lessons follow. Length must follow content: if a page is too long, cut repetition and secondary detail, never a topic and never the words that make a sentence readable. Short is not the same as readable, because a reader who must supply every *because* and *so* is doing the writer's work. And readability has to be checked, not assumed, because a page can be correct, complete and well organized and still be hard to read.
 
 ## The rules
 
 These are the rules the checks and the reviews apply. Each comes from a standard source on clear technical writing.
 
-1. **One idea per sentence.** A sentence carries one claim and, if needed, its reason. Plain-language style guides aim for an average of about 15 words and a ceiling near 25 (Australian Government *Style Manual*); readers judge length against a benchmark of about 17 words (a 2023 *PLOS One* study). The books allow a little more because technical sentences name things: a mean of 20 words and a ceiling of 30 in the practitioner edition, 22 and 35 in the full edition and the exercise book.
+1. **One idea per sentence.** A sentence carries one claim and, if needed, its reason, its consequence or its example. Splitting that claim from its reason is the opposite mistake (rule 9). Plain-language style guides aim for an average of about 15 words and a ceiling near 25 (Australian Government *Style Manual*); readers judge length against a benchmark of about 17 words (a 2023 *PLOS One* study). The books allow a little more because technical sentences name things: a mean of 20 words and a ceiling of 30 in the practitioner edition, 22 and 35 in the full edition and the exercise book.
 2. **Old before new.** Begin a sentence with what the reader already has, the *topic position*, and end it with what is new, the *stress position*, so that each sentence picks up where the last one left off (Gopen & Swan, "The Science of Scientific Writing", 1990).
 3. **Characters as subjects, actions as verbs.** Write "the mechanism adds noise", not "the addition of noise is performed". Avoid stacks of nominalizations (words ending in *-tion*, *-ment*, *-ness*), and get to the main verb quickly instead of opening with a long clause (Williams & Bizup, *Style: Lessons in Clarity and Grace*).
 4. **Words before symbols.** Explain every symbol in words where it first appears. Never start a sentence with a formula. Use only the formulas and numbers the sentence needs (Halmos, "How to Write Mathematics": "resist symbols"; Bertsekas, "Ten Simple Rules for Mathematical Writing").
@@ -27,14 +29,25 @@ These are the rules the checks and the reviews apply. Each comes from a standard
 6. **Explain, don't list.** Every result comes with the reason it holds, in words. Every condition a result needs (the quantity cannot be negative, the samples are independent, the values are bounded) is named as a condition, never stated as a fact about the quantity, and the text says what goes wrong without it.
 7. **No compression.** Don't drop articles, verbs or connectives to save words. Don't chain clauses with colons and semicolons. Don't open with a list that a colon then gathers up.
 8. **Plain words.** Prefer the common word, define jargon once, and keep terms consistent across the book.
+9. **Connect the sentences.** Each sentence says how it relates to the one before. When one sentence is the reason, consequence, example or contrast of the last, say so: join the two with *because*, *so*, *while* or *but*, or open the second with *That*, *So*, *For example* or *Then*. Several short sentences in a row, each with a new subject and no link, read in hiccups. Vary the rhythm: a mix of short and medium sentences reads better than any one length (Williams & Bizup on cohesion; Gopen & Swan's topic position).
+10. **Display the results.** A named result, a definition or a formula the reader must take in as a whole goes in display math on its own line, introduced by a sentence that names its symbols in words. Values and short arithmetic stay inline.
 
-An example of rules 1, 4 and 7 at work, from the concentration chapter:
+An example of rules 1, 4, 7 and 9 at work, from the concentration chapter, in three drafts:
 
-> **Rejected.** A noisy answer, a measured error rate, the size of a sampled minibatch: each is random, and the practical question is how wide an error bar must be to fail with probability at most $\beta$.
+> **Rejected, compressed.** A noisy answer, a measured error rate, the size of a sampled minibatch: each is random, and the practical question is how wide an error bar must be to fail with probability at most $\beta$.
 >
-> **Approved.** Almost every number in a private system is random. The noise added to a count is random by design. An error rate measured on a test set depends on which examples happened to be in it. [...] A concentration inequality tells you how wide to make an interval around your estimate so that the true value falls outside it only rarely, say once in a thousand runs.
+> **Rejected, choppy.** Almost every number in a private system is random. The noise added to a count is random by design. An error rate measured on a test set depends on which examples happened to be in it. The number of examples in a randomly sampled minibatch changes from one step to the next. Before you can use any of these numbers, you need to know how far each one can stray from the value you care about.
+>
+> **Approved.** Almost every number in a private system is random. Some are random by design, like the noise a mechanism adds to a count. Others are random because of how they were measured. An error rate depends on which examples happened to land in the test set, and the size of a randomly sampled minibatch changes from one step to the next. Before you rely on any of these numbers, you need to know how far it can stray from the value you actually care about.
 
-The rejected sentence opens with a list that a colon gathers up, puts three claims in one sentence, and uses $\beta$ before saying what it is. The approved version gives each example its own sentence and states the question in words.
+The first draft opens with a list that a colon gathers up, puts three claims in one sentence, and uses $\beta$ before saying what it is. The second fixes all three but lists the examples as four sentences that never say how they relate. The approved version sorts them into two kinds, random by design and random by measurement, and lets the sentences carry that sorting.
+
+An example of rule 10:
+
+> **Rejected.** For a quantity $X$ that cannot be negative, with average $\mathbb E[X]$, and any positive threshold $a$, Markov's inequality says that $\Pr[X \ge a] \le \mathbb E[X]/a$.
+>
+> **Approved.** In general, take a quantity $X$ that cannot be negative, and write $\mathbb E[X]$ for its average. For any positive threshold $a$, Markov's inequality says that
+> $$\Pr[X \ge a] \le \frac{\mathbb E[X]}{a}.$$
 
 Some failures are invisible to the analyzer, and only a reader catches them. An example of rule 6, from the same chapter:
 
@@ -77,9 +90,11 @@ The analyzer strips tables, figures, code, captions and reference lists, counts 
 | long opening | many words before the main clause | put the main clause first |
 | nominalizations | several *-tion*, *-ment*, *-ness* words in one sentence | turn them back into verbs |
 | paragraph length | a paragraph over the limit | split at a change of idea |
+| choppy | a run of short sentences, each starting afresh with no word linking it to the last | join the ones that are reason, consequence, example or contrast of each other, or open with a linking word |
+| result in inline math | an inline formula that states a relation between probabilities, averages, sums or logarithms | display it on its own line |
 | section grade | Flesch–Kincaid grade of a section above the limit | usually fixed by the sentence-level fixes |
 
-A page fails the check if more than the book's share of its sentences are flagged (15% for the practitioner edition, 25% for the others) or if its mean sentence length is over the limit. The checks are deliberately simple and will sometimes flag a fine sentence; when a flag is wrong, leave the sentence, and if the same false flag recurs, fix the check and add the sentence to the anchors (stage 6). They cannot tell whether an explanation is right or whether a paragraph follows from the one before. Stages 3 and 4 do that.
+The choppy and inline-result checks work on paragraphs and do not count toward the page's share of flagged sentences. A short sentence is often the right one, and a relation inside a derivation often belongs inline, so only a reader can tell. Treat it as a pointer for the reviews. A page fails the check if more than the book's share of its sentences are flagged (15% for the practitioner edition, 25% for the others) or if its mean sentence length is over the limit. The checks are deliberately simple and will sometimes flag a fine sentence; when a flag is wrong, leave the sentence, and if the same false flag recurs, fix the check and add the sentence to the anchors (stage 6). They cannot tell whether an explanation is right or whether a paragraph follows from the one before. Stages 3 and 4 do that.
 
 ### 3. Cold-reader test
 

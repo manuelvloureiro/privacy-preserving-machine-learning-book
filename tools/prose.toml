@@ -8,6 +8,8 @@ book-exercises = "exercises"
 book-practitioner = "practitioner"
 
 [profiles.practitioner]
+choppy_sentence_words = 18  # a sentence this short or shorter can be part of a choppy run
+choppy_run = 4             # this many short, unlinked sentences in a row read in hiccups
 mean_sentence_words = 20      # page average; plain-language guides aim for about 15-20
 max_sentence_words = 30       # a sentence longer than this is flagged
 max_sentence_punctuation = 4  # commas, semicolons, colons, parentheses and dashes in one sentence
@@ -23,6 +25,8 @@ grade_max = 12                # Flesch-Kincaid grade of a section's prose, formu
 page_flagged_sentence_share = 0.15   # `check` fails a page if more of its sentences are flagged
 
 [profiles.full]
+choppy_sentence_words = 18  # a sentence this short or shorter can be part of a choppy run
+choppy_run = 4             # this many short, unlinked sentences in a row read in hiccups
 mean_sentence_words = 22
 max_sentence_words = 35
 max_sentence_punctuation = 5
@@ -40,6 +44,8 @@ page_flagged_sentence_share = 0.25
 # Worked solutions are derivations in numbered steps, so they carry more formulas and numbers per
 # sentence than chapter prose; the limits on sentence length, chaining and explanation stay.
 [profiles.exercises]
+choppy_sentence_words = 18  # a sentence this short or shorter can be part of a choppy run
+choppy_run = 4             # this many short, unlinked sentences in a row read in hiccups
 mean_sentence_words = 22
 max_sentence_words = 35
 max_sentence_punctuation = 5

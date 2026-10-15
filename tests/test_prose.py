@@ -1,4 +1,4 @@
-"""tools/prose.py flags the prose the author rejected and passes the prose he approved.
+"""tools/prose.py flags the prose the author rejected and passes the prose the author approved.
 
 The anchors are real passages. The rejected ones are quoted from the practitioner edition's
 concentration chapter, as the author flagged them; the approved ones are their rewrites.
@@ -27,23 +27,36 @@ REJECTED = [
         "Apply it to the squared deviation $(X - \\mu)^2$, whose mean is the variance $\\sigma^2$, and you get "
         "**Chebyshev's inequality**,"
     ),
-]
-
-APPROVED = [
+    # Choppy: the rewrite of the first passage, which the author then rejected in turn. Every claim has its
+    # own short sentence, but nothing says how they relate, so it reads in hiccups.
     (
         "Almost every number in a private system is random. The noise added to a count is random by design. An error "
         "rate measured on a test set depends on which examples happened to be in it. The number of examples in a "
         "randomly sampled minibatch changes from one step to the next. Before you can use any of these numbers, you "
-        "need to know how far it can stray from the value you care about. A concentration inequality answers that "
-        "question. It tells you how wide to make an interval around your estimate so that the true value falls "
-        "outside it only rarely, say once in a thousand runs."
+        "need to know how far each one can stray from the value you care about."
+    ),
+    # A named result stated in inline math, at the end of a sentence that also introduces its symbols.
+    (
+        "For a quantity $X$ that cannot be negative, with average $\\mathbb E[X]$, and any positive threshold $a$, "
+        "Markov's inequality says that $\\Pr[X \\ge a] \\le \\mathbb E[X]/a$."
+    ),
+]
+
+APPROVED = [
+    (
+        "Almost every number in a private system is random. Some are random by design, like the noise a mechanism "
+        "adds to a count. Others are random because of how they were measured. An error rate depends on which "
+        "examples happened to land in the test set, and the size of a randomly sampled minibatch changes from one "
+        "step to the next. Before you rely on any of these numbers, you need to know how far it can stray from the "
+        "value you actually care about."
     ),
     (
-        "Start with the weakest thing you could know about a quantity: it is never negative, and you know its average. "
-        "That alone limits how often it can be large. Suppose customers wait 2 minutes at a counter on average. Then "
-        "at most a quarter of them can wait 8 minutes or more, because if more than a quarter did, those customers "
-        "alone would push the average above 2 minutes. This is **Markov's inequality**. For a quantity $X$ that is "
-        "never negative and a threshold $a$, it says that $\\Pr[X \\ge a] \\le \\mathbb E[X]/a$."
+        "Suppose customers wait 2 minutes at a counter on average. Then at most a quarter of them can wait 8 minutes "
+        "or more. If more than a quarter did, those customers alone would push the average above 2 minutes, and no "
+        "customer can have a negative wait that pulls it back down. In general, take a quantity $X$ that cannot be "
+        "negative, and write $\\mathbb E[X]$ for its average. For any positive threshold $a$, **Markov's "
+        "inequality** says that\n$$\\Pr[X \\ge a] \\le \\frac{\\mathbb E[X]}{a}.$$\nIn the example, an "
+        "average of 2 minutes and a threshold of 8 give the bound of a quarter."
     ),
 ]
 
@@ -76,6 +89,8 @@ def test_rejected_passages_are_flagged() -> None:
     assert any("new symbol \\beta" in f for f in first)
     assert any("new symbol X" in f for f in second)
     assert any("new symbol \\mu" in f for f in second)  # named only as part of "the squared deviation"
+    assert any("choppy" in f for f in flagged(REJECTED[2]))
+    assert any("result in inline math" in f for f in flagged(REJECTED[3]))
 
 
 def test_approved_passages_pass() -> None:
