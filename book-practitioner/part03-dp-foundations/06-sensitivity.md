@@ -2,29 +2,19 @@
 
 ## Why this matters
 
-The [Laplace and Gaussian mechanisms](03-laplace-gaussian.md) set their noise by the **global sensitivity**: the most one record can move the answer, over every pair of neighbouring datasets that could exist. For counts and clipped sums that is the right scale. For many other statistics it is not. The median of ages in $[0, 100]$ has global sensitivity 100, because a dataset of half zeros and half hundreds lets one person swing it end to end. The mean of unbounded data has infinite sensitivity, and for an estimator fitted by an optimizer nobody knows the sensitivity at all. Yet on a typical sample of 1,001 ages, one person moves the median by about a tenth of a year.
+The [Laplace and Gaussian mechanisms](03-laplace-gaussian.md) set their noise by the **global sensitivity**: the most one record can move the answer, over every pair of neighbouring datasets that could exist, not just yours. For a count that is the right scale. For many statistics it is not. The median of ages in $[0, 100]$ has global sensitivity 100, because in a dataset of half zeros and half hundreds one person swings it from end to end. The mean of incomes has infinite sensitivity, and for an estimator fitted by an optimizer nobody knows it. Yet on a realistic sample of 1,001 ages, one person moves the median by about a tenth of a year, because the ages near the middle are packed tightly together.
 
-Can you add noise on the scale of your data, not the worst conceivable dataset, and keep a differential privacy (DP) guarantee? Datasets have a fixed size $n$, and neighbours differ by one **replaced** record. The one idea: **the noise scale is itself a function of the data, so it must be private too.** Each technique below makes the scale safe in a different way (@tbl-sens-overview).
-
-| Your problem | Technique | Guarantee | Section |
-| --- | --- | --- | --- |
-| Tempted to scale noise to "this dataset's" sensitivity | Don't: it leaks | None | @sec-sens-local |
-| Median, quantiles, robust statistics with a known formula | Smooth sensitivity | $\varepsilon$ (Cauchy noise) or $(\varepsilon, \delta)$ (Laplace noise) | @sec-sens-smooth |
-| A statistic that is stable on most real data | Propose-test-release | $(2\varepsilon, \delta)$, may refuse to answer | @sec-sens-ptr |
-| A black-box estimator or model | Subsample-and-aggregate | $\varepsilon$ | @sec-sens-saa |
-| Means and sums of unbounded data | Clipping | $\varepsilon$, with a bias | @sec-sens-clip |
-
-: The problems that global sensitivity handles badly, and the technique for each. {#tbl-sens-overview}
+Can you add noise on the scale of the data you hold and keep a differential privacy (DP) guarantee? Yes, if you respect one idea: **the noise scale is itself a function of the data, so it must be private too.** Each technique below makes the scale safe to reveal in a different way. Throughout, datasets have a fixed size $n$ and neighbours differ by one **replaced** record.
 
 ## Local sensitivity, and why it leaks {#sec-sens-local}
 
-**Idea.** The obvious fix is to take the maximum only over the neighbours of the dataset you hold. That **local sensitivity** is often hundreds of times smaller than the global one. But noise scaled to it is not private: the local sensitivity can jump when one record changes, and the noise level then tells two neighbours apart even when their answers agree.
-
-**Result.** The local sensitivity of $f$ at $D$ is the largest change one record can make starting from $D$:
+The obvious fix is to take the maximum over your own dataset's neighbours only, the **local sensitivity**:
 $$\mathrm{LS}_f(D) = \max_{D':\ d(D, D') = 1}|f(D) - f(D')|,$$
-where $d(D, D')$, the **Hamming distance**, counts the records in which two datasets differ. For the median of $n$ sorted values $x_1 \le \dots \le x_n$ ($n$ odd, median $x_m$), one change moves it at most one place, so $\mathrm{LS} = \max(x_m - x_{m-1},\ x_{m+1} - x_m)$, the larger gap next to it.
+where the **Hamming distance** $d(D, D')$ counts the records in which two datasets differ. For the median of $n$ sorted values (with $n$ odd), one change can push the median at most one place up or down the sorted list, so the local sensitivity is the larger of the two gaps next to the median.
 
-**Example.** Take ages in $[0, 100]$, $\varepsilon = 1$, and the two neighbours of @tbl-sens-leak. Both have median 30, but their local sensitivities are 10 and 60.
+But noise of scale $\mathrm{LS}_f(D)/\varepsilon$ publishes the local sensitivity along with the answer, and one record can change it enormously. With ages in $[0, 100]$, the dataset $(0, 0, 0, 0, 100)$ has median 0 with gaps of 0 on both sides, so its "noisy" median is exactly 0. Its neighbour $(0, 0, 0, 100, 100)$ has the same median, but a gap of 100 above it, so its release is spread out and never exactly 0. An output of 0 identifies the first dataset with certainty, whatever $\varepsilon$ you claim.
+
+Nor does it need a degenerate dataset. The neighbours of @tbl-sens-leak both have median 30, but at $\varepsilon = 1$ their noise scales are 10 and 60. The narrow Laplace density falls off six times faster than the wide one, so the further an output lands from 30, the more it favours $D'$: the privacy loss grows in a straight line with the distance and has no bound. It passes 1 beyond a distance of 33.50, which happens with probability 0.572 under $D'$ and only 0.0351 under $D$, and covering that would take $\delta = 0.477$ (@fig-sens-local-leak).
 
 | Dataset | Values | Median | $\mathrm{LS}$ |
 | --- | --- | --- | --- |
@@ -33,70 +23,59 @@ where $d(D, D')$, the **Hamming distance**, counts the records in which two data
 
 : Two neighbouring datasets with the same median and very different local sensitivities. {#tbl-sens-leak}
 
-The releases $30 + \mathrm{Lap}(10)$ and $30 + \mathrm{Lap}(60)$ have the same centre, but the narrow one falls off six times faster. The privacy loss grows without bound and exceeds 1 once the output is more than 33.50 from 30, which happens with probability 0.572 under $D'$ and 0.0351 under $D$. To be $(1, \delta)$-DP this pair would need $\delta = 0.477$, all of it from the spread of the noise (@fig-sens-local-leak).
-
 ![Left: the median of $D$ and of $D'$ released with Laplace noise scaled to their own local sensitivities, 10 and 60. Right: the privacy loss grows linearly with the distance from 30 and crosses $\varepsilon = 1$ at distance 33.5, so no $\varepsilon$ bounds it.](figures/sens_local_leak.svg){#fig-sens-local-leak}
 
-**Pitfalls.** The same leak hides in any data-dependent scale: a clip bound set to the observed maximum, a noise level set from the empirical spread. Ask of every number that sets a noise scale whether it was computed from the private data. If it was, it needs one of the repairs below or its own share of the budget.
+The same leak hides in any scale computed from the private data, such as a clip bound set to the observed maximum. Each such number needs one of the repairs below or its own share of the budget.
 
 ## Smooth sensitivity {#sec-sens-smooth}
 
-**Idea.** Replace the local sensitivity by an upper bound that cannot jump: one that changes by at most a factor $e^\beta$ between neighbours. Rescaling the noise by a bounded factor shifts its log-density by a bounded amount, which is what a privacy loss measures. Nissim, Raskhodnikova and Smith (2007) found the smallest such bound and the noise it can be used with.
+The first repair, due to Nissim, Raskhodnikova and Smith (2007), uses a scale that cannot jump: an upper bound on the local sensitivity that changes by at most a factor $e^\beta$ between neighbours. A bounded *factor* is the right kind of control because a privacy loss is a log-ratio, and stretching the noise by $e^\beta$ shifts log-densities by about $\beta$.
 
-**Result.** The **$\beta$-smooth sensitivity** discounts the local sensitivity of every other dataset by $e^{-\beta}$ per record of distance from yours, and takes the largest:
+What is the smallest such bound? If some dataset $k$ changes away has a large local sensitivity, the bound at yours can be smaller only by the factor $e^{-\beta}$ per step on the way. So it must be at least that dataset's local sensitivity discounted by $e^{-k\beta}$, and the **$\beta$-smooth sensitivity** is exactly the largest of these discounted values:
 $$S^*_\beta(D) = \max_{D''}\ \mathrm{LS}_f(D'')\,e^{-\beta\,d(D, D'')}.$$ {#eq-sens-smooth}
-Grouping datasets by distance makes it computable: $S^*_\beta(D) = \max_k e^{-k\beta}A^{(k)}(D)$, where $A^{(k)}$ is the largest local sensitivity reachable by changing $k$ records. For the median, $A^{(k)}$ is the widest gap between order statistics $k + 1$ ranks apart that sits next to the median, $A^{(k)} = \max_{0 \le t \le k + 1}(x_{m+t} - x_{m+t-k-1})$, with ranks below 1 read as 0 and above $n$ as the upper bound $\Lambda$. That is an exact $O(n^2)$ computation (@sec-sens-code).
+For the median, $k$ changes can at most empty the stretch between two sorted values $k + 1$ ranks apart next to the median; calling the widest such gap $A^{(k)}$, $S^*_\beta$ is the largest $e^{-k\beta}A^{(k)}$, an exact $O(n^2)$ computation (@sec-sens-code).
 
-The release stretches noise of a fixed shape $Z$ by the smooth bound: $f(D) + (S^*_\beta(D)/\alpha)\,Z$, where $\alpha$ sets how many noise scales one record's shift is worth. **Pure DP needs heavy tails:** with $Z$ standard Cauchy and $\alpha = \beta = \varepsilon/6$, releasing $f(D) + \frac{6}{\varepsilon}S^*_{\varepsilon/6}(D)\cdot Z$ is $\varepsilon$-DP. **Laplace noise needs a $\delta$:** with $Z \sim \mathrm{Lap}(1)$, the release is $(\varepsilon, \delta)$-DP whenever $\beta + e^\beta\alpha + (e^\beta - 1)\ln(1/\delta) \le \varepsilon$. The last term pays for rare large draws and forces $\beta$ down to roughly $\varepsilon/(2\ln(1/\delta))$. The split exists because a light-tailed density and a stretched copy of it have an unbounded log-ratio far in the tail, as in @tbl-sens-leak.
+The release stretches noise of a fixed shape $Z$ by this bound, $f(D) + (S^*_\beta(D)/\alpha)\,Z$, where $\alpha$ sets how many noise scales one record's shift is worth. Which shapes work depends on their tails, because between neighbours the loss contains the log-ratio of a density and a copy stretched by up to $e^\beta$. For Laplace noise the log-density is linear in $|z|$, so the stretch changes it by an amount proportional to $|z|$: unbounded, exactly the leak of @tbl-sens-leak in miniature. A power-law tail has a log-density that grows only like $\ln|z|$, so a stretch changes it by a bounded amount everywhere. That is why **pure DP needs heavy tails**: with standard Cauchy noise and $\alpha = \beta = \varepsilon/6$, releasing $f(D) + \frac{6}{\varepsilon}S^*_{\varepsilon/6}(D)\cdot Z$ is $\varepsilon$-DP. Laplace noise can still be used, if you pay for its rare large draws with a $\delta$: the release is $(\varepsilon, \delta)$-DP when
+$$\beta + e^\beta\alpha + (e^\beta - 1)\ln(1/\delta) \le \varepsilon.$$
+The last term charges the change of scale once for each unit of $\ln(1/\delta)$, which forces $\beta$ down to roughly $\varepsilon/(2\ln(1/\delta))$, much smaller than the Cauchy's $\varepsilon/6$.
 
-**Example.** The full edition's script draws $n = 1001$ ages and releases their median, 36.96, at $\varepsilon = 1$, comparing median absolute errors. Global sensitivity gives 69.31 years: useless. The local sensitivity is 0.1386, but noise scaled to it is not private. Cauchy noise has $S^*_{1/6} = 0.1632$ and error 0.979 (simulation: 0.980). Laplace noise at $\delta = 10^{-6}$ and $\alpha = 1/2$ allows $\beta = 0.0322$, so $S^* = 0.5144$ and the error is 0.713. Both are 70 to 100 times more accurate than the global release, and the gain grows with $n$ (@fig-sens-methods-vs-n).
+Release the median of 1,001 synthetic ages at $\varepsilon = 1$. With global sensitivity the median absolute error is 69.31 years. The local sensitivity is 0.1386, and the Cauchy release's smooth sensitivity, 0.1632, is barely above it, because with this many people even seven changes cannot open a wide gap near the middle; its error is 0.979. Laplace noise at $\delta = 10^{-6}$ allows only $\beta = 0.0322$, so more distant datasets count and $S^* = 0.5144$, but the lighter tails make up for it: error 0.713. Both are 70 to 100 times better than the global release, and the gain grows with $n$, because the smooth bound follows the spacing of the data near the median (@fig-sens-methods-vs-n). The same reasoning shows where it fails: for $n \lesssim 20$, a few changes can open a gap across nearly the whole range, and smooth sensitivity loses to global sensitivity.
 
-**Pitfalls.** The Cauchy has no mean and a heavy tail: about one release in 16 is off by more than ten times the typical error, so don't feed Cauchy-noised values into averages. For $n \lesssim 20$ smooth sensitivity loses to global sensitivity, because a few changes open a gap across nearly the whole range. Exact formulas for $A^{(k)}$ exist for only a few statistics; a bound on $S^*$ works only if it is itself $\beta$-smooth.
+The heavy tail has its own cost: about one Cauchy release in 16 is off by more than ten times the typical error, and the Cauchy has no mean, so don't average such values. And a bound you substitute for $S^*$, for a statistic without an exact formula, works only if it is itself $\beta$-smooth.
 
 ## Propose-test-release {#sec-sens-ptr}
 
-**Idea.** When no smooth-sensitivity formula exists, Dwork and Lei (2009) take a cruder route. Propose a bound $b$ on the local sensitivity before looking at the data, test privately that the data are many records away from any dataset where $b$ is too small, and release with noise of scale $b/\varepsilon$ only if the test passes. The test is private because one record moves that distance by at most 1.
+Without a formula like the median's, Dwork and Lei (2009) take a cruder route. Propose a bound $b$ on the local sensitivity before looking at the data, then ask how many records would have to change before the local sensitivity could exceed $b$; call that distance $\operatorname{dist}_b(D)$. This count is safe to release with noise: a path from a neighbour to a bad dataset can always go through your dataset first, so one record moves the distance by at most 1. **Propose-test-release** adds $\mathrm{Lap}(1/\varepsilon)$ to the distance, outputs $\bot$ ("no answer") if the result is at most $\ln(1/\delta)/\varepsilon$, and otherwise releases $f(D) + \mathrm{Lap}(b/\varepsilon)$.
 
-**Result.** Let $\operatorname{dist}_b(D)$ be the number of records you must change before the local sensitivity can exceed $b$. **Propose-test-release** outputs $\bot$ ("no answer") if $\operatorname{dist}_b(D) + \mathrm{Lap}(1/\varepsilon) \le \ln(1/\delta)/\varepsilon$, and $f(D) + \mathrm{Lap}(b/\varepsilon)$ otherwise. It is $(2\varepsilon, \delta)$-DP: one $\varepsilon$ for the test, one for the release, and $\delta$ for a lucky pass on a dataset where $b$ is wrong. For the median, $\operatorname{dist}_b(D)$ is the first $k$ with $A^{(k)}(D) > b$.
+Why is that private? If the proposal is right for a pair of neighbours, so that their answers differ by at most $b$, the release is an ordinary Laplace mechanism, and test plus release cost $\varepsilon$ each: $2\varepsilon$ in all. If it is wrong, both datasets have local sensitivity above $b$, so both sit at distance 0, and the test passes only if the noise alone clears the threshold, which happens with probability $\delta/2$. That lucky pass is what $\delta$ pays for, so the mechanism is $(2\varepsilon, \delta)$-DP. The noise scale is now your proposal, which reveals nothing, and $\bot$ says only that the data were probably near an unstable point.
 
-**Example.** On the 1,001 ages, propose $b = 1$ year with $\varepsilon = 1$ and $\delta = 10^{-6}$. The threshold is $\ln(10^6) = 13.82$ and the distance is 21, so the test passes with probability 0.999621 and the release has median error 0.693 years, for a total of $2\varepsilon = 2$. On 101 ages the distance is 1, and the test passes with probability $1.36\times10^{-6}$ (@fig-sens-methods-vs-n, right).
+The threshold is demanding: at $\varepsilon = 1$ and $\delta = 10^{-6}$ it is $\ln(10^6) = 13.82$, so the data must be stable against more than a dozen changes. On the 1,001 ages with $b = 1$ year, the distance is 21, the test passes with probability 0.999621, and the release has median error 0.693 years at a total cost of 2. On 101 ages the distance is 1 and the test almost never passes: one year is far too optimistic there (@fig-sens-methods-vs-n, right).
 
 ![Left: median absolute noise when releasing the median age at $\varepsilon = 1$, by global sensitivity, smooth sensitivity with Cauchy noise and with Laplace noise ($\delta = 10^{-6}$), and propose-test-release with $b = 1$ when it passes, as the number of people grows. The dotted line is the non-private local sensitivity. Right: the probability that propose-test-release with $b = 1$ answers.](figures/sens_methods_vs_n.svg){#fig-sens-methods-vs-n}
 
-**Pitfalls.** Fix $b$ before you look at the data; choosing it from the data brings back the leak of @sec-sens-local. The test passes reliably only when the data are stable against more than a dozen changes. Plan for $\bot$: it is a legitimate private answer, and every retry with a larger $b$ spends budget again.
+A proposal taken from the data, such as twice the observed local sensitivity, brings back the leak of @sec-sens-local. Plan for $\bot$: every retry with a larger $b$ spends budget again.
 
 ## Subsample-and-aggregate {#sec-sens-saa}
 
-**Idea.** If you cannot analyse $f$ at all, run it on disjoint blocks of the data and privately combine the block answers. One record lives in one block, so it changes only one block answer. The privacy proof never looks inside $f$.
+When you cannot analyse $f$ at all, such as a trained model, make the sensitivity small by construction. Split the records into $B$ disjoint blocks by a partition fixed in advance (say, by a hash of a record identifier), run $f$ on each block, clip each block answer $z_j$ to $[0, R]$, and release
+$$M(D) = \frac1B\sum_{j=1}^B \operatorname{clip}_{[0,R]}(z_j) + \mathrm{Lap}\Big(\frac{R}{B\varepsilon}\Big).$$
+One record lives in one block, so it changes one clipped answer by at most $R$ and the average by at most $R/B$. That is the whole proof, and it never looks inside $f$, so the release is $\varepsilon$-DP for any $f$. It is also why the partition must not depend on the values: otherwise one record could reshuffle many blocks.
 
-**Result.** Split the records into $B$ blocks by a partition fixed in advance (by position, or by a hash of a record identifier). Compute $z_j = f(\text{block } j)$, clip each to $[0, R]$, and release
-$$M(D) = \frac1B\sum_{j=1}^B \operatorname{clip}_{[0,R]}(z_j) + \mathrm{Lap}\Big(\frac{R}{B\varepsilon}\Big),$$
-which is $\varepsilon$-DP for any $f$. Its mean squared error has three parts: the squared bias of $f$ on blocks of only $n/B$ records, a sampling term that hardly depends on $B$, and the noise variance $2(R/(B\varepsilon))^2$. More blocks mean less noise and more bias; the best $B$ balances the two.
+The number of blocks sets a trade-off. The noise falls like $1/B$, because one record's influence is diluted over more blocks. But each block sees only $n/B$ records, and many estimators are biased on small samples, so the bias grows with $B$. The sampling error hardly moves: each block estimate is noisier by a factor $B$ in variance, and averaging $B$ of them undoes it. Take the rate of $n = 10{,}000$ exponential inter-arrival times, estimated by $1/\bar x$, at $\varepsilon = 1$ with $R = 5$. Its global sensitivity is infinite. With 10 blocks the noise standard deviation is 0.7071 and swamps everything; with 1,000 blocks of 10 records the bias is 0.1111. At 250 blocks the two are of similar size and the error is 0.0396, about four times the non-private 0.0100, for an estimator whose sensitivity you never had to bound (@fig-sens-saa-blocks). Choose $B$ from an error model, not by trying values on the data.
 
-**Example.** Estimate the rate $\theta = 1$ of $n = 10{,}000$ exponential inter-arrival times at $\varepsilon = 1$. The estimate $1/\bar x$ has infinite global sensitivity. With $R = 5$, @tbl-sens-saa shows the trade-off.
+![Root-mean-square error of subsample-and-aggregate for the exponential rate against the number of blocks $B$, with its three components: the bias of the estimator on small blocks, the Laplace noise, and the sampling error.](figures/sens_saa_blocks.svg){#fig-sens-saa-blocks}
 
-| Blocks $B$ | Block size | Bias | Noise sd | Root-mean-square error |
-| --- | --- | --- | --- | --- |
-| 10 | 1,000 | 0.0010 | 0.7071 | 0.7072 |
-| 100 | 100 | 0.0101 | 0.0707 | 0.0722 |
-| 250 | 40 | 0.0256 | 0.0283 | 0.0396 |
-| 1,000 | 10 | 0.1111 | 0.0071 | 0.1120 |
-
-: Subsample-and-aggregate for the rate of an exponential distribution, $n = 10{,}000$, $\theta = 1$, $R = 5$, $\varepsilon = 1$. {#tbl-sens-saa}
-
-The best is $B = 250$, with error 0.0396, where bias and noise are of similar size. Without privacy the error would be about 0.0100: a factor of four, for an estimator whose sensitivity you never had to bound.
-
-**Pitfalls.** A partition that depends on the data values lets one record reshuffle many blocks. The range $R$ is still a global bound, now on the output of $f$, and a loose $R$ means large noise. Choose $B$ from the error formula, not by trying several on the data. With a noisy vote as the combiner, this is private aggregation of teacher ensembles (PATE), where models trained on disjoint shards vote.
+The range $R$ is still a global bound, now on the output of $f$, and a loose $R$ means large noise. With a noisy vote as the combiner, this is private aggregation of teacher ensembles (PATE), where models trained on disjoint shards vote.
 
 ## Clipping {#sec-sens-clip}
 
-**Idea.** **Clipping** each value to $\min(x, C)$ brings the sensitivity of a mean of unbounded data down to $C/n$. The price is bias, and the choice of $C$ trades it against the noise. The same move applied to per-example gradients is the core of private model training.
+For the mean of unbounded data, **clipping** forces a bound: replace each value by $\min(x, C)$, and one record moves the mean by at most $C/n$, so $\frac1n\sum_i\min(x_i, C) + \mathrm{Lap}(C/(n\varepsilon))$ is $\varepsilon$-DP for non-negative data. Every "assume the data lie in $[0, \Lambda]$" of earlier chapters is a clip in disguise, and the same move on per-example gradients is the core of private model training.
 
-**Result.** For non-negative data, the clipped mean $\frac1n\sum_i\min(x_i, C) + \mathrm{Lap}(C/(n\varepsilon))$ is $\varepsilon$-DP. Its mean squared error is the squared bias (the average mass above the clip, $\mathbb E[(X - C)_+]$), plus the sampling variance of the clipped values, plus the noise variance:
+The price is bias: clipping removes the part of each value above $C$, so the estimate is low by the average excess $\mathbb E[(X - C)_+]$. Adding the sampling variance of the clipped values and the noise variance gives the mean squared error,
 $$\operatorname{err}(C)^2 = \mathbb E[(X - C)_+]^2 + \frac{\operatorname{Var}(\min(X, C))}{n} + \frac{2C^2}{n^2\varepsilon^2}.$$ {#eq-sens-clip-error}
-Raising $C$ shrinks the bias and grows the noise. The noise shrinks with $n$ and the bias does not, so the best $C$ grows with the dataset. Given a model of your data, minimize @eq-sens-clip-error numerically before seeing any records.
+Raising $C$ shrinks the first term and grows the last. The noise shrinks with $n$ but the bias does not, so with more data you can clip further into the tail. Given a model of your data, minimize @eq-sens-clip-error numerically before seeing any records.
 
-**Example.** Incomes, in thousands, are log-normal with median 40 and mean 55.085 (@tbl-sens-clip).
+Log-normal incomes, in thousands, with median 40 and mean 55.085, show the trade-off at $n = 1000$ and $\varepsilon = 1$ (@tbl-sens-clip). Clipping at the median cuts half the population back and leaves a bias of 23. The optimum, 331.34, touches only 0.4% of people and has error 1.666, just 1% above the 1.649 of the unclipped, non-private mean. And the optimum moves out as predicted: 177.5 at $n = 100$, 557.3 at $n = 10{,}000$ (@fig-sens-clip-tradeoff).
 
 | Clip bound $C$ | $\Pr[X > C]$ | Bias | Noise sd | Root-mean-square error |
 | --- | --- | --- | --- | --- |
@@ -107,11 +86,9 @@ Raising $C$ shrinks the bias and grows the noise. The noise shrinks with $n$ and
 
 : The clipped private mean of log-normal incomes, $n = 1000$, $\varepsilon = 1$, for four clip bounds. {#tbl-sens-clip}
 
-Clipping at the median is a disaster. The optimum, 331.34, cuts off 0.4% of the population and has error 1.666, only 1% above the 1.649 of the unclipped, non-private mean. It grows with $n$: 177.5 at $n = 100$, 557.3 at $n = 10{,}000$ (@fig-sens-clip-tradeoff).
-
 ![Left: root-mean-square error of the clipped private mean of log-normal incomes against the clip bound $C$, with its bias, noise and sampling parts; the dotted line marks the optimum near 331. Right: the optimal clip bound grows with the dataset size.](figures/sens_clip_tradeoff.svg){#fig-sens-clip-tradeoff}
 
-**Pitfalls.** Setting $C$ to the observed maximum or the empirical 99th percentile brings back the leak of @sec-sens-local. Choose $C$ from domain knowledge, or spend part of the budget on a private quantile with the [exponential mechanism](05-selection.md) or the methods above. Clipping from above always underestimates; clipping to $[-C, C]$ is unbiased only for distributions symmetric about 0. Under add/remove neighbours $n$ is not public, so release a noisy clipped sum and a noisy count, divide, and charge both to the budget ([Post-processing, group privacy and composition](02-properties.md)).
+Three consequences follow. Choosing $C$ from the data, say the empirical 99th percentile, makes the noise scale a statistic again and reopens the leak of @sec-sens-local; take it from domain knowledge, or spend budget on a private quantile with the [exponential mechanism](05-selection.md) or the methods above. Clipping from above only ever lowers values, so it always underestimates, and clipping to $[-C, C]$ is unbiased only when the cuts on both sides cancel, for distributions symmetric about 0. And under add/remove neighbours $n$ itself is private, so release a noisy clipped sum and a noisy count, divide, and charge both to the budget ([Post-processing, group privacy and composition](02-properties.md)).
 
 ## Code {#sec-sens-code}
 
@@ -174,9 +151,7 @@ uv run python code/part03-dp-foundations/sensitivity.py
 
 **Rules of thumb**
 
-- If a noise scale depends on the data, ask what the scale reveals. If you can't answer, use one of the repairs above.
 - Pure DP with a data-dependent scale needs heavy-tailed noise; Laplace noise needs a $\delta$ and a $\beta$ near $\varepsilon/(2\ln(1/\delta))$.
-- Smooth sensitivity pays off once the data are dense around the statistic: for the median, once $n$ is in the hundreds.
 - Fix clip bounds, block counts and proposals before looking at the data, from an error formula or with a separate slice of the budget.
 
 ## Further reading

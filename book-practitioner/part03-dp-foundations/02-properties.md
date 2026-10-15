@@ -2,120 +2,66 @@
 
 ## Why this matters
 
-One mechanism is differentially private. Now you use it in a system. You round its output, plot it, train a model on it. Your users each contributed fifty records, and some of them share a household. And you never run just one mechanism: an analyst asks a hundred queries, a training run takes thousands of noisy gradient steps. Which of these steps cost privacy, and how do the costs add up? Three properties of differential privacy (DP) answer that, and they are what make it an engineering tool: you prove each building block once and add up the costs, instead of proving every pipeline from scratch.
+A private mechanism is never the whole system. You round its output and train models on it, your users each contributed fifty records, and an analyst asks a hundred queries or a training run takes thousands of noisy steps. Which of these cost privacy, and how do the costs add up? Three properties of differential privacy (DP) answer that without a new proof for every pipeline: you prove each building block once, then add up the costs.
 
-The one idea is about the **privacy loss**, from [The definition of differential privacy](01-definition.md): the log of how much more likely an output is when the data are $D$ than when they are a neighbouring dataset $D'$, which differs in one record. Pure $\varepsilon$-DP keeps it between $-\varepsilon$ and $\varepsilon$ for every output. **Along a path of datasets or across a sequence of mechanisms, privacy losses add; under processing, they only average.** Processing pools outputs, and an average of losses in $[-\varepsilon, \varepsilon]$ stays there. Walking from $D$ to a dataset $k$ records away crosses $k$ neighbouring pairs, and the losses of the steps add. Releasing several independent outputs multiplies their probabilities, so their losses add too. @tbl-dpprop-overview maps the decisions to the sections.
-
-| Decision or question | Rule | Section |
-| --- | --- | --- |
-| Is anything computed from a private output still private? | Yes, for free, if it never reads the data again | @sec-dpprop-post |
-| What does a per-record guarantee give a user with $k$ records? | $k\varepsilon$, and a $\delta$ that grows exponentially in $k$ | @sec-dpprop-group |
-| What do many releases from the same data cost? | Budgets add, also when each query depends on earlier answers | @sec-dpprop-comp |
-| What do releases from disjoint parts of the data cost? | The largest budget, not the sum | @sec-dpprop-parallel |
-| Which shortcuts break the guarantee? | Shared noise, data-reading "post-processing", exact side releases | @sec-dpprop-limits |
-
-: The decisions behind combining private releases, and where this chapter covers each. {#tbl-dpprop-overview}
+All three follow from one quantity, the **privacy loss** of [The definition of differential privacy](01-definition.md): the log of how much more likely an output is when the data are $D$ than when they are a neighbouring dataset $D'$, one record different. Pure $\varepsilon$-DP keeps it between $-\varepsilon$ and $\varepsilon$ for every output. The one idea of this chapter is that **privacy losses add along a path of datasets or across a sequence of mechanisms, and only average under processing.** Each section applies it to one situation.
 
 ## Post-processing {#sec-dpprop-post}
 
-**Idea.** Any processing of an output pools outputs: several raw outputs lead to the same processed one, whose probability is the sum of theirs. Its likelihood ratio is therefore a weighted average of their ratios, and an average cannot leave the band $[e^{-\varepsilon}, e^\varepsilon]$. This is the **data processing inequality**: processing can only dilute evidence.
+Suppose you transform a private output: round it, threshold it, fit a model to it. Several raw outputs can lead to the same processed one, and the probability of the processed output is the sum of theirs. So its likelihood ratio between the two datasets is a weighted average of their ratios. If every raw ratio lies between $e^{-\varepsilon}$ and $e^\varepsilon$, an average of them does too. Processing pools evidence, and pooling can only dilute it. This **data processing inequality** gives the rule: if $M$ is $(\varepsilon, \delta)$-DP and $f$ is any function that does not read the data, deterministic or with its own coins, then publishing $f(M(D))$ is $(\varepsilon, \delta)$-DP too. Its whole privacy curve $\delta(\varepsilon)$ lies on or below that of $M$.
 
-**Result.** If $M$ is $(\varepsilon, \delta)$-DP and $f$ is any function, deterministic or with its own coins, that does not read the data, then $f \circ M$, the mechanism that outputs $f(M(D))$, is $(\varepsilon, \delta)$-DP. Its privacy curve $\delta(\varepsilon)$ lies on or below that of $M$ at every $\varepsilon$.
+Collect a randomized-response answer at $\varepsilon_0 = \ln 3$, which tells the truth with probability $\frac34$, so each report is 3 times more likely under one true answer than under the other. Before publishing, flip it with probability $\frac14$ using a fresh coin. A published 1 can come from a kept 1, whose ratio is 3, or from a flipped 0, whose ratio is $\frac13$, and the two paths carry equal weight. The published 1 therefore has ratio $\frac12(3 + \frac13) = \frac53$: it has probability 0.625 when the true bit is 1 and 0.375 when it is 0. The release is $\ln\frac53 = 0.5108$-DP, well below the original $\ln 3 = 1.0986$, because the coin mixed outputs that pointed in opposite directions.
 
-**Example.** Collect a randomized-response answer at $\varepsilon_0 = \ln 3$ (the truth with probability $\frac34$), then flip it with probability $\frac14$ using a fresh coin before publishing. The published 1 has probability 0.625 when the true bit is 1 and 0.375 when it is 0, so the release is $\ln\frac53 = 0.5108$-DP, below $\ln 3 = 1.0986$. For a count with Laplace noise of scale 1, @tbl-dpprop-laplace-post shows what rounding and thresholding do.
-
-| Published | Smallest pure $\varepsilon$ | $\delta(0.25)$ | $\delta(0.5)$ |
-| --- | --- | --- | --- |
-| Noisy count $c + Z$ | 1.0000 | 0.3127 | 0.2212 |
-| Rounded to an integer | 1.0000 | 0.3073 | 0.1967 |
-| Only "is $c + Z > \frac12$?" | 0.8318 | 0.3073 | 0.1967 |
-
-: Exact privacy curves of a count with Laplace noise of scale 1, before and after two post-processings. Each row is on or below the one above it. {#tbl-dpprop-laplace-post}
+Processing you do for utility rarely mixes like that. Rounding a count with Laplace noise of scale 1 to an integer leaves its pure $\varepsilon$ at 1.0000: a rounding cell that lies entirely below both possible counts holds outputs that all have the same loss, and an average of equal ratios is that ratio. Keeping only whether the noisy count exceeds $\frac12$ merges outputs with losses of both signs, and lowers $\varepsilon$ to 0.8318 (@fig-dpprop-post). So report the guarantee of $M$ and treat any gain from processing as a bonus you don't count on.
 
 ![Left: the privacy curve $\delta(\varepsilon)$ of a count with Laplace noise of scale 1 (black), after rounding (blue), and after keeping only whether it exceeds $\frac12$ (orange); processing only lowers the curve. Right: randomized response at $\varepsilon_0 = \ln 3$ followed by a fresh coin that flips the answer with probability $f$; the dot is $f = \frac14$, where $\varepsilon = \ln\frac53$.](figures/dpprop_postprocessing.svg){#fig-dpprop-post}
 
-**Pitfalls.** The one condition is that $f$ must not touch the data. "Take the noisy top category, then report its exact count" is not post-processing; the second step is a new, non-private mechanism. Rounding and clipping merge few outputs and rarely lower $\varepsilon$ (rounding keeps it at 1.0000 above), so report the guarantee of $M$ and don't count on processing gains. The upside is large: a model trained on DP statistics, synthetic data from a DP model, a dashboard and every attack of [Threat models and attacks](../part02-attacks/00-introduction.md) are post-processing, which is why a DP system privatizes at one narrow point and treats everything after it as public.
+The argument has one condition. The averaging used the same processing under $D$ and under $D'$, and that holds only if $f$ never looks at the data. "Take the noisy top category, then report its exact count" fails it: the second step reads the data, so it is a new mechanism, and a non-private one. Within it, the rule is powerful: a model trained on DP statistics, synthetic data from a DP model and a dashboard are all post-processing, and so is every attack of [Threat models and attacks](../part02-attacks/00-introduction.md), since an attacker's guess is a function of the output, so the definition's bounds hold even against attacks invented later. That is why a DP system privatizes at one narrow point, such as noisy counts or noisy gradients, and treats everything after it as public.
 
 ## Group privacy {#sec-dpprop-group}
 
-**Idea.** The definition protects one record, but a user may own fifty, and a household moves together. Walk from $D$ to a dataset $k$ records away one record at a time. Each step can multiply an event's probability by $e^\varepsilon$, so $k$ steps multiply it by $e^{k\varepsilon}$. Each step also adds a slack $\delta$, and every later step multiplies the slack already accumulated by $e^\varepsilon$ again.
+The definition protects one record, but a user may own fifty messages, and a household shares an address and an income. To cover datasets that differ in $k$ records, walk from $D$ to the other dataset one record at a time, through $k$ neighbouring pairs. Each step can multiply an event's probability by at most $e^\varepsilon$, so $k$ steps multiply it by at most $e^{k\varepsilon}$: pure $\varepsilon$-DP becomes $k\varepsilon$-DP for the group.
 
-**Result.** An $(\varepsilon, \delta)$-DP mechanism is, for datasets $k$ records apart,
+The slack grows faster. Each step adds its own $\delta$, and every later step multiplies everything accumulated so far, including the earlier $\delta$s, by $e^\varepsilon$ again. So the $\delta$s pile up in a geometric sum. An $(\varepsilon, \delta)$-DP mechanism is, for datasets $k$ records apart,
 $$\Big(k\varepsilon,\ \delta_k\Big)\text{-DP}, \qquad \delta_k = \delta\sum_{j=0}^{k-1}e^{j\varepsilon} = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1}.$$ {#eq-dpprop-group}
-Pure DP degrades linearly: $k\varepsilon$, tight for a noisy count. The $\delta$ grows exponentially in $k$, and some mechanisms attain the bound, so none better holds in general. The simpler form $k\,e^{(k-1)\varepsilon}\delta$ is looser; use the sum.
+Some mechanisms attain this bound exactly, so no better rule holds for every $(\varepsilon, \delta)$-DP mechanism.
 
-**Example.** A per-record guarantee of $(0.5, 10^{-5})$ gives a user with 10 records $(5, 2.272 \times 10^{-3})$ by @eq-dpprop-group (@tbl-dpprop-group). A count with Gaussian noise does better than the bound, but its exact guarantee for that user is still $(5, 7.6 \times 10^{-4})$, which is weak. At $\varepsilon = 1$ and $k = 10$, $\delta$ is multiplied by 12818.3.
+The price is steep. A per-record guarantee of $(0.5, 10^{-5})$ gives a user with 10 records $(5, 2.272 \times 10^{-3})$. A particular mechanism can do better than the general bound: for a count with Gaussian noise, ten records just shift the count by ten instead of one, and its exact guarantee for that user is $(5, 7.6 \times 10^{-4})$. That is still weak. At $\varepsilon = 1$, a group of 10 multiplies $\delta$ by 12818.3, and $\delta$ had to be far below one over the number of people to begin with ([The definition of differential privacy](01-definition.md)), so the group guarantee is often vacuous. Pure DP fares no better: $0.1$-DP per record is $10$-DP for a user with 100 records.
 
-| Group size $k$ | $\varepsilon_k = k\varepsilon$ | $\delta_k$, @eq-dpprop-group | Simple form $k e^{(k-1)\varepsilon}\delta$ | Gaussian count, exact |
-| --- | --- | --- | --- | --- |
-| 1 | 0.5 | $1.000 \times 10^{-5}$ | $1.000 \times 10^{-5}$ | $1.000 \times 10^{-5}$ |
-| 2 | 1 | $2.649 \times 10^{-5}$ | $3.297 \times 10^{-5}$ | $2.551 \times 10^{-5}$ |
-| 3 | 1.5 | $5.367 \times 10^{-5}$ | $8.155 \times 10^{-5}$ | $4.858 \times 10^{-5}$ |
-| 5 | 2.5 | $1.724 \times 10^{-4}$ | $3.695 \times 10^{-4}$ | $1.288 \times 10^{-4}$ |
-| 10 | 5 | $2.272 \times 10^{-3}$ | $9.002 \times 10^{-3}$ | $7.592 \times 10^{-4}$ |
-
-: Group privacy from a $(0.5, 10^{-5})$ guarantee per record: the bound, its simple form, and the exact $\delta_k$ of a count with Gaussian noise at $\varepsilon_k = k\varepsilon$. {#tbl-dpprop-group}
-
-**Pitfalls.** A $0.1$-DP guarantee per record is $10$-DP for a user with 100 records, which promises almost nothing. Don't patch this with group privacy after the fact: define neighbours at the user level, bound each user's contribution, and prove DP at that level directly. Group privacy is the fallback when you cannot. And remember that $\delta$ must already be far below one over the number of people, so multiplying it by thousands often makes the group guarantee vacuous.
+So if you care about users, don't patch a per-record guarantee with group privacy: define neighbours as datasets that differ in one user's records, bound each user's contribution, and prove DP at that level directly. Group privacy is the fallback when you cannot.
 
 ## Sequential composition {#sec-dpprop-comp}
 
-**Idea.** Run several mechanisms on the same data with independent noise. The probability of the whole transcript of outputs is the product of the steps' probabilities, so the privacy loss of the transcript is the sum of the steps' losses. That stays true when each mechanism is chosen after seeing the earlier outputs, as an analyst does.
-
-**Result.** If $M_1, \dots, M_k$ use independent coins, and each $M_i$ is $(\varepsilon_i, \delta_i)$-DP for every value of the earlier outputs, then releasing all their outputs is
+Now run several mechanisms on the same data, each with fresh noise, and let the adversary see the whole **transcript** of outputs. Because the noise draws are independent, the probability of a transcript is the product of the probabilities of its parts, so its privacy loss, a logarithm, is the sum of theirs. So if each $M_i$ is $(\varepsilon_i, \delta_i)$-DP, releasing all their outputs is
 $$\Big(\sum_{i=1}^k\varepsilon_i,\ \sum_{i=1}^k\delta_i\Big)\text{-DP}.$$ {#eq-dpprop-basic}
-This is **basic composition**. It holds for **adaptive** composition, where each query depends on earlier answers, as long as the budgets $(\varepsilon_i, \delta_i)$ are fixed in advance. Unlike group privacy, the $\delta$s add plainly, because every mechanism compares the same pair of datasets.
+This is **basic composition**. Unlike group privacy, the $\delta$s add plainly, because every mechanism compares the same pair of datasets: there is no chain of steps to multiply them through.
 
-**Example.** Asking one person the same question $k$ times with fresh randomized response at $\varepsilon_0 = \ln 3$ costs $k\ln 3$, and that worst case is real: the transcript where every answer is truthful has exactly that loss. But it is rare, with probability $(\frac34)^k$, and the mean loss is half the bound (@fig-dpprop-rr-loss). Allowing a small $\delta$ writes off such rare transcripts: at $\varepsilon_0 = 0.1$, the basic bound for $k = 1000$ answers is 100, while the exact $\varepsilon$ at $\delta = 10^{-6}$ is 19.345. For counts with Gaussian noise, each $(0.5, 10^{-5})$-DP, @tbl-dpprop-gauss-comp shows the same gap.
+The argument only needed each mechanism to be private whatever the earlier outputs were, so the rule also covers **adaptive** composition, where an analyst picks each query after reading the last answer, as long as each query's budget $(\varepsilon_i, \delta_i)$ is fixed in advance. If the budgets themselves depend on the answers ("keep going until the estimate looks good"), @eq-dpprop-basic no longer applies in general; that needs privacy filters, covered in [Advanced and optimal composition](04-composition.md). Pure DP is the exception: each step's privacy loss is at most its $\varepsilon_i$ at every output, so the losses still add up to at most $\sum_i\varepsilon_i$ whatever order the budgets were chosen in.
 
-| $k$ | Basic: $(k\varepsilon, k\delta)$ | Exact $\varepsilon$ at the same $\delta = k \times 10^{-5}$ |
-| --- | --- | --- |
-| 1 | $(0.5, 10^{-5})$ | 0.500 |
-| 2 | $(1, 2 \times 10^{-5})$ | 0.694 |
-| 4 | $(2, 4 \times 10^{-5})$ | 0.966 |
-| 10 | $(5, 10^{-4})$ | 1.504 |
-
-: $k$ counts with Gaussian noise, each $(0.5, 10^{-5})$-DP: basic composition against the exact $\varepsilon$ at the same total $\delta$. {#tbl-dpprop-gauss-comp}
+Basic composition is the true worst case, but that case is rare. Ask one person the same yes/no question $k$ times, each with fresh randomized response at $\varepsilon_0 = \ln 3$. The transcript in which every answer is truthful has loss exactly $k\ln 3$, so no smaller pure $\varepsilon$ holds. But that transcript has probability $(\frac34)^k$. Typical transcripts mix truthful answers, which add $\ln 3$ to the loss, with lies, which subtract it, and the two partly cancel: the mean loss is half the bound (@fig-dpprop-rr-loss). A sum of $k$ independent bounded terms spreads only like $\sqrt k$ around its mean, so if you allow a small $\delta$ to write off the rare extreme transcripts, the $\varepsilon$ you need grows like $\sqrt k$ instead of $k$. At $\varepsilon_0 = 0.1$ and $k = 1000$ answers, basic composition gives 100, while the exact $\varepsilon$ at $\delta = 10^{-6}$ is 19.345. Ten counts with Gaussian noise, each $(0.5, 10^{-5})$-DP, cost $(5, 10^{-4})$ by basic composition, while their exact $\varepsilon$ at that $\delta$ is 1.504.
 
 ![Distribution of the privacy loss of 10 randomized-response answers at $\varepsilon_0 = \ln 3$ each, when the true bit is 1 (blue) or 0 (orange). The basic bound $10\ln 3$ is reached, but only with probability $(3/4)^{10} = 0.056$; the mean under the first dataset is half of it.](figures/dpprop_rr_loss.svg){#fig-dpprop-rr-loss}
 
-**Pitfalls.** Basic composition is valid and simple, and it is the right tool for a handful of releases. For ten Gaussian queries it already overstates $\varepsilon$ by a factor of 3.3, and for thousands of training steps it is useless: use the accountants of [Advanced and optimal composition](04-composition.md) and [Part 4](../part04-privacy-accounting/00-introduction.md), where $\varepsilon$ grows like $\sqrt k$ rather than $k$. If the budgets themselves depend on earlier answers ("stop when the answer is good enough"), @eq-dpprop-basic does not apply; that needs privacy filters, also in [Advanced and optimal composition](04-composition.md).
+So basic composition suits a handful of releases. It already overstates the ten Gaussian counts by a factor of 3.3, and for thousands of training steps it is useless: you need the accountants of [Advanced and optimal composition](04-composition.md) and [Part 4](../part04-privacy-accounting/00-introduction.md), which exploit exactly this cancellation.
 
 ## Parallel composition {#sec-dpprop-parallel}
 
-**Idea.** If the data are split into disjoint parts and each mechanism sees only its part, one person's record lands in one part, so only one mechanism sees a difference. You pay that part's budget, not the sum.
-
-**Result.** Split the universe of possible records into disjoint parts by a rule fixed in advance, run $M_i$ on the records in part $i$ with independent coins, and suppose each $M_i$ is $(\varepsilon_i, \delta_i)$-DP under add/remove (neighbours differ by one record added or removed). The whole release is
+If each mechanism sees a different, disjoint part of the data, one person's record lands in only one part. The other parts get identical inputs in both worlds, so their outputs contribute zero privacy loss, and only the part that changed costs anything. Split the universe of possible records into disjoint parts by a rule fixed in advance, run $M_i$ on the records in part $i$ with independent noise, and suppose each $M_i$ is $(\varepsilon_i, \delta_i)$-DP under add/remove, where neighbours differ by one record added or removed. Then the whole release is
 $$\big(\max_i\varepsilon_i,\ \max_i\delta_i\big)\text{-DP under add/remove}.$$ {#eq-dpprop-parallel}
-Under replace (one record's value changed), a record that moves between parts changes two of them, which costs up to twice as much: $2\varepsilon$ for equal pure budgets. When each part is a fixed slot, such as one person in local randomized response, a replacement changes one slot and the maximum applies again.
 
-**Example.** A histogram with Laplace noise of scale $1/\varepsilon$ in each bin is $\varepsilon$-DP under add/remove however many bins it has; for two bins the script finds exactly 1.0000 at $\varepsilon = 1$. Under replace it is $2\varepsilon$-DP (2.0000), which is why a histogram's sensitivity is quoted as 2 under replace ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md)). Mean incomes for 50 states, each $0.5$-DP, cost $0.5$ under add/remove and $1$ under replace, since a person who moves changes two states. Local randomized response at $\ln 3$ is $\ln 3$-DP for any number of people.
+This is why a histogram costs one $\varepsilon$, not one per bin. Laplace noise of scale $1/\varepsilon$ on each bin is $\varepsilon$-DP however many bins there are; for two bins the full edition's script finds exactly 1.0000 at $\varepsilon = 1$. The same reasoning makes local randomized response $\ln 3$-DP for any number of people, since each person's report depends only on their own answer.
 
-**Pitfalls.** The partition must not depend on the data. "The top 10% of earners and the rest" changes when one high earner is added, which can move records across the boundary and change both parts. Use fixed bins, or treat a data-dependent split as a mechanism of its own.
+The neighbouring relation matters here. Under replace, where one record's value is changed, a record can move from one bin to another, and then two parts see a difference: the two-bin histogram becomes 2.0000-DP. That is why a histogram's sensitivity is quoted as 2 under replace ([The Laplace and Gaussian mechanisms](03-laplace-gaussian.md)). When each part is a fixed slot, as each person is in local randomized response, a replacement changes one slot only and the maximum applies again.
+
+The argument also needs the partition to be fixed before the data are seen. "The top 10% of earners and the rest" moves its boundary when one high earner is added, which can shift other records across it and change both parts, so more than one mechanism sees a difference. Use fixed bins, or treat a data-dependent split as a mechanism of its own.
 
 ## What composes and what doesn't {#sec-dpprop-limits}
 
-**Idea.** Each property above rests on an assumption: post-processing must not read the data, composition needs fresh noise and the same neighbouring relation for every step, and the budgets must be fixed in advance. Most real failures break one of them.
+Each property rests on an assumption that its argument used: post-processing needs the processing to ignore the data, composition needs independent noise and the same neighbouring relation at every step, and both need budgets fixed in advance. Most real failures break one of them, and badly.
 
-**Result.** @tbl-dpprop-rules is the checklist.
+Shared noise is the clearest case. Release the number of smokers and the number of smokers aged 40 or over, adding the same Laplace draw $Z$ to both. Each release alone is 1-DP. But subtracting one from the other cancels $Z$ and leaves the exact number of smokers under 40, which changes when Alice, a smoker aged 30, is removed. Composition assumed the transcript's probability is a product of independent parts; with one shared draw it is not, and one release can undo the other's noise. In 200,000 simulated runs, an attacker who subtracts the two releases is right about Alice every time, an accuracy of 1.0000. With fresh noise for each count the same attack reaches 0.6206, and no attack can beat 0.6967.
 
-| Situation | Composes? | Why |
-| --- | --- | --- |
-| Function of the output, own coins | Yes, at no cost | Post-processing |
-| Second query on the same data, fresh noise | Yes, budgets add | Basic composition |
-| Second query chosen from the first answer | Yes, budgets add | Adaptive composition, budgets fixed in advance |
-| Two queries sharing one noise draw | **No** | The noise cancels in a difference |
-| "Post-processing" that reads the data again | **No** | It is a new mechanism, often a non-private one |
-| Budgets chosen from earlier outputs | For pure DP, the sum of the $\varepsilon_i$ still holds; otherwise not by basic composition | Needs privacy filters for $(\varepsilon, \delta)$ |
-| Mechanisms proved under add/remove, released under replace | Yes, at up to twice the cost | A replacement is a removal plus an addition |
-| A DP release plus an exact statistic of the same data | **No** | The exact statistic is not DP; the pair has no guarantee |
-| Many records of one person | Yes, at $k\varepsilon$ and $\delta_k$ | Group privacy |
-
-: What composes and what doesn't. {#tbl-dpprop-rules}
-
-**Example.** Release the number of smokers and the number of smokers aged 40 or over, adding the *same* Laplace draw $Z$ to both. Each release alone is 1-DP. But their difference is the exact number of smokers under 40, and it changes when Alice, a smoker aged 30, is removed. An attacker who subtracts the two releases is always right about Alice: in 200,000 simulated runs its accuracy is 1.0000. With fresh noise for each count the same attack reaches 0.6206, and no attack can beat 0.6967.
-
-**Pitfalls.** Shared noise is a total failure, not a small loss, and it hides in ordinary engineering: two mechanisms seeded with the same random seed, a cached noise value re-added to a related query, noise reused across the shards of a distributed system. Returning the same noisy answer to a repeated identical query is fine, because that is post-processing of one release. An exact total published elsewhere can be differenced against your DP release just as the two counts were. And mixing add/remove and replace guarantees inside one accountant is a factor-2 bug.
+In code, the bug hides in two mechanisms seeded with the same random seed, a cached noise value re-added to a related query, or noise reused across the shards of a distributed system. Returning the same noisy answer to a repeated identical query is fine, because that is post-processing of one release. An exact statistic published elsewhere is the same mistake in another form: it can be differenced against your DP release just as the two counts were, and the guarantee covers only what your mechanism released. Finally, a guarantee proved under add/remove costs up to twice as much under replace, because a replacement is a removal plus an addition, so mixing the two relations inside one accountant is a factor-2 bug.
 
 ## Code {#sec-dpprop-code}
 
@@ -170,9 +116,7 @@ uv run python code/part03-dp-foundations/properties.py
 **Rules of thumb**
 
 - Privatize once, as early as possible; everything after it is free.
-- Budgets add across queries on the same data and take the maximum across disjoint data.
-- For users with many records, define the neighbouring relation at the user level instead of relying on group privacy.
-- Every mechanism needs its own fresh noise.
+- For users with many records, define neighbours at the user level instead of relying on group privacy.
 - Use basic composition for a handful of releases; for many, use an accountant.
 
 ## Further reading

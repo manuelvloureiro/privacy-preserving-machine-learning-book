@@ -2,32 +2,27 @@
 
 ## Why this matters
 
-Many questions ask you to **pick** something rather than compute a number. Which of 50 hyperparameter settings scores best on the validation set? Which of a thousand monitored statistics first crosses an alarm level? The answer is a name from a list, and adding noise to a name makes no sense.
+Many questions ask you to **pick** something rather than compute a number. Which of 50 hyperparameter settings scores best on the validation set? Which of a thousand monitored statistics first crosses an alarm level? The answer is a name from a list, and "model 7 plus noise" is not a model.
 
-The [Laplace and Gaussian mechanisms](03-laplace-gaussian.md) of differential privacy (DP) add noise to numbers. Releasing a noisy score for every candidate releases $k$ numbers, and if one record can move all $k$ scores, the noise must grow with $k$. You never have to pay for the losers. The one idea: **release the position, not the values.** Each mechanism adds noise to scores it never publishes and releases only which candidate won. A candidate wins when its noise clears a bar set by the best of the others, and a maximum of numbers that each move by at most $\Delta$ moves by at most $\Delta$, however many numbers there are. So the number of candidates never enters the privacy cost. It enters only the accuracy, as $\ln k$. @tbl-sel-overview maps the decisions to the sections.
+The [Laplace and Gaussian mechanisms](03-laplace-gaussian.md) of differential privacy (DP) add noise to numbers. You could release a noisy score for every candidate, but that is $k$ releases, and if one record can move all $k$ scores, their costs add up and the noise must grow with $k$, which is often in the thousands. Yet you only wanted the winner, and you never have to pay for the losers.
 
-| Decision | Rule | Section |
-| --- | --- | --- |
-| Pick a good candidate from a fixed list | Exponential mechanism: softmax of the scores at temperature $2\Delta/\varepsilon$ | @sec-sel-exp |
-| Pick it by adding noise to the scores | Report-noisy-max: release only the argmax; Gumbel noise gives the exponential mechanism exactly | @sec-sel-rnm |
-| Find the first query in a stream above a threshold | AboveThreshold: pay once, however many queries stay below | @sec-sel-svt |
-| Review a sparse vector implementation | Fresh noise per query, halt after the $\top$, never publish noisy values | @sec-sel-svt-bugs |
-
-: The decisions behind private selection, and where this chapter makes each one. {#tbl-sel-overview}
-
-Throughout, $k$ candidates have a **score** $u(D, r)$, how good candidate $r$ is on dataset $D$. Its **sensitivity** $\Delta$ is the largest change in any one score between two **neighbouring** datasets, which differ in one person's record. Scores are **monotone** if one record always pushes all scores the same way: counts under add/remove neighbours are, a histogram under replace neighbours is not.
+The one idea of this chapter is to **release the position, not the values**. Each mechanism adds noise to scores it never publishes and releases only which candidate won. A candidate wins when its own noise clears a bar set by the best of the others, and a maximum of numbers that each move by at most $\Delta$ moves by at most $\Delta$, however many numbers there are. So the number of candidates never enters the privacy cost. It enters only the accuracy, and only as $\ln k$.
 
 ## The exponential mechanism {#sec-sel-exp}
 
-**Idea.** McSherry and Talwar (2007) give each candidate a weight that grows exponentially with its score and pick it with probability equal to its share of the total weight. One record changes each score by at most $\Delta$, so it changes the chosen candidate's weight by at most $e^{\varepsilon/2}$ and the total weight by at most $e^{\varepsilon/2}$; the two together give $e^\varepsilon$. It is a softmax of the scores with temperature $2\Delta/\varepsilon$.
+Each of $k$ candidates has a **score** $u(D, r)$, how good candidate $r$ is on dataset $D$, and its **sensitivity** $\Delta$ is the largest change in any one score between two **neighbouring** datasets, which differ in one person's record. A deterministic argmax can jump to another candidate when one record moves a score across a tie, so a private selection must be random, tilted toward high scores. The question is how much tilt you can afford.
 
-**Result.** The **exponential mechanism** outputs candidate $r$ with probability
+McSherry and Talwar (2007) answered by giving each candidate a weight that grows exponentially with its score, and picking it with probability equal to its share of the total weight. The **exponential mechanism** outputs candidate $r$ with probability
 $$\Pr[M_E(D) = r] = \frac{\exp\big(\varepsilon\,u(D, r)/(2\Delta)\big)}{\sum_s\exp\big(\varepsilon\,u(D, s)/(2\Delta)\big)},$$ {#eq-sel-em}
-and it is $\varepsilon$-DP for any number of candidates. With monotone scores the 2 can be dropped: weights $e^{\varepsilon u/\Delta}$ are also $\varepsilon$-DP, because the chosen candidate's weight and the total cannot both move against you at once. For accuracy, call the **gap** the difference between the best score $\mathrm{OPT}$ and the chosen one. For every $t > 0$, with probability at least $1 - e^{-t}$,
-$$\text{gap} \le \frac{2\Delta}{\varepsilon}(\ln k + t),$$ {#eq-sel-em-utility}
-and the expected gap is at most $\frac{2\Delta}{\varepsilon}(\ln k + 1)$. With monotone weights, replace $2\Delta$ by $\Delta$. Doubling $k$ adds only $\frac{2\Delta}{\varepsilon}\ln 2$, and a [lower bound](09-lower-bounds.md) shows that no $\varepsilon$-DP mechanism can avoid the $\ln k$.
+which is a softmax of the scores at temperature $2\Delta/\varepsilon$. Why exponential, and why the 2? Changing one record moves each score by at most $\Delta$, and an exponential turns that additive change into a multiplicative one: each weight changes by at most a factor $e^{\varepsilon/2}$, whatever the score. The probability of $r$ is its weight divided by the total, and both can move against you at once, one record raising $r$'s score while lowering its competitors'. Each costs at most $e^{\varepsilon/2}$, so the ratio is at most $e^\varepsilon$: the mechanism is $\varepsilon$-DP, and $k$ appears nowhere in that argument.
 
-**Example.** You want to release the best of 50 trained models on a private validation set of 1,000 examples. Model $r$ gets $900 - r$ right, so the best is at 90.0% accuracy. The score is the count of correct predictions, so $\Delta = 1$. @tbl-sel-em-models and @fig-sel-em-probs show the result. At $\varepsilon = 1$ you lose 1.54 correct predictions on average, 0.15% accuracy, although you pick the best model only 39% of the time: the mechanism mostly picks near-ties that cost one or two predictions. The counts are monotone, and the weights $e^{\varepsilon u}$ cut the expected gap at $\varepsilon = 1$ from 1.54 to 0.58.
+The 2 can be dropped when the scores are **monotone**, meaning one record always pushes all scores the same way. Counts under add/remove neighbours are monotone; a histogram under replace neighbours is not, because moving a record from one bin to another raises one count and lowers another. With monotone scores, $r$'s weight and the total cannot both move against you, so weights $e^{\varepsilon u/\Delta}$ are also $\varepsilon$-DP. Check this under your neighbouring relation before you drop the 2.
+
+How much accuracy does the randomness cost? Call the **gap** the distance between the best score and the chosen one. A candidate whose score is at least $c$ below the best has at most $e^{-\varepsilon c/(2\Delta)}$ times the best candidate's weight, so even if all $k$ candidates were that bad, together they would be picked with probability at most $k\,e^{-\varepsilon c/(2\Delta)}$. Setting that to $e^{-t}$ gives, with probability at least $1 - e^{-t}$,
+$$\text{gap} \le \frac{2\Delta}{\varepsilon}(\ln k + t),$$ {#eq-sel-em-utility}
+and an expected gap of at most $\frac{2\Delta}{\varepsilon}(\ln k + 1)$. The $\ln k$ comes from the factor $k$ in front of an exponential: doubling the number of candidates adds only $\frac{2\Delta}{\varepsilon}\ln 2$, and a [lower bound](09-lower-bounds.md) shows that no $\varepsilon$-DP mechanism can avoid it.
+
+Take 50 models scored on a private validation set of 1,000 examples: model $r$ gets $900 - r$ right, the score is the count of correct predictions, and $\Delta = 1$. At $\varepsilon = 1$ the mechanism picks the best model only 39% of the time, yet loses just 1.54 correct predictions on average, 0.15% accuracy: its mistakes are near-ties, which cost almost nothing (@tbl-sel-em-models, @fig-sel-em-probs). Because the counts are monotone, the weights $e^{\varepsilon u}$ cut the expected gap from 1.54 to 0.58.
 
 | $\varepsilon$ | $\Pr[\text{best}]$ | $\mathbb E[\text{gap}]$ | Bound $2(\ln 50 + 1)/\varepsilon$ | $\mathbb E[\text{gap}]$, monotone weights |
 | --- | --- | --- | --- | --- |
@@ -39,45 +34,41 @@ and the expected gap is at most $\frac{2\Delta}{\varepsilon}(\ln k + 1)$. With m
 
 ![Left: the scores of 50 models, model $r$ getting $900 - r$ of 1,000 validation examples right. Right: the probability that the exponential mechanism selects each model, for four values of $\varepsilon$. Small $\varepsilon$ spreads the probability toward uniform; large $\varepsilon$ concentrates it on the best model.](figures/select_em_probs.svg){#fig-sel-em-probs}
 
-**Pitfalls.** The candidate list must be fixed before you look at the data: a candidate read off the data leaks through its mere presence. Use the factor 2 unless you have checked that the scores are monotone under your neighbouring relation. The utility bound is loose when scores are spread out: at $\varepsilon = 1$ it says the gap exceeds 13.82 with probability at most 0.0498, while the exact probability is $9.12\times10^{-4}$. Use it to choose $\varepsilon$, not to predict the result. Never exponentiate scores in the thousands directly; subtract the largest score first, which changes nothing, or use the Gumbel form of the next section.
+The bound is loose here, 9.82 against 1.54, because it treats every candidate as if it sat just $c$ below the best, while most of these are far below and nearly weightless. Use it to choose $\varepsilon$, not to predict the result.
+
+Two consequences follow from the proof. The candidate list must be fixed before you look at the data, because the argument compares the same list on both datasets; a candidate read off the data leaks through its mere presence. And never exponentiate scores in the thousands directly. Adding a constant to every score multiplies every weight by the same factor, which cancels, so subtract the largest score first, or use the Gumbel form of the next section.
 
 ## Report-noisy-max and Gumbel noise {#sec-sel-rnm}
 
-**Idea.** Add independent noise to every score and report the index of the largest noisy score, and *only the index*. Fix the noise of every other candidate: candidate $i$ wins exactly when its own noise clears a bar, the best of the other noisy scores minus its own score. One record moves that bar by at most $2\Delta$ (the maximum by $\Delta$, its own score by $\Delta$), or by $\Delta$ for monotone scores, and Laplace noise of scale $b$ pays for a shift $s$ with a factor $e^{s/b}$. The losers enter only through one maximum, which is why they cost nothing.
+The other natural recipe adds noise to every score and reports the index of the largest, and *only the index*. **Report-noisy-max** outputs $\arg\max_r\big(u(D, r) + Z_r\big)$ with independent $Z_r \sim \mathrm{Lap}(b)$, and it is $\varepsilon$-DP with $b = 2\Delta/\varepsilon$.
 
-**Result.** **Report-noisy-max** outputs $\arg\max_r\big(u(D, r) + Z_r\big)$ with independent $Z_r \sim \mathrm{Lap}(b)$. With $b = 2\Delta/\varepsilon$ it is $\varepsilon$-DP; with monotone scores $b = \Delta/\varepsilon$ suffices. With probability at least $1 - \beta$ the gap is at most $2b\ln(k/\beta)$. If you add **Gumbel** noise of scale $2\Delta/\varepsilon$ instead of Laplace noise, the argmax picks each candidate with exactly the probability of @eq-sel-em: report-noisy-max with Gumbel noise *is* the exponential mechanism. This Gumbel-max trick samples the exponential mechanism in one pass, without a normalizer or overflow. Taking the $c$ largest noisy scores gives the same distribution as running the exponential mechanism $c$ times and removing each winner (Durfee & Rogers 2019), at a cost of $c\varepsilon$ by basic composition.
+To see why the losers cost nothing, fix the noise of every other candidate. Their noisy scores are now fixed numbers, and candidate $i$ wins exactly when its own noise clears a bar: the best of the others' noisy scores minus $i$'s own score. One record moves the maximum by at most $\Delta$, however many candidates it ranges over, and moves $i$'s score by at most $\Delta$, so the bar moves by at most $2\Delta$. Laplace noise of scale $b$ pays for a shift $s$ with a factor $e^{s/b}$, so $b = 2\Delta/\varepsilon$ makes the cost $e^\varepsilon$. With monotone scores the maximum and $i$'s score move the same way, the bar moves by at most $\Delta$, and $b = \Delta/\varepsilon$ suffices: the same factor of 2, for the same reason, as in the exponential mechanism.
 
-**Example.** On the 50 models at $\varepsilon = 1$, Laplace report-noisy-max with $b = 2$ picks the best model with probability 0.4241, against 0.3935 for the exponential mechanism, and has expected gap 1.40 against 1.54. The monotone version, $b = 1$, picks it with probability 0.6463 and has expected gap 0.54. @tbl-sel-gumbel shows the Gumbel equivalence on five candidates with noise scale 2: a million Gumbel draws land within 0.0008 of the exponential mechanism's exact probabilities, about the sampling error. Laplace noise favours the top candidate a little more, and its total variation distance from the exponential mechanism is 0.0216.
+The proof also shows why you must release only the index. It holds the other noises fixed and averages over candidate $i$'s noise; publishing the winning noisy score publishes that very noise, and the guarantee is gone. If you need the winner's score, spend extra budget on a fresh Laplace answer for that one query.
 
-| Candidate score | 4 | 3 | 3 | 1 | 0 |
-| --- | --- | --- | --- | --- | --- |
-| Exponential mechanism, exact | 0.3889 | 0.2359 | 0.2359 | 0.0868 | 0.0526 |
-| Gumbel noisy max, $10^6$ runs | 0.3891 | 0.2351 | 0.2362 | 0.0871 | 0.0525 |
-| Laplace noisy max, exact | 0.4105 | 0.2341 | 0.2341 | 0.0764 | 0.0449 |
+Accuracy follows from the same picture. If no noise exceeds $b\ln(k/\beta)$, which happens with probability at least $1 - \beta$, the noise cannot reorder candidates more than twice that apart, so the gap is at most $2b\ln(k/\beta)$. On the 50 models at $\varepsilon = 1$, Laplace report-noisy-max with $b = 2$ picks the best model with probability 0.4241, against 0.3935 for the exponential mechanism, and has expected gap 1.40 against 1.54. Neither dominates in general.
 
-: Selection probabilities with noise scale 2 for five candidates. {#tbl-sel-gumbel}
-
-**Pitfalls.** Release only the index. Publishing the winning noisy score as well publishes the very noise the proof averages over, and the guarantee is gone. If you need the winner's score, spend extra budget on a fresh Laplace answer for that one query. The noises must be independent, one fresh draw per candidate.
+They become the same mechanism with a different noise. If you add **Gumbel** noise of scale $2\Delta/\varepsilon$ instead of Laplace noise, the argmax picks each candidate with exactly the probability of @eq-sel-em. This Gumbel-max trick gives the stable sampler promised above: it works in score units, with no normalizer to overflow. On five candidates, a million Gumbel draws land within 0.0008 of the exponential mechanism's exact probabilities, about the sampling error, while Laplace noise of the same scale, with a different tail, is off by a total variation distance of 0.0216. Taking the $c$ largest Gumbel-noised scores gives the same distribution as running the exponential mechanism $c$ times and removing each winner (Durfee & Rogers 2019), at a cost of $c\varepsilon$ by basic composition.
 
 ## The sparse vector technique {#sec-sel-svt}
 
-**Idea.** Now the candidates arrive one at a time and you want the first one that is good enough, such as the first statistic to cross an alarm level. Answering each with the Laplace mechanism costs $\varepsilon$ per query. The **sparse vector technique** (Dwork, Naor, Reingold, Rothblum & Vadhan 2009) compares every query with one noisy threshold and pays only for the one that is above. All the "below" answers together say only that the noisy threshold sits above the largest of the earlier noisy answers, and that maximum moves by at most $\Delta$, so they cost one threshold noise between them.
+Now the candidates arrive one at a time and you want the first that is good enough, such as the first statistic to cross an alarm level. Answering each query with the Laplace mechanism would cost $\varepsilon$ per query, mostly to learn "below". The **sparse vector technique** (Dwork, Naor, Reingold, Rothblum & Vadhan 2009) compares every query with one noisy threshold and pays only for the one above it.
 
-**Result.** **AboveThreshold** (Dwork & Roth 2014, Algorithm 1) takes a stream of queries of sensitivity $\Delta$, possibly chosen adaptively, a threshold $T$, and budgets $\varepsilon_1 + \varepsilon_2 = \varepsilon$. It draws the threshold noise $\rho \sim \mathrm{Lap}(\Delta/\varepsilon_1)$ once. For each query it draws fresh noise $\nu_i \sim \mathrm{Lap}(2\Delta/\varepsilon_2)$; if $f_i(D) + \nu_i \ge T + \rho$ it outputs $\top$ ("above") and **halts**, and otherwise outputs $\bot$ ("below") and continues. It is $\varepsilon$-DP for any number of $\bot$ answers. With monotone queries, $\nu_i \sim \mathrm{Lap}(\Delta/\varepsilon_2)$ suffices (Lyu, Su & Li 2017). With the equal split and $k$ queries answered, with probability at least $1 - \beta$ every $\bot$ query has $f_i(D) < T + \alpha$ and the $\top$ query has $f_k(D) \ge T - \alpha$, where
+Its basic form, **AboveThreshold** (Dwork & Roth 2014, Algorithm 1), takes queries of sensitivity $\Delta$, possibly chosen adaptively, a threshold $T$, and budgets $\varepsilon_1 + \varepsilon_2 = \varepsilon$. It draws the threshold noise $\rho \sim \mathrm{Lap}(\Delta/\varepsilon_1)$ once. For each query it draws fresh noise $\nu_i \sim \mathrm{Lap}(2\Delta/\varepsilon_2)$; if $f_i(D) + \nu_i \ge T + \rho$ it outputs $\top$ ("above") and **halts**, and otherwise outputs $\bot$ ("below") and continues. It is $\varepsilon$-DP for any number of $\bot$ answers.
+
+The same bar argument explains why. The output "stop at query $k$" says two things: the noisy threshold sits above every earlier noisy answer, and at or below the $k$-th. The first is a statement about one number, the largest earlier noisy answer, which moves by at most $\Delta$ however many queries came before; sliding the threshold noise by that much keeps all the $\bot$ answers in place, at a cost of $e^{\varepsilon_1}$. The single $\top$ is paid for by sliding its own fresh noise by at most $2\Delta$, at a cost of $e^{\varepsilon_2}$. With monotone queries that slide is at most $\Delta$, and $\nu_i \sim \mathrm{Lap}(\Delta/\varepsilon_2)$ suffices (Lyu, Su & Li 2017).
+
+The accuracy, unlike the privacy, depends on $k$, because each of the $k$ query noises could happen to be large. With the equal split and probability at least $1 - \beta$, every $\bot$ query has $f_i(D) < T + \alpha$ and the $\top$ query has $f_k(D) \ge T - \alpha$, where
 $$\alpha = \frac{8\Delta\big(\ln k + \ln(2/\beta)\big)}{\varepsilon}.$$ {#eq-sel-svt-alpha}
-Only queries within $\alpha$ of $T$ can go either way. To find the first $c$ queries above the threshold, restart AboveThreshold with fresh threshold noise after each $\top$, at $\varepsilon/c$ per run.
-
-**Example.** You monitor $k = 1000$ counting queries ($\Delta = 1$) with threshold $T = 500$ at $\varepsilon = 1$. With $\beta = 0.05$, $\alpha = 84.77$. So with probability at least 0.95, no query below 415.23 fires and no query above 584.77 is skipped. If every count is 400 except query 700, which is 600, the output is query 700 with probability at least 0.95; in 10,000 simulated runs it always was (@fig-sel-svt-path shows a smaller run). Answering all 1,000 queries with the Laplace mechanism at $\varepsilon/1000$ each would add noise of scale 1,000 to counts of a few hundred.
+Only queries within $\alpha$ of $T$ can go either way. Say you monitor $k = 1000$ counting queries ($\Delta = 1$) with $T = 500$ at $\varepsilon = 1$. With $\beta = 0.05$, $\alpha = 84.77$, so with probability at least 0.95 no query below 415.23 fires and no query above 584.77 is skipped. If every count is 400 except query 700, which is 600, the output is query 700; in 10,000 simulated runs it always was (@fig-sel-svt-path shows a smaller run). Answering all 1,000 queries with the Laplace mechanism instead would add noise of scale 1,000 to counts of a few hundred.
 
 ![One run of AboveThreshold with $\varepsilon = 1$ on 30 queries whose true answers rise from 8 to 22.5, with threshold $T = 20$. Each query's noisy answer is compared with the same noisy threshold. The first one above it is reported and the run halts.](figures/select_svt_path.svg){#fig-sel-svt-path}
 
-**Pitfalls.** The accuracy, unlike the privacy, depends on $k$. AboveThreshold answers a yes/no question; to release the value of the query that fired, spend extra budget on a fresh Laplace answer. Any split of $\varepsilon$ is private, but the equal split is not the most accurate; Lyu, Su & Li give a better one.
+AboveThreshold answers a yes/no question; to release the value of the query that fired, spend extra budget on a fresh Laplace answer. To find the first $c$ queries above the threshold, restart it with fresh threshold noise after each $\top$, at $\varepsilon/c$ per run. Any split of $\varepsilon$ is private; Lyu, Su & Li give a more accurate one than the equal split.
 
 ## When the sparse vector technique goes wrong {#sec-sel-svt-bugs}
 
-**Idea.** The technique is easy to break. Lyu, Su & Li (2017) found published variants that are not DP at all, each a seemingly harmless optimization that removes one ingredient of the proof: the fresh noise $\nu_i$ that pays for the $\top$, the halt that limits the run to one $\top$, or the secrecy of the noisy values.
-
-**Result.** @tbl-sel-svt-variants lists the variants and their actual privacy.
+The proof has three ingredients, and each protects one step: the fresh noise $\nu_i$ pays for the $\top$, the halt limits the run to the one $\top$ that was paid for, and the noisy values stay secret because the proof averages over them. Lyu, Su & Li (2017) surveyed published variants, each a seemingly harmless optimization that weakens one ingredient; several are not DP at all (@tbl-sel-svt-variants).
 
 | Variant (as numbered by Lyu, Su & Li) | What it changes | Privacy shown by Lyu, Su & Li |
 | --- | --- | --- |
@@ -89,19 +80,9 @@ Only queries within $\alpha$ of $T$ can go either way. To find the first $c$ que
 
 : Variants of the sparse vector technique and their actual privacy, from Lyu, Su & Li (2017). {#tbl-sel-svt-variants}
 
-The **no-halt variant** uses exactly AboveThreshold's noise but answers every query. On a pair of neighbours where the first $m$ queries are 0 and the last $m$ are 1 on $D$, and the reverse on $D'$, the output "$m$ below, then $m$ above" has privacy loss at least $m\varepsilon/4$, which grows without bound. Without query noise even the halting version fails, with two queries.
+The **no-halt variant** is the instructive one, because it uses exactly AboveThreshold's noise and only skips the halt. Each further $\top$ would need another slide of its own noise, another factor $e^{\varepsilon_2}$, and nothing pays for it. Take neighbours where the first $m$ queries are 0 and the last $m$ are 1 on $D$, and the reverse on $D'$. The output "$m$ below, then $m$ above" is a little more likely under $D$ at every one of its $2m$ answers, and without a halt these small factors multiply: the privacy loss is at least $m\varepsilon/4$, which grows without bound. At $\varepsilon = 1$, AboveThreshold's largest loss levels off at exactly $\varepsilon$, so its proof is tight, while the no-halt variant's grows linearly in $m$ (@fig-sel-svt-buggy, left).
 
-**Example.** @tbl-sel-svt-loss gives the exact losses at $\varepsilon = 1$. AboveThreshold levels off at exactly $\varepsilon$, so its proof is tight; the no-halt variant gains about 0.45 nats (units of natural logarithm) for each pair of queries added.
-
-| $m$ | 1 | 5 | 10 | 20 | 40 |
-| --- | --- | --- | --- | --- | --- |
-| AboveThreshold, largest loss over outputs | 0.3958 | 0.8998 | 0.9940 | 1.0000 | 1.0000 |
-| No halt, loss of $\bot^m\top^m$ | 0.3958 | 2.0985 | 4.3220 | 8.8741 | 18.1246 |
-| Lower bound $m\varepsilon/4$ | 0.25 | 1.25 | 2.50 | 5.00 | 10.00 |
-
-: Exact privacy loss of AboveThreshold and of its no-halt variant on the counterexample, with $\varepsilon = 1$. {#tbl-sel-svt-loss}
-
-**Pitfalls.** The no-halt variant adds as much noise per query as the correct one, so a reviewer who checks only noise scales will miss the bug. An empirical audit catches it. If a mechanism is $\varepsilon$-DP, any event is at most $e^\varepsilon$ times as likely under $D$ as under $D'$, so the log-ratio of a test's firing rates is a lower bound on the true $\varepsilon$. The test "more $\top$ answers in the second half than in the first" gives a log-ratio of 1.40 at $m = 40$, which already proves the no-halt variant is not 1-DP (@fig-sel-svt-buggy). When you review an implementation, check four things: fresh query noise for every query (reusing one draw is Algorithm 5's bug), one threshold noise per run, a halt after the allowed number of $\top$ answers, and no published noisy values.
+A reviewer who checks only noise scales will miss this bug. An empirical audit catches it. If a mechanism is $\varepsilon$-DP, any event is at most $e^\varepsilon$ times as likely under $D$ as under $D'$, so the log-ratio of a test's firing rates is a lower bound on the true $\varepsilon$. The test "more $\top$ answers in the second half than in the first" gives a log-ratio of 1.40 at $m = 40$, which already proves the no-halt variant is not 1-DP (@fig-sel-svt-buggy, right). When you review an implementation, check the ingredients directly: fresh noise for every query (reusing one draw is Algorithm 5's bug), one threshold noise per run, a halt after the allowed number of $\top$ answers, and no published noisy values.
 
 ![Left: privacy loss on the counterexample with $\varepsilon = 1$, computed exactly. For the no-halt variant the loss of $\bot^m\top^m$ grows linearly in $m$, above the lower bound $m\varepsilon/4$; for AboveThreshold the largest loss levels off at $\varepsilon$. Right: the no-halt variant under the test "more $\top$ answers in the second half"; once the probability under $D$ exceeds $e^\varepsilon$ times that under $D'$ (dotted), no $\varepsilon$-DP mechanism could produce it.](figures/select_svt_buggy.svg){#fig-sel-svt-buggy}
 
@@ -172,14 +153,6 @@ uv run python code/part03-dp-foundations/selection.py
 | $c$ answers above | AboveThreshold restarted $c$ times at $\varepsilon/c$ | $\varepsilon$ by basic composition | $\alpha$ with $\varepsilon/c$ in place of $\varepsilon$ |
 
 : The selection mechanisms of this chapter. {#tbl-sel-cheat}
-
-**Rules of thumb**
-
-- Release positions, not values. Every released noisy value needs its own budget.
-- The number of candidates costs $\ln k$ in accuracy and nothing in privacy.
-- Use $2\Delta$ unless you have checked that the scores are monotone under your neighbouring relation.
-- To sample the exponential mechanism, add Gumbel noise and take the argmax.
-- A sparse vector implementation must draw fresh noise for every query, keep one threshold noise per run, halt after the allowed number of $\top$ answers, and never publish the noisy values it compared.
 
 ## Further reading
 
