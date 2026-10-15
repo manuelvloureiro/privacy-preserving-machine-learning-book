@@ -8,7 +8,7 @@ The repository holds three books, built with Quarto from the same code:
 
 - **The full edition** (`book-full/`) derives every result, for readers who want the mathematics.
 - **The exercise book** (`book-exercises/`) has the full edition's exercises, each with a worked solution, one page per chapter.
-- **The practitioner edition** (`book-practitioner/`, in progress) covers the same topics in the same parts and chapters, without proofs, for people who build and audit private machine-learning systems.
+- **The practitioner edition** (`book-practitioner/`) covers the same topics in the same parts and chapters, without proofs, for people who build and audit private machine-learning systems.
 
 ```
 book-full/                       the full edition
