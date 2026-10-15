@@ -26,7 +26,9 @@ Read the page below once, from the top, the way that reader would. For **every p
 Do not judge whether the content is correct, and do not suggest rewrites. Be literal: if you
 understood something only because you already knew it, count it as a stall for the stated audience.
 
-End with the three paragraphs that were hardest to read, and why.
+End with the three paragraphs that were hardest to read, and why. Then, under **Rhythm**, quote any
+run of three or more sentences that reads choppy or stilted: short sentences in a row that should be
+one, or the same opening repeated.
 
 Page:
 

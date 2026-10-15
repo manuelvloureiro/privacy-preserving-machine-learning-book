@@ -2,92 +2,155 @@
 
 ## Why this matters
 
-A noisy answer, a measured error rate, the size of a sampled minibatch: each is random, and the practical question is **how wide an error bar must be to fail with probability at most $\beta$**. Concentration inequalities answer it.
+Almost every number in a private system is random. The noise added to a count is random by design. An error rate measured on a test set depends on which examples happened to be in it. The number of examples in a randomly sampled minibatch changes from one step to the next. Before you can use any of these numbers, you need to know how far each one can stray from the value you care about.
 
-The answer depends on how much you know. Knowing only the variance, the width grows like $1/\sqrt\beta$; knowing that the tail falls off like a normal's, only like $\sqrt{\ln(1/\beta)}$; for an exponential tail, like $\ln(1/\beta)$. At 95% the difference is modest, but later parts need $\beta$ far smaller, so this chapter is about using everything you know.
+A concentration inequality answers that question. It tells you how wide to make an interval around your estimate so that the true value falls outside it only rarely, say once in a thousand runs. This chapter calls that rare event a failure, and the chance of it the **failure probability**, written $\beta$. It calls the distance from the estimate to either end of the interval the **width**, so the interval reaches one width on each side.
 
-## Variance alone: Markov and Chebyshev {#sec-conc-chebyshev}
+How wide the interval must be depends on how much you know about the random quantity. If you know only its variance, the width grows quickly as you ask for a smaller failure probability. If you also know the shape of its distribution far from the centre, the width grows very slowly. For a 95% interval the difference is modest, under a factor of two in the examples below. But later parts of this book often ask for failure probabilities of one in a hundred thousand or less. At one in a million, knowing that shape can make an interval a hundred times narrower. This chapter shows how to use everything you know.
 
-A quantity $X \ge 0$ with mean $\mathbb E[X]$ cannot often be much larger than its mean, or those large values alone would pull the mean up. That is **Markov's inequality**, $\Pr[X \ge a] \le \mathbb E[X]/a$. Apply it to the squared deviation $(X - \mu)^2$, whose mean is the variance $\sigma^2$, and you get **Chebyshev's inequality**,
+## Knowing only the variance: Markov and Chebyshev {#sec-conc-chebyshev}
+
+Start with the weakest thing you could know about a quantity: it is never negative, and you know its average. That alone limits how often it can be large. Suppose customers wait 2 minutes at a counter on average. Then at most a quarter of them can wait 8 minutes or more, because if more than a quarter did, those customers alone would push the average above 2 minutes. This is **Markov's inequality**. For a quantity $X$ that is never negative, with average $\mathbb E[X]$, and any positive threshold $a$, it says that $\Pr[X \ge a] \le \mathbb E[X]/a$.
+
+On its own, Markov's inequality is rarely useful, because it ignores how spread out the quantity is. What makes it useful is that you can apply it to other quantities built from $X$, and the first of these is the squared distance from the mean. Write $\mu$ for the mean of $X$ and $\sigma^2$ for its variance, the average squared distance from $\mu$. A squared distance is never negative, so Markov's inequality applies to it, with $\sigma^2$ as the average. Now pick a distance $t$. Being at least $t$ from the mean is the same as having a squared distance of at least $t^2$, so the chance of it is at most $\sigma^2/t^2$. This is **Chebyshev's inequality**:
 $$\Pr[|X - \mu| \ge t] \le \frac{\sigma^2}{t^2}.$$
-Setting the right side to $\beta$ and solving gives the width $\sigma/\sqrt\beta$. For a mean of $n$ independent samples the variance is $\sigma^2/n$, so the width is $\sigma/\sqrt{n\beta}$.
 
-Chebyshev must hold for every distribution with that variance, including ones that hide their spread in a rare, far-off spike, so it shrinks slowly as $\beta$ falls. @tbl-width-price compares its width with the width under a normal-shaped tail, $\sigma\sqrt{2\ln(1/\beta)}$. For Laplace noise with $b = 1$, Chebyshev gives a 95% width of about 6.3, while the exact tail gives $\ln 20 \approx 3.0$; at $\beta = 10^{-6}$ the two are 1,414 and 13.8, so ignoring the noise's shape costs a factor of 100.
+To turn the bound into an interval, set the right side equal to $\beta$ and solve for $t$, which gives $t = \sigma/\sqrt\beta$. So with probability at least $1 - \beta$, the quantity lies within $\sigma/\sqrt\beta$ of its mean. The same works for an average of $n$ independent samples. Averaging divides the variance by $n$, so the width becomes $\sigma/\sqrt{n\beta}$.
 
-| $\beta$ | Chebyshev, $1/\sqrt\beta$ | Normal-shaped tail, $\sqrt{2\ln(1/\beta)}$ |
+Chebyshev's bound is weak because it must hold for every distribution with the given variance. Some of those distributions hide their spread in a rare spike far from the mean. To cover them, the width has to grow like $1/\sqrt\beta$ as the failure probability falls. Most noise is better behaved. Its **tail**, the chance of landing far from the centre, falls off quickly. For a quantity whose tail falls off like a normal distribution's, the width is only $\sigma\sqrt{2\ln(1/\beta)}$, and the next section shows where this comes from. @tbl-width-price compares the two widths.
+
+| Failure probability $\beta$ | Chebyshev, $1/\sqrt\beta$ | Normal-shaped tail, $\sqrt{2\ln(1/\beta)}$ |
 | --- | --- | --- |
 | $0.05$ | 4.5 | 2.4 |
 | $10^{-3}$ | 31.6 | 3.7 |
 | $10^{-6}$ | 1,000 | 5.3 |
 
-: Width needed to fail with probability at most $\beta$, in units of $\sigma$. {#tbl-width-price}
+: Width needed to fail with probability at most $\beta$, in standard deviations. {#tbl-width-price}
+
+At a failure probability of 5%, Chebyshev needs 4.5 standard deviations. The normal-shaped tail needs 2.4, about half as many. At one in a million the gap is enormous: Chebyshev needs 1,000 standard deviations, while the normal-shaped tail needs 5.3. So Chebyshev's inequality is fine for a quick 95% error bar, and useless when failures must be very rare.
 
 ## Normal and Laplace noise {#sec-conc-noise}
 
-When you know the noise distribution, read the width off its tail. The Laplace tail is exact, $\Pr[|X| \ge t] = e^{-t/b}$, so setting it to $\beta$ gives $|X| \le b\ln(1/\beta)$ with probability $1 - \beta$. The normal tail has no closed form, but $\Pr[X \ge t] \le \frac12e^{-t^2/(2\sigma^2)}$ for $X \sim \mathcal N(0, \sigma^2)$, which gives the width $\sigma\sqrt{2\ln(1/\beta)}$. The shapes explain the growth rates: a tail like $e^{-t}$ reaches $\beta$ at $t = \ln(1/\beta)$, a tail like $e^{-t^2}$ at its square root.
+When you know the distribution of the noise, you don't need a general inequality. You can read the width directly off the distribution's tail. The two noise distributions this book uses most are the Laplace and the normal distributions ([Probability distributions](01-distributions.md)), both centred at zero.
 
-To keep $k$ draws small at once, ask each to fail with probability $\beta/k$. The **union bound** says the chance that any fails is at most the sum, $\beta$, because adding chances can count an outcome twice but never miss it. Replacing $\beta$ by $\beta/k$ adds $\ln k$ inside the logarithm, so all $k$ normal draws stay below $\sigma\sqrt{2\ln(k/\beta)}$ and all $k$ Laplace draws below $b\ln(k/\beta)$: controlling many things at once is cheap. When each draw rarely fails, double failures are rarer still, so the bound is nearly exact: for the maximum of 100 $\mathrm{Lap}(1)$ draws at $\beta = 0.05$ the width is $\ln(100/0.05) = 7.60$, and in simulation it fails at rate 0.0486 (@fig-laplace-max).
+Laplace noise, written $\mathrm{Lap}(b)$, has a scale $b$ that sets its typical size. Its tail has an exact formula: a draw lands more than $t$ from zero with probability $e^{-t/b}$. Setting this chance equal to $\beta$ and solving for $t$ gives the width. With probability $1 - \beta$, the noise stays within $b\ln(1/\beta)$ of zero.
 
-![Left: the width $b\ln(k/\beta)$ for the maximum of $k$ Laplace draws grows like $\ln k$. Right: the probability that the maximum exceeds it stays at $\beta = 0.05$ for every $k$.](figures/laplace_max.svg){#fig-laplace-max}
+Compare this with Chebyshev's inequality, which uses only the variance of Laplace noise, $2b^2$. For scale 1 and a 95% interval, Chebyshev gives a width of about 6.3. The exact tail gives about 3.0. At a failure probability of one in a million, Chebyshev gives 1,414 and the exact tail gives 13.8. Ignoring the shape of the noise makes the interval a hundred times wider.
 
-A sum of $k$ Laplace draws has a normal-looking bulk, as the central limit theorem (CLT) predicts, but its far tail keeps the Laplace's exponential decay. A valid bound is Gaussian for small deviations and exponential for large ones:
+Normal noise with standard deviation $\sigma$ has no simple formula for its tail, but a simple bound on it is enough to compute the width. A draw lands more than $t$ from zero with probability at most $e^{-t^2/(2\sigma^2)}$. Solving for $t$ in the same way gives the width $\sigma\sqrt{2\ln(1/\beta)}$ from @tbl-width-price.
+
+The shapes of the two tails explain why the widths grow at different rates. The Laplace tail falls like $e^{-t}$, so its width grows like $\ln(1/\beta)$. The normal tail falls like $e^{-t^2}$, so it is the squared width that grows like $\ln(1/\beta)$. The width itself grows like the square root of the logarithm, which is why it grows so slowly.
+
+Sometimes you add noisy values together, for example to compute a total from several noisy counts. Write $S$ for the sum of $k$ independent Laplace draws with scale $b$. Near its centre the sum looks like a normal distribution, as the central limit theorem (CLT) predicts. Far from the centre, though, its tail keeps the slow decay of a single Laplace draw, like $e^{-t}$ rather than $e^{-t^2}$. A bound that is valid everywhere has to describe both regions:
 $$\Pr[S \ge t] \le \exp\Big(-\min\Big(\frac{t^2}{8kb^2}, \frac{t}{4b}\Big)\Big).$$
-For $k = 10$ and $b = 1$, the normal approximation puts $\Pr[S \ge 20]$ at $3.9\times10^{-6}$; simulation gives $3.4\times10^{-5}$, nine times more (@fig-laplace-sum). When the answer must be a guarantee, use a bound, not the CLT.
+The constants come from the derivation in the full edition. What matters here is the shape. Up to $t = 2kb$, where the two terms inside the minimum are equal, the first term is the smaller one, and the bound has the normal shape. Beyond that point the second term takes over, and the bound falls only like $e^{-t}$, as a Laplace tail does.
 
-![Empirical tail of a sum of 10 $\mathrm{Lap}(1)$ draws, against the sub-exponential bound and the normal approximation, which badly underestimates the far tail.](figures/laplace_sum.svg){#fig-laplace-sum}
+The difference matters whenever you need a guarantee. Take 10 draws with scale 1, and approximate their sum by a normal distribution with the same mean and variance. That approximation says the sum reaches 20 with probability $3.9\times10^{-6}$. Simulation gives $3.4\times10^{-5}$, about nine times more (@fig-laplace-sum). A system that trusted the approximation would fail nine times as often as it promised. The bound above gives $6.7\times10^{-3}$ at the same point. It is far from the truth, but it is never below it. When the answer must be a guarantee, use a bound, not the CLT.
+
+![Empirical tail of a sum of 10 $\mathrm{Lap}(1)$ draws, against the bound above and the normal approximation, which badly underestimates the far tail.](figures/laplace_sum.svg){#fig-laplace-sum}
+
+## Many quantities at once: the union bound {#sec-conc-union}
+
+Often you need many random quantities to stay close to their targets at the same time. A system might release $k$ noisy counts and need every one of them to be accurate. The **union bound** handles this. It says that the chance that at least one of several events happens is at most the sum of their separate chances. The sum can overcount, because an outcome in which two events happen is counted twice, but it never misses an outcome. So if you want all $k$ counts to be accurate except with probability $\beta$, ask each one to fail with probability at most $\beta/k$.
+
+Dividing the failure probability by $k$ adds only $\ln k$ to the logarithm in each width, since $\ln(k/\beta) = \ln k + \ln(1/\beta)$. All $k$ Laplace draws then stay within $b\ln(k/\beta)$ of zero, and all $k$ normal draws within $\sigma\sqrt{2\ln(k/\beta)}$. Because the number of quantities enters only through a logarithm, controlling many of them at once is cheap.
+
+The union bound looks crude, but for rare, independent failures it is nearly exact. When the failures are independent and each is rare, two at once are rarer still, so the double counting adds almost nothing. For an example, take 100 Laplace draws with scale 1, and look at the one furthest from zero. With a failure probability of 0.05, the union bound gives the width $\ln(100/0.05) = 7.60$. In simulation, the draw furthest from zero lands beyond 7.60 in 4.86% of runs. That is just under the 5% the bound allows (@fig-laplace-max). The bound is far less exact when the failures are correlated. If all $k$ events were the same event, the sum would count it $k$ times.
+
+![Left: the width $b\ln(k/\beta)$ for the draw furthest from zero among $k$ Laplace draws grows like $\ln k$. Right: the simulated probability that this draw lands beyond the width stays near $\beta = 0.05$ for every $k$.](figures/laplace_max.svg){#fig-laplace-max}
 
 ## Counts: the Chernoff bound {#sec-conc-chernoff}
 
-A count has no simple exact tail, so apply Markov to $e^{\lambda X}$ instead of $X$ and choose the best $\lambda$. The average of $e^{\lambda X}$ contains every moment of $X$, and for independent terms it is a product of one factor per term, so the bound shrinks exponentially as terms are added. For a sum $S$ of independent yes/no variables with mean $\mu$,
-$$\Pr[S \ge (1+\delta)\mu] \le \exp\Big(-\frac{\delta^2\mu}{2+\delta}\Big), \qquad \Pr[S \le (1-\delta)\mu] \le \exp\Big(-\frac{\delta^2\mu}{2}\Big),$$
-the second for $0 < \delta < 1$.
+Many quantities in machine learning are counts: errors on a test set, examples in a sampled minibatch, records that match a query. A count adds up many independent yes-or-no outcomes. Chebyshev's bound for it is far too loose when you need a very small failure probability. The **Chernoff bound** gives a bound on its tail that falls exponentially, using one more idea.
 
-The exponent contains the expected count $\mu$, not the number of trials, because the bound keeps each trial's probability and so knows that the count's variance is only about $\mu$. Rare events concentrate only once you expect many: a million trials at $p = 10^{-6}$ expect one event and do not concentrate at all. The tails also differ: for large $\delta$ the upper exponent behaves like $\delta\mu$, not $\delta^2\mu$, since a count can overshoot its mean far more easily than undershoot it.
+The idea is to apply Markov's inequality to $e^{\lambda X}$ instead of to $X$ itself, where $\lambda$ is a positive number you are free to choose. The exponential keeps the order of values, so $X$ is at least $t$ exactly when $e^{\lambda X}$ is at least $e^{\lambda t}$. Markov's inequality then gives
+$$\Pr[X \ge t] \le \frac{\mathbb E[e^{\lambda X}]}{e^{\lambda t}}.$$
+The exponential turns a modest gap between $X$ and $t$ into a huge gap between $e^{\lambda X}$ and $e^{\lambda t}$. The threshold on the bottom of the fraction is then far above the typical values on top, so the bound becomes small. The bound holds for every positive $\lambda$, and you pick the one that makes it smallest. For a count, the average on top, $\mathbb E[e^{\lambda X}]$, is also easy to compute. The exponential of a sum is a product of exponentials, and for independent outcomes the average of that product is the product of the averages, one factor per outcome.
 
-Each of 60,000 examples joins a minibatch independently with probability 0.01, so $\mu = 600$. The batch is more than 20% too large with probability at most $e^{-10.9} \approx 1.8\times10^{-5}$, and more than 20% too small with probability at most $e^{-12} \approx 6.1\times10^{-6}$. Over 1,000 steps the union bound gives about 0.024 for any batch leaving $600 \pm 20\%$.
+Carrying out this calculation for a count $S$ gives a bound in terms of two numbers. The first is the expected count, written $\mu$. The second is the relative deviation you ask about, written $\delta$, so that $\delta = 0.2$ means 20% above or below $\mu$. The two Chernoff bounds are
+$$\Pr[S \ge (1+\delta)\mu] \le \exp\Big(-\frac{\delta^2\mu}{2+\delta}\Big), \qquad \Pr[S \le (1-\delta)\mu] \le \exp\Big(-\frac{\delta^2\mu}{2}\Big).$$
+The first bounds the chance that the count overshoots its mean by the fraction $\delta$. The second bounds the chance that it undershoots, and holds for $\delta$ between 0 and 1. For small $\delta$, setting either bound to $\beta$ gives a one-sided width of about $\sqrt{2\mu\ln(1/\beta)}$.
+
+The exponent contains the expected count $\mu$, not the number of trials. This has a cost and a benefit. The cost is that a count of rare events has a small error relative to its mean only once you expect many of them. A million trials that each succeed with probability one in a million expect a single success. The count is far from concentrated: no success at all and two successes are both common outcomes.
+
+The benefit is that the calculation works with each outcome's own probability before adding them up into $\mu$. An outcome that is a yes with probability $p$ has variance $p(1-p)$. When $p$ is small, that is about $p$. The variance of a count is the sum of its outcomes' variances, so a count of rare events has a variance of about $\mu$. The Chernoff bound adapts to that small variance. A bound that knew only that each outcome is 0 or 1 would have to assume the largest variance such an outcome can have, which is 0.25. The next section shows how much that costs.
+
+The overshoot and undershoot bounds also differ. For large $\delta$, the exponent of the overshoot bound grows like $\delta\mu$ rather than $\delta^2\mu$, so the overshoot bound falls more slowly. Counts have long right tails, like the Poisson distribution, so a count can overshoot its mean by a lot far more easily than it can undershoot it.
+
+Here is how the bound is used in practice. A training loop forms each minibatch by including each of 60,000 examples independently with probability 0.01. The batch size is a count with expected value $\mu = 600$. If your code or your analysis assumes a batch size near 600, you need to know how often that assumption fails. With $\delta = 0.2$, the overshoot bound says a batch is more than 20% too large with probability at most $1.8\times10^{-5}$. The undershoot bound gives $6.1\times10^{-6}$ for a batch more than 20% too small. Adding the two, a single batch leaves the range $600 \pm 20\%$ with probability about $2.4\times10^{-5}$. Over 1,000 training steps, the union bound multiplies this by 1,000. So the chance that any batch leaves the range is about 0.024.
 
 ## Averages of bounded quantities: Hoeffding and Bernstein {#sec-conc-hoeffding}
 
-A variable confined to an interval $[a, b]$ cannot have a heavy tail, and the most spread out it can be is a fair coin on the two endpoints, with variance $(b - a)^2/4$. **Hoeffding's inequality** says that an average of $n$ such variables concentrates at least as well as that worst case: with probability at least $1 - \beta$,
-$$|\bar X_n - \mu| < (b - a)\sqrt{\frac{\ln(2/\beta)}{2n}}.$$
-For a finite set $H$ of models with losses in $[0, 1]$, the union bound puts $\ln|H|$ inside the logarithm: every model's training error is within $\sqrt{\ln(2|H|/\beta)/(2n)}$ of its true error.
+Often you know neither the distribution nor the variance, only the range. A loss clipped to lie between 0 and 1 is an example, and so is a 0/1 indicator of a mistake. Knowing the range already tells you a lot. A quantity confined to an interval cannot have a heavy tail, one that reaches far out with sizable probability, because it cannot go past the ends at all. Its variance cannot be large either. The most spread-out quantity on an interval puts half its probability on each end, like a fair coin. Its variance is a quarter of the squared length of the interval.
 
-Assuming the worst-case variance is also its weakness, serious for small rates. A classifier makes 1 false positive on 1,000 negatives, and you want a 95% upper bound on its true rate. One-sided Hoeffding adds about 0.039, some 40 times the measured rate, because it assumes a variance of 0.25 when the true one is about 0.001. **Bernstein's inequality** keeps the variance $\sigma^2$: for $|X_i - \mu| \le M$ its width is about $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)$, driven by the variance except far out. With the variance estimated as 0.001 it adds about 0.0045. That is a heuristic, since the variance came from the same data. The exact binomial (Clopper–Pearson) upper bound on the rate itself is 0.0047, and [Hypothesis testing](04-hypothesis-testing.md) shows how to compute it. For the mean of 200 Bernoulli(0.1) variables reaching 0.15, Hoeffding gives 0.37, losing even to Chebyshev's 0.18; Chernoff gives 0.135 (@fig-bernoulli-tails).
+**Hoeffding's inequality** turns this into a width for an average. Take $n$ independent quantities, each in the same interval from $a$ to $b$. Write $\bar X_n$ for their average and $\mu$ for its expected value. Hoeffding's inequality says that the average has a normal-shaped tail, as if each quantity had the largest variance its range allows. With probability at least $1-\beta$,
+$$|\bar X_n - \mu| < (b - a)\sqrt{\frac{\ln(2/\beta)}{2n}}.$$
+The 2 inside the logarithm appears because the interval has two sides, and each side is allowed half the failure probability. The width shrinks like $1/\sqrt n$ as you add samples. As you lower the failure probability, it grows only like the square root of a logarithm, as for normal noise.
+
+The most common use is to compare a model's error on its training data with its **true error**, its average loss on new data from the same source. For one fixed model, the training error is an average of $n$ losses between 0 and 1, so Hoeffding's inequality applies directly. A learner, however, picks its model after seeing the data. The model it picks is the one that looks best on the training data, which makes it the one whose training error is most likely to be too optimistic. So the bound must hold for every model the learner might pick.
+
+Suppose the candidates form a finite set $H$, and write $|H|$ for their number. The union bound puts an extra $\ln|H|$ inside the logarithm. With probability at least $1-\beta$, every candidate's training error is then within $\sqrt{\ln(2|H|/\beta)/(2n)}$ of its true error. The number of candidates enters only through its logarithm, so even a huge set of them costs little.
+
+Knowing only the range is Hoeffding's strength, since there is nothing to estimate. It is also its weakness, because the inequality assumes the largest variance that the range allows. A 0/1 quantity that is rarely 1 has a much smaller variance than that. The gap is widest exactly when you measure small rates, such as a false-positive rate.
+
+Suppose a classifier makes 1 false positive on 1,000 negative examples, and you want a 95% upper bound on its true false-positive rate. An upper bound needs only one side of the interval, so it uses $\ln(1/\beta)$ in place of $\ln(2/\beta)$. With $n = 1{,}000$, this one-sided Hoeffding bound adds about 0.039 to the measured rate. The added width alone is about 40 times the rate you measured. The cause is the variance Hoeffding's inequality assumes: 0.25, the variance of a fair coin. A single 0/1 outcome that is 1 with probability near 0.001 has a variance of only about 0.001.
+
+**Bernstein's inequality** fixes this by using the variance. Write $\sigma^2$ for the variance of each quantity, and $M$ for the largest distance it can be from its mean. Then the one-sided width is about
+$$\sqrt{\frac{2\sigma^2\ln(1/\beta)}{n}} + \frac{2M\ln(1/\beta)}{3n}.$$
+The first term is the normal-shaped width, computed with the true variance. The second term pays for the range, but it shrinks like $1/n$ instead of $1/\sqrt n$. For the classifier, take $M = 1$ and estimate the variance as 0.001. Bernstein's inequality then adds about 0.0045, against Hoeffding's 0.039. This calculation is only a heuristic, because the variance was estimated from the same data. A rigorous version, empirical Bernstein, gives a wider interval.
+
+The exact answer comes from the binomial distribution itself, through the Clopper–Pearson interval. Its one-sided 95% upper bound on the rate is 0.0047, a little below the measured rate plus Bernstein's 0.0045. The same number is the upper end of a two-sided 90% interval, which is how [Hypothesis testing](04-hypothesis-testing.md) computes it.
+
+@fig-bernoulli-tails shows the cost of ignoring the variance on a second example. It averages 200 yes-or-no outcomes (Bernoulli variables), each a yes with probability 0.1. The question is how likely the average is to reach 0.15. Hoeffding's inequality bounds that chance by 0.37. Chebyshev's inequality, which uses the variance, does better here with 0.18. At this moderate deviation, Chebyshev's $1/t^2$ has not yet fallen far behind an exponential tail, so knowing the variance counts for more. The Chernoff bound has both, and gets 0.135. Even that is far above the true chance of about $9.6\times10^{-3}$, because a bound must cover every case its assumptions allow.
 
 ![Empirical tail of the mean of 200 Bernoulli(0.1) variables against the Markov, Chebyshev, Hoeffding and Chernoff bounds.](figures/bernoulli_tails.svg){#fig-bernoulli-tails}
 
 ## Functions of many inputs: McDiarmid and Azuma {#sec-conc-mcdiarmid}
 
-A trained model's risk is a function of its data, not a sum, and in a sequential procedure each step can depend on the ones before. Concentration survives both if no single input or step can move the result much. **Azuma's inequality** covers a running total whose steps have mean zero given the past and lie in intervals of lengths $d_k$, with a bound of Hoeffding's form, $\exp(-2t^2/\sum_kd_k^2)$. **McDiarmid's inequality** follows by revealing a function's inputs one at a time and tracking your best guess of the result: if the inputs are independent and changing only $X_i$ moves $f$ by at most $c_i$, each revealed input moves the guess by at most $c_i$, and
-$$\Pr[f(X) - \mathbb E f(X) \ge t] \le \exp\Big(-\frac{2t^2}{\sum_ic_i^2}\Big).$$
-For an empirical risk with losses in $[0, 1]$, one example moves the average by at most $1/n$, so McDiarmid gives $\exp(-2nt^2)$, Hoeffding again. Its real use is for functions that are not sums, such as the risk of a retrained model ([Algorithmic stability and generalization](07-stability-generalization.md)). The per-record influence $c_i$ must hold for every possible change of $X_i$, since the argument charges each input its largest possible move.
+So far, every quantity was a sum of independent pieces. Two common situations break this. A trained model's error is a complicated function of its training data, not a sum. And in a sequential procedure, each step can depend on what happened before, so the pieces are not independent. Concentration still holds in both situations, provided that no single input or step can move the result by much.
 
-Like Hoeffding, both pay for the worst-case variance. Flip 200 times, choosing before each flip a coin with heads probability 0.3 or 0.7 from the previous flip: the drift of heads from what the chosen coins predict is a running total with steps of length 1. Azuma bounds a drift of 20 by $1.83\times10^{-2}$; simulation gives $1.12\times10^{-3}$, because each step's real variance is 0.21, not the 0.25 the interval allows.
+Start with a function $f$ of independent inputs $X_1, \dots, X_n$, and write $X$ for all of them together. Suppose that changing only the $i$-th input, with the others held fixed, moves the result by at most an amount $c_i$. **McDiarmid's inequality** says that the result then concentrates around its average as tightly as a sum of pieces with ranges $c_i$ would:
+$$\Pr[f(X) - \mathbb E f(X) \ge t] \le \exp\Big(-\frac{2t^2}{\sum_ic_i^2}\Big).$$
+
+The reason is easiest to see if you reveal the inputs one at a time and keep a running best guess of the result. Before you see any input, the best guess is the average result. After you see the first input, it is the average over the inputs you have not seen yet, with the first one fixed. Each revealed input updates the guess in this way, and after the last one the guess is the result itself. So the deviation you want to bound is the sum of $n$ updates.
+
+Two facts about these updates make the sum concentrate. First, an update is zero on average. Before you see an input, you cannot predict which way it will move your guess, or that prediction would already be part of the guess. Second, the $i$-th update is small. Changing the $i$-th input moves the result by at most $c_i$, so it moves the guess by at most $c_i$ too. The updates are not independent, since each one depends on the inputs before it. The next paragraphs explain why the two facts are enough anyway.
+
+For the training error of a fixed model, with losses between 0 and 1, changing one example moves the average by at most $1/n$. With $c_i = 1/n$ for every input, McDiarmid's inequality gives back Hoeffding's bound. Its real use is for functions that are not averages, such as the error of a model retrained on the data, and [Algorithmic stability and generalization](07-stability-generalization.md) uses it that way. The amount $c_i$ must hold for every possible change to the $i$-th input, not just for typical ones, because the argument charges each input its largest possible move. This per-record influence returns in later parts under the name sensitivity.
+
+Hoeffding's inequality was stated for independent pieces, but its conclusion needs less. It is enough that each piece averages zero given everything before it, and lies in a short interval. A running total whose steps average zero given the past is called a **martingale**. **Azuma's inequality** bounds how far it drifts. Suppose the $k$-th step always lies in an interval of length $d_k$. Then the total drifts upward by $t$ or more with probability at most $\exp(-2t^2/\sum_kd_k^2)$. This is McDiarmid's bound, with the step lengths $d_k$ in place of the influences $c_i$.
+
+Azuma's inequality covers procedures that adapt as they go. Flip a coin 200 times. If the previous flip was heads, flip a coin that lands heads with probability 0.7. Otherwise, including for the first flip, use a coin that lands heads with probability 0.3. The flips depend on each other, so Hoeffding's inequality does not apply. What you can bound is the drift. Count the heads, and subtract the number of heads you would expect from the coins you chose. Each step of the drift is the flip's outcome, 1 or 0, minus the chosen coin's probability of heads. Given the past, it averages zero and lies in an interval of length 1. Azuma's inequality bounds the chance of an upward drift of 20 or more by $1.83\times10^{-2}$. Simulation gives $1.12\times10^{-3}$ (@fig-azuma-adaptive).
+
+![Empirical tail of the drift in the adaptive coin game against the Azuma bound.](figures/azuma_adaptive.svg){#fig-azuma-adaptive}
+
+The bound is loose partly for the same reason as Hoeffding's. It assumes that each step has the largest variance its interval allows, which is 0.25. The true variance of each step is 0.21 for either coin, since $0.7 \times 0.3 = 0.3 \times 0.7$.
 
 ## Cheat sheet
 
-| Bound | Assumption | Width at failure probability $\beta$ |
+| Bound | What you need to know | Width at failure probability $\beta$ (Markov: a threshold) |
 | --- | --- | --- |
-| Markov | $X \ge 0$, mean $\mu$ | $\mu/\beta$ |
+| Markov | $X \ge 0$, mean $\mu$ | Threshold $\mu/\beta$ |
 | Chebyshev | Variance $\sigma^2$ | $\sigma/\sqrt\beta$ (two-sided) |
-| Normal $\mathcal N(0, \sigma^2)$ | — | $\sigma\sqrt{2\ln(1/\beta)}$; $k$ draws: $\sigma\sqrt{2\ln(k/\beta)}$ |
-| Laplace $\mathrm{Lap}(b)$ | — | $b\ln(1/\beta)$; $k$ draws: $b\ln(k/\beta)$ |
-| Chernoff | Sum of independent Bernoullis, mean $\mu$ | $\approx\sqrt{2\mu\ln(1/\beta)}$ for small deviations |
-| Hoeffding | Mean of $n$ independent variables in $[a, b]$ | $(b-a)\sqrt{\ln(1/\beta)/(2n)}$ (one-sided) |
-| McDiarmid, Azuma | Bounded differences $c_i$ or step lengths $d_i$ | $\sqrt{\sum_i c_i^2\ln(1/\beta)/2}$ |
+| Normal noise $\mathcal N(0, \sigma^2)$ | The distribution | $\sigma\sqrt{2\ln(1/\beta)}$ (two-sided); $k$ draws: $\sigma\sqrt{2\ln(k/\beta)}$ |
+| Laplace noise $\mathrm{Lap}(b)$ | The distribution | $b\ln(1/\beta)$ (two-sided); $k$ draws: $b\ln(k/\beta)$ |
+| Chernoff | A count of independent outcomes, mean $\mu$ | $\approx\sqrt{2\mu\ln(1/\beta)}$ for small deviations (one-sided) |
+| Hoeffding | An average of $n$ independent values in $[a, b]$ | $(b-a)\sqrt{\ln(1/\beta)/(2n)}$ (one-sided) |
+| Bernstein | An average of $n$ independent values with variance $\sigma^2$ and largest deviation $M$ | $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)$ (one-sided) |
+| McDiarmid, Azuma | Influences $c_i$, or step lengths $d_k$ | $\sqrt{\sum_i c_i^2\ln(1/\beta)/2}$, with $d_k$ in place of $c_i$ for Azuma (one-sided) |
 
-: The widths of this chapter's bounds. {#tbl-concentration-cheat-sheet}
+: The widths of this chapter's bounds. Rows marked two-sided already cover both sides. To make a one-sided width two-sided, replace $\beta$ by $\beta/2$. {#tbl-concentration-cheat-sheet}
 
 **Rules of thumb**
 
-- Variance-only widths cost $1/\sqrt\beta$, normal-shaped tails $\sqrt{\ln(1/\beta)}$, exponential tails $\ln(1/\beta)$.
-- Controlling $k$ quantities at once adds $\ln k$ inside the logarithm.
+- If you know only the variance, the width grows like $1/\sqrt\beta$. With a normal-shaped tail it grows like $\sqrt{\ln(1/\beta)}$, and with a Laplace-shaped tail like $\ln(1/\beta)$.
+- To control $k$ quantities at once, add $\ln k$ inside the logarithm.
 - If the variance is far below what the range allows, use Chernoff, Bernstein or an exact interval, not Hoeffding.
 
 ## Further reading
 
 - Mitzenmacher & Upfal, *Probability and Computing*, ch. 4: the clearest Chernoff chapter, with computer-science examples.
 - Vershynin, *High-Dimensional Probability* (2018), ch. 2: sub-Gaussian and sub-exponential variables in depth.
-- Boucheron, Lugosi & Massart, *Concentration Inequalities* (2013), ch. 2 and 6: reference depth, including Bernstein's inequality.
+- Boucheron, Lugosi & Massart, *Concentration Inequalities* (2013), ch. 2 and 6: reference depth, including the derivation of Bernstein's inequality.
 
-**Derivations.** Every result in this chapter is derived step by step in [the full edition's chapter](../../book-full/part01-prerequisites/02-concentration.md).
+**Derivations.** Every result in this chapter except Bernstein's inequality is derived step by step in [the full edition's chapter](../../book-full/part01-prerequisites/02-concentration.md).

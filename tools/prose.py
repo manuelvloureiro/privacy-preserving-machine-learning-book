@@ -66,7 +66,8 @@ def prose_blocks(raw: str) -> list[tuple[str, str]]:
     raw = re.sub(r"\A---\n.*?\n---\n", "", raw, flags=re.DOTALL)
     raw = re.sub(r"<!--.*?-->", "", raw, flags=re.DOTALL)
     raw = re.sub(r"^(```|~~~).*?^\1\s*$", "", raw, flags=re.DOTALL | re.MULTILINE)
-    raw = DISPLAY.sub(" ⟦display⟧ ", raw)
+    # A display that ends with a full stop ends its sentence: keep the stop so the sentences don't merge.
+    raw = DISPLAY.sub(lambda m: " ⟦display⟧. " if re.search(r"[.]\s*\$\$", m.group(0)) else " ⟦display⟧ ", raw)
     blocks: list[tuple[str, str]] = []
     section, lines = "", list[str]()
 
@@ -281,7 +282,9 @@ def symbols_in(formula: str) -> list[str]:
 
 def numbers_in(sentence: Sentence) -> int:
     prose = re.sub(r"⟦\d+⟧", " ", sentence.text)
-    count = len(re.findall(r"(?<![\w.])\d[\d,.]*\d?%?(?![\w])", prose))
+    # 0 and 1 read as words ("between 0 and 1", "a 0/1 indicator"), not as figures to hold in mind.
+    found = re.findall(r"(?<![\w.])\d[\d,.]*\d?%?(?![\w])", prose)
+    count = sum(1 for n in found if n not in {"0", "1"})
     for formula in sentence.math:
         if re.search(r"\d", re.sub(r"_\{[^}]*\}|_\w|\^\{?\d\}?", "", formula)):
             count += 1
@@ -399,10 +402,20 @@ def check_sentence(s: Sentence, limits: dict[str, Any], seen_symbols: set[str]) 
                 continue
             seen_symbols.add(sym)
             new += 1
-            if not introduced(s.text, s.ids[i], formula):
+            if not introduced(s.text, s.ids[i], formula) and not named_later(s, i, sym):
                 s.flags.append(f"new symbol {sym} not explained in words where it first appears")
     if new > limits["max_new_symbols_per_sentence"]:
         s.flags.append(f"{new} new symbols in one sentence (limit {limits['max_new_symbols_per_sentence']})")
+
+
+def named_later(s: Sentence, first: int, sym: str) -> bool:
+    """Is the symbol named on its own later in the same sentence ("apply it to $e^{\\lambda X}$, where
+    $\\lambda$ is a number you choose")?"""
+    return any(
+        symbols_in(formula) == [sym] and introduced(s.text, s.ids[j], formula)
+        for j, formula in enumerate(s.math)
+        if j > first
+    )
 
 
 def introduced(text: str, index: int, formula: str) -> bool:
@@ -427,7 +440,8 @@ def introduced(text: str, index: int, formula: str) -> bool:
     ):
         return True
     if re.match(
-        r"^\s*(,\s*(the|a|an|which|where)\b|\(|(is|are) (the|a|an)\b|denotes|stands for|for the\b)", near_after
+        r"^\s*(,\s*(the|a|an|which|where)\b|\(|(is|are) (the|a|an)\b|denotes|stands for|for (the|its|their|a|an)\b)",
+        near_after,
     ):
         return True
     single = re.fullmatch(r"\s*\\?[A-Za-z]+(\s*[_^]\s*(\{[^}]*\}|\w))*\s*", formula) is not None
