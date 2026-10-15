@@ -24,7 +24,9 @@ Rules (PROSE.md explains each, with its source):
 5. **Few new things at once.** At most three new concepts (terms, symbols, acronyms) per paragraph.
    Introduce a concept before the result that uses it, and an example before a generalization when you can.
 6. **Explain, don't list.** Every result comes with the reason it holds, in words. A paragraph that
-   states facts without reasons is a failure even if each fact is right.
+   states facts without reasons is a failure even if each fact is right. Every condition a result needs
+   is named as a condition ("it applies only to quantities that cannot be negative"), never stated as a
+   fact about the quantity, and the text says why the result needs it.
 7. **No compression.** Don't drop articles, verbs or connectives to save words. Don't chain clauses
    with colons and semicolons. Don't open with a list that a colon then gathers up. If the page is too
    long, cut a topic, not the words that make a sentence readable.

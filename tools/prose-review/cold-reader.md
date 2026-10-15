@@ -20,7 +20,9 @@ Read the page below once, from the top, the way that reader would. For **every p
    - **overload**: too many new things at once to hold in mind;
    - **ambiguous**: a pronoun, "this", or a phrase whose referent is unclear;
    - **unmotivated**: a result or formula that appears without saying what question it answers;
-   - **garbled**: grammar or word order that makes the sentence hard to parse.
+   - **garbled**: grammar or word order that makes the sentence hard to parse;
+   - **unstated assumption**: a condition a result needs (non-negative, independent, bounded, fixed in
+     advance) stated as if it were a fact about the world, or without saying why the result needs it.
 3. Say whether the paragraph follows from the one before it (yes / weakly / no).
 
 Do not judge whether the content is correct, and do not suggest rewrites. Be literal: if you

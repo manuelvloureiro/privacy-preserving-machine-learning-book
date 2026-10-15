@@ -47,6 +47,19 @@ APPROVED = [
     ),
 ]
 
+# Rejected passages that pass every mechanical check: only the cold-reader and editorial reviews can
+# catch them. Each comes with the words the review prompts must keep using to name the failure.
+REVIEW_ONLY = [
+    (
+        (
+            "Start with the weakest thing you could know about a quantity: it is never negative, and you know its "
+            "average."
+        ),
+        "unstated assumption",
+    ),
+]
+PROMPTS = ROOT / "tools" / "prose-review"
+
 
 def flagged(text: str) -> list[str]:
     out = subprocess.run(
@@ -87,3 +100,9 @@ def test_full_edition_reference_chapter_passes() -> None:
         check=False,
     )
     assert out.returncode == 0, out.stdout
+
+
+def test_review_prompts_name_the_failures_the_analyzer_misses() -> None:
+    prompts = (PROMPTS / "cold-reader.md").read_text() + (PROMPTS / "editor.md").read_text()
+    for text, failure in REVIEW_ONLY:
+        assert failure in prompts, text[:60]

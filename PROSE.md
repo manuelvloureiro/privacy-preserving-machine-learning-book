@@ -24,7 +24,7 @@ These are the rules the checks and the reviews apply. Each comes from a standard
 3. **Characters as subjects, actions as verbs.** Write "the mechanism adds noise", not "the addition of noise is performed". Avoid stacks of nominalizations (words ending in *-tion*, *-ment*, *-ness*), and get to the main verb quickly instead of opening with a long clause (Williams & Bizup, *Style: Lessons in Clarity and Grace*).
 4. **Words before symbols.** Explain every symbol in words where it first appears. Never start a sentence with a formula. Use only the formulas and numbers the sentence needs (Halmos, "How to Write Mathematics": "resist symbols"; Bertsekas, "Ten Simple Rules for Mathematical Writing").
 5. **Few new things at once.** Introduce at most three new concepts (terms, symbols, acronyms) per paragraph, and a concept before the result that uses it. Give an example before a generalization when you can.
-6. **Explain, don't list.** Every result comes with the reason it holds, in words.
+6. **Explain, don't list.** Every result comes with the reason it holds, in words. Every condition a result needs (the quantity cannot be negative, the samples are independent, the values are bounded) is named as a condition, never stated as a fact about the quantity, and the text says what goes wrong without it.
 7. **No compression.** Don't drop articles, verbs or connectives to save words. Don't chain clauses with colons and semicolons. Don't open with a list that a colon then gathers up.
 8. **Plain words.** Prefer the common word, define jargon once, and keep terms consistent across the book.
 
@@ -35,6 +35,14 @@ An example of rules 1, 4 and 7 at work, from the concentration chapter:
 > **Approved.** Almost every number in a private system is random. The noise added to a count is random by design. An error rate measured on a test set depends on which examples happened to be in it. [...] A concentration inequality tells you how wide to make an interval around your estimate so that the true value falls outside it only rarely, say once in a thousand runs.
 
 The rejected sentence opens with a list that a colon gathers up, puts three claims in one sentence, and uses $\beta$ before saying what it is. The approved version gives each example its own sentence and states the question in words.
+
+Some failures are invisible to the analyzer, and only a reader catches them. An example of rule 6, from the same chapter:
+
+> **Rejected.** Start with the weakest thing you could know about a quantity: it is never negative, and you know its average.
+>
+> **Approved.** Every bound in this chapter starts from Markov's inequality. It applies only to quantities that cannot be negative, such as a waiting time, a count or a squared error. [...] A quantity that can be negative can balance a large value with negative ones, and then its average says nothing about how often it is large.
+
+The rejected sentence passes every mechanical check. But it states a condition of the result as if it were a fact about all quantities, and never says why the result needs it. Passages like this are kept in `REVIEW_ONLY` in [tests/test_prose.py](tests/test_prose.py), and the test checks that the review prompts still name the failure they illustrate.
 
 ## The process
 
