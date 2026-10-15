@@ -30,7 +30,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
 
 .DEFAULT_GOAL := help
 .PHONY: help setup hooks tex-deps figures figures-force full full-pdf exercises practitioner practitioner-pdf \
-        website pdf book preview terms-check acronyms index-candidates prose prose-check format test typecheck check all clean
+        website pdf book preview publish terms-check acronyms index-candidates prose prose-check format test typecheck check all clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-17s %s\n", $$1, $$2}'
@@ -135,6 +135,27 @@ website: full exercises $(if $(wildcard book-practitioner),practitioner) ## Buil
 pdf: full-pdf $(if $(wildcard book-practitioner),practitioner-pdf) ## Build every PDF into _book/
 
 book: website pdf ## Build every website and PDF
+
+# The site is the contents of $(OUT)/ plus site/, committed to the gh-pages branch from a worktree
+# in $(BUILD)/gh-pages/ and served by GitHub Pages. site/index.html is the landing page, linking to
+# the books and the PDFs; site/.nojekyll stops GitHub from
+# running Jekyll over the site. It publishes whatever is in $(OUT)/, so build first.
+PAGES     := $(BUILD)/gh-pages
+
+publish: ## Publish _book/ to the gh-pages branch for GitHub Pages (run make book first)
+	@test -d $(OUT)/book-full || { echo "Nothing to publish: run make book first"; exit 1; }
+	@rm -rf $(PAGES) && git worktree prune
+	@if git fetch -q origin gh-pages 2>/dev/null; then \
+	  git worktree add -q -B gh-pages $(PAGES) FETCH_HEAD; \
+	else \
+	  git worktree add -q --orphan -b gh-pages $(PAGES); \
+	fi
+	@rsync -a --delete --exclude .git $(OUT)/ site/ $(PAGES)/
+	@git -C $(PAGES) add -A
+	@if git -C $(PAGES) diff --cached --quiet; then echo "The site is up to date"; else \
+	  git -C $(PAGES) commit -q -m "Publish the books from $$(git rev-parse --short HEAD)" && \
+	  git -C $(PAGES) push -q origin gh-pages && echo "Pushed to gh-pages"; fi
+	@git worktree remove --force $(PAGES)
 
 preview: full ## Serve the full edition from its staged copy (rerun after editing book-full/)
 	$(QUARTO) preview $(BUILD)/full-website --profile website

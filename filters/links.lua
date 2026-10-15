@@ -2,15 +2,18 @@
 -- book-exercises/, book-practitioner/) next to code/ and tests/, and a page links to them by
 -- relative path from its source file, so the links also work when browsing the repository.
 --
--- * The websites render to _book/<book>/, mirroring the source tree one level down, and the
---   staged copies sit in _build/<book>-<profile>/. A link out to code/ or tests/ therefore gains
---   one "../", and a link to another book only swaps ".md" for ".html".
+-- * A link to code/ or tests/ points to the file on GitHub, since neither folder is part of the
+--   published site and a relative path leads nowhere from a PDF.
+-- * The websites render to _book/<book>/, mirroring the source tree one level down, so a link to
+--   another book only swaps ".md" for ".html".
 -- * PDF only: a link to another book keeps its text, followed by where to find it: "Exercise 3
 --   shows ..." becomes "Exercise 3 in the exercise book shows ...". A part page (the
 --   00-introduction.md of a partNN-* folder) becomes \part{...}, which Quarto gives no label,
 --   so a link to it keeps its text and loses the link.
 
 local is_pdf = quarto.doc.is_format("latex")
+
+local repository = "https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/"
 
 local where = {
   ["book-full"] = "in the full edition",
@@ -29,7 +32,7 @@ return {
       if ups ~= "" then
         local top = rest:match("^([^/]+)/")
         if top == "code" or top == "tests" then
-          link.target = "../" .. link.target
+          link.target = repository .. rest
           return link
         end
         local book, path, anchor = rest:match("^(book%-[%a]+)/(.-)%.md(#?.*)$")
