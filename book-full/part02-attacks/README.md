@@ -10,7 +10,7 @@ This file is the GitHub overview. It is not part of the rendered book.
 
 | Ch. | Chapter | Covers | Script |
 |-----|---------|--------|--------|
-| 17 | [Threat models and privacy games](01-threat-models.md) | Access, behaviour, trust and side information; attacks as games; advantage, total variation and the trade-off curve; average against worst case | [threat_models.py](../../code/part02-attacks/threat_models.py) |
+| 9 | [Threat models and privacy games](01-threat-models.md) | Access, behaviour, trust and side information; attacks as games; advantage, total variation and the trade-off curve; average against worst case | [threat_models.py](../../code/part02-attacks/threat_models.py) |
 | 10 | [Membership inference](02-membership-inference.md) | The loss attack and the generalization gap; shadow models; LiRA as a Neyman–Pearson test; TPR at low FPR; why outliers are exposed | [membership_inference.py](../../code/part02-attacks/membership_inference.py) |
 | 11 | [Attribute inference and model inversion](03-attribute-inference.md) | The attribute game and its link to membership; the imputation baseline; the MAP inversion attack; confidence masking | [attribute_inference.py](../../code/part02-attacks/attribute_inference.py) |
 | 12 | [Property inference](04-property-inference.md) | The property game; why a property leaks when no record does; meta-classifiers; permutation invariance | [property_inference.py](../../code/part02-attacks/property_inference.py) |
@@ -56,7 +56,7 @@ Each chapter ends with its own references, with what each is good for.
 
 ## Study-plan exercises
 
-Train a CIFAR-10 ResNet, run LiRA with 16 shadow models, and report TPR at 0.1% FPR. [Membership inference](02-membership-inference.md) describes this pipeline step by step and runs a scaled-down version (logistic regression, 64 shadow models) in seconds. Keep the pipeline: Part 5 reuses it to audit private models.
+Train a CIFAR-10 ResNet, run LiRA with 16 shadow models, and report TPR at 0.1% FPR. [Membership inference](02-membership-inference.md) describes this pipeline step by step and runs a scaled-down version (logistic regression, 64 shadow models) in seconds. Keep the pipeline: a planned later part on auditing private models reuses it.
 
 k-anonymize a census extract with ARX, then link it back to a public auxiliary table and measure the re-identification rate. [Syntactic anonymity and how it breaks](08-syntactic-anonymity.md) does this with a Mondrian anonymizer on a synthetic hospital table, then measures what the release reveals about the sensitive attribute and what two releases reveal together.
 

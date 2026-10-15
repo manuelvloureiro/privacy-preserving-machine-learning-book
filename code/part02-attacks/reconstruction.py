@@ -192,9 +192,9 @@ def bad_difference(n: int, beta: float, balanced: bool) -> FloatArray:
     return z
 
 
-def lp_queries_needed(n: int, eta: float, escape: float) -> float:
-    """m with (n+1)^n (1 − escape)^m ≤ η: the union bound over the grid of step 1/n."""
-    return (n * math.log(n + 1) + math.log(1 / eta)) / math.log(1 / (1 - escape))
+def lp_queries_needed(n: int, eta: float, escape: float) -> int:
+    """Smallest whole m with (n+1)^n (1 − escape)^m ≤ η: the union bound over the grid of step 1/n."""
+    return math.ceil((n * math.log(n + 1) + math.log(1 / eta)) / math.log(1 / (1 - escape)))
 
 
 def lp_error_tolerance(n: int, beta: float) -> float:
@@ -302,9 +302,9 @@ def sampling_curator(
     return np.asarray(answers, dtype=np.float64), kept
 
 
-def hoeffding_max_error(n: int, m: int, beta: float, keep: float) -> float:
-    """With probability ≥ 1 − β, all m sampled answers are within √(n ln(2m/β) / (2 keep²)) of the truth."""
-    return math.sqrt(n * math.log(2 * m / beta) / (2 * keep**2))
+def hoeffding_max_error(n: int, m: int, eta: float, keep: float) -> float:
+    """With probability ≥ 1 − η, all m sampled answers are within √(n ln(2m/η) / (2 keep²)) of the truth."""
+    return math.sqrt(n * math.log(2 * m / eta) / (2 * keep**2))
 
 
 def information_min_queries(n: int, beta: float, values: int) -> float:
@@ -548,7 +548,7 @@ def print_table(rng: np.random.Generator) -> None:
         print(f"  {'balanced' if balanced else 'aligned'} z: Pr[|<q,z>| > threshold]={p:.4f}  (bound 0.1875)")
     print(
         f"  LP decoder guarantee at n={n}, beta={beta}: error tolerance E <= {lp_error_tolerance(n, beta):.4f}  "
-        f"queries m >= {lp_queries_needed(n, 0.01, 3 / 16):.0f} ({lp_queries_needed(n, 0.01, 3 / 16) / n:.1f} n)"
+        f"queries m >= {lp_queries_needed(n, 0.01, 3 / 16)} ({lp_queries_needed(n, 0.01, 3 / 16) / n:.1f} n)"
     )
 
     print("== Least squares under Gaussian noise (n = 500, m = 4n) ==")
@@ -579,7 +579,7 @@ def print_table(rng: np.random.Generator) -> None:
     guess = least_squares_decode(a_matrix, answers)
     print(
         f"  kept {int(kept.sum())} of {n}  max error={err:.2f} ({err / math.sqrt(n):.2f} sqrt(n))  "
-        f"Hoeffding bound (beta=0.05)={hoeffding_max_error(n, m, 0.05, 0.5):.2f}  "
+        f"Hoeffding bound (eta=0.05)={hoeffding_max_error(n, m, 0.05, 0.5):.2f}  "
         f"recovered={fraction_agreeing(guess, d):.4f}  ceiling 3/4"
     )
     print(f"  keep=0.9: Hoeffding bound={hoeffding_max_error(n, m, 0.05, 0.9):.2f}  ceiling={0.9 + 0.1 / 2:.2f}")

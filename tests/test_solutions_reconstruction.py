@@ -22,7 +22,7 @@ def test_solutions_reconstruction_matches_page(tmp_path: Path) -> None:
         "width 4: consistent candidates=1  max distance=0  fewest separating subsets over one-bit flips=128",
         "worst-case curator with E=2: consistent candidates=912  max distance=8",
         # Exercise 2
-        "theta=0.2500: escape=0.1875  threshold=0.8333  tolerance E <= 0.1667  queries m >= 33295",
+        "theta=0.2500: escape=0.1875  threshold=0.8333  tolerance E <= 0.1667  queries m >= 33296",
         "theta=0.1111: escape=0.2634  threshold=0.5556  tolerance E <= 0.0278  queries m >= 22617",
         # Exercise 3
         "a=[1.0, 1.0, 1.0]: enumeration=21.0000  formula=21.0000",

@@ -20,7 +20,7 @@ Every attack in this part is the same object: a **game** in which a challenger t
 | [Property inference](04-property-inference.md) | Can a model reveal a fact about its training population that no single record reveals? | 3, 4, 9, 10 |
 | [Memorization and training-data extraction](05-memorization-extraction.md) | Can the model be made to emit its training text, and when? | 5, 7, 9, 10 |
 | [Gradient inversion](06-gradient-inversion.md) | What does a gradient computed on private data reveal about that data? | 6, 9 |
-| [Linkage and re-identification](07-linkage-reidentification.md) | When does removing names fail to hide who a record belongs to? | 1, 2, 5, 9 |
+| [Linkage and re-identification](07-linkage-reidentification.md) | When does removing names fail to hide who a record belongs to? | 1, 2, 5, 8, 9 |
 | [Syntactic anonymity and how it breaks](08-syntactic-anonymity.md) | What do k-anonymity, l-diversity and t-closeness guarantee, and which attacks get past each? | 1, 3, 5, 11, 15 |
 | [Reconstruction attacks](09-reconstruction.md) | How many accurate statistics does it take to rebuild a whole private dataset? | 2, 5, 9 |
 
@@ -35,7 +35,7 @@ A third idea closes the part and frames what comes after it. Reconstruction atta
 
 ## How to read this part
 
-**Order.** The part has two halves. Chapters 9 to 14 attack trained models, from the smallest secret to the largest: one bit of membership, a sensitive attribute, a property of the training population, memorized text, and whole inputs recovered from gradients. Chapters 15 to 17 attack released data, from the weakest defence to the strongest: names removed (linkage), records hidden in crowds (syntactic anonymity), and only aggregate statistics published (reconstruction).
+**Order.** The part opens with chapter 9, which sets up the vocabulary, and then has two halves. Chapters 10 to 14 attack trained models, from the smallest secret to the largest: one bit of membership, a sensitive attribute, a property of the training population, memorized text, and whole inputs recovered from gradients. Chapters 15 to 17 attack released data, from the weakest defence to the strongest: names removed (linkage), records hidden in crowds (syntactic anonymity), and only aggregate statistics published (reconstruction).
 
 Read chapter 9 first. It fixes the vocabulary (challenger, adversary, view, game, advantage, baseline) that the others use without redefining. Then read chapter 10, since membership inference is the reference attack that chapters 11, 12 and 13 extend. Chapters 11 to 14 can then be read in any order. Read chapters 15 to 17 in order: chapter 16 starts from the linkage game of chapter 15 and uses the imputation baseline of chapter 11, and chapter 17 shows that even exact aggregate statistics, with no records released at all, give the data away. Chapters 16 and 17 matter most for what comes next: the attacks of chapter 16 are the requirements the next part's definition is built to meet, and the results of chapter 17 return as lower bounds there.
 
@@ -58,11 +58,12 @@ The chapters share the conventions in @tbl-attacks-notation, set in [Threat mode
 | Symbol | Meaning |
 | --- | --- |
 | $D$, $\pi$ | A dataset of records; the population they are drawn from |
-| $T$, $\theta = T(D)$ | A (possibly randomized) training algorithm, and the model it outputs |
+| $\mathcal T$, $\theta = \mathcal T(D)$ | A (possibly randomized) training algorithm, and the model it outputs |
 | $b$ | The hidden bit of a two-world game; $b = 1$ is the world where the target record is used (the member world) |
 | $V$; $P$, $Q$ | The adversary's view; its distributions when $b = 0$ and $b = 1$ |
 | $\mathrm{TPR}$, $\mathrm{FPR}$ | $\Pr[b' = 1 \mid b = 1]$ and $\Pr[b' = 1 \mid b = 0]$ for the guess $b'$ |
 | $\mathrm{Adv}$ | The advantage, $\mathrm{TPR} - \mathrm{FPR}$, at most $\mathrm{TV}(P, Q)$ |
+| $T(P, Q)$ | The trade-off function: the smallest false negative rate $1 - \mathrm{TPR}$ of any test at each FPR |
 | $\ell(\theta, z)$ | The loss of model $\theta$ on record $z$ |
 
 : Notation shared by the chapters of this part. {#tbl-attacks-notation}

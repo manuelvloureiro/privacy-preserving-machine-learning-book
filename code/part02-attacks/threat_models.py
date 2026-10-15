@@ -419,7 +419,7 @@ def plot_game() -> Figure:
             3.3,
             "Challenger",
             "1. draw a dataset $D$ from the population\n"
-            "2. train: $\\theta = T(D)$\n"
+            "2. train a model $\\theta$ on $D$\n"
             "3. flip a fair bit $b$\n"
             "     $b = 1$: target $z$ drawn from $D$\n"
             "     $b = 0$: fresh $z$ from the population",
@@ -431,7 +431,7 @@ def plot_game() -> Figure:
             3.6,
             3.3,
             "Adversary",
-            "knows: the algorithm $T$,\nthe population, its side\ninformation\n\n4. outputs a guess b′",
+            "knows: the training algorithm,\nthe population, its side\ninformation\n\n4. outputs a guess b′",
             "C1",
         ),
     )

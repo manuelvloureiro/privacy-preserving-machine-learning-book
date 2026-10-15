@@ -164,7 +164,7 @@ The imitation can also be crude. Salem et al. (2019) found that one shadow model
 
 ### Example: the attack model on the running example
 
-For each class, the attack model is a logistic regression of "in" on $(1, \phi)$, trained on the 64,000 shadow pairs of that class. Both slopes are positive (0.238 for $y = -1$, 0.158 for $y = +1$), so within each class the predicted probability of "in" rises with $\phi$, and a threshold on it is a threshold on $\phi$. It is a per-class threshold on the loss. Its performance across all thresholds is summarized by the **area under the curve (AUC)**, the area under its ROC curve, which equals the probability that a random member gets a higher score than a random non-member. Its AUC is 0.577, the same as the loss attack's, and so is its TPR at every FPR to within sampling noise (@tbl-mia-attacks).
+For each class, the attack model is a logistic regression of "in" on $(1, \phi)$, trained on the roughly 32,000 shadow pairs of that class (64 shadow models times the pool points with that label). Both slopes are positive (0.238 for $y = -1$, 0.158 for $y = +1$), so within each class the predicted probability of "in" rises with $\phi$, and a threshold on it is a threshold on $\phi$. It is a per-class threshold on the loss. Its performance across all thresholds is summarized by the **area under the curve (AUC)**, the area under its ROC curve, which equals the probability that a random member gets a higher score than a random non-member. Its AUC is 0.577, the same as the loss attack's, and so is its TPR at every FPR to within sampling noise (@tbl-mia-attacks).
 
 Calibration works. Setting the attack model's threshold on the shadow models so that their FPR is 1% gives, on the 128 target models it never saw, an FPR of 0.0095 and a TPR of 0.0098. The attacker hits the FPR it aimed for. At that FPR the TPR is no better than chance, since 0.0098 is about the 0.0095 fraction of non-members flagged, because a global threshold on $\phi$ has nothing to work with at the low end.
 
@@ -183,9 +183,9 @@ The pooled attacks of the last two sections compare a record's output with every
 
 The attacker needs densities to form a likelihood ratio, and it only has a few dozen shadow values of $\phi_z$ per record. So it summarizes each set by a bell curve: it fits a Gaussian to each distribution, $\tilde Q_z = \mathcal N(\mu_{\mathrm{in}, z}, \sigma_{\mathrm{in}, z}^2)$ and $\tilde P_z = \mathcal N(\mu_{\mathrm{out}, z}, \sigma_{\mathrm{out}, z}^2)$, from the shadow models that did and did not train on $z$. Here $\mu$ and $\sigma$ are the mean and standard deviation of $\phi_z$ over those models.
 
-**Online LiRA** asks how much more likely the target model's $\phi_z$ is under the IN fit than under the OUT fit. Its score is the log of that ratio, where $\mathcal N(\phi; \mu, \sigma^2)$ denotes the normal density at $\phi$:
-$$\log\Lambda_z(\phi_z) = \ln\mathcal N\big(\phi_z;\, \mu_{\mathrm{in}, z}, \sigma_{\mathrm{in}, z}^2\big) - \ln\mathcal N\big(\phi_z;\, \mu_{\mathrm{out}, z}, \sigma_{\mathrm{out}, z}^2\big)$$ {#eq-mia-lira-online}
-It says "member" when $\log\Lambda_z$ exceeds a threshold $c$ that is **the same for every record**.
+**Online LiRA** asks how much more likely the target model's $\phi_z$ is under the IN fit than under the OUT fit. Its score is the natural log of that ratio, where $\mathcal N(\phi; \mu, \sigma^2)$ denotes the normal density at $\phi$:
+$$\ln\Lambda_z(\phi_z) = \ln\mathcal N\big(\phi_z;\, \mu_{\mathrm{in}, z}, \sigma_{\mathrm{in}, z}^2\big) - \ln\mathcal N\big(\phi_z;\, \mu_{\mathrm{out}, z}, \sigma_{\mathrm{out}, z}^2\big)$$ {#eq-mia-lira-online}
+It says "member" when $\ln\Lambda_z$ exceeds a threshold $c$ that is **the same for every record**.
 
 **Offline LiRA** uses only OUT models, which can be trained before the target record is known. It cannot compute an IN density, so it asks only how far above its usual OUT value the observed $\phi_z$ lies, measured in OUT standard deviations:
 $$\frac{\phi_z - \mu_{\mathrm{out}, z}}{\sigma_{\mathrm{out}, z}},$$ {#eq-mia-lira-offline}
@@ -210,7 +210,7 @@ This is the mixture argument of Fact 3 in [Threat models and privacy games](01-t
 **Offline as a one-sided test.** Offline LiRA is a weaker test, and the last two steps say what it tests and when it loses nothing.
 
 7. **Without IN models**, the attacker cannot write down $q_z$. It can still test "$\phi_z$ is from $\tilde P_z$" against "$\phi_z$ is larger than that", because training on $z$ raises $\phi_z$: the model moves to fit $z$, which increases its margin on $z$. The standardized score @eq-mia-lira-offline is the natural statistic, and $1 - \Phi$ of it is a one-sided p-value: the probability that a non-member's output would lie at least this far above its OUT mean.
-8. **When it loses nothing.** Suppose the two fits have the same width, $\sigma_{\mathrm{in}, z} = \sigma_{\mathrm{out}, z} = \sigma_z$. Measure everything in units of $\sigma_z$ from the OUT mean: the offline score is $t_z = (\phi_z - \mu_{\mathrm{out}, z})/\sigma_z$, and the IN mean sits at $s_z = (\mu_{\mathrm{in}, z} - \mu_{\mathrm{out}, z})/\sigma_z$. Then $t_z$ is standard normal under OUT and normal with mean $s_z$ under IN, which is exactly the setting of Fact 2, and @eq-mia-lira-online becomes $\log\Lambda_z = s_zt_z - s_z^2/2$. For one record, $s_z$ is a fixed positive number, so both scores rank outputs the same way. Across records, they differ: online LiRA multiplies $t_z$ by $s_z$, so it turns a given $t_z$ into strong evidence when $s_z$ is large and weak evidence when $s_z$ is small; offline LiRA treats every $t_z$ the same.
+8. **When it loses nothing.** Suppose the two fits have the same width, $\sigma_{\mathrm{in}, z} = \sigma_{\mathrm{out}, z} = \sigma_z$. Measure everything in units of $\sigma_z$ from the OUT mean: the offline score is $t_z = (\phi_z - \mu_{\mathrm{out}, z})/\sigma_z$, and the IN mean sits at $s_z = (\mu_{\mathrm{in}, z} - \mu_{\mathrm{out}, z})/\sigma_z$. Then $t_z$ is standard normal under OUT and normal with mean $s_z$ under IN, which is exactly the setting of Fact 2, and @eq-mia-lira-online becomes $\ln\Lambda_z = s_zt_z - s_z^2/2$. For one record, $s_z$ is a fixed positive number, so both scores rank outputs the same way. Across records, they differ: online LiRA multiplies $t_z$ by $s_z$, so it turns a given $t_z$ into strong evidence when $s_z$ is large and weak evidence when $s_z$ is small; offline LiRA treats every $t_z$ the same.
 
 ### Example: two kinds of record, in closed form
 
@@ -229,7 +229,7 @@ The separations are the gaps between the means, $3.5 - 3 = 0.5$ and $2 - (-2) = 
 
 **One threshold on the z-score** is offline LiRA. Each record is standardized against its own OUT distribution, so every record gets FPR $10^{-3}$, at $t_z \ge 3.0902$. Each kind then gets its own best TPR from the table, and the pooled TPR is their weighted average, $0.95 \times 0.0048 + 0.05 \times 0.8185 = 0.0455$.
 
-**One threshold on $\log\Lambda$** is online LiRA. The threshold is $\log\Lambda \ge 1.497$. With equal variances $\log\Lambda = st - s^2/2$ (step 8), so for typical records the threshold is $t \ge (1.497 + 0.125)/0.5 = 3.244$, which lets through an FPR of only $5.90\times10^{-4}$; for atypical records it is $t \ge (1.497 + 8)/4 = 2.374$, which lets through FPR 0.0088. The pooled FPR is $0.95 \times 5.90\times10^{-4} + 0.05 \times 0.0088 = 10^{-3}$. The pooled TPR is 0.0503, the best possible at that FPR by the derivation above.
+**One threshold on $\ln\Lambda$** is online LiRA. The threshold is $\ln\Lambda \ge 1.497$. With equal variances $\ln\Lambda = st - s^2/2$ (step 8), so for typical records the threshold is $t \ge (1.497 + 0.125)/0.5 = 3.244$, which lets through an FPR of only $5.90\times10^{-4}$; for atypical records it is $t \ge (1.497 + 8)/4 = 2.374$, which lets through FPR 0.0088. The pooled FPR is $0.95 \times 5.90\times10^{-4} + 0.05 \times 0.0088 = 10^{-3}$. The pooled TPR is 0.0503, the best possible at that FPR by the derivation above.
 
 The global threshold is ten times worse than either per-example test. The likelihood ratio does better still than the z-score because it moves FPR budget from records where it buys little to records where it buys a lot. A typical record's extra false positives buy almost no true positives, since its two curves overlap; an atypical record's buy many, since its IN curve lies far to the right. The likelihood ratio makes that trade automatically.
 
@@ -249,7 +249,7 @@ The global threshold is ten times worse than either per-example test. The likeli
 
 ### Check yourself
 
-- The IN and OUT distributions of a record are identical. What is its likelihood ratio, and can LiRA ever flag it? *(The ratio is 1, $\log\Lambda = 0$, for every output. With a positive threshold it is never flagged, which is right: no test can tell member from non-member for that record.)*
+- The IN and OUT distributions of a record are identical. What is its likelihood ratio, and can LiRA ever flag it? *(The ratio is 1, $\ln\Lambda = 0$, for every output. With a positive threshold it is never flagged, which is right: no test can tell member from non-member for that record.)*
 - Why does the derivation need the target record to be drawn the same way in both worlds (step 2)? *(Otherwise the factor $g(z)$ does not cancel, and the record's identity is itself evidence. If, say, members were drawn from one hospital and non-members from another, the record alone would reveal $b$.)*
 
 ## Evaluating attacks: TPR at a low FPR {#sec-mia-eval}
@@ -294,7 +294,7 @@ With $q = 0.05$ (@tbl-mia-same-auc), both AUCs are $\frac12 + \frac{0.05}2 = 0.5
 
 **Precision** is the fraction of "member" verdicts that are right. At a fair prior, members and non-members are equally many, so the right verdicts are proportional to TPR and the wrong ones to FPR, and the precision is $\mathrm{TPR}/(\mathrm{TPR} + \mathrm{FPR})$. At TPR 0.05 and FPR $10^{-3}$ that is $0.05/0.051 = 0.98$. Real targets are rarely members with probability one half. [Threat models and privacy games](01-threat-models.md) shows how the prior changes this.
 
-### Example: the four attacks on the running example
+### Example: the five attacks on the running example
 
 @tbl-mia-attacks scores every attack on the 128 target models, and @fig-mia-roc draws their ROC curves on log axes. "Best advantage" is the largest TPR − FPR over all thresholds.
 
@@ -314,7 +314,7 @@ How precise are those numbers? The **Clopper–Pearson interval** is an exact 95
 
 One caveat: **the threshold was chosen on the same data** that measure the rates, as is usual in this literature. A real attacker would set it on its shadow models, as the shadow-attack example did.
 
-![ROC curves of the five attacks on log axes, over the 128 target models. The loss threshold and the shadow attack model follow the diagonal below FPR 0.01; online LiRA stays far above it down to FPR $10^{-5}$. The dashed line marks FPR $10^{-3}$.](figures/mia_roc.svg){#fig-mia-roc}
+![ROC curves of the five attacks on log axes, over the 128 target models. The loss threshold and the shadow attack model follow the diagonal below FPR 0.01; online LiRA stays far above it down to the smallest FPR the 64,000 non-member pairs can measure, $1/64{,}000 \approx 1.6 \times 10^{-5}$. The dashed line marks FPR $10^{-3}$.](figures/mia_roc.svg){#fig-mia-roc}
 
 ### Check yourself
 
@@ -427,7 +427,7 @@ uv run python code/part02-attacks/membership_inference.py
 | Shadow attack model | Slopes 0.238 and 0.158; threshold set on shadows for FPR 1%: target FPR 0.0095, TPR 0.0098 |
 | Attacks | @tbl-mia-attacks |
 | LiRA online at FPR $10^{-3}$ | 952 true positives of 64,000, interval $[0.0140, 0.0158]$; 64 false positives of 64,000, interval $[0.00077, 0.00128]$; 17.0 times the loss attack |
-| Two kinds of record | Global threshold at $\phi = 6.075$: TPR 0.0048. z-score: 0.0455. Likelihood ratio, $\log\Lambda \ge 1.497$: 0.0503, with FPRs $5.90\times10^{-4}$ and 0.0088 |
+| Two kinds of record | Global threshold at $\phi = 6.075$: TPR 0.0048. z-score: 0.0455. Likelihood ratio, $\ln\Lambda \ge 1.497$: 0.0503, with FPRs $5.90\times10^{-4}$ and 0.0088 |
 | Same AUC | A: AUC 0.5250, advantage 0.0500, TPR 0.05095. B: $\mu = 0.0887$, advantage 0.0354, TPR 0.00134 |
 | Outliers | @tbl-mia-outliers; mean loss self-influence 0.1902, outliers' share 0.552; outliers' share of true positives 0.873 |
 | Shadow models, TPR at $10^{-3}$ for 4, 8, 16, 32, 64 | Online, per-example variance: 0.0015, 0.0009, 0.0023, 0.0086, 0.0149. Online, global: 0.0092, 0.0127, 0.0151, 0.0171, 0.0177. Offline, per-example: 0.0018, 0.0023, 0.0029, 0.0035, 0.0030. Offline, global: 0.0098, 0.0111, 0.0112, 0.0114, 0.0118 |
@@ -470,9 +470,9 @@ $\phi = \ln\frac{p_y}{1 - p_y}$ is the logit of the confidence in the true label
 | Advantage | $\mathrm{Adv} = \mathrm{TPR} - \mathrm{FPR} = 2\Pr[b' = b] - 1$ | Fair prior |
 | Loss attack (Yeom) | $\mathrm{Adv} = \mathbb E[\text{gap}]/B$; 0-1 loss: test error $-$ train error | Average-case; ignores which record it is |
 | Shadow attack model | $a(o) \to \Pr[b = 1 \mid o]$, increasing in pooled $q(o)/p(o)$ | Best among record-blind attacks; calibrates thresholds |
-| LiRA online | $\log\Lambda_z = \ln\mathcal N(\phi; \mu_{\mathrm{in}}, \sigma_{\mathrm{in}}^2) - \ln\mathcal N(\phi; \mu_{\mathrm{out}}, \sigma_{\mathrm{out}}^2)$, one threshold for all $z$ | Neyman–Pearson for the game when the fits are right |
+| LiRA online | $\ln\Lambda_z = \ln\mathcal N(\phi; \mu_{\mathrm{in}}, \sigma_{\mathrm{in}}^2) - \ln\mathcal N(\phi; \mu_{\mathrm{out}}, \sigma_{\mathrm{out}}^2)$, one threshold for all $z$ | Neyman–Pearson for the game when the fits are right |
 | LiRA offline | $(\phi - \mu_{\mathrm{out}})/\sigma_{\mathrm{out}}$ | OUT models only, reusable across targets |
-| Equal variances | $\log\Lambda_z = s_zt_z - s_z^2/2$ | Online and offline rank one record alike, records differently |
+| Equal variances | $\ln\Lambda_z = s_zt_z - s_z^2/2$ | Online and offline rank one record alike, records differently |
 | Per-example best TPR | $1 - \Phi(\Phi^{-1}(1 - \alpha) - s_z)$, $s_z = (\mu_{\mathrm{in}} - \mu_{\mathrm{out}})/\sigma$ | $\mu_{\mathrm{in}} - \mu_{\mathrm{out}}$ is the self-influence in $\phi$ |
 | Same AUC, A vs B | A: $\mathrm{TPR} = q + (1 - q)\alpha$; B: $\Phi(\mu/\sqrt2) = \frac12 + \frac q2$ | AUC hides who is exposed |
 

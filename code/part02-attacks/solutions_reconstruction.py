@@ -110,7 +110,7 @@ def print_table(rng: np.random.Generator) -> None:
         print(
             f"  theta={theta:.4f}: escape={esc:.4f}  threshold={escape_threshold(n, beta, theta):.4f}  "
             f"tolerance E <= {lp_error_tolerance_theta(n, beta, theta):.4f}  "
-            f"queries m >= {lp_queries_needed(n, 0.01, esc):.0f}"
+            f"queries m >= {lp_queries_needed(n, 0.01, esc)}"
         )
 
     print("== Exercise 3: fourth moment ==")

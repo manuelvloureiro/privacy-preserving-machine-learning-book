@@ -2,7 +2,7 @@
 
 Exercises for [Reconstruction attacks](../../book-full/part02-attacks/09-reconstruction.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part02-attacks/solutions_reconstruction.py` computes every number quoted here; run it with `uv run python code/part02-attacks/solutions_reconstruction.py`.
 
-The solutions use the chapter's notation: $d \in \{0, 1\}^n$ is the secret database, a query is a subset $S$ with indicator $q$, the curator answers $a = Ad + e$, $E$ bounds every $|e_j|$, and $\beta$ is a fraction of wrong bits. Logarithms are natural unless written $\log_2$.
+The solutions use the chapter's notation: $d \in \{0, 1\}^n$ is the secret database, a query is a subset $S$ with indicator $q$, the curator answers $a = Ad + e$, $E$ bounds every $|e_j|$, $\beta$ is a fraction of wrong bits and $\eta$ a failure probability. Logarithms are natural unless written $\log_2$.
 
 ## A rounding curator {#sec-sol-reconstruction-1}
 
@@ -26,16 +26,17 @@ The solutions use the chapter's notation: $d \in \{0, 1\}^n$ is the secret datab
 > **Exercise 2.** **Another Paley–Zygmund threshold.** Redo the lemma with $\theta = \frac19$. Show that the escape probability becomes $(8/9)^2/3 = 64/243$ at threshold $\sqrt{\beta n}/18$, and compute the error tolerance and the number of queries the theorem then needs at $n = 1000$, $\beta = 0.1$, $\eta = 0.01$. *Check: escape 0.2634, $E \le 0.0278$, $m \ge 22\,617$.* Which choice is better? *(Paley–Zygmund, union bound)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Steps 1–6 of the lemma do not involve $\theta$.** They give $\Pr[|Y| > \sqrt\theta\,\sigma] \ge (1 - \theta)^2/3$ with $\sigma \ge \sqrt{\beta n}/6$.
+1. **Steps 1–6 of the lemma do not involve $\theta$.** They give $\Pr[|Y| > \sqrt\theta\,\tau] \ge (1 - \theta)^2/3$ with $\tau \ge \sqrt{\beta n}/6$, where $\tau$ is the standard deviation of the random-sign part of the subset sum.
 2. **Set $\theta = \frac19$.** Then $\sqrt\theta = \frac13$, so the threshold is $\frac13\cdot\frac{\sqrt{\beta n}}6 = \frac{\sqrt{\beta n}}{18}$, and the probability is $(8/9)^2/3 = \frac{64}{81 \cdot 3} = \frac{64}{243} = 0.2634$.
 3. **Error tolerance.** The theorem needs $2E + \frac12 \le \sqrt{\beta n}/18 = 10/18 = 0.5556$, so $E \le (0.5556 - 0.5)/2 = 0.0278$.
 4. **Queries.** Step 4 of the theorem now uses survival probability $1 - \frac{64}{243} = \frac{179}{243}$ per query, so
-$$m \ge \frac{1000\ln1001 + \ln100}{\ln(243/179)} = \frac{6913.4}{0.3057} = 22\,617.$$
-5. **Compare with $\theta = \frac14$:** escape 0.1875, $E \le 0.1667$, $m \ge 33\,295$.
+$$m \ge \frac{1000\ln1001 + \ln100}{\ln(243/179)} = \frac{6913.4}{0.3057} = 22\,616.7,$$
+so at least 22 617 queries.
+5. **Compare with $\theta = \frac14$:** escape 0.1875, $E \le 0.1667$, $m \ge 33\,296$.
 
 | $\theta$ | Escape probability | Threshold at $n = 1000$, $\beta = 0.1$ | Error tolerance | Queries needed |
 | --- | --- | --- | --- | --- |
-| $\frac14$ | 0.1875 | 0.8333 | 0.1667 | 33 295 |
+| $\frac14$ | 0.1875 | 0.8333 | 0.1667 | 33 296 |
 | $\frac19$ | 0.2634 | 0.5556 | 0.0278 | 22 617 |
 
 : The lemma's threshold trades the error the theorem tolerates against the number of queries it needs. {#tbl-sol-reconstruction-theta}
@@ -105,12 +106,12 @@ $$m \ge \frac{1000\ln1001 + \ln100}{\ln(243/179)} = \frac{6913.4}{0.3057} = 22\,
 
 ## A sampling curator that keeps more {#sec-sol-reconstruction-7}
 
-> **Exercise 7.** **A sampling curator that keeps more.** Repeat the sampling-curator analysis with keep probability $p = 0.9$. Find the Hoeffding error bound at $n = 500$, $m = 2000$, $\beta = 0.05$, and the ceiling on the fraction any attacker recovers. *Check: 59.03 and 0.95; in simulation the largest error is 12.00 and least squares recovers 0.9420.* *(Hoeffding, union bound)*
+> **Exercise 7.** **A sampling curator that keeps more.** Repeat the sampling-curator analysis with keep probability $p = 0.9$. Find the Hoeffding error bound at $n = 500$, $m = 2000$, failure probability $\eta = 0.05$, and the ceiling on the fraction any attacker recovers. *Check: 59.03 and 0.95; in simulation the largest error is 12.00 and least squares recovers 0.9420.* *(Hoeffding, union bound)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The error terms.** Each term $d_i(t_i/p - 1)$ is 0 when $d_i = 0$, and otherwise $\frac1{0.9} - 1 = 0.111$ with probability 0.9 or $-1$ with probability 0.1. The mean is $0.9 \times 0.111 - 0.1 = 0$ and the range is $\frac1p = 1.111$.
-2. **Hoeffding and the union bound,** exactly as in the chapter: $\Pr[\text{some error} \ge u] \le 2m\exp(-2p^2u^2/n)$. Setting it to $\beta = 0.05$:
-$$u = \sqrt{\frac{n\ln(2m/\beta)}{2p^2}} = \sqrt{\frac{500\ln80\,000}{2 \times 0.81}} = \sqrt{\frac{500 \times 11.290}{1.62}} = 59.03.$$
+2. **Hoeffding and the union bound,** exactly as in the chapter: $\Pr[\text{some error} \ge u] \le 2m\exp(-2p^2u^2/n)$. Setting it to $\eta = 0.05$:
+$$u = \sqrt{\frac{n\ln(2m/\eta)}{2p^2}} = \sqrt{\frac{500\ln80\,000}{2 \times 0.81}} = \sqrt{\frac{500 \times 11.290}{1.62}} = 59.03.$$
 3. **The ceiling.** The people outside the sample $T$ are hidden, so the attacker is right on at most all of the sampled people (fraction 0.9) and half of the others: $0.9 + 0.1/2 = 0.95$.
 4. **Simulation.** The script keeps 445 of the 500 people. The largest error over 2000 queries is 12.00, well below the bound, and least squares recovers 0.9420: it gets the 445 sampled people right and, among the 55 others, exactly those whose bit is 0 (it estimates their bit as 0).
 

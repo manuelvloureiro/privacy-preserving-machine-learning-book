@@ -128,7 +128,7 @@ The script anonymizes the table with **Mondrian** (LeFevre, DeWitt & Ramakrishna
 
 : Mondrian k-anonymization of a synthetic hospital table of 10,000 patients. Mean width is the average, over records and quasi-identifiers, of the class's range as a fraction of the full range. Certain disclosure is the fraction of records in a class with a single diagnosis. Guess accuracy is the fraction of records whose diagnosis is the most common one in their class. {#tbl-anon-k}
 
-The linkage success sits between $1/(2k)$ and $1/k$ for every $k$ (@fig-anon-tradeoff, left), as it must. $J/n$ is one over the average class size. No class is smaller than $k$, which gives the upper bound, and Mondrian rarely leaves a class as large as $2k$, so the average size stays below $2k$, which gives the lower one. At $k = 2$, for instance, $0.4091$ lies between $0.25$ and $0.5$. The cost in precision is small. At $k = 5$ the average range covers 1.6% of each quasi-identifier's span.
+The linkage success sits between $1/(2k)$ and $1/k$ for every $k$ (@fig-anon-tradeoff, left). $J/n$ is one over the average class size. No class is smaller than $k$, so the upper bound $1/k$ is guaranteed. The lower bound is not: Mondrian can leave classes larger than $2k$ (up to 41 records at $k = 20$), but they are rare enough that the average size stays below $2k$ in every row. At $k = 2$, for instance, $0.4091$ lies between $0.25$ and $0.5$. The cost in precision is small. At $k = 5$ the average range covers 1.6% of each quasi-identifier's span.
 
 The last two columns are about the diagnosis, and the next section explains them.
 
@@ -326,11 +326,11 @@ That points to what is wanted instead. A definition that composes says: if relea
 
 The model understates the risk. It draws the other members of a class from the whole population. In real releases a class collects similar people (similar ages, here) who are more likely to share a diagnosis, so each class contains fewer distinct wrong values and the intersection is smaller than the model predicts.
 
-The union bound is useful only for small classes. It charges every wrong value separately, so it is accurate when two wrong values rarely turn up in both classes at once. At $k = 2$ each class has a single other member, so that almost never happens, and the bound is exact to four decimals. At $k = 5$ the expected number of shared wrong values exceeds 1, the bound is negative, and @eq-anon-pinned is needed.
+The union bound is useful only for small classes. It charges every wrong value separately, so it is accurate when two wrong values rarely turn up in both classes at once. At $k = 2$ each class has a single other member, so it holds at most one wrong value, two wrong values can never turn up together, and the bound is exact. At $k = 5$ the expected number of shared wrong values exceeds 1, the bound is negative, and @eq-anon-pinned is needed.
 
 ### Example: two hospitals
 
-In the model, with $p$ the hospital table's diagnosis frequencies, the probability that two releases pin down the diagnosis is 0.8734 for classes of 2, 0.1615 for classes of 5, 0.0288 for classes of 7 and 0.0015 for classes of 10. It falls fast because a larger class contains more wrong values, and each one is another chance for the two classes to share one. Simulation agrees to within 0.001 (@fig-anon-composition, left). The union bound gives 0.8734 at $k = 2$ and is negative from $k = 5$ on.
+In the model, with $p$ the population's diagnosis distribution, from which the hospital table is drawn, the probability that two releases pin down the diagnosis is 0.8734 for classes of 2, 0.1615 for classes of 5, 0.0288 for classes of 7 and 0.0015 for classes of 10. It falls fast because a larger class contains more wrong values, and each one is another chance for the two classes to share one. Simulation agrees to within 0.001 (@fig-anon-composition, left). The union bound gives 0.8734 at $k = 2$ and is negative from $k = 5$ on.
 
 The script then runs the attack. A city has 15,000 people drawn from the model of the hospital table. Two hospitals each treat a random 10,000 of them, so 6,649 people are treated at both. Each hospital publishes a 5-anonymous Mondrian release of its own patients. @tbl-anon-composition gives what the adversary learns about the 6,649.
 
@@ -341,7 +341,7 @@ The script then runs the attack. A city has 15,000 people drawn from the model o
 
 : The composition attack on two independent hospital releases, for the 6,649 people treated at both. "Pinned" is the fraction left with a single possible diagnosis. {#tbl-anon-composition}
 
-Two 5-anonymous releases pin down the diagnosis of 9.9% of the shared patients, more than three times either release alone (0.0985 against 0.0289 and 0.0262). Mondrian's classes average 6.8 records, and the model at $k = 7$ predicts only 2.9%: real classes, which group patients of similar age, are more alike than random draws, as the interpretation above said. With distinct 3-diversity, no single release pins anyone down, and the two together pin down 18 patients (0.27% of 6,649).
+Two 5-anonymous releases pin down the diagnosis of 9.9% of the shared patients, more than three times either release alone (0.0985 against 0.0289 and 0.0262). For comparison, in the single-table release of @tbl-anon-k at $k = 5$ a patient's class has 6.8 records on average over patients, and the model at $k = 7$ predicts only 2.9%: real classes, which group patients of similar age, are more alike than random draws, as the interpretation above said. With distinct 3-diversity, no single release pins anyone down, and the two together pin down 18 patients (0.27% of 6,649).
 
 ![Left: the probability that two releases pin down the diagnosis, against the class size, when the other members of each class are drawn from the population: exact (@eq-anon-pinned), simulated, and the union bound (@eq-anon-union). Right: the number of diagnoses still possible for a patient treated at both hospitals, from either 5-anonymous release alone and from their intersection.](figures/anon_composition.svg){#fig-anon-composition}
 

@@ -26,7 +26,7 @@ A matrix whose $(j, k)$ entry is $\delta_jx_k$ is called the **outer product** o
 
 ### The setting and the game
 
-The server is **honest-but-curious** in the sense of [Threat models and privacy games](01-threat-models.md): it runs the training protocol as specified, sends the real model and does not tamper with anything, and only analyses what it receives. It is **white-box**: it chose $\theta$, so it knows the architecture and every parameter. A client holds a batch of $B$ labelled examples $(x_1, y_1), \dots, (x_B, y_B)$. Its training loss is the average of the $B$ per-example losses, and what it sends is the gradient of that average with respect to all the parameters $\theta$. Since the derivative of an average is the average of the derivatives, this is the average of the per-example gradients:
+The server is **honest-but-curious** in the sense of [Threat models and privacy games](01-threat-models.md): it runs the training protocol as specified, sends the real model and does not tamper with anything, and only analyses what it receives. Its access is the **transcript**, the strongest level of that chapter: it sees each client's own update, which is more than the final model, and it knows the architecture and every parameter of $\theta$ because it chose them. A client holds a batch of $B$ labelled examples $(x_1, y_1), \dots, (x_B, y_B)$. Its training loss is the average of the $B$ per-example losses, and what it sends is the gradient of that average with respect to all the parameters $\theta$. Since the derivative of an average is the average of the derivatives, this is the average of the per-example gradients:
 $$g = \frac1B\sum_{i=1}^B\nabla_\theta\ell(\theta; x_i, y_i).$$
 
 This is the **reconstruction game** of that chapter, played on one client. A game there has three parts: a challenger who draws a hidden secret, an adversary who sees only what the threat model allows, and a score for the adversary's guess. Here the challenger draws the batch from the population and the secret is the inputs. The adversary sees $(\theta, g)$ and outputs reconstructions $\hat x_1, \dots, \hat x_B$, and its gain is how close they come to the true inputs. We measure closeness by the **relative error** $\lVert\hat x - x\rVert/\lVert x\rVert$: the length of the mistake as a fraction of the length of the input, so that 0 is a perfect reconstruction and 1 is a mistake as large as the image itself. Each true example is matched to its closest reconstruction, because an average does not change when you reorder the examples, so the gradient carries no record of which example came first.
@@ -105,7 +105,7 @@ Three things can stop it, and only one of them stops it fully. With ReLU, units 
 
 @fig-gradinv-rank-one shows the attack on one image.
 
-![Exact recovery from the first-layer gradient of a ReLU network with 32 hidden units. Left: the client's $8\times8$ input. Middle: $\nabla_{W_1}\ell$, one row per hidden unit and one column per pixel (red positive, blue negative), next to $\nabla_{b_1}\ell$. Every nonzero row is the image times the matching bias entry; switched-off units give zero rows. Right: one row divided by its bias entry, which is the input exactly.](figures/gradinv_rank_one.svg){#fig-gradinv-rank-one}
+![Exact recovery from the first-layer gradient of a ReLU network with 32 hidden units. Left: the client's $8\times8$ input. Middle: $\nabla_{W_1}\ell$, one row per hidden unit and one column per pixel (blue positive, red negative), next to $\nabla_{b_1}\ell$. Every nonzero row is the image times the matching bias entry; switched-off units give zero rows. Right: one row divided by its bias entry, which is the input exactly.](figures/gradinv_rank_one.svg){#fig-gradinv-rank-one}
 
 ### Example: a network you can compute by hand
 
@@ -171,7 +171,7 @@ The label matters for inversion as well. Knowing $y$ removes a discrete unknown 
 
 @fig-gradinv-labels shows both cases.
 
-![Labels from the last-layer bias gradient. Left: for one example, $\nabla_{b_2}\ell = p - e_y$ has a single negative entry, at the true label (red). Right: for a batch of 16, the counts $B(\bar p - \nabla_{b_2}\ell)$ with $\bar p$ the model's average prediction on the attacker's own images (green) are close to the true counts (grey); with $\bar p = 1/K$ (orange) they are off by up to about one example.](figures/gradinv_labels.svg){#fig-gradinv-labels}
+![Labels from the last-layer bias gradient. Left: for one example, $\nabla_{b_2}\ell = p - e_y$ has a single negative entry, at the true label (red). Right: for a batch of 16, the counts $B(\bar p - \nabla_{b_2}\ell)$ with $\bar p$ the model's average prediction on the attacker's own images (green) are close to the true counts (grey); with $\bar p = 1/K$ (orange) they are off by up to about half an example.](figures/gradinv_labels.svg){#fig-gradinv-labels}
 
 ### Example: a batch of 16
 
@@ -312,7 +312,7 @@ Finally, several local steps do not help either. If the client takes several SGD
 
 : Fraction of batch examples recovered exactly from first-layer unit ratios of a random ReLU network, against @eq-gradinv-isolation. {#tbl-gradinv-isolation}
 
-For Gaussian inputs the formula matches to within the simulation noise. It overestimates slightly, because units share inputs and so their on/off patterns are not fully independent (step 6 of the derivation). For images the formula is far too optimistic about privacy. At $B = 16$ it predicts that 1.6% of the batch is exposed in the 1024-unit network; 69.1% is.
+For Gaussian inputs the formula matches to within the simulation noise. It usually overestimates slightly (in seven of the eight rows), because units share inputs and so their on/off patterns are not fully independent (step 6 of the derivation). For images the formula is far too optimistic about privacy. At $B = 16$ it predicts that 1.6% of the batch is exposed in the 1024-unit network; 69.1% is.
 
 At $B = 4$, by contrast, the images are recovered less often than the formula predicts (0.838 against 0.984 for $m = 64$). Overdispersion cuts both ways. The same spread that makes "on for exactly one image" more common at large $B$ also makes "on for all four images" and "on for none" common at small $B$, and units like that isolate nothing.
 

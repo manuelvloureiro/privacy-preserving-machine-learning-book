@@ -33,7 +33,7 @@ def test_reconstruction_matches_section(tmp_path: Path) -> None:
         "n=1000 beta=0.1: threshold sqrt(beta n)/12=0.8333",
         "aligned z: Pr[|<q,z>| > threshold]=1.0000",
         "balanced z: Pr[|<q,z>| > threshold]=0.6161",
-        "error tolerance E <= 0.1667  queries m >= 33295 (33.3 n)",
+        "error tolerance E <= 0.1667  queries m >= 33296 (33.3 n)",
         # Least squares
         "sigma=0.1 sqrt(n)=2.24: recovered=1.0000  predicted=1.0000",
         "sigma=0.25 sqrt(n)=5.59: recovered=0.9655  predicted=0.9585",
@@ -47,7 +47,7 @@ def test_reconstruction_matches_section(tmp_path: Path) -> None:
         "E=2.00: guaranteed wrong bits <= 245.0  adversarial curator gets 20 wrong",
         "E=5.59: guaranteed wrong bits <= 1914.0  adversarial curator gets 143 wrong",
         # The Fundamental Law
-        "kept 250 of 500  max error=28.00 (1.25 sqrt(n))  Hoeffding bound (beta=0.05)=106.25  recovered=0.7560",
+        "kept 250 of 500  max error=28.00 (1.25 sqrt(n))  Hoeffding bound (eta=0.05)=106.25  recovered=0.7560",
         "keep=0.9: Hoeffding bound=59.03  ceiling=0.95",
         "n=1000 beta=0.05: h(beta)=0.2864  exact answers m >= 71.6",
         "n=1000 beta=0.01: h(beta)=0.0808  exact answers m >= 92.2",

@@ -2,7 +2,7 @@
 
 Exercises for [Membership inference](../../book-full/part02-attacks/02-membership-inference.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part02-attacks/solutions_membership_inference.py` computes every number quoted here; run it with `uv run python code/part02-attacks/solutions_membership_inference.py`.
 
-The solutions use the chapter's notation. $\phi = y\langle w, x\rangle$ is the logit of the model's confidence in the true label, IN and OUT are the distributions of a record's $\phi$ over models trained with and without it, and an attack's true positive rate (TPR) and false positive rate (FPR) are measured over (target model, pool point) pairs of the running example. The likelihood ratio attack (LiRA) is the per-example test of the chapter, and attacks are compared by their receiver operating characteristic (ROC) curves and the area under the curve (AUC). Exercises 1, 6 and 7 reuse the chapter's experiment with seed 0, so their numbers match the chapter's tables.
+The solutions use the chapter's notation. $\phi = y\langle w, x\rangle$ is the logit of the model's confidence in the true label, IN and OUT are the distributions of a record's $\phi$ over models trained with and without it, and an attack's true positive rate (TPR) and false positive rate (FPR) are measured over (target model, pool point) pairs of the running example. The likelihood ratio attack (LiRA) is the per-example test of the chapter, and attacks are compared by their receiver operating characteristic (ROC) curves and the area under the curve (AUC). Exercises 1 and 7 reuse the chapter's experiment with seed 0, so their numbers match the chapter's tables; Exercise 6 draws a fresh pool.
 
 ## Accuracy with an unbalanced prior {#sec-sol-mia-1}
 
@@ -23,13 +23,13 @@ The attack has the same TPR and FPR in both cases; only the prior changed. At $\
 
 ## The Gaussian likelihood ratio {#sec-sol-mia-2}
 
-> **Exercise 2.** **The Gaussian likelihood ratio.** For $H_0: \mathcal N(0, 1)$ against $H_1: \mathcal N(s, 1)$, show $\log\Lambda(t) = st - s^2/2$. Use it to find, for the two kinds of record of @tbl-mia-two-types, the z-score cut that the threshold $\log\Lambda \ge 1.497$ puts on each kind, and check that the pooled FPR is $10^{-3}$. *Check: cuts 3.244 (typical) and 2.374 (atypical).* *(Neyman–Pearson, per-example calibration)*
+> **Exercise 2.** **The Gaussian likelihood ratio.** For $H_0: \mathcal N(0, 1)$ against $H_1: \mathcal N(s, 1)$, show $\ln\Lambda(t) = st - s^2/2$. Use it to find, for the two kinds of record of @tbl-mia-two-types, the z-score cut that the threshold $\ln\Lambda \ge 1.497$ puts on each kind, and check that the pooled FPR is $10^{-3}$. *Check: cuts 3.244 (typical) and 2.374 (atypical).* *(Neyman–Pearson, per-example calibration)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Write the log-densities.** $\ln\mathcal N(t; s, 1) = -\frac12(t - s)^2 - \frac12\ln(2\pi)$ and $\ln\mathcal N(t; 0, 1) = -\frac12t^2 - \frac12\ln(2\pi)$.
-2. **Subtract.** The constants cancel: $\log\Lambda(t) = -\frac12(t^2 - 2st + s^2) + \frac12t^2 = st - \frac{s^2}2$.
+2. **Subtract.** The constants cancel: $\ln\Lambda(t) = -\frac12(t^2 - 2st + s^2) + \frac12t^2 = st - \frac{s^2}2$.
 3. **Spot checks** (from the script, computing both forms): at $t = 3.0902$, $s = 0.5$ gives $1.4201$ and $s = 4$ gives $4.3608$; at $t = 1$, $s = 4$ gives $-4.0000$. The same z-score is strong evidence for a record with a large separation and weak evidence for one with a small separation.
-4. **Invert.** For $s > 0$, $\log\Lambda \ge c$ is the same as $t \ge (c + s^2/2)/s$. With $c = 1.497$:
+4. **Invert.** For $s > 0$, $\ln\Lambda \ge c$ is the same as $t \ge (c + s^2/2)/s$. With $c = 1.497$:
    - typical records, $s = 0.5$: $t \ge (1.497 + 0.125)/0.5 = 3.244$;
    - atypical records, $s = 4$: $t \ge (1.497 + 8)/4 = 2.374$.
 5. **FPR of each kind.** Under OUT, $t \sim \mathcal N(0, 1)$, so the FPRs are $1 - \Phi(3.244) = 5.90\times10^{-4}$ and $1 - \Phi(2.374) = 0.0088$.

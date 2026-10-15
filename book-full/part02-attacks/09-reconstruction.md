@@ -26,7 +26,7 @@ The one idea that organizes the chapter is this. **Every answer is a linear equa
 
 The concentration tools (Hoeffding's inequality, the union bound) are in [Concentration inequalities](../part01-prerequisites/02-concentration.md). Entropy, mutual information, the data processing inequality (DPI) and Fano's inequality are in [Information theory](../part01-prerequisites/05-information-theory.md). Each is restated below where it is used. No privacy definition is used: [Part 3](../part03-dp-foundations/01-definition.md) introduces the one that defends against these attacks, and [Lower bounds](../part03-dp-foundations/09-lower-bounds.md) reads this chapter's results as lower bounds on the error any defence must add.
 
-**Conventions.** The secret database is a bit vector $d = (d_1, \dots, d_n) \in \{0, 1\}^n$, one bit per person. A **subset-sum query** is a set $S \subseteq [n] = \{1, \dots, n\}$ of people, and it asks how many of them have bit 1. It is written as its 0/1 indicator vector $q$, with $q_i = 1$ when person $i$ is in $S$; its true answer is $\sum_{i \in S}d_i = \langle q, d\rangle$. The attacker asks $m$ queries, the rows of an $m \times n$ matrix $A$. The **curator** (the party holding $d$) returns $a = Ad + e$, where $e$ is its error, one entry per query. "Error at most $E$" means $|e_j| \le E$ for every query $j$. $\beta$ is a fraction of wrong bits. Logarithms are natural unless written $\log_2$. [Threat models and privacy games](01-threat-models.md) wrote $m$ for the number of bits; here $n$ is the number of bits and $m$ the number of queries.
+**Conventions.** The secret database is a bit vector $d = (d_1, \dots, d_n) \in \{0, 1\}^n$, one bit per person. A **subset-sum query** is a set $S \subseteq [n] = \{1, \dots, n\}$ of people, and it asks how many of them have bit 1. It is written as its 0/1 indicator vector $q$, with $q_i = 1$ when person $i$ is in $S$; its true answer is $\sum_{i \in S}d_i = \langle q, d\rangle$. The attacker asks $m$ queries, the rows of an $m \times n$ matrix $A$. The **curator** (the party holding $d$) returns $a = Ad + e$, where $e$ is its error, one entry per query. "Error at most $E$" means $|e_j| \le E$ for every query $j$. $\beta$ is a fraction of wrong bits, $\eta$ a failure probability and $\sigma$ the standard deviation of random noise. Logarithms are natural unless written $\log_2$. [Threat models and privacy games](01-threat-models.md) wrote $m$ for the number of bits; here $n$ is the number of bits and $m$ the number of queries.
 
 ## Toolkit: three facts every derivation uses
 
@@ -109,7 +109,7 @@ The script draws $d = (1, 1, 1, 0, 0, 0, 0, 0, 0, 1)$, with four ones, and check
 
 : The exponential attack on $n = 10$ bits. Every surviving candidate is within $4E$ of $d$, and the bound is attained. {#tbl-recon-exp}
 
-The bound is attained at every $E$, as the tightness argument predicts: that argument needs $\lfloor 2E\rfloor$ ones and $\lfloor 2E\rfloor$ zeros to flip, at most 4 of each here, and $d$ has four ones and six zeros. At $E = 2$, 912 of the 1024 candidates survive, so the attacker learns little: the bound $4E = 8$ is close to $n = 10$, and a guarantee of at most 8 wrong bits out of 10 says almost nothing. @fig-recon-exponential draws both rows over a finer grid of $E$.
+The bound is attained at every $E$, as the tightness argument predicts: that argument needs $\lfloor 2E\rfloor$ ones and $\lfloor 2E\rfloor$ zeros to flip, at most 4 of each here, and $d$ has four ones and six zeros. At $E = 2$, 912 of the 1024 candidates survive, so the attacker learns little: the bound $4E = 8$ is close to $n = 10$, and a guarantee of at most 8 wrong bits out of 10 says almost nothing. @fig-recon-exponential draws both rows over a finer grid of $E$, for another random database of ten bits, so its counts can differ from those of @tbl-recon-exp.
 
 ![The exponential attack on ten bits. Left: the largest Hamming distance between the true database and a candidate that some curator with error $E$ can make consistent with all 1024 subset sums, against the bound $4E$. Right: the number of surviving candidates (log scale); at $E = 0$ only $d$ survives.](figures/recon_exponential.svg){#fig-recon-exponential}
 
@@ -122,7 +122,7 @@ The bound is attained at every $E$, as the tightness argument predicts: that arg
 
 ### Context
 
-Asking $2^n$ questions is not realistic. Dinur and Nissim showed that a number of *random* subsets only a logarithmic factor above $n$ suffices, with an efficient decoder. Instead of checking every bit vector, the decoder lets each unknown be any number between 0 and 1, finds a fractional vector consistent with the answers by linear programming (LP), and rounds it. A linear program finds a point that satisfies a list of linear inequalities, and it can be solved in time polynomial in the number of unknowns and inequalities.
+Asking $2^n$ questions is not realistic. Dinur and Nissim showed that a number of *random* subsets only a polylogarithmic factor above $n$ suffices, with an efficient decoder: their proof asks $n(\log n)^2$ of them, and the version proved below needs $O(n\log n)$. Instead of checking every bit vector, the decoder lets each unknown be any number between 0 and 1, finds a fractional vector consistent with the answers by linear programming (LP), and rounds it. A linear program finds a point that satisfies a list of linear inequalities, and it can be solved in time polynomial in the number of unknowns and inequalities.
 
 The price is that the error must now be $o(\sqrt n)$ instead of $o(n)$, and the reason is that a random query cannot aim at the wrong coordinates. Suppose a candidate differs from $d$ by a vector with $k$ entries of constant size. A random subset picks up each of those entries with probability $\frac12$, so its sum of the difference behaves like a sum of $k$ coin-flip terms, which fluctuates by about $\sqrt k$, not $k$. An error below $\sqrt k$ cannot hide that fluctuation. The key step is to show that the sum does fluctuate this much with constant probability, whatever the signs of the entries, and that is where the anti-concentration of Fact 3 comes in.
 
@@ -150,14 +150,14 @@ In words: error $o(\sqrt n)$ on $O(n\log n)$ random subset sums lets the attacke
 **The lemma.** The plan is to apply Paley–Zygmund (@eq-recon-pz) to $W = Y^2$, where $Y = \langle q, z\rangle$ is the random subset sum. That needs the second and fourth moments of $Y$, and Fact 2 provides them once $Y$ is written as a constant plus a random-sign sum. So write the random subset as $q_i = (1 + s_i)/2$ with independent fair signs $s_i$.
 
 1. **Split the sum into a constant and a random-sign part.** $Y = \langle q, z\rangle = \mu + X$, with the constant $\mu = \frac12\sum_iz_i$ and $X = \frac12\sum_is_iz_i$, a random-sign sum with coefficients $a_i = z_i/2$.
-2. **Compute the second moment.** By Fact 2, $\mathbb E X = 0$ and $\sigma^2 := \mathbb E X^2 = \sum_ia_i^2 = \frac14\sum_iz_i^2$. Expanding $(\mu + X)^2$, the cross term $2\mu\,\mathbb E X$ vanishes, so $\mathbb E Y^2 = \mu^2 + \sigma^2$.
-3. **Bound the fourth moment by 3 times the squared second moment.** Expand $(\mu + X)^4 = \mu^4 + 4\mu^3X + 6\mu^2X^2 + 4\mu X^3 + X^4$. The terms with $\mathbb E X$ and $\mathbb E X^3$ vanish, since odd moments of a random-sign sum are 0. Fact 2 gives $\mathbb E X^4 \le 3(\sum_ia_i^2)^2 = \frac{3}{16}(\sum_iz_i^2)^2 = 3\sigma^4$. So
-$$\mathbb E Y^4 = \mu^4 + 6\mu^2\sigma^2 + \mathbb E X^4 \le \mu^4 + 6\mu^2\sigma^2 + 3\sigma^4 \le 3(\mu^2 + \sigma^2)^2,$$
-where the last step holds because $3(\mu^2 + \sigma^2)^2 = 3\mu^4 + 6\mu^2\sigma^2 + 3\sigma^4$ is larger by $2\mu^4 \ge 0$.
-4. **Apply Paley–Zygmund** (@eq-recon-pz) with $W = Y^2$, whose mean is $\mu^2 + \sigma^2$. Step 3 says $(\mathbb E Y^2)^2/\mathbb E Y^4 \ge \frac13$, so $\Pr[Y^2 > \theta(\mu^2 + \sigma^2)] \ge (1 - \theta)^2(\mathbb E Y^2)^2/\mathbb E Y^4 \ge (1 - \theta)^2/3$.
-5. **Drop the mean.** Since $\mu^2 + \sigma^2 \ge \sigma^2$, the event $Y^2 > \theta(\mu^2 + \sigma^2)$ implies $Y^2 > \theta\sigma^2$, that is $|Y| > \sqrt\theta\,\sigma$. So $\Pr[|Y| > \sqrt\theta\,\sigma] \ge (1 - \theta)^2/3$. A non-zero mean only helps: it pushes $Y$ away from 0.
-6. **Use the large coordinates to bound $\sigma$ from below.** At least $\beta n$ coordinates have $z_i^2 \ge \frac19$, and the others contribute $z_i^2 \ge 0$, so $\sigma^2 = \frac14\sum_iz_i^2 \ge \frac14\cdot\frac{\beta n}{9}$ and $\sigma \ge \sqrt{\beta n}/6$.
-7. **Choose $\theta = \frac14$.** Then $\sqrt\theta\,\sigma \ge \frac12\cdot\sqrt{\beta n}/6 = \sqrt{\beta n}/12$, and the probability is at least $(3/4)^2/3 = (9/16)/3 = 3/16$. This gives @eq-recon-anti.
+2. **Compute the second moment.** By Fact 2, $\mathbb E X = 0$, and the variance of the random-sign part, written $\tau^2$ so that $\tau$ is its standard deviation, is $\tau^2 := \mathbb E X^2 = \sum_ia_i^2 = \frac14\sum_iz_i^2$. Expanding $(\mu + X)^2$, the cross term $2\mu\,\mathbb E X$ vanishes, so $\mathbb E Y^2 = \mu^2 + \tau^2$.
+3. **Bound the fourth moment by 3 times the squared second moment.** Expand $(\mu + X)^4 = \mu^4 + 4\mu^3X + 6\mu^2X^2 + 4\mu X^3 + X^4$. The terms with $\mathbb E X$ and $\mathbb E X^3$ vanish, since odd moments of a random-sign sum are 0. Fact 2 gives $\mathbb E X^4 \le 3(\sum_ia_i^2)^2 = \frac{3}{16}(\sum_iz_i^2)^2 = 3\tau^4$. So
+$$\mathbb E Y^4 = \mu^4 + 6\mu^2\tau^2 + \mathbb E X^4 \le \mu^4 + 6\mu^2\tau^2 + 3\tau^4 \le 3(\mu^2 + \tau^2)^2,$$
+where the last step holds because $3(\mu^2 + \tau^2)^2 = 3\mu^4 + 6\mu^2\tau^2 + 3\tau^4$ is larger by $2\mu^4 \ge 0$.
+4. **Apply Paley–Zygmund** (@eq-recon-pz) with $W = Y^2$, whose mean is $\mu^2 + \tau^2$. Step 3 says $(\mathbb E Y^2)^2/\mathbb E Y^4 \ge \frac13$, so $\Pr[Y^2 > \theta(\mu^2 + \tau^2)] \ge (1 - \theta)^2(\mathbb E Y^2)^2/\mathbb E Y^4 \ge (1 - \theta)^2/3$.
+5. **Drop the mean.** Since $\mu^2 + \tau^2 \ge \tau^2$, the event $Y^2 > \theta(\mu^2 + \tau^2)$ implies $Y^2 > \theta\tau^2$, that is $|Y| > \sqrt\theta\,\tau$. So $\Pr[|Y| > \sqrt\theta\,\tau] \ge (1 - \theta)^2/3$. A non-zero mean only helps: it pushes $Y$ away from 0.
+6. **Use the large coordinates to bound $\tau$ from below.** At least $\beta n$ coordinates have $z_i^2 \ge \frac19$, and the others contribute $z_i^2 \ge 0$, so $\tau^2 = \frac14\sum_iz_i^2 \ge \frac14\cdot\frac{\beta n}{9}$ and $\tau \ge \sqrt{\beta n}/6$.
+7. **Choose $\theta = \frac14$.** Then $\sqrt\theta\,\tau \ge \frac12\cdot\sqrt{\beta n}/6 = \sqrt{\beta n}/12$, and the probability is at least $(3/4)^2/3 = (9/16)/3 = 3/16$. This gives @eq-recon-anti.
 
 **The theorem.** The idea is to show that a solution with many wrong bits would give a difference vector that no random query catches, and that, with enough queries, no such vector exists.
 
@@ -174,7 +174,7 @@ The threshold is $\sqrt n$ because a random query cannot aim at the wrong coordi
 
 Among difference vectors, the balanced ones are the hard case. If the wrong coordinates of $z$ all have the same sign, $\langle q, z\rangle$ has a large mean and escapes any small band almost surely. If they cancel, the mean is near 0 and only the fluctuation helps. Step 5 of the lemma covers both cases, because it drops the mean and relies on the fluctuation alone. @fig-recon-anticoncentration shows the two cases.
 
-The constants are poor, but the scaling is right. The theorem asks for $E$ below about $\sqrt{\beta n}/24$, which is what $2E + \frac12 \le \sqrt{\beta n}/12$ gives after dividing by 2, and for $m \approx 33n$ at $n = 1000$ (the example below). The union bound over $(n + 1)^n$ grid points costs the $\ln(n + 1)$ factor. Sharper analyses need only $m = O(n)$ queries, and Dwork, McSherry and Talwar (2007) show that the decoder even tolerates a constant fraction of answers with arbitrarily large error. In practice, the least-squares decoder of the next section with $m = 4n$ already works at errors of about $0.2\sqrt n$.
+The constants are poor, but the scaling is right. The theorem asks for $E$ below about $\sqrt{\beta n}/24$, which is what $2E + \frac12 \le \sqrt{\beta n}/12$ gives after dividing by 2, and for $m \approx 33n$ at $n = 1000$ (the example below). The union bound over $(n + 1)^n$ grid points costs the $\ln(n + 1)$ factor. Sharper analyses need only $m = O(n)$ queries. Dwork, McSherry and Talwar (2007) go further with a variant of the decoder: instead of requiring every answer to be within $E$, which a single wildly wrong answer makes impossible, it minimises the total absolute error $\lVert Ac - a\rVert_1$, and it tolerates a constant fraction of answers with arbitrarily large error. In practice, the least-squares decoder of the next section with $m = 4n$ already works at errors of about $0.2\sqrt n$.
 
 Random queries are not essential either. Dinur and Nissim's queries were random to make the proof work. Real attacks use whatever queries the system answers. Cohen and Nissim (2020) ran a linear-programming reconstruction against a commercial query system that added noise to its answers, and recovered most of a secret column.
 
@@ -185,8 +185,8 @@ Random queries are not essential either. Dinur and Nissim's queries were random 
 Take $n = 1000$ people and target $\beta = 0.1$, so at most $0.1 \times 1000 = 100$ wrong bits. The lemma's threshold is $\sqrt{\beta n}/12 = \sqrt{100}/12 = 0.8333$. The script estimates the escape probability, the chance that a random subset sum lands outside the band $\pm0.8333$, over 100 000 random subsets for the two difference vectors of @fig-recon-anticoncentration: 0.6161 for the balanced one and 1.0000 for the aligned one, against the guaranteed 0.1875. The lemma is far from tight for both.
 
 The theorem's condition $2E + \frac12 \le \sqrt{\beta n}/12$ then allows an error of $E \le \sqrt{\beta n}/24 - \frac14 = 0.4167 - 0.25 = 0.1667$. With failure probability $\eta = 0.01$, so that $\ln(1/\eta) = \ln 100$, @eq-recon-lp asks for
-$$m \ge \frac{1000\ln1001 + \ln100}{\ln(16/13)} = 33\,295 \text{ queries},$$
-about $33n$. Both constants are far from what the attack needs in practice, but they come with a complete proof.
+$$m \ge \frac{1000\ln1001 + \ln100}{\ln(16/13)} = 33\,295.04,$$
+so at least 33 296 queries, about $33n$. Both constants are far from what the attack needs in practice, but they come with a complete proof.
 
 ### Check yourself
 
@@ -284,8 +284,8 @@ The attacks so far say when answers are too accurate. Two questions remain. Is e
 
 : The regimes of reconstruction from subset sums. The first three rows are attacks; the last two are limits on attacks. {#tbl-recon-law}
 
-**A sampling curator.** To show that error of order $\sqrt n$ can stop reconstruction, you need a curator whose errors are that small yet hide many bits completely. The idea is to answer from a random sample of the people and scale up. The curator draws a secret set $T$, keeping each person independently with probability $p$, and answers every query by $a_j = \frac1p\sum_{i \in S_j \cap T}d_i$. Dividing by $p$ makes each answer correct on average, and its error is a sum of independent zero-mean terms, one per person, so it is of order $\sqrt n$. People outside $T$ never affect any answer, so nothing reveals their bits. Then with probability at least $1 - \beta$, all $m$ answers have error at most
-$$\max_j|a_j - \langle q_j, d\rangle| \le \sqrt{\frac{n\ln(2m/\beta)}{2p^2}},$$ {#eq-recon-hoeffding}
+**A sampling curator.** To show that error of order $\sqrt n$ can stop reconstruction, you need a curator whose errors are that small yet hide many bits completely. The idea is to answer from a random sample of the people and scale up. The curator draws a secret set $T$, keeping each person independently with probability $p$, and answers every query by $a_j = \frac1p\sum_{i \in S_j \cap T}d_i$. Dividing by $p$ makes each answer correct on average, and its error is a sum of independent zero-mean terms, one per person, so it is of order $\sqrt n$. People outside $T$ never affect any answer, so nothing reveals their bits. Then, for a failure probability $\eta$, with probability at least $1 - \eta$ all $m$ answers have error at most
+$$\max_j|a_j - \langle q_j, d\rangle| \le \sqrt{\frac{n\ln(2m/\eta)}{2p^2}},$$ {#eq-recon-hoeffding}
 and if $d$ is uniform, no attacker recovers an expected fraction of more than $p + \frac{1 - p}{2}$ of the bits; at $p = \frac12$, $\frac12 + \frac14$, three quarters.
 
 **An information bound.** To bound the number of queries any attack needs, count bits of information. The secret is $n$ uniform bits, so it carries $n$ bits of information. An answer that takes at most $V$ values can carry at most $\log_2V$ bits. A guess that is wrong on a fraction $\beta$ of the bits still leaves some uncertainty, measured by the **binary entropy** $h(\beta) = -\beta\log_2\beta - (1 - \beta)\log_2(1 - \beta)$, the uncertainty in bits of a coin that comes up heads with probability $\beta$. So the answers must carry at least $n(1 - h(\beta))$ bits. Precisely, let $d$ be uniform on $\{0, 1\}^n$, and let each of the $m$ answers take at most $V$ values (for example, exact counts take $V = n + 1$ values). If an attacker's guess $\hat d$ has an expected fraction $\beta \le \frac12$ of wrong bits, then
@@ -298,7 +298,7 @@ where $h$ is the binary entropy function in bits.
 
 1. **Write the error as a sum.** With $t_i = \mathbf 1[i \in T]$, the answer is $\sum_{i \in S_j}d_it_i/p$, so the error of query $j$ is $\sum_{i \in S_j}d_i\big(\frac{t_i}{p} - 1\big)$. Only the $k \le n$ people with $d_i = 1$ in $S_j$ contribute. Their terms are independent, have mean $p\cdot\frac1p - 1 = 0$, and lie in $[-1, \frac1p - 1]$, an interval of length $\frac1p$.
 2. **Apply Hoeffding's inequality to the sum.** Hoeffding's inequality ([Concentration inequalities](../part01-prerequisites/02-concentration.md)) says that the mean of independent bounded terms is unlikely to stray far from its expectation, with a tail that falls like a Gaussian's. For a mean $\bar X$ of $k$ independent terms with range $\frac1p$ and expectation $\mu$, it reads $\Pr[\bar X - \mu \ge t] \le \exp(-2kt^2p^2)$. A sum deviates by $u$ when the mean deviates by $u/k$, so substituting $t = u/k$ and counting both tails, $\Pr[|\text{error}| \ge u] \le 2\exp(-2p^2u^2/k) \le 2\exp(-2p^2u^2/n)$, the last step because $k \le n$.
-3. **Union bound over the $m$ queries.** The probability that some answer has error at least $u$ is at most the sum over the $m$ queries: $\Pr[\text{some error} \ge u] \le 2m\exp(-2p^2u^2/n)$. Set this equal to $\beta$ and solve: $2p^2u^2/n = \ln(2m/\beta)$, so $u^2 = n\ln(2m/\beta)/(2p^2)$, which is @eq-recon-hoeffding.
+3. **Union bound over the $m$ queries.** The probability that some answer has error at least $u$ is at most the sum over the $m$ queries: $\Pr[\text{some error} \ge u] \le 2m\exp(-2p^2u^2/n)$. Set this equal to $\eta$ and solve: $2p^2u^2/n = \ln(2m/\eta)$, so $u^2 = n\ln(2m/\eta)/(2p^2)$, which is @eq-recon-hoeffding.
 
 **What the attacker can learn.** The idea is that a person outside $T$ is invisible to every answer.
 
@@ -327,7 +327,7 @@ The law has two halves, and a defence must control both. "Overly accurate" is th
 
 ### Example: three curators
 
-**The sampling curator at $n = 500$, $m = 2000$.** With $p = \frac12$ the script keeps 250 of the 500 people. The largest error over the 2000 queries is 28.00, or $28.00/\sqrt{500} = 1.25\sqrt n$. That is well under the Hoeffding bound at $\beta = 0.05$: with $p = \frac12$, $2p^2 = \frac12$, so @eq-recon-hoeffding is $\sqrt{2 \cdot 500\ln(4000/0.05)} = 106.25$. (Hoeffding assumes the worst-case spread of each term; the actual terms have a smaller variance.) Least squares on these answers recovers 0.7560 of the bits, right at the ceiling of $\frac34$.
+**The sampling curator at $n = 500$, $m = 2000$.** With $p = \frac12$ the script keeps 250 of the 500 people. The largest error over the 2000 queries is 28.00, or $28.00/\sqrt{500} = 1.25\sqrt n$. That is well under the Hoeffding bound at $\eta = 0.05$: with $p = \frac12$, $2p^2 = \frac12$, so @eq-recon-hoeffding is $\sqrt{2 \cdot 500\ln(4000/0.05)} = 106.25$. (Hoeffding assumes the worst-case spread of each term; the actual terms have a smaller variance.) Least squares on these answers recovers 0.7560 of the bits, right at the ceiling of $\frac34$.
 
 **The information bound at $n = 1000$.** For at most 5% wrong bits, $h(0.05) = 0.2864$, so each person still needs $1 - 0.2864 = 0.7136$ bits. Exact answers ($V = 1001$) carry at most $\log_21001 \approx 9.97$ bits each and need $m \ge 1000 \times 0.7136/\log_21001 = 71.6$ queries, so at least 72. If the curator rounds every count to a multiple of 10, an answer takes at most $\lfloor1000/10\rfloor + 2 = 102$ values (the 101 multiples of 10 from 0 to 1000, plus one to be safe; the script uses $\lfloor n/w\rfloor + 2$ for every width $w$), and the bound rises to 106.9. Rounding to multiples of 32 leaves $\lfloor 1000/32\rfloor + 2 = 33$ values and a bound of 141.5. These are lower bounds for any attack, whatever its running time.
 
@@ -342,7 +342,7 @@ The law has two halves, and a defence must control both. "Overly accurate" is th
 
 ### Context
 
-National statistical offices publish many tables computed from the same confidential records: counts by age, sex and race for every block, the same counts by household type, medians and means, and so on. Each table cell is a query. Garfinkel, Abowd and Martindale (2019) showed with a toy block of seven people that a modest set of published statistics can determine every person's age, sex, race and marital status, and that a constraint solver finds the solution in seconds. The US Census Bureau then ran the attack on its own 2010 publications at national scale.
+National statistical offices publish many tables computed from the same confidential records: counts by age, sex and race for every block, the same counts by household type, medians and means, and so on. Each table cell is a query. Garfinkel, Abowd and Martindale (2019) showed with a toy block of seven people that a modest set of published statistics can determine every person's age, sex, race and marital status, and that a constraint solver finds the solution in seconds. By then the US Census Bureau had already run the attack on its own 2010 publications at national scale, an experiment Abowd (2021) later described in detail.
 
 This section repeats the toy experiment with a block of our own. It is a reconstruction game where the queries are not random subsets but the tables an agency actually publishes, and where the decoder is a search over all databases consistent with them.
 
@@ -435,7 +435,7 @@ uv run python code/part02-attacks/reconstruction.py
 | Exponential attack, $n = 10$ | Survivors 1, 35, 242, 630, 912 and largest distance 0, 2, 4, 6, 8 for $E = 0, 0.5, 1, 1.5, 2$; rounding to multiples of 2 or 4: one survivor |
 | Fact 2 | $\mathbb E(s_1 + s_2 + s_3)^4 = 21$ by enumeration and by formula |
 | Lemma, $n = 1000$, $\beta = 0.1$ | Threshold 0.8333; escape probability 0.6161 (balanced), 1.0000 (aligned), bound 0.1875 |
-| Theorem, $n = 1000$, $\beta = 0.1$, $\eta = 0.01$ | $E \le 0.1667$; $m \ge 33\,295$ ($33.3n$) |
+| Theorem, $n = 1000$, $\beta = 0.1$, $\eta = 0.01$ | $E \le 0.1667$; $m \ge 33\,296$ ($33.3n$) |
 | Least squares, Gaussian noise, $n = 500$, $m = 2000$ | @tbl-recon-ls; $m/n$ for 90% recovery: 106.1 at $\sigma = 2\sqrt n$, 657.9 at $5\sqrt n$ |
 | Least squares, worst case, $n = 500$, $m = 2000$ | $s_{\min} = 11.43$ (approximation 11.18); wrong bits 0, 20, 143 for $E = 1, 2, 5.59$, bounds 61.2, 245.0, 1914.0 |
 | Sampling curator, $p = \frac12$ | Kept 250 of 500; max error 28.00 ($1.25\sqrt n$); Hoeffding bound 106.25; recovered 0.7560 |
@@ -463,7 +463,7 @@ uv run python code/part02-attacks/reconstruction.py
 
 ## Cheat sheet
 
-$d \in \{0, 1\}^n$ is the secret, $A$ the $m \times n$ 0/1 query matrix, $a = Ad + e$ the answers, $E$ a bound on every $|e_j|$, $\sigma$ the scale of random noise, $\beta$ a fraction of wrong bits. @tbl-recon-cheat collects the results.
+$d \in \{0, 1\}^n$ is the secret, $A$ the $m \times n$ 0/1 query matrix, $a = Ad + e$ the answers, $E$ a bound on every $|e_j|$, $\sigma$ the scale of random noise, $\beta$ a fraction of wrong bits, $\eta$ a failure probability. @tbl-recon-cheat collects the results.
 
 | Result | Statement | Proof idea |
 | --- | --- | --- |
@@ -473,7 +473,7 @@ $d \in \{0, 1\}^n$ is the secret, $A$ the $m \times n$ 0/1 query matrix, $a = Ad
 | Linear-programming decoder | $2E + \frac12 \le \sqrt{\beta n}/12$ and $m \ge \frac{n\ln(n+1) + \ln(1/\eta)}{\ln(16/13)}$: at most $\beta n$ wrong bits | Grid of step $1/n$, lemma, union bound |
 | Least squares, worst case | Wrong bits $\le 4mE^2/s_{\min}^2 \approx 16E^2/(1 - \sqrt{n/m})^2$ | $\lVert A^+e\rVert \le \lVert e\rVert/s_{\min}$ |
 | Least squares, Gaussian noise | Fraction recovered $\approx \Phi(\sqrt{m - n}/(4\sigma))$ | Covariance $\sigma^2(A^\top A)^{-1}$; inverse-Wishart mean |
-| Sampling curator | Error $\le \sqrt{n\ln(2m/\beta)/(2p^2)}$; recovery $\le p + \frac{1 - p}2$ | Hoeffding, union bound; unsampled bits are independent of the answers |
+| Sampling curator | Error $\le \sqrt{n\ln(2m/\eta)/(2p^2)}$; recovery $\le p + \frac{1 - p}2$ | Hoeffding, union bound; unsampled bits are independent of the answers |
 | Information bound | $m \ge n(1 - h(\beta))/\log_2V$ | DPI, chain rule, Fano for one bit, concavity of $h$ |
 
 : Every result in this chapter. {#tbl-recon-cheat}

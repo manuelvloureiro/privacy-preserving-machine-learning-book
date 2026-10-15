@@ -43,7 +43,7 @@ The same formula in the other direction: the toy release of the chapter, with cl
 2. **One pair.** Persons $i$ and $j$ are independent, so $\Pr[C_{ij} = 1] = \sum_c\Pr[i \in c]\Pr[j \in c] = \sum_cp_c^2$.
 3. **Linearity** (Fact 1): the expected number of sharing pairs is $\binom n2\sum_cp_c^2$.
 4. **Union bound.** "Somebody shares a cell" is the event that some $C_{ij} = 1$, and $\Pr[\bigcup_{i<j}\{C_{ij} = 1\}] \le \sum_{i<j}\Pr[C_{ij} = 1] = \binom n2\sum_cp_c^2$. (Equivalently, Markov's inequality applied to the number of sharing pairs.)
-5. **The example.** 730 equally likely cells give $\sum_cp_c^2 = 1/730$, and $\binom{30}{2} = 435$, so the bound is $435/730 = 0.596$. The exact probability, $1 - \prod_{i<30}(1 - i/730)$ as in the birthday bound of [Cryptographic basics](../../book-full/part01-prerequisites/08-crypto-basics.md), is 0.4534, and the lower bound $1 - e^{-0.5959} = 0.4489$.
+5. **The example.** 730 equally likely cells give $\sum_cp_c^2 = 1/730$, and $\binom{30}{2} = 435$, so the bound is $435/730 = 0.596$. The exact probability, $1 - \prod_{i<30}(1 - i/730)$ as in the birthday bound of [Cryptography basics](../../book-full/part01-prerequisites/08-crypto-basics.md), is 0.4534, and the lower bound $1 - e^{-0.5959} = 0.4489$.
 
 With birthdays alone (365 cells), the union bound is 1.192, useless as a probability, while the exact value is 0.7063.
 
