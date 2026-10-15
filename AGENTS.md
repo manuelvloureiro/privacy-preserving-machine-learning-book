@@ -91,6 +91,8 @@ make website   # fails on any warning: uncaptioned tables, unresolved @reference
 
 `book-practitioner/` covers the same topics as the full edition, in the same parts and chapters with the same file names, for people who build, review and audit private machine-learning systems. It has no proofs. A reader should come away knowing what each result says, when it applies, how to use it, and what goes wrong in practice. The rules above apply except where this section changes them. The reference chapter is [03-laplace-gaussian.md](book-practitioner/part03-dp-foundations/03-laplace-gaussian.md).
 
+**How much math.** It depends on the chapter. Keep exactly the math a practitioner needs to do the work: the formulas they calibrate, compute or check with (noise scales, composition, conversions, attack scores, error rates), each explained in words. Drop the math that only serves a proof. A chapter about a computation keeps its formulas; a chapter about a concept may need almost none.
+
 **Length.** A chapter is about 1,500–2,000 words of prose, not counting tables, figures and code: roughly a sixth of its full-edition chapter. Part 1 keeps all eight chapters, each shorter still: only the facts later parts use.
 
 **Chapter structure.**
@@ -110,4 +112,5 @@ make website   # fails on any warning: uncaptioned tables, unresolved @reference
 - **No exercises and no check-yourself questions,** and no links to the exercise book.
 - **Numbers come from the full edition's scripts.** Quote only numbers that the full edition's chapter quotes (so its test already checks them) or that a snippet on the page prints. Never compute a new number by hand.
 - **Figures come from the full edition's scripts.** Reuse its figures by name (`figures/<name>.svg`); a figure the practitioner edition needs and the full edition lacks is added to the chapter's script.
-- **Labels and links.** Labels may repeat the full edition's (`@sec-lg-laplace`), since each book resolves its own. Link to practitioner chapters for recaps, and to the full edition only for derivations.
+- **Labels and links.** Use the full edition's label prefix for the same chapter (`sec-lg-`, `eq-lg-`, `fig-lg-`, `tbl-lg-`), which keeps labels unique across the book. Use `@`-references only within a chapter; refer to another chapter by a link to its file. Link to practitioner chapters for recaps, by their final path even before they are written (`filters/fallback-links.lua` sends the reader to the full edition until then), and to the full edition only for derivations.
+- **Part pages.** Each part's `00-introduction.md` is one page of about 500–800 words: what the part is for and who needs it, the thread through its chapters, a captioned table mapping each chapter to the practical question it answers, and what the reader will be able to do at the end.
