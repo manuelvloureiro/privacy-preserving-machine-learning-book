@@ -10,5 +10,6 @@ It covers the same topics as the [full edition](../book-full/index.md), in the s
 2. **Threat models and attacks** shows how models and data leak: membership inference, attribute and property inference, memorization and extraction, gradient inversion, re-identification, and reconstruction from aggregate statistics.
 3. **Differential privacy foundations** defines the guarantee those attacks call for, builds its mechanisms, composes them, and says what privacy costs.
 4. **Privacy accounting** tracks the guarantee through the many steps of private training, and ends with how to choose an accountant and what to report.
+5. **Differential privacy in machine learning** trains models with the guarantee: where the noise goes, how the knobs of noisy, clipped gradient descent trade privacy for accuracy, what else spends the budget, who pays for the noise, which ε to choose, and how to audit the result.
 
 The numbers in the text are computed by the scripts in the repository's `code/` directory, the same ones the full edition uses, and tests check that the scripts still produce them.
