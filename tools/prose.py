@@ -353,7 +353,7 @@ def analyse(page: str, raw: str, limits: dict[str, Any], allowed: set[str], acro
                 if acronym in acronyms and acronym not in seen_acronyms:
                     seen_acronyms.add(acronym)
                     # "**true positive rate** (TPR)" is one concept, already counted as the bold term.
-                    if not re.search(rf"\*\*[^*]+\*\*\s*\({acronym}\)", source):
+                    if not re.search(rf"\*\*[^*]+\*\*\s*\({acronym}\)|\*\*[^*]+\({acronym}\)\*\*", source):
                         new_concepts += 1
             sentences.append(s)
         words = sum(s.words for s in sentences)
