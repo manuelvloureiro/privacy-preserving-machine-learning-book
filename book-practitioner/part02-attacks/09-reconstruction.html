@@ -542,13 +542,15 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">17.1</span> Why this matters</a></li>
-  <li><a href="#sec-recon-threshold" id="toc-sec-recon-threshold" class="nav-link" data-scroll-target="#sec-recon-threshold"><span class="header-section-number">17.2</span> How accurate is too accurate?</a></li>
-  <li><a href="#sec-recon-ls" id="toc-sec-recon-ls" class="nav-link" data-scroll-target="#sec-recon-ls"><span class="header-section-number">17.3</span> Least squares under random and worst-case error</a></li>
-  <li><a href="#sec-recon-law" id="toc-sec-recon-law" class="nav-link" data-scroll-target="#sec-recon-law"><span class="header-section-number">17.4</span> The Fundamental Law: what stops reconstruction, and what doesn’t</a></li>
-  <li><a href="#sec-recon-census" id="toc-sec-recon-census" class="nav-link" data-scroll-target="#sec-recon-census"><span class="header-section-number">17.5</span> Reconstructing a census block</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">17.6</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">17.7</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">17.8</span> Further reading</a></li>
+  <li><a href="#sec-recon-toolkit" id="toc-sec-recon-toolkit" class="nav-link" data-scroll-target="#sec-recon-toolkit"><span class="header-section-number">17.2</span> Counts are linear equations</a></li>
+  <li><a href="#sec-recon-exponential" id="toc-sec-recon-exponential" class="nav-link" data-scroll-target="#sec-recon-exponential"><span class="header-section-number">17.3</span> The exponential attack</a></li>
+  <li><a href="#sec-recon-lp" id="toc-sec-recon-lp" class="nav-link" data-scroll-target="#sec-recon-lp"><span class="header-section-number">17.4</span> The linear-programming decoder</a></li>
+  <li><a href="#sec-recon-ls" id="toc-sec-recon-ls" class="nav-link" data-scroll-target="#sec-recon-ls"><span class="header-section-number">17.5</span> Least squares under worst-case and random error</a></li>
+  <li><a href="#sec-recon-law" id="toc-sec-recon-law" class="nav-link" data-scroll-target="#sec-recon-law"><span class="header-section-number">17.6</span> The Fundamental Law of Information Recovery</a></li>
+  <li><a href="#sec-recon-census" id="toc-sec-recon-census" class="nav-link" data-scroll-target="#sec-recon-census"><span class="header-section-number">17.7</span> Reconstructing a census block</a></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">17.8</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">17.9</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">17.10</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
@@ -576,26 +578,202 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="17.1">
 <h2 data-number="17.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">17.1</span> Why this matters</h2>
-<p>A hospital keeps one sensitive bit per patient, whether they tested positive, and never releases it. It only answers counting questions, “how many of patients 3, 17, 42, … tested positive?”, and adds a little noise to every answer. Is that safe? Dinur and Nissim (2003) showed that it is not, unless the noise is large. Each answer is a linear equation whose unknowns are the patients’ bits, so a table of aggregates is a system of equations, and enough equations with small enough errors determine the unknowns.</p>
-<p>The error of the answers is therefore the only thing standing between the attacker and the solution, and it fails in two ways. It can be too small: to hide a wrong guess, the error must be as large as the amount by which that guess changes the answers, which for a random query is about <span class="math inline">\(\sqrt n\)</span>, where <span class="math inline">\(n\)</span> is the number of people. Or there can be too many answers: errors that are independent from answer to answer are averaged away by asking more. Dwork and Roth call this the <strong>Fundamental Law of Information Recovery</strong>: overly accurate answers to too many questions destroy privacy. If you run or audit a system that answers aggregate queries, check both.</p>
-<p>Throughout, the secret is a bit vector <span class="math inline">\(d = (d_1, \dots, d_n)\)</span>, one bit per person. A <strong>subset-sum query</strong> asks how many people in a set <span class="math inline">\(S\)</span> have bit 1. The <strong>curator</strong>, the party holding <span class="math inline">\(d\)</span>, answers <span class="math inline">\(m\)</span> queries, each with an error, and “error at most <span class="math inline">\(E\)</span>” means every answer is within <span class="math inline">\(E\)</span> of the truth.</p>
+<p>A hospital keeps one sensitive bit for each patient, recording whether that patient tested positive. It never releases the bits. It only answers counting questions such as “how many of the patients on this list tested positive?”, and to be safe it adds a little noise to every answer. Dinur and Nissim (2003) showed that this is not safe unless the noise is large. Each answer is a linear equation whose unknowns are the patients’ bits. A table of counts is therefore a system of equations, and enough equations with small enough errors determine the unknowns.</p>
+<p><a href="../part02-attacks/01-threat-models.html">Threat models and privacy games</a> set this up as the <strong>reconstruction game</strong>. The secret is a whole column of the dataset, and the attacker is scored by the fraction of entries it recovers. For bits that are equally likely to be 0 or 1, the baseline is one half, the score of guessing at random. That chapter showed that a single exact count barely beats this baseline. The count tells you which value is in the majority, but nothing about who holds it. This chapter shows what happens when the attacker gets many counts.</p>
+<p>The only thing standing between the attacker and the solution is the error in the answers, and that protection can fail in two ways. The first is error that is too small. To hide a wrong guess, the error has to be as large as the amount by which that guess changes the answers. A randomly chosen question picks up each wrong bit of the guess only about half the time, like a coin flip. So when the guess is wrong on a sizable share of the people, the change behaves like a sum of coin flips. It is then about the square root of the number of people.</p>
+<p>The second failure is too many answers. Errors that are independent from one answer to the next, and do not grow with the number of questions, are averaged away as the attacker asks more. Dwork and Roth call this the <strong>Fundamental Law of Information Recovery</strong>: overly accurate answers to too many questions destroy privacy. If you run or audit a system that answers aggregate queries, you have to check both halves of the law.</p>
 </section>
-<section id="sec-recon-threshold" class="level2" data-number="17.2">
-<h2 data-number="17.2" class="anchored" data-anchor-id="sec-recon-threshold"><span class="header-section-number">17.2</span> How accurate is too accurate?</h2>
-<p>Start with the strongest attacker, who may ask all <span class="math inline">\(2^n\)</span> subset sums, and throws away every candidate database that contradicts an answer by more than the curator’s error allows. Any candidate <span class="math inline">\(c\)</span> that survives is close to <span class="math inline">\(d\)</span>, for a simple reason. The bits where <span class="math inline">\(c\)</span> is wrong form two sets: the ones it missed and the ones it invented. The attacker asked about both. On the set of missed ones, <span class="math inline">\(d\)</span> sums to the size of the set and <span class="math inline">\(c\)</span> to zero, yet both are within <span class="math inline">\(E\)</span> of the same published answer, so the set has at most <span class="math inline">\(2E\)</span> people; the same holds for the invented ones. A surviving candidate therefore has at most <span class="math inline">\(4E\)</span> wrong bits, and the bound is tight. With <span class="math inline">\(n = 10^6\)</span> people and every answer off by up to 1000, the attacker gets at most 4,000 bits wrong, 0.4% of them. Error well below <span class="math inline">\(n\)</span> is useless against unlimited queries; a curator whose error lets the attacker recover all but a vanishing fraction of the bits is called <strong>blatantly non-private</strong>.</p>
-<p>Dinur and Nissim’s main result replaces the <span class="math inline">\(2^n\)</span> questions with random subsets, each including every person with probability <span class="math inline">\(\frac12\)</span>. The price is a lower threshold, and the reason is that a random query cannot aim. Suppose a candidate is wrong on <span class="math inline">\(k\)</span> bits. A query aimed at exactly those bits would move the answer by <span class="math inline">\(k\)</span>, but a random query picks up each wrong bit with probability <span class="math inline">\(\frac12\)</span>, so its sum over them behaves like <span class="math inline">\(k\)</span> coin flips and moves by only about <span class="math inline">\(\sqrt k\)</span>. An error below that scale cannot hide a candidate wrong on a constant fraction of the bits. So with error well below <span class="math inline">\(\sqrt n\)</span> on a number of random queries slightly above <span class="math inline">\(n\)</span>, a <strong>linear-program decoder</strong> recovers all but a small fraction of the bits in polynomial time: it finds any vector with entries between 0 and 1 whose answers are within <span class="math inline">\(E\)</span> of every published answer, and rounds it.</p>
-<p>The proved constants are poor; at <span class="math inline">\(n = 1000\)</span> the proof needs about <span class="math inline">\(33n\)</span> queries. Don’t read them as a safety margin, because the scaling is what matters and real attacks beat the constants easily: least squares with <span class="math inline">\(m = 4n\)</span> already recovers 96.55% of the bits under Gaussian noise of <span class="math inline">\(\sigma = 0.25\sqrt n\)</span> (<a href="#sec-recon-ls" class="quarto-xref"><span>Section 17.3</span></a>). Random queries aren’t needed either. Cohen and Nissim (2020) ran a linear-program reconstruction against a commercial query system that added noise to its answers and recovered most of a secret column.</p>
-<p>The same logic says which distortions don’t count as noise. A curator that rounds every answer to a multiple of 4 has error at most 2, but the rounding is a known function of the true sum, so an attacker who applies it to each candidate’s answers recovers <span class="math inline">\(d\)</span> exactly. And a few wildly wrong answers don’t help the curator: a variant of the decoder that minimises the total absolute error, instead of requiring every answer to fit, tolerates a constant fraction of them (Dwork, McSherry and Talwar, 2007).</p>
+<section id="sec-recon-toolkit" class="level2" data-number="17.2">
+<h2 data-number="17.2" class="anchored" data-anchor-id="sec-recon-toolkit"><span class="header-section-number">17.2</span> Counts are linear equations</h2>
+<p>Write the secret as a list of bits <span class="math inline">\(d = (d_1, \dots, d_n)\)</span>, one per person, where <span class="math inline">\(n\)</span> is the number of people. A <strong>subset-sum query</strong> names a set of people and asks how many of them have bit 1. You can write the query as a vector <span class="math inline">\(q\)</span> of zeros and ones, with a 1 for each person in the set. Its true answer is the inner product <span class="math inline">\(\langle q, d\rangle\)</span>, which adds up the bits of the people in the set. <a href="#tbl-recon-subsets" class="quarto-xref">Table&nbsp;<span>17.1</span></a> shows six of the 16 possible queries about four people whose secret is <span class="math inline">\((1, 0, 1, 1)\)</span>.</p>
+<div id="tbl-recon-subsets" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-subsets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.1: Six subset sums of the secret <span class="math inline">\(d = (1, 0, 1, 1)\)</span>. Each is a linear equation in the four secret bits.
+</figcaption>
+<div aria-describedby="tbl-recon-subsets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Subset</th>
+<th><span class="math inline">\(\{1\}\)</span></th>
+<th><span class="math inline">\(\{2\}\)</span></th>
+<th><span class="math inline">\(\{1, 2\}\)</span></th>
+<th><span class="math inline">\(\{3, 4\}\)</span></th>
+<th><span class="math inline">\(\{2, 3, 4\}\)</span></th>
+<th><span class="math inline">\(\{1, 2, 3, 4\}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Query vector <span class="math inline">\(q\)</span></td>
+<td>1000</td>
+<td>0100</td>
+<td>1100</td>
+<td>0011</td>
+<td>0111</td>
+<td>1111</td>
+</tr>
+<tr class="even">
+<td>True answer <span class="math inline">\(\langle q, d\rangle\)</span></td>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The party that holds the secret and answers the queries is called the <strong>curator</strong>. The attacker asks <span class="math inline">\(m\)</span> queries, and they form the rows of a <strong>query matrix</strong> <span class="math inline">\(A\)</span> with one row per query and one column per person. The true answers are then the entries of <span class="math inline">\(Ad\)</span>. The curator publishes the answers <span class="math inline">\(a = Ad + e\)</span>, where the error vector <span class="math inline">\(e\)</span> holds one error per query. Write <span class="math inline">\(E\)</span> for a bound on the size of every error, so that every published answer is within <span class="math inline">\(E\)</span> of the true one.</p>
+<p>With exact answers there is nothing to attack. In the example, the four queries about a single person reveal the four bits directly. More generally, any <span class="math inline">\(n\)</span> queries whose vectors are linearly independent determine the secret, because Gaussian elimination solves the system. Everything interesting in this chapter is about answers with error.</p>
+<p>Linearity also tells the attacker how to rule out a wrong guess. Suppose the attacker considers a candidate secret <span class="math inline">\(c\)</span>. On any query, the candidate’s answer differs from the true answer by the subset sum of the difference <span class="math inline">\(c - d\)</span> over the same set. The candidate is ruled out if this gap between the two answers is larger than the curator’s error could explain. Every attack below is a way of finding such a query for every candidate that is far from the truth.</p>
 </section>
-<section id="sec-recon-ls" class="level2" data-number="17.3">
-<h2 data-number="17.3" class="anchored" data-anchor-id="sec-recon-ls"><span class="header-section-number">17.3</span> Least squares under random and worst-case error</h2>
-<p>The attack you would actually run is simpler. <strong>Least squares</strong> picks the vector whose answers come closest to the published ones in squared distance, then clips each coordinate to <span class="math inline">\([0, 1]\)</span> and rounds it. Because its output is a linear function of the answers, its error is a linear function of the curator’s, and you can predict its success.</p>
-<p>With independent Gaussian noise of standard deviation <span class="math inline">\(\sigma\)</span> on each of <span class="math inline">\(m\)</span> random subset sums, each decoded coordinate is off by a normal error with standard deviation about <span class="math inline">\(2\sigma/\sqrt{m - n}\)</span>. The reasoning is the familiar one for averages: <span class="math inline">\(n\)</span> equations are needed to pin down <span class="math inline">\(n\)</span> unknowns, and the <span class="math inline">\(m - n\)</span> beyond those average the noise down by <span class="math inline">\(\sqrt{m - n}\)</span>; the factor 2 appears because a random query includes each person only half the time. A bit comes out wrong when its error crosses <span class="math inline">\(\frac12\)</span>, so the expected fraction recovered is <span id="eq-recon-ls-random"><span class="math display">\[\Phi\left(\frac{\sqrt{m - n}}{4\sigma}\right), \tag{17.1}\]</span></span> where <span class="math inline">\(\Phi\)</span> is the standard normal cumulative distribution function. Two consequences follow. At a fixed ratio <span class="math inline">\(m/n\)</span>, only <span class="math inline">\(\sigma/\sqrt n\)</span> matters, so <span class="math inline">\(\sqrt n\)</span> is again the scale of the threat. And at a fixed <span class="math inline">\(\sigma\)</span> the fraction tends to 1 as <span class="math inline">\(m\)</span> grows, so to hold the attack at a fixed accuracy the noise must grow like <span class="math inline">\(\sqrt m\)</span>.</p>
-<p><a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.1</span></a> checks the formula on four random databases of <span class="math inline">\(n = 500\)</span> bits with <span class="math inline">\(m = 2000\)</span> queries.</p>
+<section id="sec-recon-exponential" class="level2" data-number="17.3">
+<h2 data-number="17.3" class="anchored" data-anchor-id="sec-recon-exponential"><span class="header-section-number">17.3</span> The exponential attack</h2>
+<p>Start with the strongest attacker, who may ask all <span class="math inline">\(2^n\)</span> subset sums. How large must the curator’s error be before this attacker can no longer pin the secret down? The answer is an error that grows in proportion to <span class="math inline">\(n\)</span>, and the reason takes only a few steps.</p>
+<p>The attacker cannot know the secret, but it can throw away every candidate that contradicts an answer. Call a candidate <strong>consistent</strong> if each of its subset sums is within <span class="math inline">\(E\)</span> of the published answer. The true secret is always consistent, so at least one candidate survives, and the attacker outputs any consistent candidate.</p>
+<p>The people on whom a consistent candidate <span class="math inline">\(c\)</span> is wrong fall into two sets. One set holds the people whose bit is 1 but whom the candidate sets to 0. The other holds the people whose bit is 0 but whom the candidate sets to 1. The attacker has asked about both sets, since it asked about every set. On the first set, the true secret sums to the size of the set and the candidate sums to zero. Both sums are within <span class="math inline">\(E\)</span> of the same published answer, so they are within <span class="math inline">\(2E\)</span> of each other, and the set holds at most <span class="math inline">\(2E\)</span> people. The same argument limits the second set to <span class="math inline">\(2E\)</span> people. The number of bits on which <span class="math inline">\(c\)</span> and <span class="math inline">\(d\)</span> differ is called their <strong>Hamming distance</strong>, and it therefore satisfies <span id="eq-recon-exp"><span class="math display">\[\mathrm{dist}(c, d) \le 4E. \tag{17.1}\]</span></span></p>
+<p>The bound is tight. Flip about <span class="math inline">\(2E\)</span> of the secret’s ones to zeros and as many zeros to ones. Within any set, the flips to zero lower the candidate’s sum and the flips to one raise it. They partly cancel, so the two sums differ by at most <span class="math inline">\(2E\)</span>. A curator that answers halfway between them is within <span class="math inline">\(E\)</span> of both and keeps the candidate. It is wrong on <span class="math inline">\(4E\)</span> bits when <span class="math inline">\(2E\)</span> is a whole number and the secret has enough ones and zeros to flip.</p>
+<p>The argument assumes nothing about how the curator picks its errors except that each is at most <span class="math inline">\(E\)</span>. The errors may be chosen by an adversary, even one that has seen the attacker’s candidate. By <a href="#eq-recon-exp" class="quarto-xref">Equation&nbsp;<span>17.1</span></a>, a curator whose error is a smaller and smaller fraction of <span class="math inline">\(n\)</span> as <span class="math inline">\(n\)</span> grows lets the attacker recover all but a vanishing fraction of the bits. Dinur and Nissim call such a curator <strong>blatantly non-private</strong>. For example, take a million people with every answer off by up to 1000. The attacker then gets at most 4,000 bits wrong, only 0.4% of them.</p>
+<p>The bound is a worst case over curators, so a particular curator can leak far more than it suggests. A curator that rounds every answer to a multiple of 4 has error at most 2, but the rounding is a known function of the true sum. An attacker who applies the same rounding to each candidate’s sums therefore recovers the secret exactly. A distortion that the attacker can simulate is not noise.</p>
+<p>The proof uses only two queries, the two sets of wrong bits. The attacker does not know these sets in advance, because it does not know which bits it got wrong, and that is why it needs every answer. It also has to check <span class="math inline">\(2^n\)</span> candidates against <span class="math inline">\(2^n\)</span> answers, so the attack is far too slow to run on real data.</p>
+<p><a href="#tbl-recon-exp" class="quarto-xref">Table&nbsp;<span>17.2</span></a> runs the attack on ten people whose secret has four ones, checking all 1024 candidates against all 1024 subset sums. It counts, for each error, the candidates that some curator with that error can make consistent, and finds the farthest of them from the secret.</p>
+<div id="tbl-recon-exp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-exp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.2: The exponential attack on <span class="math inline">\(n = 10\)</span> bits. Every surviving candidate is within <span class="math inline">\(4E\)</span> of <span class="math inline">\(d\)</span>, and the bound is attained.
+</figcaption>
+<div aria-describedby="tbl-recon-exp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Error <span class="math inline">\(E\)</span></th>
+<th>0</th>
+<th>0.5</th>
+<th>1</th>
+<th>1.5</th>
+<th>2</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Candidates that survive</td>
+<td>1</td>
+<td>35</td>
+<td>242</td>
+<td>630</td>
+<td>912</td>
+</tr>
+<tr class="even">
+<td>Largest distance to <span class="math inline">\(d\)</span></td>
+<td>0</td>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<td>Bound <span class="math inline">\(4E\)</span></td>
+<td>0</td>
+<td>2</td>
+<td>4</td>
+<td>6</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The farthest survivor sits exactly at the bound for every error, as the tightness argument predicts. At the largest error, 912 of the 1024 candidates survive. There, a guarantee of at most 8 wrong bits out of 10 says almost nothing. <a href="#fig-recon-exponential" class="quarto-xref">Figure&nbsp;<span>17.1</span></a> shows the same over a finer range of errors, for another random secret.</p>
+<div id="fig-recon-exponential" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_exponential.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-exponential-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.1: The exponential attack on ten bits. Left: the largest Hamming distance between the true database and a candidate that some curator with error <span class="math inline">\(E\)</span> can make consistent with all 1024 subset sums, against the bound <span class="math inline">\(4E\)</span>. Right: the number of surviving candidates (log scale); at <span class="math inline">\(E = 0\)</span> only <span class="math inline">\(d\)</span> survives.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="sec-recon-lp" class="level2" data-number="17.4">
+<h2 data-number="17.4" class="anchored" data-anchor-id="sec-recon-lp"><span class="header-section-number">17.4</span> The linear-programming decoder</h2>
+<p>Asking <span class="math inline">\(2^n\)</span> questions is not realistic. Dinur and Nissim showed that a number of random queries only slightly larger than <span class="math inline">\(n\)</span> is enough, with a decoder that runs in polynomial time. Each random query includes each person independently with probability one half. Their proof asks for <span class="math inline">\(n(\log n)^2\)</span> queries, and the version in the full edition needs a constant times <span class="math inline">\(n\log n\)</span>.</p>
+<p>The decoder makes the search easier by allowing fractions. Instead of checking every list of bits, it lets each unknown be any number between 0 and 1. It then looks for a vector whose answers are all within <span class="math inline">\(E\)</span> of the published answers. This search is a <strong>linear program</strong>, a problem of finding a point that satisfies a list of linear inequalities. Each requirement that an answer be within <span class="math inline">\(E\)</span> is a pair of such inequalities. Linear programs can be solved in time polynomial in the number of unknowns and inequalities. The true secret meets every requirement, so a solution exists, and the decoder rounds each entry of it to the nearest bit.</p>
+<p>The price of using random queries is that the curator’s error must now be smaller, well below <span class="math inline">\(\sqrt n\)</span> instead of well below <span class="math inline">\(n\)</span>. The reason is that a random query cannot aim at the wrong bits. Suppose a candidate differs from the secret on <span class="math inline">\(k\)</span> bits. A query aimed at exactly those bits, which the exponential attacker could ask, would move the answer by <span class="math inline">\(k\)</span>. A random query picks up each of those bits with probability one half, so its sum over them behaves like a sum of <span class="math inline">\(k\)</span> coin flips. Such a sum fluctuates by about <span class="math inline">\(\sqrt k\)</span>, not by <span class="math inline">\(k\)</span>. A consistent candidate’s answers differ from the true answers by at most <span class="math inline">\(2E\)</span> on every query, so an error well below <span class="math inline">\(\sqrt k\)</span> cannot hide that fluctuation. When the candidate is wrong on a fixed share of the bits, <span class="math inline">\(\sqrt k\)</span> grows like <span class="math inline">\(\sqrt n\)</span>.</p>
+<p>The proof has to show that this fluctuation really happens with a decent probability, whatever the signs of the differences. A random query catches a bad candidate only when the subset sum of the difference is far from zero. So the proof needs a lower bound on how often a quantity is large. Markov’s inequality (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>) gives the opposite, an upper bound: a quantity that cannot be negative is rarely far above its mean.</p>
+<p>A lower bound cannot hold for every quantity. One that is 0 most of the time and huge once in a while has a large mean, and it is still usually 0. What rules this out is a <strong>second moment</strong>, the average of the square, that is not much larger than the squared mean. A rare huge value would make the average square enormous.</p>
+<p>The <strong>Paley–Zygmund inequality</strong> makes this precise. Like Markov’s inequality, it applies only to a quantity <span class="math inline">\(W\)</span> that cannot be negative, and it needs a finite second moment so that the right side below is defined. Without the first condition, being above a fraction of the mean would not mean being away from zero. A subset sum whose terms cancel can have a mean of zero and still be large in either direction. That is why the attack applies the inequality to the square of the sum. For any fraction <span class="math inline">\(\theta\)</span> from 0 up to (but not including) 1, the inequality says that <span id="eq-recon-pz"><span class="math display">\[\Pr\big[W &gt; \theta\,\mathbb E W\big] \ge (1 - \theta)^2\frac{(\mathbb E W)^2}{\mathbb E[W^2]}. \tag{17.2}\]</span></span> The right side is large when the average square is close to the squared mean, which is exactly the case where <span class="math inline">\(W\)</span> cannot hide its mass in rare spikes. A lower bound like this, on how often a quantity stays away from zero, is called <strong>anti-concentration</strong>.</p>
+<p>The attack takes <span class="math inline">\(W\)</span> to be the square of a random subset sum, so the average of <span class="math inline">\(W^2\)</span> is the average fourth power of the sum. The inequality is useful when that fourth moment is not much larger than the squared second moment. A random subset sum passes this test, because it is built from independent fair coins and has no heavy tails. Its fourth moment is at most 3 times the square of its second moment, the same ratio as for a normal distribution.</p>
+<p>Putting these facts together gives the lemma the decoder rests on. Think of a vector <span class="math inline">\(z\)</span> as the difference between a bad candidate and the secret. Write <span class="math inline">\(\beta\)</span> for a fraction of wrong bits, not a failure probability as in the concentration chapter. Suppose <span class="math inline">\(z\)</span> has at least <span class="math inline">\(\beta n\)</span> entries of size at least one third. That is less than the one half by which a wrong bit differs, because the proof leaves room for a rounding step described below. Then a random subset sum of <span class="math inline">\(z\)</span> lands far from zero with at least a constant probability, whatever the signs of the entries: <span id="eq-recon-anti"><span class="math display">\[\Pr\left[|\langle q, z\rangle| &gt; \frac{\sqrt{\beta n}}{12}\right] \ge \frac{3}{16}. \tag{17.3}\]</span></span> Here “far” is measured on the scale <span class="math inline">\(\sqrt{\beta n}\)</span>, the square root of the number of large entries, as the coin-flip picture predicts.</p>
+<p>The hard case is a difference whose entries cancel. If all the large entries of <span class="math inline">\(z\)</span> have the same sign, a random subset sum has a large average and escapes any small band around zero almost always. If half are positive and half negative, the sum is centred at zero, and only its fluctuation can carry it out of the band. The lemma covers both cases, because its proof ignores the average and relies on the fluctuation alone. <a href="#fig-recon-anticoncentration" class="quarto-xref">Figure&nbsp;<span>17.2</span></a> shows both cases for the band of half-width <span class="math inline">\(\sqrt{\beta n}/12\)</span> from <a href="#eq-recon-anti" class="quarto-xref">Equation&nbsp;<span>17.3</span></a>. In the figure’s example, a random sum escapes the band about 62% of the time even in the balanced case, far above the lemma’s guarantee of 0.1875.</p>
+<div id="fig-recon-anticoncentration" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-anticoncentration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_anticoncentration.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-anticoncentration-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.2: A random subset sum of a difference vector <span class="math inline">\(z\)</span> with <span class="math inline">\(\beta n = 100\)</span> entries of size <span class="math inline">\(\frac13\)</span> (<span class="math inline">\(n = 1000\)</span>), over 20 000 random subsets, against the band <span class="math inline">\(|\langle q, z\rangle| \le \sqrt{\beta n}/12 = 0.83\)</span> (red). Left: half the entries <span class="math inline">\(+\frac13\)</span> and half <span class="math inline">\(-\frac13\)</span>, so the sum is centred at 0, yet it still leaves the band most of the time. Right: all entries <span class="math inline">\(+\frac13\)</span>, so the sum is centred far from the band. The lemma guarantees at least <span class="math inline">\(\frac3{16} = 0.1875\)</span> in both cases.
+</figcaption>
+</figure>
+</div>
+<p>The theorem turns the lemma into a guarantee for the decoder. A query catches a bad candidate when the candidate’s answer differs from the true one by more than the error can explain. The theorem’s condition on <span class="math inline">\(E\)</span> below makes every gap beyond the lemma’s threshold such a catch. So each query catches a bad candidate with probability at least <span class="math inline">\(\frac{3}{16}\)</span>. The queries are independent, so the candidate escapes all <span class="math inline">\(m\)</span> of them with probability at most <span class="math inline">\((13/16)^m\)</span>, which shrinks exponentially as <span class="math inline">\(m\)</span> grows.</p>
+<p>The proof also has to handle the infinitely many points the program can return, because the union bound needs a finite list. It rounds them to a grid of at most <span class="math inline">\((n + 1)^n\)</span> points. The union bound (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>) over that grid then sets the number of queries below.</p>
+<p><strong>Theorem (Dinur–Nissim, in the form the full edition proves).</strong> Fix the secret, a fraction <span class="math inline">\(\beta\)</span> of wrong bits and a failure probability <span class="math inline">\(\eta\)</span>. Suppose that the curator’s error <span class="math inline">\(E\)</span> satisfies <span class="math inline">\(2E + \frac12 \le \sqrt{\beta n}/12\)</span>, and that the number of independent random queries satisfies <span id="eq-recon-lp"><span class="math display">\[m \ge \frac{n\ln(n + 1) + \ln(1/\eta)}{\ln(16/13)}. \tag{17.4}\]</span></span> Then, with probability at least <span class="math inline">\(1 - \eta\)</span> over the queries, every solution of the linear program rounds to a vector with at most <span class="math inline">\(\beta n\)</span> wrong bits, whatever errors the curator chose.</p>
+<p>The condition on the error is the lemma’s threshold with room for two things. A consistent candidate and the secret are each within <span class="math inline">\(E\)</span> of every answer, so their sums can differ by up to <span class="math inline">\(2E\)</span>. Rounding to the grid adds up to <span class="math inline">\(\frac12\)</span> more. The guarantee holds for every curator at once, because whether a bad grid point escapes depends only on the queries, not on the errors. If the error grows more slowly than <span class="math inline">\(\sqrt n\)</span>, the condition holds for smaller and smaller <span class="math inline">\(\beta\)</span> as <span class="math inline">\(n\)</span> grows. In words, the attacker then recovers all but a vanishing fraction of the bits in polynomial time, from a number of random queries of order <span class="math inline">\(n\log n\)</span>.</p>
+<p>The proved constants are poor, but the scaling is right. Take a thousand people and a target of 10% wrong bits. The theorem then tolerates an error of only 0.1667. For a failure probability of 0.01 it asks for at least 33,296 queries. That is about 33 per person, and the count per person grows with <span class="math inline">\(n\)</span> because of the factor <span class="math inline">\(\ln(n + 1)\)</span>, which the union bound over the grid adds. Sharper analyses need only a number of queries proportional to <span class="math inline">\(n\)</span>. In practice, the least-squares decoder of the next section already works at errors of about <span class="math inline">\(0.2\sqrt n\)</span> with <span class="math inline">\(4n\)</span> queries. So don’t read the proved constants as a safety margin.</p>
+<p>Two further results show that the attack does not depend on the assumptions of the proof. Requiring every answer to be within <span class="math inline">\(E\)</span> fails if a single answer is wildly wrong. Dwork, McSherry and Talwar (2007) studied a variant that instead minimises the total absolute difference between the candidate’s answers and the published ones. It tolerates a constant fraction of answers with arbitrarily large errors. Random queries are not essential either, since Dinur and Nissim used them only to make the proof work. Real attacks use whatever queries a system answers. Cohen and Nissim (2020) ran a linear-programming reconstruction against a commercial query system that added noise to its answers, and recovered most of a secret column.</p>
+</section>
+<section id="sec-recon-ls" class="level2" data-number="17.5">
+<h2 data-number="17.5" class="anchored" data-anchor-id="sec-recon-ls"><span class="header-section-number">17.5</span> Least squares under worst-case and random error</h2>
+<p>The linear program needs a solver and a value of <span class="math inline">\(E\)</span>. A simpler decoder needs neither. <strong>Least squares</strong> picks the vector whose answers come closest to the published answers, measured by the sum of squared differences. Write <span class="math inline">\(\hat x\)</span> for this estimate of the secret. It has a closed form, <span id="eq-auto-09reconstruction-1"><span class="math display">\[\hat x = (A^\top A)^{-1}A^\top a, \tag{17.5}\]</span></span> and the decoder clips each entry to the range from 0 to 1 and then rounds it. The decoded vector is a linear function of the answers. Its error is therefore a linear function of the curator’s error, and you can analyse it exactly in two cases. In the first, an adversary chooses the errors. In the second, the errors are independent random noise.</p>
+<p>How much least squares amplifies the curator’s error depends on how much the query matrix can shrink a vector. The <strong>smallest singular value</strong> <span class="math inline">\(s_{\min}(A)\)</span> is the smallest length that <span class="math inline">\(A\)</span> gives to a vector of length 1. It measures the direction that the queries see least clearly. The analysis assumes at least as many queries as people, and a query matrix whose columns are linearly independent, so that <span class="math inline">\(s_{\min}(A)\)</span> is positive. Without this, some change to the secret would leave every answer unchanged, and no decoder could detect it.</p>
+<p>Consider first errors chosen by an adversary. The closed form maps the error vector to the decoder’s error, and this map can stretch a vector by at most a factor <span class="math inline">\(1/s_{\min}(A)\)</span>. So the decoded vector is never farther from the secret than the length of the error vector times that factor. Clipping only moves an entry closer to its true bit, so it cannot make this worse. Each wrong bit is off by at least <span class="math inline">\(\frac12\)</span>, so it adds at least <span class="math inline">\(\frac14\)</span> to the squared distance. If every error is at most <span class="math inline">\(E\)</span>, the squared length of the error vector is at most <span class="math inline">\(mE^2\)</span>, and the decoder gets at most <span id="eq-recon-ls-worst"><span class="math display">\[\frac{4mE^2}{s_{\min}(A)^2} \tag{17.6}\]</span></span> bits wrong.</p>
+<p>For random subset queries, the theory of random matrices gives the approximation <span id="eq-auto-09reconstruction-2"><span class="math display">\[s_{\min}(A) \approx \tfrac12\big(\sqrt m - \sqrt n\big). \tag{17.7}\]</span></span> With four times as many queries as people, this is about half of <span class="math inline">\(\sqrt n\)</span>, so its square is about <span class="math inline">\(m/16\)</span> and the bound becomes about <span class="math inline">\(64E^2\)</span>. An error well below <span class="math inline">\(\sqrt n\)</span> therefore leaves only a small fraction of the bits wrong, with only <span class="math inline">\(4n\)</span> queries.</p>
+<p>Now let the curator’s errors be independent normal draws with mean 0, and write <span class="math inline">\(\sigma\)</span> for their standard deviation. Each entry of the decoder’s error is then normal too, with a variance of about <span class="math inline">\(4\sigma^2/(m - n)\)</span>. In words, the variance of the noise is divided by the number of equations beyond the <span class="math inline">\(n\)</span> needed to determine the secret, because those extra equations average the noise down. The factor 4 appears because a random query includes each person only half the time.</p>
+<p>The count is <span class="math inline">\(m - n\)</span> rather than <span class="math inline">\(m\)</span> because the inverse of a randomly fluctuating matrix is, on average, larger than the inverse of its average. The correction is exact for query rows drawn from a normal distribution. The rows here are zeros and ones, so the formula is only an approximation, which the simulations below check.</p>
+<p>A bit comes out wrong when its error pushes it across <span class="math inline">\(\frac12\)</span>. Write <span class="math inline">\(\Phi\)</span> for the standard normal cumulative distribution function, so <span class="math inline">\(\Phi(t)\)</span> is the probability that a standard normal draw is below <span class="math inline">\(t\)</span>. The expected fraction of bits that least squares recovers is then approximately <span id="eq-recon-ls-random"><span class="math display">\[\Phi\left(\frac{\sqrt{m - n}}{4\sigma}\right). \tag{17.8}\]</span></span> The argument of <span class="math inline">\(\Phi\)</span> is the distance <span class="math inline">\(\frac12\)</span> to the wrong side, measured in units of the error’s standard deviation <span class="math inline">\(2\sigma/\sqrt{m - n}\)</span>.</p>
+<p>Two consequences follow. The first is that only the ratio <span class="math inline">\(\sigma/\sqrt n\)</span> matters when the number of queries is a fixed multiple of <span class="math inline">\(n\)</span>. Plotted against that ratio, the recovery curves for different numbers of people fall on top of each other (<a href="#fig-recon-ls-noise" class="quarto-xref">Figure&nbsp;<span>17.3</span></a>), so <span class="math inline">\(\sqrt n\)</span> is again the scale of the threat. But noise of that order is not automatically safe. With four queries per person and noise of a quarter of <span class="math inline">\(\sqrt n\)</span>, least squares recovers about 96% of the bits. Recovery degrades smoothly as the noise grows, and it does not switch off at a threshold.</p>
+<div id="fig-recon-ls-noise" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-ls-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_ls_noise.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-ls-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.3: Fraction of bits recovered by least squares from <span class="math inline">\(m = 4n\)</span> noisy random subset sums, against the noise scale in units of <span class="math inline">\(\sqrt n\)</span>, for three database sizes. The black curve is <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.8</span></a>. The curves for different <span class="math inline">\(n\)</span> coincide: the attack’s success depends on <span class="math inline">\(\sigma/\sqrt n\)</span> only.
+</figcaption>
+</figure>
+</div>
+<p>The second consequence is that more queries average independent noise away. At a fixed noise level, the predicted fraction tends to 1 as the number of queries grows. To hold the attack at a fixed accuracy, the noise must grow like <span class="math inline">\(\sqrt m\)</span> (<a href="#fig-recon-ls-queries" class="quarto-xref">Figure&nbsp;<span>17.4</span></a>). This is the second half of the Fundamental Law. A bound on the error of each answer is not enough when the number of answers is unbounded.</p>
+<div id="fig-recon-ls-queries" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-recon-ls-queries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/recon_ls_queries.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-ls-queries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;17.4: Fraction of bits recovered by least squares at <span class="math inline">\(n = 200\)</span> as the number of queries grows, for three noise levels. Lines are <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.8</span></a>; dots are simulations. Near <span class="math inline">\(m = n\)</span> the system is barely determined and the noise is amplified; beyond that, more queries average the noise away, and even at <span class="math inline">\(\sigma = 2\sqrt n\)</span> the attack recovers most bits with <span class="math inline">\(64n = 12\,800\)</span> queries.
+</figcaption>
+</figure>
+</div>
+<p><a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.3</span></a> checks the prediction on 500 people with 2000 queries, averaged over four random secrets and query matrices. The prediction is within 0.013 of every simulated value.</p>
 <div id="tbl-recon-ls" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-ls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;17.1: Least-squares reconstruction of <span class="math inline">\(n = 500\)</span> bits from <span class="math inline">\(m = 2000\)</span> random subset sums with Gaussian noise.
+Table&nbsp;17.3: Least-squares reconstruction of <span class="math inline">\(n = 500\)</span> bits from <span class="math inline">\(m = 2000\)</span> random subset sums with Gaussian noise.
 </figcaption>
 <div aria-describedby="tbl-recon-ls-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -635,7 +813,7 @@ Table&nbsp;17.1: Least-squares reconstruction of <span class="math inline">\(n =
 <td>0.5875</td>
 </tr>
 <tr class="odd">
-<td>Recovered, <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.1</span></a></td>
+<td>Recovered, <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.8</span></a></td>
 <td>1.0000</td>
 <td>0.9585</td>
 <td>0.8069</td>
@@ -647,32 +825,65 @@ Table&nbsp;17.1: Least-squares reconstruction of <span class="math inline">\(n =
 </div>
 </figure>
 </div>
-<p>Noise of order <span class="math inline">\(\sqrt n\)</span> is not automatically safe: at <span class="math inline">\(\sigma = 0.25\sqrt n\)</span>, 96.55% of the bits come back, and recovery degrades smoothly instead of switching off at a threshold. The column at <span class="math inline">\(\sigma = 2\sqrt n\)</span> shows the second failure. That curator looks safe at <span class="math inline">\(m = 4n\)</span>, where only 0.5875 of the bits come back, but if it answers any number of queries at the same noise level, an attacker who asks <span class="math inline">\(m = 106.1\,n\)</span> recovers 90% of them (<a href="#fig-recon-ls-queries" class="quarto-xref">Figure&nbsp;<span>17.1</span></a>). A bound on the error of each answer protects nothing when the number of answers is unbounded; the error budget has to cover all of them together.</p>
-<div id="fig-recon-ls-queries" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-recon-ls-queries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/recon_ls_queries.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-ls-queries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.1: Fraction of bits recovered by least squares at <span class="math inline">\(n = 200\)</span> as the number of queries grows, for three noise levels. Lines are <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.1</span></a>; dots are simulations. Near <span class="math inline">\(m = n\)</span> the system is barely determined and the noise is amplified; beyond that, more queries average the noise away, and even at <span class="math inline">\(\sigma = 2\sqrt n\)</span> the attack recovers most bits with <span class="math inline">\(64n = 12\,800\)</span> queries.
+<p>The last column shows how a curator can look safe and still fail. With noise of twice <span class="math inline">\(\sqrt n\)</span> and four queries per person, least squares recovers only 0.5875 of the bits. But suppose the same curator answers any number of queries at the same noise level. Solving <a href="#eq-recon-ls-random" class="quarto-xref">Equation&nbsp;<span>17.8</span></a> for the number of queries, an attacker who asks <span class="math inline">\(m = 106.1n\)</span> queries is predicted to recover 90% of the bits.</p>
+<p>Errors chosen by an adversary hurt more than random errors of the same size. Least squares amplifies errors most along one direction of the secret’s space, the one belonging to the smallest singular value. Independent normal noise points in all directions equally, so only a small part of it falls along that direction. A worst-direction curator gives every answer an error of the full size <span class="math inline">\(E\)</span>. It chooses the signs so that least squares turns them into the largest possible error along that direction. <a href="#tbl-recon-ls-worst" class="quarto-xref">Table&nbsp;<span>17.4</span></a> runs such a curator in the setting of <a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.3</span></a>, where the measured smallest singular value is 11.43, close to the approximation’s 11.18.</p>
+<div id="tbl-recon-ls-worst" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-ls-worst-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;17.4: Least squares on <span class="math inline">\(n = 500\)</span> bits from <span class="math inline">\(m = 2000\)</span> random subset sums, against a curator that pushes every error along the decoder’s weakest direction.
 </figcaption>
+<div aria-describedby="tbl-recon-ls-worst-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Error <span class="math inline">\(E\)</span></th>
+<th>1</th>
+<th>2</th>
+<th><span class="math inline">\(0.25\sqrt n = 5.59\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bound <a href="#eq-recon-ls-worst" class="quarto-xref">Equation&nbsp;<span>17.6</span></a> on wrong bits</td>
+<td>61.2</td>
+<td>245.0</td>
+<td>1914.0</td>
+</tr>
+<tr class="even">
+<td>Wrong bits caused by the worst-direction curator</td>
+<td>0</td>
+<td>20</td>
+<td>143</td>
+</tr>
+</tbody>
+</table>
+</div>
 </figure>
 </div>
-<p>Gaussian noise is also the friendly case. Least squares amplifies errors most along one direction, that of the smallest singular value <span class="math inline">\(s_{\min}(A)\)</span> of the query matrix, and independent noise points in all directions equally. A curator that pushes every error along that weakest direction does far more damage: at <span class="math inline">\(E = 0.25\sqrt n = 5.59\)</span> it causes 143 wrong bits, against about 17 for Gaussian noise of the same scale. The general guarantee, at most <span class="math inline">\(4mE^2/s_{\min}(A)^2\)</span> wrong bits, covers every curator. So when a system’s errors are not independent random noise, test it with errors chosen against the decoder, not only with Gaussian noise of the same size.</p>
+<p>At the largest error, the bound exceeds the number of people and says nothing. The worst-direction curator causes 143 wrong bits there. Normal noise with the same standard deviation causes about 17, the share of 500 bits that <a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.3</span></a> shows least squares missing. The bound is loose by more than a factor of 10, but it is the only statement that holds for every curator. So when a system’s errors are not independent random noise, test it with errors chosen against the decoder, not only with normal noise of the same size.</p>
 </section>
-<section id="sec-recon-law" class="level2" data-number="17.4">
-<h2 data-number="17.4" class="anchored" data-anchor-id="sec-recon-law"><span class="header-section-number">17.4</span> The Fundamental Law: what stops reconstruction, and what doesn’t</h2>
-<p>Is error of order <span class="math inline">\(\sqrt n\)</span> enough to stop reconstruction? A <strong>sampling curator</strong> shows it can be. It keeps each person with probability <span class="math inline">\(p\)</span> in a secret set, answers every query from that set, and scales up by <span class="math inline">\(1/p\)</span> so that answers are right on average. Each answer’s error is then a sum of independent zero-mean terms, one per person, so it is of order <span class="math inline">\(\sqrt n\)</span>, and the largest of all <span class="math inline">\(m\)</span> errors is only a logarithmic factor above that, of order <span class="math inline">\(\sqrt{n\log m}\)</span>. But the people left out never affect any answer, so nothing reveals their bits, and no attacker recovers more than a fraction <span class="math inline">\(p + \frac{1 - p}{2}\)</span> of a uniformly random <span class="math inline">\(d\)</span> on average: the sampled bits, plus a coin flip for the rest. At <span class="math inline">\(n = 500\)</span>, <span class="math inline">\(m = 2000\)</span> and <span class="math inline">\(p = \frac12\)</span>, the largest error is 28.00, or <span class="math inline">\(1.25\sqrt n\)</span>, and least squares recovers 0.7560 of the bits, right at the ceiling of three quarters.</p>
-<p>That is not privacy, though. The same curator answers exactly for the people in its sample, and an attacker with enough queries learns all of their bits: half the people are fully exposed so that the other half can be fully hidden. Stopping blatant reconstruction is a much weaker goal than protecting everyone. A guarantee has to hold for every individual, which is what <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a> provides, and it has to control both halves of the law, the error scale and the number of answers. That is why differential privacy tracks a budget spent across queries.</p>
-<p>How few queries can any attack use? Count bits. The secret carries <span class="math inline">\(n\)</span> bits; an answer that takes at most <span class="math inline">\(V\)</span> values carries at most <span class="math inline">\(\log_2 V\)</span>; and a guess that may be wrong on a fraction <span class="math inline">\(\beta\)</span> of the bits still leaves <span class="math inline">\(h(\beta)\)</span> bits of uncertainty per person, where <span class="math inline">\(h(\beta) = -\beta\log_2\beta - (1 - \beta)\log_2(1 - \beta)\)</span> is the <strong>binary entropy</strong>. So any attack needs at least <span id="eq-recon-info"><span class="math display">\[m \ge \frac{n\,(1 - h(\beta))}{\log_2 V} \tag{17.2}\]</span></span> queries. At <span class="math inline">\(n = 1000\)</span> and 5% wrong bits, exact counts need at least 71.6 queries, and rounding every count to a multiple of 32 raises the floor only to 141.5. Coarser answers carry fewer bits each, but this is a floor on what an attack needs, not a defence: a curator that answers unlimited queries has only roughly doubled the minimum the attacker must ask, and the attacker can simply ask more.</p>
+<section id="sec-recon-law" class="level2" data-number="17.6">
+<h2 data-number="17.6" class="anchored" data-anchor-id="sec-recon-law"><span class="header-section-number">17.6</span> The Fundamental Law of Information Recovery</h2>
+<p>The attacks so far say when answers are too accurate. Two questions remain. Is an error of order <span class="math inline">\(\sqrt n\)</span> really enough to stop reconstruction, or is it just where the proofs stop? And how many queries does any attack need? This section answers both.</p>
+<p>To show that an error of order <span class="math inline">\(\sqrt n\)</span> can stop reconstruction, you need a curator whose errors are that small yet hide many bits completely. A <strong>sampling curator</strong> does this. It fixes a sampling probability <span class="math inline">\(p\)</span> and draws a secret sample of the people, keeping each person independently with that probability. It answers every query from the people in the sample only, and divides by <span class="math inline">\(p\)</span> so that each answer is correct on average. The error of one answer is then a sum of independent terms with mean zero, one per person, so it is of order <span class="math inline">\(\sqrt n\)</span>. Hoeffding’s inequality (<a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>) bounds that error for one query, and the union bound extends it to all <span class="math inline">\(m\)</span> queries at once. With probability at least <span class="math inline">\(1 - \eta\)</span>, every answer has error at most <span id="eq-recon-hoeffding"><span class="math display">\[\sqrt{\frac{n\ln(2m/\eta)}{2p^2}}. \tag{17.9}\]</span></span></p>
+<p>People outside the sample never affect any answer, so the answers reveal nothing about their bits. Suppose the secret bits are uniformly random. To the attacker, the bit of a person outside the sample is then a fair coin, and any guess about it is right half the time. At best the attacker gets everyone in the sample right. The expected fraction it recovers is therefore at most <span class="math inline">\(p + \frac{1 - p}{2}\)</span>, which is three quarters when <span class="math inline">\(p = \frac12\)</span>.</p>
+<p>This curator shows that an error of order <span class="math inline">\(\sqrt n\)</span> can be enough. The full edition’s script runs it in the setting of <a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.3</span></a>, keeping each person with probability one half, and it keeps 250 people. The largest error over all the queries is 28.00, or <span class="math inline">\(1.25\sqrt n\)</span>. The Hoeffding bound <a href="#eq-recon-hoeffding" class="quarto-xref">Equation&nbsp;<span>17.9</span></a> at <span class="math inline">\(\eta = 0.05\)</span> is 106.25, which is loose because it assumes the widest spread each term could have. Least squares on these answers recovers 0.7560 of the bits, right at the ceiling of three quarters. The sampling curator’s error is only a logarithmic factor above the error the attacks need. So an error of order <span class="math inline">\(\sqrt n\)</span> is necessary to stop reconstruction, and it can be enough.</p>
+<p>But stopping reconstruction is not privacy. The same curator’s answers are exact sums over its sample, scaled up by <span class="math inline">\(1/p\)</span>. An attacker with enough queries therefore learns every sampled person’s bit, because least squares recovers each such bit divided by <span class="math inline">\(p\)</span>. Half the people are fully exposed so that the other half can be fully hidden. Stopping blatant reconstruction is a much weaker goal than protecting everyone. <a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a> gives a guarantee that holds for every individual.</p>
+<p>The sampling curator also shows why the source of the errors matters, not just their size. Compare it with a curator that adds an independent random error of the same size to each answer. That curator is not as safe. Its errors are independent across queries, so least squares averages them away as the attacker asks more. The sampling curator’s errors all come from one secret sample, shared by every answer, so asking more never reveals the people left out.</p>
+<p>How few queries can any attack use? To answer, count bits of information, with the tools of <a href="../part01-prerequisites/05-information-theory.html">Information theory</a>. Suppose the secret is <span class="math inline">\(n\)</span> uniformly random bits, so that it carries <span class="math inline">\(n\)</span> bits of information. Write <span class="math inline">\(V\)</span> for the largest number of different values that one answer can take, which is <span class="math inline">\(n + 1\)</span> for exact counts of up to <span class="math inline">\(n\)</span> people. An answer with that many values carries at most <span class="math inline">\(\log_2V\)</span> bits, so the <span class="math inline">\(m\)</span> answers together carry at most <span class="math inline">\(m\log_2V\)</span> bits. The argument treats the queries as fixed in advance, so that only the answers carry information about the secret.</p>
+<p>A guess that is wrong on some bits still leaves the attacker uncertain about the secret. The <strong>binary entropy</strong> <span class="math inline">\(h(\beta) = -\beta\log_2\beta - (1 - \beta)\log_2(1 - \beta)\)</span> is the uncertainty, in bits, of a coin that comes up heads with probability <span class="math inline">\(\beta\)</span>. Fano’s inequality says how much a good guess can leave unknown. A guess that is wrong on an expected fraction <span class="math inline">\(\beta\)</span> of the bits, with <span class="math inline">\(\beta\)</span> at most one half, leaves at most <span class="math inline">\(n\,h(\beta)\)</span> bits of uncertainty about the secret. The secret carries <span class="math inline">\(n\)</span> bits, so the guess must carry the rest, at least <span class="math inline">\(n(1 - h(\beta))\)</span> bits. The data processing inequality says that a guess computed from the answers cannot carry more information about the secret than the answers themselves. Combining the two counts, any attack needs at least <span id="eq-recon-info"><span class="math display">\[m \ge \frac{n\,(1 - h(\beta))}{\log_2V} \tag{17.10}\]</span></span> queries.</p>
+<p>Take a thousand people and allow 5% wrong bits. The binary entropy of that fraction is 0.2864, so the answers must still supply 0.7136 bits per person. An exact count takes one of 1001 values, so it carries at most about 9.97 bits. Dividing one by the other, the bound asks for at least 71.6 queries. Coarser answers take fewer values and carry fewer bits each, so they raise the floor. Rounding every count to a multiple of 10 leaves about a hundred values and raises the floor to 106.9 queries. Rounding to multiples of 32 raises it to 141.5. These floors hold for any attack, whatever its running time. They are not a defence, though, because an attacker can simply ask more queries.</p>
+<p>The bound also shows that the attacks use nearly as few queries as possible. With exact counts, the bound grows like <span class="math inline">\(n/\log n\)</span>, while least squares with exact answers uses <span class="math inline">\(n\)</span> queries, only a logarithmic factor more. The bound needs answers that take finitely many values, because a real-valued answer could carry unlimited information in its low-order digits. Any published table has finite precision, so the condition holds in practice.</p>
+<p>So a defence must control both halves of the law, the error scale and the number of answers. That is why the privacy definition of Part 3 tracks a budget spent across all the queries.</p>
 </section>
-<section id="sec-recon-census" class="level2" data-number="17.5">
-<h2 data-number="17.5" class="anchored" data-anchor-id="sec-recon-census"><span class="header-section-number">17.5</span> Reconstructing a census block</h2>
-<p>Statistical offices publish tables, not query answers, but every cell is a query, and many tables come from the same confidential records. Garfinkel, Abowd and Martindale (2019) showed how far this goes with a toy block of seven people, each with an age, a sex, a race and a marital status, where nobody under 18 is married. <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.2</span></a> is everything published about such a block. Means to two decimals give exact sums, since the sum is a whole number: <span class="math inline">\(34.29 \times 7 = 240.03\)</span>, so the ages total 240.</p>
+<section id="sec-recon-census" class="level2" data-number="17.7">
+<h2 data-number="17.7" class="anchored" data-anchor-id="sec-recon-census"><span class="header-section-number">17.7</span> Reconstructing a census block</h2>
+<p>National statistical offices publish many tables computed from the same confidential records. A table might give counts by age, sex and race for every block, or the same counts by household type, or medians and means. Each table cell is a query. Garfinkel, Abowd and Martindale (2019) built a toy block of seven people. They showed that a modest set of published statistics can determine every person’s age, sex, race and marital status, and that a constraint solver finds the solution in seconds. The full edition repeats this experiment with a block of its own, as a reconstruction game whose queries are the published tables.</p>
+<p>The fictional block has seven people. Each person has a sex, a race that is Black or White, a marital status, and an age in whole years from 0 to 99. Nobody under 18 is married. <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.5</span></a> is everything the agency publishes about the block. The means are given to two decimals, which is enough to recover the sum of ages in each group exactly. A sum of ages is a whole number, and <span class="math inline">\(34.29 \times 7 = 240.03\)</span>, so the seven ages total 240.</p>
 <div id="tbl-recon-census-published" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-census-published-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;17.2: The published statistics for a fictional census block of seven people. A median over an even count is the average of the two middle ages.
+Table&nbsp;17.5: The published statistics for a fictional census block of seven people. A median over an even count is the average of the two middle ages.
 </figcaption>
 <div aria-describedby="tbl-recon-census-published-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -726,11 +937,11 @@ Table&nbsp;17.2: The published statistics for a fictional census block of seven 
 </div>
 </figure>
 </div>
-<p>A constraint solver searches for every block consistent with these eighteen numbers, and each table cuts the candidates down: of 14,790 age vectors that fit the sex statistics, 387 admit a race split, 33 a marital split, and one all three. It is the true block (<a href="#tbl-recon-census-block" class="quarto-xref">Table&nbsp;<span>17.3</span></a>).</p>
+<p>The decoder lists candidate blocks and discards those that contradict a published number. The women’s and men’s medians and means leave 14,790 candidate age vectors, and the overall median keeps 12,906 of them. Each of these already splits into four women and three men, because it was built from their lists. The decoder then tests the other two splits separately. Only 387 vectors can be split into Black and White people who match the race statistics. Only 33 can be split into married and single people who match the marital statistics. Exactly one vector passes both tests, its splits are unique, and it is the true block (<a href="#tbl-recon-census-block" class="quarto-xref">Table&nbsp;<span>17.6</span></a>).</p>
 <div id="tbl-recon-census-block" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-census-block-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;17.3: The block reconstructed from <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.2</span></a>, which is the true block.
+Table&nbsp;17.6: The block reconstructed from <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.5</span></a>, which is the true block.
 </figcaption>
 <div aria-describedby="tbl-recon-census-block-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -792,22 +1003,25 @@ Table&nbsp;17.3: The block reconstructed from <a href="#tbl-recon-census-publish
 </div>
 </figure>
 </div>
-<p>Withholding a number rarely helps, because the remaining numbers usually imply it: eight of the twelve medians and means leave the block unique when withheld (<a href="#fig-recon-census" class="quarto-xref">Figure&nbsp;<span>17.2</span></a>). The worst case for the attacker, withholding the married mean, the only statistic about the single people’s ages, still leaves only 45 blocks, and 51% of them have the true sex, race and marital pattern of all seven people.</p>
+<p>In total, eighteen published numbers determine the age, sex, race and marital status of all seven people.</p>
+<p>Withholding one number rarely helps. <a href="#fig-recon-census" class="quarto-xref">Figure&nbsp;<span>17.5</span></a> repeats the search with each of the twelve medians and means withheld in turn. Eight of the twelve leave the block uniquely determined, because the remaining statistics either imply the missing one or pin the block down without it. The female mean, for example, adds nothing, since the total and male sums imply it.</p>
 <div id="fig-recon-census" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-recon-census-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/recon_census.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-recon-census-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;17.2: Number of seven-person blocks consistent with <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.2</span></a> when one median or mean is withheld (log scale). Blue bars: the block is still unique. Red bars: a few candidates remain, still far fewer than the possible blocks.
+Figure&nbsp;17.5: Number of seven-person blocks consistent with <a href="#tbl-recon-census-published" class="quarto-xref">Table&nbsp;<span>17.5</span></a> when one median or mean is withheld (log scale). Blue bars: the block is still unique. Red bars: a few candidates remain, still far fewer than the possible blocks.
 </figcaption>
 </figure>
 </div>
-<p>Real publications are more exposed than the toy, not less: they cross-classify many variables at many geographic levels, which is the “too many questions” half of the law. And the usual protections leave most constraints exact. Swapping a small fraction of households between blocks, the main protection of the 2010 Census, changes some answers; coarsening ages and suppressing small cells remove some constraints; the rest still bind. The Census Bureau’s own reconstruction of the 2010 Census, described by Abowd (2021), rebuilt a record for each of the 308,745,538 people counted. About 46% matched a real person exactly on block, sex, age, race and ethnicity, and linking to commercial data confirmed the identity of about 17% of the population. The Bureau’s response was to move the 2020 Census to a method based on differential privacy.</p>
+<p>Withholding the married mean hurts the attacker most, because it is the only statistic about the single people’s ages. Without it, neither the married sum nor the single sum, which is the total minus the married sum, is known. Even so, only 45 blocks remain, and 51% of them have the true sex, race and marital pattern of all seven people.</p>
+<p>Real publications are more exposed than this toy, not less, because their tables overlap. They cross-classify many variables at many geographic levels, so the same people appear in thousands of cells. That is exactly the “too many questions” half of the Fundamental Law. The usual protections also leave most constraints exact. The main protection of the 2010 Census swapped a small fraction of households between blocks, which changes some answers and leaves the rest exact. Coarsening ages into bands and suppressing small cells, common in other tables, have the same weakness. They remove some constraints, and the remaining ones still hold exactly.</p>
+<p>The attack also works at full scale. Abowd (2021) described the Census Bureau’s own reconstruction of the 2010 Census. It rebuilt a record for each of the 308,745,538 people counted. Each record gave a block, sex, age, race and ethnicity, and about 46% of them matched a real person exactly on all five fields. Linking them to commercial data confirmed the identity of about 17% of the population. The Bureau responded by moving the 2020 Census to a method based on the privacy definition of <a href="../part03-dp-foundations/01-definition.html">Part 3</a>.</p>
 </section>
-<section id="code" class="level2" data-number="17.6">
-<h2 data-number="17.6" class="anchored" data-anchor-id="code"><span class="header-section-number">17.6</span> Code</h2>
-<p>To audit a query system or plan a release, three numbers come first: what fraction least squares would recover at your noise level, how many queries per person push it to a target, and the fewest queries any attack needs. The snippet computes all three, using the finite-<span class="math inline">\(m\)</span> variance <span class="math inline">\(4\sigma^2 n/((n + 1)(m - n - 1))\)</span> that the full edition derives, which is about <span class="math inline">\(4\sigma^2/(m - n)\)</span>.</p>
+<section id="code" class="level2" data-number="17.8">
+<h2 data-number="17.8" class="anchored" data-anchor-id="code"><span class="header-section-number">17.8</span> Code</h2>
+<p>To audit a query system or plan a release, three numbers come first. You want the fraction of bits that least squares would recover at your noise level, and how many queries per person push that fraction to a target. You also want the fewest queries any attack needs, and the snippet below computes all three. It uses the finite-sample variance <span class="math inline">\(4\sigma^2 n/((n + 1)(m - n - 1))\)</span> from the full edition’s derivation, which is about <span class="math inline">\(4\sigma^2/(m - n)\)</span>.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> log2, sqrt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -840,15 +1054,15 @@ Figure&nbsp;17.2: Number of seven-person blocks consistent with <a href="#tbl-re
 <span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>min_queries(<span class="dv">1000</span>, <span class="fl">0.05</span>, <span class="dv">1001</span>)<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 71.6</span></span>
 <span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>min_queries(<span class="dv">1000</span>, <span class="fl">0.05</span>, <span class="dv">1000</span> <span class="op">//</span> <span class="dv">10</span> <span class="op">+</span> <span class="dv">2</span>)<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 106.9</span></span>
 <span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>min_queries(<span class="dv">1000</span>, <span class="fl">0.05</span>, <span class="dv">1000</span> <span class="op">//</span> <span class="dv">32</span> <span class="op">+</span> <span class="dv">2</span>)<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 141.5</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The first line is the prediction row of <a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.1</span></a>. The full edition’s script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/reconstruction.py">reconstruction.py</a>, runs the attacks themselves: the exponential attack, least squares under random and worst-case error, the sampling curator and the census-block search.</p>
+<p>The first line is the prediction row of <a href="#tbl-recon-ls" class="quarto-xref">Table&nbsp;<span>17.3</span></a>. The last two lines count the values of an answer rounded to multiples of a width <span class="math inline">\(w\)</span> as <span class="math inline">\(\lfloor n/w\rfloor + 2\)</span>, as the full edition’s script does. This may count one value too many, which only lowers the bound, so the floor stays valid. The full edition’s script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part02-attacks/reconstruction.py">reconstruction.py</a>, runs the attacks themselves.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part02-attacks/reconstruction.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="cheat-sheet" class="level2" data-number="17.7">
-<h2 data-number="17.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">17.7</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="17.9">
+<h2 data-number="17.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">17.9</span> Cheat sheet</h2>
 <div id="tbl-recon-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-recon-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;17.4: The regimes of reconstruction and the rules for each.
+Table&nbsp;17.7: The results of this chapter.
 </figcaption>
 <div aria-describedby="tbl-recon-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -866,33 +1080,43 @@ Table&nbsp;17.4: The regimes of reconstruction and the rules for each.
 </thead>
 <tbody>
 <tr class="odd">
-<td>All <span class="math inline">\(2^n\)</span> subset sums, error <span class="math inline">\(\le E\)</span></td>
-<td>Any consistent candidate has <span class="math inline">\(\le 4E\)</span> wrong bits</td>
-<td>Tight; error <span class="math inline">\(o(n)\)</span> is blatantly non-private</td>
+<td>All <span class="math inline">\(2^n\)</span> subset sums, error at most <span class="math inline">\(E\)</span></td>
+<td>Any consistent candidate has at most <span class="math inline">\(4E\)</span> wrong bits</td>
+<td>Tight; holds for every curator</td>
 </tr>
 <tr class="even">
-<td>Random subset sums, error <span class="math inline">\(\le E\)</span></td>
-<td>Error well below <span class="math inline">\(\sqrt n\)</span> on about <span class="math inline">\(n\log n\)</span> queries: a linear program recovers almost all bits</td>
-<td>Proved constants are pessimistic</td>
+<td>Paley–Zygmund</td>
+<td><span class="math inline">\(\Pr[W &gt; \theta\,\mathbb E W] \ge (1 - \theta)^2(\mathbb E W)^2/\mathbb E[W^2]\)</span> for <span class="math inline">\(W \ge 0\)</span></td>
+<td>A random subset sum is not concentrated near 0</td>
 </tr>
 <tr class="odd">
-<td>Least squares, Gaussian noise <span class="math inline">\(\sigma\)</span></td>
+<td>One random query</td>
+<td><span class="math inline">\(\beta n\)</span> entries of <span class="math inline">\(z\)</span> at least <span class="math inline">\(\frac13\)</span>: <span class="math inline">\(\Pr[\lvert\langle q, z\rangle\rvert &gt; \sqrt{\beta n}/12] \ge \frac3{16}\)</span></td>
+<td>Holds whatever the signs</td>
+</tr>
+<tr class="even">
+<td>Linear-programming decoder</td>
+<td><span class="math inline">\(2E + \frac12 \le \sqrt{\beta n}/12\)</span> and <span class="math inline">\(m \ge \frac{n\ln(n+1) + \ln(1/\eta)}{\ln(16/13)}\)</span>: at most <span class="math inline">\(\beta n\)</span> wrong bits</td>
+<td>With probability <span class="math inline">\(1 - \eta\)</span> over random queries; constants pessimistic</td>
+</tr>
+<tr class="odd">
+<td>Least squares, worst-case error</td>
+<td>Wrong bits at most <span class="math inline">\(4mE^2/s_{\min}(A)^2 \approx 64E^2\)</span> for <span class="math inline">\(4n\)</span> random subsets</td>
+<td>Adversarial errors hurt more than random ones</td>
+</tr>
+<tr class="even">
+<td>Least squares, normal noise <span class="math inline">\(\sigma\)</span></td>
 <td>Fraction recovered <span class="math inline">\(\approx \Phi(\sqrt{m - n}/(4\sigma))\)</span></td>
 <td>Noise must grow like <span class="math inline">\(\sqrt m\)</span> to hold it fixed</td>
 </tr>
-<tr class="even">
-<td>Least squares, worst-case error</td>
-<td>Wrong bits <span class="math inline">\(\le 4mE^2/s_{\min}(A)^2\)</span></td>
-<td>Adversarial errors hurt more than random ones</td>
-</tr>
 <tr class="odd">
 <td>Sampling curator</td>
-<td>Error <span class="math inline">\(O(\sqrt{n\log m})\)</span>; recovery <span class="math inline">\(\le p + \frac{1 - p}{2}\)</span></td>
+<td>Error at most <span class="math inline">\(\sqrt{n\ln(2m/\eta)/(2p^2)}\)</span>; recovery at most <span class="math inline">\(p + \frac{1 - p}2\)</span></td>
 <td>Stops reconstruction, exposes the sampled people</td>
 </tr>
 <tr class="even">
 <td>Information bound</td>
-<td><span class="math inline">\(m \ge n(1 - h(\beta))/\log_2 V\)</span></td>
+<td><span class="math inline">\(m \ge n(1 - h(\beta))/\log_2V\)</span></td>
 <td>Exact counts: of order <span class="math inline">\(n/\log n\)</span> queries</td>
 </tr>
 <tr class="odd">
@@ -907,21 +1131,21 @@ Table&nbsp;17.4: The regimes of reconstruction and the rules for each.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>The threat scale of a random subset-sum query is <span class="math inline">\(\sqrt n\)</span>, of the worst query <span class="math inline">\(n\)</span>. Errors well below that reveal the database.</li>
-<li>Budget the error over all answers, not per answer.</li>
-<li>Rounding, swapping and suppression are not noise: an attacker can simulate them or route around them.</li>
-<li>Stopping reconstruction is not privacy; ask what the system guarantees for each individual.</li>
+<li>The threat scale of a random subset-sum query is <span class="math inline">\(\sqrt n\)</span>, and of the worst query <span class="math inline">\(n\)</span>. Errors well below that scale reveal the database.</li>
+<li>Independent noise per answer is averaged away by more answers. Budget the error over all answers, not per answer.</li>
+<li>Rounding, swapping and suppression are not noise, because an attacker can simulate them or work around them.</li>
+<li>Stopping reconstruction is not privacy. Ask what the system guarantees for each individual.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="17.8">
-<h2 data-number="17.8" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">17.8</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="17.10">
+<h2 data-number="17.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">17.10</span> Further reading</h2>
 <ul>
 <li>Dinur &amp; Nissim, “Revealing Information while Preserving Privacy” (PODS 2003): the original attacks and the notion of blatant non-privacy.</li>
+<li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014), ch.&nbsp;8: the reconstruction attacks as lower bounds, and the Fundamental Law of Information Recovery.</li>
 <li>Dwork, Smith, Steinke &amp; Ullman, “Exposed! A Survey of Attacks on Private Data” (Annual Review of Statistics and Its Application, 2017): a readable survey of reconstruction and tracing attacks.</li>
 <li>Garfinkel, Abowd &amp; Martindale, “Understanding Database Reconstruction Attacks on Public Data” (CACM 2019): the seven-person block reconstructed with a solver.</li>
-<li>Cohen &amp; Nissim, “Linear Program Reconstruction in Practice” (Journal of Privacy and Confidentiality, 2020): the attack against a deployed query system.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part02-attacks/09-reconstruction.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part02-attacks/09-reconstruction.html">the full edition’s chapter</a>, except these, which it cites: the size of the smallest singular value of a random query matrix, the finite-sample correction to the least-squares variance (exact for normal query rows, an approximation checked by simulation in the full edition), Dinur and Nissim’s original proof with <span class="math inline">\(n(\log n)^2\)</span> queries, the sharper analyses with a number of queries proportional to <span class="math inline">\(n\)</span>, the decoder of Dwork, McSherry and Talwar, the solver experiment of Garfinkel, Abowd and Martindale, the description of the 2010 Census swapping, and the reported attacks of Cohen and Nissim and of the Census Bureau.</p>
 
 
 </section>

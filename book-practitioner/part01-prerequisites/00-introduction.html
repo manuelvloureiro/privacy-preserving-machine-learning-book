@@ -76,35 +76,6 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -535,24 +506,32 @@ window.Quarto = {
 </header>
 
 
-<p>This part collects the mathematics the rest of the book stands on. It has no privacy in it: it is standard probability, statistics, optimization, information theory and cryptography, chosen because a later part needs it and taken only as far as that need goes. You need the basics of probability (expectation, variance, independence), enough machine learning to recognise a loss function and stochastic gradient descent (SGD), and enough Python to read a short script. If you know a topic, skim its cheat sheet; each later chapter restates in a sentence what it uses and links back here.</p>
+<p>This part collects the mathematics that the rest of the book stands on. It contains no privacy yet. Everything here is standard probability, statistics, optimization, information theory and cryptography. What makes it different from a textbook is the selection. Each topic is here because a later part needs it, and each is taken only as far as that need goes.</p>
+<p>You need the basics of probability, such as expectation, variance and independence. You need enough machine learning to recognise a loss function and stochastic gradient descent (SGD), and enough Python to read a short script. If you already know a topic, skim its cheat sheet and move on. Each later chapter restates in a sentence what it uses from here, and links back.</p>
 <section id="the-common-thread" class="level2">
 <h2 class="anchored" data-anchor-id="the-common-thread">The common thread</h2>
-<p>Later parts study algorithms whose output is random, and they keep asking the same few questions about them. How far is a random output from its expected value? How different are the outputs on two inputs that differ in one example, and how well could anyone tell them apart? How much does a trained model depend on a single training example? How much does an observation reveal about something hidden, and what can an observer with limited computing power learn?</p>
-<p>Two ideas answer most of them. The first is the <strong>likelihood ratio</strong> <span class="math inline">\(p(x)/q(x)\)</span>: how many times more likely an observation is under one distribution than under another. It measures what one observation says about which distribution produced it, so telling two distributions apart always comes down to it: divergences summarize it, the best test thresholds it, and when it is bounded no single observation is strong evidence. The second idea is the <strong>effect of one input</strong>: how far one example can move an average, a minimizer or a loss. A quantity that no single input can move much has little room to vary, so small influence turns into narrow error bars, and in learning into a model that generalizes.</p>
+<p>The later parts study algorithms whose output is random, and they keep asking the same few questions about them. How far can a random output be from its expected value? How different are the outputs on two inputs that differ in one example, and how well could anyone tell them apart? How much does a trained model depend on a single training example? How much does an observation reveal about something hidden?</p>
+<p>Two ideas answer most of these questions. The first is the <strong>likelihood ratio</strong>: how many times more likely an observation is under one distribution than under another. If you want to know which of two distributions produced an observation, this ratio is all the observation tells you. So every way of comparing two distributions comes back to it. When the ratio can never be large, no single observation is strong evidence either way, and that is the property privacy will later demand.</p>
+<p>The second idea is the <strong>effect of one input</strong>: how far one example can move an average, a trained model or a loss. A quantity that no single input can move much has little room to vary. So a small effect of one input turns into narrow error bars, and in learning, into a model that does as well on new data as on its training data.</p>
 </section>
 <section id="why-the-chapters-come-in-this-order" class="level2">
 <h2 class="anchored" data-anchor-id="why-the-chapters-come-in-this-order">Why the chapters come in this order</h2>
-<p>The first four chapters build one argument, each on the last. <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a> introduces the few families that model counts and noise, and ends by comparing a noise density with a copy of itself moved sideways: the normal’s likelihood ratio grows without bound in the tails, the Laplace’s is capped. That raises the question of how often the extreme ratios occur, and <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> answers it by turning what you know about a random quantity into an error bar that fails with a chosen small probability. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> then compresses the difference between two distributions into one number, and shows that each candidate number answers a different question. <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a> says what those numbers mean for anyone trying to tell the two distributions apart: the best test, the curve of its two errors, and why a detector should be judged where false alarms are rare.</p>
-<p><a href="../part01-prerequisites/05-information-theory.html">Information theory</a> continues the same thread from a different angle, asking how much an observation reveals about a hidden value, on average and for a single best guess. <a href="../part01-prerequisites/06-optimization.html">Optimization</a> and <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a> take up the second idea: how fast training converges, how far its result moves when one example changes, and why a model that depends little on each example generalizes. <a href="../part01-prerequisites/08-crypto-basics.html">Cryptography basics</a> stands somewhat apart. It defines what an efficient observer must not learn, as two worlds an attacker must tell apart, and can wait until a later chapter needs it.</p>
+<p>The first four chapters build one argument, each on the one before. <a href="../part01-prerequisites/01-distributions.html">Probability distributions</a> introduces the few families that model counts and noise. It ends by comparing a noise distribution with a copy of itself moved sideways. The likelihood ratio of normal noise grows without limit far from the centre, while that of Laplace noise stays below a fixed bound.</p>
+<p>That raises the question of how often extreme values occur. <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> answers it. It turns what you know about a random quantity into an error bar that fails only with a small probability you choose. <a href="../part01-prerequisites/03-divergences.html">Divergences</a> then compresses the difference between two distributions into a single number. It shows that there are several such numbers, and that each answers a different question. <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a> says what those numbers mean for anyone who tries to tell the two distributions apart. It finds the best possible test, draws the curve of its two kinds of error, and explains why a detector should be judged where false alarms are rare.</p>
+<p><a href="../part01-prerequisites/05-information-theory.html">Information theory</a> follows the same thread from another angle. It asks how much an observation reveals about a hidden value, both on average and for a single best guess. <a href="../part01-prerequisites/06-optimization.html">Optimization</a> and <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a> take up the second idea. They show how fast training converges, how far its result moves when one example changes, and why a model that depends little on each example generalizes.</p>
+<p><a href="../part01-prerequisites/08-crypto-basics.html">Cryptography basics</a> stands somewhat apart. It defines what it means that an efficient observer learns nothing it should not, by asking whether an attacker can tell two worlds apart. You can leave it until a later chapter needs it. Threat models, linkage attacks and trust models are the first chapters that do.</p>
 </section>
 <section id="how-to-read-a-chapter" class="level2">
 <h2 class="anchored" data-anchor-id="how-to-read-a-chapter">How to read a chapter</h2>
-<p>Each chapter opens with its practical question and the idea that answers it, then reasons each result from a problem, with a worked example and the consequences for practice, and closes with a cheat sheet. The derivations and the scripts that check every number are in the full edition, linked at the end.</p>
+<p>Each chapter opens with the practical question it answers and the idea behind the answer. Each section then starts from a problem and reasons its way to a result. Every formula is explained in words first, every condition a result needs is stated with its reason, and a worked example with real numbers shows the result in use. A cheat sheet at the end collects the results on one page.</p>
+<p>The chapters contain no proofs. Each one ends with a link to the matching chapter of the full edition, which derives every result step by step and has a script that checks every number quoted.</p>
 </section>
 <section id="what-you-will-be-able-to-do" class="level2">
 <h2 class="anchored" data-anchor-id="what-you-will-be-able-to-do">What you will be able to do</h2>
-<p>By the end of this part you will be able to put an error bar on a noisy answer, a measured rate or the maximum of many noise draws, and choose the inequality that gives the narrowest valid one. You will be able to compute the Kullback–Leibler (KL), Rényi, total variation and hockey-stick divergences between two normal or two Laplace distributions, and explain why processing data cannot increase any of them. You will know the best test between two distributions, read its trade-off curve, report a detector by its true positive rate at a low false positive rate, and size a test set to measure that rate. You will also be able to say how fast gradient descent converges and how much a trained model moves when one example changes, compute what an observation leaks about a hidden value, and state a security property as a game between an attacker and two worlds.</p>
+<p>After this part, you will be able to put an error bar on a noisy answer, a measured error rate, or the largest of many noise draws. You will know which inequality gives the narrowest valid error bar, and why.</p>
+<p>You will be able to compute the Kullback–Leibler (KL), Rényi, total variation and hockey-stick divergences between two normal or two Laplace distributions. You will also be able to explain why processing data can never increase any of them.</p>
+<p>You will know the best test between two distributions and how to read its trade-off curve. You will be able to report a detector by how often it catches positives at a low false-positive rate. You will also be able to size a test set so that the rate you measure is precise enough.</p>
+<p>Finally, you will be able to say how fast gradient descent converges and how far a trained model moves when one example changes. You will be able to compute how much an observation leaks about a hidden value, and state a security property as a game between an attacker and two worlds.</p>
 
 
 </section>

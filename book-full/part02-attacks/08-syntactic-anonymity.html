@@ -519,20 +519,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../study_plan.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Privacy-Preserving ML Study Plan</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
   <a href="../glossary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../term-index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
   </div>
 </li>
       </ul>
@@ -1375,7 +1369,7 @@ Table&nbsp;16.8: The script’s output with the default seed.
 </figure>
 </div>
 <p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_syntactic_anonymity.py">tests/test_syntactic_anonymity.py</a> checks that the output still matches.</p>
-<p>The study plan’s exercise is to k-anonymize a census extract with ARX, a free anonymization tool that implements these criteria, and link it back to a public table. The script’s Mondrian release plays the part of ARX, and its linkage column is that measurement: the re-identification rate against an adversary holding everyone’s quasi-identifiers, the strongest auxiliary table there can be.</p>
+<p>In practice, a census extract would be k-anonymized with ARX, a free anonymization tool that implements these criteria, and then linked back to a public table. The script’s Mondrian release plays the part of ARX, and its linkage column is that measurement: the re-identification rate against an adversary holding everyone’s quasi-identifiers, the strongest auxiliary table there can be.</p>
 <p><strong>What to take from it.</strong> k-anonymity does what it says: linkage success stays below <span class="math inline">\(1/k\)</span>, and Mondrian keeps it above <span class="math inline">\(1/(2k)\)</span> at little cost in precision. But what it says is not enough, because small classes state diagnoses outright, for 2.3% of patients at <span class="math inline">\(k = 5\)</span>. Even where nothing is stated outright, most of what an anonymized table teaches is about the population, so measure attribute disclosure against imputation, not against guessing the most common value. Each fix costs utility: recursive diversity and t-closeness remove the certain disclosures by erasing the age–diagnosis pattern the data exist to show. And two releases are worse than one, under every definition here. The composition attack more than triples the pinned diagnoses, and it is the attack that a better definition has to survive.</p>
 </section>
 <section id="references" class="level2" data-number="16.8">
