@@ -2,40 +2,27 @@
 
 ## Why this matters
 
-Some computations must hide a key, a message or a value split among several holders. **What does it mean that an observer with limited computing power learns nothing it was not supposed to learn?**
+Some computations must hide a key, a message, or a value split among several holders. What does it mean that an observer learns nothing it should not? Against unlimited time nothing can be hidden, since an attacker could try every key, so cryptography asks that every attacker with realistic computing power learns almost nothing.
 
-The one idea is that **security is a game.** A challenger picks one of two worlds by a fair coin and shows the result to an adversary, who guesses the world. The adversary's **advantage** is how much better than the coin it does, and a scheme is secure when every efficient adversary's advantage is tiny. @tbl-crypto-overview maps the results to the sections.
-
-| Question | Result | Section |
-| --- | --- | --- |
-| How do I measure "learns nothing"? | Advantage; total variation caps it; bits of security | @sec-crypto-advantage |
-| How do proofs chain steps together? | Advantages add along a chain of hybrids | @sec-crypto-hybrid |
-| How long must random identifiers be, and how much data may one key protect? | Birthday bound: collisions after about $\sqrt N$ draws | @sec-crypto-birthday |
-| What does encryption promise? | Pseudorandomness; encryption must be randomized | @sec-crypto-encryption |
-| How do I show a participant learns only what it may? | Simulation; additive secret sharing | @sec-crypto-simulation |
-| What do lattice schemes cost? | Learning with errors: noise is a budget | @sec-crypto-lwe |
-
-: The questions of this chapter, and where each is answered. {#tbl-crypto-overview}
+The precise version is a game. A challenger picks one of two worlds by a fair coin, such as the encryptions of two messages, and shows the result to an adversary, who guesses the world. The adversary's **advantage** is how much better than the coin it does, and a scheme is secure when every efficient adversary's advantage is tiny.
 
 ## Advantage and security levels {#sec-crypto-advantage}
 
-**Idea.** A **distinguisher** sees one sample and outputs a bit. Its skill at telling $X$ from $Y$ is how much more often it says 1 on one than on the other.
-
-**Result.** The advantage is
+A **distinguisher** sees one sample and outputs a bit. Its skill at telling $X$ from $Y$ is how much more often it says 1 on one than on the other,
 $$\mathrm{Adv}_A(X, Y) = \big|\Pr[A(X) = 1] - \Pr[A(Y) = 1]\big|,$$
-and in the coin game the adversary wins with probability $\frac12 + \frac12\mathrm{Adv}$. No distinguisher, however much time it has, beats the **total variation (TV) distance**, the probability $X$ puts on outcomes in excess of $Y$. TV distance 0 is **perfect** security, a small one **statistical** security; **computational** security allows a large TV distance that no efficient adversary exploits. "Tiny" means **negligible** (eventually below one over every polynomial in the key length) or, concretely, **$\kappa$-bit security**: time $t$ buys advantage at most about $t/2^\kappa$, the success of brute force.
+and in the coin game it wins with probability $\frac12 + \frac12\mathrm{Adv}$. A classifier of real against generated images is one, with advantage its true positive rate minus its false positive rate.
 
-**Example.** Saying 1 on heads tells a fair coin from one with heads probability 0.6 with advantage $0.6 - 0.5 = 0.1$, winning with probability 0.55. A classifier of real against generated images is a distinguisher with advantage equal to its true positive rate minus its false positive rate. A year at $10^{18}$ keys per second tries $2^{84.7}$ keys and finds a 128-bit key with probability $9.3\times10^{-14}$.
+The best distinguisher says 1 exactly on the outcomes more likely under $X$ than under $Y$. Its advantage is the probability $X$ puts on those outcomes in excess of $Y$, the **total variation (TV) distance**, and no distinguisher, however much time it has, can beat it. TV distance 0 is **perfect** security, since there is nothing to find; a tiny one is **statistical** security. **Computational** security allows a large TV distance, as long as no efficient adversary can find the outcomes that differ; this is what makes short keys possible.
 
-**Pitfalls.** "Negligible" says nothing at a fixed key length: $2^{-\sqrt\lambda}$ is negligible but still $3.9\times10^{-4}$ at $\lambda = 128$. Ask for concrete numbers. A proof that loses a factor $2^{20}$ turns a 128-bit primitive into a scheme with about 108 bits.
+"Tiny" needs a definition. The asymptotic one is **negligible**: eventually below one over every polynomial in the key length. But that is about the limit, and says nothing at a fixed key length: $2^{-\sqrt\lambda}$ is negligible, yet still $3.9\times10^{-4}$ at $\lambda = 128$. Real systems fix the key length, so ask for concrete numbers; the usual one is **$\kappa$-bit security**: an attacker running for time $t$ gets advantage at most about $t/2^\kappa$, which is what brute force over $2^\kappa$ keys achieves. A year at $10^{18}$ keys per second tries $2^{84.7}$ keys and finds a 128-bit key with probability $9.3\times10^{-14}$.
 
 ## Hybrid arguments {#sec-crypto-hybrid}
 
-**Idea.** Walk from one world to the other through intermediate **hybrids**, changing one thing at a time; the advantages of the steps add up.
+Proofs rarely compare the two worlds directly. They walk from one to the other through intermediate **hybrids**, changing one thing at a time. Any gap between the ends must show up somewhere along the chain, so the advantages of the steps add up:
+$$\mathrm{Adv}(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}(H_{i-1}, H_i).$$
+Swapping samples one at a time, $m$ independent samples give at most $m$ times the one-sample advantage.
 
-**Result.** $\mathrm{Adv}(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}(H_{i-1}, H_i)$. So $m$ independent samples give at most $m$ times the one-sample advantage.
-
-**Example.** For $m$ flips of a coin with heads probability 0.51 against fair flips (@tbl-crypto-coin-hybrid), the hybrid bound $m\delta$, with $\delta = 0.01$, is tight for one flip and loose afterwards: the best advantage grows like $\delta\sqrt m$.
+That factor is safe but pessimistic, because it reflects how the proof is organized, not how the best attacker works. Take $m$ flips of a coin with heads probability 0.51 against $m$ fair flips (@tbl-crypto-coin-hybrid). The hybrid bound $m\delta$, with $\delta = 0.01$, is right for one flip and useless by 100. The best attacker pools the flips; its advantage grows like $\delta\sqrt m$, because the bias in the count grows like $m\delta$ while its random spread grows like $\sqrt m$.
 
 | Flips $m$ | Majority vote (simulation) | Best possible (TV) | Hybrid bound $\min(1, m\delta)$ |
 | --- | --- | --- | --- |
@@ -45,17 +32,13 @@ and in the coin game the adversary wins with probability $\frac12 + \frac12\math
 
 : Advantage in telling $m$ flips of a $0.51$-coin from $m$ fair flips; the majority vote is simulated over 200,000 games per entry, so at $m = 100$ it exceeds the best possible by sampling noise. {#tbl-crypto-coin-hybrid}
 
-**Pitfalls.** Hybrid bounds are safe but can overstate the advantage by a factor up to $\sqrt m$. A reasonable-looking test can also be far from the best one: majority vote stalls near 0.48.
+Majority vote, a natural test, stalls near 0.48: its threshold $m/2$ sits at the centre of the fair coin's count, so the fair count lands above it half the time however large $m$ is. A reasonable-looking test can be far from the best, which is why security is measured against every adversary.
 
 ## The birthday bound {#sec-crypto-birthday}
 
-**Idea.** Among $q$ random values there are about $q^2/2$ pairs, each colliding with probability $1/N$, so collisions become likely after about $\sqrt N$ draws, not $N$.
-
-**Result.** For $q$ independent uniform draws from $N$ values,
+Among $q$ random values there are about $q^2/2$ pairs, and each pair collides with probability $1/N$, so collisions become likely once $q^2/2$ approaches $N$, that is after about $\sqrt N$ draws, not $N$. Precisely, for $q$ independent uniform draws from $N$ values,
 $$1 - e^{-q(q-1)/(2N)} \le \Pr[\text{collision}] \le \frac{q(q-1)}{2N},$$
-and the 50% point is $q \approx 1.18\sqrt N$. A block cipher on $n$-bit blocks differs visibly from a random function only through collisions, which costs at most $q^2/2^{n+1}$ after $q$ blocks.
-
-**Example.** @tbl-crypto-birthday gives three cases, computed in @sec-crypto-code. For 128-bit blocks, $2^{32}$ blocks (64 GiB) cost at most $2^{-65}$; at $2^{64}$ blocks the bound reaches $\frac12$.
+with the 50% point at $q \approx 1.18\sqrt N$. The lower bound is the accurate one (@tbl-crypto-birthday).
 
 | Case | $q$ | $N$ | Exact | Union bound | $1 - e^{-q(q-1)/(2N)}$ |
 | --- | --- | --- | --- | --- | --- |
@@ -65,39 +48,35 @@ and the 50% point is $q \approx 1.18\sqrt N$. A block cipher on $n$-bit blocks d
 
 : Collision probability, exact against the two bounds. {#tbl-crypto-birthday}
 
-**Pitfalls.** Anything random of $\kappa$ bits starts colliding after about $2^{\kappa/2}$ draws: random 32-bit identifiers for 100,000 records are more likely than not to clash. A $q$-query bound is a data limit, so change keys long before it.
+So anything random of $\kappa$ bits starts colliding after about $2^{\kappa/2}$ draws: random 32-bit identifiers for 100,000 records are more likely than not to clash. The same counting limits how much data one key may protect. A block cipher on $n$-bit blocks never maps two inputs to the same output, while a random function sometimes does, so after $q$ blocks an observer can tell them apart only through a collision, with advantage at most $q^2/2^{n+1}$. For 128-bit blocks, $2^{32}$ blocks (64 GiB) cost at most $2^{-65}$, but at $2^{64}$ blocks the bound reaches $\frac12$. A $q$-query bound is a data limit: change keys long before it.
 
 ## Pseudorandomness and encryption {#sec-crypto-encryption}
 
-**Idea.** A short random key can stand in for a lot of randomness if no efficient adversary can tell the difference.
+A short random key can stand in for a lot of randomness. A **pseudorandom generator (PRG)** stretches a short seed into a long string that no efficient distinguisher tells from uniform. A **pseudorandom function (PRF)** $F_k$ turns a key into a huge table of random-looking values: no efficient adversary, choosing its own queries, can tell it from a truly random function. In proofs, both let you replace "pseudorandom" by "truly random" at the cost of a small advantage.
 
-**Result.** A **pseudorandom generator (PRG)** stretches a short random seed into a longer string that no efficient distinguisher tells from uniform. A **pseudorandom function (PRF)** $F_k$ is a keyed function that no efficient adversary, choosing its own queries, tells from a truly random function. The **one-time pad** $m \oplus K$, with a uniform key as long as the message, has **perfect secrecy**: the ciphertext is uniform whatever the message. Practical schemes aim for indistinguishability under **chosen-plaintext attack (CPA)**: an adversary who can get any message encrypted picks two, receives the encryption of one, and must not tell which. The scheme $(r, m \oplus F_k(r))$, with a fresh random $r$ from a set $\mathcal R$, achieves this up to twice the PRF advantage plus $q/\lvert\mathcal R\rvert$ after $q$ encryptions.
+The **one-time pad** $m \oplus K$, with a uniform key as long as the message, has **perfect secrecy**: XOR with a uniform key gives a uniform ciphertext whatever the message. But the key is as long as the data, and it must never be reused, since $(m_1 \oplus K) \oplus (m_2 \oplus K) = m_1 \oplus m_2$ cancels the key.
 
-**Example.** A deterministic scheme loses the game with advantage 1.000: the adversary asks for the encryption of $m_0$ and compares. With 8-bit nonces and 16 encryptions, the attack that waits for a repeated $r$ wins with advantage 0.0607, against the bound 0.0625.
-
-**Pitfalls.** Encryption must be randomized: deterministic encryption of a column of labels reveals how often each label occurs. Never reuse a one-time pad, since $(m_1 \oplus K) \oplus (m_2 \oplus K) = m_1 \oplus m_2$, and make nonces long enough never to repeat.
+Practical schemes aim for indistinguishability under **chosen-plaintext attack (CPA)**: an adversary who can get any message encrypted picks two, receives the encryption of one, and must not tell which. This forces encryption to be randomized. If encrypting $m_0$ always gives the same ciphertext, the adversary asks for the encryption of $m_0$ and compares, winning with advantage 1.000: deterministic encryption of a column of labels reveals how often each label occurs. The scheme $(r, m \oplus F_k(r))$, with a fresh random $r$ from a set $\mathcal R$, works because each message gets a fresh pad as long as $r$ never repeats. Its advantage after $q$ encryptions is at most twice the PRF advantage plus $q/\lvert\mathcal R\rvert$, and the second term is real: with 8-bit nonces and 16 encryptions, the attack that waits for a repeated $r$ wins with advantage 0.0607, against the bound 0.0625. Size nonces with the birthday bound.
 
 ## Simulation and secret sharing {#sec-crypto-simulation}
 
-**Idea.** Many procedures must reveal something to a participant, such as the final result, and nothing else. If the participant could fake everything it sees from what it may learn, what it sees contains nothing more.
+Many procedures must reveal something, such as the final result, and nothing else. "Nothing else" is hard to state directly, since the participant may combine what it sees cleverly. **Simulation** sidesteps this: if the participant could have faked everything it sees from what it is allowed to learn, then what it sees contains nothing more. Formally, a procedure reveals nothing beyond $L(x)$ if an efficient **simulator**, given only $L(x)$, produces output distributed like the participant's real **view**, perfectly, statistically or computationally.
 
-**Result.** A procedure reveals nothing beyond $L(x)$ to a participant if an efficient **simulator** $S$, given only $L(x)$, produces output with the same distribution as the participant's real **view** (perfectly, statistically or computationally). **Additive secret sharing** splits a secret $x$ in $\mathbb Z_p$, the integers mod $p$, among $h$ holders: $h - 1$ uniform random shares, and a last share equal to $x$ minus their sum mod $p$. All shares sum to $x$, shares of two secrets add to shares of their sum, and any $h - 1$ shares are independent and uniform whatever $x$ is. Their simulator outputs uniform numbers: perfect security.
+**Additive secret sharing** is the simplest case. To split a secret $x$ in $\mathbb Z_p$, the integers mod $p$, among $h$ holders, draw $h - 1$ uniform random shares and set the last to $x$ minus their sum, mod $p$. Shares of two secrets add to shares of their sum. Any $h - 1$ shares are uniform whatever $x$ is, because subtracting a uniform number mod $p$ wraps around and hits every value equally often. The simulator outputs uniform numbers: perfect security.
 
-**Example.** Reduced mod $p = 11$, the shares of $x = 0$ and $x = 7$ are both uniform. Over the integers, with $r$ uniform below 16 and the share $x - r$ unreduced, the share's range moves with the secret, and the TV distance between the two secrets is $7/16 = 0.4375$ (@fig-crypto-shares).
+The wrap-around is essential. Over the integers, with $r$ uniform below 16 and the share $x - r$ unreduced, the share's range moves with the secret: values possible for one secret are impossible for the other, and the TV distance between $x = 0$ and $x = 7$ is $7/16 = 0.4375$ (@fig-crypto-shares). In general it is $|x - x'|/R$ for a mask range $R$.
 
 ![Histograms of the second share for secrets $x = 0$ and $x = 7$. Left: reduced mod $p = 11$, both are uniform. Right: over the integers with $r < 16$, the support shifts with the secret.](figures/crypto_basics_shares.svg){#fig-crypto-shares}
 
-**Pitfalls.** Reduce mod $p$: integer shares leak, at a TV distance of $|x - x'|/R$ for a mask range $R$. All $h$ shares together reveal $x$. And simulation only proves that nothing beyond $L(x)$ leaks; check that $L(x)$ itself is acceptable to reveal.
+Simulation proves only that nothing beyond $L(x)$ leaks; whether $L(x)$ itself is acceptable to reveal is a separate question.
 
 ## Learning with errors {#sec-crypto-lwe}
 
-**Idea.** **Learning with errors (LWE)** hides a secret vector $s$ behind linear equations with slightly wrong right-hand sides. Without the errors, linear algebra recovers $s$; with them, the problem is as hard as worst-case lattice problems, and no efficient quantum attack is known. Encryption built on it can add ciphertexts, at the price of growing noise.
+**Learning with errors (LWE)** hides a secret vector $s$ behind linear equations whose right-hand sides are slightly wrong: samples $(a, \langle a, s\rangle + e \bmod p)$ with $a$ uniform and a small error $e$. Without the errors, Gaussian elimination recovers $s$. With them, elimination solves the wrong system exactly and multiplies the small errors by large numbers mod $p$: on a 16-dimensional secret it recovers all 16 coordinates without noise, and 0 of 16 with errors in $\{-1, 0, 1\}$. LWE is as hard as worst-case lattice problems, with no known efficient quantum attack.
 
-**Result.** An LWE sample is $(a, \langle a, s\rangle + e \bmod p)$ with $a$ uniform and a small error $e$. **Regev encryption** of a bit $m$ adds $m\cdot\frac p2$ to a sample, and decryption is correct when $|e| < p/4$. Adding $k$ ciphertexts gives an encryption of the XOR of their bits with the sum of their errors, so with errors bounded by $B$ it is guaranteed to decrypt when
+**Regev encryption** of a bit $m$ adds $m\cdot\frac p2$ to a sample. The key holder subtracts $\langle a, s\rangle$ and is left with $m\cdot\frac p2 + e$, which rounds to the right bit as long as $|e| < p/4$. Adding $k$ ciphertexts adds their bits (that is, their XOR) and also their errors, so with errors bounded by $B$, decryption is guaranteed when
 $$k < \frac{p}{4B}.$$
-Independent errors with standard deviation $\sigma$ partly cancel, so the summed error typically grows like $\sigma\sqrt k$, not $kB$.
-
-**Example.** Gaussian elimination recovers all 16 coordinates of an LWE secret without noise and 0 of 16 with errors in $\{-1, 0, 1\}$. With $p = 4096$ and $B = 32$, the guarantee covers $k < 32$ additions. @tbl-crypto-regev shows the real failure rate.
+With $p = 4096$ and $B = 32$ that is $k < 32$. But independent errors partly cancel, so the summed error typically grows like $\sigma\sqrt k$, not $kB$, and @tbl-crypto-regev shows that failures stay rare well beyond the guarantee.
 
 | Ciphertexts added $k$ | Empirical failure rate | Normal approximation |
 | --- | --- | --- |
@@ -108,7 +87,7 @@ Independent errors with standard deviation $\sigma$ partly cancel, so the summed
 
 : Decryption failure rate of a sum of $k$ Regev ciphertexts, $p = 4096$, errors uniform on $\{-32, \dots, 32\}$. {#tbl-crypto-regev}
 
-**Pitfalls.** Noise is a budget: every operation spends some, and once it nears $p/4$ decryption becomes a coin flip. A larger modulus relative to the noise buys more operations. The worst-case budget is very conservative, but going beyond it trades a guarantee for a failure probability.
+Noise is a budget: every operation spends some, and once it nears $p/4$ decryption becomes a coin flip. Going beyond the worst-case budget trades a guarantee for a failure probability.
 
 ## Code {#sec-crypto-code}
 
@@ -161,15 +140,12 @@ uv run python code/part01-prerequisites/crypto_basics.py
 
 **Rules of thumb**
 
-- $\kappa$ bits of security means an attacker with time $t$ succeeds with probability about $t/2^\kappa$.
 - Random values of $\kappa$ bits collide after about $2^{\kappa/2}$ draws: size identifiers, nonces and key lifetimes accordingly.
-- Encryption that hides equality must be randomized.
 - In LWE schemes, noise is a budget that each operation spends.
 
 ## Further reading
 
 - Katz & Lindell, *Introduction to Modern Cryptography* (3rd ed., 2020), ch. 2–3: perfect secrecy, pseudorandomness and CPA security.
-- Boneh & Shoup, *A Graduate Course in Applied Cryptography*: the same in the concrete-security style, with the birthday and switching bounds.
 - Lindell, "How to Simulate It — A Tutorial on the Simulation Proof Technique" (2017): the simulation paradigm step by step.
 - Peikert, "A Decade of Lattice Cryptography" (2016): LWE, its variants and their parameters.
 

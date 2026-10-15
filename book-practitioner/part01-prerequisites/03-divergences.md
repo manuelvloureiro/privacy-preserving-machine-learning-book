@@ -2,46 +2,30 @@
 
 ## Why this matters
 
-How far is a fitted model from the truth? How many samples does it take to see a drift? Later parts ask the same about the outputs of an algorithm run on two different inputs. Each time you need one number for **how different two distributions $P$ and $Q$ are**, and each candidate number answers a different question.
+How far is a fitted model from the truth? How many samples reveal a drift? Later parts ask the same about an algorithm's outputs on two different inputs. Each time you need one number for **how different two distributions $P$ and $Q$ are**, and there are several candidates because there are several questions.
 
-The one idea is the **likelihood ratio** $r(x) = p(x)/q(x)$, how many times more likely an outcome is under $P$ than under $Q$. Its logarithm $L(x) = \ln r(x)$ is the evidence for $P$, in nats. Every divergence is a summary of $r$ (@tbl-div-questions).
-
-| Question | Divergence | Summary of $r$ | Section |
-| --- | --- | --- | --- |
-| How much evidence does one observation give, on average? | Kullback–Leibler (KL) | $\mathbb E_P[\ln r]$ | @sec-div-kl |
-| The same, weighting rare large ratios more, up to the worst case | Rényi $D_\alpha$, max-divergence $D_\infty$ | log of a power mean of $r$; $\ln\max r$ | @sec-div-renyi |
-| How often is the best single guess right? | Total variation (TV) | $\mathbb E_Q[(r - 1)_+]$ | @sec-div-tv |
-| The same, when one answer must be $\gamma$ times more convincing | Hockey-stick $E_\gamma$ | $\mathbb E_Q[(r - \gamma)_+]$ | @sec-div-tv |
-| Can processing help, and how do I turn KL into TV? | Data processing, Pinsker | — | @sec-div-dpi |
-
-: Each divergence answers one question by summarizing the likelihood ratio $r = p/q$; $(y)_+ = \max(y, 0)$. {#tbl-div-questions}
-
-The running example is a die, fair ($Q$) or loaded so that a six comes up half the time ($P$). A six has $r = 3$; any other roll has $r = 0.6$.
+All of them summarize the **likelihood ratio** $r(x) = p(x)/q(x)$, how many times more likely an outcome is under $P$ than under $Q$; its logarithm $L(x) = \ln r(x)$ is the evidence for $P$, in nats. The running example is a die, fair ($Q$) or loaded so that a six comes up half the time ($P$). A six has $r = 0.5/(1/6) = 3$; any other roll has $r = 0.1/(1/6) = 0.6$.
 
 ## KL divergence {#sec-div-kl}
 
-**Idea.** The evidence from many independent observations of $P$ adds up and drifts upward. The drift per observation, the average evidence, is the KL divergence: how fast data from $P$ rule out $Q$. Maximum likelihood minimizes it over the model $Q$.
-
-**Result.**
+Roll the loaded die many times and add up the evidence $\sum_i\ln r(x_i)$. Sixes are frequent, so the sum drifts upward. That rate, the average evidence per observation from $P$, is the **Kullback–Leibler (KL) divergence**,
 $$D_{\mathrm{KL}}(P\|Q) = \mathbb E_P\left[\ln\frac{p(X)}{q(X)}\right] = \sum_x p(x)\ln\frac{p(x)}{q(x)}.$$
-It is never negative, zero only when $P = Q$, not symmetric, and additive: $n$ independent samples carry $n$ times the KL of one. For two normals with the same variance, shifted by $\mu$ standard deviations, $D_{\mathrm{KL}} = \mu^2/2$. For $\mathrm{Lap}(0, b)$ against $\mathrm{Lap}(s, b)$ with $t = s/b$, $D_{\mathrm{KL}} = t + e^{-t} - 1$.
+Independent observations multiply their likelihoods, so their evidence adds: $n$ samples carry $n$ times the KL of one. And since the drift grows like $n$ while its fluctuation grows like $\sqrt n$, telling the two apart takes on the order of $1/\mathrm{KL}$ samples. For the die, $D_{\mathrm{KL}}(P\|Q) = 0.2939$ per roll.
 
-**Example.** For the die, $D_{\mathrm{KL}}(P\|Q) = 0.5\ln1.8 = 0.2939$ but $D_{\mathrm{KL}}(Q\|P) = 0.2426$: a loaded die gives itself away faster than a fair one proves its innocence. Telling two distributions apart takes on the order of $1/\mathrm{KL}$ samples.
+KL is never negative and is zero only when $P = Q$, but it averages over its first argument, so it is asymmetric. The fair die proves its innocence more slowly, $D_{\mathrm{KL}}(Q\|P) = 0.2426$, because its evidence is the absence of sixes.
+The direction also shapes fitted models. Maximum likelihood minimizes the forward KL, averaged over the data, so wherever the data go and the model has almost no mass, $\ln(p/q)$ explodes: the fit must cover everything. Variational inference minimizes the reverse KL, averaged over the model, which only punishes mass where the data aren't. Fitting one Gaussian to two separated bumps, the forward fit spreads over both and the reverse fit locks onto one; the second has forward KL 15.307, against 0.724 for the first. If $Q$ gives zero probability to anything $P$ can produce, that outcome is infinite evidence and KL is infinite.
 
-**Pitfalls.** The direction matters. Fitting one Gaussian to two separated bumps, forward KL (maximum likelihood) covers both bumps, reverse KL (variational inference) locks onto one, and each fit is bad in the other's direction: the forward fit has forward KL 0.724 but reverse KL 2.097, the reverse fit reverse KL 0.693 but forward KL 15.307. KL is infinite if $Q$ gives zero probability to anything $P$ can produce.
+For two normals with the same variance and means $\mu$ standard deviations apart, $D_{\mathrm{KL}} = \mu^2/2$; for $\mathrm{Lap}(0, b)$ against $\mathrm{Lap}(s, b)$, with $t = s/b$, $D_{\mathrm{KL}} = t + e^{-t} - 1$. The normal's is quadratic in the shift, which is why small drifts need many samples.
 
 ## Rényi divergence and the worst case {#sec-div-renyi}
 
-**Idea.** The Rényi order $\alpha$ is a dial: as it grows, rare outcomes with large ratios weigh more, and at $\alpha \to \infty$ only the worst case counts. It keeps KL's additivity and, unlike KL, bounds how often the evidence is large.
-
-**Result.** For $\alpha > 0$, $\alpha \ne 1$,
+KL is the average of $\ln r$, so $e^{D_{\mathrm{KL}}}$ is the geometric mean of $r$. Other means weight large ratios more: for the die under $P$, the geometric mean is 1.3416, the arithmetic mean 1.8000, the largest value 3.0000. The **Rényi divergence** of order $\alpha$ is the logarithm of the power mean of $r$ with exponent $\alpha - 1$: for $\alpha > 0$, $\alpha \ne 1$,
 $$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\mathbb E_Q\big[r^\alpha\big] = \frac{1}{\alpha - 1}\ln\sum_x p(x)^\alpha q(x)^{1-\alpha}.$$
-It is non-decreasing in $\alpha$, tends to KL as $\alpha \to 1$, adds over independent coordinates, and tends to the **max-divergence** $D_\infty(P\|Q) = \ln\max_x r(x) = \ln\max_A P(A)/Q(A)$, the largest log ratio of the probabilities of any event. For the shifted normal pair, $D_\alpha = \alpha\mu^2/2$ and $D_\infty = \infty$. For the shifted Laplace pair, $D_\infty = t$ and
-$$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\left(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)t} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha t}\right) \qquad (\alpha \ne \tfrac12, 1).$$ {#eq-div-laplace-renyi}
-The tail of the evidence under $Q$ is controlled by every order at once: for any $\alpha > 0$,
-$$Q[L \ge c] \le \exp\big(-\alpha c + (\alpha - 1)D_\alpha(P\|Q)\big).$$ {#eq-div-renyi-tail}
+The order is a dial: $\alpha \to 1$ gives KL, larger $\alpha$ weighs large ratios more, so $D_\alpha$ never decreases, and $\alpha \to \infty$ gives the **max-divergence** $D_\infty(P\|Q) = \ln\max_x r(x)$, the largest log ratio $\ln P(A)/Q(A)$ of any event. Every order adds over samples.
 
-**Example.** In @tbl-div-laplace-gauss the Laplace pair is further apart at low orders, the normal pair above order 2.98 (@fig-div-gauss-laplace-renyi). For the normal pair with $\mu = 1$, a draw from $Q$ gives at least 2 nats of evidence for $P$ with probability 0.0062; @eq-div-renyi-tail bounds it by 0.1353 at $\alpha = 1$ and 0.0439 at $\alpha = 2.5$.
+The normal pair's log ratio is a straight line, so higher orders keep finding larger ratios further out: $D_\alpha = \alpha\mu^2/2$ and $D_\infty = \infty$. The Laplace pair's is capped at $t$, so $D_\alpha$ levels off at $D_\infty = t$:
+$$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\left(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)t} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha t}\right) \qquad (\alpha \ne \tfrac12, 1).$$ {#eq-div-laplace-renyi}
+At equal variance, the Laplace pair is further apart at low orders, because its sharp peak moves visibly, and the normal pair above order 2.98, where its unbounded tail takes over (@tbl-div-laplace-gauss, @fig-div-gauss-laplace-renyi). "More different" must name the order.
 
 | | KL | $D_{0.5}$ | $D_2$ | $D_{10}$ | $D_\infty$ |
 | --- | --- | --- | --- | --- | --- |
@@ -52,32 +36,35 @@ $$Q[L \ge c] \le \exp\big(-\alpha c + (\alpha - 1)D_\alpha(P\|Q)\big).$$ {#eq-di
 
 ![Left: a Laplace pair and a normal pair, both with shift 1 and variance 2. Right: their Rényi divergences against the order $\alpha$. The normal pair's grows linearly without bound; the Laplace pair's levels off at its max-divergence, 1.](figures/divergences_gauss_laplace_renyi.svg){#fig-div-gauss-laplace-renyi}
 
-**Pitfalls.** Finite $D_\alpha$ at every finite order does not mean a bounded likelihood ratio, as the normal pair shows. Which pair is "more different" depends on the order, so state it. A bounded ratio (Laplace) reaches its worst case on half of $P$'s mass here; an unbounded one (normal) has extreme evidence that is rare, and @eq-div-renyi-tail says how rare.
+Unbounded is not frequent, and Rényi divergences say how rare large evidence is, which an average cannot. Markov's inequality applied to $r^\alpha$, whose $Q$-average is what $D_\alpha$ measures, gives for any $\alpha > 0$
+$$Q[L \ge c] \le \exp\big(-\alpha c + (\alpha - 1)D_\alpha(P\|Q)\big).$$ {#eq-div-renyi-tail}
+For the normal pair with $\mu = 1$, a draw from $Q$ gives at least 2 nats of evidence for $P$ with probability 0.0062. The bound gives 0.1353 at $\alpha = 1$, valid for any pair, and 0.0439 at $\alpha = 2.5$.
 
 ## Total variation and the hockey-stick divergence {#sec-div-tv}
 
-**Idea.** Total variation is the mass of $P$ that sticks out above $Q$; it says how well the best single guess can do. The hockey-stick divergence $E_\gamma$, for $\gamma \ge 1$, is the mass still sticking out above $\gamma Q$: the part of the difference due to likelihood ratios above $\gamma$.
+Draw $p$ and $q$ on the same axes. Where they overlap, an observation can't tell you which one produced it. **Total variation (TV)** is the mass that doesn't overlap:
+$$\mathrm{TV}(P, Q) = \max_A|P(A) - Q(A)| = \frac12\sum_x|p(x) - q(x)|.$$
+The best single guess says "$P$" exactly where $p > q$, so with equal priors it is right with probability $\frac12 + \frac12\mathrm{TV}$, and no classifier does better. The mean of any statistic with values in $[a, b]$ likewise moves by at most $(b - a)\,\mathrm{TV}$. For the normal pair, with $\Phi$ the standard normal cumulative distribution function (CDF), $\mathrm{TV} = 2\Phi(\mu/2) - 1$; at $\mu = 1$ it is 0.3829, so the best guess is right with probability 0.6915.
 
-**Result.**
-$$\mathrm{TV}(P, Q) = \max_A|P(A) - Q(A)| = \frac12\sum_x|p(x) - q(x)|, \qquad E_\gamma(P\|Q) = \max_A\big[P(A) - \gamma Q(A)\big] = \sum_x\big(p(x) - \gamma q(x)\big)_+.$$
-With equal priors, the best guess from one observation is right with probability $\frac12 + \frac12\mathrm{TV}$, and every statistic with values in $[a, b]$ changes its mean by at most $(b - a)\,\mathrm{TV}$. $E_1 = \mathrm{TV}$, $E_\gamma$ falls as $\gamma$ grows, and it reaches zero exactly at $\gamma = e^{D_\infty}$. For the normal pair, with $\Phi$ the standard normal cumulative distribution function (CDF),
-$$\mathrm{TV} = 2\Phi(\mu/2) - 1, \qquad E_\gamma = \Phi\Big(\frac\mu2 - \frac{\ln\gamma}\mu\Big) - \gamma\,\Phi\Big(-\frac\mu2 - \frac{\ln\gamma}\mu\Big).$$ {#eq-div-gauss-hockey}
-For the Laplace pair, $\mathrm{TV} = 1 - e^{-t/2}$ and $E_\gamma = 1 - e^{-(t - \ln\gamma)/2}$ for $1 \le \gamma \le e^t$, zero beyond.
+TV is capped at 1 and does not add over samples. A shift of a tenth of a standard deviation has TV 0.0399 in one sample, yet the best test on 400 samples is right with probability 0.8413. So compute KL or Rényi for $n$ samples, where they add, and convert at the end (@sec-div-dpi).
 
-**Example.** For the normal pair with $\mu = 1$, $\mathrm{TV} = 0.3829$, so the best guess is right with probability 0.6915; $E_2 = 0.1906$ and $E_4 = 0.0692$, never zero (@fig-div-hockey-stick). For $\mathcal N(0, 1)$ against $\mathcal N(0.1, 1)$, one sample has TV 0.0399, but the best test on 400 samples is right with probability 0.8413.
+TV counts all excess mass, however weak its evidence. To keep only strong evidence, scale $q$ up by $\gamma \ge 1$ and measure the mass of $p$ still above $\gamma q$, the **hockey-stick divergence**:
+$$E_\gamma(P\|Q) = \max_A\big[P(A) - \gamma Q(A)\big] = \sum_x\big(p(x) - \gamma q(x)\big)_+,$$
+with $(y)_+ = \max(y, 0)$. Only outcomes with ratio above $\gamma$ count, so $E_1 = \mathrm{TV}$, $E_\gamma$ falls as $\gamma$ grows, and it reaches zero at $\gamma = e^{D_\infty}$. For the die only the six counts, and $E_\gamma = 0.5 - \gamma/6$ hits zero at $\gamma = 3$. For the Laplace pair, $E_\gamma = 1 - e^{-(t - \ln\gamma)/2}$ up to $\gamma = e^t$, zero beyond. The normal pair never reaches zero,
+$$E_\gamma = \Phi\Big(\frac\mu2 - \frac{\ln\gamma}\mu\Big) - \gamma\,\Phi\Big(-\frac\mu2 - \frac{\ln\gamma}\mu\Big),$$ {#eq-div-gauss-hockey}
+giving $E_2 = 0.1906$ and $E_4 = 0.0692$ at $\mu = 1$ (@fig-div-hockey-stick): its large ratios exist but carry little mass.
 
 ![The hockey-stick divergence $E_\gamma(P\|Q)$ against $\ln\gamma$ for the loaded die, a Laplace pair and a normal pair with the same variance. The die and Laplace curves reach zero at their max-divergences; the normal curve stays positive.](figures/divergences_hockey_stick.svg){#fig-div-hockey-stick}
 
-**Pitfalls.** TV is not additive and is capped at 1: for $n$ samples compute KL or Rényi and convert (@sec-div-dpi). TV says nothing about rare outcomes with large ratios; $E_\gamma$ for large $\gamma$ does.
-
 ## Data processing and Pinsker's inequality {#sec-div-dpi}
 
-**Idea.** Binning, features, thresholds and added noise all average likelihood ratios together, pulling strong evidence toward weak. So no processing can make two distributions easier to tell apart. Pinsker's inequality turns an easy KL into a bound on the TV you want to report.
+Binning, thresholds and added noise map several outcomes to one, and the output's likelihood ratio is then an average of theirs. Report the die's parity, and the six (ratio 3) joins the two and four (0.6 each) in an even result with ratio $(3 + 0.6 + 0.6)/3 = 1.4$. Averaging pulls strong evidence toward weak, and a divergence, a convex summary of the ratios, can only shrink. That is the **data processing inequality (DPI)**: if both inputs go through the same channel $K$, even a randomized one, then $D(PK\|QK) \le D(P\|Q)$ for KL, TV, $E_\gamma$, every $D_\alpha$ and $D_\infty$, and every **f-divergence** $\mathbb E_Q[f(r)]$ with $f$ convex and $f(1) = 0$.
 
-**Result.** The **data processing inequality (DPI)**: if both inputs go through the same channel $K$, then $D(PK\|QK) \le D(P\|Q)$ for KL, TV, $E_\gamma$, every $D_\alpha$ and $D_\infty$, and in fact every **f-divergence** $\mathbb E_Q[f(r)]$ with $f$ convex and $f(1) = 0$. Equality holds when the processing keeps the likelihood ratio. Pinsker and Bretagnolle–Huber:
+Nothing is lost when processing keeps the ratio: parity drops the die's KL from 0.2939 to 0.0823, while "is it a six?" keeps all of it. Thresholding draws from $\mathcal N(0, 1)$ or $\mathcal N(1, 1)$ at the midpoint lowers KL from 0.5 to 0.3090 but keeps all of the TV, since it is the best test. The DPI bounds the best test only: processing can help a bad classifier, never beat the best test on raw data.
+
+**Pinsker's inequality** turns the KL you can compute into a bound on the TV you want to report, and Bretagnolle–Huber stays below 1:
 $$\mathrm{TV} \le \sqrt{\tfrac12D_{\mathrm{KL}}}, \qquad \mathrm{TV} \le \sqrt{1 - e^{-D_{\mathrm{KL}}}}.$$
-
-**Example.** Rounding draws from $\mathcal N(0, 1)$ or $\mathcal N(1, 1)$ into bins of width 0.5, 1 and 2 lowers KL from 0.5 to 0.4898, 0.4618 and 0.3781; a single bit, the midpoint threshold, keeps 0.3090 and all of the TV. For the die, parity drops KL from 0.2939 to 0.0823, while "is it a six?" keeps all of it. @tbl-div-pinsker shows the two bounds at work.
+Pinsker is tight for nearly equal distributions but passes 1 at KL $= 2$; Bretagnolle–Huber is better above 1.59 (@tbl-div-pinsker). There is no converse: a tiny TV is compatible with infinite KL.
 
 | $n$ | KL of $n$ samples | Exact TV | Pinsker | Bretagnolle–Huber |
 | --- | --- | --- | --- | --- |
@@ -85,8 +72,6 @@ $$\mathrm{TV} \le \sqrt{\tfrac12D_{\mathrm{KL}}}, \qquad \mathrm{TV} \le \sqrt{1
 | 400 | 2.00 | 0.6827 | 1.0000 | 0.9299 |
 
 : Exact total variation between $n$ samples of $\mathcal N(0, 1)$ and of $\mathcal N(0.1, 1)$, and the two bounds computed from KL. {#tbl-div-pinsker}
-
-**Pitfalls.** Pinsker is vacuous once KL reaches 2; above 1.59 use Bretagnolle–Huber. A tiny TV is compatible with infinite KL, so you cannot bound KL by TV. The DPI bounds the *best* test: processing can help a bad classifier, never beat the best test on raw data.
 
 ## Code {#sec-div-code}
 
@@ -154,7 +139,6 @@ The full edition's script, [divergences.py](../../code/part01-prerequisites/dive
 - Compute in KL or Rényi, where independent samples add; convert to TV at the end.
 - A bounded likelihood ratio gives a finite max-divergence; an unbounded one gives finite $D_\alpha$ at every finite order but $D_\infty = \infty$.
 - Processing never increases a divergence.
-- Pinsker is good for small KL and useless beyond 2; switch to Bretagnolle–Huber.
 
 ## Further reading
 

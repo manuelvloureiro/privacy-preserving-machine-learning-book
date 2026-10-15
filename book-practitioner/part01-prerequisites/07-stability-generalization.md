@@ -2,45 +2,33 @@
 
 ## Why this matters
 
-Your model's training loss is low. **Will its loss on new data be low too, and which training examples does it depend on?** The difference between test loss and training loss is the **generalization gap**. The classical answer counts how rich the model class is; this chapter looks at the training algorithm instead.
+Your model's training loss is low. Will its loss on new data be low too, and which training examples does it depend on? For a model fixed before you saw the data, the training loss is an unbiased estimate of the test loss. For a model fitted to the data it is biased downward, because training picked the model that looks good on exactly these examples. That bias, test loss minus training loss, is the **generalization gap**.
 
-The one idea is that **a model generalizes when it does not depend much on any single training example.** The expected gap is exactly the average effect of swapping one example out; an algorithm that limits that effect limits the gap; and you can turn the two knobs that control it: regularization strength, and how long you train with stochastic gradient descent (SGD). Later parts measure how much a trained model depends on a single example, and they use the quantities defined here. @tbl-stability-overview maps the results to the sections.
-
-| Question | Result | Section |
-| --- | --- | --- |
-| What is the gap, really? | The average replace-one effect; at most the stability $\beta$ | @sec-stability-gap |
-| How sure is the bound for the one model I trained? | A high-probability bound, useful when $\beta$ falls faster than $1/\sqrt n$ | @sec-stability-gap |
-| How stable is regularized training? | $\beta = 2L^2/(\lambda n)$ | @sec-stability-erm |
-| How stable is SGD? | $\beta \le (2L^2/n)\sum_t\eta_t$: stop early | @sec-stability-sgd |
-| Which examples carry the gap? | Atypical ones, measured by self-influence | @sec-stability-memorization |
-
-: The questions of this chapter, and where each is answered. {#tbl-stability-overview}
+Instead of counting how rich the model class is, this chapter looks at the training algorithm, and its one idea is that **a model generalizes when it does not depend much on any single training example.** The gap is exactly the average effect of swapping one example out, and two knobs you already turn control that effect: regularization strength, and how long you train with stochastic gradient descent (SGD). Later parts reuse these quantities.
 
 **Notation.** The training set is $S = (z_1, \dots, z_n)$, drawn independently from a distribution $\mathcal D$, and $S^{(i)}$ is $S$ with example $i$ replaced by a fresh draw $z_i'$. The algorithm $A$ returns the model $A(S)$, with test loss $R(A(S))$ and training loss $\hat R_S(A(S))$.
 
 ## The gap and uniform stability {#sec-stability-gap}
 
-**Idea.** The test loss can be measured on a fresh point $z_i'$. Swap the names of $z_i$ and $z_i'$, which have the same distribution, and the same number becomes the loss on $z_i$ of a model trained without it. So the gap is how much worse each example does when it is left out.
+The test loss of $A(S)$ can be measured on the fresh point $z_i'$, which the model never saw. Swap the names of $z_i$ and $z_i'$. They have the same distribution, so nothing changes on average, but the same number now reads as the loss on $z_i$ of a model trained on $S^{(i)}$, which did not see $z_i$. The training loss is the loss on $z_i$ of the model that did. So for any algorithm,
+$$\mathbb E[\mathrm{gap}] = \frac1n\sum_{i=1}^n\mathbb E\Big[\ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big)\Big]:$$
+the expected gap is how much worse each example does when it is left out, averaged over examples.
 
-**Result.** For any algorithm,
-$$\mathbb E[\mathrm{gap}] = \frac1n\sum_{i=1}^n\mathbb E\Big[\ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big)\Big].$$
-$A$ is **$\beta$-uniformly stable** if replacing any one example moves the loss of the trained model by at most $\beta$ at every test point, for every training set and replacement (in expectation over $A$'s own randomness, for SGD). Then $|\mathbb E[\mathrm{gap}]| \le \beta$. For the one model you trained, with losses in $[0, M]$, McDiarmid's inequality ([Concentration inequalities](02-concentration.md)) gives, with probability at least $1 - \delta$,
+To bound the gap, bound each bracket. $A$ is **$\beta$-uniformly stable** if replacing any one example moves the loss of the trained model by at most $\beta$ at every test point, for every training set and replacement (in expectation over $A$'s own randomness, for SGD). Then every bracket is at most $\beta$, and so is the expected gap. No model class appears, so the bound holds for large models too.
+
+You train once, though, so you want the gap of your model, not its average over training sets. The gap is a function of $n$ independent examples, none of which can move it by much, and that is the situation of McDiarmid's inequality ([Concentration inequalities](02-concentration.md)). With losses in $[0, M]$, with probability at least $1 - \delta$,
 $$R(A(S)) \le \hat R_S(A(S)) + \beta + (2n\beta + M)\sqrt{\frac{\ln(1/\delta)}{2n}}.$$
-The term $2n\beta\sqrt{\ln(1/\delta)/(2n)}$ vanishes only if $\beta$ falls faster than $1/\sqrt n$.
+The $M$ part is the usual $1/\sqrt n$ fluctuation you would pay even for a fixed model. The $2n\beta$ part is the price of learning, and it vanishes only if $\beta$ falls faster than $1/\sqrt n$. It is loose, because it charges every example the full $2\beta$ although their effects largely cancel; sharper bounds (Bousquet, Klochkov & Zhivotovskiy) need only $\beta \to 0$.
 
-**Example.** The running example is logistic regression on features uniform on the unit sphere in 10 dimensions, regularized with $\lambda = 0.01$. With $n = 50$, averaged over 100 training sets, the training loss is 0.4603 and the test loss 0.5781, an expected gap of about 0.119. With $n = 1000$ the gap is about 0.006. At $n = 10{,}000$ and $\delta = 0.05$, the high-probability bound adds 0.065 to the training loss at $\lambda = 1$, where the loss is at most $M = \ln(1 + e) = 1.313$ because the weights satisfy $\|w\| \le 1/\lambda$, and 0.614 at $\lambda = 0.1$.
-
-**Pitfalls.** The identity is exact; the bounds are worst cases, and the high-probability one is loose because it charges every example the full $2\beta$. Sharper bounds (Feldman & Vondrák; Bousquet, Klochkov & Zhivotovskiy) need only $\beta \to 0$. Zero training error is a warning, not a result: a lookup table that memorizes its training set has $\beta = 1$, the largest value for a loss in $[0, 1]$, and a gap that never shrinks.
+The running example is logistic regression on 10-dimensional features uniform on the unit sphere, regularized with $\lambda = 0.01$. With $n = 50$ the training loss is 0.4603 and the test loss 0.5781, a gap of about 0.119; with $n = 1000$ the gap is about 0.006. At $n = 10{,}000$ and $\delta = 0.05$, the high-probability bound adds 0.065 to the training loss at $\lambda = 1$ but 0.614 at $\lambda = 0.1$, mostly through the $2n\beta$ term.
 
 ## Regularized ERM is stable {#sec-stability-erm}
 
-**Idea.** The penalty $\frac\lambda2\|w\|^2$ makes the training objective a bowl with curvature at least $\lambda$, and one example, with weight $1/n$, can only tilt such a bowl so far.
-
-**Result.** For regularized **empirical risk minimization (ERM)** with a convex, $L$-Lipschitz loss, replacing one example moves the minimizer by at most $2L/(\lambda n)$ and the loss at any point by at most
+Regularized **empirical risk minimization (ERM)** minimizes the training loss plus $\frac\lambda2\|w\|^2$. The penalty makes the objective a bowl with curvature at least $\lambda$, and one example, carrying weight $1/n$, can only tilt such a bowl so far. [Optimization](06-optimization.md) turns that into a number: with a convex, $L$-Lipschitz loss, replacing one example moves the minimizer by at most $2L/(\lambda n)$, so the loss at any point moves by at most $L$ times that,
 $$\beta = \frac{2L^2}{\lambda n}.$$
-Doubling $\lambda$ halves $\beta$, and $\beta$ falls like $1/n$, fast enough for both bounds above. The weights also satisfy $\|w\| \le L/\lambda$. This is the movement bound of [Optimization](06-optimization.md).
+Doubling $\lambda$ halves $\beta$, and $\beta$ falls like $1/n$, faster than $1/\sqrt n$, so both bounds above go to zero as the data grow.
 
-**Example.** @tbl-stability-replace-one flips one label in logistic regression with unit-norm features ($L = 1$) and records the largest changes.
+@tbl-stability-replace-one flips one label in logistic regression with unit-norm features ($L = 1$), keeping $\lambda n$ fixed so the bound stays at 0.02.
 
 | $n$ | $\lambda$ | Bound $2L^2/(\lambda n)$ | Largest loss change | Ratio |
 | --- | --- | --- | --- | --- |
@@ -50,37 +38,35 @@ Doubling $\lambda$ halves $\beta$, and $\beta$ falls like $1/n$, fast enough for
 
 : Replace-one loss changes of regularized logistic regression against the stability bound. {#tbl-stability-replace-one}
 
-The measured expected gap is a fixed fraction of the bound: about 3% at $\lambda = 0.01$ and 11% to 13% at $\lambda = 1$.
+The slack comes from the worst cases in the argument: two examples' gradients rarely point in opposite directions at full length, and the data add curvature of their own, which the bound ignores. That second slack grows when the regularizer is weak, which is why the ratio drops to 0.14 at $\lambda = 0.01$. The measured expected gap is smaller still: about 3% of the bound at $\lambda = 0.01$, 11% to 13% at $\lambda = 1$.
 
-**Pitfalls.** The bound needs a Lipschitz loss: squared loss qualifies only on a bounded set of weights and labels. It ignores the data's own curvature, so with weak regularization it overestimates more (ratio 0.14 against 0.25). Stability is not accuracy: too large a $\lambda$ closes the gap by underfitting, and the test loss is U-shaped in $\lambda$.
+The argument needs a Lipschitz loss, so squared loss qualifies only on a bounded set of weights and labels. And stability is not accuracy: a large $\lambda$ closes the gap by pulling the weights towards zero and underfitting, so the test loss is U-shaped in $\lambda$.
 
 ## SGD is stable if you stop early {#sec-stability-sgd}
 
-**Idea.** Run SGD on $S$ and on $S^{(i)}$ with the same random order. The two runs only drift apart on the steps that pick example $i$, about once per epoch. On every other step they take a gradient step on the same convex smooth loss, which does not push two points apart as long as the step size $\eta \le 2/\rho$, with $\rho$ the smoothness.
+Large models are trained by SGD for a number of steps, not to a minimizer. Run SGD on $S$ and on $S^{(i)}$ with the same random order. On steps that pick a shared example, both runs take a gradient step on the same convex, $\rho$-smooth loss, and such a step does not push two points apart as long as $\eta \le 2/\rho$. Only the steps that pick example $i$ can separate them, by at most $2L\eta_t$, and those come about once per epoch. Adding up the jumps gives (Hardt, Recht & Singer 2016)
+$$\beta \le \frac{2L^2}{n}\sum_{t=1}^T\eta_t.$$
+With a constant step $\eta$ for $E$ epochs this is $2L^2\eta E$. Stability degrades with training time, and the $n$ cancels: for a fixed number of epochs, more data does not help the bound.
 
-**Result.** For a convex, $\rho$-smooth, $L$-Lipschitz loss and steps $\eta_t \le 2/\rho$, SGD is uniformly stable with
-$$\beta \le \frac{2L^2}{n}\sum_{t=1}^T\eta_t$$
-(Hardt, Recht & Singer 2016). With a constant step $\eta$ for $E$ epochs this is $2L^2\eta E$: it grows with training time and does not improve with more data at a fixed number of epochs.
-
-**Example.** Unregularized logistic regression with $n = 100$ and $\eta = 0.25$ has bound $0.5E$. The measured gap grows from 0.036 after 1 epoch to 0.121 after 40, and the test loss is lowest after about 5 epochs while the training loss keeps falling (@fig-stability-sgd-epochs).
+So early stopping is a trade-off, not a trick: training longer lowers the optimization error but raises $\beta$. With unregularized logistic regression, $n = 100$ and $\eta = 0.25$, the measured gap grows from 0.036 after 1 epoch to 0.121 after 40, and the test loss is lowest after about 5 epochs while the training loss keeps falling (@fig-stability-sgd-epochs).
 
 ![Left: train and test loss of SGD on logistic regression ($n = 100$, $\eta = 0.25$) against the number of epochs. Right: the measured gap against the stability bound $2L^2\eta T/n$, on a log scale. Both grow with training time; the bound grows faster.](figures/stability_sgd_epochs.svg){#fig-stability-sgd-epochs}
 
-**Pitfalls.** Training longer lowers the optimization error but raises $\beta$, so early stopping is a trade-off, not a trick. The bound is loose, by a factor of 14 after one epoch and 165 after 40, because on a curved loss the two runs contract between jumps instead of drifting further apart. For non-convex losses a gradient step can push points apart, and the bound grows much faster with $T$.
+The bound, $0.5E$ here, is loose by a factor of 14 after one epoch and 165 after 40, because the argument only uses that a step does not expand distances; on a curved loss it usually contracts them, so the runs drift apart much more slowly. On a non-convex loss a gradient step can push points apart, and the bound grows much faster with $T$.
 
 ## Memorization and self-influence {#sec-stability-memorization}
 
-**Idea.** The bracket in the gap identity can be measured example by example. It shows which examples the model fits only because it saw them.
-
-**Result.** The **self-influence**, or **memorization score**, of example $i$ is
+The bracket in the gap identity can be measured example by example, by retraining without each one: the **self-influence**, or **memorization score**, of example $i$,
 $$\mathrm{mem}_i(S) = \ell\big(A(S^{(i)}), z_i\big) - \ell\big(A(S), z_i\big),$$
-its loss under a model trained without it minus its loss under a model trained with it. Its average is the expected gap. Typical examples are fitted whether or not they are present; atypical and mislabelled ones are fitted only when present, so they carry most of the gap.
+and by the identity its average is the expected gap. With $n = 40$ and $\lambda = 0.01$, the measured gap is $0.1482 \pm 0.0073$ and the average self-influence $0.1422 \pm 0.0025$, equal within error.
 
-**Example.** With $n = 40$ and $\lambda = 0.01$, the measured gap is $0.1482 \pm 0.0073$ and the average self-influence $0.1422 \pm 0.0025$, equal within error. Examples whose label goes against the trend have average self-influence 0.284, against 0.097 for the rest (@fig-stability-self-influence). The 1-nearest-neighbour classifier, which predicts the label of the closest training point, is the extreme: training error 0, $\beta = 1$, and a test error that falls only to 0.352 at $n = 4{,}000$, towards its limit 0.338.
+The scores are uneven, and the reason is redundancy. A typical example is fitted whether or not it is present, because its neighbours carry the same information. An atypical or mislabelled one is fitted only if it is there itself. So examples whose label goes against the trend have average self-influence 0.284, against 0.097 for the rest (@fig-stability-self-influence).
 
 ![Self-influence of each training example against $y_ix_{i1}$, which measures how typical its label is, for $n = 40$ and two values of $\lambda$. Examples whose label goes against the trend have the largest self-influence; regularization flattens the profile. The dashed line is the average, which equals the expected gap.](figures/stability_self_influence.svg){#fig-stability-self-influence}
 
-**Pitfalls.** A small average gap allows a few heavily memorized examples; uniform stability does not. Memorization is not always a defect: Feldman (2020) shows that on data with a long tail of rare subpopulations, fitting the singletons is needed for accuracy. So expect the rarest examples to be the most memorized, and measure them rather than the average.
+The extreme case is the 1-nearest-neighbour classifier, which predicts the label of the closest training point. It fits every training example using that example itself, so its training error is 0 and its $\beta$ is 1, the largest possible for the 0-1 loss. Its test error falls only to 0.352 at $n = 4{,}000$, towards a limit of 0.338, while the stable logistic regression reaches 0.259 on the same data. Zero training error is a warning, not a result.
+
+A small average gap still allows a few heavily memorized examples; only uniform stability caps each. And memorization is not always a defect: Feldman (2020) shows that on data with a long tail of rare subpopulations, fitting the singletons is needed for accuracy. So expect the rarest examples to be the most memorized, and measure them rather than the average.
 
 ## Code
 
@@ -107,7 +93,6 @@ uv run python code/part01-prerequisites/stability.py
 
 - Regularization strength and training time are the two stability knobs: $\beta \propto 1/\lambda$ for ERM, $\beta \propto \eta T$ for SGD.
 - A useful high-probability bound needs $\beta$ to fall faster than $1/\sqrt n$.
-- Training error 0 means the model may depend entirely on individual examples.
 - The examples a model memorizes most are the atypical ones.
 
 ## Further reading
