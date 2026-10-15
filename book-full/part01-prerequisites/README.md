@@ -34,7 +34,7 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 3. Then chapters 6 → 7. Stability uses the optimization results directly.
 4. Chapter 8 last. It can wait until chapter 9 (threat models, which uses its security games), and chapters 15 (linkage, which uses the birthday bound) and 25 (trust models, which use secret sharing) build on it too, as will a planned later part on cryptographic approaches.
 
-## Core readings (from the study plan)
+## Core readings
 
 - Vershynin, *High-Dimensional Probability* (2018), ch. 2 → chapter 2
 - van Erven & Harremoës, "Rényi Divergence and Kullback–Leibler Divergence" (2014), sections 1–3 → chapter 3
@@ -48,7 +48,7 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 
 Each chapter ends with its own references, with what each is good for.
 
-## Study-plan exercises
+## Exercises
 
 1. Derive the Chernoff bound for a sum of Bernoullis: worked step by step in [Concentration inequalities](02-concentration.md), section "The Chernoff method".
 2. Compute the KL and Rényi divergence between two Gaussians with equal variance by hand: worked two ways in [Divergences](03-divergences.md), section "Two Gaussians with equal variance, by hand".

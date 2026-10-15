@@ -375,7 +375,7 @@ uv run python code/part02-attacks/syntactic_anonymity.py
 
 [tests/test_syntactic_anonymity.py](../../tests/test_syntactic_anonymity.py) checks that the output still matches.
 
-The study plan's exercise is to k-anonymize a census extract with ARX, a free anonymization tool that implements these criteria, and link it back to a public table. The script's Mondrian release plays the part of ARX, and its linkage column is that measurement: the re-identification rate against an adversary holding everyone's quasi-identifiers, the strongest auxiliary table there can be.
+In practice, a census extract would be k-anonymized with ARX, a free anonymization tool that implements these criteria, and then linked back to a public table. The script's Mondrian release plays the part of ARX, and its linkage column is that measurement: the re-identification rate against an adversary holding everyone's quasi-identifiers, the strongest auxiliary table there can be.
 
 **What to take from it.** k-anonymity does what it says: linkage success stays below $1/k$, and Mondrian keeps it above $1/(2k)$ at little cost in precision. But what it says is not enough, because small classes state diagnoses outright, for 2.3% of patients at $k = 5$. Even where nothing is stated outright, most of what an anonymized table teaches is about the population, so measure attribute disclosure against imputation, not against guessing the most common value. Each fix costs utility: recursive diversity and t-closeness remove the certain disclosures by erasing the age–diagnosis pattern the data exist to show. And two releases are worse than one, under every definition here. The composition attack more than triples the pinned diagnoses, and it is the attack that a better definition has to survive.
 

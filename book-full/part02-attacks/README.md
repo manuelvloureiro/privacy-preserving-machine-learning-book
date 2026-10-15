@@ -28,7 +28,7 @@ uv run python code/part02-attacks/<script>.py
 
 Every chapter's exercises, each with a worked solution, are in the exercise book, [book-exercises/part02-attacks/](../../book-exercises/part02-attacks/), one file per chapter. The exercise book is its own website, and `code/part02-attacks/solutions_<script>.py` prints the numbers they quote.
 
-## Core readings (from the study plan)
+## Core readings
 
 - Shokri et al., "Membership Inference Attacks against Machine Learning Models" (S&P 2017) → chapter 10
 - Carlini et al., "Membership Inference Attacks From First Principles" (S&P 2022) → chapter 10
@@ -54,7 +54,7 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 
 Each chapter ends with its own references, with what each is good for.
 
-## Study-plan exercises
+## Exercises
 
 Train a CIFAR-10 ResNet, run LiRA with 16 shadow models, and report TPR at 0.1% FPR. [Membership inference](02-membership-inference.md) describes this pipeline step by step and runs a scaled-down version (logistic regression, 64 shadow models) in seconds. Keep the pipeline: a planned later part on auditing private models reuses it.
 

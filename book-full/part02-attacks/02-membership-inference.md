@@ -382,7 +382,7 @@ and the numerator $\mu_{\mathrm{in}, z} - \mu_{\mathrm{out}, z}$ is the **self-i
 
 ### Context
 
-The study plan's exercise for this phase is to train an image classifier on CIFAR-10, a standard benchmark of small colour images in ten classes, run LiRA with 16 shadow models, and report the TPR at FPR 0.1%, and to keep the pipeline for auditing private training later. That takes hours of GPU time, so this book does not run it. The running example is the same protocol with logistic regression in place of a ResNet, a deep convolutional network for images. This section lists what changes at full size.
+The usual full-scale experiment trains an image classifier on CIFAR-10, a standard benchmark of small colour images in ten classes, runs LiRA with 16 shadow models, and reports the TPR at FPR 0.1%; the same pipeline later audits private training. That takes hours of GPU time, so this book does not run it. The running example is the same protocol with logistic regression in place of a ResNet, a deep convolutional network for images. This section lists what changes at full size.
 
 ### Statement: the protocol
 

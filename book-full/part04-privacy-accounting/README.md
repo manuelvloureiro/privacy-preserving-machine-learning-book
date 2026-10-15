@@ -1,6 +1,6 @@
 # Part 4 — Privacy accounting
 
-How to compute the privacy of a long run of noisy steps: Rényi differential privacy and its conversions, concentrated DP, f-DP and Gaussian DP, amplification by subsampling, shuffling and iteration, numerical accounting with privacy loss distributions, adaptive composition, and how to choose and report an accountant. This part follows Phase 4 of the [study plan](../study_plan.md).
+How to compute the privacy of a long run of noisy steps: Rényi differential privacy and its conversions, concentrated DP, f-DP and Gaussian DP, amplification by subsampling, shuffling and iteration, numerical accounting with privacy loss distributions, adaptive composition, and how to choose and report an accountant.
 
 Start with the [introduction](00-introduction.md), which is part of the book. It assumes the [prerequisites](../part01-prerequisites/README.md), especially divergences and hypothesis testing, and the [DP foundations](../part03-dp-foundations/README.md) part, especially composition and the Gaussian mechanism.
 
@@ -35,7 +35,7 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 3. Chapters 31 → 32, the practical core. Chapter 29 fits anywhere after chapter 28, except its section on subsampling, which uses one formula from chapter 31.
 4. Chapters 33 and 34 in either order, then chapter 35.
 
-## Core readings (from the study plan)
+## Core readings
 
 - Mironov, "Rényi Differential Privacy" (CSF 2017) → chapters 27, 28
 - Mironov, Talwar & Zhang, "Rényi Differential Privacy of the Sampled Gaussian Mechanism" (2019) → chapter 31
@@ -58,7 +58,7 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 
 Each chapter ends with its own references, with what each is good for.
 
-## Study-plan exercise
+## Exercise
 
 Write an RDP accountant for the Poisson-subsampled Gaussian and check it against Google's `dp_accounting` within 1%. Then, for DP-SGD with $q = 0.01$, $\sigma = 1$ and up to 10,000 steps, plot ε at δ = 10⁻⁵ from four accountants: RDP with Mironov's conversion, RDP with the improved conversion, the GDP central-limit approximation, and PLD, alongside advanced composition applied per step.
 

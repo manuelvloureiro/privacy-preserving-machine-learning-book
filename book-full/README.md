@@ -1,6 +1,6 @@
 # Contents
 
-The book follows the [study plan](study_plan.md), one phase per part. Each folder is a part, and each file in it is a chapter, numbered across the whole book as in the rendered edition.
+Each folder is a part, and each file in it is a chapter, numbered across the whole book as in the rendered edition.
 
 ## Part 1 · [Prerequisites](part01-prerequisites/README.md) · [introduction](part01-prerequisites/00-introduction.md)
 

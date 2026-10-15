@@ -15,7 +15,7 @@ local data = quarto.json.decode(file:read("a"))
 file:close()
 
 -- The PDF book is one document: each page starts at a level-1 heading. Skip the pages
--- whose first heading id is listed (the study plan, the glossary, the index itself).
+-- whose first heading id is listed (the glossary, the index itself).
 local skip = {}
 for _, id in ipairs(data.skip or {}) do
   skip[id] = true

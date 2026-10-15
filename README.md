@@ -1,6 +1,6 @@
 # Privacy-Preserving Machine Learning
 
-Notes and code for a book on privacy-preserving machine learning, written alongside a [study plan](book-full/study_plan.md).
+Notes and code for a book on privacy-preserving machine learning.
 
 ## Layout
 
@@ -13,9 +13,8 @@ The repository holds three books, built with Quarto from the same code:
 ```
 book-full/                       the full edition
   _quarto.yml                    the Quarto book: parts, chapters, PDF settings, filters
-  _quarto-website.yml            website profile: adds the study plan
+  _quarto-website.yml            website profile
   _quarto-pdf.yml                PDF profile
-  study_plan.md                  the plan the book follows, one phase per part
   README.md                      table of contents
   partNN-<topic>/                one part of the book
     README.md                    part overview, readings, exit check

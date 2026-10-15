@@ -4,7 +4,7 @@ How to write content for the full edition (`book-full/`) and its exercise book (
 
 ## What the book is
 
-A book on privacy-preserving machine learning that follows [book-full/study_plan.md](book-full/study_plan.md), one phase per part. Chapters build on each other, so each chapter may only use what earlier chapters introduced.
+A book on privacy-preserving machine learning. Chapters build on each other, so each chapter may only use what earlier chapters introduced.
 
 **Units.** The book uses Quarto's units. A **part** is a folder `book-full/partNN-<topic>/`. A **chapter** is one file in it; Quarto numbers chapters 1, 2, … across the whole book, so Part 4's fifth file is chapter 31. A **section** is a `##` heading in a chapter, numbered 31.2. Write "Part 3" or "this part" for a folder, "chapter" for a file and "section" for a `##` heading.
 
@@ -16,7 +16,7 @@ A book on privacy-preserving machine learning that follows [book-full/study_plan
 - Each part opens with `00-introduction.md`, listed in `book-full/_quarto.yml` as the part's `part:` file so it becomes the part page. It is one or two pages: what the part is for and what it assumes, the thread that ties its chapters together, a captioned table mapping each chapter to the question it answers, a reading order, shared notation, and what the reader will be able to do at the end. It does not follow the chapter structure below.
 - A chapter's code lives in `code/<part>/<topic>.py` at the repository's root, shared by the three books. Its figures are written to `_build/figures/<part>/` and staged into the part's `figures/` folder, so a chapter references them as `figures/<name>.svg`.
 - A chapter's exercises and their worked solutions live in `book-exercises/<part>/NN-<topic>.md`, with the same file name as the chapter. These pages form the **exercise book**, a separate book (website only) listed in `book-exercises/_quarto.yml`. The chapter pages themselves have no exercises. An exercise page may reference the full edition's equations, sections, figures and tables as `@eq-name` and so on: the build turns them into links to the full edition (`tools/xrefs.py`, `filters/xrefs.lua`). Numbers the exercise book quotes come from `code/<part>/solutions_<script>.py`, named after the chapter's script, and are checked by `tests/test_solutions_<script>.py`, like a chapter's.
-- When you add, remove or renumber a chapter, update every link to it, the part's `README.md`, `book-full/README.md`, the chapter lists in `book-full/_quarto.yml` and `book-exercises/_quarto.yml`, the matching practitioner chapter, and the global chapter numbers quoted in the READMEs and `book-full/study_plan.md`.
+- When you add, remove or renumber a chapter, update every link to it, the part's `README.md`, `book-full/README.md`, the chapter lists in `book-full/_quarto.yml` and `book-exercises/_quarto.yml`, the matching practitioner chapter, and the global chapter numbers quoted in the READMEs.
 - Each chapter's script has a test in `tests/` that runs it and checks every number the text quotes.
 
 ## Chapter structure
