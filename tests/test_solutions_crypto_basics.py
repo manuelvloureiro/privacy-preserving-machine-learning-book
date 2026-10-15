@@ -33,14 +33,14 @@ def test_solutions_crypto_basics_match_page(tmp_path: Path) -> None:
         "[Ex8 uniform B=32] var=352  z=2.576  k=449.0  wrapped k=449",
         "simulated failure at that k=0.0109",
         "[Ex8 rounded normal sigma=3.2] var=10.3233  k=15309  wrapped k=15309  simulated failure at that k=0.0111",
-        "[Ex9 k=1] q=4093: drift=0.00 (predicted 0.00)  failure=0.0000 (normal 0.0000)  q=4096: drift=0.00 failure=0.0000",
-        "[Ex9 k=31] q=4093: drift=-7.51 (predicted -7.50)  failure=0.0000 (normal 0.0000)  "
-        "q=4096: drift=0.00 failure=0.0000",
-        "[Ex9 k=256] q=4093: drift=-63.79 (predicted -63.75)  failure=0.0010 (normal 0.0008)  "
-        "q=4096: drift=0.00 failure=0.0003",
-        "[Ex9 k=1024] q=4093: drift=-255.81 (predicted -255.75)  failure=0.1167 (normal 0.1171)  "
-        "q=4096: drift=0.00 failure=0.0873",
-        "[Ex9 k=4096] q=4093: drift=-1023.82 (predicted -1023.75)  failure=0.5007 (normal 0.5001)  "
-        "q=4096: drift=0.00 failure=0.3780",
+        "[Ex9 k=1] p=4093: drift=0.00 (predicted 0.00)  failure=0.0000 (normal 0.0000)  p=4096: drift=0.00 failure=0.0000",
+        "[Ex9 k=31] p=4093: drift=-7.51 (predicted -7.50)  failure=0.0000 (normal 0.0000)  "
+        "p=4096: drift=0.00 failure=0.0000",
+        "[Ex9 k=256] p=4093: drift=-63.79 (predicted -63.75)  failure=0.0010 (normal 0.0008)  "
+        "p=4096: drift=0.00 failure=0.0003",
+        "[Ex9 k=1024] p=4093: drift=-255.81 (predicted -255.75)  failure=0.1167 (normal 0.1171)  "
+        "p=4096: drift=0.00 failure=0.0873",
+        "[Ex9 k=4096] p=4093: drift=-1023.82 (predicted -1023.75)  failure=0.5007 (normal 0.5001)  "
+        "p=4096: drift=0.00 failure=0.3780",
     ):
         assert expected in out, expected

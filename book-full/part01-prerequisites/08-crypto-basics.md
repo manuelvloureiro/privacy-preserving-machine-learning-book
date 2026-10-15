@@ -22,6 +22,8 @@ The whole subject is one idea, used over and over. **Security is a game.** A cha
 
 Later parts build protocols from these primitives. The probability tools used here (union bound, $1 + x \le e^x$, the normal tail) are proved in [Concentration inequalities](02-concentration.md), and total variation (TV) distance is studied in [Divergences](03-divergences.md); each is restated below where it is used.
 
+**Notation.** This chapter departs from the part's shared notation in two letters. It keeps $P$ and $Q$ for two distributions, but lowercase $q$ counts the queries an adversary makes (or the random draws in the birthday bound), and lowercase $p$ is the modulus of the arithmetic in secret sharing and learning with errors, not a density. The bit length of blocks, messages and inputs is $n$, the number of share holders is $h$, and the dimension of a learning-with-errors secret is $d$.
+
 **A warning about the code.** Every scheme in this chapter's script is a toy, written to make the definitions concrete. Its parameters are far too small to be secure, nothing runs in constant time, and NumPy's generator is not a cryptographic source of randomness. Never use it to protect anything.
 
 ## Toolkit: five facts every derivation uses
@@ -96,13 +98,13 @@ Putting the two together, a scheme is **secure** if every PPT adversary has negl
 
 ### Closure: polynomially many tries keep it negligible
 
-**Statement.** If $\mu$ is negligible and $p$ is a polynomial, then $p(\lambda)\mu(\lambda)$ is negligible. The sum of two negligible functions is negligible.
+**Statement.** If $\mu$ is negligible and $\mathrm{poly}$ is a polynomial, then $\mathrm{poly}(\lambda)\mu(\lambda)$ is negligible. The sum of two negligible functions is negligible.
 
-**Derivation.** The idea is that a negligible function beats every inverse polynomial, so you can ask it to beat one that is steep enough to also cancel the polynomial $p$.
+**Derivation.** The idea is that a negligible function beats every inverse polynomial, so you can ask it to beat one that is steep enough to also cancel the polynomial $\mathrm{poly}$.
 
-1. **Bound the polynomial by a power.** A polynomial of degree $d$ is eventually below $\lambda^{d+1}$, because $\lambda^{d+1}$ grows faster than any of its terms. So $p(\lambda) \le \lambda^{d+1}$ for all $\lambda \ge \lambda_1$.
-2. **Ask $\mu$ for a steeper decay.** Fix any $c > 0$. Apply @eq-crypto-negligible to $\mu$ with exponent $c + d + 1$ instead of $c$: $\mu(\lambda) < \lambda^{-(c+d+1)}$ for $\lambda \ge \lambda_2$.
-3. **Multiply the two bounds.** For $\lambda \ge \max(\lambda_1, \lambda_2)$, $p(\lambda)\mu(\lambda) < \lambda^{d+1}\lambda^{-(c+d+1)} = \lambda^{-c}$. Since $c$ was arbitrary, $p\mu$ meets the definition of negligible.
+1. **Bound the polynomial by a power.** A polynomial of degree $c' - 1$ is eventually below $\lambda^{c'}$, because $\lambda^{c'}$ grows faster than any of its terms. So $\mathrm{poly}(\lambda) \le \lambda^{c'}$ for all $\lambda \ge \lambda_1$.
+2. **Ask $\mu$ for a steeper decay.** Fix any $c > 0$. Apply @eq-crypto-negligible to $\mu$ with exponent $c + c'$ instead of $c$: $\mu(\lambda) < \lambda^{-(c+c')}$ for $\lambda \ge \lambda_2$.
+3. **Multiply the two bounds.** For $\lambda \ge \max(\lambda_1, \lambda_2)$, $\mathrm{poly}(\lambda)\mu(\lambda) < \lambda^{c'}\lambda^{-(c+c')} = \lambda^{-c}$. Since $c$ was arbitrary, $\mathrm{poly}\cdot\mu$ meets the definition of negligible.
 4. **Handle a sum the same way.** Apply @eq-crypto-negligible to each term with exponent $c + 1$: $\mu_1 + \mu_2 < 2\lambda^{-(c+1)}$, and $2\lambda^{-(c+1)} \le \lambda^{-c}$ is the same as $2 \le \lambda$, which holds once $\lambda \ge 2$.
 
 This is why the definitions use polynomials and negligible functions together. A PPT adversary can repeat an attack a polynomial number of times. By the union bound (Fact 5: the chance that at least one try succeeds is at most the sum of the per-try chances), its overall success is at most the number of tries times the per-try success, which is still negligible.
@@ -170,7 +172,7 @@ Quantitatively, a distinguisher with advantage $\varepsilon$ on $m$ copies yield
 3. **Identify what $D$ sees.** If $z \sim X$, the tuple handed to $D$ has $i - 1$ entries from $Y$ followed by entries from $X$, so it is distributed as $H_{i-1}$. If $z \sim Y$, it has $i$ entries from $Y$, so it is $H_i$.
 4. **Average over the random position.** Each $i$ is chosen with probability $\frac1m$, so $\Pr[D'(X) = 1] - \Pr[D'(Y) = 1] = \frac1m\sum_{i=1}^m\big(\Pr[D(H_{i-1}) = 1] - \Pr[D(H_i) = 1]\big)$.
 5. **Telescope.** As in Fact 3, but without absolute values, the intermediate terms cancel and the sum equals $\Pr[D(H_0) = 1] - \Pr[D(H_m) = 1]$, whose absolute value is $D$'s advantage $\varepsilon$. So $D'$ has advantage exactly $\varepsilon/m$.
-6. **Conclude by contradiction.** Suppose $\varepsilon$ were not negligible. Negating @eq-crypto-negligible, there would be a $c$ with $\varepsilon(\lambda) \ge \lambda^{-c}$ for infinitely many $\lambda$. With $m(\lambda) \le \lambda^d$, this gives $\varepsilon/m \ge \lambda^{-(c+d)}$ for those same $\lambda$, so the efficient $D'$ would have non-negligible advantage on one sample, contradicting $X \approx_c Y$.
+6. **Conclude by contradiction.** Suppose $\varepsilon$ were not negligible. Negating @eq-crypto-negligible, there would be a $c$ with $\varepsilon(\lambda) \ge \lambda^{-c}$ for infinitely many $\lambda$. With $m(\lambda) \le \lambda^{c'}$ for some exponent $c'$, this gives $\varepsilon/m \ge \lambda^{-(c+c')}$ for those same $\lambda$, so the efficient $D'$ would have non-negligible advantage on one sample, contradicting $X \approx_c Y$.
 
 The same argument without the running-time bookkeeping shows $\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \le m\,\mathrm{TV}(P, Q)$, where $P^{\otimes m}$ is the distribution of $m$ independent samples from $P$.
 
@@ -316,7 +318,7 @@ Here $A^{O}$ means the adversary run with oracle $O$.
 2. **Pre-sample the answers.** The random-function oracle can be run by drawing $Y_1, \dots, Y_q$ independently and uniformly from $\mathcal X$ in advance and answering the $i$-th query with $Y_i$. On distinct queries this is exactly a random function, because a random function gives each new input a fresh uniform output.
 3. **Do the same for the permutation.** A random permutation answers the $i$-th distinct query with a value that is uniform over the $|\mathcal X| - i + 1$ values not yet used, whatever the queries are: every unused value is the image of the new query under the same number of permutations consistent with the answers so far. So the permutation oracle can be run by pre-sampling a uniformly random sequence of $q$ *distinct* values.
 4. **Compare the two.** Let $C$ be the event that the list $Y_1, \dots, Y_q$ of step 2 has a collision. Every list has probability $|\mathcal X|^{-q}$, so conditioning on no collision leaves every list of distinct values equally likely: exactly the permutation's answers. Hence $\Pr[A^{\text{RF}} = 1 \mid \neg C] = \Pr[A^{\text{RP}} = 1]$, writing $\mathrm{RF}$ for the random function and $\mathrm{RP}$ for the random permutation.
-5. **Bound the difference.** Write $p = \Pr[A^{\text{RP}} = 1]$. Splitting on $C$, $\Pr[A^{\text{RF}} = 1] = \Pr[C]\Pr[A^{\text{RF}} = 1 \mid C] + (1 - \Pr[C])\,p$. Subtracting $p$ gives $\Pr[A^{\text{RF}} = 1] - p = \Pr[C]\big(\Pr[A^{\text{RF}} = 1 \mid C] - p\big)$. The bracket is a difference of two probabilities, so its absolute value is at most 1, and the whole is at most $\Pr[C]$.
+5. **Bound the difference.** Write $\rho = \Pr[A^{\text{RP}} = 1]$. Splitting on $C$, $\Pr[A^{\text{RF}} = 1] = \Pr[C]\Pr[A^{\text{RF}} = 1 \mid C] + (1 - \Pr[C])\,\rho$. Subtracting $\rho$ gives $\Pr[A^{\text{RF}} = 1] - \rho = \Pr[C]\big(\Pr[A^{\text{RF}} = 1 \mid C] - \rho\big)$. The bracket is a difference of two probabilities, so its absolute value is at most 1, and the whole is at most $\Pr[C]$.
 6. **Apply the birthday bound** (@eq-crypto-birthday) with $N = |\mathcal X|$.
 
 The event $C$ is defined on the pre-sampled answers, before the adversary acts, which is what makes step 4 valid for adaptive adversaries: whatever the adversary does, the answers it receives are the same list. (Bellare & Rogaway 2006 point out that a commonly given proof, which conditions on events defined through the adversary's queries, has a gap; their "identical until bad" game-playing proof is the one above.)
@@ -419,20 +421,20 @@ The two sides are often called the **real world**, where the procedure runs, and
 
 ### Worked example: additive secret sharing
 
-**Construction.** Additive sharing splits a number into random pieces that add up to it, working in $\mathbb Z_q$, the integers $\{0, \dots, q - 1\}$ with arithmetic mod $q$. To share a secret $x \in \mathbb Z_q$ among $n$ holders, sample $r_1, \dots, r_{n-1}$ uniformly from $\mathbb Z_q$ and hand out
-$$s_1 = r_1,\ \dots,\ s_{n-1} = r_{n-1},\qquad s_n = x - (r_1 + \dots + r_{n-1}) \bmod q.$$
-All $n$ shares sum to $x$. Shares also add: if $(s_i)$ shares $x$ and $(t_i)$ shares $y$, then $(s_i + t_i)$ shares $x + y$.
+**Construction.** Additive sharing splits a number into random pieces that add up to it, working in $\mathbb Z_p$, the integers $\{0, \dots, p - 1\}$ with arithmetic mod $p$. To share a secret $x \in \mathbb Z_p$ among $h$ holders, sample $r_1, \dots, r_{h-1}$ uniformly from $\mathbb Z_p$ and hand out
+$$s_1 = r_1,\ \dots,\ s_{h-1} = r_{h-1},\qquad s_h = x - (r_1 + \dots + r_{h-1}) \bmod p.$$
+All $h$ shares sum to $x$. Shares also add: if $(s_i)$ shares $x$ and $(t_i)$ shares $y$, then $(s_i + t_i)$ shares $x + y$.
 
-**Statement.** Any $n - 1$ shares look like independent uniform numbers, whatever the secret is, because the one missing share is what ties them to $x$. Precisely, any $n - 1$ shares are independent and uniform on $\mathbb Z_q^{n-1}$, whatever $x$ is. The simulator for a coalition of $n - 1$ holders, with no leakage at all, outputs $n - 1$ independent uniform elements of $\mathbb Z_q$, and @eq-crypto-simulation holds with $\equiv$: perfect security.
+**Statement.** Any $h - 1$ shares look like independent uniform numbers, whatever the secret is, because the one missing share is what ties them to $x$. Precisely, any $h - 1$ shares are independent and uniform on $\mathbb Z_p^{h-1}$, whatever $x$ is. The simulator for a coalition of $h - 1$ holders, with no leakage at all, outputs $h - 1$ independent uniform elements of $\mathbb Z_p$, and @eq-crypto-simulation holds with $\equiv$: perfect security.
 
 **Derivation by counting.** The plan is to show that the coalition's shares are a one-to-one relabelling of the uniform randomness, and then apply Fact 4.
 
-1. The randomness $(r_1, \dots, r_{n-1})$ is uniform on $\mathbb Z_q^{n-1}$: each of the $q^{n-1}$ tuples has probability $q^{-(n-1)}$.
-2. Fix $x$ and a coalition that misses holder $j$. Its shares are a function of the randomness. If $j = n$, the coalition sees $(r_1, \dots, r_{n-1})$ itself. If $j < n$, it sees every $r_i$ with $i \ne j$ together with $s_n$, and $r_j$ can be recovered uniquely as $r_j = x - s_n - \sum_{i \ne j} r_i$, by rearranging the definition of $s_n$.
-3. Either way the map from randomness to the coalition's shares can be undone, so it is a bijection of $\mathbb Z_q^{n-1}$, and every tuple of shares comes from exactly one tuple of randomness (Fact 4).
-4. So every tuple of shares has probability $q^{-(n-1)}$, for every $x$. That is the simulator's output distribution.
+1. The randomness $(r_1, \dots, r_{h-1})$ is uniform on $\mathbb Z_p^{h-1}$: each of the $p^{h-1}$ tuples has probability $p^{-(h-1)}$.
+2. Fix $x$ and a coalition that misses holder $j$. Its shares are a function of the randomness. If $j = h$, the coalition sees $(r_1, \dots, r_{h-1})$ itself. If $j < h$, it sees every $r_i$ with $i \ne j$ together with $s_h$, and $r_j$ can be recovered uniquely as $r_j = x - s_h - \sum_{i \ne j} r_i$, by rearranging the definition of $s_h$.
+3. Either way the map from randomness to the coalition's shares can be undone, so it is a bijection of $\mathbb Z_p^{h-1}$, and every tuple of shares comes from exactly one tuple of randomness (Fact 4).
+4. So every tuple of shares has probability $p^{-(h-1)}$, for every $x$. That is the simulator's output distribution.
 
-@tbl-crypto-shares makes step 3 concrete for $n = 2$ and $q = 5$: the second share $x - r$ takes each value exactly once as $r$ runs over $\mathbb Z_5$, for both secrets.
+@tbl-crypto-shares makes step 3 concrete for $h = 2$ and $p = 5$: the second share $x - r$ takes each value exactly once as $r$ runs over $\mathbb Z_5$, for both secrets.
 
 | $r$ | 0 | 1 | 2 | 3 | 4 |
 | --- | --- | --- | --- | --- | --- |
@@ -441,21 +443,21 @@ All $n$ shares sum to $x$. Shares also add: if $(s_i)$ shares $x$ and $(t_i)$ sh
 
 : Two-holder additive sharing in $\mathbb Z_5$. Each row is a permutation of $\mathbb Z_5$, so the share is uniform for every secret. {#tbl-crypto-shares}
 
-The script repeats the count exhaustively for $n = 3$ and $q = 5$: for every secret and every coalition of two holders, each of the 25 pairs of shares occurs for exactly one of the 25 choices of randomness.
+The script repeats the count exhaustively for $h = 3$ and $p = 5$: for every secret and every coalition of two holders, each of the 25 pairs of shares occurs for exactly one of the 25 choices of randomness.
 
-**With leakage.** If the coalition also learns $x$ (for example because the secret is later published), the simulator receives $L = x$. It samples $n - 1$ uniform shares and sets the last one to $x$ minus their sum. By the statement above, this matches the joint distribution of the real shares and $x$ exactly. This is the typical form of a simulator: random where the view is random, and consistent with the leakage where the leakage pins it down.
+**With leakage.** If the coalition also learns $x$ (for example because the secret is later published), the simulator receives $L = x$. It samples $h - 1$ uniform shares and sets the last one to $x$ minus their sum. By the statement above, this matches the joint distribution of the real shares and $x$ exactly. This is the typical form of a simulator: random where the view is random, and consistent with the leakage where the leakage pins it down.
 
 ### Interpretation: perfect, statistical, and broken
 
-Reducing mod $q$ is what makes step 3 a bijection: subtracting $r$ wraps around, so every value is hit once whatever $x$ is. Over the integers it fails, because nothing wraps and the range of the share moves with the secret. Take $x \in \{0, \dots, 7\}$, $r$ uniform on $\{0, \dots, R - 1\}$, and the share $x - r$ without reduction. The share is uniform on $\{x - R + 1, \dots, x\}$, an interval of $R$ values that moves with $x$. For secrets $x$ and $x'$ the two intervals overlap in $R - |x - x'|$ values, so $|x - x'|$ of the $R$ values, each with probability $1/R$, are possible under one secret and impossible under the other. Their TV distance is therefore $|x - x'|/R$, and by Fact 2 that is the best adversary's advantage.
+Reducing mod $p$ is what makes step 3 a bijection: subtracting $r$ wraps around, so every value is hit once whatever $x$ is. Over the integers it fails, because nothing wraps and the range of the share moves with the secret. Take $x \in \{0, \dots, 7\}$, $r$ uniform on $\{0, \dots, R - 1\}$, and the share $x - r$ without reduction. The share is uniform on $\{x - R + 1, \dots, x\}$, an interval of $R$ values that moves with $x$. For secrets $x$ and $x'$ the two intervals overlap in $R - |x - x'|$ values, so $|x - x'|$ of the $R$ values, each with probability $1/R$, are possible under one secret and impossible under the other. Their TV distance is therefore $|x - x'|/R$, and by Fact 2 that is the best adversary's advantage.
 
-@fig-crypto-shares shows both cases. With $q = 11$, the shares of $x = 0$ and $x = 7$ have the same flat histogram; the empirical TV distance over 100,000 shares each is 0.0045, which is sampling noise around the exact value 0. Over the integers with $R = 16$, the supports visibly differ; the empirical TV distance is 0.4423, against the exact $7/16 = 0.4375$. Taking $R = 2^{3 + \sigma}$ for secrets below $2^3$ makes the TV distance at most $7/2^{3 + \sigma}$, which is below $2^{-\sigma}$: statistical rather than perfect security.
+@fig-crypto-shares shows both cases. With $p = 11$, the shares of $x = 0$ and $x = 7$ have the same flat histogram; the empirical TV distance over 100,000 shares each is 0.0045, which is sampling noise around the exact value 0. Over the integers with $R = 16$, the supports visibly differ; the empirical TV distance is 0.4423, against the exact $7/16 = 0.4375$. Taking $R = 2^{3 + \sigma}$ for secrets below $2^3$ makes the TV distance at most $7/2^{3 + \sigma}$, which is below $2^{-\sigma}$: statistical rather than perfect security.
 
-![Histograms of the second share for secrets $x = 0$ and $x = 7$. Left: reduced mod $q = 11$, both are uniform. Right: over the integers with $r < 16$, the support shifts with the secret.](figures/crypto_basics_shares.svg){#fig-crypto-shares}
+![Histograms of the second share for secrets $x = 0$ and $x = 7$. Left: reduced mod $p = 11$, both are uniform. Right: over the integers with $r < 16$, the support shifts with the secret.](figures/crypto_basics_shares.svg){#fig-crypto-shares}
 
 ### Check yourself
 
-- Two of three holders combine their shares of $x$. What do they learn? *(Nothing: two shares out of three are uniform on $\mathbb Z_q^2$ whatever $x$ is. Only all three together determine $x$.)*
+- Two of three holders combine their shares of $x$. What do they learn? *(Nothing: two shares out of three are uniform on $\mathbb Z_p^2$ whatever $x$ is. Only all three together determine $x$.)*
 - Why must the simulator be efficient? *(An unbounded simulator could, in a computational setting, invert functions the participant cannot. The definition would then accept procedures whose views reveal information that is hard to compute from $L(x)$ but easy to read from the view.)*
 
 ## Learning with errors
@@ -466,64 +468,64 @@ Every primitive so far is generic. Learning with errors (LWE) is a specific hard
 
 ### Definition
 
-LWE hides a secret vector behind linear equations whose right-hand sides are slightly wrong. Fix a dimension $n$, a modulus $q$, and an error distribution $\chi$ on small integers. Pick a secret $s$ uniform in $\mathbb Z_q^n$, vectors of $n$ integers mod $q$. An **LWE sample** is a random vector $a$ together with the inner product $\langle a, s\rangle = \sum_j a_j s_j$, perturbed by a small error $e$:
-$$(a,\ b = \langle a, s\rangle + e \bmod q), \qquad a \text{ uniform in } \mathbb Z_q^n,\ e \sim \chi.$$
-There are two versions of the problem. **Search LWE** asks you to find $s$, given $m$ samples. **Decision LWE** asks you to decide, given $m$ pairs, whether they are LWE samples or uniform pairs in $\mathbb Z_q^n \times \mathbb Z_q$.
+LWE hides a secret vector behind linear equations whose right-hand sides are slightly wrong. Fix a dimension $d$, a modulus $p$ (an integer that need not be prime), and an error distribution $\chi$ on small integers. Pick a secret $s$ uniform in $\mathbb Z_p^d$, vectors of $d$ integers mod $p$. An **LWE sample** is a random vector $a$ together with the inner product $\langle a, s\rangle = \sum_j a_j s_j$, perturbed by a small error $e$:
+$$(a,\ b = \langle a, s\rangle + e \bmod p), \qquad a \text{ uniform in } \mathbb Z_p^d,\ e \sim \chi.$$
+There are two versions of the problem. **Search LWE** asks you to find $s$, given $m$ samples. **Decision LWE** asks you to decide, given $m$ pairs, whether they are LWE samples or uniform pairs in $\mathbb Z_p^d \times \mathbb Z_p$.
 
-If you can solve search, you can solve decision: find a candidate $s$, then check whether the values $b - \langle a, s\rangle$ are small, which they are for LWE samples and are not for uniform pairs. So decision is no harder than search. Regev shows the converse for prime $q$ polynomial in $n$, by guessing the coordinates of $s$ one at a time and using the decision oracle to test each guess.
+If you can solve search, you can solve decision: find a candidate $s$, then check whether the values $b - \langle a, s\rangle$ are small, which they are for LWE samples and are not for uniform pairs. So decision is no harder than search. Regev shows the converse for prime $p$ polynomial in $d$, by guessing the coordinates of $s$ one at a time and using the decision oracle to test each guess.
 
-**Hardness.** For $\chi$ a discretized Gaussian (a normal distribution rounded to integers) of standard deviation about $\alpha q$ with $\alpha q > 2\sqrt n$, Regev (2009) proves that solving LWE is at least as hard as solving worst-case lattice problems with a quantum algorithm. The lattice problems are GapSVP, the gap version of the shortest vector problem, and the shortest independent vectors problem, both to within an approximation factor $\tilde O(n/\alpha)$ ($n/\alpha$ up to logarithmic factors). Peikert (2009) and Brakerski, Langlois, Peikert, Regev & Stehlé (2013) give classical reductions. Treat these as cited results; the proofs are long.
+**Hardness.** For $\chi$ a discretized Gaussian (a normal distribution rounded to integers) of standard deviation about $\alpha p$ with $\alpha p > 2\sqrt d$, Regev (2009) proves that solving LWE is at least as hard as solving worst-case lattice problems with a quantum algorithm. The lattice problems are GapSVP, the gap version of the shortest vector problem, and the shortest independent vectors problem, both to within an approximation factor $\tilde O(d/\alpha)$ ($d/\alpha$ up to logarithmic factors). Peikert (2009) and Brakerski, Langlois, Peikert, Regev & Stehlé (2013) give classical reductions. Treat these as cited results; the proofs are long.
 
 ### Without noise, LWE is easy
 
-With $e = 0$, the samples are a linear system $As = b$ over $\mathbb Z_q$, where the rows of $A$ are the vectors $a$, and Gaussian elimination solves it from $n$ independent equations.
+With $e = 0$, the samples are a linear system $As = b$ over $\mathbb Z_p$, where the rows of $A$ are the vectors $a$, and Gaussian elimination solves it from $d$ independent equations.
 
-Here it is with $n = 2$, $q = 7$ and $s = (3, 5)$. Take $a_1 = (1, 2)$ and $a_2 = (3, 1)$, so $b_1 = 3 + 10 = 13 \equiv 6$ and $b_2 = 9 + 5 = 14 \equiv 0$.
+Here it is with $d = 2$, $p = 7$ and $s = (3, 5)$. Take $a_1 = (1, 2)$ and $a_2 = (3, 1)$, so $b_1 = 3 + 10 = 13 \equiv 6$ and $b_2 = 9 + 5 = 14 \equiv 0$.
 
 1. The second equation $3s_1 + s_2 = 0$ gives $s_2 = -3s_1 = 4s_1$, since $-3 \equiv 4 \pmod 7$.
 2. Substitute into $s_1 + 2s_2 = 6$: $9s_1 \equiv 2s_1 = 6$, so $s_1 = 3$ and $s_2 = 12 \equiv 5$. Correct.
 
-Now add the error $e = (1, 0)$, so $b = (0, 0)$. The same steps give $s_2 = 4s_1$ and $2s_1 = 0$, so $\hat s = (0, 0)$, completely wrong. The reason is that elimination solves $A\hat s = b = As + e$ exactly, so in general it returns $\hat s = s + A^{-1}e$, and $A^{-1}$ has large entries mod $q$. Here $A^{-1} = \begin{pmatrix}4 & 6\\ 2 & 4\end{pmatrix}$ (check: the first row of $A$ times the first column gives $1\cdot4 + 2\cdot2 = 8 \equiv 1$), and $A^{-1}(1, 0) = (4, 2)$, which shifts $s$ to $(7, 7) \equiv (0, 0)$. A unit error is amplified into a uniformly scrambled answer.
+Now add the error $e = (1, 0)$, so $b = (0, 0)$. The same steps give $s_2 = 4s_1$ and $2s_1 = 0$, so $\hat s = (0, 0)$, completely wrong. The reason is that elimination solves $A\hat s = b = As + e$ exactly, so in general it returns $\hat s = s + A^{-1}e$, and $A^{-1}$ has large entries mod $p$. Here $A^{-1} = \begin{pmatrix}4 & 6\\ 2 & 4\end{pmatrix}$ (check: the first row of $A$ times the first column gives $1\cdot4 + 2\cdot2 = 8 \equiv 1$), and $A^{-1}(1, 0) = (4, 2)$, which shifts $s$ to $(7, 7) \equiv (0, 0)$. A unit error is amplified into a uniformly scrambled answer.
 
-The script does the same at $n = 16$ and $q = 4096$ with 32 samples. (Mod a power of two, elimination may only divide by odd numbers, the invertible ones, so it picks odd pivots.) Without noise it recovers all 16 coordinates of $s$. With errors in $\{-1, 0, 1\}$, it recovers 0 of 16.
+The script does the same at $d = 16$ and $p = 4096$ with 32 samples. (Mod a power of two, elimination may only divide by odd numbers, the invertible ones, so it picks odd pivots.) Without noise it recovers all 16 coordinates of $s$. With errors in $\{-1, 0, 1\}$, it recovers 0 of 16.
 
 ### Regev's symmetric bit encryption
 
-**Construction.** Picture $\mathbb Z_q$ as a clock with $q$ positions. To encrypt a bit, take an LWE sample and move its $b$ halfway round the clock if the bit is 1. Whoever knows $s$ can subtract $\langle a, s\rangle$ and see whether what remains is near 0 or near halfway; the small error does not hide that. Concretely, take $q$ even. The key is $s \in \mathbb Z_q^n$. To encrypt a bit $m$, draw a fresh $a$ and $e \sim \chi$ and output
-$$\mathrm{Enc}_s(m) = \big(a,\ b = \langle a, s\rangle + e + m\cdot\tfrac q2 \bmod q\big).$$
-To decrypt, compute $d = b - \langle a, s\rangle \bmod q$ and output 1 if $d$ is closer to $q/2$ than to 0 (counting distance round the clock, so that values just below $q$ are close to 0), that is if $q/4 < d < 3q/4$.
+**Construction.** Picture $\mathbb Z_p$ as a clock with $p$ positions. To encrypt a bit, take an LWE sample and move its $b$ halfway round the clock if the bit is 1. Whoever knows $s$ can subtract $\langle a, s\rangle$ and see whether what remains is near 0 or near halfway; the small error does not hide that. Concretely, take $p$ even. The key is $s \in \mathbb Z_p^d$. To encrypt a bit $m$, draw a fresh $a$ and $e \sim \chi$ and output
+$$\mathrm{Enc}_s(m) = \big(a,\ b = \langle a, s\rangle + e + m\cdot\tfrac p2 \bmod p\big).$$
+To decrypt, compute $v = b - \langle a, s\rangle \bmod p$ and output 1 if $v$ is closer to $p/2$ than to 0 (counting distance round the clock, so that values just below $p$ are close to 0), that is if $p/4 < v < 3p/4$.
 
-**Statement (correctness).** Decryption is correct whenever $|e| < q/4$.
+**Statement (correctness).** Decryption is correct whenever $|e| < p/4$.
 
 **Derivation.** Removing $\langle a, s\rangle$ leaves the error plus the encoded bit; the error is too small to move it across the decision boundary.
 
-1. $d = e + m\frac q2 \bmod q$, by the definition of $b$.
-2. If $m = 0$, $d \equiv e$ with $|e| < q/4$, so $d \in [0, q/4) \cup (3q/4, q)$ (a negative $e$ wraps to just below $q$) and the output is 0.
-3. If $m = 1$, $d = e + q/2 \in (q/4, 3q/4)$ and the output is 1.
+1. $v = e + m\frac p2 \bmod p$, by the definition of $b$.
+2. If $m = 0$, $v \equiv e$ with $|e| < p/4$, so $v \in [0, p/4) \cup (3p/4, p)$ (a negative $e$ wraps to just below $p$) and the output is 0.
+3. If $m = 1$, $v = e + p/2 \in (p/4, 3p/4)$ and the output is 1.
 
 **Security, in one hybrid.** Without $s$, the pair $(a, \langle a, s\rangle + e)$ looks uniform by decision LWE, so the message is added to something that looks uniform: a one-time pad. Under decision LWE, the pairs $(a, \langle a, s\rangle + e)$ in all ciphertexts can be replaced by uniform pairs $(a, u)$. Then $b = u + mq/2$ is uniform whatever $m$ is (Fact 4, with the bijection "add $mq/2$"). So an IND-CPA adversary winning with probability $\frac12 + \varepsilon$ yields a decision-LWE distinguisher with advantage $\varepsilon$: it runs the game with the given pairs and outputs 1 iff the adversary wins, by the argument of step 2 in the PRF scheme.
 
-**Worked example** with $n = 3$, $q = 4096$ and $s = (5, 1000, 3000)$. Here $q/2 = 2048$, and reducing mod 4096 means subtracting 4096.
+**Worked example** with $d = 3$, $p = 4096$ and $s = (5, 1000, 3000)$. Here $p/2 = 2048$, and reducing mod 4096 means subtracting 4096.
 
-- Encrypt $m = 1$ with $a_1 = (17, 2, 1)$ and $e_1 = -7$: $\langle a_1, s\rangle = 85 + 2000 + 3000 = 5085 \equiv 5085 - 4096 = 989$, so $b_1 = 989 - 7 + 2048 = 3030$. Decrypting, $d = 3030 - 989 = 2041$, which is 7 from $q/2 = 2048$: the output is 1.
+- Encrypt $m = 1$ with $a_1 = (17, 2, 1)$ and $e_1 = -7$: $\langle a_1, s\rangle = 85 + 2000 + 3000 = 5085 \equiv 5085 - 4096 = 989$, so $b_1 = 989 - 7 + 2048 = 3030$. Decrypting, $v = 3030 - 989 = 2041$, which is 7 from $p/2 = 2048$: the output is 1.
 - Encrypt $m = 1$ with $a_2 = (1, 1, 1)$ and $e_2 = 12$: $\langle a_2, s\rangle = 4005$, so $b_2 = 4005 + 12 + 2048 = 6065 \equiv 1969$.
 
 ### Adding ciphertexts, and the noise budget
 
 **Statement.** Because everything in a ciphertext is linear in $a$, the error and the encoded bit, adding ciphertexts adds all three. The bits add mod 2, since two half-turns round the clock are a full turn, and the errors pile up. So the componentwise sum of ciphertexts of $m_1, \dots, m_k$ is a ciphertext of $m_1 \oplus \dots \oplus m_k$ with error $e_1 + \dots + e_k$. If every $|e_i| \le B$, the total error is at most $kB$, and it decrypts correctly whenever
-$$k < \frac{q}{4B}.$$ {#eq-crypto-regev-budget}
+$$k < \frac{p}{4B}.$$ {#eq-crypto-regev-budget}
 
 **Derivation.**
 
-1. The sum is $(\sum_i a_i,\ \sum_i b_i)$. By linearity of the inner product, $\sum_i b_i - \langle\sum_i a_i, s\rangle = \sum_i e_i + (\sum_i m_i)\frac q2 \bmod q$.
-2. Because $q$ is even, $2\cdot\frac q2 = q \equiv 0$, so only the parity of $\sum_i m_i$ survives: $(\sum_i m_i)\frac q2 \equiv (m_1 \oplus \dots \oplus m_k)\frac q2$.
-3. So the sum is an encryption of the XOR with error $\sum_i e_i$, and $|\sum_i e_i| \le kB$ by the triangle inequality. By the correctness statement, $kB < q/4$ suffices.
+1. The sum is $(\sum_i a_i,\ \sum_i b_i)$. By linearity of the inner product, $\sum_i b_i - \langle\sum_i a_i, s\rangle = \sum_i e_i + (\sum_i m_i)\frac p2 \bmod p$.
+2. Because $p$ is even, $2\cdot\frac p2 = p \equiv 0$, so only the parity of $\sum_i m_i$ survives: $(\sum_i m_i)\frac p2 \equiv (m_1 \oplus \dots \oplus m_k)\frac p2$.
+3. So the sum is an encryption of the XOR with error $\sum_i e_i$, and $|\sum_i e_i| \le kB$ by the triangle inequality. By the correctness statement, $kB < p/4$ suffices.
 
-In the worked example, the sum is $a_1 + a_2 = (18, 3, 2)$ and $b_1 + b_2 = 4999 \equiv 903$. Then $\langle(18, 3, 2), s\rangle = 9090 \equiv 898$, and $d = 903 - 898 = 5 = e_1 + e_2$: it decrypts to $0 = 1 \oplus 1$.
+In the worked example, the sum is $a_1 + a_2 = (18, 3, 2)$ and $b_1 + b_2 = 4999 \equiv 903$. Then $\langle(18, 3, 2), s\rangle = 9090 \equiv 898$, and $v = 903 - 898 = 5 = e_1 + e_2$: it decrypts to $0 = 1 \oplus 1$.
 
-**Interpretation: the worst case and the typical case.** @eq-crypto-regev-budget is a worst-case guarantee: it assumes every error is as large as possible and all have the same sign. Independent errors with mean zero mostly cancel. Variances of independent variables add, so the sum of $k$ errors with standard deviation $\sigma$ has standard deviation $\sigma\sqrt k$, not $kB$. With $\chi$ uniform on the $2B + 1$ values $\{-B, \dots, B\}$, the variance is the average of $j^2$ over those values, $2\sum_{j=1}^B j^2/(2B + 1) = 2\cdot\frac{B(B+1)(2B+1)}{6}/(2B+1) = B(B+1)/3$. By the central limit theorem the sum is approximately normal, and decryption fails when the summed error, read round the clock, lands more than $q/4$ from 0. So the normal approximation predicts
-$$\Pr[\text{failure after } k \text{ additions}] \approx \Pr\Big[\big|Z \sqrt{kB(B+1)/3}\big| > q/4 \text{ after wrapping mod } q\Big], \quad Z \sim \mathcal N(0, 1).$$
-@fig-crypto-regev and @tbl-crypto-regev compare the two for $q = 4096$ and $B = 32$, where @eq-crypto-regev-budget guarantees correctness for $k < 32$ (since $q/(4B) = 4096/128 = 32$). The simulation adds $k$ real toy ciphertexts (with $n = 4$) of random bits, 20,000 times, and checks the decrypted XOR.
+**Interpretation: the worst case and the typical case.** @eq-crypto-regev-budget is a worst-case guarantee: it assumes every error is as large as possible and all have the same sign. Independent errors with mean zero mostly cancel. Variances of independent variables add, so the sum of $k$ errors with standard deviation $\sigma$ has standard deviation $\sigma\sqrt k$, not $kB$. With $\chi$ uniform on the $2B + 1$ values $\{-B, \dots, B\}$, the variance is the average of $j^2$ over those values, $2\sum_{j=1}^B j^2/(2B + 1) = 2\cdot\frac{B(B+1)(2B+1)}{6}/(2B+1) = B(B+1)/3$. By the central limit theorem the sum is approximately normal, and decryption fails when the summed error, read round the clock, lands more than $p/4$ from 0. So the normal approximation predicts
+$$\Pr[\text{failure after } k \text{ additions}] \approx \Pr\Big[\big|Z \sqrt{kB(B+1)/3}\big| > p/4 \text{ after wrapping mod } p\Big], \quad Z \sim \mathcal N(0, 1).$$
+@fig-crypto-regev and @tbl-crypto-regev compare the two for $p = 4096$ and $B = 32$, where @eq-crypto-regev-budget guarantees correctness for $k < 32$ (since $p/(4B) = 4096/128 = 32$). The simulation adds $k$ real toy ciphertexts (with $d = 4$) of random bits, 20,000 times, and checks the decrypted XOR.
 
 | Ciphertexts added $k$ | Empirical failure rate | Normal approximation |
 | --- | --- | --- |
@@ -533,21 +535,21 @@ $$\Pr[\text{failure after } k \text{ additions}] \approx \Pr\Big[\big|Z \sqrt{kB
 | 1,024 | 0.0868 | 0.0881 |
 | 4,096 | 0.3814 | 0.3833 |
 
-: Decryption failure rate of a sum of $k$ Regev ciphertexts, $q = 4096$, errors uniform on $\{-32, \dots, 32\}$ (seed 0, 20,000 trials). {#tbl-crypto-regev}
+: Decryption failure rate of a sum of $k$ Regev ciphertexts, $p = 4096$, errors uniform on $\{-32, \dots, 32\}$ (seed 0, 20,000 trials). {#tbl-crypto-regev}
 
-To see where a row comes from, take $k = 1024$: the standard deviation of the summed error is $\sqrt{1024 \times 32 \times 33/3} \approx 600$, and $q/4 = 1024$ is about 1.7 standard deviations, which a normal variable exceeds in absolute value with probability about 0.088. At $k = 256$ the standard deviation is about 300 and $q/4$ is 3.4 standard deviations away, far in the tail.
+To see where a row comes from, take $k = 1024$: the standard deviation of the summed error is $\sqrt{1024 \times 32 \times 33/3} \approx 600$, and $p/4 = 1024$ is about 1.7 standard deviations, which a normal variable exceeds in absolute value with probability about 0.088. At $k = 256$ the standard deviation is about 300 and $p/4$ is 3.4 standard deviations away, far in the tail.
 
-The worst-case budget is therefore very conservative. Failures only become measurable around $k = 256$, eight times the guaranteed 32, because the noise grows like $\sqrt k$ rather than $k$. But the budget is still finite. Once the noise is comparable to $q/4$, the decrypted value is spread round the whole clock, decryption becomes a coin flip, and the failure rate tends to $\frac12$. Larger $q$ (relative to the noise) buys more additions; that is the parameter trade-off of every LWE-based scheme that computes on ciphertexts.
+The worst-case budget is therefore very conservative. Failures only become measurable around $k = 256$, eight times the guaranteed 32, because the noise grows like $\sqrt k$ rather than $k$. But the budget is still finite. Once the noise is comparable to $p/4$, the decrypted value is spread round the whole clock, decryption becomes a coin flip, and the failure rate tends to $\frac12$. Larger $p$ (relative to the noise) buys more additions; that is the parameter trade-off of every LWE-based scheme that computes on ciphertexts.
 
-![Decryption failure rate of a sum of $k$ Regev ciphertexts ($q = 4096$, errors uniform on $\{-32, \dots, 32\}$): simulation against the normal approximation. The dashed line is the worst-case guarantee $k < q/(4B) = 32$.](figures/crypto_basics_regev_noise.svg){#fig-crypto-regev}
+![Decryption failure rate of a sum of $k$ Regev ciphertexts ($p = 4096$, errors uniform on $\{-32, \dots, 32\}$): simulation against the normal approximation. The dashed line is the worst-case guarantee $k < p/(4B) = 32$.](figures/crypto_basics_regev_noise.svg){#fig-crypto-regev}
 
 ### Ring-LWE, briefly
 
-A Regev ciphertext carries one bit in $n + 1$ numbers, and the key has $n$ numbers. Ring-LWE packs much more into the same space by replacing vectors with polynomials. **Ring-LWE** (Lyubashevsky, Peikert & Regev 2010) replaces vectors in $\mathbb Z_q^n$ by polynomials in $R_q = \mathbb Z_q[X]/(X^N + 1)$, that is, polynomials of degree below $N$ with coefficients mod $q$, multiplied with the rule $X^N = -1$, and replaces the inner product by polynomial multiplication. One ring sample $(a, a\cdot s + e)$ stands for $N$ correlated LWE samples, carries $N$ message coefficients, and is computed in $O(N\log N)$ time with the number-theoretic transform, a fast Fourier transform for arithmetic mod $q$. Its hardness rests on lattice problems restricted to ideal lattices, which have this extra structure. A middle ground, module-LWE, underlies the standardized key-encapsulation mechanism ML-KEM (FIPS 203, 2024).
+A Regev ciphertext carries one bit in $d + 1$ numbers, and the key has $d$ numbers. Ring-LWE packs much more into the same space by replacing vectors with polynomials. **Ring-LWE** (Lyubashevsky, Peikert & Regev 2010) replaces vectors in $\mathbb Z_p^d$ by polynomials in $R_p = \mathbb Z_p[X]/(X^N + 1)$, that is, polynomials of degree below $N$ with coefficients mod $p$, multiplied with the rule $X^N = -1$, and replaces the inner product by polynomial multiplication. One ring sample $(a, a\cdot s + e)$ stands for $N$ correlated LWE samples, carries $N$ message coefficients, and is computed in $O(N\log N)$ time with the number-theoretic transform, a fast Fourier transform for arithmetic mod $p$. Its hardness rests on lattice problems restricted to ideal lattices, which have this extra structure. A middle ground, module-LWE, underlies the standardized key-encapsulation mechanism ML-KEM (FIPS 203, 2024).
 
 ### Check yourself
 
-- Why does $q$ have to be even in the addition argument, and what happens for odd $q$ with $\lfloor q/2\rfloor$ as the encoding? *(For odd $q$, $2\lfloor q/2\rfloor = q - 1 \equiv -1$, so every pair of 1-bits adds an extra error of $-1$. The error drifts by about $k/4$ on top of the random part.)*
+- Why does $p$ have to be even in the addition argument, and what happens for odd $p$ with $\lfloor p/2\rfloor$ as the encoding? *(For odd $p$, $2\lfloor p/2\rfloor = p - 1 \equiv -1$, so every pair of 1-bits adds an extra error of $-1$. The error drifts by about $k/4$ on top of the random part.)*
 - Is the LWE problem with $\chi$ uniform on $\{-B, \dots, B\}$ covered by Regev's theorem? *(Not directly. The theorem is for a Gaussian-shaped error; other small distributions need separate arguments. The toy uses a uniform error only because its worst case is easy to state.)*
 
 ## Code: check the numbers by simulation
@@ -569,8 +571,8 @@ uv run python code/part01-prerequisites/crypto_basics.py
 | IND-CPA, deterministic scheme | Advantage 1.000 |
 | IND-CPA, PRF scheme, $q = 16$, 8-bit nonce | Simulated 0.0605; exact 0.0607; bound 0.0625 |
 | Secret shares, $x = 0$ against $x = 7$ | Mod 11: TV 0.0045 (exact 0). Integers, $R = 16$: TV 0.4423 (exact 0.4375) |
-| Gaussian elimination, $n = 16$, $q = 4096$ | 16/16 coordinates without noise; 0/16 with errors in $\{-1, 0, 1\}$ |
-| Regev sums, $q = 4096$, $B = 32$ | See @tbl-crypto-regev |
+| Gaussian elimination, $d = 16$, $p = 4096$ | 16/16 coordinates without noise; 0/16 with errors in $\{-1, 0, 1\}$ |
+| Regev sums, $p = 4096$, $B = 32$ | See @tbl-crypto-regev |
 
 : Output of the chapter's script (seed 0). {#tbl-crypto-output}
 
@@ -609,9 +611,9 @@ uv run python code/part01-prerequisites/crypto_basics.py
 | One-time pad | Perfect secrecy; needs $\lvert\mathcal K\rvert \ge \lvert\mathcal M\rvert$; never reuse the pad |
 | IND-CPA | Deterministic schemes have advantage 1; $(r, m \oplus F_k(r))$ has $\Pr[\text{win}] \le \frac12 + \mathrm{Adv}_{\mathrm{PRF}} + q/(2\lvert\mathcal R\rvert)$ |
 | Simulation | Secure if $S(L(x)) \equiv$ (or $\approx$) $\mathrm{View}(x)$ for all $x$ |
-| Additive sharing in $\mathbb Z_q$ | Any $n - 1$ shares uniform: perfect security |
+| Additive sharing in $\mathbb Z_p$ | Any $h - 1$ shares uniform: perfect security |
 | LWE | $(a, \langle a, s\rangle + e)$; easy without $e$ by elimination |
-| Regev bit encryption | Correct if $\lvert e\rvert < q/4$; sums of $k$ ciphertexts correct if $kB < q/4$; typical noise $\sim\sigma\sqrt k$ |
+| Regev bit encryption | Correct if $\lvert e\rvert < p/4$; sums of $k$ ciphertexts correct if $kB < p/4$; typical noise $\sim\sigma\sqrt k$ |
 
 : Summary of the definitions and bounds in this chapter. {#tbl-crypto-cheat-sheet}
 

@@ -382,17 +382,17 @@ Each candidate gives $x$ its own density. If $\mu = 0$, then $x = X$, with densi
 The second claim is the step to check. The CDF of $s + X$ at a point $t$ is $\Pr[s + X \le t] = \Pr[X \le t - s] = F(t - s)$, where $F$ is the CDF of $X$, and differentiating in $t$ gives the density $f(t - s)$. So $f(x - s)$ is the graph of $f$ moved right by $s$: its value at $x$ is the value $f$ had at $x - s$. With $s = 1$, for instance, $f(x - 1)$ at $x = 1$ equals $f(0)$, so the shifted copy has its peak at 1.
 
 To decide between the two candidates from one observation $x$, compare the two densities at $x$. Their ratio $f(x)/f(x - s)$ says how many times more likely $x$ is under $\mu = 0$ than under $\mu = s$. Taking its logarithm turns the ratio into a difference, and since both densities below are exponentials of something, it leaves just the difference of the exponents. That logarithm is the **log ratio**
-$$r(x) = \ln\frac{f(x)}{f(x - s)} = \ln f(x) - \ln f(x - s).$$
+$$L(x) = \ln\frac{f(x)}{f(x - s)} = \ln f(x) - \ln f(x - s).$$
 It is positive when $x$ favours $\mu = 0$, negative when $x$ favours $\mu = s$, and zero when $x$ says nothing.
 
-The question this section answers is: **how large can $|r(x)|$ get?** If it is bounded, no single observation can make one candidate much more likely than the other. If it is unbounded, some observations settle the question almost for certain. The normal and the Laplace give opposite answers. Later parts compare distributions in exactly this way, and the next chapters build on it: [divergences](03-divergences.md) average the log ratio over $x$, and [hypothesis testing](04-hypothesis-testing.md) uses it to decide.
+The question this section answers is: **how large can $|L(x)|$ get?** If it is bounded, no single observation can make one candidate much more likely than the other. If it is unbounded, some observations settle the question almost for certain. The normal and the Laplace give opposite answers. Later parts compare distributions in exactly this way, and the next chapters build on it: [divergences](03-divergences.md) average the log ratio over $x$, and [hypothesis testing](04-hypothesis-testing.md) uses it to decide.
 
 ### Statement
 
 The answer follows from the shapes of the two log densities. A normal log density is a parabola, and the difference of a parabola and the same parabola shifted is a straight line, which grows without bound. A Laplace log density is a pair of straight lines with slopes $\pm 1/b$, and the difference of two such shapes can never exceed what the shift moves it, $|s|/b$. For any shift $s \in \mathbb R$, if $f$ is the $\mathcal N(0, \sigma^2)$ density, then
-$$r(x) = \frac{s^2 - 2sx}{2\sigma^2},$$
+$$L(x) = \frac{s^2 - 2sx}{2\sigma^2},$$
 which is linear in $x$ and unbounded. If $f$ is the $\mathrm{Lap}(b)$ density, then
-$$r(x) = \frac{|x - s| - |x|}{b}, \qquad |r(x)| \le \frac{|s|}{b} \quad\text{for every } x.$$
+$$L(x) = \frac{|x - s| - |x|}{b}, \qquad |L(x)| \le \frac{|s|}{b} \quad\text{for every } x.$$
 
 ### Derivation
 
@@ -401,33 +401,33 @@ $$r(x) = \frac{|x - s| - |x|}{b}, \qquad |r(x)| \le \frac{|s|}{b} \quad\text{for
 1. *Write the shifted density.* Replace $x$ by $x - s$: $f(x - s) = \frac{1}{\sigma\sqrt{2\pi}}e^{-(x - s)^2/(2\sigma^2)}$. The constant in front is the same; only the exponent changes.
 2. *Take the ratio.* The constants cancel, and $e^a/e^c = e^{a - c}$:
 $$\frac{f(x)}{f(x - s)} = \frac{e^{-x^2/(2\sigma^2)}}{e^{-(x - s)^2/(2\sigma^2)}} = \exp\!\left(\frac{(x - s)^2 - x^2}{2\sigma^2}\right).$$
-3. *Take the logarithm.* Since $\ln e^c = c$, the log ratio is the exponent: $r(x) = \dfrac{(x - s)^2 - x^2}{2\sigma^2}$.
-4. *Expand the square.* $(x - s)^2 = x^2 - 2sx + s^2$, and the $x^2$ cancels against $-x^2$, leaving $r(x) = \dfrac{s^2 - 2sx}{2\sigma^2}$.
+3. *Take the logarithm.* Since $\ln e^c = c$, the log ratio is the exponent: $L(x) = \dfrac{(x - s)^2 - x^2}{2\sigma^2}$.
+4. *Expand the square.* $(x - s)^2 = x^2 - 2sx + s^2$, and the $x^2$ cancels against $-x^2$, leaving $L(x) = \dfrac{s^2 - 2sx}{2\sigma^2}$.
 
-The $x^2$ terms cancel because both densities have the same curvature; what is left is linear in $x$, with slope $-s/\sigma^2$. A line with nonzero slope has no bound, so $|r(x)| \to \infty$ as $|x| \to \infty$.
+The $x^2$ terms cancel because both densities have the same curvature; what is left is linear in $x$, with slope $-s/\sigma^2$. A line with nonzero slope has no bound, so $|L(x)| \to \infty$ as $|x| \to \infty$.
 
 **Laplace.** Start from $f(x) = \frac{1}{2b}e^{-|x|/b}$.
 
 1. *Write the shifted density.* $f(x - s) = \frac{1}{2b}e^{-|x - s|/b}$.
-2. *Take the ratio and the logarithm,* as for the normal: the constants cancel and the log leaves the difference of exponents, $r(x) = -\dfrac{|x|}{b} + \dfrac{|x - s|}{b} = \dfrac{|x - s| - |x|}{b}$.
+2. *Take the ratio and the logarithm,* as for the normal: the constants cancel and the log leaves the difference of exponents, $L(x) = -\dfrac{|x|}{b} + \dfrac{|x - s|}{b} = \dfrac{|x - s| - |x|}{b}$.
 3. *Bound it from above.* The triangle inequality $|a + c| \le |a| + |c|$ says that the size of a sum is at most the sum of the sizes. With $a = x$, $c = -s$ it gives $|x - s| \le |x| + |s|$, so $|x - s| - |x| \le |s|$.
 4. *Bound it from below.* The same inequality with $a = x - s$, $c = s$ gives $|x| \le |x - s| + |s|$, so $|x - s| - |x| \ge -|s|$.
-5. *Combine.* $\big||x - s| - |x|\big| \le |s|$, so $|r(x)| \le |s|/b$ for every $x$, and the ratio of the two densities never exceeds $e^{|s|/b}$.
+5. *Combine.* $\big||x - s| - |x|\big| \le |s|$, so $|L(x)| \le |s|/b$ for every $x$, and the ratio of the two densities never exceeds $e^{|s|/b}$.
 
 The bound is reached, not just approached. For $s > 0$ and any $x \le 0$, $|x - s| - |x| = (s - x) - (-x) = s$; for any $x \ge s$, it is $(x - s) - x = -s$. Between 0 and $s$ the log ratio falls linearly from $s/b$ to $-s/b$.
 
-@tbl-shifted-log-ratio puts numbers on both formulas for $s = 1$, $\sigma = 1$ and $b = 1$, where they read $r(x) = (1 - 2x)/2$ and $r(x) = |x - 1| - |x|$.
+@tbl-shifted-log-ratio puts numbers on both formulas for $s = 1$, $\sigma = 1$ and $b = 1$, where they read $L(x) = (1 - 2x)/2$ and $L(x) = |x - 1| - |x|$.
 
 | $x$ | $-2$ | $0$ | $0.5$ | $1$ | $3$ | $10$ |
 | --- | --- | --- | --- | --- | --- | --- |
-| Normal, $r(x) = (1 - 2x)/2$ | 2.5 | 0.5 | 0 | $-0.5$ | $-2.5$ | $-9.5$ |
-| Laplace, $r(x) = \lvert x - 1\rvert - \lvert x\rvert$ | 1 | 1 | 0 | $-1$ | $-1$ | $-1$ |
+| Normal, $L(x) = (1 - 2x)/2$ | 2.5 | 0.5 | 0 | $-0.5$ | $-2.5$ | $-9.5$ |
+| Laplace, $L(x) = \lvert x - 1\rvert - \lvert x\rvert$ | 1 | 1 | 0 | $-1$ | $-1$ | $-1$ |
 
-: The log ratio $r(x)$ of a density and its copy shifted by $s = 1$, for $\mathcal N(0, 1)$ and $\mathrm{Lap}(1)$, at a few observations $x$. {#tbl-shifted-log-ratio}
+: The log ratio $L(x)$ of a density and its copy shifted by $s = 1$, for $\mathcal N(0, 1)$ and $\mathrm{Lap}(1)$, at a few observations $x$. {#tbl-shifted-log-ratio}
 
 Both vanish at the midpoint $x = 0.5$, where the two candidates are equally plausible. Far out they part ways. At $x = 10$ the normal log ratio is $-9.5$, so the observation is $e^{9.5} \approx 13{,}360$ times more likely under $\mu = 1$ than under $\mu = 0$. The Laplace never says more than $e^1 \approx 2.72$ times, however far out $x$ is (@fig-shifted-log-ratio).
 
-![Log ratio $r(x)$ of a density and its copy shifted by $s = 1$, for the standard normal and $\mathrm{Lap}(1)$.](figures/shifted_log_ratio.svg){#fig-shifted-log-ratio}
+![Log ratio $L(x)$ of a density and its copy shifted by $s = 1$, for the standard normal and $\mathrm{Lap}(1)$.](figures/shifted_log_ratio.svg){#fig-shifted-log-ratio}
 
 ### Interpretation
 
@@ -435,8 +435,8 @@ For the Laplace, the two copies are within a fixed factor of each other everywhe
 
 ### Check yourself
 
-- For the normal, at which $x$ is $r(x) = 0$, and why is that point natural? *($x = s/2$, the midpoint, where the two densities cross.)*
-- Under $x \sim \mathcal N(0, \sigma^2)$, what is the distribution of $r(x)$? *(It is linear in a normal, so normal: mean $s^2/(2\sigma^2)$, variance $(s/\sigma^2)^2\sigma^2 = s^2/\sigma^2$.)*
+- For the normal, at which $x$ is $L(x) = 0$, and why is that point natural? *($x = s/2$, the midpoint, where the two densities cross.)*
+- Under $x \sim \mathcal N(0, \sigma^2)$, what is the distribution of $L(x)$? *(It is linear in a normal, so normal: mean $s^2/(2\sigma^2)$, variance $(s/\sigma^2)^2\sigma^2 = s^2/\sigma^2$.)*
 
 ## Code: check the facts by simulation
 

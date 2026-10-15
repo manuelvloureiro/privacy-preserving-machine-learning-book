@@ -120,12 +120,12 @@ The threshold test is in fact the best possible test here. The likelihood ratio 
 
 ## A curve that starts below 1 {#sec-sol-hypothesis-testing-6}
 
-> **Exercise 6.** For $P = U[0, 1]$ and $Q = U[s, 1 + s]$ with $0 < s < 1$, show that $T(\alpha) = \max(0, 1 - s - \alpha)$. Which outcomes have $L = \infty$, $L = 1$ and $L = 0$? *Check: at $s = 0.2$, $T(0) = 0.8$ and $\mathrm{TV} = 0.2$.* *(Neyman–Pearson with $p = 0$, continuity at 0)*
+> **Exercise 6.** For $P = U[0, 1]$ and $Q = U[s, 1 + s]$ with $0 < s < 1$, show that $T(\alpha) = \max(0, 1 - s - \alpha)$. Which outcomes have $\Lambda = \infty$, $\Lambda = 1$ and $\Lambda = 0$? *Check: at $s = 0.2$, $T(0) = 0.8$ and $\mathrm{TV} = 0.2$.* *(Neyman–Pearson with $p = 0$, continuity at 0)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 $p = 1$ on $[0, 1]$ and $q = 1$ on $[s, 1 + s]$, so the line splits into the three regions of @tbl-sol-hypothesis-testing-uniform.
 
-| Region | $p$ | $q$ | $L = q/p$ | $P$-mass | $Q$-mass |
+| Region | $p$ | $q$ | $\Lambda = q/p$ | $P$-mass | $Q$-mass |
 | --- | --- | --- | --- | --- | --- |
 | $[0, s)$ | 1 | 0 | 0 | $s$ | 0 |
 | $[s, 1]$ | 1 | 1 | 1 | $1 - s$ | $1 - s$ |
@@ -133,7 +133,7 @@ $p = 1$ on $[0, 1]$ and $q = 1$ on $[s, 1 + s]$, so the line splits into the thr
 
 : The three regions of the uniform pair. Outside $[0, 1 + s]$ both densities are 0, which has probability 0 under both hypotheses. {#tbl-sol-hypothesis-testing-uniform}
 
-1. **The likelihood ratio.** $L = \infty$ on $(1, 1 + s]$, where only $Q$ can land; $L = 1$ on the overlap $[s, 1]$; and $L = 0$ on $[0, s)$, where only $P$ can land.
+1. **The likelihood ratio.** $\Lambda = \infty$ on $(1, 1 + s]$, where only $Q$ can land; $\Lambda = 1$ on the overlap $[s, 1]$; and $\Lambda = 0$ on $[0, s)$, where only $P$ can land.
 2. **$\alpha = 0$.** A size-0 test must have $\phi = 0$ on almost all of $[0, 1]$, so it can only reject on $(1, 1 + s]$. Rejecting all of it gives power $s$. So $T(0) = 1 - s$, which is the chapter's $T(0) = 1 - Q[p = 0]$.
 3. **$0 < \alpha \le 1 - s$.** Take the LR test @eq-ht-lr-test with $\eta = 1$: reject where $q > p$, which is $(1, 1 + s]$; on the tie set $q = p$, which is $[s, 1]$, reject with the constant probability $\gamma = \alpha/(1 - s) \in (0, 1]$; keep $[0, s)$. Its size is $\gamma(1 - s) = \alpha$ and its power is $s + \gamma(1 - s) = s + \alpha$. By the Neyman–Pearson lemma it is the most powerful test of level $\alpha$, so $T(\alpha) = 1 - s - \alpha$.
 4. **$\alpha > 1 - s$.** The test "reject $x \ge s$" has size $1 - s < \alpha$ and power 1, so $T(\alpha) = 0$.
@@ -141,7 +141,7 @@ $p = 1$ on $[0, 1]$ and $q = 1$ on $[s, 1 + s]$, so the line splits into the thr
 
 **The check.** At $s = 0.2$, $T(0) = 0.8$. By @eq-ht-tv, $\mathrm{TV} = \frac12\int|q - p| = \frac12(s + s) = s = 0.2$: the two regions where exactly one density is 1. A midpoint-rule integral gives 0.2000. A simulation of the randomized test of step 3 at $\alpha = 0.3$, with 1,000,000 draws per hypothesis, gives size 0.3004 and power 0.5001, against the exact 0.3 and $1 - T(0.3) = 0.5$.
 
-**Continuity at 0.** $T$ starts at $1 - s < 1$, but it is continuous there: $T(\alpha) \to 1 - s = T(0)$ as $\alpha \to 0$. This is property 4 of @sec-ht-tradeoff, and the $\mathbb E_P[L\,\mathbf 1[L > K]]$ term in its proof is 0 here because $L \le 1$ wherever $p > 0$. The curve is also a single segment of slope $-1$, so the advantage $1 - \alpha - T(\alpha) = s$ at every $\alpha \le 1 - s$: every point of the segment attains the TV.
+**Continuity at 0.** $T$ starts at $1 - s < 1$, but it is continuous there: $T(\alpha) \to 1 - s = T(0)$ as $\alpha \to 0$. This is property 4 of @sec-ht-tradeoff, and the $\mathbb E_P[\Lambda\,\mathbf 1[\Lambda > K]]$ term in its proof is 0 here because $\Lambda \le 1$ wherever $p > 0$. The curve is also a single segment of slope $-1$, so the advantage $1 - \alpha - T(\alpha) = s$ at every $\alpha \le 1 - s$: every point of the segment attains the TV.
 
 *Mass that only $Q$ can produce is free power: a test catches it with no false alarms, so the curve starts at $1 - Q[p = 0]$ instead of 1.*
 :::
@@ -153,7 +153,7 @@ $p = 1$ on $[0, 1]$ and $q = 1$ on $[s, 1 + s]$, so the line splits into the thr
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Error of a test.** With prior $\pi = \frac12$, a test $\phi$ errs with probability $\frac12\alpha_\phi + \frac12\beta_\phi$ (step 2 of the Bayesian derivation in @sec-ht-bayes).
 2. **Rewrite with the advantage.** $\frac12(\alpha_\phi + \beta_\phi) = \frac12\big(1 - (1 - \alpha_\phi - \beta_\phi)\big)$. The error is a decreasing function of the advantage $1 - \alpha_\phi - \beta_\phi$, so the test with the smallest error is the one with the largest advantage.
-3. **Use the best advantage.** By @eq-ht-tv the largest advantage over all tests, randomized or not, is $\mathrm{TV}(P, Q)$, attained by rejecting where $q > p$. So the smallest error is $\frac12(1 - \mathrm{TV}(P, Q))$, attained by the same test, which is the Bayes rule $L(x) > (1 - \pi)/\pi = 1$.
+3. **Use the best advantage.** By @eq-ht-tv the largest advantage over all tests, randomized or not, is $\mathrm{TV}(P, Q)$, attained by rejecting where $q > p$. So the smallest error is $\frac12(1 - \mathrm{TV}(P, Q))$, attained by the same test, which is the Bayes rule $\Lambda(x) > (1 - \pi)/\pi = 1$.
 
 **Concrete: the spam example.** $\mathrm{TV} = 0.40$, so the bound is $\frac12(1 - 0.40) = 0.30$. Of the 16 deterministic tests on $\{0, 1, 2, 3\}$, the script finds the smallest error 0.30, at the rejection region $\{2, 3\}$: $\frac12(0.3 + 0.3) = 0.30$ from @tbl-ht-spam-tests.
 

@@ -398,7 +398,7 @@ def print_table(rng: np.random.Generator) -> None:
         f"exact={nonce_repeat_probability(queries, nonce_bits):.4f}  bound q/|R|={queries / 2**nonce_bits:.4f}"
     )
 
-    print(f"[Sharing n=3 q=5] every coalition of 2 sees each pair exactly once: {all_coalitions_uniform(3, 5)}")
+    print(f"[Sharing h=3 p=5] every coalition of 2 sees each pair exactly once: {all_coalitions_uniform(3, 5)}")
     size = 100_000
     tv_mod = empirical_tv(second_share_mod(rng, 0, 11, size), second_share_mod(rng, 7, 11, size))
     tv_int = empirical_tv(second_share_integer(rng, 0, 16, size), second_share_integer(rng, 7, 16, size))
@@ -411,7 +411,7 @@ def print_table(rng: np.random.Generator) -> None:
     ok_clean = sum(u == v for u, v in zip(lwe.secret, lwe.noiseless or [], strict=False))
     ok_noisy = sum(u == v for u, v in zip(lwe.secret, lwe.noisy or [], strict=False))
     print(
-        f"[LWE n=16 q=4096] elimination recovers {ok_clean}/16 coordinates without noise, "
+        f"[LWE d=16 p=4096] elimination recovers {ok_clean}/16 coordinates without noise, "
         f"{ok_noisy}/16 with e in {{-1,0,1}}"
     )
 
@@ -426,7 +426,7 @@ def print_table(rng: np.random.Generator) -> None:
 
     bound, ks = 32, [1, 31, 256, 1024, 4096]
     rates = regev_sum_failure_rates(rng, n=4, q=q, bound=bound, ks=ks, trials=20_000)
-    print(f"[Regev sums q={q} B={bound}] worst-case safe for k < {regev_worst_case_k(q, bound):.0f}")
+    print(f"[Regev sums p={q} B={bound}] worst-case safe for k < {regev_worst_case_k(q, bound):.0f}")
     for k, rate in zip(ks, rates, strict=True):
         print(f"[Regev k={k}] empirical failure={rate:.4f}  normal approx={regev_failure_normal(k, q, bound):.4f}")
 
@@ -509,13 +509,13 @@ def plot_shares(rng: np.random.Generator, q: int = 11, r_max: int = 16, size: in
         shares = second_share_mod(rng, x, q, size)
         freq = np.bincount(shares, minlength=q) / size
         left.bar(np.arange(q) + (i - 0.5) * 0.4, freq, width=0.4, label=f"secret x = {x}")
-    left.axhline(1 / q, color="k", linestyle="--", label=f"1/q = 1/{q}")
+    left.axhline(1 / q, color="k", linestyle="--", label=f"1/p = 1/{q}")
     left.set(
         xticks=range(q),
         ylim=(0, 0.16),
-        xlabel=r"share $(x - r)$ mod $q$",
+        xlabel=r"share $(x - r)$ mod $p$",
         ylabel="frequency",
-        title=rf"Mod $q = {q}$: the same uniform distribution",
+        title=rf"Mod $p = {q}$: the same uniform distribution",
     )
     left.legend(loc="upper right")
     for i, x in enumerate((0, 7)):
@@ -539,14 +539,14 @@ def plot_regev(rng: np.random.Generator, q: int = 4096, bound: int = 32) -> Figu
     fig, ax = plt.subplots(figsize=(6.5, 4.2))
     ax.plot(ks, [regev_failure_normal(k, q, bound) for k in ks], "k", linewidth=2, label="normal approximation")
     ax.plot(ks, rates, "o", color="C3", label="simulation")
-    ax.axvline(regev_worst_case_k(q, bound), color="C0", linestyle="--", label=r"worst-case limit $k = q/(4B)$")
+    ax.axvline(regev_worst_case_k(q, bound), color="C0", linestyle="--", label=r"worst-case limit $k = p/(4B)$")
     ax.axhline(0.5, color="gray", linestyle=":", label="random guess")
     ax.set(
         xscale="log",
         ylim=(-0.02, 0.6),
         xlabel="ciphertexts added k",
         ylabel="decryption failure rate",
-        title=rf"Noise growth in Regev sums, $q = {q}$, $B = {bound}$",
+        title=rf"Noise growth in Regev sums, $p = {q}$, $B = {bound}$",
     )
     ax.set_xscale("log", base=2)
     ax.legend(loc="upper left")

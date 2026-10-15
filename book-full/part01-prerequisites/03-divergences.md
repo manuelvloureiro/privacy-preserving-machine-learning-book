@@ -27,7 +27,7 @@ says how many times more likely $x$ is under $P$ than under $Q$. Its logarithm, 
 
 : The loaded die $P$ against the fair die $Q$, outcome by outcome. This is the running example of the chapter. {#tbl-div-die}
 
-A six is three times more likely under the loaded die ($0.5 / \frac16 = 3$). It is fairly strong evidence for "loaded", $\ln 3 = 1.10$ nats. Any other roll is $0.1/\frac16 = 0.6$ times as likely under the loaded die, weak evidence for "fair", $\ln 0.6 = -0.51$ nats. For continuous pairs, $r(x)$ is a curve. @fig-shifted-log-ratio in [Probability distributions](01-distributions.md) draws $\ln r$ for a normal density and for a Laplace density, each against a copy of itself shifted sideways. The normal's log-ratio is a straight line that grows without bound. The Laplace's is flat beyond a point, so it never exceeds a fixed value. That difference comes back in every section of this chapter.
+A six is three times more likely under the loaded die ($0.5 / \frac16 = 3$). It is fairly strong evidence for "loaded", $\ln 3 = 1.10$ nats. Any other roll is $0.1/\frac16 = 0.6$ times as likely under the loaded die, weak evidence for "fair", $\ln 0.6 = -0.51$ nats. For continuous pairs, $r(x)$ is a curve. @fig-shifted-log-ratio in [Probability distributions](01-distributions.md) draws $\ln r$, written $L(x)$ there, for a normal density and for a Laplace density, each against a copy of itself shifted sideways. The normal's log-ratio is a straight line that grows without bound. The Laplace's is flat beyond a point, so it never exceeds a fixed value. That difference comes back in every section of this chapter.
 
 **Every divergence in this chapter is a summary of the likelihood ratio.** The divergences differ only in which summary they take, and each summary answers one question (@tbl-div-questions). In the table, $\mathbb E_P$ means an average over outcomes drawn from $P$, $\mathbb E_Q$ an average over outcomes drawn from $Q$, and $(y)_+ = \max(y, 0)$ keeps only the positive part of a number.
 
@@ -288,7 +288,7 @@ Check two entries by hand. At order 2 the definition is $\ln\mathbb E_Q[r^2]$, a
 - Using @eq-renyi-psi, why does a quadratic $\psi$ give a Rényi divergence that is linear in $\alpha$? *(If $\psi(\lambda) = a\lambda + b\lambda^2$, then $\psi(\alpha-1)/(\alpha-1) = a + b(\alpha - 1)$. The Gaussian pair below is exactly this case.)*
 - Can $D_2(P\|Q)$ be finite while $D_\infty(P\|Q)$ is infinite? *(Yes. $D_\infty$ is infinite whenever $r$ is unbounded, even if large ratios are rare enough that $\mathbb E_Q[r^2]$ is finite. The Gaussian pair below is an example.)*
 
-## Two Gaussians with equal variance, by hand {#exercise-gaussians-with-equal-variance}
+## Two Gaussians with equal variance, by hand {#sec-div-gauss}
 
 ### Context
 
@@ -298,7 +298,7 @@ The most common pair in practice is a distribution and a shifted copy of it: the
 
 Let $P = \mathcal N(0, \sigma^2)$ and $Q = \mathcal N(s, \sigma^2)$: the same bell curve with standard deviation $\sigma$, centred at 0 and at $s$. What matters is how far apart the centres are compared with the width of the curves, so write $\mu = s/\sigma$ for the shift in standard deviations. KL is half the square of that shift, each Rényi divergence is $\alpha$ times the KL, and the max-divergence is infinite because the likelihood ratio is unbounded:
 $$D_{\mathrm{KL}}(P\|Q) = \frac{s^2}{2\sigma^2} = \frac{\mu^2}2, \qquad D_\alpha(P\|Q) = \frac{\alpha s^2}{2\sigma^2} = \frac{\alpha\mu^2}2, \qquad D_\infty(P\|Q) = \infty.$$ {#eq-gauss-renyi}
-Shifting both distributions by the same amount changes nothing, so the same holds for $\mathcal N(\mu_0, \sigma^2)$ against $\mathcal N(\mu_1, \sigma^2)$ with $s = \mu_1 - \mu_0$.
+Shifting both distributions by the same amount changes nothing, so the same holds for $\mathcal N(m_0, \sigma^2)$ against $\mathcal N(m_1, \sigma^2)$, with means $m_0$ and $m_1$ and $s = m_1 - m_0$.
 
 ### Derivation
 

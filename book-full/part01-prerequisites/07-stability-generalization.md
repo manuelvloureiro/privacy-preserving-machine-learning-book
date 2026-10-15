@@ -25,6 +25,8 @@ Where each result is used (@tbl-stability-uses):
 
 : Results of this chapter and where they are used. {#tbl-stability-uses}
 
+**Notation.** This chapter departs from the part's shared notation in one place. Following the learning-theory literature, it writes the training set as $S = (z_1, \dots, z_n)$ rather than $D$, and uses $\mathcal D$ for the distribution the examples are drawn from.
+
 Later parts return to how much a trained model depends on a single example, and they reuse the quantities defined here. Every fact this chapter borrows is restated where it is used. The full derivation of McDiarmid's inequality is in [Concentration inequalities](02-concentration.md), and more on the convexity facts behind the ERM bound is in [Optimization](06-optimization.md).
 
 ## Toolkit: five facts every derivation uses
@@ -63,14 +65,14 @@ A function $f$ is **$\rho$-smooth** when its gradient $\nabla f$ is $\rho$-Lipsc
 $$\langle\nabla f(u) - \nabla f(v),\, u - v\rangle \ge \frac1\rho\|\nabla f(u) - \nabla f(v)\|^2.$$
 The proof needs more than a few lines and is in Nesterov's book.
 
-What this chapter uses is a consequence for gradient descent. Take two starting points $u$ and $v$ and apply the same gradient step to both, $G(w) = w - \eta\nabla f(w)$. If the step size satisfies $0 \le \eta \le 2/\rho$, the two points do not end up farther apart than they started:
-$$\|G(u) - G(v)\| \le \|u - v\|.$$
+What this chapter uses is a consequence for gradient descent. Take two starting points $u$ and $v$ and apply the same gradient step to both, $\psi(w) = w - \eta\nabla f(w)$. If the step size satisfies $0 \le \eta \le 2/\rho$, the two points do not end up farther apart than they started:
+$$\|\psi(u) - \psi(v)\| \le \|u - v\|.$$
 
-The reason is that the step moves both points by an amount that depends on the gradient difference $\Delta = \nabla f(u) - \nabla f(v)$, and co-coercivity says this difference points enough "towards closing the distance". Expand the square of $G(u) - G(v) = (u - v) - \eta\Delta$, then use co-coercivity to replace $\langle\Delta, u - v\rangle$ by the smaller quantity $\|\Delta\|^2/\rho$:
-$$\|G(u) - G(v)\|^2 = \|u - v\|^2 - 2\eta\langle\Delta, u - v\rangle + \eta^2\|\Delta\|^2 \le \|u - v\|^2 - \eta\left(\frac2\rho - \eta\right)\|\Delta\|^2 \le \|u - v\|^2.$$
+The reason is that the step moves both points by an amount that depends on the gradient difference $\Delta = \nabla f(u) - \nabla f(v)$, and co-coercivity says this difference points enough "towards closing the distance". Expand the square of $\psi(u) - \psi(v) = (u - v) - \eta\Delta$, then use co-coercivity to replace $\langle\Delta, u - v\rangle$ by the smaller quantity $\|\Delta\|^2/\rho$:
+$$\|\psi(u) - \psi(v)\|^2 = \|u - v\|^2 - 2\eta\langle\Delta, u - v\rangle + \eta^2\|\Delta\|^2 \le \|u - v\|^2 - \eta\left(\frac2\rho - \eta\right)\|\Delta\|^2 \le \|u - v\|^2.$$
 The last step holds because $\eta \le 2/\rho$ makes the subtracted term non-negative.
 
-A one-dimensional case shows why the condition on $\eta$ is needed. For $f(w) = \frac\rho2 w^2$, the gradient is $\rho w$, so the step is $G(w) = w - \eta\rho w = (1 - \eta\rho)w$, and it multiplies every distance by $|1 - \eta\rho|$. It is non-expansive exactly when $|1 - \eta\rho| \le 1$, that is $\eta \le 2/\rho$. Larger steps overshoot the minimum and blow differences up. The stability of SGD rests on this fact.
+A one-dimensional case shows why the condition on $\eta$ is needed. For $f(w) = \frac\rho2 w^2$, the gradient is $\rho w$, so the step is $\psi(w) = w - \eta\rho w = (1 - \eta\rho)w$, and it multiplies every distance by $|1 - \eta\rho|$. It is non-expansive exactly when $|1 - \eta\rho| \le 1$, that is $\eta \le 2/\rho$. Larger steps overshoot the minimum and blow differences up. The stability of SGD rests on this fact.
 
 ### Fact 5 — McDiarmid's inequality
 
@@ -256,12 +258,12 @@ The first bound is the sensitivity of ERM, that is how far the minimizer can mov
 
 ### Derivation
 
-Write $w = w_S$, $w' = w_{S^{(i)}}$, $G = J_S$, $G' = J_{S^{(i)}}$. The idea is to look at the gradient of $G$ at the *other* minimizer $w'$: it is small, because $G$ and $G'$ differ in only one term, and strong convexity says a small gradient means you are close to the minimizer.
+Write $w = w_S$, $w' = w_{S^{(i)}}$, $J = J_S$, $J' = J_{S^{(i)}}$. The idea is to look at the gradient of $J$ at the *other* minimizer $w'$: it is small, because $J$ and $J'$ differ in only one term, and strong convexity says a small gradient means you are close to the minimizer.
 
-1. **Optimality.** The gradient of a differentiable convex function is zero at its minimizer: $\nabla G(w) = 0$ and $\nabla G'(w') = 0$.
-2. **The two objectives differ in one term.** Only the $i$-th loss differs, so $G - G' = \frac1n\big(\ell(\cdot, z_i) - \ell(\cdot, z_i')\big)$. Since $\nabla G'(w') = 0$, subtracting it changes nothing, and $\nabla G(w') = \nabla G(w') - \nabla G'(w') = \frac1n\big(\nabla\ell(w', z_i) - \nabla\ell(w', z_i')\big)$. Each gradient has norm at most $L$ (Fact 1), so this has norm at most $2L/n$.
-3. **Strong convexity.** $G$ is a convex function plus $\frac\lambda2\|w\|^2$, so it is $\lambda$-strongly convex. Fact 3 says its gradient changes by at least $\lambda\|w' - w\|$ along the direction from $w$ to $w'$. With $\nabla G(w) = 0$ from step 1,
-$$\lambda\|w' - w\|^2 \le \langle\nabla G(w') - \nabla G(w),\, w' - w\rangle = \langle\nabla G(w'),\, w' - w\rangle \le \frac{2L}n\|w' - w\|,$$
+1. **Optimality.** The gradient of a differentiable convex function is zero at its minimizer: $\nabla J(w) = 0$ and $\nabla J'(w') = 0$.
+2. **The two objectives differ in one term.** Only the $i$-th loss differs, so $J - J' = \frac1n\big(\ell(\cdot, z_i) - \ell(\cdot, z_i')\big)$. Since $\nabla J'(w') = 0$, subtracting it changes nothing, and $\nabla J(w') = \nabla J(w') - \nabla J'(w') = \frac1n\big(\nabla\ell(w', z_i) - \nabla\ell(w', z_i')\big)$. Each gradient has norm at most $L$ (Fact 1), so this has norm at most $2L/n$.
+3. **Strong convexity.** $J$ is a convex function plus $\frac\lambda2\|w\|^2$, so it is $\lambda$-strongly convex. Fact 3 says its gradient changes by at least $\lambda\|w' - w\|$ along the direction from $w$ to $w'$. With $\nabla J(w) = 0$ from step 1,
+$$\lambda\|w' - w\|^2 \le \langle\nabla J(w') - \nabla J(w),\, w' - w\rangle = \langle\nabla J(w'),\, w' - w\rangle \le \frac{2L}n\|w' - w\|,$$
 where the last step is the Cauchy–Schwarz inequality, $\langle a, b\rangle \le \|a\|\,\|b\|$, with the norm from step 2. Divide by $\lambda\|w' - w\|$ to get $\|w' - w\| \le 2L/(\lambda n)$.
 4. **From weights to losses.** By Fact 1, a weight change of at most $2L/(\lambda n)$ changes every loss by at most $L$ times that, $2L^2/(\lambda n)$.
 
@@ -290,7 +292,7 @@ The running example uses unit-norm features, so $L = 1$ by Fact 1 and $\beta = 2
 
 : Replace-one changes of regularized logistic regression against the bounds in @eq-stability-erm. Ratio is the largest loss change divided by the loss bound. {#tbl-stability-replace-one}
 
-@tbl-stability-replace-one and @fig-stability-erm-bound show the $1/(\lambda n)$ scaling exactly: rows with the same $\lambda n$ have nearly the same changes. For $\lambda = 1$ the ratio is $0.25$, and both factors of 2 can be read off.
+@tbl-stability-replace-one and @fig-stability-erm-bound show the $1/(\lambda n)$ scaling closely where the penalty dominates the curvature, that is for $\lambda \ge 0.1$: the rows with $n = 100, \lambda = 1$ and $n = 1{,}000, \lambda = 0.1$ share $\lambda n = 100$ and have nearly the same loss change ($0.00505$ and $0.00499$). The third row with $\lambda n = 100$, at $n = 10{,}000$ and $\lambda = 0.01$, moves less ($0.00336$ in the weights, against $0.00976$ and $0.00809$), because there the data's own curvature adds to $\lambda$, as explained below. For $\lambda = 1$ the ratio is $0.25$, and both factors of 2 can be read off.
 
 The first factor of 2 comes from step 2. With margin $m = y\langle w, x\rangle$, the gradient for label $y$ is $-y\,\sigma(-m)x$, and for the flipped label $-y$ the margin becomes $-m$ and the gradient is $y\,\sigma(m)x$. Their difference is $-y\,\sigma(-m)x - y\,\sigma(m)x = -yx$, because $\sigma(-m) + \sigma(m) = 1$. Its norm is $\|x\| = 1$, not the worst case $2L = 2$. So the weights move by about $1/(\lambda n)$, half the bound: $0.00976$ against $0.02$.
 
@@ -335,18 +337,18 @@ Large models are not trained to an exact minimizer. They are trained by SGD for 
 
 The idea is that two SGD runs, one on $S$ and one on $S^{(i)}$, can only drift apart on the steps that happen to pick example $i$. Each such step pushes them apart by at most $2\eta_tL$, and it happens with probability $1/n$; every other step, by Fact 4, does not push them apart. So the expected distance grows by at most $2\eta_tL/n$ per step.
 
-The assumptions are those of Fact 4 plus a gradient bound. Let $\ell(\cdot, z)$ be convex, $\rho$-smooth (gradient changes by at most $\rho$ per unit distance) and $L$-Lipschitz (gradient norm at most $L$) for every $z$. Run SGD for $T$ steps, $w_{t+1} = w_t - \eta_t\nabla\ell(w_t, z_{I_t})$, where each index $I_t$ is drawn uniformly from $\{1, \dots, n\}$ and $\eta_t \le 2/\rho$. Then SGD is uniformly stable (in expectation over the indices) with
+The assumptions are those of Fact 4 plus a gradient bound. Let $\ell(\cdot, z)$ be convex, $\rho$-smooth (gradient changes by at most $\rho$ per unit distance) and $L$-Lipschitz (gradient norm at most $L$) for every $z$. Run SGD for $T$ steps from a starting point $w_0$: step $t = 1, \dots, T$ updates $w_t = w_{t-1} - \eta_t\nabla\ell(w_{t-1}, z_{I_t})$, and the output is $w_T$. Each index $I_t$ is drawn uniformly from $\{1, \dots, n\}$ and $\eta_t \le 2/\rho$. Then SGD is uniformly stable (in expectation over the indices) with
 $$\beta \le \frac{2L^2}{n}\sum_{t=1}^T\eta_t.$$ {#eq-stability-hrs}
 This is Theorem 3.8 of Hardt, Recht & Singer (2016), who write $\beta$ for the smoothness and $\epsilon_{\text{stab}}$ for the stability.
 
 ### Derivation
 
-Run SGD on $S$ and on $S^{(i)}$ with the **same** index sequence $I_1, I_2, \dots$ and the same starting point. This pairing, called a **coupling**, is legitimate because the stability condition for a randomized algorithm compares the *average* loss of each run, and each run's average depends only on its own distribution. Using the same random indices for both runs does not change either run's distribution, and it makes the two runs as similar as possible. Let $\delta_t = \|w_t - w_t'\|$ be the distance between the two runs after $t$ steps, with $\delta_0 = 0$. (Only here, $\delta_t$ is a distance, not a failure probability.)
+Run SGD on $S$ and on $S^{(i)}$ with the **same** index sequence $I_1, I_2, \dots$ and the same starting point. This pairing, called a **coupling**, is legitimate because the stability condition for a randomized algorithm compares the *average* loss of each run, and each run's average depends only on its own distribution. Using the same random indices for both runs does not change either run's distribution, and it makes the two runs as similar as possible. Let $\delta_t = \|w_t - w_t'\|$ be the distance between the two runs after $t$ steps, with $\delta_0 = 0$ because both start at $w_0$. Step $t$ uses the index $I_t$ and the step size $\eta_t$ and turns $\delta_{t-1}$ into $\delta_t$. (Only here, $\delta_t$ is a distance, not a failure probability.)
 
-1. **Same example picked** ($I_t \ne i$, probability $1 - 1/n$). Both runs take a gradient step on the same function $\ell(\cdot, z_{I_t})$. By Fact 4 (a gradient step with $\eta_t \le 2/\rho$ on a convex smooth function does not increase distances), $\delta_{t+1} \le \delta_t$.
-2. **Differing example picked** ($I_t = i$, probability $1/n$). One run steps on $z_i$, the other on $z_i'$, so Fact 4 does not apply. Instead, write $w_{t+1} - w_{t+1}' = (w_t - w_t') - \eta_t\nabla\ell(w_t, z_i) + \eta_t\nabla\ell(w_t', z_i')$ and use the triangle inequality on the three terms: $\delta_{t+1} \le \|w_t - w_t'\| + \eta_t\|\nabla\ell(w_t, z_i)\| + \eta_t\|\nabla\ell(w_t', z_i')\| \le \delta_t + 2\eta_tL$, since each gradient has norm at most $L$.
-3. **Take expectations** over $I_t$. The index $I_t$ is drawn fresh at step $t$, so it is independent of $\delta_t$, which depends only on earlier indices. Weighting the two cases by their probabilities, $\mathbb E\delta_{t+1} \le (1 - \frac1n)\mathbb E\delta_t + \frac1n(\mathbb E\delta_t + 2\eta_tL) = \mathbb E\delta_t + \frac{2\eta_tL}{n}$.
-4. **Unroll.** Starting from $\delta_0 = 0$ and adding the increments of all $T$ steps, $\mathbb E\delta_T \le \frac{2L}n\sum_{t<T}\eta_t$.
+1. **Same example picked** ($I_t \ne i$, probability $1 - 1/n$). Both runs take a gradient step on the same function $\ell(\cdot, z_{I_t})$. By Fact 4 (a gradient step with $\eta_t \le 2/\rho$ on a convex smooth function does not increase distances), $\delta_t \le \delta_{t-1}$.
+2. **Differing example picked** ($I_t = i$, probability $1/n$). One run steps on $z_i$, the other on $z_i'$, so Fact 4 does not apply. Instead, write $w_t - w_t' = (w_{t-1} - w_{t-1}') - \eta_t\nabla\ell(w_{t-1}, z_i) + \eta_t\nabla\ell(w_{t-1}', z_i')$ and use the triangle inequality on the three terms: $\delta_t \le \|w_{t-1} - w_{t-1}'\| + \eta_t\|\nabla\ell(w_{t-1}, z_i)\| + \eta_t\|\nabla\ell(w_{t-1}', z_i')\| \le \delta_{t-1} + 2\eta_tL$, since each gradient has norm at most $L$.
+3. **Take expectations** over $I_t$. The index $I_t$ is drawn fresh at step $t$, so it is independent of $\delta_{t-1}$, which depends only on earlier indices. Weighting the two cases by their probabilities, $\mathbb E\delta_t \le (1 - \frac1n)\mathbb E\delta_{t-1} + \frac1n(\mathbb E\delta_{t-1} + 2\eta_tL) = \mathbb E\delta_{t-1} + \frac{2\eta_tL}{n}$.
+4. **Unroll.** Starting from $\delta_0 = 0$ and adding the increments of steps $t = 1, \dots, T$, $\mathbb E\delta_T \le \frac{2L}n\sum_{t=1}^T\eta_t$.
 5. **From weights to losses.** By Fact 1, at every test point $z$ the loss difference is at most $L\delta_T$, so its expectation is at most $L\,\mathbb E\delta_T$: $\big|\mathbb E[\ell(w_T, z) - \ell(w_T', z)]\big| \le L\,\mathbb E\delta_T$. Multiplying the bound of step 4 by $L$ gives @eq-stability-hrs.
 
 ### Interpretation
@@ -494,7 +496,7 @@ uv run python code/part01-prerequisites/stability.py
 
 [tests/test_stability.py](../../tests/test_stability.py) checks that the output still matches the numbers in this chapter.
 
-**What to take from it.** The $1/(\lambda n)$ scaling is exact, but the constant is not: replace-one changes and gaps follow $1/(\lambda n)$ closely, yet sit between 4 and 36 times below the bound, because the bound takes the worst case at every step. The identity, unlike the bounds, is exact: the average self-influence matches the measured gap within simulation error. The SGD bound gets the direction right and the size wrong: the gap grows with training time, but the divergence between coupled runs saturates while the bound grows linearly. Finally, memorizers do not generalize their training error: 1-NN has training error 0 and test error 0.35, while regularized logistic regression has train and test errors that meet.
+**What to take from it.** The $1/(\lambda n)$ scaling holds, but the constant is loose: replace-one changes and gaps follow $1/(\lambda n)$ closely when $\lambda \ge 0.1$ (with weaker regularization the data's own curvature makes them smaller still), yet sit between 4 and 36 times below the bound, because the bound takes the worst case at every step. The identity, unlike the bounds, is exact: the average self-influence matches the measured gap within simulation error. The SGD bound gets the direction right and the size wrong: the gap grows with training time, but the divergence between coupled runs saturates while the bound grows linearly. Finally, memorizers do not generalize their training error: 1-NN has training error 0 and test error 0.35, while regularized logistic regression has train and test errors that meet.
 
 ## References
 

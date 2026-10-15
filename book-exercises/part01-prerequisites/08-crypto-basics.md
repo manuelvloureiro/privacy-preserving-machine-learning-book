@@ -179,7 +179,7 @@ Holders are numbered $i = 1, 2, 3$, and $p > 3$ so that these are distinct and n
 **Any single share is uniform.**
 
 1. Fix the secret $x$ and a holder $i$. The share $s_i = x + ci \bmod p$ is a function of the randomness $c$ alone.
-2. Because $p$ is prime and $i \ne 0 \bmod p$, $i$ has an inverse mod $p$. For any value $v$, the equation $x + ci = v$ has exactly one solution, $c = (v - x)\,i^{-1}$.
+2. Because $p$ is prime and $i \ne 0 \bmod p$, $i$ has an inverse mod $p$. For any value $y$, the equation $x + ci = y$ has exactly one solution, $c = (y - x)\,i^{-1}$.
 3. So $c \mapsto x + ci$ is a bijection of $\mathbb Z_p$, and by Fact 4 the share is uniform: each value has probability $1/p$, whatever $x$ is.
 4. The simulator for one holder, with no leakage, outputs a uniform element of $\mathbb Z_p$, and @eq-crypto-simulation holds with $\equiv$.
 
@@ -210,14 +210,14 @@ Geometrically, the shares are points on the line $y = x + ct$ at $t = 1, 2, 3$, 
 
 ## Regev's budget {#sec-sol-crypto-basics-8}
 
-> **Exercise 8.** **Regev's budget.** Using the normal approximation, find the $k$ at which the failure rate for $q = 4096$, $B = 32$ reaches 1%. Then change the script's error distribution to a rounded normal with $\sigma = 3.2$ and redo it. *Check for the first part: $1024^2/(2.576^2\cdot352) \approx 450$.* *(Noise growth)*
+> **Exercise 8.** **Regev's budget.** Using the normal approximation, find the $k$ at which the failure rate for $p = 4096$, $B = 32$ reaches 1%. Then change the script's error distribution to a rounded normal with $\sigma = 3.2$ and redo it. *Check for the first part: $1024^2/(2.576^2\cdot352) \approx 450$.* *(Noise growth)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **Uniform errors on $\{-32, \dots, 32\}$.**
 
 1. **Variance of one error.** $B(B + 1)/3 = 32\cdot33/3 = 352$, as in the chapter.
 2. **Variance of the sum.** The $k$ errors are independent, so their sum has variance $352k$ and is close to normal.
-3. **Failure event.** Decryption fails when the summed error leaves $(-q/4, q/4) = (-1024, 1024)$. Ignoring the wrap-around mod $q$, which only matters near failure rate $\frac12$,
+3. **Failure event.** Decryption fails when the summed error leaves $(-p/4, p/4) = (-1024, 1024)$. Ignoring the wrap-around mod $p$, which only matters near failure rate $\frac12$,
 $$\Pr[\text{failure}] \approx \Pr\big[|Z| > 1024/\sqrt{352k}\big], \qquad Z \sim \mathcal N(0, 1).$$
 4. **Set it to 1%.** $\Pr[|Z| > z] = 0.01$ at $z = 2.576$. So $1024/\sqrt{352k} = 2.576$, and
 $$k = \frac{1024^2}{2.576^2\cdot352} = 449.0.$$
@@ -229,32 +229,32 @@ The wrapped approximation used by the chapter's script, solved over the integers
 2. **Same formula.** $k = 1024^2/(2.576^2\cdot10.3233) = 15{,}309$, and the wrapped approximation gives the same integer.
 3. **Simulation.** Adding 15,309 ciphertexts, 20,000 times, gives a failure rate of 0.0111.
 
-The smaller error buys 34 times as many additions, which is the ratio of the variances, $352/10.3233$. The budget scales like $(q/\sigma)^2$: halving the error standard deviation buys four times as many additions.
+The smaller error buys 34 times as many additions, which is the ratio of the variances, $352/10.3233$. The budget scales like $(p/\sigma)^2$: halving the error standard deviation buys four times as many additions.
 
 There is no worst-case analogue of @eq-crypto-regev-budget for a rounded normal, because its support is unbounded; one bounds it by a tail cut instead, such as $|e| \le 6\sigma$, at a tiny failure probability.
 
-*Under random errors the noise budget is set by the variance, not the bound: $k \approx (q/4)^2/(z^2\sigma^2)$ additions for failure rate $\Pr[|Z| > z]$.*
+*Under random errors the noise budget is set by the variance, not the bound: $k \approx (p/4)^2/(z^2\sigma^2)$ additions for failure rate $\Pr[|Z| > z]$.*
 :::
 
 ## Odd modulus {#sec-sol-crypto-basics-9}
 
-> **Exercise 9.** **Odd modulus.** Modify the addition experiment to use a prime $q$ and the encoding $\lfloor q/2\rfloor$. Measure the extra drift and compare with the prediction of about $-k/4$. *(LWE arithmetic)*
+> **Exercise 9.** **Odd modulus.** Modify the addition experiment to use a prime $p$ and the encoding $\lfloor p/2\rfloor$. Measure the extra drift and compare with the prediction of about $-k/4$. *(LWE arithmetic)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **Prediction.**
 
-1. **Write $q = 2h + 1$**, so the encoding is $h = \lfloor q/2\rfloor$ and $2h = q - 1 \equiv -1$.
-2. **The sum.** As in the derivation of @eq-crypto-regev-budget, the summed ciphertext decrypts to $d = \sum_i e_i + wh \bmod q$, where $w = \sum_i m_i$ is the number of 1-bits.
+1. **Write $p = 2\Delta + 1$**, so the encoding is $\Delta = \lfloor p/2\rfloor$ and $2\Delta = p - 1 \equiv -1$.
+2. **The sum.** As in the derivation of @eq-crypto-regev-budget, the summed ciphertext decrypts to $v = \sum_i e_i + w\Delta \bmod p$, where $w = \sum_i m_i$ is the number of 1-bits.
 3. **Split $w$.** $w = (w \bmod 2) + 2\lfloor w/2\rfloor$, so
-$$wh = (w \bmod 2)\,h + \lfloor w/2\rfloor\cdot 2h \equiv (w \bmod 2)\,h - \lfloor w/2\rfloor.$$
+$$w\Delta = (w \bmod 2)\,\Delta + \lfloor w/2\rfloor\cdot 2\Delta \equiv (w \bmod 2)\,\Delta - \lfloor w/2\rfloor.$$
 The first term is the correct encoding of the parity. The second is an extra error of $-\lfloor w/2\rfloor$: every pair of 1-bits adds $-1$.
 4. **Its mean.** For random bits, $w \sim \mathrm{Bin}(k, \frac12)$, with $\mathbb E w = k/2$. Also $\Pr[w \text{ even}] - \Pr[w \text{ odd}] = \mathbb E(-1)^w = (\frac12 - \frac12)^k = 0$ for $k \ge 1$, so $\Pr[w \text{ odd}] = \frac12$. Hence
 $$\mathbb E\lfloor w/2\rfloor = \frac{\mathbb E w - \Pr[w \text{ odd}]}{2} = \frac{k - 1}4, \qquad \text{drift} = -\frac{k - 1}4.$$
 This is the "about $-k/4$" of the exercise, exact up to the $\frac14$.
 
-**Measurement.** The script repeats the addition experiment with the prime $q = 4093$ (the largest prime below 4096), errors uniform on $\{-32, \dots, 32\}$, $n = 4$ and 20,000 trials. It computes the drift as $d - \sum_i e_i - (w \bmod 2)h$, centred in $(-q/2, q/2]$, and also reruns $q = 4096$ for comparison. The normal approximation for the odd modulus shifts the mean of the summed error by the predicted drift. @tbl-sol-crypto-basics-odd has the results.
+**Measurement.** The script repeats the addition experiment with the prime $p = 4093$ (the largest prime below 4096), errors uniform on $\{-32, \dots, 32\}$, $d = 4$ and 20,000 trials. It computes the drift as $v - \sum_i e_i - (w \bmod 2)\Delta$, centred in $(-p/2, p/2]$, and also reruns $p = 4096$ for comparison. The normal approximation for the odd modulus shifts the mean of the summed error by the predicted drift. @tbl-sol-crypto-basics-odd has the results.
 
-| $k$ | Drift, $q = 4093$ | Predicted $-(k-1)/4$ | Failure, $q = 4093$ | Normal approximation with drift | Failure, $q = 4096$ |
+| $k$ | Drift, $p = 4093$ | Predicted $-(k-1)/4$ | Failure, $p = 4093$ | Normal approximation with drift | Failure, $p = 4096$ |
 | --- | --- | --- | --- | --- | --- |
 | 1 | 0.00 | 0.00 | 0.0000 | 0.0000 | 0.0000 |
 | 31 | $-7.51$ | $-7.50$ | 0.0000 | 0.0000 | 0.0000 |
@@ -262,10 +262,10 @@ This is the "about $-k/4$" of the exercise, exact up to the $\frac14$.
 | 1,024 | $-255.81$ | $-255.75$ | 0.1167 | 0.1171 | 0.0873 |
 | 4,096 | $-1023.82$ | $-1023.75$ | 0.5007 | 0.5001 | 0.3780 |
 
-: Sums of $k$ Regev ciphertexts with the odd modulus $q = 4093$ and encoding $\lfloor q/2\rfloor$, against the even modulus $q = 4096$ (errors uniform on $\{-32, \dots, 32\}$, seed 0, 20,000 trials). {#tbl-sol-crypto-basics-odd}
+: Sums of $k$ Regev ciphertexts with the odd modulus $p = 4093$ and encoding $\lfloor p/2\rfloor$, against the even modulus $p = 4096$ (errors uniform on $\{-32, \dots, 32\}$, seed 0, 20,000 trials). {#tbl-sol-crypto-basics-odd}
 
 - **The drift matches the prediction** to within 0.1 at every $k$. With the even modulus it is exactly 0.
-- **It costs correctness.** The drift grows like $k$, the random part only like $\sqrt k$. At $k = 1024$ the drift ($-256$) is already 0.43 standard deviations of the random part ($\sqrt{352\cdot1024} = 600$), and the failure rate rises from 0.0873 to 0.1167. At $k = 4096$ the drift reaches $-q/4$ by itself, and decryption is a coin flip.
+- **It costs correctness.** The drift grows like $k$, the random part only like $\sqrt k$. At $k = 1024$ the drift ($-256$) is already 0.43 standard deviations of the random part ($\sqrt{352\cdot1024} = 600$), and the failure rate rises from 0.0873 to 0.1167. At $k = 4096$ the drift reaches $-p/4$ by itself, and decryption is a coin flip.
 
 *With an odd modulus the encoding is not exactly additive: each pair of 1-bits leaks $-1$ into the noise, a deterministic drift of $-(k-1)/4$ that eventually dominates the random noise.*
 :::

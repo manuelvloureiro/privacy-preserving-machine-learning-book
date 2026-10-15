@@ -34,29 +34,29 @@ The expected conditional KL is $0.7 \times 0.3023 = 0.2116$, and $0.0823 + 0.211
 
 ## Gaussians with different variances {#sec-sol-divergences-2}
 
-> **Exercise 2.** **Gaussians with different variances.** Show $D_{\mathrm{KL}}(\mathcal N(\mu_0, \sigma_0^2)\|\mathcal N(\mu_1, \sigma_1^2)) = \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2 + (\mu_0 - \mu_1)^2}{2\sigma_1^2} - \frac12$. *Check: $D_{\mathrm{KL}}(\mathcal N(0, 1)\|\mathcal N(0, 4)) = \ln2 + \frac18 - \frac12 = 0.3181$.* For the Rényi divergence, repeat route 1 of the Gaussian section and find the condition on $\alpha$ under which the integral is finite. *Hint: the coefficient of $x^2$ must stay negative: $\alpha/\sigma_0^2 + (1-\alpha)/\sigma_1^2 > 0$.* *(Completing the square)*
+> **Exercise 2.** **Gaussians with different variances.** Show $D_{\mathrm{KL}}(\mathcal N(m_0, \sigma_0^2)\|\mathcal N(m_1, \sigma_1^2)) = \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2 + (m_0 - m_1)^2}{2\sigma_1^2} - \frac12$. *Check: $D_{\mathrm{KL}}(\mathcal N(0, 1)\|\mathcal N(0, 4)) = \ln2 + \frac18 - \frac12 = 0.3181$.* For the Rényi divergence, repeat route 1 of the Gaussian section and find the condition on $\alpha$ under which the integral is finite. *Hint: the coefficient of $x^2$ must stay negative: $\alpha/\sigma_0^2 + (1-\alpha)/\sigma_1^2 > 0$.* *(Completing the square)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-Write $P = \mathcal N(\mu_0, \sigma_0^2)$, $Q = \mathcal N(\mu_1, \sigma_1^2)$ and $\Delta = \mu_0 - \mu_1$.
+Write $P = \mathcal N(m_0, \sigma_0^2)$ and $Q = \mathcal N(m_1, \sigma_1^2)$, with means $m_0, m_1$, and $\Delta = m_0 - m_1$.
 
 **KL.**
 
-1. **The log-likelihood ratio.** The normal density is $\frac{1}{\sigma\sqrt{2\pi}}e^{-(x - \mu)^2/(2\sigma^2)}$, so
-$$L(x) = \ln\frac{\sigma_1}{\sigma_0} - \frac{(x - \mu_0)^2}{2\sigma_0^2} + \frac{(x - \mu_1)^2}{2\sigma_1^2}.$$
+1. **The log-likelihood ratio.** The normal density is $\frac{1}{\sigma\sqrt{2\pi}}e^{-(x - m)^2/(2\sigma^2)}$ for mean $m$, so
+$$L(x) = \ln\frac{\sigma_1}{\sigma_0} - \frac{(x - m_0)^2}{2\sigma_0^2} + \frac{(x - m_1)^2}{2\sigma_1^2}.$$
 Unlike the equal-variance case, $L$ is quadratic in $x$.
-2. **Two second moments under $P$.** $\mathbb E_P(X - \mu_0)^2 = \sigma_0^2$. For the other, write $X - \mu_1 = (X - \mu_0) + \Delta$; the cross term averages to 0, so $\mathbb E_P(X - \mu_1)^2 = \sigma_0^2 + \Delta^2$.
+2. **Two second moments under $P$.** $\mathbb E_P(X - m_0)^2 = \sigma_0^2$. For the other, write $X - m_1 = (X - m_0) + \Delta$; the cross term averages to 0, so $\mathbb E_P(X - m_1)^2 = \sigma_0^2 + \Delta^2$.
 3. **Average $L$ under $P$:** $D_{\mathrm{KL}} = \ln\frac{\sigma_1}{\sigma_0} - \frac12 + \frac{\sigma_0^2 + \Delta^2}{2\sigma_1^2}$, the claimed formula.
 4. **Check.** For $\mathcal N(0, 1)\|\mathcal N(0, 4)$: $\sigma_0 = 1$, $\sigma_1 = 2$, $\Delta = 0$, so $D_{\mathrm{KL}} = \ln2 + \frac18 - \frac12 = 0.3181$. A numerical integral of $p\ln(p/q)$ gives 0.3181 as well. In the other direction, $D_{\mathrm{KL}}(\mathcal N(0, 4)\|\mathcal N(0, 1)) = -\ln2 + 2 - \frac12 = 0.8069$: KL is not symmetric here. With $\sigma_0 = \sigma_1$ the formula reduces to $\Delta^2/(2\sigma^2)$, as in @eq-gauss-renyi.
 
 **Rényi, by route 1.**
 
 1. **Constants.** $p^\alpha q^{1-\alpha}$ has the constant factor $\frac{1}{\sqrt{2\pi}}\sigma_0^{-\alpha}\sigma_1^{-(1-\alpha)}$ times $\exp\big(-\frac12B(x)\big)$, with
-$$B(x) = w_0(x - \mu_0)^2 + w_1(x - \mu_1)^2, \qquad w_0 = \frac{\alpha}{\sigma_0^2},\quad w_1 = \frac{1 - \alpha}{\sigma_1^2}.$$
+$$B(x) = w_0(x - m_0)^2 + w_1(x - m_1)^2, \qquad w_0 = \frac{\alpha}{\sigma_0^2},\quad w_1 = \frac{1 - \alpha}{\sigma_1^2}.$$
 2. **Finiteness.** The coefficient of $x^2$ in $-\frac12B$ is $-\frac12(w_0 + w_1)$. If $w_0 + w_1 \le 0$, the integrand does not decay in at least one direction (it grows like $e^{cx^2}$, or, when the coefficient is exactly 0, like $e^{cx}$ or a constant), and the integral is infinite. So the integral is finite exactly when
 $$w_0 + w_1 = \frac{\alpha}{\sigma_0^2} + \frac{1 - \alpha}{\sigma_1^2} > 0 \iff \sigma_\alpha^2 := \alpha\sigma_1^2 + (1 - \alpha)\sigma_0^2 > 0$$
 (multiply by $\sigma_0^2\sigma_1^2 > 0$). Note $w_0 + w_1 = \sigma_\alpha^2/(\sigma_0^2\sigma_1^2)$.
-3. **Complete the square.** For weights with $w_0 + w_1 > 0$, $w_0(x - \mu_0)^2 + w_1(x - \mu_1)^2 = (w_0 + w_1)(x - m)^2 + \frac{w_0w_1}{w_0 + w_1}\Delta^2$ with $m = \frac{w_0\mu_0 + w_1\mu_1}{w_0 + w_1}$. (Expand both sides: the $x^2$ and $x$ terms match by the choice of $m$, and the constant is what is left.) Here $\frac{w_0w_1}{w_0 + w_1} = \frac{\alpha(1-\alpha)}{\sigma_0^2\sigma_1^2}\cdot\frac{\sigma_0^2\sigma_1^2}{\sigma_\alpha^2} = \frac{\alpha(1 - \alpha)}{\sigma_\alpha^2}$.
-4. **Integrate.** $\int e^{-(w_0 + w_1)(x - m)^2/2}dx = \sqrt{2\pi/(w_0 + w_1)} = \sqrt{2\pi}\,\sigma_0\sigma_1/\sigma_\alpha$. So
+3. **Complete the square.** For weights with $w_0 + w_1 > 0$, $w_0(x - m_0)^2 + w_1(x - m_1)^2 = (w_0 + w_1)(x - \bar m)^2 + \frac{w_0w_1}{w_0 + w_1}\Delta^2$ with $\bar m = \frac{w_0m_0 + w_1m_1}{w_0 + w_1}$. (Expand both sides: the $x^2$ and $x$ terms match by the choice of $\bar m$, and the constant is what is left.) Here $\frac{w_0w_1}{w_0 + w_1} = \frac{\alpha(1-\alpha)}{\sigma_0^2\sigma_1^2}\cdot\frac{\sigma_0^2\sigma_1^2}{\sigma_\alpha^2} = \frac{\alpha(1 - \alpha)}{\sigma_\alpha^2}$.
+4. **Integrate.** $\int e^{-(w_0 + w_1)(x - \bar m)^2/2}dx = \sqrt{2\pi/(w_0 + w_1)} = \sqrt{2\pi}\,\sigma_0\sigma_1/\sigma_\alpha$. So
 $$\int p^\alpha q^{1-\alpha}\,dx = \frac{\sigma_0^{1-\alpha}\sigma_1^{\alpha}}{\sigma_\alpha}\exp\left(-\frac{\alpha(1-\alpha)\Delta^2}{2\sigma_\alpha^2}\right).$$
 5. **Take the logarithm and divide by $\alpha - 1$.** The exponent gives $\frac{\alpha\Delta^2}{2\sigma_\alpha^2}$, as in the equal-variance case. The prefactor gives $\frac{(1-\alpha)\ln\sigma_0 + \alpha\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1} = \ln\frac{\sigma_1}{\sigma_0} + \frac{\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1}$. Together,
 $$D_\alpha(P\|Q) = \ln\frac{\sigma_1}{\sigma_0} + \frac{1}{2(\alpha - 1)}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} + \frac{\alpha\Delta^2}{2\sigma_\alpha^2} \quad\text{if } \sigma_\alpha^2 > 0, \qquad D_\alpha = \infty \text{ otherwise}.$$

@@ -135,11 +135,11 @@ The leave-one-out estimate overshoots the test loss at size 10 by $\sigma^2/(n(n
 > **Exercise 5.** **SGD with a strongly convex loss.** If each $\ell(\cdot, z)$ is $\mu$-strongly convex and $\rho$-smooth (on a bounded domain, since a strongly convex function cannot be Lipschitz everywhere), the gradient step with $\eta \le 2/(\rho + \mu)$ is $(1 - \eta\rho\mu/(\rho + \mu))$-contractive (Hardt, Recht & Singer 2016, Lemma 3.7). With constant $\eta$, show that $\mathbb E\delta_T \le \frac{2L}{n}\cdot\frac{\rho + \mu}{\rho\mu}$ for every $T$. *Check: for $\mu \ll \rho$ this is about $2L/(\mu n)$, the ERM bound: with strong convexity, training longer no longer costs stability.* *(SGD coupling, geometric series)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-Run SGD on $S$ and $S^{(i)}$ with the same index sequence, as in the chapter, and write $q = 1 - \eta\rho\mu/(\rho + \mu) < 1$ for the contraction factor and $G_j(w) = w - \eta\nabla\ell(w, z_j)$ for the gradient step on example $j$.
+Run SGD on $S$ and $S^{(i)}$ with the same index sequence, as in the chapter, and write $q = 1 - \eta\rho\mu/(\rho + \mu) < 1$ for the contraction factor and $\psi_j(w) = w - \eta\nabla\ell(w, z_j)$ for the gradient step on example $j$.
 
-1. **Same example picked** ($I_t \ne i$, probability $1 - 1/n$). Both runs apply the same map $G_{I_t}$, which is $q$-contractive: $\delta_{t+1} \le q\,\delta_t$.
+1. **Same example picked** ($I_t \ne i$, probability $1 - 1/n$). Both runs apply the same map $\psi_{I_t}$, which is $q$-contractive: $\delta_{t+1} \le q\,\delta_t$.
 2. **Differing example picked** ($I_t = i$, probability $1/n$). Split the difference so that the contraction still applies:
-$$w_{t+1} - w_{t+1}' = \big[G_i(w_t) - G_i(w_t')\big] + \eta\big[\nabla\ell(w_t', z_i') - \nabla\ell(w_t', z_i)\big].$$
+$$w_{t+1} - w_{t+1}' = \big[\psi_i(w_t) - \psi_i(w_t')\big] + \eta\big[\nabla\ell(w_t', z_i') - \nabla\ell(w_t', z_i)\big].$$
 The first bracket has norm at most $q\,\delta_t$; the second at most $2\eta L$, since both gradients have norm at most $L$ on the domain. So $\delta_{t+1} \le q\,\delta_t + 2\eta L$.
 3. **Take expectations** over $I_t$, which is independent of $\delta_t$: $\mathbb E\delta_{t+1} \le q\,\mathbb E\delta_t + \frac{2\eta L}n$. (In step 2 of the chapter, without strong convexity, the factor in front of $\mathbb E\delta_t$ was 1; here it is $q$ in both cases.)
 4. **Unroll** from $\delta_0 = 0$. After one step, $\mathbb E\delta_1 \le \frac{2\eta L}n$; after two, $\le \frac{2\eta L}n(1 + q)$; after $T$,

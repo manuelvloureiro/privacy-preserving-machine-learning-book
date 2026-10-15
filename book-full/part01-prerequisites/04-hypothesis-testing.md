@@ -26,13 +26,13 @@ The distributions used here are in [Probability distributions](01-distributions.
 
 The derivations below reuse four facts. Each is stated and proved once here, with a small running example.
 
-**The running example.** A spam filter counts suspicious words in an email, capped at 3. The default assumption is that an email is ham; this is the **null hypothesis** $H_0$, under which the count $X$ has distribution $P$. The **alternative** $H_1$ is that the email is spam, under which $X$ has distribution $Q$. @tbl-ht-spam gives both, and their likelihood ratio $L(x) = q(x)/p(x)$. Spam tends to have more suspicious words, so the ratio grows with the count: a count of 3 is four times as likely in spam as in ham, a count of 0 a quarter as likely.
+**The running example.** A spam filter counts suspicious words in an email, capped at 3. The default assumption is that an email is ham; this is the **null hypothesis** $H_0$, under which the count $X$ has distribution $P$. The **alternative** $H_1$ is that the email is spam, under which $X$ has distribution $Q$. @tbl-ht-spam gives both, and their likelihood ratio $\Lambda(x) = q(x)/p(x)$, with the alternative on top so that large values point to $H_1$. ([Divergences](03-divergences.md) writes the ratio the other way up, as $r(x) = p(x)/q(x)$, and its logarithm as $L(x)$; here $\Lambda$ is always the plain ratio $q/p$.) Spam tends to have more suspicious words, so the ratio grows with the count: a count of 3 is four times as likely in spam as in ham, a count of 0 a quarter as likely.
 
 | $x$ | 0 | 1 | 2 | 3 |
 | --- | --- | --- | --- | --- |
 | $p(x)$, ham | 0.4 | 0.3 | 0.2 | 0.1 |
 | $q(x)$, spam | 0.1 | 0.2 | 0.3 | 0.4 |
-| $L(x) = q(x)/p(x)$ | 0.250 | 0.667 | 1.500 | 4.000 |
+| $\Lambda(x) = q(x)/p(x)$ | 0.250 | 0.667 | 1.500 | 4.000 |
 
 : Word-count distributions under ham ($P$) and spam ($Q$), and their likelihood ratio. {#tbl-ht-spam}
 
@@ -48,11 +48,11 @@ For example, the test "reject when $X \ge 2$" has $\phi = (0, 0, 1, 1)$ on the o
 
 ### Fact 2 — Change of measure
 
-The likelihood ratio converts averages under $P$ into averages under $Q$. The reason is simple: wherever $p(x) > 0$, the spam probability $q(x)$ equals the ham probability $p(x)$ multiplied by $L(x) = q(x)/p(x)$. So any average under $Q$ can be computed as an average under $P$ in which each outcome is reweighted by $L$. The one catch is outcomes that $P$ never produces, where $p(x) = 0$ and the ratio is undefined; those have to be counted separately. For any function $g \ge 0$,
-$$\mathbb E_Q[g(X)] = \mathbb E_P[g(X)L(X)] + \mathbb E_Q\big[g(X)\mathbf 1[p(X) = 0]\big].$$
-To prove it, split the sum (or integral) $\sum_x g(x)q(x)$ into the points with $p(x) > 0$, where $q(x) = L(x)p(x)$ turns the sum into $\sum_x g(x)L(x)p(x) = \mathbb E_P[gL]$, and the points with $p(x) = 0$, which give the second term.
+The likelihood ratio converts averages under $P$ into averages under $Q$. The reason is simple: wherever $p(x) > 0$, the spam probability $q(x)$ equals the ham probability $p(x)$ multiplied by $\Lambda(x) = q(x)/p(x)$. So any average under $Q$ can be computed as an average under $P$ in which each outcome is reweighted by $\Lambda$. The one catch is outcomes that $P$ never produces, where $p(x) = 0$ and the ratio is undefined; those have to be counted separately. For any function $g \ge 0$,
+$$\mathbb E_Q[g(X)] = \mathbb E_P[g(X)\Lambda(X)] + \mathbb E_Q\big[g(X)\mathbf 1[p(X) = 0]\big].$$
+To prove it, split the sum (or integral) $\sum_x g(x)q(x)$ into the points with $p(x) > 0$, where $q(x) = \Lambda(x)p(x)$ turns the sum into $\sum_x g(x)\Lambda(x)p(x) = \mathbb E_P[g\Lambda]$, and the points with $p(x) = 0$, which give the second term.
 
-In the spam example $p > 0$ everywhere, so only the first term appears. For "reject when $X = 3$", $\phi = (0, 0, 0, 1)$ and $\mathbb E_P[\phi L] = 0.1 \times 4 = 0.4$, which is exactly $\mathbb E_Q\phi$, the spam mass at 3. One consequence is used later: taking $g = 1$, the left side is 1 and the second term is $Q[p = 0]$, the $Q$-probability of the outcomes $P$ never produces, so $\mathbb E_P[L] = 1 - Q[p = 0] = Q[p > 0] \le 1$.
+In the spam example $p > 0$ everywhere, so only the first term appears. For "reject when $X = 3$", $\phi = (0, 0, 0, 1)$ and $\mathbb E_P[\phi \Lambda] = 0.1 \times 4 = 0.4$, which is exactly $\mathbb E_Q\phi$, the spam mass at 3. One consequence is used later: taking $g = 1$, the left side is 1 and the second term is $Q[p = 0]$, the $Q$-probability of the outcomes $P$ never produces, so $\mathbb E_P[\Lambda] = 1 - Q[p = 0] = Q[p > 0] \le 1$.
 
 ### Fact 3 — Mixing tests mixes their errors
 
@@ -118,7 +118,7 @@ A screening test flags a patient when the biomarker exceeds $t = 1.645$, the thr
 ### Check yourself
 
 - A test rejects with probability $\alpha$ regardless of the data. What are its errors? *($\alpha_\phi = \alpha$ and $\beta_\phi = 1 - \alpha$. This "coin flip" test is the baseline every useful test must beat.)*
-- Why is the test that rejects on $\{0\}$ in @tbl-ht-spam-tests worse than the coin flip at the same $\alpha$? *(It rejects where $L(x) = 0.25 < 1$: on that region ham is four times as likely as spam, so it spends false-positive budget where spam is rare.)*
+- Why is the test that rejects on $\{0\}$ in @tbl-ht-spam-tests worse than the coin flip at the same $\alpha$? *(It rejects where $\Lambda(x) = 0.25 < 1$: on that region ham is four times as likely as spam, so it spends false-positive budget where spam is rare.)*
 
 ## The Neyman–Pearson lemma {#sec-ht-np}
 
@@ -126,13 +126,13 @@ A screening test flags a patient when the biomarker exceeds $t = 1.645$, the thr
 
 Among all tests at level $\alpha$, which one is the most powerful? The space of tests is huge: every function $\phi: \mathcal X \to [0, 1]$. The Neyman–Pearson lemma says that you only need to look at one family, thresholds of the likelihood ratio, and that the best test in that family beats every other test.
 
-The intuition is a budget. Each outcome $x$ you decide to reject costs $p(x)$ of false-positive budget and buys $q(x)$ of power. The exchange rate at $x$ is $q(x)/p(x) = L(x)$, units of power per unit of budget. If you want the most power for a fixed budget, you should spend it on the outcomes with the best exchange rate first, and that means rejecting exactly where $L(x)$ is above some cut-off.
+The intuition is a budget. Each outcome $x$ you decide to reject costs $p(x)$ of false-positive budget and buys $q(x)$ of power. The exchange rate at $x$ is $q(x)/p(x) = \Lambda(x)$, units of power per unit of budget. If you want the most power for a fixed budget, you should spend it on the outcomes with the best exchange rate first, and that means rejecting exactly where $\Lambda(x)$ is above some cut-off.
 
 ### Statement
 
 Let $P$ and $Q$ have densities (or probability mass functions) $p$ and $q$. A **likelihood ratio (LR) test** with threshold $\eta \ge 0$ rejects wherever $q(x)$ is more than $\eta$ times $p(x)$, keeps $H_0$ wherever it is less, and on the tie set, where $q(x) = \eta\,p(x)$ exactly, may reject with any probability $\gamma(x) \in [0, 1]$:
 $$\phi^*(x) = \begin{cases} 1 & \text{if } q(x) > \eta\,p(x), \\ \gamma(x) & \text{if } q(x) = \eta\,p(x), \\ 0 & \text{if } q(x) < \eta\,p(x). \end{cases}$$ {#eq-ht-lr-test}
-Writing the condition as $q > \eta p$ rather than $L > \eta$ also covers points where $p(x) = 0$: there any $q(x) > 0$ counts as above every threshold. The lemma has two parts.
+Writing the condition as $q > \eta p$ rather than $\Lambda > \eta$ also covers points where $p(x) = 0$: there any $q(x) > 0$ counts as above every threshold. The lemma has two parts.
 
 1. **Optimality.** Every test $\phi$ with $\alpha_\phi \le \alpha_{\phi^*}$ has $\beta_\phi \ge \beta_{\phi^*}$: no test that spends at most as much false-positive budget misses less.
 2. **Existence.** For every $\alpha \in (0, 1]$ there is an LR test with a constant $\gamma$ and size exactly $\alpha$.
@@ -151,15 +151,15 @@ $$\mathbb E_Q[\phi^*] - \mathbb E_Q[\phi] \ge \eta\big(\mathbb E_P[\phi^*] - \ma
 3. **Use the level constraint.** The other test spends no more budget: $\mathbb E_P[\phi] = \alpha_\phi \le \alpha_{\phi^*} = \mathbb E_P[\phi^*]$. Together with $\eta \ge 0$, the right side is $\ge 0$.
 4. **Read off the errors.** So $\mathbb E_Q[\phi^*] \ge \mathbb E_Q[\phi]$. Both sides are powers, $1 - \beta_{\phi^*} \ge 1 - \beta_\phi$, which is $\beta_\phi \ge \beta_{\phi^*}$.
 
-Step 2 is the budget intuition of the Context written out. $\eta$ is the exchange rate at the cut-off: every unit of false-positive probability spent at $x$ buys $L(x)$ units of power. The LR test spends its budget only where the exchange rate is at least $\eta$, so no other allocation of the same budget buys more power.
+Step 2 is the budget intuition of the Context written out. $\eta$ is the exchange rate at the cut-off: every unit of false-positive probability spent at $x$ buys $\Lambda(x)$ units of power. The LR test spends its budget only where the exchange rate is at least $\eta$, so no other allocation of the same budget buys more power.
 
 ### Derivation of existence
 
-The idea is to lower the cut-off on $L$ until the outcomes strictly above it use at most $\alpha$ of the budget, while including the outcomes at the cut-off would use at least $\alpha$. Then randomizing on the outcomes exactly at the cut-off fills the gap. To make this precise, let $X \sim P$ and let $G(c) = \Pr_P[L(X) > c]$ for $c \ge 0$ be the ham probability of the outcomes whose ratio exceeds $c$, which is the size of the test that rejects strictly above $c$. (Points with $p(x) = 0$ have probability 0 under $P$, so $L(X)$ is finite.)
+The idea is to lower the cut-off on $\Lambda$ until the outcomes strictly above it use at most $\alpha$ of the budget, while including the outcomes at the cut-off would use at least $\alpha$. Then randomizing on the outcomes exactly at the cut-off fills the gap. To make this precise, let $X \sim P$ and let $G(c) = \Pr_P[\Lambda(X) > c]$ for $c \ge 0$ be the ham probability of the outcomes whose ratio exceeds $c$, which is the size of the test that rejects strictly above $c$. (Points with $p(x) = 0$ have probability 0 under $P$, so $\Lambda(X)$ is finite.)
 
-1. **How $G$ behaves.** Raising $c$ removes outcomes from $\{L > c\}$, so $G$ is non-increasing. It is right-continuous, because as $c' \downarrow c$ the sets $\{L > c'\}$ grow to $\{L > c\}$, and the probability of a growing sequence of sets tends to the probability of their union. In the same way, as $c' \uparrow c$ the sets $\{L > c'\}$ shrink to $\{L \ge c\}$, so the left limit is $G(c^-) = \Pr_P[L(X) \ge c]$.
-2. **Choose the cut-off.** Set $\eta = \inf\{c \ge 0 : G(c) \le \alpha\}$, the smallest cut-off whose strict rejection region fits in the budget. Right-continuity gives $G(\eta) \le \alpha$. Just left of $\eta$, $G > \alpha$, so $\Pr_P[L \ge \eta] \ge \alpha$ (when $\eta = 0$ this reads $1 \ge \alpha$).
-3. **Randomize on the ties.** The LR test with constant $\gamma$ rejects $\{L > \eta\}$ always and $\{L = \eta\}$ with probability $\gamma$, so its size is $G(\eta) + \gamma\Pr_P[L = \eta]$. If $\Pr_P[L = \eta] > 0$, pick $\gamma = \big(\alpha - G(\eta)\big)/\Pr_P[L = \eta]$ to make the size exactly $\alpha$. It lies in $[0, 1]$: it is $\ge 0$ because $G(\eta) \le \alpha$, and $\le 1$ because $G(\eta) + \Pr_P[L = \eta] = \Pr_P[L \ge \eta] \ge \alpha$, both by step 2. If $\Pr_P[L = \eta] = 0$, step 2 gives $G(\eta) = \alpha$ and any $\gamma$ works.
+1. **How $G$ behaves.** Raising $c$ removes outcomes from $\{\Lambda > c\}$, so $G$ is non-increasing. It is right-continuous, because as $c' \downarrow c$ the sets $\{\Lambda > c'\}$ grow to $\{\Lambda > c\}$, and the probability of a growing sequence of sets tends to the probability of their union. In the same way, as $c' \uparrow c$ the sets $\{\Lambda > c'\}$ shrink to $\{\Lambda \ge c\}$, so the left limit is $G(c^-) = \Pr_P[\Lambda(X) \ge c]$.
+2. **Choose the cut-off.** Set $\eta = \inf\{c \ge 0 : G(c) \le \alpha\}$, the smallest cut-off whose strict rejection region fits in the budget. Right-continuity gives $G(\eta) \le \alpha$. Just left of $\eta$, $G > \alpha$, so $\Pr_P[\Lambda \ge \eta] \ge \alpha$ (when $\eta = 0$ this reads $1 \ge \alpha$).
+3. **Randomize on the ties.** The LR test with constant $\gamma$ rejects $\{\Lambda > \eta\}$ always and $\{\Lambda = \eta\}$ with probability $\gamma$, so its size is $G(\eta) + \gamma\Pr_P[\Lambda = \eta]$. If $\Pr_P[\Lambda = \eta] > 0$, pick $\gamma = \big(\alpha - G(\eta)\big)/\Pr_P[\Lambda = \eta]$ to make the size exactly $\alpha$. It lies in $[0, 1]$: it is $\ge 0$ because $G(\eta) \le \alpha$, and $\le 1$ because $G(\eta) + \Pr_P[\Lambda = \eta] = \Pr_P[\Lambda \ge \eta] \ge \alpha$, both by step 2. If $\Pr_P[\Lambda = \eta] = 0$, step 2 gives $G(\eta) = \alpha$ and any $\gamma$ works.
 
 **Concrete: the spam example at $\alpha = 0.25$.** The distinct ratios, from the largest, are 4 (mass 0.1 under $P$), 1.5 (mass 0.2), 0.667 and 0.25. For any cut-off $c$ with $1.5 \le c < 4$, only the count 3 has a ratio above $c$, so $G(c) = 0.1$, which fits in the budget. Just below 1.5 the count 2 joins, and $G = 0.1 + 0.2 = 0.3$, which does not. So $\eta = 1.5$. The test rejects the count 3 always and must spend the remaining $0.25 - 0.1 = 0.15$ on the tie set $\{2\}$, whose ham mass is 0.2: $\gamma = (0.25 - 0.1)/0.2 = 0.75$. This is the randomized test of @sec-ht-setup. Its power is the spam mass it rejects, $0.4 + 0.75 \times 0.3 = 0.625$, so $\beta = 0.375$.
 
@@ -169,24 +169,24 @@ The script checks the lemma by brute force. It draws 200,000 random tests, $\phi
 
 ### Interpretation
 
-**Only the likelihood ratio matters.** The optimal test looks at $x$ only through $L(x)$, so two observations with the same likelihood ratio are interchangeable for testing. Everything else about $x$ is noise.
+**Only the likelihood ratio matters.** The optimal test looks at $x$ only through $\Lambda(x)$, so two observations with the same likelihood ratio are interchangeable for testing. Everything else about $x$ is noise.
 
-**Monotone ratios give thresholds on $x$.** Often $L(x)$ increases with some simple statistic $s(x)$, such as the word count in the spam example. Then "the ratio is above $\eta$" is the same event as "the statistic is above some $t$", $\{L > \eta\} = \{s > t\}$, and the optimal test is a plain threshold on $s$. The word count, the Gaussian biomarker and the Laplace shift below all work this way. This is why thresholding a well-calibrated score is the right thing to do.
+**Monotone ratios give thresholds on $x$.** Often $\Lambda(x)$ increases with some simple statistic $s(x)$, such as the word count in the spam example. Then "the ratio is above $\eta$" is the same event as "the statistic is above some $t$", $\{\Lambda > \eta\} = \{s > t\}$, and the optimal test is a plain threshold on $s$. The word count, the Gaussian biomarker and the Laplace shift below all work this way. This is why thresholding a well-calibrated score is the right thing to do.
 
-**The slope of the curve is $-\eta$.** Plot the LR tests as points $(\alpha, \beta)$. Moving along a segment of this curve means rejecting one more outcome $x$ with a little more probability. That spends $p(x)$ of false-positive budget per unit of extra rejection probability and gains $q(x)$ of power, so $\beta$ falls by $L(x)$ for each unit $\alpha$ rises: the slope of the segment is $-L(x)$. In @fig-ht-discrete-tradeoff the segments have slopes $-4$, $-1.5$, $-0.667$ and $-0.25$: the likelihood ratios, largest first. Because the LR test adds outcomes in decreasing order of exchange rate, each segment is less steep than the last, and a curve whose slope keeps increasing is convex.
+**The slope of the curve is $-\eta$.** Plot the LR tests as points $(\alpha, \beta)$. Moving along a segment of this curve means rejecting one more outcome $x$ with a little more probability. That spends $p(x)$ of false-positive budget per unit of extra rejection probability and gains $q(x)$ of power, so $\beta$ falls by $\Lambda(x)$ for each unit $\alpha$ rises: the slope of the segment is $-\Lambda(x)$. In @fig-ht-discrete-tradeoff the segments have slopes $-4$, $-1.5$, $-0.667$ and $-0.25$: the likelihood ratios, largest first. Because the LR test adds outcomes in decreasing order of exchange rate, each segment is less steep than the last, and a curve whose slope keeps increasing is convex.
 
-**Many observations.** For $n$ independent observations the joint probability of the sample is the product of the individual probabilities, under $P$ and under $Q$. So the likelihood ratio of the whole sample is $\prod_i L(x_i)$, and the LR test thresholds its logarithm $\sum_i \ln L(x_i)$, a sum of independent terms. Sums of independent terms concentrate, so the errors decay exponentially in $n$. With the false positive rate held fixed, the type II error decays like $e^{-n\,\mathrm{KL}(P\|Q)}$, where the KL divergence $\mathrm{KL}(P\|Q) = \mathbb E_P[\ln(p(X)/q(X))]$ is the average log-ratio by which a ham observation favours ham over spam (the Chernoff–Stein lemma; Cover & Thomas, ch. 11, and [Exercise 8](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-hypothesis-testing-8)).
+**Many observations.** For $n$ independent observations the joint probability of the sample is the product of the individual probabilities, under $P$ and under $Q$. So the likelihood ratio of the whole sample is $\prod_i \Lambda(x_i)$, and the LR test thresholds its logarithm $\sum_i \ln \Lambda(x_i)$, a sum of independent terms. Sums of independent terms concentrate, so the errors decay exponentially in $n$. With the false positive rate held fixed, the type II error decays like $e^{-n\,\mathrm{KL}(P\|Q)}$, where the KL divergence $\mathrm{KL}(P\|Q) = \mathbb E_P[\ln(p(X)/q(X))]$ is the average log-ratio by which a ham observation favours ham over spam (the Chernoff–Stein lemma; Cover & Thomas, ch. 11, and [Exercise 8](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-hypothesis-testing-8)).
 
 **What the lemma needs.** Both hypotheses must be simple. A composite alternative such as "the mean is positive" contains many distributions, each with its own LR test, and one test is optimal against all of them at once only in special cases. The main one is a one-sided test in a family with a monotone likelihood ratio, where every member's LR test is the same threshold on one statistic (Karlin–Rubin; Casella & Berger, §8.3).
 
 ### Example: why a classifier's score should be a likelihood ratio
 
-A fraud model outputs a score $s(x)$. Suppose the score is calibrated, $s(x) = \Pr[\text{fraud} \mid x]$, with a base rate $\pi$ of fraud. Bayes' rule says that the odds of fraud after seeing $x$ are the odds before seeing it, multiplied by the likelihood ratio (@sec-ht-bayes derives this): $s/(1 - s) = \frac{\pi}{1 - \pi}L(x)$. The odds $s/(1 - s)$ grow with $s$, so $s$ is an increasing function of $L(x)$. Thresholding $s$ is then an LR test, and Neyman–Pearson says no other use of $x$ can catch more fraud at the same false-alarm rate. If the score is not monotone in $L$, re-ranking the transactions by an estimate of $L$ can only help.
+A fraud model outputs a score $s(x)$. Suppose the score is calibrated, $s(x) = \Pr[\text{fraud} \mid x]$, with a base rate $\pi$ of fraud. Bayes' rule says that the odds of fraud after seeing $x$ are the odds before seeing it, multiplied by the likelihood ratio (@sec-ht-bayes derives this): $s/(1 - s) = \frac{\pi}{1 - \pi}\Lambda(x)$. The odds $s/(1 - s)$ grow with $s$, so $s$ is an increasing function of $\Lambda(x)$. Thresholding $s$ is then an LR test, and Neyman–Pearson says no other use of $x$ can catch more fraud at the same false-alarm rate. If the score is not monotone in $\Lambda$, re-ranking the transactions by an estimate of $\Lambda$ can only help.
 
 ### Check yourself
 
 - Where did the proof use that $\phi$ takes values in $[0, 1]$? *(In step 1: when $q > \eta p$ it needs $\phi \le 1 = \phi^*$, and when $q < \eta p$ it needs $\phi \ge 0 = \phi^*$.)*
-- In the spam example, what is the most powerful test at level $\alpha = 0.3$, and does it need randomization? *(Reject $\{2, 3\}$, with power 0.70. No: 0.3 is exactly the $P$-mass of the outcomes with $L \ge 1.5$.)*
+- In the spam example, what is the most powerful test at level $\alpha = 0.3$, and does it need randomization? *(Reject $\{2, 3\}$, with power 0.70. No: 0.3 is exactly the $P$-mass of the outcomes with $\Lambda \ge 1.5$.)*
 
 ## Trade-off functions and ROC curves {#sec-ht-tradeoff}
 
@@ -222,9 +222,9 @@ Conversely, every function $f: [0, 1] \to [0, 1]$ with these four properties is 
 3. **Convex.** Convexity says the curve at a mixed budget is no higher than the same mixture of the curve's values, and Fact 3 provides exactly that mixture. Fix $\alpha_1, \alpha_2$, $\lambda \in [0, 1]$ and a small $\delta > 0$. Pick tests $\phi_i$ with $\alpha_{\phi_i} \le \alpha_i$ and $\beta_{\phi_i} \le T(\alpha_i) + \delta$, which exist by the definition of the infimum. By Fact 3, the mixture $\lambda\phi_1 + (1 - \lambda)\phi_2$ has size at most $\lambda\alpha_1 + (1 - \lambda)\alpha_2$ and type II error at most $\lambda T(\alpha_1) + (1 - \lambda)T(\alpha_2) + \delta$. So $T(\lambda\alpha_1 + (1 - \lambda)\alpha_2) \le \lambda T(\alpha_1) + (1 - \lambda)T(\alpha_2) + \delta$. Let $\delta \to 0$.
 4. **Continuous.** Inside $(0, 1)$ this comes free from convexity: a convex function on an interval is continuous at every interior point, because its chords pin it between two lines on either side of the point (any analysis text, e.g. Rockafellar, *Convex Analysis*, §10). At $\alpha = 1$, the test $\phi \equiv 1$ has $\beta = 0$, so $T(1) = 0$, and property 2 squeezes $0 \le T(\alpha) \le 1 - \alpha \to 0$.
 
-    At $\alpha = 0$ convexity alone allows a jump, so the argument needs Fact 2. First, $T(0) = 1 - Q[p = 0]$: a test of size 0 must have $\phi = 0$ wherever $p > 0$, so the most it can do is reject everywhere $p = 0$. Now take any test with $\alpha_\phi \le \alpha$ and any cut-off $K > 0$, and bound its power. By Fact 2 the power is $\mathbb E_Q[\phi] = \mathbb E_P[\phi L] + \mathbb E_Q[\phi\,\mathbf 1[p = 0]]$, and the second term is at most $Q[p = 0]$. Split $\mathbb E_P[\phi L]$ by whether $L \le K$: where $L \le K$ it is at most $K\,\mathbb E_P[\phi] \le K\alpha$, and where $L > K$ it is at most $\mathbb E_P[L\,\mathbf 1[L > K]]$ because $\phi \le 1$. So
-    $$1 - \beta_\phi = \mathbb E_Q[\phi] \le Q[p = 0] + \mathbb E_P[\phi L] \le Q[p = 0] + K\alpha + \mathbb E_P\big[L\,\mathbf 1[L > K]\big].$$
-    Hence $T(\alpha) \ge T(0) - K\alpha - \mathbb E_P[L\,\mathbf 1[L > K]]$. Since $\mathbb E_P[L] \le 1$ is finite (Fact 2), the part of that average coming from $L > K$ tends to 0 as $K \to \infty$. So choose $K$ large to make the last term small, then $\alpha$ small to make $K\alpha$ small: $T(\alpha) \to T(0)$.
+    At $\alpha = 0$ convexity alone allows a jump, so the argument needs Fact 2. First, $T(0) = 1 - Q[p = 0]$: a test of size 0 must have $\phi = 0$ wherever $p > 0$, so the most it can do is reject everywhere $p = 0$. Now take any test with $\alpha_\phi \le \alpha$ and any cut-off $K > 0$, and bound its power. By Fact 2 the power is $\mathbb E_Q[\phi] = \mathbb E_P[\phi \Lambda] + \mathbb E_Q[\phi\,\mathbf 1[p = 0]]$, and the second term is at most $Q[p = 0]$. Split $\mathbb E_P[\phi \Lambda]$ by whether $\Lambda \le K$: where $\Lambda \le K$ it is at most $K\,\mathbb E_P[\phi] \le K\alpha$, and where $\Lambda > K$ it is at most $\mathbb E_P[\Lambda\,\mathbf 1[\Lambda > K]]$ because $\phi \le 1$. So
+    $$1 - \beta_\phi = \mathbb E_Q[\phi] \le Q[p = 0] + \mathbb E_P[\phi \Lambda] \le Q[p = 0] + K\alpha + \mathbb E_P\big[\Lambda\,\mathbf 1[\Lambda > K]\big].$$
+    Hence $T(\alpha) \ge T(0) - K\alpha - \mathbb E_P[\Lambda\,\mathbf 1[\Lambda > K]]$. Since $\mathbb E_P[\Lambda] \le 1$ is finite (Fact 2), the part of that average coming from $\Lambda > K$ tends to 0 as $K \to \infty$. So choose $K$ large to make the last term small, then $\alpha$ small to make $K\alpha$ small: $T(\alpha) \to T(0)$.
 
 ### Interpretation
 
@@ -256,8 +256,8 @@ More generally, $\mathcal N(m_0, \sigma^2)$ against $\mathcal N(m_1, \sigma^2)$ 
 The plan is to compute the likelihood ratio, see that it increases with $x$, and then read both errors of the threshold test off normal tails.
 
 1. **The likelihood ratio.** With the standard normal density $\varphi(x) = e^{-x^2/2}/\sqrt{2\pi}$, the density of $Q$ is $\varphi(x - \mu)$. The constants cancel in the ratio, and expanding the square, $x^2 - (x - \mu)^2 = 2\mu x - \mu^2$:
-$$L(x) = \frac{\varphi(x - \mu)}{\varphi(x)} = \exp\Big(\frac{x^2 - (x - \mu)^2}{2}\Big) = \exp\Big(\mu x - \frac{\mu^2}{2}\Big).$$
-2. **The LR test is a threshold on $x$.** For $\mu > 0$, $L$ is strictly increasing in $x$, so $L(x) > \eta$ exactly when $x > t$, where $t = (\ln\eta + \mu^2/2)/\mu$ solves $\mu t - \mu^2/2 = \ln\eta$. Ties $L(x) = \eta$ happen only at the single point $x = t$, which has probability 0, so no randomization is needed. By Neyman–Pearson, the tests $\phi_t(x) = \mathbf 1[x > t]$ are optimal.
+$$\Lambda(x) = \frac{\varphi(x - \mu)}{\varphi(x)} = \exp\Big(\frac{x^2 - (x - \mu)^2}{2}\Big) = \exp\Big(\mu x - \frac{\mu^2}{2}\Big).$$
+2. **The LR test is a threshold on $x$.** For $\mu > 0$, $\Lambda$ is strictly increasing in $x$, so $\Lambda(x) > \eta$ exactly when $x > t$, where $t = (\ln\eta + \mu^2/2)/\mu$ solves $\mu t - \mu^2/2 = \ln\eta$. Ties $\Lambda(x) = \eta$ happen only at the single point $x = t$, which has probability 0, so no randomization is needed. By Neyman–Pearson, the tests $\phi_t(x) = \mathbf 1[x > t]$ are optimal.
 3. **Size fixes the threshold.** $\alpha = \Pr_P[X > t] = 1 - \Phi(t)$, so $t = \Phi^{-1}(1 - \alpha)$.
 4. **Type II error.** Under $Q$, $X - \mu \sim \mathcal N(0, 1)$, so the test misses with probability $\beta = \Pr_Q[X \le t] = \Pr[X - \mu \le t - \mu] = \Phi(t - \mu)$.
 5. **Substitute** step 3 into step 4 to get @eq-ht-gaussian-tradeoff.
@@ -268,7 +268,7 @@ $$L(x) = \frac{\varphi(x - \mu)}{\varphi(x)} = \exp\Big(\frac{x^2 - (x - \mu)^2}
 
 **One number describes the problem.** The curve depends on the two normals only through $\mu$, the distance between the means in units of the standard deviation. @fig-ht-gaussian-tradeoff shows the family. Crosses mark simulated thresholds at $\mu = 1$, with 20,000 draws per point.
 
-**Near $\alpha = 0$ the curve is vertical.** The slope of the curve at the point with threshold $t$ is $-L(t)$, as in the slope rule of @sec-ht-np. Here it follows from the two errors: moving the threshold from $t$ to $t + dt$ lowers $\alpha$ by $p(t)\,dt$ and raises $\beta$ by $q(t)\,dt$, so $T'(\alpha) = d\beta/d\alpha = -q(t)/p(t) = -L(t)$. Small $\alpha$ means a large threshold, and $L(t) = e^{\mu t - \mu^2/2} \to \infty$ as $t \to \infty$. So the first sliver of false-positive budget buys power at an unbounded exchange rate. The Laplace pair of @sec-ht-laplace behaves differently.
+**Near $\alpha = 0$ the curve is vertical.** The slope of the curve at the point with threshold $t$ is $-\Lambda(t)$, as in the slope rule of @sec-ht-np. Here it follows from the two errors: moving the threshold from $t$ to $t + dt$ lowers $\alpha$ by $p(t)\,dt$ and raises $\beta$ by $q(t)\,dt$, so $T'(\alpha) = d\beta/d\alpha = -q(t)/p(t) = -\Lambda(t)$. Small $\alpha$ means a large threshold, and $\Lambda(t) = e^{\mu t - \mu^2/2} \to \infty$ as $t \to \infty$. So the first sliver of false-positive budget buys power at an unbounded exchange rate. The Laplace pair of @sec-ht-laplace behaves differently.
 
 **Averaging $n$ observations.** Take $n$ independent draws from $\mathcal N(0, \sigma^2)$ against $\mathcal N(\delta, \sigma^2)$. Step 1, with the spread $\sigma$ put back, gives each draw a log likelihood ratio $(\delta x_i - \delta^2/2)/\sigma^2$, and the log ratios of independent draws add up to $\sum_i(\delta x_i - \delta^2/2)/\sigma^2$. This depends on the data only through $\sum_i x_i$, that is, through the sample mean $\bar x$, so the best test thresholds $\bar x$. The sample mean is $\mathcal N(0, \sigma^2/n)$ against $\mathcal N(\delta, \sigma^2/n)$, a shift of $\delta$ with standard deviation $\sigma/\sqrt n$. So the curve is @eq-ht-gaussian-tradeoff with
 $$\mu = \frac{\delta\sqrt n}{\sigma}.$$
@@ -316,10 +316,10 @@ The three pieces correspond to a threshold above the spam-side centre $s$, betwe
 
 Rescale $x$ by $b$, which changes no test's errors (as for the normal), so that $b = 1$ and $s = \kappa$. The CDF of $\mathrm{Lap}(0, 1)$ is $F(x) = \frac12 e^x$ for $x < 0$ and $1 - \frac12 e^{-x}$ for $x \ge 0$, obtained by integrating the density $\frac12 e^{-|x|}$ on each side of 0. The plan is the same as for the normal: find the likelihood ratio, see that thresholds on $x$ are LR tests, and read the errors off $F$, now in three cases.
 
-1. **The likelihood ratio.** The normalizing constants cancel, so $\ln L(x) = -|x - \kappa| + |x| = |x| - |x - \kappa|$. Removing the absolute values on each side of 0 and $\kappa$ gives
-$$\ln L(x) = \begin{cases} -\kappa, & x \le 0, \\ 2x - \kappa, & 0 < x < \kappa, \\ \kappa, & x \ge \kappa. \end{cases}$$
+1. **The likelihood ratio.** The normalizing constants cancel, so $\ln \Lambda(x) = -|x - \kappa| + |x| = |x| - |x - \kappa|$. Removing the absolute values on each side of 0 and $\kappa$ gives
+$$\ln \Lambda(x) = \begin{cases} -\kappa, & x \le 0, \\ 2x - \kappa, & 0 < x < \kappa, \\ \kappa, & x \ge \kappa. \end{cases}$$
 It is non-decreasing in $x$ and clipped to $[-\kappa, \kappa]$ (@fig-ht-laplace-tradeoff, left).
-2. **Thresholds on $x$ are LR tests.** Because $L$ is non-decreasing, the region $\{x > t\}$ always consists of every point with $L > \eta$, for $\eta = L(t)$, plus part of the tie set $\{L = \eta\}$. When $t$ falls in a flat piece, the tie set is a whole half-line with positive probability, and rejecting only the part of it with $x > t$ is one allowed choice of $\gamma(x)$ in @eq-ht-lr-test. So every threshold test is optimal, and its errors $\alpha = 1 - F(t)$ and $\beta = \Pr_Q[X \le t] = F(t - \kappa)$ trace $T$.
+2. **Thresholds on $x$ are LR tests.** Because $\Lambda$ is non-decreasing, the region $\{x > t\}$ always consists of every point with $\Lambda > \eta$, for $\eta = \Lambda(t)$, plus part of the tie set $\{\Lambda = \eta\}$. When $t$ falls in a flat piece, the tie set is a whole half-line with positive probability, and rejecting only the part of it with $x > t$ is one allowed choice of $\gamma(x)$ in @eq-ht-lr-test. So every threshold test is optimal, and its errors $\alpha = 1 - F(t)$ and $\beta = \Pr_Q[X \le t] = F(t - \kappa)$ trace $T$.
 3. **Case $t \ge \kappa$.** Both $t$ and $t - \kappa$ are $\ge 0$. Then $\alpha = \frac12 e^{-t} \le \frac12 e^{-\kappa}$, and $\beta = 1 - \frac12 e^{-(t - \kappa)} = 1 - e^{\kappa}\cdot\frac12 e^{-t} = 1 - e^{\kappa}\alpha$.
 4. **Case $0 \le t < \kappa$.** Now $t \ge 0$ but $t - \kappa < 0$. Then $\alpha = \frac12 e^{-t} \in (\frac12 e^{-\kappa}, \frac12]$, and $\beta = \frac12 e^{t - \kappa}$. Substituting $e^t = 1/(2\alpha)$ from the first equation: $\beta = \frac12 e^{-\kappa}/(2\alpha) = e^{-\kappa}/(4\alpha)$.
 5. **Case $t < 0$.** Both are negative. Then $\alpha = 1 - \frac12 e^t > \frac12$, so $\frac12 e^t = 1 - \alpha$, and $\beta = \frac12 e^{t - \kappa} = e^{-\kappa}(1 - \alpha)$.
@@ -328,7 +328,7 @@ It is non-decreasing in $x$ and clipped to $[-\kappa, \kappa]$ (@fig-ht-laplace-
 
 ### Interpretation
 
-**The ends are straight lines.** Their slopes are $-e^{\kappa}$ and $-e^{-\kappa}$. That is the slope rule of @sec-ht-np at work: the slope of $T$ is $-L$ at the threshold, and on the two flat pieces of the likelihood ratio $L$ is the constant $e^{\kappa}$ or $e^{-\kappa}$. Because $L \le e^{\kappa}$ everywhere, no test can buy power faster than $e^{\kappa}$ per unit of false-positive rate. Reading the first piece as power: for small $\alpha$, the best power is exactly $1 - T(\alpha) = e^{\kappa}\alpha$.
+**The ends are straight lines.** Their slopes are $-e^{\kappa}$ and $-e^{-\kappa}$. That is the slope rule of @sec-ht-np at work: the slope of $T$ is $-\Lambda$ at the threshold, and on the two flat pieces of the likelihood ratio $\Lambda$ is the constant $e^{\kappa}$ or $e^{-\kappa}$. Because $\Lambda \le e^{\kappa}$ everywhere, no test can buy power faster than $e^{\kappa}$ per unit of false-positive rate. Reading the first piece as power: for small $\alpha$, the best power is exactly $1 - T(\alpha) = e^{\kappa}\alpha$.
 
 **Gaussian against Laplace.** To compare the two shapes fairly, match the two problems by their best advantage, the largest gap $\mathrm{TPR} - \mathrm{FPR}$ any test achieves. @sec-ht-tv shows that it equals $1 - e^{-\kappa/2}$ for the Laplace pair and $2\Phi(\mu/2) - 1$ for the Gaussian pair. At $\kappa = 1$ the Laplace value is $1 - e^{-1/2} = 0.3935$, and solving $2\Phi(\mu/2) - 1 = 0.3935$ gives a Gaussian pair with $\mu = 1.0301$. In the bulk the two curves nearly coincide. At small $\alpha$ they do not, as @tbl-ht-laplace-vs-gaussian shows: the Laplace power is $e\alpha$, and the Gaussian power is $1 - \Phi(\Phi^{-1}(1 - \alpha) - 1.0301)$.
 
@@ -351,8 +351,8 @@ A simulation of the threshold test at $\alpha = 0.25$ with 1,000,000 draws per h
 
 ### Check yourself
 
-- On which piece of @eq-ht-laplace-tradeoff does the threshold $t$ lie between the two medians $0$ and $s$? *(The middle piece, $\frac12 e^{-\kappa} \le \alpha \le \frac12$, where $L$ is strictly increasing.)*
-- Why can a test on the Laplace pair at level $\alpha = 10^{-3}$ never have power above $e^{\kappa} \times 10^{-3}$? *(Fact 2: power $= \mathbb E_P[\phi L] \le e^{\kappa}\,\mathbb E_P[\phi] \le e^{\kappa}\alpha$, since $L \le e^{\kappa}$ everywhere.)*
+- On which piece of @eq-ht-laplace-tradeoff does the threshold $t$ lie between the two medians $0$ and $s$? *(The middle piece, $\frac12 e^{-\kappa} \le \alpha \le \frac12$, where $\Lambda$ is strictly increasing.)*
+- Why can a test on the Laplace pair at level $\alpha = 10^{-3}$ never have power above $e^{\kappa} \times 10^{-3}$? *(Fact 2: power $= \mathbb E_P[\phi \Lambda] \le e^{\kappa}\,\mathbb E_P[\phi] \le e^{\kappa}\alpha$, since $\Lambda \le e^{\kappa}$ everywhere.)*
 
 ## Best advantage equals total variation {#sec-ht-tv}
 
@@ -372,7 +372,7 @@ with the sum replaced by an integral for densities. The maximum is attained by t
 2. **Maximize term by term.** Each $\phi(x)$ appears in one term only, so each can be chosen separately. A term is largest with $\phi(x) = 1$ where $q(x) > p(x)$ and $\phi(x) = 0$ where $q(x) < p(x)$. So the maximum is $\sum_{x: q > p}(q(x) - p(x)) = Q(A^*) - P(A^*)$ with $A^* = \{q > p\}$. A deterministic $\phi = \mathbf 1_A$ gives $Q(A) - P(A)$, and the best of these is $A^*$, so the maximum is also $\sup_A (Q(A) - P(A))$.
 3. **Rewrite as half the $L^1$ distance.** Both tables sum to 1, so $\sum_x(q - p) = 1 - 1 = 0$, and the positive and negative parts of $q - p$ are equal: $\sum_{q > p}(q - p) = \sum_{q < p}(p - q)$. Their sum is $\sum_x|q - p|$, so each is half of it.
 
-On the trade-off curve, the advantage at level $\alpha$ is $1 - \alpha - T(\alpha)$: the vertical gap between the diagonal and the curve. Its derivative is $-1 - T'(\alpha)$, which is zero where the slope of $T$ is $-1$. By the slope rule of @sec-ht-np the slope is $-L$ at the threshold, so this is the point where the LR threshold is $\eta = 1$ (@fig-ht-tv-advantage).
+On the trade-off curve, the advantage at level $\alpha$ is $1 - \alpha - T(\alpha)$: the vertical gap between the diagonal and the curve. Its derivative is $-1 - T'(\alpha)$, which is zero where the slope of $T$ is $-1$. By the slope rule of @sec-ht-np the slope is $-\Lambda$ at the threshold, so this is the point where the LR threshold is $\eta = 1$ (@fig-ht-tv-advantage).
 
 ![The Gaussian trade-off curve at $\mu = 1$, the diagonal $1 - \alpha$, and the advantage $1 - \alpha - T(\alpha)$ (dashed). The red segment is the largest gap, at $\alpha = 0.3085$, and its length is the total variation 0.3829.](figures/hypothesis_testing_tv_advantage.svg){#fig-ht-tv-advantage}
 
@@ -380,7 +380,7 @@ On the trade-off curve, the advantage at level $\alpha$ is $1 - \alpha - T(\alph
 
 **Spam words.** The differences $|q - p|$ in @tbl-ht-spam are 0.3, 0.1, 0.1 and 0.3, so $\mathrm{TV} = \frac12(0.3 + 0.1 + 0.1 + 0.3) = 0.40$. Spam is more likely than ham at the counts 2 and 3, so the best test rejects $\{2, 3\}$, and indeed its advantage is $1 - 0.3 - 0.3 = 0.4$ (@tbl-ht-spam-tests).
 
-**Gaussian.** The best test rejects where $q > p$, that is, where $L(x) = e^{\mu x - \mu^2/2} > 1$, which is $x > \mu/2$: the point halfway between the two means, where the two bell curves cross. That test has $\alpha = 1 - \Phi(\mu/2)$ and $\beta = \Phi(\mu/2 - \mu) = \Phi(-\mu/2) = 1 - \Phi(\mu/2)$, so $\mathrm{TV} = 1 - 2(1 - \Phi(\mu/2)) = 2\Phi(\mu/2) - 1$. At $\mu = 1$ this is $2\Phi(0.5) - 1 = 0.3829$, reached at $\alpha = 1 - \Phi(0.5) = 0.3085$. Maximizing $1 - \alpha - T(\alpha)$ over a grid of 100,001 values of $\alpha$ gives the same 0.3829 at $\alpha = 0.3085$.
+**Gaussian.** The best test rejects where $q > p$, that is, where $\Lambda(x) = e^{\mu x - \mu^2/2} > 1$, which is $x > \mu/2$: the point halfway between the two means, where the two bell curves cross. That test has $\alpha = 1 - \Phi(\mu/2)$ and $\beta = \Phi(\mu/2 - \mu) = \Phi(-\mu/2) = 1 - \Phi(\mu/2)$, so $\mathrm{TV} = 1 - 2(1 - \Phi(\mu/2)) = 2\Phi(\mu/2) - 1$. At $\mu = 1$ this is $2\Phi(0.5) - 1 = 0.3829$, reached at $\alpha = 1 - \Phi(0.5) = 0.3085$. Maximizing $1 - \alpha - T(\alpha)$ over a grid of 100,001 values of $\alpha$ gives the same 0.3829 at $\alpha = 0.3085$.
 
 **Laplace.** Here it is easiest to maximize the gap on the curve directly. On the middle piece of @eq-ht-laplace-tradeoff the gap is $1 - \alpha - \frac{e^{-\kappa}}{4\alpha}$, and setting its derivative to zero, $-1 + \frac{e^{-\kappa}}{4\alpha^2} = 0$, gives $\alpha = \frac12 e^{-\kappa/2}$. There $\frac{e^{-\kappa}}{4\alpha} = \frac12 e^{-\kappa/2}$ as well, so $\mathrm{TV} = 1 - e^{-\kappa/2}$. At $\kappa = 1$ that is 0.3935, at $\alpha = 0.3033$; the grid search agrees.
 
@@ -454,15 +454,15 @@ Neyman–Pearson treats the two hypotheses asymmetrically and uses no prior. In 
 ### Statement
 
 Bayes' rule says how evidence updates a belief, and in terms of odds it is a single multiplication. Write $\pi = \Pr[H_1]$ for the prior probability of $H_1$, the base rate. The odds of $H_1$ against $H_0$ after seeing $x$ are the odds before seeing it, multiplied by the likelihood ratio of $x$:
-$$\underbrace{\frac{\Pr[H_1 \mid x]}{\Pr[H_0 \mid x]}}_{\text{posterior odds}} = \underbrace{\frac{\pi}{1 - \pi}}_{\text{prior odds}} \times \underbrace{\frac{q(x)}{p(x)}}_{L(x)}.$$ {#eq-ht-posterior-odds}
-If you want to make as few mistakes as possible, you should say $H_1$ whenever the posterior odds exceed 1, that is, exactly when $L(x) > (1 - \pi)/\pi$. So the decision that minimizes the probability of error is again an LR test, with the threshold set by the prior.
+$$\underbrace{\frac{\Pr[H_1 \mid x]}{\Pr[H_0 \mid x]}}_{\text{posterior odds}} = \underbrace{\frac{\pi}{1 - \pi}}_{\text{prior odds}} \times \underbrace{\frac{q(x)}{p(x)}}_{\Lambda(x)}.$$ {#eq-ht-posterior-odds}
+If you want to make as few mistakes as possible, you should say $H_1$ whenever the posterior odds exceed 1, that is, exactly when $\Lambda(x) > (1 - \pi)/\pi$. So the decision that minimizes the probability of error is again an LR test, with the threshold set by the prior.
 
 ### Derivation
 
 1. **Bayes' rule.** The probability of $H_1$ and $x$ together is $\pi q(x)$, and of $H_0$ and $x$ together is $(1 - \pi)p(x)$. Dividing each by the total probability of $x$, $m(x) = \pi q(x) + (1 - \pi)p(x)$, gives $\Pr[H_1 \mid x] = \pi q(x)/m(x)$ and $\Pr[H_0 \mid x] = (1 - \pi)p(x)/m(x)$. Dividing one by the other cancels $m(x)$ and gives @eq-ht-posterior-odds.
 2. **Error of a test.** A test errs when $H_0$ holds and it rejects, with probability $(1 - \pi)\alpha_\phi$, or when $H_1$ holds and it misses, with probability $\pi\beta_\phi$. By Fact 1, writing $\alpha_\phi = \sum_x\phi p$ and $\beta_\phi = 1 - \sum_x\phi q$,
 $$(1 - \pi)\alpha_\phi + \pi\beta_\phi = \pi + \sum_x \phi(x)\big((1 - \pi)p(x) - \pi q(x)\big).$$
-3. **Minimize term by term.** Each $\phi(x)$ appears in one term, so set $\phi(x) = 1$ where the bracket is negative and 0 where it is positive. The bracket is negative where $\pi q(x) > (1 - \pi)p(x)$, or $L(x) > (1 - \pi)/\pi$.
+3. **Minimize term by term.** Each $\phi(x)$ appears in one term, so set $\phi(x) = 1$ where the bracket is negative and 0 where it is positive. The bracket is negative where $\pi q(x) > (1 - \pi)p(x)$, or $\Lambda(x) > (1 - \pi)/\pi$.
 4. **The minimum error on the curve.** Because the optimal test is an LR test, it lies on the trade-off curve, so the minimum error is $\min_\alpha\big[(1 - \pi)\alpha + \pi T(\alpha)\big]$. With equal priors, $\pi = \frac12$, it is $\frac12\min_\alpha(\alpha + T(\alpha))$. Minimizing $\alpha + T(\alpha)$ is maximizing the advantage $1 - \alpha - T(\alpha)$, whose maximum is TV by @eq-ht-tv, so the minimum error is $\frac12(1 - \mathrm{TV})$. For the Gaussian pair at $\mu = 1$ that is $\frac12(1 - 0.3829) = 0.3085$.
 
 The same holds for any outcome you observe, not only for $x$. If the evidence is just "the test fired", its likelihood ratio is the probability of firing under $H_1$ over that under $H_0$, $\Pr[\text{fire} \mid H_1]/\Pr[\text{fire} \mid H_0] = (1 - \beta)/\alpha$, the power divided by the false positive rate.
@@ -475,14 +475,14 @@ At $\alpha = 0.05$ the power is 0.6388, so a positive result has likelihood rati
 
 The stricter threshold catches fewer ill patients but makes a positive result far more informative (@fig-ht-posterior). This is the second reason low-FPR behaviour matters: when positives are rare, the false-positive rate, not the power, decides whether an alarm is worth acting on.
 
-**The Bayes rule here.** Minimizing the error probability at $\pi = 0.01$ means rejecting when $L(x) > (1 - \pi)/\pi = 99$. For the Gaussian, $L(x) = e^{\mu x - \mu^2/2} > 99$ means $x > \mu/2 + \ln(99)/\mu = 1 + 4.5951/2 = 3.2976$. That test has $\alpha = 1 - \Phi(3.2976) = 4.88\times10^{-4}$ and power only $1 - \Phi(3.2976 - 2) = 0.0972$: when errors of both kinds count equally and the disease is rare, it is cheapest to rarely say "ill". If missing a case costs $c$ times as much as a false alarm, the quantity to minimize becomes $(1 - \pi)\alpha + c\pi\beta$, the same argument gives the threshold $(1 - \pi)/(c\pi)$, and the test moves along the same curve.
+**The Bayes rule here.** Minimizing the error probability at $\pi = 0.01$ means rejecting when $\Lambda(x) > (1 - \pi)/\pi = 99$. For the Gaussian, $\Lambda(x) = e^{\mu x - \mu^2/2} > 99$ means $x > \mu/2 + \ln(99)/\mu = 1 + 4.5951/2 = 3.2976$. That test has $\alpha = 1 - \Phi(3.2976) = 4.88\times10^{-4}$ and power only $1 - \Phi(3.2976 - 2) = 0.0972$: when errors of both kinds count equally and the disease is rare, it is cheapest to rarely say "ill". If missing a case costs $c$ times as much as a false alarm, the quantity to minimize becomes $(1 - \pi)\alpha + c\pi\beta$, the same argument gives the threshold $(1 - \pi)/(c\pi)$, and the test moves along the same curve.
 
 ![Posterior probability of illness after a positive result, as a function of the prior, for the $\mu = 2$ biomarker test at two thresholds. At 1% prevalence (dashed line) the stricter test gives 0.582 against 0.114.](figures/hypothesis_testing_posterior.svg){#fig-ht-posterior}
 
 ### Check yourself
 
 - If the prior doubles from 1% to 2%, roughly how does the posterior odds after a positive change? *(It roughly doubles: posterior odds scale linearly with prior odds, $2/98$ against $1/99$.)*
-- Why is the Bayes-optimal test an LR test even though Bayes and Neyman–Pearson ask different questions? *(Both trade off the two errors linearly: Bayes with fixed weights $1 - \pi$ and $\pi$, Neyman–Pearson with the exchange rate $\eta$, which plays the role of a Lagrange multiplier on the false-positive budget. Each linear trade-off is minimized by a threshold on $L$.)*
+- Why is the Bayes-optimal test an LR test even though Bayes and Neyman–Pearson ask different questions? *(Both trade off the two errors linearly: Bayes with fixed weights $1 - \pi$ and $\pi$, Neyman–Pearson with the exchange rate $\eta$, which plays the role of a Lagrange multiplier on the false-positive budget. Each linear trade-off is minimized by a threshold on $\Lambda$.)*
 
 ## Estimating error rates from finite trials {#sec-ht-estimation}
 
@@ -585,12 +585,12 @@ Four things stand out. First, Neyman–Pearson is not just a theorem: a random s
 | Errors of a test $\phi$ | $\alpha_\phi = \mathbb E_P\phi$, $\beta_\phi = 1 - \mathbb E_Q\phi$, power $= 1 - \beta_\phi$ | Fact 1 |
 | Neyman–Pearson | The size-$\alpha$ test that rejects when $q/p > \eta$ (randomizing at $=$) is most powerful at level $\alpha$ | $(\phi^* - \phi)(q - \eta p) \ge 0$ pointwise |
 | Trade-off function | $T(\alpha) = \inf\{\beta_\phi : \alpha_\phi \le \alpha\}$; non-increasing, $\le 1 - \alpha$, convex, continuous | Mixing tests; change of measure |
-| Slope of $T$ | $T'(\alpha) = -L$ at the threshold | $d\beta/d\alpha = -q(t)/p(t)$ |
+| Slope of $T$ | $T'(\alpha) = -\Lambda$ at the threshold | $d\beta/d\alpha = -q(t)/p(t)$ |
 | Gaussian $\mathcal N(0, 1)$ vs $\mathcal N(\mu, 1)$ | $T(\alpha) = \Phi(\Phi^{-1}(1 - \alpha) - \mu)$; $n$ draws: $\mu = \delta\sqrt n/\sigma$ | LR increasing in $x$ |
 | Laplace $\mathrm{Lap}(0, b)$ vs $\mathrm{Lap}(s, b)$ | $1 - e^\kappa\alpha$; $e^{-\kappa}/(4\alpha)$; $e^{-\kappa}(1 - \alpha)$, with $\kappa = s/b$ | LR clipped to $[e^{-\kappa}, e^\kappa]$ |
 | Best advantage | $\max_\phi(1 - \alpha_\phi - \beta_\phi) = \mathrm{TV}(P, Q)$; Gaussian $2\Phi(\mu/2) - 1$; Laplace $1 - e^{-\kappa/2}$ | Reject where $q > p$ |
 | AUC | $\Pr[S_+ > S_-]$; binormal $\Phi(m/\sqrt{1 + \sigma^2})$ | Change of variables in $\int\mathrm{TPR}\,d\mathrm{FPR}$ |
-| Bayes | Posterior odds $=$ prior odds $\times L(x)$; minimum error at $\pi = \frac12$ is $\frac12(1 - \mathrm{TV})$ | Bayes' rule |
+| Bayes | Posterior odds $=$ prior odds $\times \Lambda(x)$; minimum error at $\pi = \frac12$ is $\frac12(1 - \mathrm{TV})$ | Bayes' rule |
 | Clopper–Pearson | $\Pr[\mathrm{Bin}(n, l) \ge k] = \Pr[\mathrm{Bin}(n, u) \le k] = a/2$; zero counts: $u \approx 3/n$ | Inverting binomial tails |
 
 : Every result in this chapter. {#tbl-ht-cheat-sheet}
@@ -599,7 +599,7 @@ Four things stand out. First, Neyman–Pearson is not just a theorem: a random s
 
 - To find the best test, compute the likelihood ratio and threshold it. If it is monotone in a statistic, threshold the statistic.
 - Look at the whole trade-off curve, on log axes if false positives must be rare. TV and AUC are single points or averages of it.
-- A bounded likelihood ratio caps power at small $\alpha$: power $\le L_{\max}\,\alpha$.
+- A bounded likelihood ratio caps power at small $\alpha$: power $\le \Lambda_{\max}\,\alpha$.
 - To measure a rate near $\alpha$, plan for about $100/\alpha$ trials, and report a Clopper–Pearson interval.
 
 **Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md).

@@ -32,7 +32,7 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 1. Chapters 1 → 2 → 3 → 4, in order. Each uses the previous one: distributions give the moment generating functions that concentration needs, concentration bounds tails, divergences summarize how different two distributions are, and hypothesis testing says what an observer can do with that difference.
 2. Then chapter 5, information theory, which builds on divergences.
 3. Then chapters 6 → 7. Stability uses the optimization results directly.
-4. Chapter 8 last. It is needed only for Part 8, on cryptographic approaches, so it can wait.
+4. Chapter 8 last. It can wait until chapter 9 (threat models, which uses its security games), and chapters 15 (linkage, which uses the birthday bound) and 25 (trust models, which use secret sharing) build on it too, as will a planned later part on cryptographic approaches.
 
 ## Core readings (from the study plan)
 

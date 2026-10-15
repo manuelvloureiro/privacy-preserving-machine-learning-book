@@ -167,11 +167,11 @@ In @tbl-sol-optimization-batch, the bound is flat up to $B = 80$, where the best
 > **Exercise 7.** Redo the ERM derivation assuming $J(\cdot; D)$ is $\mu$-strongly convex and the two replaced gradients differ by at most $\Gamma$ at $w'$. Show that the movement is at most $\Gamma/(\mu n)$. Using $\mu \approx \lambda + 0.0233$ and $\Gamma \approx 1$, predict the ratio observed/bound at $\lambda = 0.01$ and compare with @tbl-opt-erm. *(Strong monotonicity)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-Use the chapter's notation: $G = J(\cdot; D)$, $G' = J(\cdot; D') = G + h$ with $h(v) = \frac1n(\ell(v, z') - \ell(v, z_i))$, $w = w^*(D)$, $w' = w^*(D')$.
+Use the chapter's notation: $J_D = J(\cdot; D)$, $J_{D'} = J(\cdot; D') = J_D + h$ with $h(v) = \frac1n(\ell(v, z') - \ell(v, z_i))$, $w = w^*(D)$, $w' = w^*(D')$.
 
 1. **The gradient difference at $w'$.** $\nabla h(w') = \frac1n\big(\nabla\ell(w', z') - \nabla\ell(w', z_i)\big)$, so $\|\nabla h(w')\| \le \Gamma/n$ by assumption. (The chapter used the triangle inequality to get $2L/n$; here $\Gamma$ replaces $2L$.)
-2. **Optimality,** as in the chapter: $\nabla G(w) = 0$ and $\nabla G(w') = -\nabla h(w')$.
-3. **Strong monotonicity** of the $\mu$-strongly convex $G$ (@eq-strong-monotone with $\mu$ in place of $\lambda$): $\mu\|w' - w\|^2 \le \langle\nabla G(w') - \nabla G(w), w' - w\rangle = \langle -\nabla h(w'), w' - w\rangle$.
+2. **Optimality,** as in the chapter: $\nabla J_D(w) = 0$ and $\nabla J_D(w') = -\nabla h(w')$.
+3. **Strong monotonicity** of the $\mu$-strongly convex $J_D$ (@eq-strong-monotone with $\mu$ in place of $\lambda$): $\mu\|w' - w\|^2 \le \langle\nabla J_D(w') - \nabla J_D(w), w' - w\rangle = \langle -\nabla h(w'), w' - w\rangle$.
 4. **Cauchy–Schwarz** (Fact 2) and step 1: $\mu\|w' - w\|^2 \le \frac\Gamma n\|w' - w\|$.
 5. **Divide** by $\mu\|w' - w\|$: $\|w' - w\| \le \frac{\Gamma}{\mu n}$. With $\mu = \lambda$ and $\Gamma = 2L$ this is @eq-erm-sensitivity.
 
@@ -179,7 +179,7 @@ Use the chapter's notation: $G = J(\cdot; D)$, $G' = J(\cdot; D') = G + h$ with 
 $$\frac{\Gamma/(\mu n)}{2L/(\lambda n)} = \frac{\lambda\Gamma}{2L\mu} = \frac{0.01 \times 1}{2 \times (0.01 + 0.0233)} = 0.150.$$
 If the sharper bound were nearly attained, the observed/bound ratio at $\lambda = 0.01$ would be about 0.150. @tbl-opt-erm reports 0.10 to 0.13: the right size, and a little lower.
 
-**Why a little lower.** The script repeats the experiment at $n = 1{,}000$, $\lambda = 0.01$ (20 replacements on a fresh dataset) and measures, for each replacement, $\Gamma$ at $w'$ and $\mu$ as the smallest Hessian eigenvalue of $G$ along the segment from $w$ to $w'$ (all the proof needs).
+**Why a little lower.** The script repeats the experiment at $n = 1{,}000$, $\lambda = 0.01$ (20 replacements on a fresh dataset) and measures, for each replacement, $\Gamma$ at $w'$ and $\mu$ as the smallest Hessian eigenvalue of $J_D$ along the segment from $w$ to $w'$ (all the proof needs).
 
 - The largest movement is $2.38\times10^{-2}$, ratio 0.119 to $2L/(\lambda n)$, inside the chapter's range.
 - For that replacement, $\Gamma = 1.133$ and $\mu = 0.0404$, so the sharper bound is $2.81\times10^{-2}$.
@@ -220,7 +220,7 @@ So the minimizer moves by $\min\big(1, \frac{1}{\lambda n}\big)$. The chapter's 
 
 : Movement of the regularized median when one of $k + 1$ zeros becomes a one, against @eq-erm-sensitivity. {#tbl-sol-optimization-median}
 
-**Why half.** In step 2 of the chapter's derivation, the gradient of $G$ at $w'$ is $\frac{k + 1}{n} - \frac kn + \lambda w' = \frac2n$ — the full $2L/n$. But strong monotonicity compares it with the subgradient 0 at $w = 0$, and the subgradient of $G$ jumps from 0 to $\frac1n$ at the kink: just to the right of 0 it is already $\frac1n + \lambda w$. Half of the $\frac2n$ is absorbed by that jump, and only the other half must be supplied by the regularizer's slope $\lambda w'$. The bound assumes all of it is.
+**Why half.** In step 2 of the chapter's derivation, the gradient of $J_D$ at $w'$ is $\frac{k + 1}{n} - \frac kn + \lambda w' = \frac2n$ — the full $2L/n$. But strong monotonicity compares it with the subgradient 0 at $w = 0$, and the subgradient of $J_D$ jumps from 0 to $\frac1n$ at the kink: just to the right of 0 it is already $\frac1n + \lambda w$. Half of the $\frac2n$ is absorbed by that jump, and only the other half must be supplied by the regularizer's slope $\lambda w'$. The bound assumes all of it is.
 
 *Strong convexity turns a jump of 1 into a move of $1/(\lambda n)$, and the kink of the absolute loss at the old minimizer acts as extra curvature that the bound does not count.*
 :::

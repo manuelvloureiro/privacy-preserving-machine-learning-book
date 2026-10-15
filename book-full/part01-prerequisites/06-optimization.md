@@ -10,7 +10,7 @@ Both questions have the same kind of answer. **A few constants of the loss decid
 | --- | --- | --- |
 | Lipschitz, smooth, strongly convex | The constants every later result is stated in | Checking that a loss qualifies; picking step sizes |
 | SGD, convex and Lipschitz: $RL/\sqrt T$ | Error of the averaged iterate after $T$ steps | Linear models with logistic or hinge loss |
-| SGD, strongly convex: $O(L^2/(\lambda T))$ | Error with a regularizer | Ridge and regularized logistic regression |
+| SGD, strongly convex: $O(G^2/(\lambda T))$, $G$ the gradient bound | Error with a regularizer | Ridge and regularized logistic regression |
 | SGD, smooth non-convex | How fast the gradient norm goes to zero | Neural networks |
 | Gradient noise and minibatches | How variance slows SGD and shrinks the best step | Choosing step size and batch size |
 | Sensitivity of regularized empirical risk minimization (ERM): $2L/(\lambda n)$ | How far the minimizer moves when one example changes | Stability and generalization; per-example influence |
@@ -461,15 +461,15 @@ $$\|w^*(D) - w^*(D')\| \le \frac{2L}{\lambda n}.$$ {#eq-erm-sensitivity}
 
 ### Derivation
 
-Let $D'$ replace $z_i$ by $z'$. Write $G = J(\cdot; D)$ and $G' = J(\cdot; D')$ for the two objectives, and $w = w^*(D)$ and $w' = w^*(D')$ for their minimizers.
+Let $D'$ replace $z_i$ by $z'$. Write $J_D = J(\cdot; D)$ and $J_{D'} = J(\cdot; D')$ for the two objectives, and $w = w^*(D)$ and $w' = w^*(D')$ for their minimizers.
 
-1. **The two objectives differ by one term.** $G' - G = h$ with $h(v) = \frac1n\big(\ell(v, z') - \ell(v, z_i)\big)$: the new example's loss in, the old one's out, each with weight $1/n$. Each loss has gradient of length at most $L$, and the length of a difference is at most the sum of the lengths (the triangle inequality), so $\|\nabla h(v)\| \le \frac{2L}{n}$ for every $v$.
-2. **At $w'$, the old objective has a small gradient.** Each minimizer has zero gradient for its own objective, $\nabla G(w) = 0$ and $\nabla G'(w') = 0$. So $\nabla G(w') = \nabla G'(w') - \nabla h(w') = -\nabla h(w')$. The point $w'$ is not optimal for $G$, but the gradient of $G$ there has length at most $2L/n$.
-3. **Strong convexity of $G$.** $G$ is an average of convex losses plus $\frac\lambda2\|w\|^2$, so it is $\lambda$-strongly convex (consequence (b) in @sec-opt-definitions: adding that term to a convex function adds curvature $\lambda$). Strong monotonicity @eq-strong-monotone then gives $\lambda\|w' - w\|^2 \le \langle\nabla G(w') - \nabla G(w), w' - w\rangle$.
-4. **Substitute step 2 and apply Cauchy–Schwarz.** With $\nabla G(w) = 0$ and $\nabla G(w') = -\nabla h(w')$, $\lambda\|w' - w\|^2 \le \langle -\nabla h(w'), w' - w\rangle \le \frac{2L}{n}\|w' - w\|$.
+1. **The two objectives differ by one term.** $J_{D'} - J_D = h$ with $h(v) = \frac1n\big(\ell(v, z') - \ell(v, z_i)\big)$: the new example's loss in, the old one's out, each with weight $1/n$. Each loss has gradient of length at most $L$, and the length of a difference is at most the sum of the lengths (the triangle inequality), so $\|\nabla h(v)\| \le \frac{2L}{n}$ for every $v$.
+2. **At $w'$, the old objective has a small gradient.** Each minimizer has zero gradient for its own objective, $\nabla J_D(w) = 0$ and $\nabla J_{D'}(w') = 0$. So $\nabla J_D(w') = \nabla J_{D'}(w') - \nabla h(w') = -\nabla h(w')$. The point $w'$ is not optimal for $J_D$, but the gradient of $J_D$ there has length at most $2L/n$.
+3. **Strong convexity of $J_D$.** $J_D$ is an average of convex losses plus $\frac\lambda2\|w\|^2$, so it is $\lambda$-strongly convex (consequence (b) in @sec-opt-definitions: adding that term to a convex function adds curvature $\lambda$). Strong monotonicity @eq-strong-monotone then gives $\lambda\|w' - w\|^2 \le \langle\nabla J_D(w') - \nabla J_D(w), w' - w\rangle$.
+4. **Substitute step 2 and apply Cauchy–Schwarz.** With $\nabla J_D(w) = 0$ and $\nabla J_D(w') = -\nabla h(w')$, $\lambda\|w' - w\|^2 \le \langle -\nabla h(w'), w' - w\rangle \le \frac{2L}{n}\|w' - w\|$.
 5. **Divide** by $\lambda\|w' - w\|$ (if it is zero there is nothing to prove), which gives @eq-erm-sensitivity.
 
-In other words, this is consequence (a) of strong convexity, $\|w' - w\| \le \|\nabla G(w')\|/\lambda$ (a small gradient means you are close to the minimizer), applied to $G$ at the point $w'$, where its gradient is at most $2L/n$. With subgradients in place of gradients, the same steps work for non-differentiable losses such as the hinge loss.
+In other words, this is consequence (a) of strong convexity, $\|w' - w\| \le \|\nabla J_D(w')\|/\lambda$ (a small gradient means you are close to the minimizer), applied to $J_D$ at the point $w'$, where its gradient is at most $2L/n$. With subgradients in place of gradients, the same steps work for non-differentiable losses such as the hinge loss.
 
 **The bound is tight.** A loss with no curvature of its own shows it, because then the regularizer is the only curvature and nothing is lost. Take $d = 1$, labels $z_i \in \{-1, +1\}$, and the linear loss $\ell(w, z) = zw$, which is convex and 1-Lipschitz. Then $J(w; D) = \bar z w + \frac\lambda2 w^2$ with $\bar z$ the mean label, and setting the derivative $\bar z + \lambda w$ to zero gives $w^*(D) = -\bar z/\lambda$. Changing one label from $+1$ to $-1$ changes the sum of the labels by 2, so it lowers $\bar z$ by $2/n$ and moves $w^*$ by exactly $2/(\lambda n)$. For $n = 1{,}000$ and $\lambda = 0.1$ that is $2/100 = 0.02$.
 

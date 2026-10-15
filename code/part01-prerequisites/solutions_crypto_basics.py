@@ -370,9 +370,9 @@ def print_table(rng: np.random.Generator) -> None:
     even = regev_sum_experiment(rng, 4, q, uniform_noise(bound), ks, trials)
     for k, (fail_o, drift_o), (fail_e, drift_e) in zip(ks, odd, even, strict=True):
         print(
-            f"[Ex9 k={k}] q={q_odd}: drift={drift_o:.2f} (predicted {odd_drift_prediction(k):.2f})  "
+            f"[Ex9 k={k}] p={q_odd}: drift={drift_o:.2f} (predicted {odd_drift_prediction(k):.2f})  "
             f"failure={fail_o:.4f} (normal {failure_normal(k, q_odd, var_u, odd_drift_prediction(k)):.4f})  "
-            f"q={q}: drift={drift_e:.2f} failure={fail_e:.4f}"
+            f"p={q}: drift={drift_e:.2f} failure={fail_e:.4f}"
         )
 
 
