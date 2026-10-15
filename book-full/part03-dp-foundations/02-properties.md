@@ -372,7 +372,7 @@ The three properties hold under weak assumptions, which makes it tempting to app
 | Two queries sharing one noise draw | **No** | The noise cancels in a difference; Fact 3 needs independent coins |
 | "Post-processing" that reads the data again | **No** | It is a new mechanism, often a non-private one |
 | Budgets chosen from earlier outputs | Not by @eq-dpprop-basic | Needs privacy filters ([Advanced and optimal composition](04-composition.md)) |
-| Mechanisms proved under add/remove, released under replace | Yes, at up to twice the cost | A replacement is a removal plus an addition (@eq-dpprop-parallel) |
+| Mechanisms proved under add/remove, released under replace | Yes: $\varepsilon$ doubles to $2\varepsilon$ and $\delta$ grows to $(1 + e^\varepsilon)\delta$ | A replacement is a removal plus an addition, so group privacy with $k = 2$ (@eq-dpprop-group) applies, as in @eq-dpdef-replace of [The definition of differential privacy](01-definition.md) |
 | A DP release plus an exact statistic of the same data | **No** | The exact statistic is not DP; the pair has no guarantee |
 | Many records of one person | Yes, at $k\varepsilon$ and $\delta_k$ | Group privacy (@eq-dpprop-group) |
 

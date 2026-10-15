@@ -33,7 +33,7 @@ def test_laplace_gaussian_matches_section(tmp_path: Path) -> None:
         "eps=1 delta=1e-05: sigma=4.8448  t=4.7416  exact delta=4.114e-08  P[L>eps]=1.060e-06  Mills=1.104e-06",
         "proof needs t >= 0.5262, which holds for every eps <= 1 when delta <= 0.7448",
         # Exact curve
-        "max relative error 3.1e-06",
+        "24 of 30 (eps, mu) pairs with delta > 1e-12: max relative error 3.1e-06",
         "mu=1: delta(0)=0.3829 (TV)  delta(1)=0.1269 (integrated 0.1269, Monte Carlo 0.1270)  P[L>1]=0.3085  "
         "e Q[L>1]=0.1816  delta(2)=0.0209  delta(4)=4.71e-05",
         "sigma=2 (mu=0.5): P[L>1]=0.0401  delta(1)=0.0068",

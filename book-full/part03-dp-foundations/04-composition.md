@@ -38,7 +38,7 @@ $$\delta(\varepsilon) = E_{e^\varepsilon}(P\|Q) = \sum_y\big(p(y) - e^\varepsilo
 
 To see the middle equality, factor $p(y)$ out of each term: $(p - e^\varepsilon q)_+ = p\,(1 - e^\varepsilon q/p)_+$, and $e^\varepsilon q/p = e^{\varepsilon - \ln(p/q)} = e^{\varepsilon - L(y)}$. A sum of $p(y)$ times something over all $y$ is the expectation of that something when $Y$ is drawn from $P$. For the inequality, look at the bracket: when $L \le \varepsilon$ the exponent $\varepsilon - L$ is non-negative, $e^{\varepsilon - L} \ge 1$, and the bracket is 0. When $L > \varepsilon$ the bracket is $1 - e^{\varepsilon - L}$, which is below 1. So the bracket is at most the indicator of $L > \varepsilon$, and its average is at most $\Pr[L > \varepsilon]$.
 
-A concrete case: randomized response at $\varepsilon = \ln 3$ has $t = 3/(1 + 3) = \frac34$. Take a person whose bit is 1 in $D$ and 0 in $D'$. A report of 1 has probability $\frac34$ under $D$ and $\frac14$ under $D'$, so its loss is $\ln 3$; a report of 0 has loss $-\ln 3$. Under $D$ the loss is therefore $+\ln 3$ with probability $\frac34$ and $-\ln 3$ with probability $\frac14$. At $\varepsilon = 0$ the bracket is $1 - e^{-\ln 3} = 1 - \frac13$ for the first value and $(1 - 3)_+ = 0$ for the second, so $\delta(0) = \frac34(1 - \frac13) = \frac12$. At $\varepsilon = 0$ the hockey-stick sum is $\sum_y(p - q)_+$, the largest difference $P(S) - Q(S)$ over sets of outputs, which is the total variation distance between the two output distributions. Here it is $\frac34 - \frac14 = \frac12$, as it should be.
+A concrete case: randomized response at $\varepsilon = \ln 3$ has $t = 3/(1 + 3) = \frac34$. Take a person whose bit is 0 in $D$ and 1 in $D'$. A report of 0 has probability $\frac34$ under $D$ and $\frac14$ under $D'$, so its loss is $\ln 3$; a report of 1 has loss $-\ln 3$. Under $D$ the loss is therefore $+\ln 3$ with probability $\frac34$ and $-\ln 3$ with probability $\frac14$. At $\varepsilon = 0$ the bracket is $1 - e^{-\ln 3} = 1 - \frac13$ for the first value and $(1 - 3)_+ = 0$ for the second, so $\delta(0) = \frac34(1 - \frac13) = \frac12$. At $\varepsilon = 0$ the hockey-stick sum is $\sum_y(p - q)_+$, the largest difference $P(S) - Q(S)$ over sets of outputs, which is the total variation distance between the two output distributions. Here it is $\frac34 - \frac14 = \frac12$, as it should be.
 
 The use of this fact is that a composition theorem only has to bound the distribution of the total privacy loss. The tail bound $\Pr[L > \varepsilon]$ is the cheap version, and @eq-comp-delta is the exact one.
 
@@ -48,12 +48,12 @@ Run $M_1, \dots, M_k$ in sequence, where $M_i$ may depend on the earlier outputs
 $$L(y_1, \dots, y_k) = \sum_{i=1}^k L_i(y_i \mid y_{<i}), \qquad L_i(y_i \mid y_{<i}) = \ln\frac{p_i(y_i \mid y_{<i})}{q_i(y_i \mid y_{<i})}.$$ {#eq-comp-sum}
 Each term $L_i$ is the privacy loss of step $i$ alone, for the mechanism that was run after that history.
 
-A concrete case: two rounds of randomized response at $\varepsilon = \ln 3$, on a person whose bit is 1 in $D$ and 0 in $D'$. Each round reports 1 with probability $\frac34$ on $D$ and $\frac14$ on $D'$, independently, so for instance $p(1, 1) = \frac34 \cdot \frac34 = \frac9{16}$ and $q(1, 1) = \frac14 \cdot \frac14 = \frac1{16}$. @tbl-comp-two-rr lists the four outputs. Each loss is the sum of two per-round terms $\pm\ln 3$: the output $(1, 0)$ has loss $\ln 3 - \ln 3 = 0$, because one report favours $D$ as much as the other favours $D'$.
+A concrete case: two rounds of randomized response at $\varepsilon = \ln 3$, on a person whose bit is 0 in $D$ and 1 in $D'$. Each round reports 0 with probability $\frac34$ on $D$ and $\frac14$ on $D'$, independently, so for instance $p(0, 0) = \frac34 \cdot \frac34 = \frac9{16}$ and $q(0, 0) = \frac14 \cdot \frac14 = \frac1{16}$. @tbl-comp-two-rr lists the four outputs. Each loss is the sum of two per-round terms $\pm\ln 3$: the output $(0, 1)$ has loss $\ln 3 - \ln 3 = 0$, because one report favours $D$ as much as the other favours $D'$.
 
-| Output $(y_1, y_2)$ | $(1, 1)$ | $(1, 0)$ | $(0, 1)$ | $(0, 0)$ |
+| Output $(y_1, y_2)$ | $(0, 0)$ | $(0, 1)$ | $(1, 0)$ | $(1, 1)$ |
 | --- | --- | --- | --- | --- |
-| $p$ (bit 1) | 9/16 | 3/16 | 3/16 | 1/16 |
-| $q$ (bit 0) | 1/16 | 3/16 | 3/16 | 9/16 |
+| $p$ (bit 0) | 9/16 | 3/16 | 3/16 | 1/16 |
+| $q$ (bit 1) | 1/16 | 3/16 | 3/16 | 9/16 |
 | $L = \ln(p/q)$ | $2\ln 3$ | 0 | 0 | $-2\ln 3$ |
 
 : Two rounds of randomized response at $\varepsilon = \ln 3$. The privacy loss of each output is the sum of the two per-round losses. {#tbl-comp-two-rr}
@@ -83,7 +83,7 @@ Basic composition charges $k\varepsilon$, the largest value the total loss can t
 
 ### Statement
 
-Compose $k$ rounds of randomized response at level $\varepsilon$, on a person whose bit is 1 in $D$ and 0 in $D'$. A report of 1 is the truth under $D$, so it **points to $D$**; a report of 0 points to $D'$. Under $D$, each report points to $D'$ only when it is a lie, which happens with probability $1 - t$. Let $J$ be the number of rounds whose report points to $D'$. Each such round contributes $-\varepsilon$ to the loss and each other round $+\varepsilon$, so the whole loss is fixed by $J$. Under $D$,
+Compose $k$ rounds of randomized response at level $\varepsilon$, on a person whose bit is 0 in $D$ and 1 in $D'$. A report of 0 is the truth under $D$, so it **points to $D$**; a report of 1 points to $D'$. Under $D$, each report points to $D'$ only when it is a lie, which happens with probability $1 - t$. Let $J$ be the number of rounds whose report points to $D'$. Each such round contributes $-\varepsilon$ to the loss and each other round $+\varepsilon$, so the whole loss is fixed by $J$. Under $D$,
 $$J \sim \mathrm{Bin}(k, 1 - t), \qquad L = (k - 2J)\varepsilon,$$ {#eq-comp-rr-loss}
 and the loss has mean, standard deviation and worst-case probability
 $$\mathbb E[L] = k\varepsilon\tanh(\varepsilon/2), \qquad \operatorname{sd}(L) = \varepsilon\sqrt{k\big(1 - \tanh^2(\varepsilon/2)\big)}, \qquad \Pr[L = k\varepsilon] = t^k.$$

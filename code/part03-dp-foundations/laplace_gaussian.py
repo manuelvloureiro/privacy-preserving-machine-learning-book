@@ -320,13 +320,16 @@ def print_table(rng: np.random.Generator) -> None:
 
     print("[Gaussian mechanism: the exact privacy curve]")
     worst = 0.0
+    pairs = 0
     for e in (0.0, 0.5, 1.0, 2.0, 4.0, 8.0):
         for mu in (0.25, 0.5, 1.0, 2.0, 4.0):
             exact = gaussian_delta(e, mu)
             if exact > 1e-12:
+                pairs += 1
                 worst = max(worst, abs(gaussian_delta_integrated(e, mu) - exact) / exact)
     print(
-        f"  closed form vs Simpson integration, 30 (eps, mu) pairs with delta > 1e-12: max relative error {worst:.1e}"
+        f"  closed form vs Simpson integration, {pairs} of 30 (eps, mu) pairs with delta > 1e-12: "
+        f"max relative error {worst:.1e}"
     )
     print(
         f"  mu=1: delta(0)={gaussian_delta(0.0, 1.0):.4f} (TV)  delta(1)={gaussian_delta(1.0, 1.0):.4f} "

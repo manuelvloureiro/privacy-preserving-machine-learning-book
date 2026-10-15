@@ -453,7 +453,7 @@ Empirical audits catch it, and you do not need the exact probabilities to run on
 
 At $m = 1$ the two mechanisms coincide, because $\bot\top$ is a complete AboveThreshold output: AboveThreshold halts after the $\top$ anyway. From then on the no-halt loss grows by about $18.1246/40 = 0.45$ nats (units of natural logarithm) for each pair of queries added, while AboveThreshold never exceeds $\varepsilon$. The lower bound is loose by a factor of a little under 2 (18.1246 against 10.00 at $m = 40$), because step 4 of the derivation used a lower bound on $h(t)$ that holds at every threshold, and at every threshold $h$ is in fact larger.
 
-The integrals are checked by simulation at $m = 2$: the exact probability of $\bot\bot\top\top$ under $D$ is 0.0669, and 400,000 runs give 0.0671. The sign test of @fig-sel-svt-buggy (200,000 runs per dataset) gives
+The integrals are checked by simulation at $m = 2$: the exact probability of $\bot\bot\top\top$ under $D$ is 0.0669, and 400,000 runs give 0.0671. The sign test of @fig-sel-svt-buggy, run 200,000 times per dataset in the script (the figure uses 100,000 runs per point), gives
 $\Pr[\text{more }\top\text{ in the second half}]$ of 0.5529 under $D$ and 0.2552 under $D'$ at $m = 10$, a log-ratio of 0.77; 0.7399 and 0.1832 at $m = 40$, a log-ratio of 1.40; and 0.9151 and 0.0659 at $m = 160$, a log-ratio of 2.63. From $m = 40$ on, the log-ratio is above 1, so this test alone proves that the variant is not 1-DP.
 
 ### Check yourself

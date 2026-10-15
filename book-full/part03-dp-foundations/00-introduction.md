@@ -23,8 +23,8 @@ A randomized algorithm is differentially private when changing one person's reco
 | [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md) | How much noise does a numerical query need, and what is the exact privacy of Gaussian noise? | 1, 2, 3, 18, 19 |
 | [Advanced and optimal composition](04-composition.md) | How does privacy degrade over many releases, exactly? | 2, 3, 4, 18, 19 |
 | [Selection: exponential mechanism, report-noisy-max, sparse vector](05-selection.md) | How do you privately choose the best of many options, or find the few queries above a threshold? | 1, 2, 18–20 |
-| [Beyond global sensitivity](06-sensitivity.md) | What if the worst case is far from the data you actually have? | 2, 6, 18–20 |
-| [Discrete and floating-point-safe mechanisms](07-discrete-mechanisms.md) | Why do textbook mechanisms break on real computers, and how is that fixed? | 1, 18, 20 |
+| [Beyond global sensitivity](06-sensitivity.md) | What if the worst case is far from the data you actually have? | 1, 2, 3, 9, 18–20 |
+| [Discrete and floating-point-safe mechanisms](07-discrete-mechanisms.md) | Why do textbook mechanisms break on real computers, and how is that fixed? | 1, 3, 18, 20 |
 | [Local, shuffle and distributed trust models](08-trust-models.md) | What changes when no one is trusted with the raw data? | 2, 8, 9, 18, 20 |
 | [Lower bounds: what privacy costs](09-lower-bounds.md) | How much accuracy must every private mechanism give up? | 2, 4, 5, 10, 17, 18–20 |
 
@@ -44,12 +44,13 @@ uv run python code/part03-dp-foundations/laplace_gaussian.py
 
 ## Notation
 
-The chapters share the conventions in @tbl-dp-notation, set in [The definition of differential privacy](01-definition.md). The next part uses the same notation.
+The chapters share the conventions in @tbl-dp-notation, set in [The definition of differential privacy](01-definition.md). The next part uses the same notation, except that $\sigma$ there is the noise multiplier (the noise standard deviation per unit of sensitivity) and an attacker's two error rates are written $a$ and $b$.
 
 | Symbol | Meaning |
 | --- | --- |
 | $M$ | A randomized mechanism, mapping a dataset to a random output |
 | $D \simeq D'$ | Neighbouring datasets: by default one is the other with one record added or removed; "replace one record" is named explicitly when used |
+| $D' = D \cup \{x\}$ | Under add/remove, $D'$ is the dataset that contains the record $x$ and $D$ the one without it. A membership test says "$D'$" when it guesses that the record is in; its false positive rate is the chance of saying "$D'$" when the data were $D$, and its true positive rate the chance of saying "$D'$" when they were $D'$ |
 | $\varepsilon$, $\delta$ | The privacy parameters of $(\varepsilon, \delta)$-DP; pure DP is $\delta = 0$ |
 | $\Delta_1 f$, $\Delta_2 f$ | The $\ell_1$ and $\ell_2$ sensitivities of a query $f$ |
 | $L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}$ | The privacy loss of output $y$; $L_{D,D'}(Y)$ with $Y \sim M(D)$ is the privacy loss random variable |
