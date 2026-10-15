@@ -86,3 +86,28 @@ uv run pytest
 uv run pyright
 make website   # fails on any warning: uncaptioned tables, unresolved @references, broken links
 ```
+
+## The practitioner edition
+
+`book-practitioner/` covers the same topics as the full edition, in the same parts and chapters with the same file names, for people who build, review and audit private machine-learning systems. It has no proofs. A reader should come away knowing what each result says, when it applies, how to use it, and what goes wrong in practice. The rules above apply except where this section changes them. The reference chapter is [03-laplace-gaussian.md](book-practitioner/part03-dp-foundations/03-laplace-gaussian.md).
+
+**Length.** A chapter is about 1,500–2,000 words of prose, not counting tables, figures and code: roughly a sixth of its full-edition chapter. Part 1 keeps all eight chapters, each shorter still: only the facts later parts use.
+
+**Chapter structure.**
+
+1. **`# Title`**, the same title as the full edition's chapter.
+2. **`## Why this matters`**: the practical question, the one idea, and a captioned table mapping each decision or result to its section. No toolkit section.
+3. **One `##` section per topic**, usually fewer than the full chapter has: merge sections that a practitioner uses together (the classic and exact Gaussian calibrations become one section), and reduce a theory-heavy one to a paragraph and a pointer to the full edition when it changes nothing in practice. Each section has four parts, as bold lead-ins rather than headings: **Idea** (what it is and why it works, in words), **Result** (the formula or rule, each symbol named in words), **Example** (a calculation with real numbers) and **Pitfalls** (what goes wrong in practice, and how to avoid it).
+4. **`## Code`**, only where code is the point: a short, self-contained snippet a reader can copy (standard library only, typed, each `print` line ending with its expected output as a comment, so `tests/test_practitioner_snippets.py` can run it), or the command that runs the full edition's script. Decide chapter by chapter.
+5. **`## Cheat sheet`**: one table of the chapter's results and a few rules of thumb.
+6. **`## Further reading`**: two to four references, with what each is good for.
+7. **The pointer to the derivations**, the last line of the page: `**Derivations.** Every result in this chapter is derived step by step in [the full edition's chapter](../../book-full/<part>/NN-<topic>.md).`
+
+**What changes from the full edition's rules.**
+
+- **No derivations.** State results and explain in words why they hold. "Derive, don't assert" becomes "explain, then cite": every result either is explained in words or cites its source, and the full edition has the derivation.
+- **Recap, then link.** When a page uses a concept from another chapter, restate it in one sentence and link to it. Don't restate arguments.
+- **No exercises and no check-yourself questions,** and no links to the exercise book.
+- **Numbers come from the full edition's scripts.** Quote only numbers that the full edition's chapter quotes (so its test already checks them) or that a snippet on the page prints. Never compute a new number by hand.
+- **Figures come from the full edition's scripts.** Reuse its figures by name (`figures/<name>.svg`); a figure the practitioner edition needs and the full edition lacks is added to the chapter's script.
+- **Labels and links.** Labels may repeat the full edition's (`@sec-lg-laplace`), since each book resolves its own. Link to practitioner chapters for recaps, and to the full edition only for derivations.
