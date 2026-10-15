@@ -5,19 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy-Preserving Machine Learning</title>
 <style>
-  :root { --bg: #ffffff; --fg: #1f2328; --muted: #59636e; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; } }
-  body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: var(--bg); color: var(--fg);
+  :root { --bg: #ffffff; --fg: #1f2328; --muted: #59636e; --line: #d1d9e0; --link: #0969da; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --line: #3d444d; --link: #4493f8; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg);
          font: 17px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  main { max-width: 42rem; padding: 2rem 1rem; text-align: center; }
-  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .5rem; }
-  p { color: var(--muted); margin: 0; }
+  main { max-width: 42rem; margin: 0 auto; padding: 3rem 1rem; }
+  h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 .25rem; }
+  .author { color: var(--muted); margin: 0 0 2.5rem; }
+  section { border-top: 1px solid var(--line); padding: 1.25rem 0; }
+  h2 { font-size: 1.2rem; margin: 0 0 .35rem; }
+  p { margin: 0 0 .5rem; }
+  a { color: var(--link); }
 </style>
 </head>
 <body>
 <main>
   <h1>Privacy-Preserving Machine Learning</h1>
-  <p>Manuel V. Loureiro</p>
+  <p class="author">Manuel V. Loureiro</p>
+
+  <section>
+    <h2><a href="book-full/">The full edition</a></h2>
+    <p>Every result derived, for readers who want the mathematics.</p>
+    <p><a href="Privacy-Preserving-Machine-Learning.pdf">Download the PDF</a></p>
+  </section>
+
+  <section>
+    <h2><a href="book-exercises/">The exercise book</a></h2>
+    <p>The full edition's exercises, each with a worked solution.</p>
+  </section>
+
+  <section>
+    <h2><a href="book-practitioner/">The practitioner edition</a></h2>
+    <p>The same topics without proofs, for people who build and audit private machine-learning systems.</p>
+    <p><a href="Privacy-Preserving-Machine-Learning-Practitioner.pdf">Download the PDF</a></p>
+  </section>
 </main>
 </body>
 </html>
