@@ -267,7 +267,7 @@ def symbols_in(formula: str) -> list[str]:
     f = re.sub(r"\\(text|mathrm|operatorname|mathbf|textbf)\s*\{[^}]*\}", " ", formula)
     f = re.sub(r"\\mathbb\s*\{?[A-Z]\}?", " ", f)
     f = re.sub(
-        r"\\(Pr|ln|log|exp|min|max|sum|prod|sqrt|frac|left|right|cdot|le|ge|leq|geq|in|to|infty|approx)\b", " ", f
+        r"\\(Pr|ln|log|exp|min|max|sum|prod|sqrt|frac|left|right|cdot|le|ge|leq|geq|in|to|infty|approx|pi)\b", " ", f
     )
     found: list[str] = []
     for m in re.finditer(r"\\([A-Za-z]+)|(?<![A-Za-z\\])([A-Za-z])(?![A-Za-z])", f):
@@ -339,7 +339,9 @@ def analyse(page: str, raw: str, limits: dict[str, Any], allowed: set[str], acro
             for acronym in re.findall(r"\b[A-Z][A-Z0-9]*[A-Z]\b", re.sub(r"⟦\d+⟧", " ", chunk)):
                 if acronym in acronyms and acronym not in seen_acronyms:
                     seen_acronyms.add(acronym)
-                    new_concepts += 1
+                    # "**true positive rate** (TPR)" is one concept, already counted as the bold term.
+                    if not re.search(rf"\*\*[^*]+\*\*\s*\({acronym}\)", source):
+                        new_concepts += 1
             sentences.append(s)
         words = sum(s.words for s in sentences)
         p = Paragraph(section, source, sentences, bold, words)
