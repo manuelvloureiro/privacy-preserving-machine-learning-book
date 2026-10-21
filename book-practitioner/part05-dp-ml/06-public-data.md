@@ -2,51 +2,63 @@
 
 ## Why this matters
 
-Training from random weights with the differential privacy (DP) version of stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), loses a great deal of accuracy at a privacy loss $\varepsilon$ of 1 and below. The most accurate private models are built differently. They start from a model **pretrained** without privacy on a large public dataset, and only **fine-tune** it privately on the sensitive data. Such models are far more accurate than those trained privately from scratch, as Tramèr & Boneh (2021) and later work report.
+The differential privacy (DP) version of stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), loses much accuracy when it trains a model from random weights. The loss is large at a privacy loss $\varepsilon$ of 1 or below.
 
-Fine-tuning only a small part of the model, such as the last layer or a low-rank update to each matrix, often helps further. That is because DP-SGD adds noise to every weight it trains, while the useful signal is bounded by clipping and usually lies in a few directions. This chapter gives the order in which to try the options and what public data does *not* protect.
+The most accurate private models avoid that. They start from a model **pretrained** without privacy on a large public dataset, and only **fine-tune** it privately on the sensitive data. That makes them far more accurate than models trained privately from scratch (Tramèr & Boneh 2021).
+
+Fine-tuning only a small part of the model often helps further. DP-SGD adds noise to every weight it trains, while the useful signal does not grow with their number, so fewer weights mean less noise for the same signal. This chapter says which weights to train, and what public data does *not* protect, and the workflow [Fine-tune a language model privately with LoRA](14-private-llm-finetuning.md) does the job end to end.
 
 ## How many weights to train {#sec-pub-dimension}
 
-The privacy argument of DP-SGD needs only that one record changes the clipped gradient sum by at most the clipping norm $C$, whichever weights are trained. So the choice of trainable weights leaves $\varepsilon$ unchanged and changes only how much noise lands on the model. Public data are free for a related reason, because anything computed from public data alone, such as the starting weights, is a fixed input as far as the private data are concerned. The condition is that nothing in it was chosen by looking at the private data. That includes normalization statistics and tokenizers, which are fine when fitted on public data and a leak when fitted on private data.
+Which weights you train leaves $\varepsilon$ unchanged, because the guarantee of DP-SGD needs only that one record changes the clipped gradient sum by at most the clipping norm $C$. The choice changes only how much noise lands on the model. Anything else computed from public data alone, such as the starting weights, also costs no privacy, provided nothing in it was chosen by looking at the private data. So a tokenizer or normalization statistics fitted on public data are free, while fitted on the private data they leak.
 
-The noise grows with the number $k$ of trainable weights. Write $\sigma$ for the noise multiplier and $B$ for the expected batch size. Then the noise on the averaged gradient has length about
+The noise grows with the number $k$ of trainable weights. Write $\sigma$ for the noise multiplier and $B$ for the expected batch size, expected because DP-SGD's Poisson sampling draws batches of random size. Then the noise on the averaged gradient has length about
 $$\text{noise length} \approx \frac{\sigma C\sqrt k}{B}.$$ {#eq-pub-noise-length}
-The signal, the average clipped gradient, is at most $C$ long whatever $k$ is, and it can even grow when fewer weights are trained, because shorter gradients are clipped less.
+The signal, the average clipped gradient, is at most $C$ long whatever $k$ is. It can even get longer when fewer weights train, because clipping then cuts each record's gradient less.
 
-This part's running example is a small network with 3,329 weights, pretrained on a related public task and then fine-tuned on 10,000 private records. It trains for 10,000 steps with a clipping norm of 0.5 and a batch size of 100, at a slack $\delta$ of $10^{-5}$. At $\varepsilon = 1$ the noise multiplier is 4.13, and the noise length is 1.191 for all weights against 0.166 for the 65 weights of the last layer.
+The running example of [DP-SGD](02-dp-sgd.md), a small network with 3,329 weights, is pretrained on a public task close to the private one and then fine-tuned on the 10,000 private records. It trains for 10,000 steps with batches of 100 and a clipping norm of 0.5, and at $\varepsilon = 1$ the noise multiplier is 4.13. Compared with the signal at the pretrained weights, the noise is then 92.0 times longer when all weights train. It is only 6.7 times longer when the 65 weights of the last layer train. The gap is wider than the formula predicts, because the signal is longer when only the last layer trains (0.0250 against 0.0130).
 
-Measured against the signal, the noise is 92.0 times larger for all weights but only 6.7 times for the last layer. So the signal needs about 8,455 steps to show through the noise for all weights, and only 44 for the last layer.
+Counting weights overstates the cost of training them all, though. Noise does harm only along the directions in which the loss is curved, because a step along a flat direction barely changes the loss. Near a pretrained model few directions are curved (Li, Liu et al. 2022). So on the running example, full fine-tuning has 51 times the last layer's weights, but its noise is predicted to raise the training loss only about 7.5 times as much.
 
-Counting weights overstates the cost, though. Noise hurts only in directions in which the loss is curved enough to notice it within the run (Li, Liu et al. 2022). Write $h_j$ for the curvature of the loss in its $j$-th principal direction. With step size $\eta$, the number of directions the noise has time to fill is the **effective dimension**
-$$d_{\text{eff}} = \sum_{j=1}^k\Big(1 - (1 - \eta h_j)^{2T}\Big),$$ {#eq-pub-noise-cost}
-and the noise raises the loss in proportion to it. On the running example, full fine-tuning has an effective dimension of 451 out of 3,329 weights. So its noise is 51 times larger in squared length than the last layer's, but it costs only about 7.5 times more. A larger step size or a longer run fills more flat directions with noise, which is why private fine-tuning wants smaller step sizes than training from scratch.
-
-Freezing weights has a cost too, a **bias**, because no amount of private data can move the model along a frozen direction that the task needs.
+A larger step size lets the noise into more of the nearly flat directions within a run, so private fine-tuning wants smaller steps than training from scratch. Training fewer weights has its own cost, a **bias**, because no amount of private data can move the model along a frozen direction that the task needs.
 
 ## Linear probing first {#sec-pub-features}
 
-The simplest option freezes everything but the last layer and trains a linear classifier on the frozen features, which is **linear probing**. Tramèr & Boneh (2021) showed that it beats end-to-end private training on standard image benchmarks at moderate budgets. It turns private deep learning back into the convex problem of [Private empirical risk minimization](01-dp-erm.md), so it is the safe first baseline.
+The simplest option freezes everything but the last layer and trains a linear classifier on the frozen features, which is **linear probing**. Because the features are fixed, the probe's loss is convex. Linear probing thus turns private deep learning back into the problem of [Private empirical risk minimization](01-dp-erm.md), which makes it the safe first baseline.
 
-Its accuracy is capped by the features. The error of a private probe is the privacy cost of convex empirical risk minimization (ERM) in $k$ dimensions plus the **feature gap**. That gap is how far the best linear model on the features falls short of the best model of any kind, and it does not shrink with more records or a larger $\varepsilon$. The best possible probe reaches 0.9536, against 0.9606 for a network trained non-privately from scratch. The private probe stays within 0.006 of its ceiling at every budget, but it can never pass it. So measure the probe's non-private ceiling first, and if it already meets your target, stop there. To train the probe privately, feed the frozen features to `diffprivlib.models.LogisticRegression`, or run DP-SGD on the one layer.
+The error of a private probe is the error that privacy adds to convex empirical risk minimization (ERM), which grows with the number $k$ of features, plus the **feature gap**. That gap is how far the best linear model on the features falls short of the best model of any kind. No number of records or size of $\varepsilon$ closes it. For example, the running example's probe fitted without privacy, its ceiling, has a test accuracy of 0.9536, while a network trained without privacy from scratch reaches 0.9606. The private probe stays within 0.006 of that ceiling, but never passes it.
+
+Measure the probe's ceiling first, by fitting it without privacy on labelled public data that resemble the task. If it already meets your target, stop there. To train the probe privately, feed the frozen features to the `LogisticRegression` of diffprivlib, IBM's library of private scikit-learn models, or run DP-SGD on the one layer.
 
 ## Low-rank adapters and full fine-tuning {#sec-pub-lora}
 
-When the features are not quite right, the probe stops at its ceiling, and you need to change the earlier layers. **Low-rank adaptation** (LoRA, Hu et al. 2022) freezes each pretrained matrix $W_0$ and learns a correction $UV^\top$ whose rank, the number $r$ of columns of the two factors, is small. For a matrix with $d_{\text{in}}$ inputs and $d_{\text{out}}$ outputs, that is
-$$k = r(d_{\text{in}} + d_{\text{out}})$$ {#eq-pub-lora-count}
-trainable weights instead of $d_{\text{in}}d_{\text{out}}$.
+When the features are not quite right, the probe stops at a ceiling below your target, and only changing the earlier layers can lift it. **Low-rank adaptation** (LoRA, Hu et al. 2022) freezes each pretrained matrix and learns a small correction to it. The correction is the product of two thin matrices that each have $r$ columns, where $r$ is the rank. A matrix with $d_{\text{in}}$ inputs and $d_{\text{out}}$ outputs has $d_{\text{in}}d_{\text{out}}$ weights, while its adapter has only
+$$k = r(d_{\text{in}} + d_{\text{out}}).$$ {#eq-pub-lora-count}
 
-Training starts with the factor $U$ at zero, so the model begins exactly at the pretrained one, and with the factor $V$ random. That random draw must be independent of the private data. The adapter's per-example gradients are outer products, so the ghost clipping of [DP-SGD](02-dp-sgd.md#sec-dpsgd-ghost) applies and no per-example matrix is ever formed. Yu et al. (2022) showed that private fine-tuning of language models with LoRA matches or beats private full fine-tuning, at a fraction of the cost.
+The adapter comes from Hugging Face's `peft` library. This snippet puts a rank-4 adapter on the first layer of a network shaped like the running example, and trains its last layer in full.
 
-Full fine-tuning is not ruled out. Li, Tramèr et al. (2022) matched or beat the adapters by fine-tuning all the weights of language models, with large batches, a step size tuned for private training, and a fine-tuning objective that resembles the pretraining one. The evidence on accuracy goes both ways, but the adapter is cheaper to store, compute and clip.
+```python
+import torch
+from peft import LoraConfig, get_peft_model
 
-In PyTorch, the usual stack is Hugging Face's `peft` library for the adapter and Opacus for DP-SGD. Build a `LoraConfig(r=..., target_modules=...)` and wrap the base model with `get_peft_model(model, config)`, so that only the adapter's weights require gradients. Then pass the model, its optimizer and data loader to the `make_private` method of Opacus's `PrivacyEngine`, which computes per-sample gradients only for the trainable parameters. For large language models, the `private-transformers` package of Li et al. and Microsoft's `dp-transformers` wrap this setup, with ghost clipping to save memory.
+model = torch.nn.Sequential(torch.nn.Linear(50, 64), torch.nn.Tanh(), torch.nn.Linear(64, 1))
+print(sum(p.numel() for p in model.parameters()))  # 3329
+config = LoraConfig(r=4, lora_alpha=8, target_modules=["0"], modules_to_save=["2"], lora_dropout=0.0)
+adapted = get_peft_model(model, config)  # freezes every pretrained weight
+print(sum(p.numel() for p in adapted.parameters() if p.requires_grad))  # 521
+```
 
-A third option projects each private gradient onto a subspace estimated from public gradients and adds noise only there (Zhou, Wu & Banerjee 2021). It keeps the same $\varepsilon$ and trades noise for the bias of the signal it projects away.
+In the snippet, `target_modules` and `modules_to_save` name layers by their index in the `Sequential`, and `lora_alpha` scales the correction. It trains 521 weights, the adapter's $4 \times (50 + 64) = 456$ and the last layer's 65. The run in @sec-pub-run treats the first layer's biases as a 51st input, so its adapter has $4 \times (51 + 64) = 460$ weights, and 525 with the last layer. Opacus's `PrivacyEngine`, used as in [DP-SGD](02-dp-sgd.md), then computes per-sample gradients only for the parameters that require them, so the frozen weights cost nothing. Call `model.train()` before `make_private`, since Opacus rejects a model left in evaluation mode, as a pretrained model often is after you measure it.
+
+The adapter's second factor starts at zero, so training begins exactly at the pretrained model. The first factor starts random, and that draw must not depend on the private data.
+
+Yu et al. (2022) showed that private fine-tuning of language models with LoRA matches or beats private full fine-tuning, at a fraction of the compute and memory. Each adapter factor is an ordinary linear layer, so the ghost clipping of [DP-SGD](02-dp-sgd.md#sec-dpsgd-ghost) applies to it. It gets each record's gradient norm without ever forming the per-example gradient.
+
+Full fine-tuning is not ruled out. Li, Tramèr et al. (2022) matched the adapters by fine-tuning all the weights of language models. They used large batches and a step size tuned for private training, so the evidence goes both ways. A third option adds noise only in the few directions in which public gradients mostly lie, and throws away the private signal outside them (Zhou, Wu & Banerjee 2021).
 
 ## Which method at which budget {#sec-pub-run}
 
-On the running example, DP-SGD fine-tunes the last layer, a rank-4 adapter on the first layer plus the last layer, or all weights, against a baseline trained from scratch. Each method's step size was chosen at $\varepsilon = 1$ on half of the private test set, and accuracy is reported on the other half.
+The numbers in this section come from the full edition's synthetic running example. No practitioner script reproduces them, so treat them as one task's evidence. On it, DP-SGD fine-tunes the last layer, a rank-4 adapter plus the last layer, or all weights, against a model trained privately from scratch. Each method's step size was chosen at $\varepsilon = 1$ on half of the private test set, and accuracy is reported on the other half. That choice looked at private data without paying for it, so the table compares methods at their best rather than what a real run could claim ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
 
 | | Scratch | Full | Last layer | Adapter, rank 4 |
 | --- | --- | --- | --- | --- |
@@ -59,69 +71,41 @@ On the running example, DP-SGD fine-tunes the last layer, a rank-4 adapter on th
 
 : Test accuracy (mean of two runs), $\delta = 10^{-5}$. The pretrained model without fine-tuning has 0.9035. {#tbl-pub-run}
 
-On this task, pretraining is worth about a factor of eight in $\varepsilon$, since the adapter at $\varepsilon = 1$ matches training from scratch at $\varepsilon = 8$.
+Here pretraining is worth about a factor of eight in $\varepsilon$, since the adapter at $\varepsilon = 1$ matches training from scratch at $\varepsilon = 8$.
 
-Which weights to train depends on the budget. At $\varepsilon = 0.5$ the last layer is best, because its noise is 7.2 times shorter than full fine-tuning's and its ceiling is not yet binding. From $\varepsilon = 1$ on, it is stuck near that ceiling, while the adapter and full fine-tuning keep improving. The adapter is never more than 0.0022 below the best method at any budget, so it is the robust middle choice.
+At $\varepsilon = 0.5$ the last layer is best, because its noise is 7.2 times shorter than full fine-tuning's and its ceiling is not yet binding. From $\varepsilon = 1$ on, it is stuck near its ceiling while the others keep improving. The adapter is never more than 0.0022 below the best method at any budget, so it is the robust middle choice here. That ranking depends on the task. A public task further from the private one can reverse it even when the probe's ceiling looks fine. So rerun the comparison on a public stand-in for your task before you commit.
 
-The step size matters as much as the method. A step size three times too large costs full fine-tuning 1.3 points of accuracy. Their best step size is 2.5 times smaller than the one for training from scratch. The adapter's rank, by contrast, is cheap to get roughly right, since ranks from 1 to 16 differ by less than the run-to-run spread.
+The step size matters as much as the method, since a step three times too large costs full fine-tuning 1.3 percentage points of accuracy. The adapter's rank, by contrast, is cheap to get roughly right, because at $\varepsilon = 1$ ranks 1, 4 and 16 differ by about the run-to-run spread.
 
 ## What public data does not buy {#sec-pub-caveats}
 
-The guarantee is exactly this. For every fixed public dataset, the map from the private dataset to the fine-tuned model is $(\varepsilon, \delta)$-DP. With respect to the public dataset, there is no guarantee of any kind. Non-private pretraining can memorize individual records ([Memorization and training-data extraction](../part02-attacks/05-memorization-extraction.md)), and the fine-tuned model inherits whatever the pretrained weights encode (Tramèr, Kamath & Carlini 2024).
+Whatever the public data are, training on the private data is $(\varepsilon, \delta)$-DP, where $\delta$ is the small additive slack the guarantee allows. The public data get no guarantee of any kind. Non-private pretraining can memorize individual records ([Memorization and training-data extraction](../part02-attacks/05-memorization-extraction.md)), and the fine-tuned model inherits whatever the pretrained weights encode (Tramèr, Kamath & Carlini 2024).
 
-This matters most for a person whose record is in both datasets, because only the private copy is protected, and a membership attack against the pretrained model ([Membership inference](../part02-attacks/02-membership-inference.md)) has no bound at all. Web-scale "public" datasets contain posts, profiles and leaked documents, so a private set of medical notes or emails may well overlap with them.
+A person in both datasets is protected only in the private copy. A membership attack against the pretrained model ([Membership inference](../part02-attacks/02-membership-inference.md)) has no bound at all. Web-scale "public" datasets contain posts, profiles and leaked documents, so private notes or emails may well overlap with them.
 
-Before you train and when you report, go through this checklist.
+Text raises a second question, which unit the guarantee protects, called the privacy unit. A language model trains on fixed-length sequences, but one person's documents span many of them, so a guarantee per sequence protects far less than a person ([User-level differential privacy](07-user-level.md)).
 
-1. Deduplicate the private set against the public data. That protects copies, not people, because exact matching misses paraphrases and records about the same person.
-2. Check that the public data resemble the private task, because benchmarks with a "private" set close to curated public data overstate what you will get on genuinely sensitive data.
-3. Choose the public model, the step size, the adapter rank and the architecture on public data, or pay for every private run. Keeping the best of three privately fine-tuned models spends the budget of all three runs, unless you use a private selection procedure ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
-4. Say what the public data are, how they were obtained and whether overlap was checked, and state that the guarantee covers the private data given the pretrained model.
+Check three things before you train and when you report.
 
-## Code {#sec-pub-code}
-
-Before choosing what to fine-tune, compare the candidates' noise lengths at the noise multiplier your accountant gives.
-
-```python
-from math import sqrt
-
-
-def noise_length(sigma: float, clip: float, batch: float, trainable: int) -> float:
-    return sigma * clip * sqrt(trainable) / batch
-
-
-def lora_weights(rank: int, d_in: int, d_out: int) -> int:
-    return rank * (d_in + d_out)
-
-
-adapter = lora_weights(4, 51, 64) + 65  # first-layer adapter plus the 65-weight last layer
-print(adapter)  # 525
-print(f"{noise_length(4.13, 0.5, 100, 3329):.3f}")  # 1.191
-print(f"{noise_length(4.13, 0.5, 100, adapter):.3f}")  # 0.473
-print(f"{noise_length(4.13, 0.5, 100, 65):.3f}")  # 0.166
-```
+1. Check that the public data resemble the private task, and deduplicate the private set against them. Deduplication protects copies, not people, since exact matching misses paraphrases.
+2. Choose the public model and the hyperparameters on public data. Otherwise every private run costs privacy ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
+3. Name the public data and the overlap check, and state that the guarantee covers the private data given the pretrained model.
 
 ## Cheat sheet
 
 | Situation | Train | Why |
 | --- | --- | --- |
-| Very small budget, or a probe already meets the target | Last layer (linear probe) | Fewest weights, convex, known ceiling |
-| Moderate budget, features not quite right | Low-rank adapter plus last layer | Never far from the best; cheap to clip and store |
-| Larger budget, large batches, tuned step size | All weights | Pays for the effective dimension, not every weight |
+| Tiny budget, or the probe meets the target | Last layer (linear probe) | Fewest weights; convex |
+| Moderate budget, features not quite right | Low-rank adapter plus last layer | Never far from the best |
+| Larger budget, large batches, tuned step size | All weights | Noise costs only along curved directions |
 
-: Which weights to fine-tune privately. The noise length is $\sigma C\sqrt k/B$ for $k$ trainable weights, whatever they are. {#tbl-pub-cheat}
+: Where to start when fine-tuning privately; the ranking depends on the task. {#tbl-pub-cheat}
 
-**Rules of thumb**
-
-- Start from a model pretrained on public data that resembles the private task.
-- Measure the linear probe's ceiling before anything else.
-- Use large batches and a step size smaller than for training from scratch, and tune them on public data.
-- Never call the pretrained model private, since nothing protects its training data.
-- Expect little from a public model far from the task.
+**Rule of thumb.** Measure the linear probe's ceiling before anything else. Then use large batches and a smaller step size than for training from scratch. Tune the step size by DP-SGD runs at the target noise on public data, since a non-private sweep does not show how the noise moves the best step.
 
 ## Further reading
 
 - Tramèr & Boneh, "Differentially Private Learning Needs Better Features (or Much More Data)" (ICLR 2021): linear probing on good features.
-- Li, Tramèr, Liang & Hashimoto, "Large Language Models Can Be Strong Differentially Private Learners" (ICLR 2022), and Yu et al., "Differentially Private Fine-tuning of Language Models" (ICLR 2022): full and parameter-efficient private fine-tuning, and the hyperparameters that make each work.
+- Li, Tramèr, Liang & Hashimoto, "Large Language Models Can Be Strong Differentially Private Learners" (ICLR 2022), and Yu et al., "Differentially Private Fine-tuning of Language Models" (ICLR 2022): full and adapter-based private fine-tuning.
 
 **Derivations.** Every result here is derived step by step in [the full edition's chapter](../../book-full/part05-dp-ml/06-public-data.md).

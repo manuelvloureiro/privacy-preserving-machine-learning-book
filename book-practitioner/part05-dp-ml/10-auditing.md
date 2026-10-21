@@ -2,148 +2,129 @@
 
 ## Why this matters
 
-The running example trains a network with differential privacy (DP), using the private form of stochastic gradient descent (SGD) called [DP-SGD](02-dp-sgd.md). Its noise multiplier $\sigma$, the noise's standard deviation in units of the clipping norm, is 1. The Rényi differential privacy (RDP) accountant turns its configuration into a privacy level $\varepsilon$ of 6.71 at a slack $\delta$ of $10^{-5}$. That number is a proof about an algorithm, while what ships is code, and a bug in the noise or the sampling barely changes the accuracy.
+When you train with differential privacy (DP), the accountant turns your configuration into a privacy level $\varepsilon$ at a slack $\delta$. That number is a proof about an algorithm, but what ships is code. A bug in the noise, the clipping or the sampling makes the model less private but barely changes its accuracy. Accuracy is flat across a wide range of noise levels ([the training workflow](13-train-dp-sgd.md)), so the usual tests never notice the bug.
 
-An **audit** checks the code by attacking it. It plants records called **canaries**, trains with and without them, and counts how often a membership test guesses right. DP caps how often any test can be right, so a test that is right too often proves that the code is less private than claimed. The reverse never holds, because a weak attack also fails against a leaky model.
-
-## Which audit for which question {#sec-audit-choose}
-
-Use the cheapest audit that answers your question (@tbl-audit-choose). The per-step audit also works as a regression test (@sec-audit-ci).
-
-| Question | Audit | Cost | Blind to |
-| --- | --- | --- | --- |
-| Does the code clip and add the noise it claims? | Per-step audit with a Dirac canary in every step (@sec-audit-bugs) | Two training runs | Sampling and accounting bugs |
-| Is the claimed $\varepsilon$ right, accounting included? | End-to-end white-box audit with the likelihood-ratio statistic (@sec-audit-tight) | Thousands of runs per hypothesis | Bugs smaller than its shortfall, about 3 units here |
-| A cheap end-to-end check of a slow model | One-run audit with many white-box canaries (@sec-audit-onerun) | One run | Most bugs, since its best bound here was 2.53 |
-| What can a realistic attacker learn from the released model? | Black-box one-run audit with mislabeled canaries (@sec-audit-blackbox) | One run, plus controls | The mechanism's worst case |
-
-: Which audit answers which question. "Here" means the running example, whose claim is 6.71. {#tbl-audit-choose}
+An **audit** checks the code by attacking it. It plants records called **canaries**, trains with and without them, and counts how often a membership test guesses right. DP caps how often any test can be right, so a test that is right too often proves that the code is less private than claimed. A test that is rarely right proves nothing, since a weak attack also fails against a leaky model. This chapter gives you two audits to run, a unit test for continuous integration (CI) and a one-run audit of a trained model. @tbl-audit-cheat compares them with two costlier ones.
 
 ## Known bugs, and which audit catches them {#sec-audit-bugs}
 
-Read the code for each bug below, since an audit catches only some of them.
+These bugs break the private form of stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md).
 
-- **Variance passed where a standard deviation is expected.** With the running example's clipping norm of 0.5, this halves the noise. A per-step audit catches it.
-- **Noise scaled for the mean but added to the sum,** which makes it too small by the batch size. A per-step audit catches it at once.
-- **Clipping applied after averaging, or noise from a weak seed** with only 100 possible values. Nasr et al. (2023) found both in real code with per-step audits.
-- **The accountant told the wrong numbers,** such as 20,000 records instead of 10,000 because augmented copies were counted. The noise is right, so only an end-to-end audit can catch it, and only if the error is large.
-- **Batches shuffled but accounted as Poisson sampling,** which can make the true $\varepsilon$ several times the reported one ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). No cheap audit exercises the sampling, so read that code yourself.
+- **The variance passed where the standard deviation is expected,** or **noise scaled for the mean but added to the sum,** which adds the batch size times too little noise. The CI test catches both.
+- **Clipping applied after averaging, or noise from a weak seed.** Nasr et al. (2023) found both in real code with per-step audits like the CI test below.
+- **The accountant told the wrong numbers,** such as a record count that includes augmented copies, which makes $\varepsilon$ look smaller than it is. Only an end-to-end audit can catch it, and only if the error is large.
+- **Batches shuffled but accounted as Poisson sampling,** which can make the true $\varepsilon$ several times the reported one ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). No audit here exercises the sampling, so check the loader itself.
 
-The per-step audit puts a Dirac canary (@sec-audit-canaries) into every step of one run and leaves it out of another. Each step's noisy value on the canary's coordinate, in units of the clipping norm, is one trial, and for correct code it follows
+Audits catch errors only in the unsafe direction, so code that adds too much noise passes them all.
+
+## A CI test for the noise and the clipping {#sec-audit-ci}
+
+The cheapest strong audit tests one step of the optimizer, many times. A **Dirac canary** is a per-example gradient that is zero except on one coordinate, where every other record's gradient is zero. Put it into every step of one run and leave it out of another. The reading $x_t$ is step $t$'s noisy gradient sum on that coordinate, divided by the clipping norm $C$. The canary is longer than $C$, so a correct optimizer clips it to length $C$ and it adds exactly 1 to the reading. The optimizer also adds noise of standard deviation $\sigma C$, where $\sigma$ is the noise multiplier, so each reading follows
 $$x_t \sim \mathcal N(0, \sigma^2) \text{ without the canary}, \qquad x_t \sim \mathcal N(1, \sigma^2) \text{ with it}.$$ {#eq-audit-perstep}
-The audit bounds the separation $\mu$ of these two distributions from below with @eq-audit-mu, and correct code has $\mu = 1/\sigma$. On the running example, two runs of 10,000 steps bound $\mu$ by 0.886 for the correct code, against the claimed 1, while the variance bug gives 1.745 and is refuted.
 
-Audits catch errors only in the unsafe direction, so code that adds too much noise passes every audit.
+A threshold test says "canary in" whenever a reading exceeds a threshold. Its **true positive rate (TPR)** is how often it says so when the canary was there. Its **false positive rate (FPR)** is how often it says so when the canary was not. For two normal distributions a distance $\mu$ apart, every threshold gives $\Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}) = \mu$, where $\Phi$ is the standard normal distribution function. So measured rates bound the true separation $\mu$, which a correct optimizer keeps at $1/\sigma$:
+$$\mu \ge \Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}).$$ {#eq-audit-mu}
+The test plugs in the low end of the TPR's Clopper–Pearson interval and the high end of the FPR's. Each end is taken at level $\beta/2$, so the bound holds with probability $1 - \beta$ ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). If this bound exceeds $1/\sigma$, the code adds less noise than it claims.
+
+The script [practitioner_audit.py](../../code/part05-dp-ml/practitioner_audit.py) runs the test on Opacus's own `DPOptimizer`. It writes per-example gradients into `grad_sample` by hand, as Opacus's hooks would, and reads the noisy sum that `optimizer.step()` leaves in `grad`.
+
+```{.python excerpt="audit-ci-observe"}
+def canary_coordinate(sigma: float, planted_bug: str, with_canary: bool, steps: int) -> Array:
+    """Run the optimizer for `steps` steps; return the canary coordinate of each noisy sum, in units of C."""
+    layer = torch.nn.Linear(DIM_CI, 1, bias=False)
+    optimizer = make_optimizer(layer, sigma, planted_bug)
+    observations = np.empty(steps)
+    for t in range(steps):
+        setattr(layer.weight, "grad_sample", batch_grad_samples(with_canary))  # as Opacus's hooks would
+        optimizer.step()  # clip each row to C, sum, add N(0, σ²C²)
+        assert layer.weight.grad is not None
+        observations[t] = layer.weight.grad[0, CANARY_COORD].item() / CLIP_CI
+        optimizer.zero_grad()
+    return observations
+```
+
+The canary's gradient is ten times $C$, so the test also exercises clipping. The test chooses its threshold on the first half of the steps and counts on the second half, and says "canary in" only for a reading strictly above it. It also checks that the canary-free readings have a standard deviation within 10% of $\sigma$, because with no noise at all every reading is 0 and the rates mean nothing. Run `uv run python code/part05-dp-ml/practitioner_audit.py`, which tests the correct optimizer, one with the variance bug planted and one with the noise turned off, at $\sigma = 0.7$ and a batch of $B = 64$ records. The variance bug removes noise only because $\sigma$ is below 1, where $\sigma^2 < \sigma$; above 1 it would pass.
+
+```text
+sigma=0.7  C=1.0  B=64  steps per run=2000  claim mu=1/sigma=1.429
+correct: noise std 0.687 (claim 0.7)  FP 206/1000  TP 710/1000
+correct: mu_lo=1.201  pass
+variance for std: noise std 0.481 (claim 0.7)  FP 206/1000  TP 862/1000
+variance for std: mu_lo=1.722  FAIL
+no noise: noise std 0.000 (claim 0.7)  FP 0/1000  TP 1000/1000
+no noise: mu_lo=5.360  FAIL
+```
+
+The correct optimizer's bound on $\mu$ is 1.201, below its claimed 1.429, so it passes. The variance bug's bound is 1.722 and the missing noise's is 5.360, so both fail. The test takes seconds, so run it on every commit.
+
+Three things go wrong in practice. First, a correct optimizer still fails with probability $\beta$, here 5%, so an unseeded test fails one build in twenty. Fix the seed, or use a $\beta$ of $10^{-3}$ with more steps. Second, the script builds its own optimizer, so it tests Opacus, not your call to it. Point it at your code by having your setup function return the optimizer it makes, and drive that one. Third, the test never draws a batch or calls the accountant. For those, assert in the same suite that the loader is Opacus's `DPDataLoader` and that a second library's $\varepsilon$ matches yours ([Train a model with DP-SGD](13-train-dp-sgd.md#sec-trainwf-crosscheck)).
 
 ## From an attack to a lower bound {#sec-audit-bound}
 
-A **trial** is one training run with or without the canary, and the attack says "in" when a score, such as minus the canary's loss, is above a threshold. Its **true positive rate (TPR)** is the chance that it says "in" when the canary was trained on. Its **false positive rate (FPR)** is the chance that it says "in" when the canary was left out. DP requires, for every test,
+For a whole training run, the attack is a membership test on a planted canary. A **trial** is one training run, with or without the canary. Under $(\varepsilon, \delta)$-DP, every such test satisfies
 $$\mathrm{TPR} \le e^\varepsilon\,\mathrm{FPR} + \delta, \qquad 1 - \mathrm{FPR} \le e^\varepsilon\,(1 - \mathrm{TPR}) + \delta.$$ {#eq-audit-region}
-
-The rates are measured from $n$ trials with the canary and $n$ without, so the bound must use their pessimistic ends. Write $\bar\alpha$ for the one-sided Clopper–Pearson upper bound on the FPR ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). Write $\underline\tau$ for the lower bound on the TPR, both at level $\beta/2$, where $\beta$ is the chance that the audit is wrong. For a count of `k` events in `n` trials, SciPy gives the upper bound as `scipy.stats.beta.ppf(1 - beta / 2, k + 1, n - k)`, and statsmodels' `proportion_confint(..., method="beta")` gives the same interval. With probability at least $1 - \beta$, the code is then not $(\varepsilon, \delta)$-DP for any level below
+Solving these two inequalities for $\varepsilon$ turns measured rates into a lower bound on it. Write $\bar\alpha$ for the one-sided Clopper–Pearson upper bound on the FPR at level $\beta/2$, and $\underline\tau$ for the lower bound on the TPR at the same level. With probability at least $1 - \beta$, the code is then not $(\varepsilon, \delta)$-DP, at the claimed $\delta$, for any $\varepsilon$ below
 $$\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline\tau - \delta}{\bar\alpha},\ \ln\frac{1 - \bar\alpha - \delta}{1 - \underline\tau}\Big\}.$$ {#eq-audit-eps-lo}
-The bound needs independent trials and a threshold chosen without looking at the counted trials. So choose the threshold on half of the trials, and count on the other half.
+The bound needs independent trials, and a threshold chosen on other trials than those it counts, since one tuned on the counted trials would inflate the bound.
 
-Suppose 1,000 runs with the canary give 500 true positives, and 1,000 without give one false positive. The point estimate is 6.21, but confidence is expensive, and the certified bound is only 4.43. Even a perfect attack hits a ceiling. With $n$ trials per hypothesis, it can certify at most about
-$$\varepsilon_{\max}(n) \approx \ln\frac{n}{\ln(2/\beta)}.$$ {#eq-audit-ceiling}
-So each extra unit of $\varepsilon$ costs a factor of $e$ in trials. At 95% confidence, 1,000 trials per hypothesis certify at most 5.60, and 10,000 at most 7.90. Certifying the running example's 6.71 takes at least 3,038, so no feasible end-to-end audit can confirm that a large claim is tight.
-
-## Canaries and threat models {#sec-audit-canaries}
-
-An **input-space canary** is a record designed to stand out, such as a mislabeled example. A **gradient-space canary** has a gradient that the auditor writes directly. The strongest is the **Dirac canary** of Nasr et al. (2023). Its gradient has length exactly the clipping norm, all on one coordinate that no other record's gradient touches.
-
-The threat model says what the attacker sees. In the **black-box** model it sees only the final model. In the **white-box** model it sees every intermediate model, and so it can recover each step's noisy gradient sum. Against a Dirac canary seen white-box, the most powerful test thresholds a **likelihood-ratio statistic** built from those sums, which the full edition derives. A simpler score that adds up the canary coordinate's total change is weaker, lowering the most the audit can certify on the running example from 6.01 to 4.35.
-
-## Tight audits of the mechanism {#sec-audit-tight}
-
-An end-to-end white-box audit with Dirac canaries faces the accountant's own worst case, but it still falls far short of the claim, because at small $\delta$ the level is decided at a tiny FPR. For the running example that rate is $8.1\times10^{-8}$, far below the $3/n$ that $n$ trials can measure. Nasr et al. (2023) avoid the tail by assuming a Gaussian trade-off curve. Write $\Phi$ for the standard normal distribution function. A single test then bounds the separation $\mu$ from below,
-$$\mu \ge \Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}),$$ {#eq-audit-mu}
-read at a moderate FPR, where trials are cheap. Its conversion to $\varepsilon$ holds only if the curve really is Gaussian.
-
-On the running example, the rigorous bound @eq-audit-eps-lo reaches 3.63 with 50,000 trials per hypothesis, about half the claim. The Gaussian-shape estimate reaches 5.33.
-
-## One-run auditing {#sec-audit-onerun}
-
-Steinke, Nasr & Jagielski (2023) get many trials from one run. Choose a number $m$ of canaries, include each one by its own independent fair coin, train once and score every canary. For a list of $r$ guesses, guess "in" for the $r/2$ highest scores and "out" for the $r/2$ lowest. Under $\varepsilon$-DP, the number $W$ of correct guesses is no more likely to reach any count $v$ than a binomial count is:
-$$\Pr[W \ge v] \le \Pr\big[\mathrm{Bin}(r, p_\varepsilon) \ge v\big], \qquad p_\varepsilon = \frac{e^\varepsilon}{1 + e^\varepsilon}.$$ {#eq-audit-onerun}
-The certified bound is the largest level whose tail at the observed count is below $\beta$.
-
-The coins must be independent and fair, and trying several list lengths needs a Bonferroni correction. Under $(\varepsilon, \delta)$-DP, the paper adds a term of at most $2m\delta$.
-
-On the running example, one run with 1,000 white-box Dirac canaries certifies 2.22, against 2.84 from 10,000 runs per hypothesis.
-
-## Black-box audit of the trained network {#sec-audit-blackbox}
-
-To see what the released network gives away, plant **mislabeled canaries** and attack the final model with a loss score or the likelihood-ratio attack of [Membership inference](../part02-attacks/02-membership-inference.md). Run a non-private control next to it.
-
-The non-private model memorizes its canaries and certifies 2.96, but the DP-SGD model certifies only 0.13. A model with clipping but no noise, which has no finite $\varepsilon$ at all, certifies only 0.24. So a black-box bound of 0.5 against a claimed 8 does not show that the model is safe, or that its real $\varepsilon$ is 0.5. It measures this attacker only.
-
-## Auditing in continuous integration {#sec-audit-ci}
-
-The per-step audit is cheap enough to run as a unit test on every commit. Feed the code's own clip-and-noise step a Dirac canary's gradient, written by hand. In Opacus, for example, write it into a parameter's `p.grad_sample` before the `DPOptimizer` runs `clip_and_accumulate` and `add_noise`, and read the noisy gradient afterwards. Test the code path that ships, not a copy of it. Run the steps with the canary and without, record each step's noisy value on the canary's coordinate, and bound $\mu$ with @eq-audit-mu. The test fails when the bound exceeds $1/\sigma$.
-
-Fix the seeds so that a failure can be reproduced, and use a $\beta$ below 5%, or correct code fails for one seed in twenty.
-
-## Code
-
-This snippet computes the certified bound of @eq-audit-eps-lo from counts, and prints the number quoted in the text.
+SciPy computes it in a few lines, since a Clopper–Pearson bound is a quantile of a beta distribution. Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.
 
 ```python
-from collections.abc import Callable
-from math import exp, lgamma, log
+from math import log
+
+from scipy.stats import beta
 
 
-def binom_cdf(k: int, n: int, p: float) -> float:
-    """Pr[Bin(n, p) <= k], summed in logs so that large n is safe."""
-    log_terms = (lgamma(n + 1) - lgamma(i + 1) - lgamma(n - i + 1) + i * log(p) + (n - i) * log(1 - p) for i in range(k + 1))
-    return min(1.0, sum(exp(t) for t in log_terms))
-
-
-def bisect(f: Callable[[float], float], target: float, lo: float, hi: float) -> float:
-    """The x in [lo, hi] with f(x) = target, for f decreasing in x."""
-    for _ in range(100):
-        mid = (lo + hi) / 2
-        lo, hi = (mid, hi) if f(mid) > target else (lo, mid)
-    return lo
-
-
-def eps_lower_bound(fp: int, tp: int, n: int, delta: float, beta: float = 0.05) -> float:
-    """The eps certified with confidence 1 - beta from fp false and tp true positives in n trials each."""
-    fpr_hi = bisect(lambda p: binom_cdf(fp, n, p), beta / 2, 1e-12, 1 - 1e-12)
-    tpr_lo = 1 - bisect(lambda p: binom_cdf(n - tp, n, p), beta / 2, 1e-12, 1 - 1e-12)
+def eps_lower_bound(fp: int, tp: int, n: int, delta: float, level: float = 0.05) -> float:
+    fpr_hi = beta.ppf(1 - level / 2, fp + 1, n - fp)  # one-sided Clopper-Pearson upper bound
+    tpr_lo = beta.ppf(level / 2, tp, n - tp + 1)  # one-sided Clopper-Pearson lower bound
     return max(log((tpr_lo - delta) / fpr_hi), log((1 - fpr_hi - delta) / (1 - tpr_lo)))
 
 
 print(f"{eps_lower_bound(1, 500, 1_000, 1e-5):.2f}")  # 4.43
+print(f"{eps_lower_bound(0, 1_000, 1_000, 1e-5):.2f}")  # 5.60
 ```
 
-The full edition's script runs every audit:
+The raw rates alone would suggest 6.21, but confidence is expensive, and the certified bound is only 4.43. Even a perfect attack certifies only 5.60 from 1,000 trials per hypothesis, so never expect an end-to-end audit to certify the whole of a large claim. Even a **white-box** attacker, who sees every intermediate model, certifies only 3.63 in the full edition against a claimed 6.71.
 
-```bash
-uv run python code/part05-dp-ml/auditing.py
-```
+## A one-run audit of the trained model {#sec-audit-onerun}
+
+Thousands of runs are out of reach for a real model, so Steinke, Nasr & Jagielski (2023) get many trials from one run. Plant a number $m$ of canaries, include each one by its own fair coin, train once and score every canary. Then fix a list length $r$. Guess "in" for the $r/2$ highest scores and "out" for the $r/2$ lowest, and make no guess about the rest. Write $W$ for the number of correct guesses.
+
+Under $\varepsilon$-DP, no attack guesses one canary's coin right with a probability above the limit $p_\varepsilon$ given below. So the count $W$ is no more likely to reach any value $v$ than a binomial count with that success rate is:
+$$\Pr[W \ge v] \le \Pr\big[\mathrm{Bin}(r, p_\varepsilon) \ge v\big], \qquad p_\varepsilon = \frac{e^\varepsilon}{1 + e^\varepsilon}.$$ {#eq-audit-onerun}
+An observed count that this binomial reaches with probability below $\beta$ rules out that $\varepsilon$. The certified bound is the largest $\varepsilon$ ruled out this way. Under $(\varepsilon, \delta)$-DP, the paper adds at most $2m\delta$ to that probability. The coins must be independent and fair. Trying several list lengths needs a Bonferroni correction, which runs each test at $\beta$ divided by their number.
+
+The script runs it on the released pipeline of [Train a model with DP-SGD](13-train-dp-sgd.md), the Adult census data that predicts whether a person's income exceeds \$50K. It reuses that script's whole recipe and adds only the canaries, 1,000 held-out rows with flipped labels. Each is included by a coin, and 537 join the 30,000 training rows. DP-SGD runs at the release's noise multiplier, which gives $\varepsilon = 3.91$ for this slightly larger set. A non-private model uses the release's baseline recipe, and a memorizing control runs non-private Adam for 60 epochs with small batches. The slack is the book's default, $\delta = 10^{-5}$. Each canary is scored by minus its loss. The script tries six list lengths, from 20 to 1,000, and @tbl-audit-adult gives each model's best.
+
+| Training | Mean canary loss, in / out | Correct guesses | Certified $\varepsilon$ |
+| --- | --- | --- | --- |
+| DP-SGD, release recipe | 4.105 / 4.006 | 10 of 20 | 0.00 |
+| Non-private, release recipe | 2.240 / 2.222 | 8 of 20 | 0.00 |
+| Memorizing control | 1.994 / 2.992 | 75 of 100 | 0.53 |
+
+: One-run audit of the released pipeline on Adult with 1,000 mislabeled canaries, at 95% overall confidence and $\delta = 10^{-5}$. {#tbl-audit-adult}
+
+Both release-recipe models certify nothing, and the reason is the recipe, not privacy. Ten epochs with large batches barely fit the flipped labels, so included canaries have the same loss as excluded ones, with or without noise. Adult's many near-duplicate rows with opposite labels make a flipped label look like ordinary noise. Only the memorizing control separates its canaries, and even it certifies 0.53 for a model with no finite $\varepsilon$, because each canary is a single trial and 1,000 trials cap any bound. Here a perfect list of all 1,000 guesses would certify at most 5.27.
+
+So use the one-run audit as a test that exposes a bug when a DP model certifies more than its claim, never as evidence of privacy. Report it with its threat model, a black-box attacker who sees only the final model, and with a control that shows the attack can detect leakage on your data.
+
+Stronger black-box attacks, such as the likelihood ratio attack (LiRA) of [Pre-release privacy risk assessment](../part02-attacks/10-risk-assessment.md#sec-risk-lira), train **shadow models**, copies of the model trained with its exact recipe on similar data. Run them before release and keep their results with the release documents ([Release and governance](12-release-governance.md)). LiRA's TPR at a low FPR shows what a realistic attacker learns. But its (model, record) pairs share models, so they are not independent trials, and its rates in @eq-audit-eps-lo give no certified bound. Certify only from independent trials, such as the one-run audit's coins or many separate training runs.
 
 ## Cheat sheet
 
-| Result | Formula | Conditions |
-| --- | --- | --- |
-| Certified bound | @eq-audit-eps-lo, Clopper–Pearson at $\beta/2$ | Independent trials; threshold chosen on other trials |
-| Ceiling | @eq-audit-ceiling, 5.60 at 1,000 trials | A perfect attack |
-| One run | @eq-audit-onerun, plus at most $2m\delta$ | Canaries included by independent fair coins |
+| Question | Audit and cost | Rule | Blind to |
+| --- | --- | --- | --- |
+| Does the code clip and add the noise it claims? | CI test, seconds | Fail if the bound on $\mu$, @eq-audit-mu, exceeds $1/\sigma$ | Sampling and accounting bugs |
+| Is the claimed $\varepsilon$ right, accounting included? | End-to-end audit, thousands of runs | @eq-audit-eps-lo, Clopper–Pearson at $\beta/2$ | Bugs smaller than the bound's shortfall |
+| Does a trained model leak planted records? | One-run audit, one extra run | @eq-audit-onerun plus $2m\delta$, Bonferroni | Most bugs, since its bounds are low |
+| What can a realistic attacker learn? | Shadow-model attack ([LiRA](../part02-attacks/10-risk-assessment.md#sec-risk-lira)) | TPR at a low FPR; no certified bound | The most the code could leak |
 
-: The results of this chapter. {#tbl-audit-cheat}
-
-**Rules of thumb**
-
-- An audit can refute a claim, never prove one, so report its threat model with its number.
-- Budget trials before you start, at least $e^\varepsilon\ln(2/\beta)$ per hypothesis, and never call an audit tight with too few.
-- Choose thresholds and list lengths on separate data, or pay with a Bonferroni correction.
-- Read the sampling and accounting code yourself, because the cheap audits cannot see them.
-- Never read a small black-box bound as the model's real $\varepsilon$.
+: Which audit answers which question, and its rule. {#tbl-audit-cheat}
 
 ## Further reading
 
-- Nasr, Hayes, Steinke, Balle, Tramèr, Jagielski, Carlini & Terzis, "Tight Auditing of Differentially Private Machine Learning" (USENIX Security 2023): Dirac canaries, per-step audits and real bugs.
+- Nasr et al., "Tight Auditing of Differentially Private Machine Learning" (USENIX Security 2023): Dirac canaries, per-step audits and real bugs.
 - Steinke, Nasr & Jagielski, "Privacy Auditing with One (1) Training Run" (NeurIPS 2023): the one-run audit.
 
 **Derivations.** Every result here is derived step by step in [the full edition's chapter](../../book-full/part05-dp-ml/10-auditing.md).

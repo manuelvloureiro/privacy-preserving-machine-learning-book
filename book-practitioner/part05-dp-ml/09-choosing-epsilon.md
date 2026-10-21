@@ -2,148 +2,124 @@
 
 ## Why this matters
 
-Every model trained with differential privacy (DP) ships with a privacy budget $\varepsilon$. The chapter on private stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), measured what each budget costs in accuracy. That is half of the choice, and the other half is what each budget means for the people in the data. Without it, $\varepsilon$ gets chosen by habit ("everyone uses 8"), and the choice does not survive a reviewer who asks what the number promises.
+Every model trained with differential privacy (DP) ships with a privacy budget $\varepsilon$. The chapter on private stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), showed what each budget costs in accuracy, which is half of the choice. The other half is what it means for the people in the data. Without it, $\varepsilon$ gets chosen by habit ("everyone uses 8"), and it does not survive a reviewer who asks what the number promises.
 
-The answer reads privacy as a test. An attacker who wants to know whether a record was used for training runs a membership test, and every test has two error rates. The budget $\varepsilon$, together with its small slack $\delta$, caps one rate in terms of the other. But the training algorithm has its own curve of the best rates an attacker can reach, which is usually much lower. Choosing $\varepsilon$ well means computing that curve, reading it where your threat lives, and writing down what it says.
+An attacker who wants to know whether a record was used for training runs a membership test. The test can catch real members, its true positives, and it can wrongly flag non-members, its false positives. The budget $\varepsilon$, together with its small slack $\delta$ ([The definition of differential privacy](../part03-dp-foundations/01-definition.md)), caps the rate of true positives in terms of the rate of false positives. But each training run also has its own curve of the best rates an attacker can reach, and that curve usually lies far below the cap. Choosing $\varepsilon$ well means computing the curve, reading it at the false positive rate your threat calls for, and setting it beside the accuracy that each budget buys.
 
 ## Justifying a choice {#sec-epsc-justify}
 
-A defensible choice fixes the claim before the number, in six steps.
+A defensible choice says what the budget protects before it picks the number, in six steps.
 
-1. **Unit and neighbours.** Say whether the privacy unit is a record, a user or a device, and whether neighbours add or remove a unit or replace it. Say over what period the budget is spent, counting every run and search that touched the data ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
-2. **Threat.** Say whether the concern is membership, reconstruction or attribute inference, what the attacker knows beforehand, and what it sees, because this decides where you read the curve.
-3. **Whole guarantee.** Compute the trade-off curve with a tight accountant (@sec-epsc-curve), choose $\delta$ small (@sec-epsc-delta), and read the curve at the threat's operating points.
-4. **Evidence.** The curve is a theorem about an algorithm, not about your code. So run an empirical audit whose lower bound is consistent with the claim ([Auditing private training](10-auditing.md)).
-5. **Utility.** Plot accuracy against $\varepsilon$ next to the risk, and pick the smallest budget past the bend where accuracy stops rising steeply.
-6. **Comparison.** Only now compare with deployments (@sec-epsc-deployed) and with the tiers of Ponomareva et al. (2023) in the rules of thumb.
+1. **Unit and period.** Say whether one unit is a record, a user or a device, and whether neighbouring datasets differ by adding or removing one unit or by replacing one. Say which runs and searches the budget covers, since every run used to tune hyperparameters spends budget too ([Hyperparameter tuning](03-hyperparameter-tuning.md)).
+2. **Threat.** Say whether the concern is membership, reconstruction or attribute inference, and what the attacker knows and sees. This decides the false positive rate at which you read the curve, a low one for an attacker who must rarely accuse a non-member.
+3. **Whole guarantee.** Choose $\delta$ by the book's default (@sec-epsc-delta), then compute the trade-off curve (@sec-epsc-curve) and read it there.
+4. **Evidence.** The curve is a theorem about an algorithm, not about your code, so run an audit that could refute it ([Auditing private training](10-auditing.md)).
+5. **Utility.** Put accuracy against $\varepsilon$ next to the risk, and pick the smallest budget past the bend, where accuracy stops improving. Draw it on public or proxy data, because private runs that choose $\varepsilon$ are a search whose cost the reported $\varepsilon$ leaves out.
+6. **Comparison.** Only now compare with deployments (@sec-epsc-deployed) and with the tiers in the rules of thumb at the end of this page.
 
-On the running example, measure the risk in step 5 as the largest true positive rate (TPR) of a membership test at a false positive rate (FPR) of 1%. The first two doublings of the budget, from 1 to 4, raise test accuracy by 2.66 and then 1.07 points, while that TPR stays below 0.0724. But the next doubling gains only 0.56 points, and it nearly triples the TPR, to 0.2092. So past $\varepsilon = 4$, each point of accuracy is bought with a much larger worst-case risk.
+Adult, a public census survey, shows step 5 on a real run. [Train a model with DP-SGD](13-train-dp-sgd.md) trains one small network on 30,000 of its people at five budgets, each with $\delta = 10^{-5}$ and with the noise multiplier that meets it. @tbl-epsc-adult sets the test accuracies beside a measure of risk, the largest true positive rate (TPR) that any membership test can reach at a false positive rate (FPR) of $10^{-3}$. The snippet in @sec-epsc-curve computes it.
 
-A team that chooses the $\varepsilon = 4$ run can then write the statement in @tbl-epsc-statement, a template for any model card.
+| $\varepsilon$ | Noise multiplier | Test accuracy | Largest TPR at FPR $10^{-3}$ |
+| --- | --- | --- | --- |
+| 0.25 | 8.125 | 0.793 | 0.0013 |
+| 1 | 2.383 | 0.843 | 0.0023 |
+| 2 | 1.431 | 0.845 | 0.0046 |
+| 4 | 0.973 | 0.846 | 0.0123 |
+| 8 | 0.722 | 0.846 | 0.0445 |
+| Non-private | — | 0.847 | — |
 
-| Item | Statement |
-| --- | --- |
-| Training | DP-SGD with Poisson sampling rate 0.01, noise multiplier 1.36, clipping norm 0.5 and 10,000 steps, on 10,000 records, one record per person |
-| Unit and period | One record under add/remove neighbours; this one run, and no other run touched the training data |
-| Assumptions | Poisson sampling and per-example clipping as the accountant assumes, checked by an audit |
-| Guarantee | The Rényi differential privacy (RDP) accountant gives $(3.993, 10^{-5})$-DP and $(5.209, 10^{-8})$-DP; a privacy loss distribution (PLD) accountant gives $\varepsilon \le 3.729$ at $\delta = 10^{-5}$ |
-| Membership | Against an attacker who knows every other record and sees every iterate, any membership test has TPR at most 0.01312 at FPR $10^{-3}$ and at most 0.0724 at FPR $10^{-2}$ |
-| Utility | Test accuracy 0.9548, against 0.9610 without privacy |
+: Accuracy and worst-case membership risk on Adult, one seed. {#tbl-epsc-adult}
 
-: A privacy statement for the running example's $\varepsilon = 4$ run, following the six steps. {#tbl-epsc-statement}
+Accuracy rises by five points from $\varepsilon = 0.25$ to 1, then stays within a few thousandths of the non-private model, which on one seed is noise. The risk keeps growing, though, and faster with each doubling of the budget, from 0.0023 at $\varepsilon = 1$ to 0.0445 at $\varepsilon = 8$. So on Adult the bend sits at $\varepsilon = 1$, and a budget of 1 or 2 is the defensible choice. These runs trained and were scored on private rows, so here the table illustrates step 5; a real choice reads it from a public stand-in. [Release and governance](12-release-governance.md) releases the $\varepsilon = 4$ run to show the steps, and a reviewer would be right to ask why it spends more than accuracy needs. Expect the bend further right on a harder task, a larger model or a smaller dataset.
 
 ## The pair and the whole curve {#sec-epsc-curve}
 
-A membership test says "member" or "non-member" about one target record. Its TPR is the chance that it says "member" when the target was in the training set. Its FPR is the chance that it says so when the target was not. Every test against an $(\varepsilon, \delta)$-DP mechanism satisfies
+A membership test says "member" or "non-member" about one target record. Its TPR is the chance that it says "member" when the target was in the training set, and its FPR the chance that it says so when the target was not. Every test against an $(\varepsilon, \delta)$-DP mechanism satisfies
 $$\mathrm{TPR} \le \min\big\{1,\ e^\varepsilon\,\mathrm{FPR} + \delta,\ 1 - e^{-\varepsilon}(1 - \delta - \mathrm{FPR})\big\}.$$ {#eq-epsc-pair}
-Attacks are judged at a low FPR, because an attack that rarely flags a non-member identifies people with confidence ([Membership inference](../part02-attacks/02-membership-inference.md)). Yet at $\varepsilon = 8$ the pair caps the TPR at 0.9997, which constrains almost nothing.
+The middle term is the one that binds at low FPR, and the last applies the same cap to the members a test misses. Attacks are judged at a low FPR, because an attack that rarely flags a non-member identifies people with confidence ([Membership inference](../part02-attacks/02-membership-inference.md)). Yet at $\varepsilon = 8$ and an FPR of $10^{-3}$, the pair caps the TPR at 0.9997, which constrains almost nothing.
 
-A real training run satisfies DP for a whole range of pairs, with one $\delta(\varepsilon)$ for each $\varepsilon$. The best TPR an attacker can reach at a given FPR is the lowest of all their lines, which is called the **trade-off curve**:
+A real training run satisfies DP for a whole range of pairs, one $\delta(\varepsilon)$ for each $\varepsilon$, because its accountant can trade a larger $\varepsilon$ for a smaller $\delta$. Each pair gives a line, the middle term of @eq-epsc-pair, and every test must stay under all of these lines at once. The best test reaches the lowest line exactly, and that line is called the **trade-off curve**:
 $$\mathrm{TPR}^*(\mathrm{FPR}) = \min_{\varepsilon}\big(e^\varepsilon\,\mathrm{FPR} + \delta(\varepsilon)\big).$$ {#eq-epsc-duality}
-For DP-SGD, a PLD accountant computes this curve, and its two roundings bracket the truth ([Numerical accounting](../part04-privacy-accounting/06-numerical-accounting.md)). @tbl-epsc-curve compares the answers for the running example, sampled at rate 0.01 for 10,000 steps.
+For DP-SGD, a privacy loss distribution (PLD) accountant computes this curve. It can round the privacy loss up or down, and the two curves it gets bracket the true one ([Numerical accounting](../part04-privacy-accounting/06-numerical-accounting.md)). @tbl-epsc-curve compares the pair with the curve for this part's running example from [DP-SGD](02-dp-sgd.md), a synthetic run sampled at rate 0.01 for 10,000 steps.
 
-| $\varepsilon$ | Noise multiplier | Pair, FPR $10^{-3}$ | Exact, FPR $10^{-3}$ | Exact, FPR $10^{-2}$ |
+| $\varepsilon$ | Noise multiplier | Pair, FPR $10^{-3}$ | Curve, FPR $10^{-3}$ | Curve, FPR $10^{-2}$ |
 | --- | --- | --- | --- | --- |
 | 4 | 1.36 | 0.05461 | [0.01215, 0.01312] | [0.06739, 0.0724] |
 | 8 | 0.917 | 0.9997 | [0.05555, 0.0589] | [0.1987, 0.2092] |
-| 16 | 0.695 | 1 | [0.2714, 0.2808] | [0.5447, 0.5588] |
 
-: The largest TPR of a membership test against the running example's DP-SGD at $\delta = 10^{-5}$, from the pair alone and exactly from the PLD bracket. {#tbl-epsc-curve}
+: Largest TPR of a membership test against the running example at $\delta = 10^{-5}$, from the pair and from the curve. {#tbl-epsc-curve}
 
-At an FPR of $10^{-3}$, the curve of the $\varepsilon = 8$ run allows a TPR of at most 0.0589, far below the pair's cap. So a budget of 8 means little as a bare pair, but something real for DP-SGD once you report its curve.
+So a budget of 8 means little as a bare pair, while its curve caps the TPR at 0.0589 at an FPR of $10^{-3}$.
 
-Use the PLD bracket to certify, while an RDP accountant also gives a valid but looser curve. The Gaussian differential privacy (GDP) approximation in the snippet below is a quick check, not a bound, since at $\varepsilon = 16$ it reports 0.3234, above the exact value. With Google's `dp_accounting`, build the run's PLD and read the curve through @eq-epsc-duality, passing a grid of $\varepsilon$ to `get_delta_for_epsilon`:
+With Google's `dp_accounting`, build the run's PLD, ask it for $\delta$ on a grid of $\varepsilon$, and take the lowest line. The snippet's first print, for the running example at $\varepsilon = 4$, falls inside the bracket of @tbl-epsc-curve. Its second uses Adult's sampling rate of 1/30 and 300 steps, and gives the last column of @tbl-epsc-adult.
 
-```text
-from dp_accounting.pld import privacy_loss_distribution as pld
+```python
 import numpy as np
+from dp_accounting.pld import privacy_loss_distribution as pld
 
-run = pld.from_gaussian_mechanism(1.36, sampling_prob=0.01).self_compose(10_000)
-eps = np.linspace(0.0, 20.0, 2001)
-tpr = np.min(np.exp(eps) * 1e-3 + run.get_delta_for_epsilon(eps))  # TPR at FPR 1e-3
+EPS_GRID = np.linspace(0.0, 20.0, 2001)
+
+
+def tpr_at(sigma: float, q: float, steps: int, fpr: float) -> float:
+    run = pld.from_gaussian_mechanism(sigma, sampling_prob=q).self_compose(steps)
+    deltas = np.array(run.get_delta_for_epsilon(EPS_GRID))
+    return float(np.min(np.exp(EPS_GRID) * fpr + deltas))
+
+
+print(f"{tpr_at(1.36, 0.01, 10_000, 1e-3):.4f}")  # 0.0126
+adult = [tpr_at(sigma, 1 / 30, 300, 1e-3) for sigma in (8.125, 2.383, 1.431, 0.973, 0.722)]
+print(" ".join(f"{tpr:.4f}" for tpr in adult))  # 0.0013 0.0023 0.0046 0.0123 0.0445
 ```
 
-For $\varepsilon$ alone, `dp_accounting.pld.PLDAccountant` and Opacus's default `accountant="prv"` give the same kind of tight answer ([Numerical accounting](../part04-privacy-accounting/06-numerical-accounting.md)). The curve describes a strong attacker who sees every intermediate model, and a typical record attacked through the final model is much safer.
+The library's default PLD rounds the loss up, so its curve is a valid upper bound. A Rényi differential privacy (RDP) accountant gives a valid but looser curve. The Gaussian differential privacy (GDP) approximation is quick but not a bound, so use it to explain and the PLD to certify.
 
-The same curve bounds reconstruction ([Reconstruction attacks](../part02-attacks/09-reconstruction.md)). Suppose an attacker knows the target is one of a number $m$ of equally likely records. It then succeeds with probability at most the curve read at an FPR of $1/m$, so at most 0.0589 for a thousand candidates at $\varepsilon = 8$.
+The curve is also a worst case. It describes a strong attacker who sees every intermediate model, and a typical record attacked through the final model alone is much safer. It also bounds reconstruction, since guessing which of $m$ equally likely records is the target is a membership test at an FPR of $1/m$ ([Reconstruction attacks](../part02-attacks/09-reconstruction.md)).
 
 ## What an attacker can believe {#sec-epsc-bayes}
 
-Most people ask how sure someone can become that they were in the data. Write $p$ for the attacker's **prior**, its probability of "member" before it sees the model. If no output has a privacy loss above $\varepsilon$, its belief afterwards is at most
+Most people ask how sure an attacker can become that a given person was in the data. Write $p$ for the attacker's **prior**, its probability of "member" before it sees the model. Suppose no output is more than $e^\varepsilon$ times as likely with the person's record as without it, which is what a privacy loss of at most $\varepsilon$ means. Then the attacker's belief afterwards is at most
 $$\Pr[\text{member} \mid \text{output}] \le \frac{p\,e^\varepsilon}{p\,e^\varepsilon + 1 - p}.$$ {#eq-epsc-posterior}
-So DP bounds the change of belief, not the belief itself. At $\varepsilon = 4$, an attacker who starts at 1% can end at 35.55%. That is the worst output, though, and in DP-SGD the realized loss is usually far below $\varepsilon$.
+DP bounds the change of belief, not the belief itself. An attacker who starts at 1% can end at 35.55% when $\varepsilon = 4$. That is the worst output, though, and in DP-SGD the privacy loss of the model actually released is usually far below $\varepsilon$.
 
-Base rates matter as much as the loss. An attacker who acts on a flag is right with probability
+Base rates matter as much as the loss. An attacker who accuses every person its test flags as a member is right with probability
 $$\Pr[\text{member} \mid \text{flag}] = \frac{p\,\mathrm{TPR}}{p\,\mathrm{TPR} + (1 - p)\,\mathrm{FPR}}.$$ {#eq-epsc-precision}
-Suppose an attacker with a 1% prior flags at an FPR of $10^{-2}$, against the $\varepsilon = 8$ run. Its flags are then right with probability at most 0.1744, so five out of six are false. A statement about beliefs must therefore name the attacker, because an insider with a prior of 0.5 starts much closer to certainty.
+Take the running example's $\varepsilon = 8$ run and an attacker with a 1% prior who flags at an FPR of $10^{-2}$. The curve caps its TPR there at 0.2092 (@tbl-epsc-curve), so its flags are right with probability at most 0.1744, and five out of six are false. An insider with a prior of 0.5 would be right far more often, so a statement about beliefs must name the attacker.
 
 ## How small δ must be {#sec-epsc-delta}
 
-A deliberately bad mechanism shows what $\delta$ permits. It publishes each of $n$ records in full, independently with probability $\delta$, and it is $(0, \delta)$-DP. Yet it publishes at least one record with probability
+A deliberately bad mechanism shows what $\delta$ permits. It publishes each of $n$ records in full, independently with probability $\delta$. It is $(0, \delta)$-DP, because adding or removing one record changes the output only when that record's own coin comes up. Yet it publishes at least one record with probability
 $$1 - (1 - \delta)^n \approx 1 - e^{-n\delta}.$$ {#eq-epsc-release}
-For the running example's 10,000 records at $\delta = 1/n$, that is 0.6321. So $n\delta$ must be much smaller than 1. Here $n$ counts privacy units, which means people when one person has many records ([User-level differential privacy](07-user-level.md)). NIST SP 800-226 reports the common recommendation that $\delta$ be at most $1/n^2$, and calls values above $10^{-5}$ suspicious.
+For 10,000 records at $\delta = 1/n$, that is 0.6321. So $n\delta$ must be below 1. Here $n$ counts privacy units, the thing one guarantee protects, which means people when one person has many records ([User-level differential privacy](07-user-level.md)).
 
-For DP-SGD a smaller $\delta$ is cheap, because its privacy loss has a light tail. Moving the $\varepsilon = 4$ run to $\delta = 1/n^2$ raises its budget only to 5.209.
+This book uses one default throughout. Take $\delta \le 1/n^{1.1}$ and round it down to a power of ten, which keeps $n\delta$ below 1 for every $n$. It gives $10^{-5}$ for both of this page's runs, and the `delta_for` function of [Train a model with DP-SGD](13-train-dp-sgd.md) computes it. When $n$ is just above a power of ten, as with Adult's 30,000 people, the default is not far below $1/n$. That is one more reason to report a second, smaller $\delta$. NIST SP 800-226, the US guidelines for evaluating DP claims, reports a stricter common recommendation of $1/n^2$, and calls a $\delta$ above $10^{-5}$ suspicious unless justified.
+
+For DP-SGD a smaller $\delta$ is cheap. The RDP accountant that set the running example's $\varepsilon = 4$ run puts it at only 5.209 when $\delta$ falls to $10^{-8}$. So report $\varepsilon$ at a second, smaller $\delta$ too, and never quote a $\delta$ as large as one over the number of units.
 
 ## Comparing with deployed values {#sec-epsc-deployed}
 
-"Industry uses $\varepsilon$ between 1 and 10" hides what every $\varepsilon$ needs, its **privacy unit** and the **period** over which it is spent. The Census Bureau's 2020 redistricting data used zero-concentrated differential privacy (zCDP), whose guarantee is a single number $\rho$. It spent $\rho = 2.56$ on persons, reported as $\varepsilon = 17.14$ at $\delta = 10^{-10}$, with one person's record replaced as the unit. Google's Gboard language models, trained privately in federated learning, had device-level guarantees for a whole training run, from about 1 to 14 at the same $\delta$. Apple's local DP is stated per donation, with QuickType at $\varepsilon = 8$ and two donations a day, so up to 16 a day.
+"Industry uses $\varepsilon$ between 1 and 10" hides what every $\varepsilon$ needs, its **privacy unit** and the **period** over which it is spent. The Census Bureau's 2020 redistricting data used zero-concentrated differential privacy (zCDP), which states the whole guarantee as one number, written $\rho$, that converts to $(\varepsilon, \delta)$ pairs. The unit was one person's record under the replace-one relation, and persons got $\rho = 2.56$, which the Bureau reported as $\varepsilon = 17.14$ at $\delta = 10^{-10}$. Google's Gboard keyboard models, trained in federated learning on users' phones, had per-device guarantees for a whole training run, from about 1 to 14 at the same $\delta$.
 
 So convert both budgets to the same unit, neighbouring relation and $\delta$ before comparing. A zCDP parameter $\rho$ converts to a pair by
 $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$ {#eq-epsc-zcdp}
-An add/remove guarantee $(\varepsilon, \delta)$ implies only the replace-one guarantee $(2\varepsilon, (1 + e^\varepsilon)\delta)$. A budget per day adds up over time, to 365 a year at $\varepsilon = 1$ per day.
+For the Census figures this formula gives 17.92. The Bureau's 17.14 comes from a tighter conversion. Since a replacement is a removal followed by an addition, an add/remove guarantee $(\varepsilon, \delta)$ implies only the replace-one guarantee $(2\varepsilon, (1 + e^\varepsilon)\delta)$ ([The definition of differential privacy](../part03-dp-foundations/01-definition.md)). And a budget stated per day or per report adds up over time by composition, to 365 a year at $\varepsilon = 1$ per day.
 
-So the running example's $\varepsilon = 8$ run is not "less than half the Census budget", because at $\delta = 10^{-10}$ it is at 11.627, and a replacement can double that.
-
-## Code
-
-This snippet turns a claimed pair into the TPR it allows, and approximates DP-SGD's curve with GDP.
-
-```python
-from math import exp, sqrt
-from statistics import NormalDist
-
-
-def pair_tpr_cap(eps: float, delta: float, fpr: float) -> float:
-    """The largest TPR any test can reach at a given FPR, from the pair (eps, delta) alone."""
-    return min(1.0, exp(eps) * fpr + delta, 1 - exp(-eps) * (1 - delta - fpr))
-
-
-def gdp_tpr(q: float, steps: int, sigma: float, fpr: float) -> float:
-    """GDP estimate of DP-SGD's TPR at an FPR (sampling rate q, noise multiplier sigma); not a bound."""
-    mu = q * sqrt(steps * (exp(1 / sigma**2) - 1))
-    return NormalDist().cdf(NormalDist().inv_cdf(fpr) + mu)
-
-
-print(f"{pair_tpr_cap(4, 1e-5, 1e-3):.5f}")  # 0.05461
-print(f"{gdp_tpr(0.01, 10_000, 1.36, 1e-3):.5f}")  # 0.01244
-```
-
-The full edition's script computes the exact curves and every other number in this chapter, in two to three minutes:
-
-```bash
-uv run python code/part05-dp-ml/choosing_epsilon.py
-```
+So it would be wrong to call the running example's $\varepsilon = 8$ run "less than half the Census budget". At the Census's $\delta = 10^{-10}$ it is at 11.627, and under the Census's replace-one relation that can double.
 
 ## Cheat sheet
 
 | Question | Tool | Notes |
 | --- | --- | --- |
-| What does DP-SGD allow? | The trade-off curve, @eq-epsc-duality | Certify with the PLD, check with GDP |
+| What does DP-SGD allow? | The trade-off curve, @eq-epsc-duality | Certify with the PLD, not with GDP |
 | How sure can an attacker become? | @eq-epsc-posterior and @eq-epsc-precision | Name the prior; base rates dominate |
-| Can a record be reconstructed? | The curve at FPR $1/m$ | State the prior, "one of $m$" |
-| How small a $\delta$? | $\delta \le 1/n^2$ | $n$ counts privacy units |
-| Comparing with a deployment? | @eq-epsc-zcdp; replace-one doubles $\varepsilon$ | Same unit and $\delta$ first |
+| How small a $\delta$? | $\delta \le 1/n^{1.1}$, rounded down to a power of ten | $n$ counts privacy units |
+| Comparing with a deployment? | @eq-epsc-zcdp; replace-one doubles $\varepsilon$ | Same unit and $\delta$ |
 
 : Which tool answers which question when choosing $\varepsilon$. {#tbl-epsc-cheat}
 
 **Rules of thumb**
 
-- Report the curve, not just the pair, as the TPR at FPR $10^{-3}$ and $10^{-2}$.
-- A budget of at most 1 is strong for any mechanism. One up to 10 needs DP-SGD's curve as justification, and one above 10 needs the curve and an audit.
-- Default to $\delta \le 1/n^2$, since it costs DP-SGD little, and never use $\delta \ge 1/n$.
-- Never read the line $e^\varepsilon\,\mathrm{FPR} + \delta$ as DP-SGD's actual risk, because its curve lies far below it.
-- Never quote $\varepsilon$ without its unit, $\delta$ and period, and never compare a daily budget with a lifetime one.
+- A budget of at most 1 is strong for any mechanism. A budget between 1 and 10 needs DP-SGD's curve as justification, and a budget above 10 needs the curve and an audit (Ponomareva et al. 2023).
+- Never quote $\varepsilon$ without its unit, $\delta$ and period.
 
 ## Further reading
 

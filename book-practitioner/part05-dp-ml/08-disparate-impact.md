@@ -2,122 +2,133 @@
 
 ## Why this matters
 
-Training the part's running example with differential privacy (DP) at a privacy budget $\varepsilon$ of 4 costs less than one point of test accuracy ([private gradient descent](02-dp-sgd.md)). The private model reaches 0.9548, against 0.9610 without privacy. That number is an average over the whole test set, so it says nothing about who loses the point. Bagdasaryan, Poursaeed & Shmatikov (2019) studied networks trained with the private form of stochastic gradient descent (SGD), called DP-SGD. They found that the lost accuracy falls mostly on the classes and subgroups that are under-represented in the training data, and called this the **disparate impact** of DP on model accuracy.
+A private model's test accuracy is an average over everyone, so it cannot show which people lose the accuracy that privacy costs. Bagdasaryan, Poursaeed & Shmatikov (2019) trained networks with differential privacy (DP), using the private form of stochastic gradient descent (SGD) called [DP-SGD](02-dp-sgd.md). They found that the lost accuracy fell mostly on under-represented groups, and called this the **disparate impact** of DP.
 
-So a model that is "less than a point worse" on average can be ten points worse for one group of people. Those groups are often the ones a privacy guarantee is meant to protect, such as small populations, people with rare conditions and records that are unusual in other ways.
+So a model that is a point worse on average can be ten points worse for one group, often a small group that privacy is meant to protect. Before you ship a private model, measure its cost for each group against a non-private baseline, with a confidence interval on every number.
 
 ## Evaluating a private model per group {#sec-fair-measure}
 
-Before you look at any results, decide which groups matter, and give each group its own test records. Then train a non-private baseline with the same data and recipe. A gap between groups may already exist without privacy, so the quantity that DP is responsible for compares each group with itself.
+Decide which groups matter before you look at any results, so that the results cannot steer the choice. Then train a non-private baseline with the same data and recipe. A gap between groups may exist without privacy, so what DP is responsible for is how far each group's own accuracy drops when training becomes private.
 
-Write $\mathrm{acc}_g$ for a model's accuracy on the test records of group $g$. The **privacy cost** $\pi_g$ is the accuracy the group loses when the same training is made private,
+Write $\mathrm{acc}_g$ for a model's accuracy on the test records of group $g$. Private training is random, so its accuracy is averaged over several training runs, written $\mathbb E$. The **privacy cost** $\pi_g$ is then the accuracy the group loses when the same data and hyperparameters are trained privately,
 $$\pi_g = \mathrm{acc}_g(\text{non-private}) - \mathbb E\big[\mathrm{acc}_g(\text{private})\big].$$ {#eq-fair-cost}
-The average runs over training runs, because private training is random. DP has disparate impact when different groups have different privacy costs, and the difference between two groups' costs is the **privacy cost gap**.
+DP has disparate impact when groups have different privacy costs.
 
-Every accuracy needs an interval. Each test record is either classified correctly or not, so a group's accuracy is a binomial proportion, and the exact Clopper–Pearson interval covers it ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). In SciPy, `scipy.stats.binomtest(correct, m).proportion_ci(method="exact")` returns it, and in statsmodels `proportion_confint(correct, m, alpha=0.05, method="beta")` does. The gap between two groups needs its own interval. Write $\hat p_g$ for a group's measured accuracy and $m_g$ for its number of test records. For a first group $a$ and a second group $b$, measured on disjoint test records with large counts, an approximate 95% interval for the gap is
+Every accuracy needs an interval. Each test record is either classified correctly or not, so a group's accuracy is a binomial proportion. Its exact Clopper–Pearson interval contains the true accuracy in at least 95% of test samples ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). The gap between two groups needs its own interval. Write $\hat p_g$ for group $g$'s measured accuracy and $m_g$ for its number of test records. For two groups $a$ and $b$ measured on disjoint test records, the estimates are independent, so their variances add. For large counts, 1.96 standard deviations on each side give an approximate 95% interval for the gap,
 $$(\hat p_a - \hat p_b) \pm 1.96\sqrt{\frac{\hat p_a(1 - \hat p_a)}{m_a} + \frac{\hat p_b(1 - \hat p_b)}{m_b}}.$$ {#eq-fair-gap}
 
-These intervals are wider than most people expect. Suppose a 2,000-record test split holds a 5% minority, so only 100 of its records come from the minority. On one model trained at $\varepsilon = 4$, 88 of them were correct, which gives an interval 13.6 points wide. Against the majority's 1,812 out of 1,900, the measured gap of 0.074 has the interval $[0.010, 0.138]$ by @eq-fair-gap. So the gap is real, but it could be anywhere from one point to fourteen. The width falls only like one over the square root of the number of records. So a 5-point gap shows only with a few hundred test records from the group, and a 1-point gap only with thousands.
-
-A larger test set does nothing about the second source of variation, which is training itself. The next run gives another model, and a small group's accuracy varies far more between runs. In the running example at $\varepsilon = 4$, the minority's run-to-run standard deviation is almost six times the majority's. So a comparison of two recipes on one run each can easily reverse for the small group, and you should train three or more times.
-
-`fairlearn.metrics.MetricFrame`, given a `sensitive_features` column, computes any metric per group in its `by_group` table, without intervals. The evaluation can also leak. Per-group accuracies on private test data are statistics of that data, so publishing them needs its own privacy analysis ([Choosing ε](09-choosing-epsilon.md)).
-
-## What to expect {#sec-fair-observed}
-
-To show the effect, the full edition gives the running example a minority. Of its 10,000 training records, 500 come from a different region of input space. Their inputs are longer, and their labels follow a rule that the majority's records do not teach. Without privacy the model learns both groups well, with a gap of only 1.2 points, so any large gap after private training is caused by privacy (@tbl-fair-eps).
-
-| Training | Majority accuracy | Minority accuracy | Privacy cost: majority | minority |
-| --- | --- | --- | --- | --- |
-| Non-private SGD | $0.9529 \pm 0.0018$ | $0.9411 \pm 0.0052$ | — | — |
-| Clipping only, $\sigma = 0$ | $0.9581 \pm 0.0015$ | $0.9007 \pm 0.0048$ | $-0.0051$ | 0.0404 |
-| $\varepsilon = 8$, $\sigma = 0.917$ | $0.9550 \pm 0.0006$ | $0.8553 \pm 0.0110$ | $-0.0020$ | 0.0858 |
-| $\varepsilon = 4$, $\sigma = 1.36$ | $0.9470 \pm 0.0037$ | $0.8477 \pm 0.0211$ | 0.0059 | 0.0934 |
-| $\varepsilon = 1$, $\sigma = 4.13$ | $0.8822 \pm 0.0032$ | $0.6133 \pm 0.0173$ | 0.0707 | 0.3278 |
-
-: Test accuracy of each group (mean ± standard deviation over 3 runs) of the running example with a 5% minority, trained with SGD, with clipping alone, and with DP-SGD at three budgets ($\delta = 10^{-5}$, noise multiplier $\sigma$). The privacy cost is @eq-fair-cost. {#tbl-fair-eps}
-
-The minority pays almost all of the cost. At $\varepsilon = 4$ the majority loses 0.59 points and the minority 9.34, which is 15.7 times as much. Even at $\varepsilon = 8$, where the majority loses nothing, the minority loses 8.58 points. An overall accuracy hides this, because a test set with 95% majority records reports a loss of about one point at $\varepsilon = 4$.
-
-The cost depends steeply on the group's share of the data. At $\varepsilon = 4$, a minority with 1% of the training records loses 34.88 points and ends at chance, while one with 20% loses only 2.80.
-
-## Why small groups pay: clipping and noise {#sec-fair-clipping}
-
-Both causes, clipping and noise, are blind to groups. The clipping row of @tbl-fair-eps adds no noise, so it gives no privacy at all. Yet the minority already loses 4.04 points there while the majority gains 0.51, so clipping alone is disparate.
-
-Clipping caps every record's pull on the update at the clipping norm $C$, so it cuts back hardest the groups whose gradients are long. Gradients are long where the model fits a group badly, as for rare patterns, and where the group's inputs are large, as for outlying records. A small group that has not been learned yet has both, so training gives it less weight than its share of the data.
-
-The noise is the same for every group, while a group's signal grows with its size. So a small group's signal is the weakest against the noise, and its privacy cost grows roughly like one over its **share** of the training records. The two causes also compound, since a group whose gradients clipping halves pays like a group half its size.
-
-What you need from this is a diagnosis. Log the median per-example gradient norm and the fraction of records clipped, per group, during training. In Opacus, each parameter's `p.grad_sample` holds the per-example gradients after the backward pass, so their norms can be grouped by a label you keep beside the batch.
-
-## Mitigations and what they cost {#sec-fair-mitigation}
-
-Every fix moves the cost around rather than removing it, as @tbl-fair-mitigation-guide shows.
-
-| Fix | What happens | Use it? |
-| --- | --- | --- |
-| Upweight the group's loss | Clipping scales the longer gradients back to $C$, so clipped records gain nothing | No |
-| Smaller clipping norm | More records clipped, so the group's effective share falls further | No |
-| Larger clipping norm, with the step size times $C$ fixed | Less clipping bias, but the noise $\sigma C$ grows relative to short gradients | Rarely; on the running example neither direction helped |
-| Clipping norm set from the largest observed gradient | Depends on the data, so it breaks the privacy proof | Only if chosen privately and charged |
-| Oversample the group | Its records' $\varepsilon$ is set by their higher sampling rate, so $\sigma$ must rise | Only with that accounting |
-| Global scaling with an adaptive bound (Esipova et al. 2023) | The same as a larger clipping norm with a smaller step; keeps the update's direction | Worth a try |
-| Group-aware clipping or fairness constraints (research) | Equalizes the groups' clipping or loss | Only with lawful group labels, spending budget on group statistics |
-| More data from the group, a public pretrained model, or a larger $\varepsilon$ | Raises the group's signal or lowers the noise | The fixes that work |
-
-: Mitigations for disparate impact, and when to use them. {#tbl-fair-mitigation-guide}
-
-Oversampling raises a group's pull but costs that group's privacy, because a record's guarantee depends on its own chance of being sampled ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). The rule must be fixed in advance, with the accountant at the highest rate. Sampling the 5% minority four times as often, at $\varepsilon = 4$ for its records, raises the noise multiplier from 1.36 to 4.71. Without the higher noise, the minority would silently get $\varepsilon = 20.96$, the weakest privacy for the group already worst served. With it, the gap narrows from 9.93 points to 3.99, but by **levelling down**. Both groups lose accuracy, the majority 8.01 points.
-
-Some of the cost cannot be avoided by any algorithm, because learning a small group's own rule is private estimation on its few records ([Lower bounds](../part03-dp-foundations/10-lower-bounds.md)). So the reliable fixes are more data from the group, or a starting point that already serves it, such as a public pretrained model ([Public data and private fine-tuning](06-public-data.md)).
-
-## Code {#sec-fair-code}
-
-This function computes the interval for the accuracy gap, @eq-fair-gap, and prints the one quoted above.
+These intervals are wider than most people expect. Suppose a test split holds only 100 records of a minority, and 88 of them are classified correctly. The majority gets 1,812 of its 1,900 records right, an accuracy of 0.954. So the measured gap is 0.074. SciPy gives the minority's interval, and @eq-fair-gap gives the gap's.
 
 ```python
 from math import sqrt
 
+from scipy.stats import binomtest
 
-def gap_interval(pa: float, ma: int, pb: float, mb: int) -> tuple[float, float]:
-    """Approximate 95% interval for the accuracy gap pa - pb, measured on disjoint test sets."""
-    se = sqrt(pa * (1 - pa) / ma + pb * (1 - pb) / mb)
-    return pa - pb - 1.96 * se, pa - pb + 1.96 * se
+minority = binomtest(88, 100).proportion_ci(confidence_level=0.95, method="exact")
+print(f"{minority.low:.3f} {minority.high:.3f}")  # 0.800 0.936
 
-
-print("%.3f %.3f" % gap_interval(0.954, 1_900, 0.880, 100))  # 0.010 0.138
+gap, se = 0.954 - 0.880, sqrt(0.954 * 0.046 / 1_900 + 0.880 * 0.120 / 100)
+print(f"{gap - 1.96 * se:.3f} {gap + 1.96 * se:.3f}")  # 0.010 0.138
 ```
 
-The full edition's script trains the running example with a minority and computes every number in this chapter:
+So the gap is real, since its interval excludes zero, but it could be anywhere from one point to fourteen. An interval separates a 5-point gap from zero only with a few hundred test records from the group, and a 1-point gap only with thousands.
 
-```bash
-uv run python code/part05-dp-ml/disparate_impact.py
+The privacy cost needs a different interval, because both models are scored on the same test records, so their accuracies are not independent and @eq-fair-gap does not apply. Pair them instead. Among group $g$'s $m_g$ test records, write $b$ for the number that only the non-private model gets right, and $c$ for the number that only the private one gets right. One run's cost is then $(b - c)/m_g$, and for large counts an approximate 95% interval is
+$$\frac{b - c}{m_g} \pm \frac{1.96}{m_g}\sqrt{b + c - \frac{(b - c)^2}{m_g}}.$$ {#eq-fair-paired}
+
+The test records are one source of variation. Training is a second source, and a larger test set does nothing about it. A small group's accuracy varies far more from one training run to the next than a large group's. So a comparison of two recipes on one run each can easily reverse for it. Train each recipe several times with different seeds, average the per-run costs and report their spread. `fairlearn.metrics.MetricFrame` computes any metric per group, but without intervals.
+
+The evaluation itself can also leak. Per-group accuracies on private test data are statistics of that data. To publish them, add noise to each group's count of correct predictions and count it in a budget of its own ([Release statistics with a library](../part03-dp-foundations/12-release-statistics.md)). Otherwise keep them in the internal assessment.
+
+## Disparate impact, measured {#sec-fair-observed}
+
+The script [practitioner_dp_sgd.py](../../code/part05-dp-ml/practitioner_dp_sgd.py) of [Train a model with DP-SGD](13-train-dp-sgd.md) uses the Adult census data, which predicts whether a person's income exceeds \$50K. It trains a small network once without privacy and once with DP-SGD at a privacy level $\varepsilon$ of 4 and a slack $\delta$ of $10^{-5}$. Then it scores both models on the test rows of each `sex`, the only attribute it measures. Other attributes, such as race, have much smaller groups and wider intervals. For each group it counts the correct predictions, marked in the boolean array `right`, and asks SciPy for the exact interval.
+
+```{.python excerpt="dpsgd-per-group"}
+in_group = sex == group
+correct, total = int(right[in_group].sum()), int(in_group.sum())
+interval = binomtest(correct, total).proportion_ci(confidence_level=0.95, method="exact")
 ```
+
+Its seed-0 run, `uv run python code/part05-dp-ml/practitioner_dp_sgd.py`, gives @tbl-fair-adult.
+
+| Group | Test records | Non-private accuracy | Accuracy at $\varepsilon = 4$ | Privacy cost |
+| --- | --- | --- | --- | --- |
+| Female | 5,613 | 0.924 [0.917, 0.931] | 0.922 [0.915, 0.929] | +0.002 |
+| Male | 11,229 | 0.808 [0.800, 0.815] | 0.807 [0.800, 0.815] | +0.001 |
+
+: Accuracy on Adult by sex, with exact 95% intervals, for one training run of each model. {#tbl-fair-adult}
+
+Here DP has no measurable disparate impact. Each group loses at most 0.002, well inside its intervals, which overlap almost entirely. It comes from one private run, a single draw of @eq-fair-cost rather than its average. The large gap between the groups, 0.924 against 0.808, is there without privacy too, so DP is not responsible for it. Adult is easy, because both groups are large and the whole model loses almost nothing at this budget, 0.846 with DP against 0.847 without.
+
+A small group tells a different story. The full edition's running example is a synthetic task with 10,000 training records, labelled by a fixed random network. Of these records, 500 form a minority whose inputs come from a different region and follow a different labelling rule (@tbl-fair-eps).
+
+| Training | Majority accuracy | Minority accuracy | Majority's privacy cost | Minority's privacy cost |
+| --- | --- | --- | --- | --- |
+| Non-private SGD | 0.9529 | 0.9411 | — | — |
+| Clipping only, $\sigma = 0$ | 0.9581 | 0.9007 | $-0.0051$ | 0.0404 |
+| $\varepsilon = 4$, $\sigma = 1.36$ | 0.9470 | 0.8477 | 0.0059 | 0.0934 |
+
+: Test accuracy of each group of the full edition's running example with a 5% minority, averaged over 3 runs ($\delta = 10^{-5}$, noise multiplier $\sigma$). Costs are fractions of accuracy, and a negative cost is a gain. {#tbl-fair-eps}
+
+The minority pays almost all of the cost. At $\varepsilon = 4$ the majority loses 0.59 points, while the minority loses 9.34. The cost also depends steeply on the group's share of the data. At the same budget, a minority with 1% of the training records loses 34.88 points. With 20% of the records, it loses only 2.80. So check every small group, whatever the overall accuracy says.
+
+## Why small groups pay: clipping and noise {#sec-fair-clipping}
+
+DP-SGD loses accuracy through two steps, clipping and noise, and both treat every record alike. The clipping row of @tbl-fair-eps clips without adding noise, so it gives no privacy at all. Yet the minority already loses 4.04 points there, which means clipping by itself treats the groups unequally.
+
+Clipping caps every record's pull on the update at the clipping norm $C$, so it cuts back the groups with long gradients hardest. A group's gradients are long where the model fits it badly, as it does a rare pattern that the rest of the data does not teach. So training gives such a group less weight than its share of the records.
+
+The noise is the same for every group, while a group's signal grows with its size. So a small group's signal is the weakest against the noise, and its privacy cost grows roughly like one over its share of the training records. The two causes compound, because the noise acts on the weight that clipping has already shrunk. So a group whose gradients clipping halves pays like a group half its size.
+
+To see which cause hurts your model, measure per-example gradient norms by group. Opacus's `GradSampleModule`, the wrapper DP-SGD training already uses, keeps one gradient per row in each parameter's `grad_sample`. So one backward pass gives the norms, which `stacked_norms` combines over all parameters.
+
+```{.python excerpt="dpsgd-grad-norms"}
+wrapped = GradSampleModule(model)  # adds hooks that keep one gradient per row
+wrapped.train()
+logits: torch.Tensor = wrapped(split.x)
+nn.CrossEntropyLoss()(logits, split.y).backward()  # fills p.grad_sample for every weight p
+norms = stacked_norms(wrapped)
+```
+
+Group the norms by each row's group label, kept beside the batch but not fed to the model. To measure a model that Opacus has already wrapped, copy its weights into a fresh, unwrapped module first, because `GradSampleModule` refuses a model that already carries its hooks. Log each group's median norm and fraction clipped as training goes on, because the groups can separate late. At initialization on Adult, the median norm is 1.444, and $C = 1$ clips every row, whatever its group.
+
+## Mitigations and what they cost {#sec-fair-mitigation}
+
+At a fixed budget, a change to the training recipe only moves the cost between the groups or between clipping and noise (@tbl-fair-mitigation-guide). Only the last row, which changes the data, the starting model or the budget, reduces it.
+
+| Fix | What happens | Use it? |
+| --- | --- | --- |
+| Upweight the group's loss, or use a smaller clipping norm | Clipping cuts an upweighted gradient back to $C$, and a smaller norm clips more of the group | No |
+| Larger clipping norm, with step size times $C$ held fixed | Less clipping, but more noise relative to short gradients | Rarely, since it did not help the running example |
+| Clipping norm set to the largest gradient seen in the data | Breaks the privacy proof, which assumes $C$ is fixed in advance | Only if chosen privately and charged |
+| Oversample the group | Its records' $\varepsilon$ is set by their higher sampling rate, so $\sigma$ must rise | Only with that accounting |
+| Global scaling with an adaptive bound (Esipova et al. 2023), one shared scale for every gradient | Keeps the update's direction and needs no group labels | Worth a try |
+| More data from the group, a public pretrained model ([Public data and private fine-tuning](06-public-data.md)), or a larger $\varepsilon$ | Raises the group's signal or lowers the noise | The fixes that work |
+
+: Mitigations for disparate impact, and when to use them. {#tbl-fair-mitigation-guide}
+
+Oversampling costs the group's privacy, because a record's guarantee depends on its own chance of being sampled ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)). So run the accountant at the oversampled group's rate. In the running example, the minority is sampled four times as often and its records are held at $\varepsilon = 4$, which raises the noise multiplier from 1.36 to 4.71. With it, the gap between the groups' accuracies narrows from 9.93 points to 3.99. But it narrows by **levelling down**, since the majority loses 8.01 points. Research methods that clip or penalize each group separately need lawful group labels and private per-group statistics.
+
+Some of the cost cannot be avoided by any algorithm. Learning a small group's own rule means estimating it privately from that group's few records, and private estimation from few records has an error floor that no mechanism beats ([Lower bounds](../part03-dp-foundations/10-lower-bounds.md)).
 
 ## Cheat sheet
 
 | Question | Answer | Conditions |
 | --- | --- | --- |
 | Does DP hurt this group? | Its privacy cost, @eq-fair-cost, against the non-private baseline | Same data and recipe, averaged over runs |
-| Is the gap real? | Clopper–Pearson per group, @eq-fair-gap for the gap | Disjoint test records, large counts |
-| How many test records? | A few hundred per group for a 5-point gap, thousands for 1 point | Width falls like $1/\sqrt{m_g}$ |
-| How big will the cost be? | Roughly one over the group's share, more with long gradients | Grows as $\varepsilon$ falls |
-| Which fix? | More data or a public model, then global scaling | See @tbl-fair-mitigation-guide |
+| How big will the cost be? | Negligible for large groups at moderate $\varepsilon$, roughly one over the group's share for small ones | Grows as $\varepsilon$ falls |
 
 : The decisions of this chapter. {#tbl-fair-cheat}
 
 **Rules of thumb**
 
-- Report accuracy and privacy cost per group, with intervals and the spread over runs, next to the non-private model's.
-- Never report overall accuracy alone, and never report the gap alone, because levelling down closes it too.
-- Never compare two recipes on one seed each, because a small group's accuracy varies most between runs.
-- Oversample a group only with the accountant at its higher sampling rate.
-- Treat published per-group metrics on private test data as a release, and remember that the group labels themselves are sensitive.
+- Report accuracy and privacy cost per group, with intervals, next to the non-private model's.
+- Never report the gap alone, because levelling down closes it too.
 
 ## Further reading
 
 - Bagdasaryan, Poursaeed & Shmatikov, "Differential Privacy Has Disparate Impact on Model Accuracy" (NeurIPS 2019): the observation.
-- Esipova, Ghomi, Luo & Cresswell, "Disparate Impact in Differential Privacy from Gradient Misalignment" (ICLR 2023): clipping's direction error, and global scaling with an adaptive bound.
+- Esipova, Ghomi, Luo & Cresswell, "Disparate Impact in Differential Privacy from Gradient Misalignment" (ICLR 2023): global scaling.
 
 **Derivations.** Every result here is derived step by step in [the full edition's chapter](../../book-full/part05-dp-ml/08-disparate-impact.md).
