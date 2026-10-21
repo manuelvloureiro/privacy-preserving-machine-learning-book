@@ -2,101 +2,120 @@
 
 ## Why this matters
 
-Every mechanism so far in this part assumed a **trusted curator**, which holds the raw data and releases only the mechanism's output. In this **central model**, the differential privacy (DP) guarantee covers the output, not the curator's database, its engineers or a court order for the data. Often the curator cannot be trusted that far, as when a browser vendor collects usage statistics from its own users.
+Every mechanism so far in this part assumed a **trusted curator**, which holds the raw data and releases only the mechanism's output. In this **central model**, the differential privacy (DP) guarantee protects what the curator publishes, but not against a breach of its database, a curious engineer or a court order. A browser vendor that collects usage statistics from its users is often not trusted that far.
 
-The other three models trust less. In the **local model** nobody is trusted, and each person randomizes their own record before it leaves their device. In the **shuffle model** a shuffler is trusted only to cut the link between each report and its sender. In the **distributed model** cryptography and enough honest participants are trusted. The further upstream the noise enters, the fewer parties you trust and the more noise reaches the answer.
+The other three models trust less. In the **local model** nobody is trusted, and each person randomizes their own record before it leaves their device. The **shuffle model** trusts a shuffler only to cut the link between each report and its sender. The **distributed model** trusts cryptography that reveals only a sum, run by enough honest participants. The closer to each person the noise is added, the fewer parties you trust, and the more noise reaches the answer.
 
 ## Choosing a trust model {#sec-trust-compare}
 
-Start from whom you cannot trust, then pay what that model costs. At a fixed privacy level, the error of a count stays constant in the central model, but in the local model it grows with the square root of the number of people. For a small histogram at the same guarantee, the full edition finds that at a hundred thousand people the local model's squared error is about 42,000 times the central one. Whatever you choose, state the trust model next to the privacy parameters, because the same numbers protect against different adversaries.
+Each model has a price. As the population grows, the noise on a private count stays fixed in the central model but grows with its square root in the local model. On the full edition's eight-value histogram over a hundred thousand people, the local model's squared error is about 42,000 times the central one at the same guarantee. The shuffle and distributed models close most of that gap.
+
+So use the central model whenever a curator can be trusted with the raw data, and [Release statistics with a library](12-release-statistics.md) does that job end to end. Choose local only when nobody may see a raw record and the population is large enough, which you check by solving the standard deviation of @sec-trust-local for the number of people. Either way, state the trust model next to the privacy parameters, because the same $\varepsilon$ protects against a different adversary in each model.
 
 ## Central and local differential privacy {#sec-trust-local}
 
-In the local model, each person sends only a **report**, the output of a **local randomizer** $R$ run on their own record. Write $\varepsilon_0$ for the privacy level of one report. The randomizer is $\varepsilon_0$-DP when every set of reports $S$ is at most $e^{\varepsilon_0}$ times as likely under one record as under any other:
+In the local model, each person sends only a **report**, the output of a **local randomizer** $R$ run on their own record. Write $\varepsilon_0$ for the privacy level of one report. The randomizer is $\varepsilon_0$-DP when no set of possible reports becomes more than $e^{\varepsilon_0}$ times as likely when the record changes. In symbols, every set of reports $S$ and every two records $x$ and $x'$ satisfy
 $$\Pr[R(x) \in S] \le e^{\varepsilon_0}\Pr[R(x') \in S].$$ {#eq-trust-ldp}
-With independent randomness per person, the whole collection is then $\varepsilon_0$-DP in the central sense. The guarantee covers only the randomized value, so a network address stored next to a report links it back to the person.
+Changing one person's record changes only their own report, so the whole collection is then $\varepsilon_0$-DP in the central sense, with neighbours that differ in one replaced record. The guarantee covers only the randomized value, so a network address stored with a report links it back to the person.
 
-The basic local randomizer is **randomized response** on one bit. Each person reports their true bit with probability $e^{\varepsilon_0}/(1 + e^{\varepsilon_0})$, and the flipped bit otherwise. The analyst undoes the known flipping to get an unbiased estimate $\hat\pi$ of the fraction of ones, whose standard deviation for $n$ people is
+The basic local randomizer is [randomized response](01-definition.md) on one bit. Each person reports their true bit with a probability, written $p$, of $e^{\varepsilon_0}/(1 + e^{\varepsilon_0})$, and the flipped bit otherwise. The analyst undoes the expected flips by subtracting $1 - p$ from the share of reported ones and dividing by $2p - 1$. Every report has the same variance whatever its true bit, so the estimate's standard deviation depends only on the level and the number of people $n$:
 $$\operatorname{sd}(\hat\pi) = \frac{e^{\varepsilon_0/2}}{(e^{\varepsilon_0} - 1)\sqrt n}.$$
-For example, survey ten thousand people at the level $\ln 3$. The estimated count then has a standard deviation of 86.6 people, while a trusted curator adding Laplace noise would be off by 1.287. So the local survey is 67.3 times noisier.
 
-That factor is the model's, not the protocol's. No local protocol can estimate a fraction with error below order $1/((e^{\varepsilon_0} - 1)\sqrt n)$, and randomized response is optimal up to a constant. That is why local DP is used for the most frequent items in large populations, as in Apple's, Google's and Microsoft's telemetry, and almost never for finer ones. On a small user base its estimates are mostly noise. OpenDP provides randomized response as `dp.m.make_randomized_response_bool` for one bit and `dp.m.make_randomized_response` for a list of values.
+The script [practitioner_adult_statistics.py](../../code/part03-dp-foundations/practitioner_adult_statistics.py) runs both models at $\varepsilon_0 = \ln 3$ on the 48,842 people of the Adult census data, where each bit says whether a person's income is over \$50K. In the local model, each bit goes through diffprivlib's `Binary` mechanism, and the analyst sees only the reports.
+
+```{.python excerpt="adult-local-rr"}
+answers = (adult["income"] == ">50K").cast(pl.Int8).cast(pl.String).to_list()  # "1" or "0"
+n, eps = len(answers), log(3)
+coin = Binary(epsilon=eps, value0="0", value1="1", random_state=seed)
+reports = [coin.randomise(a) for a in answers]  # each person randomizes their own answer
+p = exp(eps) / (1 + exp(eps))  # chance a report is truthful: 0.75
+reported = reports.count("1") / n
+local = (reported - (1 - p)) / (2 * p - 1)  # undo the expected flips
+local_sd = math.sqrt(p * (1 - p) / n) / (2 * p - 1)  # the randomization noise alone
+print(f"true share over 50K: {answers.count('1') / n:.4f}")
+print(f"local estimate: {local:.4f}  sd {local_sd:.4f}")
+```
+
+In the central model, a trusted curator counts the true bits with diffprivlib's `tools.count_nonzero` at the same level, which adds Laplace noise with standard deviation $\sqrt2/\varepsilon$ to the count.
+
+```{.python excerpt="adult-central-count"}
+rich = (adult["income"] == ">50K").to_numpy()
+central = tools.count_nonzero(rich, epsilon=log(3), random_state=seed) / len(rich)
+central_sd = math.sqrt(2) / log(3) / len(rich)  # a Laplace count with sensitivity 1
+print(f"central estimate: {central:.4f}  sd {central_sd:.6f}")
+```
+
+Its seed-0 run, `uv run python code/part03-dp-foundations/practitioner_adult_statistics.py`, prints this.
+
+```text
+true share over 50K: 0.2393
+local estimate: 0.2359  sd 0.0039
+central estimate: 0.2393  sd 0.000026
+local sd / central sd: 149
+```
+
+So at the same guarantee, the local estimate is 149 times noisier, and the factor grows like the square root of the population. No local protocol can estimate a fraction with an error below order $1/((e^{\varepsilon_0} - 1)\sqrt n)$, and randomized response reaches that order, so the factor belongs to the model. That is why Apple, Google and Microsoft use local DP only for the most frequent items in very large populations.
 
 ## Frequency estimation: $k$-ary randomized response and unary encoding {#sec-trust-frequency}
 
-The workhorse of deployed local DP is **frequency estimation**. Each person holds one of a known list of values, such as emoji, and the analyst wants the fraction holding each one. Write $k$ for the number of values.
-
-In a **frequency oracle**, each report supports a value with a probability that is $p$ if the person holds it and a smaller $q$ otherwise. Count the reports $C_v$ that support a value $v$. The debiased estimate of its fraction is then
+The workhorse of deployed local DP is **frequency estimation**. Each person holds one value from a known list, such as an emoji, and the analyst wants the share holding each one. A report votes for a value with some probability $p$ if the person holds it, and with a smaller probability $q$ otherwise. Write $C_v$ for the number of the $n$ reports that vote for a value $v$. Removing the false votes on average gives the unbiased estimate
 $$\hat f_v = \frac{C_v/n - q}{p - q}.$$
-There are two standard designs, and the pure-ldp Python package implements both. The first, **$k$-ary randomized response**, reports the true value with probability $e^{\varepsilon_0}/(e^{\varepsilon_0} + k - 1)$, and any other value otherwise. The second, **optimized unary encoding** (Wang et al. 2017), writes the value as $k$ bits with a single 1. It keeps that 1 with probability one half, and it turns each 0 into a 1 with probability $1/(e^{\varepsilon_0} + 1)$.
 
-Rare values decide between them, because their variance is the noise floor below which nothing can be seen. Times $n$, the two floors are
-$$k\text{-ary: } \frac{e^{\varepsilon_0} + k - 2}{(e^{\varepsilon_0} - 1)^2}, \qquad \text{optimized unary: } \frac{4e^{\varepsilon_0}}{(e^{\varepsilon_0} - 1)^2}.$$
-So $k$-ary randomized response wins exactly when $k < 3e^{\varepsilon_0} + 2$. Unary encoding's floor does not depend on $k$, and its price is a report of $k$ bits. To size $n$, note that a value is visible only if its frequency is about three times the square root of the floor divided by $n$.
+Two designs set $p$ and $q$ for a list of $k$ values. In **$k$-ary randomized response**, each person reports their true value with probability $e^{\varepsilon_0}/(e^{\varepsilon_0} + k - 1)$, and another value otherwise. **Optimized unary encoding** sends one bit per value, and it keeps the 1 of the value held only half the time but almost never turns a 0 into a 1. Most values of a long list are rare, and a rare value's variance sets the smallest share that can be seen. Comparing those variances, use $k$-ary randomized response when $k < 3e^{\varepsilon_0} + 2$, and unary encoding otherwise, at the price of a $k$-bit report. The pure-ldp Python package implements both.
 
-For example, a keyboard app wants the frequency of each of 128 emoji from a million users at $\varepsilon_0 = 1$. A rare emoji's estimate has a standard deviation of 0.0019 under optimized unary encoding, against 0.0066 under $k$-ary randomized response. An estimate must stand about three standard deviations above zero to be seen, so even the better design loses every emoji used by fewer than about 0.6% of users.
+For example, a keyboard app wants the share of each of 128 emoji from a million users at $\varepsilon_0 = 1$. A rare emoji's estimate then has a standard deviation of 0.0019 under unary encoding, against 0.0066 under $k$-ary randomized response. By convention, an estimate must stand three standard deviations above zero to be told from noise. So even the better design loses every emoji used by fewer than about 0.6% of users, and you should size the population from that floor before collecting.
 
 ## Large and unknown domains: hashing and heavy hitters {#sec-trust-heavy}
 
-Unary reports need one bit per possible value, which **local hashing** avoids. Each person draws a hash function from a large public family, maps their value into one of $w$ buckets, and sends the hash index with a $w$-ary randomized response of their bucket. Choose $w$ from the privacy level, because near $w = e^{\varepsilon_0} + 1$ the variance equals that of optimized unary encoding, with reports of a few bits.
-
-An oracle also needs the analyst to name each value in advance. Finding frequent values with no dictionary is the **heavy hitters** problem, and the standard answer grows prefixes (Bassily et al. 2017). Split the people into one group per symbol position, and let group $\ell$ report the first $\ell$ symbols of its value by local hashing. The analyst keeps the short prefixes whose estimates clear a threshold, extends each survivor by one symbol, and tests those on the next group. Each threshold comes from the normal tail of an absent value's estimate, so that a level raises few false alarms.
-
-Deployed systems use these pieces. Google's RAPPOR, in Chrome, sends a unary encoding of a hashed value and tests candidates that the analyst supplies (Erlingsson, Pihur & Korolova 2014). Apple's count-mean sketch hashes each value and sends a unary encoding of its bucket.
+When $k$ bits per report are too many, **local hashing** hashes each value into one of about $e^{\varepsilon_0} + 1$ buckets and randomizes the bucket. That matches unary encoding's variance with a few bits. When the analyst cannot even list the candidates, **heavy hitters** protocols build them up letter by letter, keeping only frequent prefixes (Bassily et al. 2017).
 
 ## Numbers in one bit: local mean estimation {#sec-trust-mean}
 
-Telemetry also collects numbers, such as minutes in an app, each between 0 and a known bound $m$. Ding, Kulkarni & Yekhanin (2017) showed that one bit per person is enough. A person with value $x$ sends a bit that is 1 with a probability rising in a straight line, from the lie probability of randomized response at 0 to its truth probability at $m$:
-$$\Pr[Y = 1] = \frac{1}{e^{\varepsilon_0} + 1} + \frac{x}{m}\cdot\frac{e^{\varepsilon_0} - 1}{e^{\varepsilon_0} + 1}.$$ {#eq-trust-onebit}
-The analyst undoes the line to get an unbiased mean. For a million users of an app at $\varepsilon_0 = 1$, the one-bit estimate has a standard deviation of 1.420 minutes. Fix the bound before collection and clip to it on the device, because a bound taken from the data would let one record change everyone's randomizer.
+Telemetry also collects numbers, such as minutes in an app, each between 0 and a known bound. One bit per person is enough (Ding, Kulkarni & Yekhanin 2017). The chance of sending a 1 rises in a straight line with the value, so the analyst can invert that line to get an unbiased mean. Take a million users and a bound of 1,440 minutes. At $\varepsilon_0 = 1$, the mean has a standard deviation of 1.420 minutes. Fix the bound before collection and clip to it on the device, because a bound computed from the reports would let one person's value change everyone's randomizer.
 
 ## Collecting every day: memoization {#sec-trust-repeated}
 
-Telemetry asks the same question every day, and fresh noise averages away. By basic [composition](02-properties.md), each report of the same value adds its $\varepsilon_0$ to the cost. After a hundred daily reports of one bit at the level $\ln 3$, the bit is no longer in doubt.
+Telemetry asks the same question every day. Averaging the daily reports of an unchanged value removes fresh noise, and [composition](02-properties.md) counts that leak by adding each report's $\varepsilon_0$. The fix is **memoization**. The device draws one permanent randomized response per value and reuses it, so an unchanged value costs only that response's level, written $\varepsilon_\infty$. RAPPOR, Google's collection of Chrome users' homepages, has $\varepsilon_\infty = 2.043$.
 
-The fix is **memoization**. The device draws one permanent randomized response per value and reuses it, so all reports of an unchanged value cost only that one response's level $\varepsilon_\infty$. RAPPOR's homepage collection has $\varepsilon_\infty = 2.043$. Memoization fails when the value changes, since each new value costs another $\varepsilon_\infty$. A user who changes their homepage every month reaches $\varepsilon = 24.5$ in a year.
-
-For numbers that drift a little, Microsoft's Windows 10 telemetry uses **$\alpha$-point rounding**, named after a secret random threshold $\alpha$. A report then changes only when the value crosses that threshold. State such a guarantee as one about changes in behaviour, not as a per-round $\varepsilon$ times the number of rounds.
+Memoization fails when the value changes, since each new value costs another $\varepsilon_\infty$, so a user who changes their homepage every month reaches $\varepsilon = 24.5$ in a year. For drifting numbers, Microsoft's Windows telemetry compares each value with a secret random threshold per device, so a report changes only when the value crosses it. Its guarantee is about behaviour, not rounds. A user who stays within a band reveals nothing new, and one who changes reveals roughly when.
 
 ## The shuffle model and amplification by shuffling {#sec-trust-shuffle}
 
-In the **shuffle model** (Cheu et al. 2019), each person sends a local report to a **shuffler**. The shuffler strips identifiers and timing and forwards the reports in random order, so each report hides among the others ([Amplification by shuffling and by iteration](../part04-privacy-accounting/07-shuffling-iteration.md)). Feldman, McMillan & Talwar (2021) give the bound to compute with. It needs enough people to hide among, which means
+In the **shuffle model** (Cheu et al. 2019), each person sends a local report to a **shuffler**, which strips identifiers and timing and forwards the reports in random order. Each report then hides among the others, so the collection meets central $(\varepsilon, \delta)$-DP, with a small slack $\delta$, at an $\varepsilon$ far below $\varepsilon_0$ ([Amplification by shuffling and by iteration](../part04-privacy-accounting/07-shuffling-iteration.md)). The closed-form bound of Feldman, McMillan & Talwar (2021) gives that $\varepsilon$ only when there are enough people to hide among:
 $$\varepsilon_0 \le \ln\frac{n}{16\ln(2/\delta)}.$$
-When this holds, the shuffled reports are $(\varepsilon, \delta)$-DP for a small slack $\delta$, with
-$$\varepsilon \le \ln\left(1 + \frac{e^{\varepsilon_0} - 1}{e^{\varepsilon_0} + 1}\left(\frac{8\sqrt{e^{\varepsilon_0}\ln(4/\delta)}}{\sqrt n} + \frac{8e^{\varepsilon_0}}{n}\right)\right).$$ {#eq-trust-fmt}
 
-In practice you solve the bound for the local level. Roughly, a central $\varepsilon$ allows $\varepsilon_0$ up to about $\ln(\varepsilon^2 n/\ln(1/\delta))$. For a central $\varepsilon = 1$ at $\delta = 10^{-6}$, ten thousand people may each randomize at $\varepsilon_0 = 3.504$, but at a thousand people the condition caps it at 1.460. The closed form is several times looser than the numerical bound of the same paper, so plan with the closed form, and deploy with that numerical bound, for which the authors publish code. When you quote the shuffled $\varepsilon$, say that it assumes a trusted shuffler.
+In practice you fix the central target and solve the bound for the largest $\varepsilon_0$ it allows. For a central $(1, 10^{-6})$, ten thousand people may each randomize at $\varepsilon_0 = 3.504$. At a thousand people the condition above binds first and caps it at 1.460. Both use a $\delta$ below the book's default $1/n^{1.1}$. The closed form overstates $\varepsilon$ by a factor of 2.6 to 4.6 at ten thousand people. So plan with it, and deploy with the paper's published numerical bound.
 
-Three things undo the amplification. A shuffler that colludes with the analyst leaves each report at its local $\varepsilon_0$, so keep that level reasonable. Fake senders provide no cover, so count only honest ones in @eq-trust-fmt. And timing and message sizes must not leak, which is why real shufflers batch and pad their traffic.
+Three things undo the amplification. A shuffler that colludes with the analyst leaves each report at $\varepsilon_0$, so choose an $\varepsilon_0$ you could defend on its own, within the tiers of [the definition](01-definition.md#sec-dpdef-testing). Fake senders give no cover, so count only honest ones in $n$. And real shufflers batch and pad their traffic, so that timing and sizes do not leak.
 
 ## Distributed DP: splitting the noise {#sec-trust-distributed}
 
-The **distributed model** adds the central amount of noise once, in pieces. Each client adds a small share of noise to its value, and **secure aggregation** reveals only the sum to the server ([Cryptography basics](../part01-prerequisites/08-crypto-basics.md)).
+In the **distributed model**, each client adds a small share of the central noise, and **secure aggregation** reveals only the sum to the server ([Cryptography basics](../part01-prerequisites/08-crypto-basics.md)). Gaussian noise splits cleanly, because variances of independent shares add. If each of $n$ clients adds normal noise of variance $\sigma^2/n$, the shares sum to central noise with standard deviation $\sigma$, as private as the central [Gaussian mechanism](03-laplace-gaussian.md).
 
-Gaussian noise splits cleanly. Write $\sigma$ for the standard deviation of the central noise, and suppose each of the $n$ clients adds normal noise of variance $\sigma^2/n$. The shares then sum to the central noise of variance $\sigma^2$, so the server's view is as private as the central [Gaussian mechanism](03-laplace-gaussian.md). The small shares are also the weakness. When some number $t$ of the clients collude with the server or drop out, only the honest clients' noise is left, of standard deviation
+The small shares are also the weakness. A client that colludes with the server can reveal its share, and one that drops out adds none. With a number $t$ of such clients, only the honest clients' noise is left, with standard deviation
 $$\sigma\sqrt{\frac{n - t}{n}}.$$
-So decide in advance the largest fraction $\rho$ of clients that may collude or drop out, and have each client add variance $\sigma^2/(n(1 - \rho))$. For example, take a histogram summed through 100 clients and calibrated to $\varepsilon = 1$. If a fifth of the clients collude, the guarantee weakens to 1.128, and with only a tenth honest it is 3.525.
+So fix in advance the largest fraction $\rho$ of clients that may collude or drop out, and have each client add variance $\sigma^2/(n(1 - \rho))$. The honest clients alone then supply the full noise.
 
-Secure aggregation works on integers modulo a large number, so clients round their scaled vectors and add integer noise ([Discrete mechanisms](08-discrete-mechanisms.md)). The usual choices are Skellam noise (Agarwal, Kairouz & Liu 2021) and the distributed discrete Gaussian (Kairouz, Liu & Steinke 2021), which TensorFlow Federated implements in `tff.aggregators.DistributedDpSumFactory`.
+For example, a server sums a histogram of many users through 100 clients and targets $(1, 10^{-6})$, the default $\delta$ for about a hundred thousand users. A user who changes value moves one count down and another up, so the $\ell_2$ sensitivity is $\sqrt 2$. The analytic Gaussian calibration of [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md) gives a total $\sigma$ of 5.975, or a standard deviation of 0.597 per client. Without over-provisioning, a fifth of the clients colluding weakens the guarantee to $\varepsilon = 1.128$ at the same $\delta$. Half colluding gives 1.455, and nine-tenths gives 3.525.
+
+Secure aggregation works on integers, so clients add integer noise, Skellam or the distributed discrete Gaussian of [Discrete mechanisms](08-discrete-mechanisms.md), as TensorFlow Federated's `tff.aggregators.DistributedDpSumFactory` does. Secure aggregation does not check inputs, so a malicious client can still send any vector.
 
 ## Cheat sheet
 
 | Situation | Use | Rule |
 | --- | --- | --- |
-| Nobody may see raw records | Local randomized response | Only for frequent items in very large populations |
-| Frequencies over $k$ values | $k$-ary randomized response or optimized unary encoding | $k$-ary if $k < 3e^{\varepsilon_0} + 2$ |
-| A huge or unknown domain | Local hashing and growing prefixes | About $e^{\varepsilon_0} + 1$ buckets |
-| A bounded number | One-bit mean | Fix the bound before collection |
-| The same question every day | Memoization, $\alpha$-point rounding for drifting numbers | Each new value costs another $\varepsilon_\infty$ |
-| An anonymizing relay | Shuffle model | Plan with @eq-trust-fmt, deploy with a numerical bound |
-| Federated sums | Distributed Gaussian, Skellam or discrete Gaussian | Over-provision for colluding and dropped clients |
+| A curator can be trusted | Central Laplace or Gaussian | The default |
+| Nobody may see raw records | Local randomized response | Frequent items, very large populations |
+| Frequencies over $k$ values | $k$-ary randomized response or unary encoding | $k$-ary if $k < 3e^{\varepsilon_0} + 2$ |
+| The same question daily | Memoization | Each new value costs $\varepsilon_\infty$ |
+| An anonymizing relay | Shuffle model | Deploy with a numerical bound |
+| Federated sums | Distributed Gaussian or Skellam | Over-provision for colluders |
 
 : Which trust model and protocol to use, by situation. {#tbl-trust-cheat}
 
 **Rules of thumb**
 
-- Local DP costs about $\sqrt n$ in error over central DP.
-- Always state the trust model next to $(\varepsilon, \delta)$.
+- Local noise exceeds central noise by a factor that grows like $\sqrt n$, 149 on Adult at $\ln 3$.
 
 ## Further reading
 
