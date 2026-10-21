@@ -2,121 +2,119 @@
 
 ## Why this matters
 
-A hospital publishes a model that predicts a disease, and you hold a patient's record. **Was that record in the training set?** If it was, the patient was treated there for that disease. This is **membership inference**, the standard measure of leakage, since a model that cannot hide whether a record was used will hide little else.
+A hospital publishes a model that predicts a disease, and you hold a patient's record. **Was that record in the training set?** If it was, the patient was treated there for that disease. This is **membership inference**, and it is the standard measure of leakage, because a model that cannot hide whether a record was used will hide little else.
 
-The one idea of this chapter is that membership is a test about one record. Some records are predicted well whether or not the model trained on them, so their outputs reveal almost nothing. Others are predicted well only if it did. An attack that applies one rule to every record mixes the two kinds and identifies almost nobody. The attack to use in an audit is the likelihood ratio attack (LiRA). It compares the model's output on a record with how that same record fares under models trained with and without it.
+The one idea of this chapter is that membership is a test about one record, so an attack must compare each record with itself. The attack to use in an audit is the likelihood ratio attack (LiRA). It compares the model's output on a record with that record's outputs under models trained with and without it.
 
 ## Membership as a test about one record {#sec-mia-test}
 
-The game is the one of [Threat models and privacy games](01-threat-models.md). The attacker gets a training member or a fresh record with equal chance. It is scored by its **true positive rate (TPR)** and **false positive rate (FPR)**, and its advantage is the TPR minus the FPR.
+The game is the one of [Threat models and privacy games](01-threat-models.md). The attacker gets a training member or a fresh record and says "member" or "not". It is scored by its **true positive rate (TPR)**, the share of members it flags, and its **false positive rate (FPR)**, the share of non-members it flags.
 
-Fix one target record, written $z$, and look at the model's output on it, such as its loss. Over many training runs with $z$, that output has one distribution, and over runs without $z$ it has another. Call them the **IN** and **OUT** distributions of $z$. The best test thresholds their likelihood ratio ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)).
+Fix one target record, written $z$, and look at the model's output on it, such as its loss. Retrain on fresh random draws of the data, and that output has one distribution over the runs that include $z$ and another over the runs without it. Call them the **IN** and **OUT** distributions of $z$. The best test of membership compares their likelihoods at the observed output ([the Neyman–Pearson lemma](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-np)), and it does well only where the two lie far apart. A typical record's distributions almost overlap, because the rest of the data already predict it. An outlier's lie far apart, because the model gets it right only if it trained on it, so the records an attack finds at a low FPR are mostly outliers.
 
-A simple case sets the scale. Suppose the attack's score is normal with standard deviation 1 and mean 0 for non-members, and shifted for members by an amount $s$, called the **separation**. Then, writing $\Phi$ for the standard normal cumulative distribution function and $\alpha$ for the FPR you allow, the best TPR is
-$$\mathrm{TPR}(\alpha) = 1 - \Phi\big(\Phi^{-1}(1 - \alpha) - s\big).$$ {#eq-mia-gauss-tpr}
-For example, at an FPR of $10^{-3}$ a separation of 0.5 gives a TPR of only 0.0048, but a separation of 4 gives 0.8185. Typical records have small separations and outliers have large ones, so the low-FPR end of any attack is made of outliers.
-
-The numbers below come from the full edition's experiment, which trains logistic regression on random halves of a pool in which 5% of points are outliers. The attacker attacks 128 target models, with 64 shadow models of its own.
+The numbers in this chapter come from [practitioner_lira.py](../../code/part02-attacks/practitioner_lira.py), which trains 64 logistic-regression classifiers on random halves of scikit-learn's digits dataset, 1,797 images of handwritten digits. Each model takes a turn as the target, while the other 63 serve as the attacker's **shadow models**, copies trained the same way whose training images the attacker knows.
 
 ## The quick check: the generalization gap {#sec-mia-loss}
 
-Before any attack, compare the training and test errors. A model fits its training data, so its loss is lower on members. Yeom et al. (2018) showed that the attack "member if correctly classified" has an advantage equal to the gap between the errors:
+Before any attack, compare the training and test errors. A model fits its training data, so it gets members right more often than fresh records. Yeom et al. (2018) turned that into the attack "member if correctly classified". When members and non-members come from the same population, its advantage, the TPR minus the FPR, equals the gap between the two errors:
 $$\mathrm{Adv} = \text{test error} - \text{training error}.$$
-In the running example, the gap between the two errors, and so the advantage, is 0.1168.
+On the digits, averaged over the 64 target models, the gap is 0.0422.
 
-This gives a lower bound for free, since a model with a generalization gap leaks membership by at least the gap. The converse fails, because the gap is an average over records, and an average hides who is exposed. Yeom et al. even construct models that leak with no gap at all, so **a small gap does not mean a private model.** At a low FPR the loss attack is near chance, as @tbl-mia-attacks shows.
+So a large gap shows a leak at no cost. But **a small gap does not mean a private model**, because the gap is an average over records, and an average hides who is exposed. The loss attack, which flags every record whose loss falls below one threshold, shows why. On the digits, at an FPR of $10^{-3}$, it reaches a TPR of 0.0009. That is no higher than its FPR, so it does no better than a coin weighted to say "member" one time in a thousand.
 
-The classic attack of Shokri et al. (2017) trains **shadow models**, copies of the target trained on the same population, and learns to tell their members from non-members. It learns a rule that treats all records alike, so it is mostly superseded, but shadows remain the way to calibrate a threshold for the target.
+The classic attack of Shokri et al. (2017) uses shadow models to learn one rule for all records, so it too fails at a low FPR.
 
 ## LiRA: a likelihood-ratio test per example {#sec-mia-lira}
 
-LiRA, from Carlini et al. (2022), estimates each record's own IN and OUT distributions from shadow models trained with and without it. Its statistic is the logit of the model's confidence. Writing $p_y$ for the confidence in the true label $y$, the logit is
+LiRA, from Carlini et al. (2022), uses the shadow models instead to estimate each record's own IN and OUT distributions. Its statistic is the logit of the model's confidence $p_y$ in the true label $y$,
 $$\phi = \ln\frac{p_y}{1 - p_y}.$$
-LiRA uses it because it is close to normal over retrainings, while the confidence itself piles up against 1. For each record, fit a normal distribution to its logit under the shadow models that trained on it, with the mean $\mu_{\mathrm{in}}$ and the standard deviation $\sigma_{\mathrm{in}}$. Fit another to the shadow models that did not, with mean $\mu_{\mathrm{out}}$ and standard deviation $\sigma_{\mathrm{out}}$.
+LiRA uses the logit because it is close to normal over retrainings, while the confidence itself piles up against 1.
 
-**Online LiRA** scores the target model's output $\phi_z$ by how much more likely it is under the IN fit than the OUT fit. Writing $\mathcal N(\phi; \mu, \sigma^2)$ for the normal density, the score is
+For each record, the attacker fits a normal distribution to the record's logit over the shadow models that trained on it. Its mean is written $\mu_{\mathrm{in}}$ and its standard deviation $\sigma_{\mathrm{in}}$. A second fit, over the shadow models that did not train on the record, has mean $\mu_{\mathrm{out}}$ and standard deviation $\sigma_{\mathrm{out}}$.
+
+**Online LiRA** scores the target model's logit $\phi_z$ on the record by how much more likely it is under the IN fit than under the OUT fit. Writing $\mathcal N(\phi; \mu, \sigma^2)$ for the normal density, the score is
 $$\ln\Lambda_z = \ln\mathcal N\big(\phi_z;\, \mu_{\mathrm{in}}, \sigma_{\mathrm{in}}^2\big) - \ln\mathcal N\big(\phi_z;\, \mu_{\mathrm{out}}, \sigma_{\mathrm{out}}^2\big).$$ {#eq-mia-lira-online}
-**Offline LiRA** uses only OUT models, which can be trained once and reused for every target record. It asks how many OUT standard deviations the output lies above its usual value,
+**Offline LiRA** uses only OUT models. Unlike IN models, which must contain the record being tested, they can be trained once and reused for every new record. It asks how many OUT standard deviations the logit lies above its usual value,
 $$\frac{\phi_z - \mu_{\mathrm{out}}}{\sigma_{\mathrm{out}}}.$$ {#eq-mia-lira-offline}
-Both put one threshold on the score for all records. Online LiRA is stronger, because it weighs each record's evidence by its own separation, while offline LiRA is cheaper. @tbl-mia-attacks compares them with the older attacks by their area under the curve (AUC) and by their TPR at a low FPR.
 
-| Attack | AUC | TPR at FPR $10^{-3}$ |
-| --- | --- | --- |
-| Loss threshold (Yeom) | 0.577 | 0.0009 |
-| Shadow attack model (Shokri) | 0.577 | 0.0008 |
-| LiRA offline | 0.632 | 0.0030 |
-| LiRA online | 0.629 | 0.0149 |
-| LiRA online, global variance | 0.623 | 0.0177 |
+Each score already compares a record with its own fits, so one threshold then serves for all records. In the script, `phi` holds the target's logits on the images and `shadow_phi` the shadows' logits, one row per shadow. The array `shadow_member` says which shadow trained on which image.
 
-: Every attack on the running example: 128 target models, 64 shadow models, 64,000 member and 64,000 non-member pairs. {#tbl-mia-attacks}
+```{.python excerpt="lira-scores"}
+# Fit a Gaussian to each image's φ over the shadows that trained on it (IN) and those that did not (OUT).
+phi_in = np.where(shadow_member, shadow_phi, np.nan)  # NaN where the shadow did not train on the image
+phi_out = np.where(~shadow_member, shadow_phi, np.nan)
+mu_in, sd_in = np.nanmean(phi_in, axis=0), np.nanstd(phi_in, axis=0, ddof=1)
+mu_out, sd_out = np.nanmean(phi_out, axis=0), np.nanstd(phi_out, axis=0, ddof=1)
+if global_variance:  # one spread shared by all images: steadier with few shadow models
+    sd_in = np.full_like(sd_in, np.sqrt(np.nanmean(sd_in**2)))
+    sd_out = np.full_like(sd_out, np.sqrt(np.nanmean(sd_out**2)))
+# Online: how much more likely the target's φ is under the image's IN fit than under its OUT fit.
+online = norm.logpdf(phi, loc=mu_in, scale=sd_in) - norm.logpdf(phi, loc=mu_out, scale=sd_out)
+# Offline (OUT shadows only): how many OUT standard deviations φ lies above the OUT mean.
+offline = (phi - mu_out) / sd_out
+```
 
-The table shows why the AUC is the wrong summary, because by AUC the attacks are close. But at an FPR of $10^{-3}$ the loss and shadow attacks are at chance, since their TPR is no higher than the FPR. Online LiRA's TPR is 17.0 times the loss attack's there, although both use the same statistic, so comparing each record with itself is the whole gain.
+The command `uv run python code/part02-attacks/practitioner_lira.py` runs it in seconds. It compares the attacks by their TPR at two low FPRs and by their area under the curve (AUC) of the TPR against the FPR.
 
-The main practical failure is noisy fits. Each record's variance is estimated from half the shadow models. An underestimated variance makes an ordinary output look like a far-tail event, and that produces false positives exactly at the strict thresholds that matter. Carlini et al. therefore recommend one **global variance**, estimated from all records at once, when shadow models are few. For example, with 16 shadow models online LiRA reaches a TPR of only 0.0023 at an FPR of one in a thousand with per-record variances. With a global variance it reaches 0.0151.
+```text
+  loss attack: AUC=0.518  TPR@0.001=0.0009  TPR@0.01=0.0105
+  LiRA offline: AUC=0.577  TPR@0.001=0.0087  TPR@0.01=0.0345
+  LiRA online: AUC=0.623  TPR@0.001=0.0318  TPR@0.01=0.0790
+  LiRA online, global variance: AUC=0.614  TPR@0.001=0.0250  TPR@0.01=0.0737
+```
+
+By AUC the attacks look close. At an FPR of $10^{-3}$ they are not, because online LiRA finds 0.0318 of the members and the loss attack only 0.0009. Both use the same model outputs, so the whole gain comes from comparing each record's output with that record's own fits. Online LiRA beats offline LiRA because its IN fit also tells it how far training on a record moves that record's logit.
+
+Noisy fits are the main practical failure. Each record's variance comes from only about half the shadow models, and an underestimated one makes an ordinary output look like a far-tail event. That output becomes a false positive at exactly the strict thresholds that matter. So Carlini et al. recommend one **global variance**, shared by all records, when shadow models are few. With a global variance 16 shadows give a usable attack, while per-record variances need about 64. With 63 shadows, as here, the per-record fits win.
 
 ## Running LiRA on your model {#sec-mia-cifar}
 
-The full-scale benchmark, CIFAR-10 with 16 shadow models, takes hours of GPU time, but the recipe is the same for any model.
+The recipe is the same for any model. Train the target and its shadows each on a random half of the data pool, all with exactly the target's recipe. A shadow trained differently, even with another augmentation, estimates the wrong IN and OUT distributions. Then compute each model's logit on each record and fit the IN and OUT normals. Let each model take a turn as the target, and score every pair of target model and record, for enough non-member pairs to measure a low FPR. The shadow count is the budget decision, since each shadow is a training run. [Pre-release privacy risk assessment](10-risk-assessment.md) runs the whole job on the digits.
 
-1. **Split the data.** For each of $N + 1$ models, where $N$ is the number of shadows, choose a random half of the training pool. One model plays the target, and rotating that role adds pairs.
-2. **Train** every model with exactly the target's recipe, augmentation included.
-3. **Compute the logit** for each model and record. Compute it from the class scores $f$ before the softmax, as $f_y - \ln\sum_{y' \ne y}e^{f_{y'}}$, which never forms $1 - p_y$ and so never rounds to 0 for a confident model. Carlini et al. also query a few augmented copies of each input, such as flipped images, and fit over all of them.
-4. **Fit** IN and OUT normals for each record over the shadows, with a global variance if you have fewer than about 64.
-5. **Score** each pair of model and record with @eq-mia-lira-online, or with @eq-mia-lira-offline if you only have OUT models.
-6. **Evaluate.** Pool all pairs, sweep one threshold, and plot the receiver operating characteristic (ROC) curve on log axes.
+For a confident model, $1 - p_y$ rounds to 0 and the logit becomes infinite. So compute it from the class scores $f$ before the softmax, as $f_y - \ln\sum_{y' \ne y}e^{f_{y'}}$, or from the log-probabilities of `log_softmax`, which keep the tail where members and non-members differ. Clipping the probabilities is no substitute. On a nearly separable model most confidences hit the clip, so the fits have no spread, those pairs drop out, and the most exposed records go with them. The script clips only because no digits model comes near the clip. Treat pairs dropped for want of spread as a failed audit.
 
-The cost is $N + 1$ training runs, so the shadow count is the budget decision, and a global variance makes 16 shadows enough.
+The most common way a membership audit goes wrong is to draw members and non-members from different distributions. If non-members come from a later period, another site or another preprocessing pipeline, the attack measures that shift rather than the model, so split one pool at random.
 
-The members and non-members must come from the same distribution, and violating this is the most common way a membership audit goes wrong. If non-members come from a later period, another site or another preprocessing pipeline, the attack measures that shift rather than the model. So draw both from one pool, split at random, as step 1 does.
+When shadows cost too much, the reference-model attack of Zarifzadeh et al. (2024) stays strong with only a few. Returning labels only does not stop the attack, because a label-only attack measures how much an input must change before its label flips (Choquette-Choo et al., 2021). Check which attack a library runs, because TensorFlow Privacy's `run_attacks` and the Adversarial Robustness Toolbox's `MembershipInferenceBlackBox` treat all records alike, while ML Privacy Meter implements LiRA.
 
-When shadows cost too much, there are cheaper options. Offline LiRA reuses one set of OUT models. Reference-model attacks, such as the relative membership inference attack of Zarifzadeh et al. (2024), are designed to stay strong with only a few reference models. Against a service that returns labels only, a label-only attack measures how much an input must be perturbed before its label flips (Choquette-Choo et al., 2021).
-
-For the computation, `scipy.stats.norm.logpdf` gives the two terms of the online score, and `sklearn.metrics.roc_curve` gives the curve. TensorFlow Privacy's membership-inference tests take losses or logits of members and non-members in an `AttackInputData` object, and `run_attacks` runs simple threshold attacks on them. LiRA's reference implementation lives in the same repository. The Adversarial Robustness Toolbox offers `MembershipInferenceBlackBox`, a trained attack model, and `LabelOnlyDecisionBoundary`, and ML Privacy Meter implements reference-model attacks.
+To catch a training change that makes a model leak, rerun a cheaper LiRA on every release candidate. Train 16 models with the candidate's own recipe, since shadows cached from an older recipe are stale, and score online LiRA with a global variance. On the digits, `practitioner_lira.py --models 16` runs this check in seconds, and it blocks the model, as the 64-model run does. Apply the release rule of [the risk assessment](10-risk-assessment.md#sec-risk-threat) unchanged, so the check and the decision agree. To catch a drift below that rule, store the last release's interval and alert when a candidate's lower end exceeds its upper end. Comparing point values would alarm on seed noise alone.
 
 ## Reading the result {#sec-mia-eval}
 
-Report the TPR at an FPR of $10^{-3}$ or lower, with the ROC curve on log axes ([Threat models and privacy games](01-threat-models.md)), because averages hide breaches. An attack that exposes 5% of members with certainty can have the same AUC as one that nudges every score slightly, yet catch 38 times as many members.
+Report the TPR at an FPR of $10^{-3}$ or lower, with the receiver operating characteristic (ROC) curve on log axes, because averages hide breaches. Part 1's [recipe for evaluating a detector at a low FPR](../part01-prerequisites/04-hypothesis-testing.md#sec-ht-recipe) says how many non-members that takes and how to put Clopper–Pearson intervals on both rates. It also sets the thresholds on a separate split, a step the script skips, as the literature does.
 
-Measuring a low FPR takes many non-members, because an FPR is estimated by counting false positives. A count of $k$ events has a relative error of about $1/\sqrt k$. So to see $k$ false positives at an FPR $\alpha$, you need about $k/\alpha$ non-members. For example, the running example's 64,000 non-members give about 64 false positives at one in a thousand. Even then, the Clopper–Pearson 95% interval for online LiRA's FPR runs from 0.00077 to 0.00128.
+```text
+  LiRA offline: TP=502/57704  TPR=0.0087 [0.0080, 0.0095]  FP=56/57304  FPR=0.00098 [0.00074, 0.00127]  ln(TPR/FPR)=2.19  pass
+  LiRA online: TP=1833/57704  TPR=0.0318 [0.0303, 0.0332]  FP=57/57304  FPR=0.00099 [0.00075, 0.00129]  ln(TPR/FPR)=3.46  block
+```
 
-Then check three things.
-
-- **The TPR's interval is clear of the FPR.** If not, the attack is at chance there, like the loss attack in @tbl-mia-attacks.
-- **The top-scored records make sense.** Inspect them, because they are usually outliers, rare subgroups or mislabelled points.
-- **The thresholds were set on separate data.** Setting them on the data that measure the rates is usual but optimistic.
+The last word on each line applies the [risk assessment's](10-risk-assessment.md#sec-risk-threat) blocking rule. It blocks a release when the lower end of the TPR's 95% interval at an FPR of $10^{-3}$ is above 0.01, ten times that FPR. Online LiRA blocks this model, while offline LiRA alone would have passed it. The logarithm of the ratio of the rates is 3.46 for online LiRA. It is a point estimate of how large the privacy level $\varepsilon$ of differential privacy (Part 3) would have to be to allow this attack, not a certified lower bound. The pairs share models, so they are not independent trials, and a certified bound needs independent ones, such as the canaries of [Auditing](../part05-dp-ml/10-auditing.md#sec-audit-bound).
 
 ## Who is exposed, and what helps {#sec-mia-outliers}
 
-The exposed records are those whose IN and OUT distributions lie far apart. A record's separation is large when the rest of the data contradict its label or its features are unusual. In the running example, at an FPR of one in a thousand, a share of 0.873 of the members online LiRA finds are outliers.
+Look at the records an attack scores highest, usually outliers, rare subgroups or mislabelled points. Their IN and OUT distributions lie far apart, because the rest of the data contradict their label or their features are unusual. On the digits, the most exposed image is a 9 that the models classify with confidence 0.812 when they trained on it and 0.003 when they did not. Online LiRA flags it at an FPR of $10^{-3}$ in all 33 target models that trained on it.
 
-That points to what does and does not help.
+Removing the exposed records does not help, because then the next layer of records becomes exposed, which Carlini et al. (2022b) call the onion effect. Closing the generalization gap is not enough either, because the low-FPR end is set by the worst records, not the average.
 
-- **Removing the exposed records does not.** Carlini et al. (2022b) removed the most exposed records and retrained, and the next layer became exposed. They call this the onion effect.
-- **Closing the generalization gap is not enough.** More data or stronger regularization shrink the average, but the low-FPR end is set by the worst records.
-- **Masking the output does not bound the leak,** because label-only attacks still work.
-- **Differential privacy does.** It bounds every record's separation at once. [Private training](../part05-dp-ml/02-dp-sgd.md) provides it, and [an audit with planted canaries](../part05-dp-ml/10-auditing.md) checks it.
-
-Expect a trade-off, because memorizing rare cases can be what makes a model accurate on long-tailed data (Feldman, 2020).
+Differential privacy does help, because [private training](../part05-dp-ml/02-dp-sgd.md) limits how far any one record can move the model, and so how far apart every record's IN and OUT distributions can lie. Expect a trade-off, because when many subgroups are rare, memorizing them can be what makes a model accurate (Feldman, 2020).
 
 ## Cheat sheet
 
 | Situation | Use | Notes |
 | --- | --- | --- |
 | A first look, no attack budget | Test error $-$ training error | A lower bound on the leak; a small gap proves nothing |
-| An audit with few shadow models | Online LiRA with a global variance | 16 shadows are usable this way |
-| A label-only service | A label-only attack | Masking the scores does not stop membership inference |
+| A release decision | Online LiRA, @eq-mia-lira-online, 64 shadows | Report TPR at FPR $10^{-3}$ with intervals |
+| Few shadow models | Online LiRA with a global variance | 16 shadows are usable this way |
 
 : Which attack or check to use. {#tbl-mia-cheat}
 
 **Rules of thumb**
 
-- Audit with LiRA, not with a global loss threshold, which is near chance at a low FPR.
-- Draw members and non-members from one pool, split at random, and train shadows with the target's exact recipe.
-- Overfitting implies membership leakage, but no overfitting does not imply its absence. A failed weak attack is not evidence of safety.
+- Audit with LiRA. A failed weak attack, such as a global loss threshold, is not evidence of safety.
 
 ## Further reading
 
-- Carlini, Chien, Nasr, Song, Terzis & Tramèr, "Membership Inference Attacks From First Principles" (IEEE S&P 2022): LiRA online and offline, the global variance, and the protocol to follow in an audit.
+- Carlini, Chien, Nasr, Song, Terzis & Tramèr, "Membership Inference Attacks From First Principles" (IEEE S&P 2022): LiRA, the global variance, and the audit protocol.
 - Yeom, Giacomelli, Fredrikson & Jha, "Privacy Risk in Machine Learning: Analyzing the Connection to Overfitting" (IEEE CSF 2018): the loss attack and its link to the generalization gap.
 
 **Derivations.** Every result here is derived step by step in [the full edition's chapter](../../book-full/part02-attacks/02-membership-inference.md).
