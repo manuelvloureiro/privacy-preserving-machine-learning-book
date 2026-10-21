@@ -2,129 +2,97 @@
 
 ## Why this matters
 
-Most private models are trained with stochastic gradient descent (SGD) made to satisfy differential privacy (DP), a method called DP-SGD. Each step clips every example's gradient, sums the clipped gradients and adds Gaussian noise, whose standard deviation is the clipping norm times the **noise multiplier** $\sigma$. Suppose every record paid the full cost of a Gaussian mechanism at every step. With $\sigma = 1$, ten thousand steps would then cost a privacy level of $\varepsilon = 5425.5$ ([Rényi DP](01-renyi-dp.md)).
+Most private models are trained with stochastic gradient descent (SGD) made to satisfy differential privacy (DP), a method called DP-SGD. Each step clips every example's gradient to a maximum length, the **clipping norm**, sums the clipped gradients and adds Gaussian noise. The noise has a standard deviation equal to the clipping norm times the **noise multiplier** $\sigma$. Suppose every record paid the full cost of a Gaussian mechanism at every step. Then ten thousand steps with $\sigma = 1$ would have a privacy level $\varepsilon$ of 5425.5 at $\delta = 10^{-5}$ ([Rényi DP](01-renyi-dp.md)), which is no guarantee at all.
 
-DP-SGD escapes this cost because each step looks only at a small random batch. Write $q$ for the **sampling rate**, the probability that a given record lands in the batch. An attacker must then first guess whether the record was used at all, and that uncertainty is worth a lot. This effect is called **amplification by subsampling**. It depends on exactly how the batch was drawn, so the accountant, the code that adds up a run's privacy cost, must assume the sampler the training code actually runs. Getting that wrong is the largest single error in DP-SGD accounting.
+DP-SGD escapes this cost because each step looks only at a small random batch. Write $q$ for the **sampling rate**, the probability that a given record lands in the batch. An attacker must then first guess whether the record was used at all, and that uncertainty is worth a lot. This effect is called **amplification by subsampling**, and it depends on exactly how the batch was drawn. So the accountant, the code that adds up a run's privacy cost, must assume the sampler that the training code actually runs. Getting that wrong is the largest single error in DP-SGD accounting, far larger than the difference between one accountant and another (@sec-sub-dpsgd).
 
 ## One step under Poisson sampling {#sec-sub-eps-delta}
 
-The simplest sampler is **Poisson sampling**, in which each record enters the batch by its own coin flip, with probability $q$, independently of every other record. Pair it with add/remove neighbours, datasets that differ by one record being present or absent. Balle, Barthe and Gaboardi (2018) give the tight result. If a step is $(\varepsilon, \delta)$-DP on its own, where $\delta$ is the slack, then the same step run on a Poisson sample is $(\varepsilon', \delta')$-DP with
+The simplest sampler is **Poisson sampling**, in which each record enters the batch by its own coin flip, with probability $q$, independently of every other record. It goes with **add/remove** neighbours, two datasets of which one has an extra record. For that pairing, Balle, Barthe and Gaboardi (2018) give the best possible result for one step. As in Part 3, $\delta$ is the guarantee's small additive slack. If the step is $(\varepsilon, \delta)$-DP when it sees every record, then the same step run on a Poisson sample is $(\varepsilon', \delta')$-DP with
 $$\varepsilon' = \ln\big(1 + q(e^\varepsilon - 1)\big), \qquad \delta' = q\delta.$$ {#eq-sub-amplify}
 
-The formula behaves very differently for small and large $\varepsilon$. For small $\varepsilon$ the amplified cost is about $q\varepsilon$, so a 1% sample makes a step about a hundred times cheaper. With that sample, for example, a 1-DP step costs 0.0170. But for large $\varepsilon$ the amplified cost is about
+The formula behaves very differently for small and large $\varepsilon$. For small $\varepsilon$ the amplified cost is about $q\varepsilon$, so a 1% sample makes a step about a hundred times cheaper. With that sample, for example, a 1-DP step costs 0.0170. For large $\varepsilon$, though, the amplified cost is about
 $$\varepsilon' \approx \varepsilon - \ln(1/q),$$
-so sampling only subtracts a fixed amount. With the same sample, a 10-DP step still costs 5.3993. The switch happens where $\varepsilon$ is near $\ln(1/q)$.
+so sampling only subtracts a fixed amount. That is why a 10-DP step on the same sample still costs 5.3993. The switch happens where $\varepsilon$ is near $\ln(1/q)$. So amplification helps most when each step is already fairly private, which is why DP-SGD takes many cheap steps.
 
-The result has two conditions. Each record's coin must be independent of the others, so that the record is drawn with probability exactly $q$ whatever else is in the batch. And the batch must stay secret, because an attacker who sees the list of records drawn knows whether the target was used. The rule applies to any $(\varepsilon, \delta)$-DP step, not only to the Gaussian. So a pure DP or randomized-response release run on a secret Poisson sample is amplified too. For example, 1-DP randomized response on a 10% sample costs 0.1586. Per-step pairs compose badly over thousands of steps, though (@sec-sub-dpsgd).
+The result has two conditions. Each record's coin must be independent of the others, so that every record is drawn with probability exactly $q$ whatever else is in the batch. And the batch must stay secret, because an attacker who sees the list of records drawn, for example in a readable log, knows whether the target was used.
 
 ## Match the sampler to the accountant {#sec-sub-schemes}
 
-Most training code does not draw Poisson batches. Some draws a fresh random batch of a fixed size, written $m$, from the $n$ records at each step. Much more code shuffles the data once per epoch and cuts the list into consecutive batches, which is called **shuffle and partition**. Each sampler pairs naturally with a neighbouring relation, and @tbl-sub-matching gives what to account for under each pairing.
+Most training code does not draw Poisson batches. Some code draws a fresh random batch of a fixed size $B$ from the $n$ records at each step. Much more code shuffles the data once per epoch and cuts the list into consecutive batches, which is called **shuffle and partition**.
 
-| Sampling | Neighbours | What to account for |
-| --- | --- | --- |
-| Poisson, rate $q$ | add/remove | A Poisson accountant with $q$ and $\sigma$ |
-| Fixed size $m$ of $n$ | add/remove | A Poisson accountant with rate $m/n$ and noise multiplier $\sigma/2$ (Lebeda et al. 2024) |
-| Fixed size $m$ of $n$ | replace-one | Per step, @eq-sub-amplify with $q = m/n$ and $\sigma/2$; no Poisson shortcut |
-| Poisson, rate $q$ | replace-one | About twice the add/remove cost for pure DP at small $\varepsilon$ |
-| Shuffle and partition | zero-out | No amplification formula; the Poisson number can be far too small |
+Each sampler needs its own accounting under each neighbouring relation. Under **replace-one**, the datasets have the same size and differ in one record's value, and under **zero-out**, the target's gradient is set to zero. @tbl-sub-matching gives the accounting for DP-SGD. It writes each step as an event of Google's `dp_accounting` library, which a Rényi differential privacy (RDP) or privacy loss distribution (PLD) accountant then composes.
 
-: What to account for under each combination of sampling scheme and neighbouring relation. {#tbl-sub-matching}
+| Sampler | Neighbours | What to account for | `dp_accounting` step |
+| --- | --- | --- | --- |
+| Poisson, rate $q$ | add/remove | A Poisson accountant with $q$ and $\sigma$ | `PoissonSampledDpEvent(q, GaussianDpEvent(σ))` |
+| Poisson, rate $q$ | replace-one | The same event, at $\sigma$, in a PLD accountant built with `NeighboringRelation.REPLACE_ONE`, which models the swap itself | `PoissonSampledDpEvent(q, GaussianDpEvent(σ))` |
+| Fixed size $B$ of $n$ | add/remove | A Poisson accountant with rate $B/n$ and noise multiplier $\sigma/2$ | `PoissonSampledDpEvent(B/n, GaussianDpEvent(σ/2))` |
+| Fixed size $B$ of $n$ | replace-one | Sampling without replacement at noise multiplier $\sigma/2$, in the RDP accountant only | `SampledWithoutReplacementDpEvent(n, B, GaussianDpEvent(σ/2))` |
+| Shuffle and partition | zero-out | No amplification: each epoch is one full Gaussian release | `GaussianDpEvent(σ)` once per epoch |
 
-The factor of two in the noise comes from the gradient sum. Adding or removing a record moves the clipped sum by at most the clipping norm. But a record that enters a fixed-size batch pushes another one out, so the sum can move by twice as much. Twice the shift with the same noise is the same as the original shift with half the noise multiplier, and that is not a small change. This part's running example takes ten thousand steps with $q = 0.01$ and $\sigma = 1$. At $\delta = 10^{-5}$, the Poisson accountant gives it $\varepsilon = 6.71$. With fixed-size batches under add/remove it must be run at $\sigma = 0.5$, and it then gives 47.42, about seven times more.
+: What to account for under each sampler and neighbouring relation in DP-SGD. {#tbl-sub-matching}
 
-Shuffle and partition is worse, because the source of amplification is missing. Within an epoch the record is in exactly one batch and is never absent, so the attacker only has to find which batch held it. Chua et al. (2024) build a dataset where the target's batch stands out, under zero-out neighbours, which set the target's gradient to 0. A test on it proves that one shuffled epoch of the running example has $\varepsilon$ of at least 4.06, while a Poisson accountant reports at most 1.21. So a Poisson number reported for shuffled training can be provably false.
+The factor of two for fixed-size batches comes from the gradient sum. Under Poisson sampling, adding or removing a record moves the clipped sum by at most the clipping norm. A fixed-size batch has no room for an extra record, so a drawn record takes another's place, and the sum can move by twice as much (Lebeda et al. 2025). Twice the shift with the same noise is the same as the original shift with half the noise multiplier. Replace-one swaps a record by definition, so its shift doubles too, but the Poisson accountant does not cover that relation. The RDP accountant of `dp_accounting` does, given the replace-one relation and the halved noise multiplier.
 
-So read the data loader before you trust a reported $\varepsilon$. A PyTorch `DataLoader` with `shuffle=True` and a `batch_size` is shuffle and partition, and a `tf.data` pipeline that shuffles and then batches is not Poisson sampling either. Opacus replaces the loader with a Poisson one by default: `PrivacyEngine.make_private` takes `poisson_sampling=True` unless you turn it off, and `opacus.data_loader.DPDataLoader.from_data_loader` converts a loader by hand. A Poisson loader gives batches of varying size, which is a quick check that it is in use. When the largest batches do not fit in memory, Opacus's `BatchMemoryManager` splits them into physical batches without changing the accounting ([Private stochastic gradient descent](../part05-dp-ml/02-dp-sgd.md)). If you cannot use Poisson sampling, report under the matching row of @tbl-sub-matching, or say plainly that $\varepsilon$ assumes a sampler you did not run.
+Shuffle and partition is worse, because the source of amplification is missing. Within an epoch the record is in exactly one batch and is never absent, so the attacker only has to find which batch held it. Chua et al. (2024) build a dataset in which the target's gradient points against all the others, so its batch's sum stands out. Take this part's running example, with a 1% sampling rate and $\sigma = 1$, under zero-out at $\delta = 10^{-5}$. On that dataset, one shuffled epoch provably has an $\varepsilon$ of at least 4.06, while a Poisson accountant reports at most 1.21. So a Poisson number reported for shuffled training can be provably false. The honest bound for shuffled training is the last row of the table, one full Gaussian release per epoch, since each epoch uses the record exactly once.
 
-## The accountant for DP-SGD {#sec-sub-dpsgd}
+So read the data loader before you trust a reported $\varepsilon$. A PyTorch `DataLoader` with `shuffle=True` and a `batch_size` is shuffle and partition. Opacus replaces the loader with a Poisson one by default, since `PrivacyEngine.make_private` takes `poisson_sampling=True` unless you turn it off. You can also convert a loader by hand with `opacus.data_loader.DPDataLoader.from_data_loader`. Either way, the loader's `batch_sampler` is then a `UniformWithReplacementSampler`, which despite its name flips one coin per record. So its batches vary in size from step to step, a quick check in the training log. When the largest batches do not fit in memory, Opacus's `BatchMemoryManager` splits each one into pieces that fit. The optimizer still takes one noisy step, and the accountant counts one step, per sampled batch ([Train a model with DP-SGD](../part05-dp-ml/13-train-dp-sgd.md)). If you cannot use Poisson sampling, report under the matching row of @tbl-sub-matching, and name the sampler next to $\varepsilon$.
 
-Accountants for DP-SGD work in Rényi differential privacy (RDP), which describes a mechanism by a curve $\varepsilon(\alpha)$ over orders $\alpha > 1$ ([Rényi DP](01-renyi-dp.md)). Curves add over steps, even adaptive ones. So a run of $k$ steps has the curve $k\,\varepsilon(\alpha)$, which is [converted](02-rdp-conversions.md) to $(\varepsilon, \delta)$ once.
+## Accounting each sampler {#sec-sub-dpsgd}
 
-Mironov, Talwar and Zhang (2019) show that one Poisson-subsampled Gaussian step has, at integer orders, the curve
-$$\varepsilon(\alpha) = \frac{\ln A_\alpha}{\alpha - 1}, \qquad A_\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^j\exp\Big(\frac{j^2 - j}{2\sigma^2}\Big).$$ {#eq-sub-binomial}
-Here the index $j$ counts the imagined copies of the run that used the record, and accountants compute fractional orders by numerical integration. On the running example the curve is tiny at low orders. At order 2, for example, it is $1.7181 \times 10^{-4}$, against 1 without sampling. @tbl-sub-dpsgd shows what the accountant gives over a run, against the per-step route that amplifies each step with @eq-sub-amplify and then composes the pairs.
+DP-SGD is never accounted step by step with @eq-sub-amplify. That route splits $\delta$ into a tiny share per step, and a tiny $\delta$ forces a large per-step $\varepsilon$, which sampling barely reduces. On the running example's 10,000 steps it gives 24379.55 with advanced composition, worse even than 5425.5 without sampling. An RDP accountant instead adds the steps' Rényi curves order by order and converts the total to $(\varepsilon, \delta)$ once, which gives 6.71 ([Rényi DP](01-renyi-dp.md)). A PLD accountant is tighter still ([Numerical accounting](06-numerical-accounting.md)).
 
-| Steps $k$ | RDP, Mironov's conversion | RDP, improved conversion | Per step, basic composition | Per step, advanced composition |
-| --- | --- | --- | --- | --- |
-| 1,000 | 2.54 | 2.10 | 839.39 | 1258.64 |
-| 10,000 | 7.43 | 6.71 | 11296.93 | 24379.55 |
-
-: The $\varepsilon$ at $\delta = 10^{-5}$ of DP-SGD with $q = 0.01$, $\sigma = 1$ under four accounting routes. {#tbl-sub-dpsgd}
-
-The per-step route fails because each step keeps a tiny share of $\delta$, which forces a large per-step $\varepsilon$ that sampling barely reduces. So never compose per-step pairs for DP-SGD. The best order also falls as the run grows, to about 4 at ten thousand steps. So make sure the accountant's grid includes small and fractional orders, because a missing order can only raise $\varepsilon$.
-
-In practice you use a library. Opacus's `RDPAccountant` and Google's `dp_accounting.rdp.RdpAccountant` both compute @eq-sub-binomial, and in `dp_accounting` you describe a step as `PoissonSampledDpEvent(sampling_probability, GaussianDpEvent(noise_multiplier))`. For fixed-size batches it has a `SampledWithoutReplacementDpEvent` for the replace-one relation, while Microsoft's `prv_accountant` describes the same step as a `PoissonSubsampledGaussianMechanism`. The value 6.71 is still an upper bound, and [numerical accounting](06-numerical-accounting.md) computes the tight value.
-
-## Small q and the design of a run {#sec-sub-small-q}
-
-For small $q$ the curve has a simple leading term, which is what makes the trade-offs between batch size, noise and epochs visible:
-$$\varepsilon(\alpha) \approx \frac{\alpha q^2\big(e^{1/\sigma^2} - 1\big)}{2} \approx \frac{\alpha q^2}{2\sigma^2}\ \text{for large } \sigma.$$ {#eq-sub-small-q}
-The per-step cost is quadratic in $q$, while a run of $E$ epochs takes $E/q$ steps. So the total RDP is about
-$$\frac{E\,q\,\alpha}{2\sigma^2}.$$
-At a fixed number of epochs, smaller batches are therefore cheaper in privacy.
-
-That gives the recipe for planning a run. Fix the batch size $B$ and the number of epochs $E$ that your accuracy needs. Then the sampling rate is $q = B/n$ and the number of steps is $k = En/B$, where $n$ is the size of the dataset you actually train on, after any filtering. A wrong $n$ gives a wrong $q$, and so a wrong $\varepsilon$. Let the accountant solve for the noise multiplier that meets the target. Opacus does this with `get_noise_multiplier(target_epsilon=..., target_delta=..., sample_rate=..., epochs=...)`, or in one call with `make_private_with_epsilon`. Then check the result with a second accountant ([Choosing an accountant](09-choosing-an-accountant.md)).
-
-Use @eq-sub-small-q for planning only, never inside an accountant, because at high orders it is far too small. The closed-form bound of the original **moments accountant** (Abadi et al. 2016) has the same shape and is outdated.
-
-## Other mechanisms {#sec-sub-generic}
-
-For RDP, unlike for @eq-sub-amplify, no rule returns every mechanism's subsampled curve exactly. General bounds for other mechanisms exist (Zhu & Wang 2019), but they are looser, so use the exact sum for the Gaussian.
-
-## Code {#sec-sub-code}
-
-The accountant below handles Poisson sampling and add/remove neighbours. It computes @eq-sub-binomial in log space at integer orders only, so its value for the running example is a little above the 6.71 of fractional orders.
+The snippet below accounts the running example under the four rows of @tbl-sub-matching, with a training set of $n = 50{,}000$ records and batches of 500. It uses $\delta = 10^{-5}$, the value at which this part compares accountants. A report for 50,000 records would use the book's rule, $\delta \le 1/n^{1.1}$ rounded down to a power of ten, which gives $10^{-6}$ ([Report and review an ε claim](09-choosing-an-accountant.md)).
 
 ```python
-from math import exp, lgamma, log
+from dp_accounting import GaussianDpEvent, NeighboringRelation, PoissonSampledDpEvent
+from dp_accounting import SampledWithoutReplacementDpEvent, SelfComposedDpEvent
+from dp_accounting.pld import PLDAccountant
+from dp_accounting.rdp import RdpAccountant
 
-
-def subsampled_gaussian_rdp(alpha: int, q: float, sigma: float) -> float:
-    """RDP at integer order alpha of one Poisson-subsampled Gaussian step (sensitivity 1)."""
-    logs = [
-        lgamma(alpha + 1) - lgamma(j + 1) - lgamma(alpha - j + 1)
-        + (alpha - j) * log(1 - q) + j * log(q) + (j * j - j) / (2 * sigma**2)
-        for j in range(alpha + 1)
-    ]
-    top = max(logs)
-    log_a = top + log(sum(exp(t - top) for t in logs))  # log-sum-exp avoids overflow
-    return log_a / (alpha - 1)
-
-
-def dpsgd_eps(q: float, sigma: float, steps: int, delta: float) -> tuple[float, int]:
-    """Compose over the steps, convert with the improved conversion at the best integer order."""
-    best = (float("inf"), 0)
-    for alpha in range(2, 64):
-        rdp = steps * subsampled_gaussian_rdp(alpha, q, sigma)
-        eps = rdp + log((alpha - 1) / alpha) - (log(delta) + log(alpha)) / (alpha - 1)
-        best = min(best, (eps, alpha))
-    return best
-
-
-print(f"{subsampled_gaussian_rdp(2, 0.01, 1.0):.4e}")  # 1.7181e-04
-print("%.3f %d" % dpsgd_eps(0.01, 1.0, 10_000, 1e-5))  # 6.719 4
+n, batch, sigma, steps, delta = 50_000, 500, 1.0, 10_000, 1e-5  # q = 0.01, 100 epochs
+poisson = SelfComposedDpEvent(PoissonSampledDpEvent(batch / n, GaussianDpEvent(sigma)), steps)
+fixed_size = SelfComposedDpEvent(PoissonSampledDpEvent(batch / n, GaussianDpEvent(sigma / 2)), steps)  # add/remove
+shuffled = SelfComposedDpEvent(GaussianDpEvent(sigma), 100)  # one Gaussian release per epoch, no amplification
+pld = [PLDAccountant(value_discretization_interval=1e-3).compose(e) for e in (poisson, fixed_size, shuffled)]  # 1e-3: the PLD's grid spacing
+print(" ".join(f"{accountant.get_epsilon(delta):.2f}" for accountant in pld))  # 6.19 43.37 91.82
+replace_one = RdpAccountant(neighboring_relation=NeighboringRelation.REPLACE_ONE)
+swap = SampledWithoutReplacementDpEvent(n, batch, GaussianDpEvent(sigma / 2))  # replace-one: the sum moves by up to 2C
+replace_one.compose(SelfComposedDpEvent(swap, steps))
+print(f"{replace_one.get_epsilon(delta):.2f}")  # 118.73
 ```
+
+Poisson sampling costs 6.19. The same noise with fixed-size batches costs 43.37 under add/remove, about seven times more, and shuffling with no amplification costs 91.82 under zero-out. The replace-one value, 118.73, protects a different thing, the value of a record rather than its presence, so compare it only with other replace-one numbers. The sampler moves $\varepsilon$ by a factor of seven or more. On this run the accountant moves it by less than 10%, from 6.71 by RDP to 6.19 by PLD, but the gap is wider on shorter runs, 14.6% at 1,000 steps ([Report and review an ε claim](09-choosing-an-accountant.md)).
+
+Two more checks belong here. `PLDAccountant().supports(event)` returns `False` for a `SampledWithoutReplacementDpEvent` under either relation, so call `supports` before you compose an unusual event. And accountants use an exact curve for the subsampled Gaussian but looser general bounds for other mechanisms (Zhu & Wang 2019), so a subsampled step of another mechanism carries more slack.
+
+## Batch size, epochs and noise {#sec-sub-small-q}
+
+Amplification also shapes how you plan a run. Write $E$ for the number of epochs, so that a run takes $E/q$ steps. For a small sampling rate and a large noise multiplier, the run's Rényi cost at an order $\alpha$ is roughly
+$$\varepsilon(\alpha) \approx \frac{E\,q\,\alpha}{2\sigma^2}.$$
+Use this only for planning, never as the reported number, because at high orders the true curve rises far above it (from about order 9 at $\sigma = 1$ and $q = 0.01$). It says that at a fixed number of epochs, a smaller sampling rate costs less privacy. Each step costs about $q^2$, and the number of steps grows only as $1/q$.
+
+Privacy is not the only cost, though, because the noise lands on the averaged gradient. With $C$ for the clipping norm, the noise on the sum of a batch of $B$ examples has standard deviation $\sigma C$, so the noise on their average has $\sigma C/B$. So compare plans by $\sigma/B$, not by $\sigma$. The planning table of [Calibrate and account a DP-SGD run](10-calibrate-dp-sgd.md) shows the trade-off on the 30,000 training rows of the Adult census data. For $\varepsilon = 4$ over 10 epochs, a batch of 100 needs $\sigma = 0.62$ and a batch of 1,000 needs $\sigma = 0.97$. Yet the larger batch trains with far less noise, since $\sigma/B$, which the table lists times 1,000, falls from 6.16 to 0.97.
+
+Plan in this order, then. First fix the batch size $B$ and the number of epochs $E$ that your accuracy needs. They set the sampling rate $q = B/n$ and the number of steps $E/q$. Here $n$ is the size of the dataset you actually train on, after any filtering, because a wrong $n$ gives a wrong $\varepsilon$. Then let the accountant solve for $\sigma$. [Calibrate and account a DP-SGD run](10-calibrate-dp-sgd.md) does this with Opacus's `get_noise_multiplier`, naming the numerical accountant because the default is RDP, and checks the result with a second accountant.
 
 ## Cheat sheet
 
 | Situation | What to use | Notes |
 | --- | --- | --- |
-| One step, Poisson, add/remove | $\varepsilon' = \ln(1 + q(e^\varepsilon - 1))$, $\delta' = q\delta$ | About $q\varepsilon$ for small $\varepsilon$, $\varepsilon - \ln(1/q)$ for large |
-| DP-SGD, Poisson | RDP or numerical accountant with $q$, $\sigma$ | 6.71 for the running example |
-| DP-SGD, fixed-size batches, add/remove | Poisson accountant with $m/n$ and $\sigma/2$ | About seven times the Poisson $\varepsilon$ here |
-| DP-SGD, shuffle and partition | No valid Poisson number | Switch to Poisson sampling |
+| One step, Poisson, add/remove | $\varepsilon' = \ln(1 + q(e^\varepsilon - 1))$, $\delta' = q\delta$ | About $q\varepsilon$ for small $\varepsilon$ |
+| DP-SGD, Poisson loader | PLD or RDP accountant with $q$ and $\sigma$ | 6.19 by PLD for the running example |
+| DP-SGD, fixed-size batches, add/remove | Poisson accountant with $B/n$ and $\sigma/2$ | 43.37, about seven times the Poisson value |
+| DP-SGD, fixed-size batches, replace-one | `SampledWithoutReplacementDpEvent` at $\sigma/2$ in the RDP accountant | Not comparable with add/remove numbers |
+| DP-SGD, shuffle and partition | One Gaussian release per epoch, under zero-out | A Poisson number does not apply; better, switch the loader to Poisson sampling |
 
-: Which accounting to use for each sampler, and how to plan a run. {#tbl-sub-cheat}
+: Which accounting to use for each sampler. {#tbl-sub-cheat}
 
 **Rules of thumb**
 
 - Account for the sampler you run, and state the neighbouring relation next to $\varepsilon$.
-- The sampler can move $\varepsilon$ by a factor of seven, while the choice of conversion moves it by about 10%.
-- Never compose per-step $(\varepsilon, \delta)$ pairs for DP-SGD. Compose RDP curves or privacy loss distributions, and convert once.
-- Keep the small-$q$ formula for planning, never for the reported number.
-- Compute $q$ from the dataset you actually train on, after filtering.
-- A Poisson add/remove number does not hold for a replace-one claim.
+- Check that the loader's batches vary in size. Constant batch sizes mean it is not Poisson sampling.
 
 ## Further reading
 
