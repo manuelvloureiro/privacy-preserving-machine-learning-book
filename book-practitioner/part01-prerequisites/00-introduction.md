@@ -4,11 +4,11 @@ This part is a mathematical toolkit, and it contains no privacy yet. You do not 
 
 ## What each chapter is for
 
-Two ideas run through the part. The first is the **likelihood ratio**, how many times more likely an output is under one dataset than under a neighbouring one. The second is the **effect of one input**, how far a single example can move a result.
+Two ideas run through the part. The first is the **likelihood ratio**, how many times more likely an observation is under one explanation than under another. The second is the **effect of one input**, how far a single example can move a result.
 
-[Probability distributions](01-distributions.md) and [Concentration inequalities](02-concentration.md) give you the noise families, their scales and the error bars you publish with noisy numbers, which Parts 3 and 4 use constantly. [Divergences](03-divergences.md) compares the output distributions on two datasets with a single number, the language of Parts 3 and 4. [Hypothesis testing](04-hypothesis-testing.md) shows how to read a detector's trade-off curve at low false positive rates, which Parts 2 and 5 rely on. [Information theory](05-information-theory.md) bounds what an output reveals about a hidden value, which Part 2 uses.
+[Hypothesis testing](04-hypothesis-testing.md) is the one full chapter, because the rest of the book leans on it most. It shows how to read a detector's trade-off curve at a low false positive rate. It also shows how to put an honest interval on a rate measured from a few hundred cases.
 
-[Optimization](06-optimization.md) gives the constants, step sizes and clipping that Part 5 needs. [Algorithmic stability and generalization](07-stability-generalization.md) explains why regularization and early stopping limit how much a model depends on one example, and why a reused holdout set misleads you. [Cryptography basics](08-crypto-basics.md) teaches you to read a security claim stated as a game or a simulator, which later parts need.
+The other seven are short reference pages, each with the result, when you meet it, how to use it and what goes wrong. [Probability distributions](01-distributions.md) and [Concentration inequalities](02-concentration.md) give you the noise families, their scales in NumPy and SciPy, and the error bars and sample sizes you attach to a measured number. [Divergences](03-divergences.md) compares two distributions with a single number. [Information theory](05-information-theory.md) bounds what an output reveals about a hidden value. [Optimization](06-optimization.md) gives the constants and step sizes of gradient descent, and [Algorithmic stability and generalization](07-stability-generalization.md) explains why a reused holdout set misleads you. [Cryptography basics](08-crypto-basics.md) teaches you to read a security claim stated as a game.
 
 ## Notation
 
@@ -24,4 +24,4 @@ Two ideas run through the part. The first is the **likelihood ratio**, how many 
 
 ## How to use the chapters
 
-Each chapter states its results, shows how to use them with a worked number, and links to its derivations in the full edition. Every number comes from a script you can rerun, such as `uv run python code/part01-prerequisites/concentration.py`. The scripts draw their randomness from seeded NumPy generators, `numpy.random.default_rng`, so reruns give the same numbers.
+Each page states its results, shows how to use them with a worked number, and links to its derivations in the full edition. Every number comes from a snippet on the page or from the full edition's script for the same chapter, which you can rerun, such as `uv run python code/part01-prerequisites/optimization.py`. The code draws its randomness from seeded NumPy generators, `numpy.random.default_rng`, so reruns give the same numbers.
