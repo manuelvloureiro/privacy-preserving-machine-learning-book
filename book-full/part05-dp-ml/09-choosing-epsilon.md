@@ -306,7 +306,7 @@ The $(\varepsilon, \delta)$ form $e^\varepsilon\kappa + \delta$ is this chapter'
 
 **Small priors are the honest assumption only if you can defend them.** If the attacker can narrow the target to two candidates, $\kappa = 0.5$ and reconstruction is as easy as membership at FPR 0.5. A defensible reconstruction claim states the prior: "an attacker who knows the target is one of $m$ records".
 
-Guo, Karrer, Chaudhuri & van der Maaten (2022) bound reconstruction differently, for continuous targets: under RDP of order 2 at level $\varepsilon$, the expected mean squared error of any reconstruction is at least of order $1/(e^\varepsilon - 1)$, and Fisher information gives a tighter, data-dependent bound for unbiased reconstructions.
+Guo, Karrer, Chaudhuri & van der Maaten (2022) bound reconstruction differently, for continuous targets: under RDP of order 2 at level $\varepsilon$, any unbiased reconstruction of a target that ranges over an interval of width $w$ has expected squared error at least $w^2/(4(e^\varepsilon - 1))$, and Fisher information gives a tighter, data-dependent bound. The bound needs unbiasedness: for small $\varepsilon$ a constant guess at the middle of the interval does better. @sec-apx-audit-recon in the appendices derives the bound and shows why it needs that condition.
 
 ### Example: one of m candidates
 

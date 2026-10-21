@@ -216,7 +216,7 @@ On members, the model is too sure of the truth. Training lowers the loss $-\ln f
 
 On non-members, an overfit model does worse than imputation. Its confidences carry the noise of a small training set rather than the population's exact probabilities, so the attack's guesses fall below the ceiling.
 
-More data closes both gaps. As $n$ grows, the model approaches $p(y \mid x, s)$ and both success rates approach $V(S \mid X, Y)$ (@fig-attr-success-vs-n). The population inference gets better and the individual leak gets smaller.
+More data closes both gaps. As $n$ grows, a correctly specified model approaches $p(y \mid x, s)$ and both success rates approach $V(S \mid X, Y)$ (@fig-attr-success-vs-n). The population inference gets better and the individual leak gets smaller.
 
 The same idea can invert the whole input rather than one field. Fredrikson, Jha & Ristenpart (2015) also attacked a face recognition model in which each class is one person. They searched for the input image that maximizes the confidence of a chosen class, by gradient descent on the image, and obtained a recognizable, blurred image of that person. It is the same idea with $s$ replaced by the whole input, and the prior $p(s \mid x)$ replaced by an image regularizer that keeps the search among plausible images. What it recovers is a typical input of the class, which is population inference about the class; it is a privacy problem because the class is a single person.
 

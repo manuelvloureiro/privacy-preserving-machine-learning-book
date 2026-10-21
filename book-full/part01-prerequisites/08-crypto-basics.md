@@ -264,7 +264,7 @@ A **random function** from $\mathcal X$ to $\mathcal Y$ is a table that assigns 
 
 A random function on 128-bit inputs is a table with $2^{128}$ entries, which nobody can store. A PRF gives the same appearance from a 128-bit key. In practice the hash-based message authentication code (HMAC) is modelled as a PRF; the toy code uses HMAC-SHA256.
 
-### From a PRG to a PRF: the GGM tree
+### From a PRG to a PRF: the GGM tree {#sec-crypto-ggm}
 
 Goldreich, Goldwasser & Micali (1986) build a PRF from any length-doubling PRG; the construction is called the GGM tree after them. Split the PRG's output into its two halves, $G(s) = G_0(s)\,\|\,G_1(s)$, each as long as the seed. The idea is to use the PRG repeatedly to grow a binary tree of keys, picking the left or right half at each level according to the next bit of the input.
 
@@ -272,7 +272,7 @@ Goldreich, Goldwasser & Micali (1986) build a PRF from any length-doubling PRG; 
 2. For an input $x = x_1x_2\cdots x_n$, walk down the tree: the node reached after the first $i$ bits is $k_{x_1\cdots x_i} = G_{x_i}(k_{x_1\cdots x_{i-1}})$, the left or right half of the PRG applied to its parent.
 3. Output the leaf: $F_k(x) = k_x$.
 
-**Proof sketch.** The proof replaces the tree by random values one level at a time. Let hybrid $H_j$ replace every node at depth $j$ by an independent uniform string, sampled when first needed, and compute everything below it with $G$. $H_0$ is the real $F_k$, and $H_n$, where every leaf is independent and uniform, is a random function. Between $H_{j-1}$ and $H_j$, the only change is at depth $j$: in $H_{j-1}$ the nodes there are the two halves of $G$ applied to uniform parents, and in $H_j$ they are uniform. Each query is a path from root to leaf, with one node per depth, so a $q$-query adversary touches at most $q$ parents at depth $j - 1$. Telling $H_{j-1}$ from $H_j$ therefore means telling $q$ outputs of $G$ on uniform seeds from $q$ uniform strings. By the hybrid lemma that costs at most $q$ times the PRG advantage. Summing over the $n$ levels (Fact 3): $\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}$. The full proof is in Goldreich, *Foundations of Cryptography*, Vol. 1, §3.6.
+**Proof sketch.** The proof replaces the tree by random values one level at a time. Let hybrid $H_j$ replace every node at depth $j$ by an independent uniform string, sampled when first needed, and compute everything below it with $G$. $H_0$ is the real $F_k$, and $H_n$, where every leaf is independent and uniform, is a random function. Between $H_{j-1}$ and $H_j$, the only change is at depth $j$: in $H_{j-1}$ the nodes there are the two halves of $G$ applied to uniform parents, and in $H_j$ they are uniform. Each query is a path from root to leaf, with one node per depth, so a $q$-query adversary touches at most $q$ parents at depth $j - 1$. Telling $H_{j-1}$ from $H_j$ therefore means telling $q$ outputs of $G$ on uniform seeds from $q$ uniform strings. By the hybrid lemma that costs at most $q$ times the PRG advantage. Summing over the $n$ levels (Fact 3): $\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}$. The full proof is in Goldreich, *Foundations of Cryptography*, Vol. 1, §3.6, and @sec-apx-crypto-ggm in the appendices derives it step by step, including how the reduction handles queries chosen adaptively.
 
 ### The birthday bound
 
@@ -460,7 +460,7 @@ Reducing mod $p$ is what makes step 3 a bijection: subtracting $r$ wraps around,
 - Two of three holders combine their shares of $x$. What do they learn? *(Nothing: two shares out of three are uniform on $\mathbb Z_p^2$ whatever $x$ is. Only all three together determine $x$.)*
 - Why must the simulator be efficient? *(An unbounded simulator could, in a computational setting, invert functions the participant cannot. The definition would then accept procedures whose views reveal information that is hard to compute from $L(x)$ but easy to read from the view.)*
 
-## Learning with errors
+## Learning with errors {#sec-crypto-lwe}
 
 ### Context
 
@@ -472,7 +472,7 @@ LWE hides a secret vector behind linear equations whose right-hand sides are sli
 $$(a,\ b = \langle a, s\rangle + e \bmod p), \qquad a \text{ uniform in } \mathbb Z_p^d,\ e \sim \chi.$$
 There are two versions of the problem. **Search LWE** asks you to find $s$, given $m$ samples. **Decision LWE** asks you to decide, given $m$ pairs, whether they are LWE samples or uniform pairs in $\mathbb Z_p^d \times \mathbb Z_p$.
 
-If you can solve search, you can solve decision: find a candidate $s$, then check whether the values $b - \langle a, s\rangle$ are small, which they are for LWE samples and are not for uniform pairs. So decision is no harder than search. Regev shows the converse for prime $p$ polynomial in $d$, by guessing the coordinates of $s$ one at a time and using the decision oracle to test each guess.
+If you can solve search, you can solve decision: find a candidate $s$, then check whether the values $b - \langle a, s\rangle$ are small, which they are for LWE samples and are not for uniform pairs. So decision is no harder than search. Regev shows the converse for prime $p$ polynomial in $d$, by guessing the coordinates of $s$ one at a time and using the decision oracle to test each guess. @sec-apx-crypto-lwe in the appendices derives this reduction step by step.
 
 **Hardness.** For $\chi$ a discretized Gaussian (a normal distribution rounded to integers) of standard deviation about $\alpha p$ with $\alpha p > 2\sqrt d$, Regev (2009) proves that solving LWE is at least as hard as solving worst-case lattice problems with a quantum algorithm. The lattice problems are GapSVP, the gap version of the shortest vector problem, and the shortest independent vectors problem, both to within an approximation factor $\tilde O(d/\alpha)$ ($d/\alpha$ up to logarithmic factors). Peikert (2009) and Brakerski, Langlois, Peikert, Regev & Stehlé (2013) give classical reductions. Treat these as cited results; the proofs are long.
 
@@ -503,7 +503,7 @@ To decrypt, compute $v = b - \langle a, s\rangle \bmod p$ and output 1 if $v$ is
 2. If $m = 0$, $v \equiv e$ with $|e| < p/4$, so $v \in [0, p/4) \cup (3p/4, p)$ (a negative $e$ wraps to just below $p$) and the output is 0.
 3. If $m = 1$, $v = e + p/2 \in (p/4, 3p/4)$ and the output is 1.
 
-**Security, in one hybrid.** Without $s$, the pair $(a, \langle a, s\rangle + e)$ looks uniform by decision LWE, so the message is added to something that looks uniform: a one-time pad. Under decision LWE, the pairs $(a, \langle a, s\rangle + e)$ in all ciphertexts can be replaced by uniform pairs $(a, u)$. Then $b = u + mq/2$ is uniform whatever $m$ is (Fact 4, with the bijection "add $mq/2$"). So an IND-CPA adversary winning with probability $\frac12 + \varepsilon$ yields a decision-LWE distinguisher with advantage $\varepsilon$: it runs the game with the given pairs and outputs 1 iff the adversary wins, by the argument of step 2 in the PRF scheme.
+**Security, in one hybrid.** Without $s$, the pair $(a, \langle a, s\rangle + e)$ looks uniform by decision LWE, so the message is added to something that looks uniform: a one-time pad. Under decision LWE, the pairs $(a, \langle a, s\rangle + e)$ in all ciphertexts can be replaced by uniform pairs $(a, u)$. Then $b = u + m\cdot\tfrac p2$ is uniform whatever $m$ is (Fact 4, with the bijection "add $m\cdot\tfrac p2$"). So an IND-CPA adversary winning with probability $\frac12 + \varepsilon$ yields a decision-LWE distinguisher with advantage $\varepsilon$: it runs the game with the given pairs and outputs 1 iff the adversary wins, by the argument of step 2 in the PRF scheme.
 
 **Worked example** with $d = 3$, $p = 4096$ and $s = (5, 1000, 3000)$. Here $p/2 = 2048$, and reducing mod 4096 means subtracting 4096.
 

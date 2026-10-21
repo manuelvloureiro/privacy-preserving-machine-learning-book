@@ -137,7 +137,7 @@ Removing Carol changes one bin (the smokers) by 1 and leaves the other alone, so
 
 ### Context
 
-With the neighbours fixed, "the output distribution barely changes" needs a measure. Part 1 offers many, and the choice matters. An average-case measure such as the Kullback–Leibler divergence, which averages the privacy loss over outputs, can be small while one rare output carries an enormous privacy loss. A measure based on a difference, such as the total variation distance, fails in another way. As the derivation below shows, no single value of it gives a definition that is both useful and private. Differential privacy takes the worst case over everything that can vary: over all neighbouring pairs, over all events, with no assumption on the adversary's knowledge or computing power. And it bounds a ratio, with a small difference allowed only on top.
+With the neighbours fixed, "the output distribution barely changes" needs a measure. Part 1 offers many, and the choice matters. An average-case measure such as the Kullback–Leibler divergence, which averages the privacy loss over outputs, can be small while one rare output carries an enormous privacy loss. A measure based on a difference, such as the total variation distance, fails in another way. As the derivation below shows, no single value of it gives a definition that is both useful and private. Differential privacy takes the worst case over everything that can vary: over all neighbouring pairs, over all events, with no assumption on the adversary's knowledge or computing power. And it bounds a ratio, with a small difference allowed only on top. @sec-apx-cal-dp in the appendices derives the definition's forms from scratch, with a three-outcome example.
 
 ### Statement
 
@@ -213,7 +213,7 @@ Likewise, the largest $\Pr[M(D) \in S] - 2\Pr[M(D') \in S]$ over the 256 events 
 
 You want the fraction of people who have done something embarrassing: cheated on an exam, used a drug, evaded a tax. Asked directly, people lie, and two simple protocols fail in opposite ways. If everyone reports their true answer, the fraction is exact and nobody has any privacy. If everyone reports a fair coin toss instead, each report says nothing about its sender, but the reports also say nothing about the population.
 
-Warner (1965) found the middle ground. Each respondent spins a private spinner that shows, with a known probability $p$ above one half, the statement "I belong to the group", and otherwise its negation, "I do not belong to the group". The respondent says only whether the statement shown is true for them, so they answer truthfully with probability $p$. A popular variant, the **forced-response** design usually credited to Boruch (1971), uses two coins instead. On heads the respondent answers truthfully, and on tails they toss again and answer "yes" on heads and "no" on tails. In both designs every "yes" has a plausible excuse, yet the population fraction can still be estimated, because the randomization is known and averages out over many people. Randomized response is the first differentially private mechanism, four decades before the definition, and it is the reference point for the whole part.
+Warner (1965) found the middle ground. Each respondent spins a private spinner that shows, with a known probability $p$ above one half, the statement "I belong to the group", and otherwise its negation, "I do not belong to the group". The respondent says only whether the statement shown is true for them, so they answer truthfully with probability $p$. A popular variant, the **forced-response** design usually credited to Boruch (1971), uses two coins instead. On heads the respondent answers truthfully, and on tails they toss again and answer "yes" on heads and "no" on tails. In both designs every "yes" has a plausible excuse, yet the population fraction can still be estimated, because the randomization is known and averages out over many people. Randomized response is the first differentially private mechanism, four decades before the definition, and it is the reference point for the whole part. @sec-apx-cal-rr in the appendices derives it from scratch, with worked numbers.
 
 ### Statement
 
@@ -360,7 +360,7 @@ In terms of the true positive rate (TPR) $1 - \beta$, the fraction of the time t
 
 ### Interpretation
 
-The result draws a forbidden region. In the plane of (FPR, FNR), every attack against an $(\varepsilon, \delta)$-DP mechanism lies on or above the two lines of @eq-dpdef-testing (@fig-dpdef-tradeoff-region, left). The two lines are mirror images of each other across the diagonal $\alpha = \beta$, so they cross on it: setting $\alpha = \beta$ in $\alpha + e^\varepsilon\beta = 1 - \delta$ gives $\alpha = \beta = (1 - \delta)/(1 + e^\varepsilon)$.
+The result draws a forbidden region (@sec-apx-conv-testing in the appendices derives both inequalities from scratch, with a worked example at 5% false positives). In the plane of (FPR, FNR), every attack against an $(\varepsilon, \delta)$-DP mechanism lies on or above the two lines of @eq-dpdef-testing (@fig-dpdef-tradeoff-region, left). The two lines are mirror images of each other across the diagonal $\alpha = \beta$, so they cross on it: setting $\alpha = \beta$ in $\alpha + e^\varepsilon\beta = 1 - \delta$ gives $\alpha = \beta = (1 - \delta)/(1 + e^\varepsilon)$.
 
 Low FPR is where DP bites. Part 2 evaluated membership attacks by their TPR at a low FPR, because an attack that flags someone while almost never flagging non-members is one that confidently identifies people. DP caps that TPR at $e^\varepsilon\alpha + \delta$. At $\alpha = 10^{-3}$, $\varepsilon = 1$ and $\delta = 10^{-5}$, no attack has TPR above $e \times 10^{-3} + 10^{-5} = 0.002728$. The ratio TPR/FPR is at most $e^\varepsilon + \delta/\alpha$, and as $\alpha \to 0$ the $\delta/\alpha$ term dominates (@fig-dpdef-tradeoff-region, right): at very low FPR, the guarantee rests almost entirely on $\delta$.
 
@@ -467,7 +467,7 @@ $$\Pr_{y \sim M(D)}[y \in B] \le \frac{\delta}{1 - e^{\varepsilon - \varepsilon'
 
 ### Interpretation
 
-DP bounds the *change* in belief, not the belief. It is relative, not absolute. An adversary who is already 99% sure stays about that sure; DP only promises that the output does not make it much surer.
+DP bounds the *change* in belief, not the belief (@sec-apx-conv-bayes in the appendices derives the bound with a two-hypothesis table, and shows why with $\delta > 0$ it can fail at the same $\varepsilon$ on more than a $\delta$ share of the outputs). It is relative, not absolute. An adversary who is already 99% sure stays about that sure; DP only promises that the output does not make it much surer.
 
 The adversary in this statement is as strong as can be. It knows every record except the one in question, since it knows the data are $D$ or $D'$. Against weaker adversaries, who are unsure about other records too, the same bound holds in a slightly different form: for the posterior about one person's record, compared with the posterior computed from the data without that record (Kasiviswanathan & Smith, 2014).
 

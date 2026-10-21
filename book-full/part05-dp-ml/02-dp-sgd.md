@@ -69,7 +69,7 @@ Start from weights $w_0$ chosen independently of the data. For $t = 0, \dots, T 
 4. **Noisy sum.** $G_t = \sum_{i\in S_t}\bar g_i + \xi_t$ with $\xi_t \sim \mathcal N(0, \sigma^2C^2I)$.
 5. **Step.** $w_{t+1} = w_t - \eta\,G_t/B$, with $B = qn$ the expected batch size.
 
-Releasing all of $w_1, \dots, w_T$ is $(\varepsilon, \delta)$-DP for add/remove neighbours, with $\varepsilon$ given by @eq-dpsgd-convert. The guarantee does not depend on the loss, the model, $C$ or $\eta$.
+Releasing all of $w_1, \dots, w_T$ is $(\varepsilon, \delta)$-DP for add/remove neighbours, with $\varepsilon$ given by @eq-dpsgd-convert. @sec-apx-sgd-accounting in the appendices derives this from scratch, from clipping to the final $\varepsilon$, with worked numbers. The guarantee does not depend on the loss, the model, $C$ or $\eta$.
 
 ### Derivation
 

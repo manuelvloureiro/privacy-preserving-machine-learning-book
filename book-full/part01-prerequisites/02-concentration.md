@@ -161,13 +161,13 @@ Now use the shape of the noise. Integrating the density gives the exact tail $\P
 
 ### Context
 
-Small failure probabilities like $10^{-5}$ are out of reach for polynomial bounds at sensible widths. The fix is to apply generalized Markov with $g(x) = e^{\lambda x}$. Its average is the MGF, which contains every moment of $X$ at once, so the bound uses everything about the distribution, not just the mean or the variance. The resulting Chernoff bound is exponentially tight: Cramér's theorem says that for a sum of $n$ independent copies of a variable, the probability of a large deviation decays exponentially in $n$ with exactly the rate the optimized Chernoff bound gives, so no method can improve its exponent for large sums.
+Small failure probabilities like $10^{-5}$ are out of reach for polynomial bounds at sensible widths. The fix is to apply generalized Markov with $g(x) = e^{\lambda x}$. Its average is the MGF, which contains every moment of $X$ at once, so the bound uses everything about the distribution, not just the mean or the variance. The resulting Chernoff bound is exponentially tight: Cramér's theorem says that for a sum of $n$ independent copies of a variable, the probability of a large deviation decays exponentially in $n$ with exactly the rate the optimized Chernoff bound gives, so no method can improve its exponent for large sums. (@sec-apx-tail-cramer-stein in the appendices derives this matching lower bound.)
 
 ### The recipe
 
 **The master bound.** For any $\lambda > 0$, $e^{\lambda x}$ is positive and increasing, so generalized Markov applies with $g(x) = e^{\lambda x}$. Dividing $\mathbb E[e^{\lambda X}]$ by $e^{\lambda t}$ gives the first form below. Writing the MGF as $e^{\psi(\lambda)}$, where $\psi$ is the logarithm of the MGF (the **log-MGF**), puts the whole bound into one exponent:
 $$\Pr[X \ge t] \le e^{-\lambda t}\,\mathbb E[e^{\lambda X}] = \exp\big(-(\lambda t - \psi(\lambda))\big), \qquad \psi(\lambda) = \ln\mathbb E[e^{\lambda X}].$$
-This holds for every $\lambda > 0$, so you are free to pick the $\lambda$ that makes the bound smallest, which is the one that makes $\lambda t - \psi(\lambda)$ largest. The best exponent, $\sup_\lambda(\lambda t - \psi(\lambda))$, viewed as a function of $t$, has a name: the **Legendre transform** $\psi^*(t)$ of the log-MGF. It is the exponent Cramér's theorem says is exact.
+This holds for every $\lambda > 0$, so you are free to pick the $\lambda$ that makes the bound smallest, which is the one that makes $\lambda t - \psi(\lambda)$ largest. The best exponent, $\sup_\lambda(\lambda t - \psi(\lambda))$, viewed as a function of $t$, has a name: the **Legendre transform** $\psi^*(t)$ of the log-MGF. It is the exponent Cramér's theorem says is exact (@sec-apx-tail-cramer-stein).
 
 In practice every Chernoff bound in this chapter is computed by the same five steps:
 
@@ -284,9 +284,9 @@ As a two-sided confidence interval, add the matching lower tail to get $2\exp(-2
 
 Hoeffding needs only the range, not the variance. That is its strength, since there is nothing to estimate, and its weakness, since it assumes the worst-case variance $(b-a)^2/4$, the variance of the fair coin on the endpoints.
 
-When the true variance $\sigma^2$ is much smaller than that, use **Bernstein's inequality**, which keeps the variance in the bound. It is proved by the same Chernoff recipe, with a sharper bound on each factor's MGF that uses the variance and the size of the largest deviation (Boucheron, Lugosi & Massart, ch. 2, give the derivation). For $|X_i - \mu| \le M$:
+When the true variance $\sigma^2$ is much smaller than that, use **Bernstein's inequality**, which keeps the variance in the bound. It is proved by the same Chernoff recipe, with a sharper bound on each factor's MGF that uses the variance and the size of the largest deviation (Boucheron, Lugosi & Massart, ch. 2, give the derivation, and @sec-apx-tail-bernstein in the appendices derives it step by step). For $|X_i - \mu| \le M$:
 $$\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{nt^2}{2\sigma^2 + \frac23 Mt}\right).$$
-The denominator shows the two regimes. For small $t$ the $2\sigma^2$ term dominates and the bound looks Gaussian with the true variance; for large $t$ the $\frac23 Mt$ term dominates and the bound decays only exponentially in $t$. Setting the bound equal to $\beta$ and solving the quadratic in $t$ shows that its width is about $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)$: driven by the variance for moderate deviations, and by the range only at the far end.
+The denominator shows the two regimes. For small $t$ the $2\sigma^2$ term dominates and the bound looks Gaussian with the true variance; for large $t$ the $\frac23 Mt$ term dominates and the bound decays only exponentially in $t$. Setting the bound equal to $\beta$ and solving the quadratic in $t$ shows that its width is at most $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)$: driven by the variance for moderate deviations, and by the range only at the far end.
 
 @fig-bernoulli-tails puts all the bounds so far side by side for the mean of 200 Bernoulli(0.1) variables. Hoeffding even loses to Chebyshev at small deviations here, because the true variance $0.1 \times 0.9 = 0.09$ is far below Hoeffding's worst case of $1/4 = 0.25$ for variables in $[0, 1]$.
 

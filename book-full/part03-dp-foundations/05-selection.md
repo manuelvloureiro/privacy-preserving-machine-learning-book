@@ -92,7 +92,7 @@ For the proof, raise every term to its highest possible value: $\max_j a'_j \le 
 
 ### Context
 
-You want to output a good candidate, and "good" is measured by a score with bounded sensitivity. The natural private answer is a random candidate, tilted toward high scores. How much tilting can you afford? McSherry and Talwar (2007) answered: give each candidate a weight $e^{\varepsilon u/(2\Delta)}$ and pick it with probability proportional to that weight. One record changes each score by at most $\Delta$, so it changes every weight by at most a factor $e^{\varepsilon/2}$, and that is enough for $\varepsilon$-DP whatever the number of candidates.
+You want to output a good candidate, and "good" is measured by a score with bounded sensitivity. The natural private answer is a random candidate, tilted toward high scores. How much tilting can you afford? McSherry and Talwar (2007) answered: give each candidate a weight $e^{\varepsilon u/(2\Delta)}$ and pick it with probability proportional to that weight. One record changes each score by at most $\Delta$, so it changes every weight by at most a factor $e^{\varepsilon/2}$, and that is enough for $\varepsilon$-DP whatever the number of candidates. @sec-apx-cal-exponential in the appendices derives this and the utility bound from scratch, with worked numbers.
 
 ### Statement
 
@@ -363,7 +363,7 @@ The exponential mechanism now has two proofs. It can be analysed by its weights 
 
 The noisy-max form also gives stable sampling. Computing $e^{\varepsilon u/(2\Delta)}$ for scores in the thousands overflows. The noisy max works in score units directly. (Subtracting the largest score before exponentiating, as the script does, is the other fix; it is allowed because adding a constant to every score does not change the mechanism.)
 
-It also gives top-$c$ selection in one shot. Taking the $c$ largest of $u_r + G_r$ gives the same distribution as running the exponential mechanism $c$ times, removing each winner (Durfee & Rogers 2019). Its privacy is that of $c$ exponential mechanisms, $c\varepsilon$ by basic composition.
+It also gives top-$c$ selection in one shot. Taking the $c$ largest of $u_r + G_r$ gives the same distribution as running the exponential mechanism $c$ times, removing each winner (Durfee & Rogers 2019; @sec-apx-mech-gumbel in the appendices derives it through a race of exponential clocks). Its privacy is that of $c$ exponential mechanisms, $c\varepsilon$ by basic composition.
 
 Laplace noise is close, not equal. Laplace and Gumbel noise of the same scale have similar bodies but different tails, so the selection probabilities differ by a few percent.
 
@@ -443,7 +443,7 @@ $$\Pr[\text{stop at } k \mid D] = \iint p_\rho(r)\,p_\nu(v)\,\mathbf 1\big[g(D) 
 
 The $\bot$ answers are free because the derivation pays for all of them at once, in step 4, through one maximum $g$ and one shift of the threshold noise. Fact 4 makes that shift at most $\Delta$ whether there are 3 or 3 million queries below the threshold. The single $\top$ is paid for separately, by its own noise.
 
-The run must halt because that payment covers only one $\top$. After the first $\top$, the remaining answers would still compare against the same $\rho$. The proof's shift of $\rho$ was chosen to keep the $\bot$s consistent; each further $\top$ would need another shift of size up to $2\Delta$ in its own noise, and so another factor $e^{\varepsilon_2}$. With $c$ answers above, Lyu, Su & Li's Algorithm 1 keeps one threshold noise and uses $\nu_i \sim \mathrm{Lap}(2c\Delta/\varepsilon_2)$, so that the $c$ shifts together cost $e^{\varepsilon_2}$; without any limit on $c$ the cost is unbounded (@sec-sel-svt-bugs).
+The run must halt because that payment covers only one $\top$. After the first $\top$, the remaining answers would still compare against the same $\rho$. The proof's shift of $\rho$ was chosen to keep the $\bot$s consistent; each further $\top$ would need another shift of size up to $2\Delta$ in its own noise, and so another factor $e^{\varepsilon_2}$. With $c$ answers above, Lyu, Su & Li's Algorithm 1 keeps one threshold noise and uses $\nu_i \sim \mathrm{Lap}(2c\Delta/\varepsilon_2)$, so that the $c$ shifts together cost $e^{\varepsilon_2}$ (@sec-apx-mech-svt in the appendices proves it by extending the steps above). Without any limit on $c$ the cost is unbounded (@sec-sel-svt-bugs).
 
 AboveThreshold answers a yes/no question. It outputs positions, not values. To also release the value of the query that fired, spend extra budget on a fresh Laplace answer to that query.
 

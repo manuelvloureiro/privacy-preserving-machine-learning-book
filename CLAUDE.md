@@ -42,6 +42,10 @@ The book's units are Quarto's: a folder `partNN-<topic>/` is a **part**, each fi
 - List every new file in `book-full/_quarto.yml` under its part in the `chapters:` list, its exercise-book page (`book-exercises/<part>/NN-<topic>.md`) in `book-exercises/_quarto.yml`, and its practitioner chapter in `book-practitioner/_quarto.yml`. Quarto does not pick up new files on its own.
 - Write internal links as relative links to the source file (`[divergences](03-divergences.md)`). Quarto rewrites them for each output, and `filters/links.lua` rewrites links to the other books.
 
+## Appendices
+
+The full edition's appendices of derivations live in `book-full/appendix-derivations/`, one file per appendix, listed under `appendices:` in both `book-full/_quarto-website.yml` and `book-full/_quarto-pdf.yml`, before the generated glossary and index. Their scripts are in `code/appendix-derivations/`, and staging copies their figures into `appendix-derivations/figures/` as it does for a part. [AGENTS.md](AGENTS.md) says what an appendix contains.
+
 ## `.md` or `.qmd`
 
 - **`.md`:** text with no computed content. Figures that a chapter script generates go in with `![caption](figures/name.svg){#fig-name}`.

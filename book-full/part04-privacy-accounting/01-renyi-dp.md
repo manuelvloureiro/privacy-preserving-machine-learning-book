@@ -138,7 +138,7 @@ With sensitivity 1, the three curves are as follows. The Gaussian mechanism adds
 $$\text{Gaussian:}\quad \varepsilon(\alpha) = \frac{\alpha}{2\sigma^2},$$ {#eq-rdp-gauss}
 $$\text{Laplace:}\quad \varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln\left(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)/b} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha/b}\right),$$ {#eq-rdp-laplace}
 $$\text{randomized response:}\quad \varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln\Big(p^\alpha(1-p)^{1-\alpha} + (1-p)^\alpha p^{1-\alpha}\Big).$$ {#eq-rdp-rr}
-These are Corollaries 3 and 2 and the randomized response entry of Table 2 in Mironov (2017). The Laplace formula is for a real-valued query.
+These are Corollaries 3 and 2 and the randomized response entry of Table 2 in Mironov (2017). The Laplace formula is for a real-valued query. @sec-apx-ccomp-rdp in the appendices derives the Gaussian curve by completing the square.
 
 ### Derivation
 
@@ -198,7 +198,7 @@ Training a model runs thousands of mechanisms, each chosen after seeing the outp
 
 Let $M_1$ have RDP curve $\varepsilon_1$. Let $M_2(\cdot\,; y_1)$ be a mechanism chosen using the first output $y_1$, whose RDP curve is at most $\varepsilon_2$ for every $y_1$. The **adaptive composition** releases both outputs, $M(D) = (y_1, y_2)$, with $y_1 \sim M_1(D)$ and $y_2 \sim M_2(D; y_1)$. Its curve is at most the sum of the two curves:
 $$\varepsilon_M(\alpha) \le \varepsilon_1(\alpha) + \varepsilon_2(\alpha) \qquad\text{for every } \alpha > 1.$$ {#eq-rdp-compose}
-By induction, treating the first $k - 1$ steps as one mechanism, $k$ adaptively chosen mechanisms have curve at most $\sum_{i=1}^k \varepsilon_i(\alpha)$. This is Mironov (2017), Proposition 1.
+By induction, treating the first $k - 1$ steps as one mechanism, $k$ adaptively chosen mechanisms have curve at most $\sum_{i=1}^k \varepsilon_i(\alpha)$. This is Mironov (2017), Proposition 1. @sec-apx-ccomp-rdp in the appendices derives it from scratch, and @sec-apx-ccomp-compare compares it with the other accountants on one mechanism.
 
 ### Derivation
 

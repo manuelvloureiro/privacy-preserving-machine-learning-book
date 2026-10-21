@@ -64,7 +64,7 @@ To see why, write the strong convexity inequality as given, and again with $u$ a
 
 A function $f$ is **$\rho$-smooth** when its gradient $\nabla f$ is $\rho$-Lipschitz: the gradient changes by at most $\rho$ per unit of distance, so the function curves no more sharply than $\frac\rho2\|w\|^2$. For a function that is both convex and smooth, the gradient satisfies a property called **co-coercivity** (Nesterov 2004, Theorem 2.1.5). In words: when two gradients differ by a lot, the two points must be far apart along the direction in which the gradients differ. Precisely,
 $$\langle\nabla f(u) - \nabla f(v),\, u - v\rangle \ge \frac1\rho\|\nabla f(u) - \nabla f(v)\|^2.$$
-The proof needs more than a few lines and is in Nesterov's book.
+The proof needs more than a few lines. It is in Nesterov's book, and @sec-apx-opt-cocoercive in the appendices derives it step by step.
 
 What this chapter uses is a consequence for gradient descent. Take two starting points $u$ and $v$ and apply the same gradient step to both, $\psi(w) = w - \eta\nabla f(w)$. If the step size satisfies $0 \le \eta \le 2/\rho$, the two points do not end up farther apart than they started:
 $$\|\psi(u) - \psi(v)\| \le \|u - v\|.$$
@@ -402,7 +402,7 @@ Stability is sufficient for generalization, in the sense of a vanishing gap. See
 
 1. **Training error is 0.** Each training point is its own nearest neighbour (assume distinct points), so it is predicted with its own label.
 2. **$\beta = 1$.** It is enough to find one training set, one replacement and one test point where the loss changes by 1. Take any $S$ and the test point $z = z_i = (x_i, y_i)$. On $S$ the prediction at $x_i$ is $y_i$: loss 0. Replace $z_i$ by $z_i' = (x_i, -y_i)$, the same point with the opposite label. On $S^{(i)}$ the nearest neighbour of $x_i$ is $z_i'$, so the prediction is $-y_i$: loss 1.
-3. **The gap equals the test error.** By step 1 the training loss is 0, so $\mathrm{gap}(S) = R(A(S))$. As $n$ grows, the training points fill the space, so the nearest neighbour of a test point $x$ lies at (essentially) $x$, and its label is an independent draw that is $+1$ with probability $p(x)$. The test label is another independent draw with the same probability. The two disagree when one is $+1$ and the other $-1$, which happens with probability $p(1 - p) + (1 - p)p = 2p(1 - p)$. Averaging over $x$ gives the limit.
+3. **The gap equals the test error.** By step 1 the training loss is 0, so $\mathrm{gap}(S) = R(A(S))$. As $n$ grows, the training points fill the space, so the nearest neighbour of a test point $x$ lies at (essentially) $x$, and its label is an independent draw that is $+1$ with probability $p(x)$. (@sec-apx-opt-nn in the appendices makes this precise, assuming $p$ is continuous and $x$ lies in a closed and bounded set.) The test label is another independent draw with the same probability. The two disagree when one is $+1$ and the other $-1$, which happens with probability $p(1 - p) + (1 - p)p = 2p(1 - p)$. Averaging over $x$ gives the limit.
 
 ### Interpretation
 

@@ -288,7 +288,7 @@ with equality in the first inequality iff $X$ is uniform on its **support**, the
 
 Min-entropy has a direct reading: $H_\infty$ is the number of bits of a uniform distribution that is exactly as easy to guess as $X$. A uniform $k$-bit string is guessed in one try with probability $2^{-k}$, so a value with $H_\infty = k$ bits is as hard to guess in one try as a uniform $k$-bit string, no matter how large $H(X)$ is.
 
-Both entropies belong to one family. The **Rényi entropy** of order $\alpha$ is $H_\alpha(X) = \frac{1}{1 - \alpha}\log\sum_x p(x)^\alpha$. As $\alpha$ grows, the sum $\sum_x p(x)^\alpha$ is dominated more and more by the largest probability, and as $\alpha \to \infty$ the formula tends to $-\log\max_x p(x) = H_\infty$. As $\alpha \to 1$ the formula becomes $0/0$, and its limit is Shannon's $H$. This parallels the family of Rényi divergences in [Divergences](03-divergences.md).
+Both entropies belong to one family. The **Rényi entropy** of order $\alpha$ is $H_\alpha(X) = \frac{1}{1 - \alpha}\log\sum_x p(x)^\alpha$. As $\alpha$ grows, the sum $\sum_x p(x)^\alpha$ is dominated more and more by the largest probability, and as $\alpha \to \infty$ the formula tends to $-\log\max_x p(x) = H_\infty$. As $\alpha \to 1$ the formula becomes $0/0$, and its limit is Shannon's $H$ (@sec-apx-tail-renyi-kl in the appendices derives both limits). This parallels the family of Rényi divergences in [Divergences](03-divergences.md).
 
 For a coin, @fig-binary-entropy shows the gap. The min-entropy $H_\infty = -\log\max(p, 1 - p)$ is smooth on each side of $\frac12$ but has a kink there, where the most likely outcome switches from tails to heads, and it lies below $h(p)$.
 

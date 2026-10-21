@@ -71,7 +71,7 @@ The derivatives of $\psi_X$ at 0 are called the **cumulants** of $X$: the first 
 $$M_{X+Y}(\lambda) = \mathbb E\big[e^{\lambda X}e^{\lambda Y}\big] = \mathbb E\big[e^{\lambda X}\big]\,\mathbb E\big[e^{\lambda Y}\big] = M_X(\lambda)M_Y(\lambda).$$
 The first step is $e^{a + b} = e^ae^b$; the second uses independence, which lets the expectation of a product split into a product of expectations. In log form, $\psi_{X+Y} = \psi_X + \psi_Y$. This is how you get the binomial MGF from the Bernoulli one without touching the probability table, and it is the starting point of every exponential tail bound in [Concentration inequalities](02-concentration.md).
 
-**The MGF pins down the distribution.** If two distributions have the same MGF on an interval around 0, they are the same distribution. This is a standard theorem of probability (it is proved in Blitzstein & Hwang, listed in the references); its proof needs more analysis than this book uses, so take it as given. We use it to identify sums: compute the MGF of $X + Y$ as a product, recognise it as the MGF of a known family, and conclude that $X + Y$ belongs to that family ("the sum of independent Poissons is Poisson"). The MGF can be infinite for some $\lambda$, and for heavy-tailed distributions it is infinite for every $\lambda > 0$; the identification needs it finite near 0.
+**The MGF pins down the distribution.** If two distributions have the same MGF on an interval around 0, they are the same distribution. This is a standard theorem of probability (it is proved in Blitzstein & Hwang, listed in the references); its proof needs more analysis than this book uses, so take it as given. You can check each sum this chapter identifies without it: @sec-apx-prob-convolution in the appendices derives every one directly, by integrating or summing over the ways the two values can add up. We use it to identify sums: compute the MGF of $X + Y$ as a product, recognise it as the MGF of a known family, and conclude that $X + Y$ belongs to that family ("the sum of independent Poissons is Poisson"). The MGF can be infinite for some $\lambda$, and for heavy-tailed distributions it is infinite for every $\lambda > 0$; the identification needs it finite near 0.
 
 ### Tails: how fast large values become rare {#sec-dist-tails}
 
@@ -358,7 +358,7 @@ The leftover lean is measured by the **skewness** $\mathbb E[(X - \mu)^3]/\sigma
 
 : How far the standardized sum of $n$ $\mathrm{Exp}(1)$ variables is from $\mathcal N(0, 1)$. The CDF gap is the maximum of $|F_n(z) - \Phi(z)|$ over $z \in [-5, 5]$ in steps of 0.01. {#tbl-clt-exponential}
 
-Multiply each gap by $\sqrt n$ and you get 0.159, 0.134, 0.133 and 0.133: the product settles to a constant, so the error decays like $1/\sqrt n$. This rate holds in general. The Berry–Esseen theorem bounds the gap by $C\,\mathbb E|X - \mu|^3/(\sigma^3\sqrt n)$ for a universal constant $C < 0.48$ (Shevtsova, 2011). The numerator is a third moment, like the skewness, so the more skewed the summands, the more terms you need.
+Multiply each gap by $\sqrt n$ and you get 0.159, 0.134, 0.133 and 0.133: the product settles to a constant, so the error decays like $1/\sqrt n$. This rate holds in general. The Berry–Esseen theorem bounds the gap by $C\,\mathbb E|X - \mu|^3/(\sigma^3\sqrt n)$ for a universal constant $C < 0.48$ (Shevtsova, 2011). @sec-apx-prob-clt in the appendices proves the central limit theorem itself, with a slower rate, by swapping one term at a time for a normal one. The numerator is a third moment, like the skewness, so the more skewed the summands, the more terms you need.
 
 This is also why the normal curve in @fig-poisson-limit fits so well: $\mathrm{Poisson}(5)$ is a sum of five independent $\mathrm{Poisson}(1)$ variables, since Poisson means add, so the CLT already applies to it. A common rule of thumb is that the normal approximation to a binomial is reasonable once $np(1-p) \gtrsim 10$. The CLT is a statement about the *bulk*. In the far tails, where worst-case guarantees operate, it can be badly wrong, because the gap it controls is an absolute error of order $1/\sqrt n$, far larger than the tiny tail probabilities themselves; that is the job of the concentration inequalities in the next chapter.
 
@@ -368,7 +368,7 @@ Add $\mathcal N(0, \sigma^2I_d)$ noise to a model with $d = 10^6$ parameters and
 
 ### Check yourself
 
-- If $X \sim \mathcal N(0, \sigma^2I_d)$ and $u, v$ are orthogonal unit vectors, are $\langle u, X\rangle$ and $\langle v, X\rangle$ independent? *(Yes. They are jointly normal with covariance $\sigma^2\langle u, v\rangle = 0$, and for jointly normal variables zero covariance means independence.)*
+- If $X \sim \mathcal N(0, \sigma^2I_d)$ and $u, v$ are orthogonal unit vectors, are $\langle u, X\rangle$ and $\langle v, X\rangle$ independent? *(Yes. They are jointly normal with covariance $\sigma^2\langle u, v\rangle = 0$, and for jointly normal variables zero covariance means independence, which @sec-apx-prob-convolution proves by rotation.)*
 - Why does the mean of $\|X\|/\sqrt d$ approach 1 from below? *(Jensen's inequality says that for a concave function $g$, such as the square root, $\mathbb E g(Y) \le g(\mathbb E Y)$. With $Y = \|X\|^2$ this gives $\mathbb E\|X\| \le \sqrt{\mathbb E\|X\|^2} = \sqrt d$.)*
 
 ## Comparing a density with its shifted copy

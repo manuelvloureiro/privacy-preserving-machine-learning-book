@@ -65,4 +65,28 @@ Each folder is a part, and each file in it is a chapter, numbered across the who
 47. [Auditing private training](part05-dp-ml/10-auditing.md) · [code](../code/part05-dp-ml/auditing.py)
 48. [Adaptive data analysis](part05-dp-ml/11-adaptive-data-analysis.md) · [code](../code/part05-dp-ml/adaptive_data_analysis.py)
 
+## Appendices · derivations
+
+The appendices derive the book's mathematics in plain words, with worked numbers and figures, and the chapters point to them where they use a result. Appendix letters follow the rendered book.
+
+The first four derive the core formulas from scratch: how much Laplace or Gaussian noise to add, what repeated releases cost, how DP-SGD's ε is computed, and what ε means.
+
+- A. [How much noise to add](appendix-derivations/01-calibration.md) · [code](../code/appendix-derivations/apx_core_calibration.py)
+- B. [Composing private releases](appendix-derivations/02-composition.md) · [code](../code/appendix-derivations/apx_core_composition.py)
+- C. [Accounting for DP-SGD](appendix-derivations/03-dp-sgd.md) · [code](../code/appendix-derivations/apx_core_dp_sgd.py)
+- D. [What ε means, and converting between definitions](appendix-derivations/04-conversions.md) · [code](../code/appendix-derivations/apx_core_conversions.py)
+
+The other ten derive the results that the chapters cite to a paper, sketch, or take as given, grouped by mathematical theme.
+
+- E. [Sums, limits and counting](appendix-derivations/05-probability.md) · [code](../code/appendix-derivations/apx_probability.py)
+- F. [Tail bounds, tests and divergences](appendix-derivations/06-tails-tests-divergences.md) · [code](../code/appendix-derivations/apx_tails.py)
+- G. [Optimization and estimation](appendix-derivations/07-optimization-estimation.md) · [code](../code/appendix-derivations/apx_optimization.py)
+- H. [Random matrices and factorizations](appendix-derivations/08-matrices.md) · [code](../code/appendix-derivations/apx_matrices.py)
+- I. [Pseudorandom functions and learning with errors](appendix-derivations/09-cryptography.md) · [code](../code/appendix-derivations/apx_cryptography.py)
+- J. [Mechanisms and their limits](appendix-derivations/10-mechanisms.md) · [code](../code/appendix-derivations/apx_mechanisms.py)
+- K. [Composition of trade-off functions](appendix-derivations/11-composition.md) · [code](../code/appendix-derivations/apx_composition.py)
+- L. [Subsampling, shuffling and iteration](appendix-derivations/12-amplification.md) · [code](../code/appendix-derivations/apx_amplification.py)
+- M. [Private learning and tuning](appendix-derivations/13-private-learning.md) · [code](../code/appendix-derivations/apx_learning.py)
+- N. [Auditing, reconstruction and adaptive analysis](appendix-derivations/14-auditing-adaptivity.md) · [code](../code/appendix-derivations/apx_auditing.py)
+
 The exercise book (a separate website, [book-exercises/](../book-exercises/)) has every chapter's exercises and worked solutions, one page per chapter: [Part 1](../book-exercises/part01-prerequisites/), [Part 2](../book-exercises/part02-attacks/), [Part 3](../book-exercises/part03-dp-foundations/), [Part 4](../book-exercises/part04-privacy-accounting/), [Part 5](../book-exercises/part05-dp-ml/).

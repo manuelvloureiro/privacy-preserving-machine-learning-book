@@ -228,7 +228,7 @@ The generic bound comes from writing the best-of distribution of Fact 3 as a der
 6. **Poisson: compute $f'$.** $f(x) = e^{\mu(x - 1)}$, so $f'(x) = \mu e^{\mu(x - 1)}$ and $\ln[f'(q)^\lambda f'(q')^{1 - \lambda}] = \ln\mu + \mu\big[\lambda(q - 1) + (1 - \lambda)(q' - 1)\big] = \ln\mu + \mu\big[(\lambda - 1)(1 - q') - \lambda(1 - q)\big]$.
 7. **Use $(\hat\varepsilon, \hat\delta)$-DP on the rejection event.** $1 - q'$ and $1 - q$ are the probabilities that the test of step 5 rejects, on $D'$ and $D$, so $1 - q' \le e^{\hat\varepsilon}(1 - q) + \hat\delta$. The bracket is at most $(1 - q)\big[(\lambda - 1)e^{\hat\varepsilon} - \lambda\big] + (\lambda - 1)\hat\delta$.
 8. **The condition on $\hat\varepsilon$ kills the first term.** $e^{\hat\varepsilon} \le 1 + \frac{1}{\lambda - 1}$ is the same as $(\lambda - 1)e^{\hat\varepsilon} \le \lambda$, so the first term is not positive and the bracket is at most $(\lambda - 1)\hat\delta$. Divide by $\lambda - 1$ and add $D_\lambda(Q\|Q') \le \varepsilon(\lambda)$: that is @eq-hpt-poisson.
-9. **Truncated negative binomial.** Here $f'(x) = \gamma^{\eta + 1}\mathbb E[K]\,(1 - (1 - \gamma)x)^{-\eta - 1}$. The same steps apply, except that step 7 bounds the probabilities $1 - q$ and $1 - q'$ through the run's RDP guarantee at a second order $\hat\lambda$, again by post-processing, which gives @eq-hpt-tnb; Papernot & Steinke (2022, Appendix B.2) carry out the algebra.
+9. **Truncated negative binomial.** Here $f'(x) = \gamma^{\eta + 1}\mathbb E[K]\,(1 - (1 - \gamma)x)^{-\eta - 1}$. The same steps apply, except that step 7 bounds the probabilities $1 - q$ and $1 - q'$ through the run's RDP guarantee at a second order $\hat\lambda$, again by post-processing, which gives @eq-hpt-tnb; Papernot & Steinke (2022, Appendix B.2) carry out the algebra, and @sec-apx-learn-tuning in the appendices does it step by step, with their Corollaries 3 and 4.
 
 ### Interpretation
 
@@ -236,13 +236,13 @@ The generic bound comes from writing the best-of distribution of Fact 3 as a der
 
 **Choosing $\eta$: privacy against the shape of $K$.** Smaller $\eta$ means a smaller multiple, $(1 + \eta)$, of the second term, so better privacy; the logarithmic distribution ($\eta = 0$) is the best of the family that keeps $K \ge 1$ with a finite mean. But smaller $\eta$ also means a more skewed distribution of $K$. With mean 10, the logarithmic distribution has $\gamma = 0.02692$ and stops after a single run with probability 0.2692, against 0.1000 for the geometric ($\eta = 1$) and 0.1562 for $\eta = 0.5$. The Poisson distribution is the limit $\eta \to \infty$ at a fixed mean, and is concentrated near its mean: with mean 10, $P[K \le 1] = 4.99 \times 10^{-4}$. @fig-hpt-k shows the four distributions with mean 8. A skewed $K$ often runs few candidates, which @sec-hpt-run shows costs accuracy.
 
-**How tight are the bounds?** They are upper bounds for every run with the given curve, so they can be loose for a particular one. On randomized response with $\varepsilon = 0.5$ and a logarithmic number of runs with mean 10, @tbl-hpt-rr-check compares the exact Rényi divergence of the release with @eq-hpt-tnb (best $\hat\lambda$) and with composition of 10 runs. At order 2, @eq-hpt-tnb is worse than composition, because its constant terms dominate at small orders. At orders 5 and 20, where conversions to $(\varepsilon, \delta)$ usually land, it is two to four times below composition and two to three times above the exact value.
+**How tight are the bounds?** They are upper bounds for every run with the given curve, so they can be loose for a particular one. On randomized response with $\varepsilon = 0.5$ and a logarithmic number of runs with mean 10, @tbl-hpt-rr-check compares the exact Rényi divergence of the release with @eq-hpt-tnb and with composition of 10 runs. Randomized response is pure DP, so the bound keeps falling as $\hat\lambda$ grows, and the table gives its limit, in which the two middle terms become $(1 + \eta)\varepsilon = 0.5$. At order 2, @eq-hpt-tnb is worse than composition, because its constant terms dominate at small orders. At orders 5 and 20, where conversions to $(\varepsilon, \delta)$ usually land, it is 2.6 and 4.3 times below composition, and 3.7 and 1.7 times above the exact value.
 
 | Order $\lambda$ | Exact $D_\lambda$ | Bound @eq-hpt-tnb | Composition of 10 runs |
 | --- | --- | --- | --- |
-| 2 | 0.1438 | 3.0561 | 2.2734 |
-| 5 | 0.3912 | 1.4860 | 3.8424 |
-| 20 | 0.6379 | 1.1224 | 4.7505 |
+| 2 | 0.1438 | 3.0299 | 2.2734 |
+| 5 | 0.3912 | 1.4599 | 3.8424 |
+| 20 | 0.6379 | 1.0962 | 4.7505 |
 
 : Randomized response with $\varepsilon = 0.5$, best of a logarithmic number of runs with mean 10: the exact Rényi divergence against the bound and against composition. {#tbl-hpt-rr-check}
 

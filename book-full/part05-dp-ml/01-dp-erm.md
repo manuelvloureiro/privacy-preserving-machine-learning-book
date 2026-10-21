@@ -96,7 +96,7 @@ Release
 $$\tilde w = w^*(D) + Z, \qquad Z \sim \mathcal N\big(0, \sigma^2I\big), \qquad \sigma = \frac{2L}{\lambda n\,\mu(\varepsilon, \delta)}.$$ {#eq-dperm-output}
 This is $(\varepsilon, \delta)$-DP for replace-one neighbours. Replacing $Z$ by noise with density $\propto e^{-\|b\|/s}$ and $s = 2L/(\lambda n\varepsilon)$ gives pure $\varepsilon$-DP. If the objective has Hessian $H$ at $w^*$, the excess risk is, to second order,
 $$\mathbb E\big[J(\tilde w) - J(w^*)\big] \approx \frac12\,\mathbb E\big[Z^\top HZ\big] = \frac{\mathbb E\|Z\|^2}{2d}\operatorname{tr}H,$$ {#eq-dperm-output-risk}
-for any noise whose direction is uniform, so $\frac{\sigma^2}{2}\operatorname{tr}H$ for the Gaussian. An approximate minimizer $w$ with $\|\nabla J(w; D)\| \le g$ has sensitivity at most
+for any noise whose direction is uniform, so $\frac{\sigma^2}{2}\operatorname{tr}H$ for the Gaussian. Without the second-order approximation, @sec-apx-learn-erm in the appendices brackets the excess risk exactly between $\frac\lambda2\mathbb E\|Z\|^2$ and $\frac\beta2\mathbb E\|Z\|^2$, where $\lambda$ and $\beta$ are the smallest and largest curvature of $J$. An approximate minimizer $w$ with $\|\nabla J(w; D)\| \le g$ has sensitivity at most
 $$\frac{2L}{\lambda n} + \frac{2g}{\lambda}.$$ {#eq-dperm-approx}
 
 ### Derivation
@@ -145,6 +145,8 @@ If $\varepsilon' > 0$, this is $\varepsilon$-DP for replace-one neighbours (Chau
 
 The minimizer moves, to first order, by $-H^{-1}b/n$, so the excess risk is about
 $$\mathbb E\big[J(\tilde w) - J(w^*)\big] \approx \frac{1}{2n^2}\mathbb E\big[b^\top H^{-1}b\big] = \frac{\mathbb E\|b\|^2}{2dn^2}\operatorname{tr}H^{-1}.$$ {#eq-dperm-objective-risk}
+Without the approximation, @sec-apx-learn-erm in the appendices brackets it between $\lambda\mathbb E\|b\|^2/(2\beta^2n^2)$ and $\mathbb E\|b\|^2/(2\lambda n^2)$.
+
 
 ### Derivation
 
@@ -273,7 +275,7 @@ $$\frac1\mu \le \frac{\sqrt{2\ln(1.25/\delta)}}{\varepsilon}.$$
 
 **More steps never hurt here.** In @sec-dperm-gradient the noise floor grew with $T$, because the step size $1/\beta$ was fixed while the noise per step grew like $\sqrt T$. Here the step shrinks like $1/\sqrt T$ and the iterates are averaged, and step 5 shows the two effects cancel exactly. The noise term is fixed by $n$, $d$ and the budget, and extra steps only remove optimization error. So the step count needs no tuning. It only has to reach the public threshold $n^2\mu^2/(4d)$.
 
-**The rate cannot be beaten.** For convex losses with $L$-bounded gradients over a ball of radius $R$, Bassily, Smith & Thakurta (2014) prove that, as long as $\sqrt d \le n\varepsilon$, every $(\varepsilon, \delta)$-DP algorithm has excess risk of order $RL\sqrt d/(n\varepsilon)$ on some dataset, by the fingerprinting argument of [Lower bounds](../part03-dp-foundations/10-lower-bounds.md). @eq-dperm-convex-rate matches it up to the factor $\sqrt{\ln(1/\delta)}$ and constants. Compare the strongly convex rate @eq-dperm-rate-strong of @sec-dperm-compare, which is of order $d/(\lambda n^2\varepsilon^2)$: a guaranteed curvature $\lambda$ turns $\sqrt d/(n\varepsilon)$ into its square, divided by $\lambda$.
+**The rate cannot be beaten.** For convex losses with $L$-bounded gradients over a ball of radius $R$, Bassily, Smith & Thakurta (2014) prove that, as long as $\sqrt d \le n\varepsilon$, every $(\varepsilon, \delta)$-DP algorithm has excess risk of order $RL\sqrt d/(n\varepsilon)$ on some dataset, by the fingerprinting argument of [Lower bounds](../part03-dp-foundations/10-lower-bounds.md). @sec-apx-learn-erm in the appendices derives this lower bound step by step, with explicit but loose constants. @eq-dperm-convex-rate matches it up to the factor $\sqrt{\ln(1/\delta)}$ and constants. Compare the strongly convex rate @eq-dperm-rate-strong of @sec-dperm-compare, which is of order $d/(\lambda n^2\varepsilon^2)$: a guaranteed curvature $\lambda$ turns $\sqrt d/(n\varepsilon)$ into its square, divided by $\lambda$.
 
 **The cost is computation.** Full-batch steps touch all $n$ records, so $T \approx n^2\mu^2/(4d)$ steps cost about $n^3\mu^2/(4d)$ gradient evaluations. Bassily, Smith & Thakurta use one random record per step instead, about $n^2$ steps. Sampling makes each step cheaper, and by [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md) also more private, so the noise per step can be smaller. The rate is the same up to logarithms. Random batches, clipping and an accountant for many such steps are the ingredients of DP-SGD in the [next chapter](02-dp-sgd.md).
 
@@ -316,7 +318,7 @@ Each method is private by its own argument. Which should you use? Theory answers
 
 For $\lambda$-strongly convex objectives with $L$-Lipschitz losses, Bassily, Smith & Thakurta (2014) show that the best achievable expected excess risk under $(\varepsilon, \delta)$-DP is of order
 $$\frac{L^2\,d}{\lambda\,n^2\varepsilon^2},$$ {#eq-dperm-rate-strong}
-up to logarithmic factors in $n$ and $1/\delta$. Their upper bound, attained by noisy stochastic gradient descent, carries such factors. Their lower bound, which holds for every $(\varepsilon, \delta)$-DP algorithm, does not, so the two match only up to those logarithms. For convex objectives over a ball of radius $R$, without strong convexity, the rate is of order $LR\sqrt d/(n\varepsilon)$ up to logarithms, and @sec-dperm-convex derives the upper bound. The lower bounds come from the fingerprinting codes of [Lower bounds](../part03-dp-foundations/10-lower-bounds.md): a private algorithm whose output is too accurate would let an adversary trace which records were used.
+up to logarithmic factors in $n$ and $1/\delta$. Their upper bound, attained by noisy stochastic gradient descent, carries such factors. Their lower bound, which holds for every $(\varepsilon, \delta)$-DP algorithm, does not, so the two match only up to those logarithms. @sec-apx-learn-erm in the appendices proves both sides with explicit constants; with full gradients and a weighted average of the iterates, the upper bound needs no logarithm of $n$. For convex objectives over a ball of radius $R$, without strong convexity, the rate is of order $LR\sqrt d/(n\varepsilon)$ up to logarithms, and @sec-dperm-convex derives the upper bound. The lower bounds come from the fingerprinting codes of [Lower bounds](../part03-dp-foundations/10-lower-bounds.md): a private algorithm whose output is too accurate would let an adversary trace which records were used.
 
 On the running example, @tbl-dperm-compare gives the measured excess risk of the four private releases.
 
@@ -333,7 +335,7 @@ On the running example, @tbl-dperm-compare gives the measured excess risk of the
 
 ### Derivation
 
-The upper bounds for output and objective perturbation are @eq-dperm-output-risk and @eq-dperm-objective-risk with the noise of each method substituted. Both have $\mathbb E\|\text{noise}\|^2 \propto 1/n^2$ (the output noise has scale $1/(\lambda n)$; the objective noise has scale 1 and is divided by $n$), which gives the $1/n^2$. For noisy gradient descent, the noise floor $d\sigma^2/(4\beta)$ has $\sigma^2 \propto T/n^2$, and the optimization error must be pushed below it, which takes $T \propto \frac\beta\lambda\ln n$ steps; this gives $1/n^2$ times a logarithm. The proofs of the optimal rate and of the lower bound are long; Bassily, Smith & Thakurta (2014) give both.
+The upper bounds for output and objective perturbation are @eq-dperm-output-risk and @eq-dperm-objective-risk with the noise of each method substituted. Both have $\mathbb E\|\text{noise}\|^2 \propto 1/n^2$ (the output noise has scale $1/(\lambda n)$; the objective noise has scale 1 and is divided by $n$), which gives the $1/n^2$. For noisy gradient descent, the noise floor $d\sigma^2/(4\beta)$ has $\sigma^2 \propto T/n^2$, and the optimization error must be pushed below it, which takes $T \propto \frac\beta\lambda\ln n$ steps; this gives $1/n^2$ times a logarithm. Bassily, Smith & Thakurta (2014) give both proofs. @sec-apx-learn-erm in the appendices derives an upper bound of this order, with explicit constants, for noisy projected gradient descent, and the lower bound by a reduction to the fingerprinting bound.
 
 ### Interpretation
 

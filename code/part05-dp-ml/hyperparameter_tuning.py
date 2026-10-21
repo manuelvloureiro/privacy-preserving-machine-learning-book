@@ -242,12 +242,18 @@ def fixed_rdp(curve: Sequence[float], k: int) -> list[float]:
     return [k * e for e in curve]
 
 
-def tnb_rdp_exact_curve(eps_of: Callable[[float], float], eta: float, gamma: float, lam: float) -> float:
-    """Theorem 2 at one order λ for a base whose RDP curve is known in closed form, best λ̂ on a fine grid."""
+def tnb_rdp_exact_curve(
+    eps_of: Callable[[float], float], eta: float, gamma: float, lam: float, eps_inf: float | None = None
+) -> float:
+    """Theorem 2 at one order λ for a base whose RDP curve is known in closed form, best λ̂ on a fine grid.
+
+    For a pure ε_∞-DP base (eps_inf given), the middle terms tend to (1+η)ε_∞ as λ̂ → ∞, a candidate too.
+    """
     lam_hats = [1 + x / 20 for x in range(1, 2000)]
     extra = min(
         [(1 + eta) * (1 - 1 / ah) * eps_of(ah) + (1 + eta) * math.log(1 / gamma) / ah for ah in lam_hats]
         + [(1 + eta) * math.log(1 / gamma)]
+        + ([] if eps_inf is None else [(1 + eta) * eps_inf])
     )
     return eps_of(lam) + extra + math.log(tnb_mean(eta, gamma)) / (lam - 1)
 
@@ -528,7 +534,7 @@ def print_table(rng: np.random.Generator) -> TuningResult:
         gamma = tnb_gamma(0, 10)
         a, aa = best_of_pmf(p5, tnb_pgf(0, gamma)), best_of_pmf(pp5, tnb_pgf(0, gamma))
         exact = max(renyi(a, aa, lam), renyi(aa, a, lam))
-        bound = tnb_rdp_exact_curve(rr_rdp, 0.0, gamma, lam)
+        bound = tnb_rdp_exact_curve(rr_rdp, 0.0, gamma, lam, eps_inf=max_loss(p5, pp5))
         comp = 10 * rr_rdp(lam)
         print(
             f"randomized response eps=0.5, logarithmic mean 10, order {lam:g}: exact D={exact:.4f}  "

@@ -45,11 +45,11 @@ tex-deps: ## Install the LaTeX packages the PDF needs (also needs rsvg-convert: 
 	$(TLMGR) --repository $(CTAN) install $(TEX_PKGS)
 	@command -v rsvg-convert >/dev/null || echo "rsvg-convert not found: sudo apt install librsvg2-bin"
 
-# Figures are not committed: each chapter script in code/<part>/ writes its SVGs into
-# $(BUILD)/figures/<part>/, deterministically (seeded, no timestamps), and staging copies them into
-# each book's <part>/figures/. A script is rerun only when a file in its folder changes, since
-# scripts import their siblings; its printed tables go to a log in $(BUILD)/logs/, which doubles
-# as the up-to-date marker. Run with -j to regenerate in parallel.
+# Figures are not committed: each script in code/<folder>/ writes its SVGs into
+# $(BUILD)/figures/<folder>/, deterministically (seeded, no timestamps), and staging copies them into
+# the book folder of the same name, <part>/figures/ or appendix-derivations/figures/. A script is
+# rerun only when a file in its folder changes, since scripts import their siblings; its printed
+# tables go to a log in $(BUILD)/logs/, which doubles as the up-to-date marker. Run with -j to regenerate in parallel.
 FIG_LOGS  := $(patsubst code/%.py,$(BUILD)/logs/%.log,$(SCRIPTS))
 
 .SECONDEXPANSION:
@@ -74,9 +74,9 @@ define STAGE
 	@mkdir -p $(BUILD)/$(2)
 	@rsync -a --delete --exclude .quarto/ --exclude _book/ --exclude __pycache__/ $(4) $(1)/ $(BUILD)/$(2)/
 	@rsync -a filters/ $(BUILD)/$(2)/filters/
-	@for part in $(BUILD)/$(2)/part*/; do \
-	  name=$$(basename $$part); \
-	  if [ -d $(BUILD)/figures/$$name ]; then rsync -a $(BUILD)/figures/$$name/ $$part/figures/; fi; \
+	@for part in $(BUILD)/$(2)/part*/ $(BUILD)/$(2)/appendix*/; do \
+	  [ -d "$$part" ] || continue; name=$$(basename "$$part"); \
+	  if [ -d "$(BUILD)/figures/$$name" ]; then rsync -a $(BUILD)/figures/$$name/ $$part/figures/; fi; \
 	done
 endef
 
