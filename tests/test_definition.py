@@ -22,6 +22,10 @@ def test_definition_matches_section(tmp_path: Path) -> None:
         "disjoint uniforms, m=1000: pointwise delta=0.0010  event delta=1.0000",
         "max event ratio=3.0000  max pointwise ratio=3.0000  events checked=256",
         "max_S P(S) - 2Q(S): brute force=0.2500  hockey-stick=0.2500",
+        # Why a ratio
+        "additive-only definition, n=1000, delta=0.0001: TV between any two datasets <= 0.1000  best accuracy <= 0.5500",
+        "additive-only definition, n=1000, delta=0.001: TV between any two datasets <= 1.0000  best accuracy <= 1.0000  "
+        "release-each-record exposure=0.6323",
         # Randomized response
         "two coins: Pr(yes | yes)=0.7500  Pr(yes | no)=0.2500  eps=ln 3=1.0986",
         "eps=0.1000: truth prob=0.5250",
@@ -29,6 +33,7 @@ def test_definition_matches_section(tmp_path: Path) -> None:
         "report rate=0.4000  sd formula=0.0274  simulated mean=0.2996 sd=0.0278  survey sampling sd=0.0145",
         "eps=0.1000: estimator sd x sqrt(n)=9.9958",
         "eps=0.5: estimator sd at n=1000=0.0626",
+        "central Laplace on the count, n=1000, eps=ln3: fraction sd=0.00129  randomized response / central=21.3",
         # Divergence forms
         "delta(0.5)=0.3378  delta(1)=0.0704  delta(ln3)=0.0000",
         "Laplace count b=1: delta(0.5)=0.2212  delta(1)=0.0000",
@@ -65,6 +70,10 @@ def test_definition_matches_section(tmp_path: Path) -> None:
         "n=10000 delta=1e-06: expected published=0.01  Pr[at least one]=9.9502e-03",
         "n=10000 delta=1e-08: expected published=0.0001  Pr[at least one]=9.9995e-05",
         "mean published=1.0077  fraction with one or more=0.6351",
+        # Two shapes of delta
+        "two shapes of delta at eps=1: catastrophic delta=6.830e-03  Gaussian delta=6.830e-03",
+        "Pr[L = inf]: catastrophic=6.830e-03  Gaussian=0  Pr[L > 3]: catastrophic=6.830e-03  Gaussian=4.462e-09",
+        "bound on Pr[L > 3] from (1, delta) alone=7.899e-03",
         # Limits
         "group of k=5, eps=1: max loss=5.0000  advantage bound=0.9866  Laplace exact=0.9179",
     ):
@@ -77,4 +86,5 @@ def test_definition_matches_section(tmp_path: Path) -> None:
         "dpdef_advantage.svg",
         "dpdef_posterior.svg",
         "dpdef_release.svg",
+        "dpdef_delta_shapes.svg",
     }

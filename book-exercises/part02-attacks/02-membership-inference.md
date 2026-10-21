@@ -106,7 +106,7 @@ Given $z$, the second term is $\mathcal N\big(0, (n - 1)\|z\|^2/n^2\big)$ by the
 
 The simulation (@tbl-sol-mia-mean) matches the formula within its sampling error at $n = 100$. At $n = 25$ the approximation in step 4 is cruder: the IN variance is $24/25$, not 1, and $\|z\|/\sqrt n$ varies from target to target. The simulated FPR stays at about $10^{-3}$ because step 1 is exact.
 
-*Exposure depends on the ratio of parameters to records, $d/n$. With as many dimensions as records, a member is flagged 1.8% of the time at FPR $10^{-3}$; with ten times more dimensions, more than half the time. The tracing attacks of [Lower bounds](../../book-full/part03-dp-foundations/09-lower-bounds.md) build on exactly this statistic.*
+*Exposure depends on the ratio of parameters to records, $d/n$. With as many dimensions as records, a member is flagged 1.8% of the time at FPR $10^{-3}$; with ten times more dimensions, more than half the time. The tracing attacks of [Lower bounds](../../book-full/part03-dp-foundations/10-lower-bounds.md) build on exactly this statistic.*
 :::
 
 ## The onion effect {#sec-sol-mia-6}

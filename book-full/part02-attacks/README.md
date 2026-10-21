@@ -16,9 +16,9 @@ This file is the GitHub overview. It is not part of the rendered book.
 | 12 | [Property inference](04-property-inference.md) | The property game; why a property leaks when no record does; meta-classifiers; permutation invariance | [property_inference.py](../../code/part02-attacks/property_inference.py) |
 | 13 | [Memorization and training-data extraction](05-memorization-extraction.md) | Verbatim, discoverable and extractable memorization; duplication; canaries and exposure; extraction without a prefix | [memorization.py](../../code/part02-attacks/memorization.py) |
 | 14 | [Gradient inversion](06-gradient-inversion.md) | Exact recovery from a fully connected layer; label recovery; Deep Leakage from Gradients; batches and averaging | [gradient_inversion.py](../../code/part02-attacks/gradient_inversion.py) |
-| 15 | [Linkage and re-identification](07-linkage-reidentification.md) | Quasi-identifiers; how many people are unique; the Netflix attack and eccentricity; why sampling does not protect | [linkage.py](../../code/part02-attacks/linkage.py) |
+| 15 | [Linkage and re-identification](07-linkage-reidentification.md) | Quasi-identifiers; hashed identifiers and the New York taxi release; how many people are unique; the Netflix attack and eccentricity; why sampling does not protect | [linkage.py](../../code/part02-attacks/linkage.py) |
 | 16 | [Syntactic anonymity and how it breaks](08-syntactic-anonymity.md) | k-anonymity and Mondrian; homogeneity and background knowledge; l-diversity; skewness and t-closeness; the composition attack | [syntactic_anonymity.py](../../code/part02-attacks/syntactic_anonymity.py) |
-| 17 | [Reconstruction attacks](09-reconstruction.md) | The exponential attack; Dinur–Nissim; least-squares decoding; the Fundamental Law of Information Recovery; a census block rebuilt from its tables | [reconstruction.py](../../code/part02-attacks/reconstruction.py) |
+| 17 | [Reconstruction attacks](09-reconstruction.md) | The exponential attack; Dinur–Nissim; least-squares decoding; the Fundamental Law of Information Recovery; the Cohen–Nissim attack on Diffix; a census block rebuilt from its tables | [reconstruction.py](../../code/part02-attacks/reconstruction.py) |
 
 Each script prints the numbers its chapter quotes and regenerates the chapter's figures in `_build/figures/part02-attacks/` (the build copies them into each book):
 
@@ -47,6 +47,7 @@ Every chapter's exercises, each with a worked solution, are in the exercise book
 - Zhu et al., "Deep Leakage from Gradients" (NeurIPS 2019) → chapter 14
 - Ganju et al., "Property Inference Attacks on Fully Connected Neural Networks" (CCS 2018) → chapter 12
 - Nasr et al., "Scalable Extraction of Training Data from (Production) Language Models" (2023) → chapter 13
+- Cohen & Nissim, "Linear Program Reconstruction in Practice" (JPC 2020) → chapter 17
 - Garfinkel, Abowd & Martindale, "Understanding Database Reconstruction Attacks on Public Data" (CACM 2019) → chapter 17
 - Rocher, Hendrickx & de Montjoye, "Estimating the success of re-identifications in incomplete datasets" (Nature Communications 2019) → chapter 15
 - Salem et al., "SoK: Let the Privacy Games Begin!" (S&P 2023) → chapter 9
@@ -73,5 +74,6 @@ You are done with this part when you can do each of these on paper, without note
 - [ ] Sketch the Dinur–Nissim proof that error $o(\sqrt n)$ on random subset sums allows reconstruction of almost every bit.
 - [ ] Recover an input from the gradient of a fully connected layer with bias, and the label from the last-layer gradient.
 - [ ] Explain why a dataset property can leak with advantage near 1 while membership advantage is near 0.
+- [ ] Explain why hashing an identifier is not anonymization, and why a random pseudonym still links a person's records.
 - [ ] Compute the expected fraction of unique people for a given number of bits of quasi-identifier, and explain the eccentricity test.
 - [ ] Prove that k-anonymity caps linkage at $1/k$, show a homogeneity and a skewness attack on a k-anonymous table, and run the composition attack on two independent releases.

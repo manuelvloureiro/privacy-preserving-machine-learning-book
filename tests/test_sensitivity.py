@@ -1,4 +1,4 @@
-"""code/part03-dp-foundations/sensitivity.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/06-sensitivity.md."""
+"""code/part03-dp-foundations/sensitivity.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/07-sensitivity.md."""
 
 import subprocess
 import sys
@@ -56,6 +56,18 @@ def test_sensitivity_matches_section(tmp_path: Path) -> None:
         "n=100: C*=177.5",
         "n=10000: C*=557.3",
         "n=100000: C*=876.3",
+        # Inverse sensitivity
+        "lengths: 1 2 1 2 3 1",
+        "len: 3 2 1 1 2 3",
+        "probs: 0.0544 0.1792 0.1477 0.2955 0.2688 0.0544",
+        "Pr[3 <= t <= 6]=0.4432",
+        "median |error|=0.0783  simulated=0.0784  Cauchy smooth=0.979  LS=0.1386",
+        "n=101: median |error|=0.696",
+        # Stability-based release
+        "lead=10: distance=4  pass probability=2.73e-05",
+        "lead=30: distance=14  pass probability=0.5842",
+        "lead=40: distance=19  pass probability=0.9972",
+        "lead needed for pass probability 0.95: 35",
     ):
         assert expected in out or expected in squeezed, expected
     assert {f.name for f in tmp_path.iterdir()} == {

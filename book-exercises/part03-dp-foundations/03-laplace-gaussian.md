@@ -124,3 +124,17 @@ $$\frac{d\delta_\mu}{d\varepsilon} = -\frac{\varphi(a)}\mu - e^\varepsilon\Phi(c
 
 *Bounding a vector's $\ell_2$ norm makes its $\ell_1$ sensitivity grow like $\sqrt d$, so for norm-bounded data, such as clipped gradients, Gaussian noise is the right choice.*
 :::
+
+## The privacy loss distribution of the Laplace mechanism {#sec-sol-lapgauss-7}
+
+> **Exercise 7.** **The privacy loss distribution of the Laplace mechanism.** A count is released with $\mathrm{Lap}(1/\varepsilon)$ noise, and its true answers are 0 on $D$ and 1 on $D'$. Find the distribution of the privacy loss $L$ of an output drawn from $M(D)$: its two atoms, and the density of its continuous part. Check that the total probability is 1, and that the mean loss is $\varepsilon + e^{-\varepsilon} - 1$. *Check: at $\varepsilon = 1$ the atoms carry 0.5000 and 0.1839, and the mean loss is 0.3679.* *(@fig-lg-loss-distributions)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The loss as a function of the output.** With $b = 1/\varepsilon$, the loss is $L(y) = \varepsilon(|y - 1| - |y|)$. It equals $\varepsilon$ for $y \le 0$ and $-\varepsilon$ for $y \ge 1$. In between, for $0 < y < 1$, it is $\varepsilon(1 - 2y)$, a straight line from $\varepsilon$ down to $-\varepsilon$.
+2. **The atoms.** Under $M(D)$ the output is $\mathrm{Lap}(0, 1/\varepsilon)$. So $\Pr[y \le 0] = \frac12$ by symmetry, and $\Pr[y \ge 1] = \frac12e^{-\varepsilon}$, the Laplace tail beyond one unit, which is $\varepsilon$ scales. These are the atoms at $+\varepsilon$ and $-\varepsilon$.
+3. **The continuous part.** On $0 < y < 1$ the density of $y$ is $\frac\varepsilon2e^{-\varepsilon y}$. Change variables to $l = \varepsilon(1 - 2y)$, so $y = (1 - l/\varepsilon)/2$ and $|dy/dl| = 1/(2\varepsilon)$. The density of $L$ on $(-\varepsilon, \varepsilon)$ is $\frac\varepsilon2e^{-(\varepsilon - l)/2}\cdot\frac1{2\varepsilon} = \frac14e^{(l - \varepsilon)/2}$.
+4. **Total probability.** The continuous part integrates to $\frac14 \cdot 2\big(1 - e^{-\varepsilon}\big) = \frac12(1 - e^{-\varepsilon})$. Adding the atoms gives $\frac12 + \frac12e^{-\varepsilon} + \frac12 - \frac12e^{-\varepsilon} = 1$. The script's midpoint sum gives 1.0000 at $\varepsilon = 0.5$ and at $\varepsilon = 1$.
+5. **The mean.** The mean of the privacy loss under $M(D)$ is the Kullback–Leibler divergence of the pair, which for two Laplace densities with centres $\varepsilon$ scales apart is $\varepsilon + e^{-\varepsilon} - 1$. The script computes the mean from the atoms and the density: 0.3679 at $\varepsilon = 1$ and 0.1065 at $\varepsilon = 0.5$, equal to the formula.
+
+*The loss never leaves $[-\varepsilon, \varepsilon]$, which is pure DP, and half the time it sits at the worst value $\varepsilon$. A Gaussian loss is centred at a much smaller value but has no end points.*
+:::

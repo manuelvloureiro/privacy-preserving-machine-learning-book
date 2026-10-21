@@ -1,4 +1,4 @@
-"""Compute the numbers quoted in book-exercises/part03-dp-foundations/06-sensitivity.md.
+"""Compute the numbers quoted in book-exercises/part03-dp-foundations/07-sensitivity.md.
 
     uv run python code/part03-dp-foundations/solutions_sensitivity.py
 
@@ -25,6 +25,8 @@ from sensitivity import (
     distance_to_instability,
     median_a_profile,
     median_smooth_sensitivity,
+    mode_gap_for_pass,
+    mode_stability_distance,
     order_stat_a_profile,
     ptr_pass_probability,
     saa_error,
@@ -89,6 +91,53 @@ def exp_clip_optimum(n: int, eps: float) -> float:
         else:
             hi = mid
     return (lo + hi) / 2
+
+
+# --- Exercise 8: inverse sensitivity for a quantile -------------------------------------------
+
+
+def quantile_inverse_probabilities(x: Array, lam: float, rank: int, eps: float) -> tuple[Array, Array]:
+    """Padded sorted values and the probability of each gap: len = rank - i below, i - rank + 1 above."""
+    p = np.concatenate([[0.0], np.sort(x), [lam]])
+    i = np.arange(len(p) - 1)
+    lens = np.where(i >= rank, i - rank + 1, rank - i).astype(np.float64)
+    lengths = np.diff(p)
+    logw = np.log(np.maximum(lengths, 1e-300)) - eps * lens / 2
+    w = np.where(lengths > 0, np.exp(logw - logw.max()), 0.0)
+    return p, w / w.sum()
+
+
+def quantile_inverse_median_abs_error(x: Array, lam: float, rank: int, eps: float) -> float:
+    """Median of |t - x_rank| under the inverse-sensitivity release, by bisection on its CDF."""
+    p, probs = quantile_inverse_probabilities(x, lam, rank, eps)
+    centre = float(p[rank])
+    lengths = np.diff(p)
+
+    def cdf(r: float) -> float:
+        lo = np.clip(centre - r, p[:-1], p[1:])
+        hi = np.clip(centre + r, p[:-1], p[1:])
+        return float(np.sum(probs * np.where(lengths > 0, (hi - lo) / np.maximum(lengths, 1e-300), 0.0)))
+
+    a, b = 0.0, lam
+    for _ in range(200):
+        mid = (a + b) / 2
+        a, b = (mid, b) if cdf(mid) < 0.5 else (a, mid)
+    return (a + b) / 2
+
+
+# --- Exercise 9: the stable mode under add/remove ----------------------------------------------
+
+
+def mode_distance_add_remove(gap: int) -> int:
+    """max(0, g - 1): one added or removed record moves the lead by at most 1."""
+    return max(0, gap - 1)
+
+
+def mode_gap_for_pass_add_remove(prob: float, eps: float, delta: float) -> int:
+    g = 0
+    while ptr_pass_probability(mode_distance_add_remove(g), eps, delta) < prob:
+        g += 1
+    return g
 
 
 # --- The solutions' numbers ------------------------------------------------------------------
@@ -174,6 +223,23 @@ def print_table(rng: np.random.Generator) -> None:
     s0 = median_smooth_sensitivity(x0, lam, beta_c)
     s1 = median_smooth_sensitivity(x1, lam, beta_c)
     print(f"  ratio S*(x')/S*(x)={s1 / s0:.4f}  e^β={math.exp(beta_c):.4f}")
+
+    print("[Exercise 8: inverse sensitivity for the 90th percentile of the ages, ε=1]")
+    err90 = quantile_inverse_median_abs_error(x, AGE_MAX, 901, EPS)
+    err50 = quantile_inverse_median_abs_error(x, AGE_MAX, 501, EPS)
+    print(
+        f"  r=901: median |error|={err90:.4f}  smooth Cauchy scale (Exercise 3)={6 * s90 / EPS:.3f}  r=501: {err50:.4f}"
+    )
+
+    print("[Exercise 9: the stable mode, ε=1, δ=1e-6]")
+    print(
+        f"  lead for 0.95: replace={mode_gap_for_pass(0.95, EPS, DELTA)}  "
+        f"add/remove={mode_gap_for_pass_add_remove(0.95, EPS, DELTA)}"
+    )
+    print(
+        f"  lead 20: replace distance={mode_stability_distance(20)} pass={ptr_pass_probability(mode_stability_distance(20), EPS, DELTA):.4g}  "
+        f"add/remove distance={mode_distance_add_remove(20)} pass={ptr_pass_probability(mode_distance_add_remove(20), EPS, DELTA):.4f}"
+    )
 
 
 def main() -> None:

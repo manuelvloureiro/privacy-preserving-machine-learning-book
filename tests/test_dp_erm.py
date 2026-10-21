@@ -56,7 +56,28 @@ def test_dp_erm_matches_chapter(tmp_path: Path) -> None:
         "output-pure: predicted 6.885e-04  measured 8.321e-04",
         "objective: predicted 7.127e-05  measured 8.156e-05",
         "T=20: 1.027e-03  T=50: 2.875e-04  T=100: 7.137e-04  T=200: 1.076e-03  T=500: 2.939e-03  T=1000: 6.018e-03",
+        # Noisy projected gradient descent without a ridge
+        "classic ratio eps/sqrt(2 ln(1.25/delta))=0.2064  exact mu=0.2681",
+        "n=1000: T=1797  sigma=0.3163  G^2=1+d sigma^2=2.0004  step=0.0834  bound=0.1668  "
+        "limit 2RL sqrt(d)/(n mu)=0.1180",
+        "n=1000, T=100: bound=0.5137",
+        "n=1000, T=1000: bound=0.1973",
+        "n=1000, T=10000: bound=0.1281",
+        "n=1000, T=100000: bound=0.1190",
+        "n=300: T=162  sigma=0.3166  measured=1.119e-01  bound=5.558e-01  ratio=5.0",
+        "n=1000: T=1797  sigma=0.3163  measured=3.028e-02  bound=1.668e-01  ratio=5.5",
+        "n=3000: T=16167  sigma=0.3162  measured=7.297e-03  bound=5.561e-02  ratio=7.6",
+        "log-log slope against n: measured -1.18  bound -1.00",
+        "d=10, n=10000: limit=0.0118  T rule=179629",
+        "d=40, n=10000: limit=0.0236  T rule=44908",
+        "d=160, n=10000: limit=0.0472  T rule=11227",
     ):
         assert expected in out, expected
-    for name in ("erm_output_1d.svg", "erm_objective_density.svg", "erm_comparison.svg", "erm_noisy_gd_steps.svg"):
+    for name in (
+        "erm_output_1d.svg",
+        "erm_objective_density.svg",
+        "erm_comparison.svg",
+        "erm_noisy_gd_steps.svg",
+        "erm_convex.svg",
+    ):
         assert (tmp_path / name).exists()

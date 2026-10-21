@@ -11,7 +11,18 @@ import math
 from pathlib import Path
 
 import numpy as np
-from dp_erm import C_LOGISTIC, bisect, classic_sigma, gaussian_mu, gaussian_sigma, objective_perturbation_plan
+from dp_erm import (
+    C_LOGISTIC,
+    bisect,
+    classic_sigma,
+    convex_bound,
+    convex_limit,
+    convex_steps_rule,
+    gaussian_mu,
+    gaussian_sigma,
+    noisy_gd_sigma,
+    objective_perturbation_plan,
+)
 from numpy.typing import NDArray
 
 # Figures are build output: _build/figures/<part>/, which the build copies into each book.
@@ -118,6 +129,23 @@ def gradient_tolerance(n: int, lipschitz: float, slack: float) -> float:
     return slack * lipschitz / n
 
 
+# --- Exercise 8: privacy noise as gradient variance ----------------------------------------------
+
+
+def nonprivate_bound(radius: float, steps: int, lipschitz: float = 1.0) -> float:
+    """RL/√T: projected gradient descent's guarantee when the gradients carry no noise."""
+    return radius * lipschitz / math.sqrt(steps)
+
+
+# --- Exercise 9: how many steps without a ridge ---------------------------------------------------
+
+
+def steps_within(n: int, d: int, eps: float, delta: float, slack: float) -> int:
+    """Smallest T with RL√(1/T + a) ≤ (1 + slack) RL√a, a = 4d/(n²μ²): T ≥ 1/(((1 + slack)² - 1) a)."""
+    a = 4 * d / (n**2 * gaussian_mu(eps, delta) ** 2)
+    return math.ceil(1 / (((1 + slack) ** 2 - 1) * a))
+
+
 def print_table(rng: np.random.Generator) -> None:
     print("== Exercise 1")
     for eps in (0.25, 0.5, 1.0):
@@ -166,6 +194,24 @@ def print_table(rng: np.random.Generator) -> None:
     )
     print("== Exercise 7")
     print(f"n=10000, L=1, 10% slack: g={gradient_tolerance(10_000, 1.0, 0.1):.0e}")
+    print("== Exercise 8")
+    n, d, radius = 1_000, 10, 5.0
+    steps = convex_steps_rule(n, d, 1.0, 1e-5)
+    sigma = noisy_gd_sigma(n, steps, 1.0, 1e-5)
+    print(
+        f"n={n}, d={d}, R=5: T={steps}  sigma={sigma:.4f}  d sigma^2={d * sigma**2:.4f}  "
+        f"private bound={convex_bound(n, d, steps, radius, 1.0, 1e-5):.4f}  "
+        f"noiseless bound={nonprivate_bound(radius, steps):.4f}  "
+        f"ratio={convex_bound(n, d, steps, radius, 1.0, 1e-5) / nonprivate_bound(radius, steps):.4f}"
+    )
+    print("== Exercise 9")
+    for n in (1_000, 10_000):
+        t = steps_within(n, 10, 1.0, 1e-5, 0.1)
+        print(
+            f"n={n}, d=10: T within 10% of the limit={t}  bound={convex_bound(n, 10, t, 5.0, 1.0, 1e-5):.4f}  "
+            f"limit={convex_limit(n, 10, 5.0, 1.0, 1e-5):.4f}  gradient evaluations n*T={n * t:.3g}  "
+            f"one record per step, n^2 steps={n**2:.3g}"
+        )
 
 
 def main() -> None:

@@ -124,3 +124,58 @@ The solutions use the chapter's notation. Differential privacy (DP) is defined b
 
 *The ratio is smallest at moderate $\varepsilon$. For small $\varepsilon$ both are $\varepsilon/2$, and for large $\varepsilon$ both approach 1. In between, the script finds the smallest ratio, 0.8284, at $\varepsilon = 1.76$: there the Laplace count leaves 17% of the bound unused.*
 :::
+
+## An additive bound alone cannot work {#sec-sol-dpdef-8}
+
+> **Exercise 8.** **An additive bound alone cannot work.** Suppose a definition asked only that $|\Pr[M(D) \in S] - \Pr[M(D') \in S]| \le \delta$ for all neighbours under replace and all events $S$. Show that any two datasets of $n$ records then have outputs at most $n\delta$ apart in total variation (TV). Conclude that with $n = 1000$ and $\delta = 10^{-4}$ no test can tell an all-ones dataset from an all-zeros one with probability above 0.55. Then show that with $\delta = 10^{-3}$ the definition allows a mechanism that exposes someone with probability 0.6323. *Check: the TV bound is 0.1000 at $\delta = 10^{-4}$.* *(Why a ratio and not only a difference)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The path.** Two datasets $D$ and $D^*$ of $n$ records differ in at most $n$ positions. Change them one at a time to get $D = D_0, D_1, \dots, D_m = D^*$ with $m \le n$, each pair of consecutive datasets being replace neighbours.
+2. **One step.** The assumption says that $\mathrm{TV}(M(D_{i-1}), M(D_i)) \le \delta$, because TV is the largest gap $|P(S) - Q(S)|$ over events.
+3. **The triangle inequality.** TV is a distance, so $\mathrm{TV}(M(D_0), M(D_m)) \le \sum_{i=1}^m\mathrm{TV}(M(D_{i-1}), M(D_i)) \le m\delta \le n\delta$.
+4. **Useless when $n\delta$ is small.** With the two datasets equally likely, the best test is right with probability $\frac12 + \frac12\mathrm{TV}$. At $n = 1000$, $\delta = 10^{-4}$: $\mathrm{TV} \le 0.1000$, so the accuracy is at most 0.5500, whatever the mechanism computes. Even "is everyone a one, or no one?" cannot be answered reliably.
+5. **Not private when $n\delta$ is large.** The mechanism that publishes each record with probability $\delta$ changes the output between neighbours only through that record's own coin, so its TV between neighbours is at most $\delta$ and it satisfies the additive definition. At $\delta = 10^{-3} = 1/n$ it publishes at least one record with probability $1 - (1 - 10^{-3})^{1000} = 0.6323$.
+
+*No single $\delta$ is both useful and private. The multiplicative factor $e^\varepsilon$ lets datasets far apart give very different outputs while keeping each single step small in ratio.*
+:::
+
+## A private mechanism must be randomized {#sec-sol-dpdef-9}
+
+> **Exercise 9.** **A private mechanism must be randomized.** Let $f$ be a deterministic algorithm that is not constant on datasets of size $n$. Show that $f$ is not $(\varepsilon, \delta)$-DP under replace for any $\varepsilon$ and any $\delta < 1$. Then explain why releasing the exact mean of a large dataset, rounded to one decimal, is not differentially private however large the dataset. *(Pure and approximate DP)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Two datasets with different outputs.** Since $f$ is not constant, some $D$ and $D^*$ of size $n$ have $f(D) \ne f(D^*)$.
+2. **A path of neighbours.** Change $D$ into $D^*$ one record at a time, as in Exercise 8. The output starts at $f(D)$ and ends at $f(D^*)$, so it changes at some step: there are neighbours $D_{i-1}$ and $D_i$ with $f(D_{i-1}) \ne f(D_i)$.
+3. **The event.** Let $S = \{f(D_{i-1})\}$. Then $\Pr[f(D_{i-1}) \in S] = 1$ and $\Pr[f(D_i) \in S] = 0$.
+4. **The definition fails.** @eq-dpdef-def asks $1 \le e^\varepsilon \cdot 0 + \delta = \delta$, which is false for every $\delta < 1$, whatever $\varepsilon$ is.
+5. **The rounded mean.** Rounding is deterministic, and the rounded mean is not constant: moving from all records 0 to all records 1 moves it from 0 to 1. So step 2 finds two neighbours on either side of a rounding boundary, and an observer who sees which side the output lands on learns which of the two datasets it was. However large $n$ is, such a pair exists, and the definition is a worst case over all pairs.
+
+*Privacy in the sense of DP always comes from randomness the mechanism adds. Coarsening an exact answer only moves the place where it gives itself away.*
+:::
+
+## A catastrophic mechanism with a small $\delta$ {#sec-sol-dpdef-10}
+
+> **Exercise 10.** **A catastrophic mechanism with a small $\delta$.** A person holds a bit. The mechanism publishes the bit itself with probability $\delta$, and otherwise reports it by randomized response at level $\varepsilon$. Show that it is exactly $(\varepsilon, \delta)$-DP, that its privacy loss is infinite with probability $\delta$, and compare $\Pr[L > 3]$ with the bound @eq-dpdef-bad-set for $\varepsilon = 1$, $\delta = 0.01$. *Check: $\Pr[L > 3] = 0.0100$ against the bound 0.0116.* *(Divergence forms, two shapes of $\delta$)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The outputs.** There are four: "published 1", "published 0", "report 1" and "report 0". Write $t = e^\varepsilon/(1 + e^\varepsilon)$. With the true bit 1 ($D$) their probabilities are $\delta$, $0$, $(1 - \delta)t$ and $(1 - \delta)(1 - t)$. With the bit 0 ($D'$) they are $0$, $\delta$, $(1 - \delta)(1 - t)$ and $(1 - \delta)t$.
+2. **The hockey-stick divergence at $e^\varepsilon$.** Add up the positive parts of $p - e^\varepsilon q$. "Published 1" gives $\delta - 0 = \delta$. "Report 1" gives $(1 - \delta)(t - e^\varepsilon(1 - t)) = 0$, because $t = e^\varepsilon(1 - t)$. The other two outputs give negative terms. So $E_{e^\varepsilon}(P\|Q) = \delta$, and by symmetry the same holds with $D$ and $D'$ swapped. The mechanism is $(\varepsilon, \delta)$-DP and no smaller $\delta$ works at this $\varepsilon$. The script confirms 0.0100 for $\varepsilon = 1$, $\delta = 0.01$.
+3. **The privacy loss.** Under $D$, "published 1" has $q = 0$, so its loss is infinite, with probability $\delta$. The two reports have losses $\pm\varepsilon$, and "published 0" never occurs under $D$.
+4. **The tail at 3.** Only the infinite loss exceeds 3, so $\Pr[L > 3] = \delta = 0.0100$. The bound @eq-dpdef-bad-set, which uses only $(\varepsilon, \delta)$, is $\delta/(1 - e^{\varepsilon - 3}) = 0.01/(1 - e^{-2}) = 0.0116$. The mechanism comes within 14% of the largest tail any $(1, 0.01)$-DP mechanism can have.
+5. **At a smaller $\varepsilon$.** At $\varepsilon = 0.5$ the report outputs also contribute, and the script gives $\delta(0.5) = 0.2948$.
+
+*A quoted $(\varepsilon, \delta)$ cannot rule this mechanism out. Unless you know more about the mechanism, assume its $\delta$ may be spent on total failures.*
+:::
+
+## Is it a privacy violation? {#sec-sol-dpdef-11}
+
+> **Exercise 11.** **Is it a privacy violation?** Apply the three-question test of @sec-dpdef-violation to each case, and say what the first question answers and which other question explains the case. (a) A model trained with DP on hospital records predicts that a patient in the training set has diabetes, and she does. (b) A text model trained on a company's chat logs completes "the door code is" with the code one employee typed once. (c) An insurer raises a smoker's premium after a published study, which did not include him, finds that smoking causes cancer. (d) A recommender trained on all users suggests baby products to a user who has bought prenatal vitamins from the same shop. *(The three-question test)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **(a) Not a violation by itself.** Ask the first question: would the model predict diabetes for her if her record were left out? A DP model's prediction can barely depend on one record, and if patients with her features usually have diabetes, a model trained without her says the same. The second question confirms it: the prediction is right because the model is accurate. To check, compare the model's accuracy on training patients with its accuracy on similar patients outside the training set.
+2. **(b) A violation.** The first question decides it. No other record makes that particular code likely, so a model trained without the employee's message would give it no special probability. The completion exists because the model memorized one record, which is what DP prevents.
+3. **(c) Not a violation.** The first question decides it outright: he was not in the study, so his record cannot have changed its result. This is the population inference of @sec-dpdef-limits. Preventing it would mean not running the study.
+4. **(d) Not a violation in the DP sense.** The first question decides it: a recommender trained without her record would make the same suggestion from her purchases, because the pattern is shared by many customers. The third question explains why it still feels invasive: the suggestion uses her own purchase history, which she handed to the shop, as input. Whether such targeting is acceptable is a real question, but it is not one that DP answers.
+
+*Only the first question decides a violation in the DP sense. The second and third explain why an inference that feels invasive may still be population inference.*
+:::

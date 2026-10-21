@@ -269,6 +269,78 @@ def queries_for_recovery(fraction: float, sigma_over_sqrt_n: float) -> float:
     return 1 + (4 * sigma_over_sqrt_n * z) ** 2
 
 
+# --- A deployed query system: one-condition "random" subsets ---------------------------------
+
+# The first 25 primes, the digits 1..5 after the decimal point, the exponents 0.5, 0.6, ..., 1.9 except 1,
+# and the moduli 2 and 5: 25 × 5 × 14 × 2 = 3500 predicates, the query family of Cohen & Nissim (2020).
+PRIMES: tuple[int, ...] = tuple(p for p in range(2, 100) if all(p % k for k in range(2, p)))  # 25 primes
+DIGITS: tuple[int, ...] = (1, 2, 3, 4, 5)
+EXPONENTS: tuple[float, ...] = tuple(k / 10 for k in range(5, 20) if k != 10)
+MODULI: tuple[int, ...] = (2, 5)
+DIFFIX_SIGMA = 4.0  # the noise standard deviation Cohen & Nissim report for their queries
+DIFFIX_ROWS: tuple[int, ...] = (73, 110, 130, 142)  # the sizes of the four client-id ranges they attacked
+
+
+def digit_predicate(identifier: int, prime: int, digit: int, exponent: float, modulus: int) -> bool:
+    """Is the `digit`-th decimal digit after the point of (prime · identifier)^exponent divisible by `modulus`?"""
+    value = math.pow(prime * identifier, exponent)
+    scaled: float = value * 10.0**digit
+    return math.floor(scaled) % 10 % modulus == 0
+
+
+def digit_predicate_queries(identifiers: Sequence[int]) -> FloatArray:
+    """One 0/1 row per predicate (prime, digit, exponent, modulus): the records whose identifier it selects."""
+    rows = [
+        [1.0 if digit_predicate(i, p, j, e, mod) else 0.0 for i in identifiers]
+        for p in PRIMES
+        for j in DIGITS
+        for e in EXPONENTS
+        for mod in MODULI
+    ]
+    return np.array(rows, dtype=np.float64)
+
+
+def mean_inclusion_variance(queries: FloatArray) -> float:
+    """The average over queries of ρ(1 − ρ), where ρ is the fraction of records a query includes."""
+    rho = queries.mean(axis=1)
+    return float(np.mean(rho * (1 - rho)))
+
+
+def ls_predicted_fraction_rate(n: int, m: int, sigma: float, v: float) -> float:
+    """Φ(√(v(m − n − 1))/(2σ)): the least-squares prediction when a query includes a record at rate ρ, v = mean ρ(1−ρ).
+
+    With inclusion rate 1/2, v = 1/4 and this is ls_predicted_fraction without its n/(n + 1) factor.
+    """
+    if m <= n + 1:
+        return 0.5
+    return normal_cdf(math.sqrt(v * (m - n - 1)) / (2 * sigma))
+
+
+def sigma_for_recovery(n: int, m: int, v: float, fraction: float) -> float:
+    """The noise σ at which the prediction Φ(√(v(m − n − 1))/(2σ)) falls to `fraction`."""
+    return math.sqrt(v * (m - n - 1)) / (2 * normal_quantile(fraction))
+
+
+def diffix_identifiers(rng: np.random.Generator, n: int) -> list[int]:
+    """n distinct client identifiers drawn from the range 2000..3000, sorted."""
+    return sorted(int(i) for i in rng.choice(np.arange(2000, 3001), size=n, replace=False))
+
+
+def diffix_attack(rng: np.random.Generator, n: int, ms: Sequence[int], sigma: float) -> tuple[list[int], float]:
+    """One run of the attack: draw identifiers and secret bits, answer the digit-predicate queries with noise.
+
+    The queries are put in a random order and the attack with m queries uses the first m. The noise is drawn
+    once per query, as a system that repeats its noise for a repeated query would. Returns the number of wrong
+    bits for each m, and the mean ρ(1 − ρ) of the query family.
+    """
+    ids = diffix_identifiers(rng, n)
+    queries = digit_predicate_queries(ids)[rng.permutation(len(PRIMES) * len(DIGITS) * len(EXPONENTS) * len(MODULI))]
+    d = random_bits(rng, n)
+    answers = queries @ d + rng.normal(0.0, sigma, size=len(queries))
+    wrong = [hamming(least_squares_decode(queries[:m], answers[:m]), d) for m in ms]
+    return wrong, mean_inclusion_variance(queries)
+
+
 def smallest_singular_value(matrix: FloatArray) -> float:
     """√(smallest eigenvalue of AᵀA)."""
     return float(math.sqrt(np.linalg.eigvalsh(matrix.T @ matrix)[0]))
@@ -618,6 +690,46 @@ def print_table(rng: np.random.Generator) -> None:
                 f"true pattern in {share:.2f} of them"
             )
 
+    print("== A deployed query system: digit-predicate queries, sigma = 4 ==")
+    m = len(PRIMES) * len(DIGITS) * len(EXPONENTS) * len(MODULI)
+    sample = digit_predicate_queries(diffix_identifiers(rng, 73))
+    rho = sample.mean(axis=1)
+    by_mod = [rho[k :: len(MODULI)] for k in range(len(MODULI))]
+    print(
+        f"  queries={m}  example: digit 2 of (2 * 2011)^0.7 = {math.pow(2 * 2011, 0.7):.5f}  "
+        f"selected (mod 5): {digit_predicate(2011, 2, 2, 0.7, 5)}"
+    )
+    print(
+        f"  n=73: mean inclusion rate mod 2={float(by_mod[0].mean()):.3f}  mod 5={float(by_mod[1].mean()):.3f}  "
+        f"mean rho(1-rho)={mean_inclusion_variance(sample):.4f}"
+    )
+    v73 = mean_inclusion_variance(sample)
+    s75 = sigma_for_recovery(73, m, v73, 0.75)
+    print(f"  n=73: sigma for 75% recovery / Diffix sigma={s75 / DIFFIX_SIGMA:.1f}")
+    print(
+        f"  n=73, sigma=2 sqrt(n)={2 * math.sqrt(73):.1f}: predicted fraction with all {m} queries="
+        f"{ls_predicted_fraction_rate(73, m, 2 * math.sqrt(73), v73):.3f}"
+    )
+    reps = 50
+    for n in DIFFIX_ROWS:
+        wrong_total = 0
+        perfect = 0
+        v_total = 0.0
+        for _ in range(reps):
+            wrong, v = diffix_attack(rng, n, [m], DIFFIX_SIGMA)
+            wrong_total += wrong[0]
+            perfect += wrong[0] == 0
+            v_total += v
+        v_mean = v_total / reps
+        pred = ls_predicted_fraction_rate(n, m, DIFFIX_SIGMA, v_mean)
+        print(
+            f"  n={n}: sigma/sqrt(n)={DIFFIX_SIGMA / math.sqrt(n):.2f}  perfect in {perfect} of {reps} runs  "
+            f"wrong bits per run={wrong_total / reps:.2f}  "
+            f"predicted fraction={pred:.5f}  predicted wrong bits={n * (1 - pred):.3f}  "
+            f"sigma for 75% recovery={sigma_for_recovery(n, m, v_mean, 0.75):.1f} "
+            f"({sigma_for_recovery(n, m, v_mean, 0.75) / math.sqrt(n):.2f} sqrt(n))"
+        )
+
 
 # --- Figures ---------------------------------------------------------------------------------
 
@@ -724,6 +836,36 @@ def plot_census(rows: Sequence[tuple[str, int]]) -> Figure:
     return fig
 
 
+def plot_diffix(rng: np.random.Generator, n: int = 73, reps: int = 20) -> Figure:
+    ms = [100, 150, 200, 300, 500, 750, 1000, 1500, 2000, 2500, 3500]
+    sigmas = [DIFFIX_SIGMA, 2 * math.sqrt(n)]
+    fig, ax = plt.subplots(figsize=(6.5, 4.2))
+    for color, sigma in zip(("C0", "C3"), sigmas, strict=True):
+        totals = [0.0] * len(ms)
+        v_total = 0.0
+        for _ in range(reps):
+            wrong, v = diffix_attack(rng, n, ms, sigma)
+            totals = [t + 1 - w / n for t, w in zip(totals, wrong, strict=True)]
+            v_total += v
+        v_mean = v_total / reps
+        label = rf"$\sigma = {sigma:.0f}$" if sigma == DIFFIX_SIGMA else rf"$\sigma = 2\sqrt{{n}} = {sigma:.1f}$"
+        ax.plot(ms, [t / reps for t in totals], "o", color=color, markersize=4, label=f"simulated, {label}")
+        fine = np.geomspace(ms[0], ms[-1], 200)
+        ax.plot(
+            fine, [ls_predicted_fraction_rate(n, int(f), sigma, v_mean) for f in fine], "-", color=color, linewidth=1
+        )
+    ax.axhline(0.5, color="gray", linestyle=":")
+    ax.set(
+        xscale="log",
+        xlabel="digit-predicate queries m",
+        ylabel="fraction of bits recovered",
+        ylim=(0.45, 1.01),
+        title=f"One-condition queries on n = {n} records (lines: prediction)",
+    )
+    ax.legend(fontsize=8, loc="lower right")
+    return fig
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seed", type=int, default=0)
@@ -742,6 +884,7 @@ def main() -> None:
         "recon_ls_noise.svg": plot_ls_noise(rng),
         "recon_ls_queries.svg": plot_ls_queries(rng),
         "recon_census.svg": plot_census(withheld_counts(publish(BLOCK))),
+        "recon_diffix.svg": plot_diffix(rng),
     }
     for name, fig in figures.items():
         fig.tight_layout()

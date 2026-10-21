@@ -52,6 +52,11 @@ def test_composition_matches_section(tmp_path: Path) -> None:
         "sigma=5 k=100: basic=93.178  advanced=89.843  optimal=76.223  exact=9.997",
         "optimal / exact = 7.6",
         "sigma=20 k=1000: basic=238.578  advanced=68.008  optimal=62.720  exact=7.511",
+        # Laplace noise on dense counts
+        "d=100: pure Laplace=141.4  Laplace + advanced=69.3  Laplace + optimal=52.3  Gaussian=37.3",
+        "d=1000: pure Laplace=1414.2  Laplace + advanced=219.2  Laplace + optimal=166.6  Gaussian=118.0",
+        "d=10000: pure Laplace=14142.1  Laplace + advanced=693.0  Laplace + optimal=527.5  Gaussian=373.1",
+        "d=1000 per-count eps0: advanced=0.00645  optimal=0.00849",
         "optimal / exact = 8.4",
         # Exercises
         "ex2 crossover eps=0.1 delta'=1e-5: formula k > 28.8  search k=29",

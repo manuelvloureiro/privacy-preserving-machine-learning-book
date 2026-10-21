@@ -47,6 +47,9 @@ def test_solutions_linkage_matches_page(tmp_path: Path) -> None:
         "e^-phi=0.2231",
         "simulated, n=1000: exponential=0.2257  normal=0.0024",
         "normal approximation exp(-phi sqrt(2 ln n))=0.0038",
+        # Exercise 8
+        "licences=2000000 (20.9 bits)  seconds at 1e7/s=0.2  passwords 62^10=8.39e+17 (59.5 bits)  years=2661",
+        "trips: cells=4.1e+10  n/M=0.00422  unique fraction under uniform cells=0.9958",
     ):
         assert expected in out, expected
     assert list(tmp_path.iterdir()) == []

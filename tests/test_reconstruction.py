@@ -68,6 +68,18 @@ def test_reconstruction_matches_section(tmp_path: Path) -> None:
         "withhold black median: 36 consistent blocks, 3 attribute patterns, true pattern in 0.64 of them",
         "withhold married median: 26 consistent blocks, 4 attribute patterns, true pattern in 0.46 of them",
         "withhold married mean: 45 consistent blocks, 7 attribute patterns, true pattern in 0.51 of them",
+        # A deployed query system
+        "queries=3500",
+        "n=73: mean inclusion rate mod 2=0.502  mod 5=0.198  mean rho(1-rho)=0.2016",
+        "n=73: sigma for 75% recovery / Diffix sigma=4.9",
+        "n=73, sigma=2 sqrt(n)=17.1: predicted fraction with all 3500 queries=0.779",
+        (
+            "n=73: sigma/sqrt(n)=0.47  perfect in 49 of 50 runs  wrong bits per run=0.02  "
+            "predicted fraction=0.99950  predicted wrong bits=0.036  sigma for 75% recovery=19.5"
+        ),
+        "n=142: sigma/sqrt(n)=0.34  perfect in 45 of 50 runs  wrong bits per run=0.10",
+        "predicted wrong bits=0.077",
+        "predicted fraction=0.99946",
     ):
         assert expected in out
     for statistic in (
@@ -87,4 +99,5 @@ def test_reconstruction_matches_section(tmp_path: Path) -> None:
         "recon_ls_noise.svg",
         "recon_ls_queries.svg",
         "recon_census.svg",
+        "recon_diffix.svg",
     }

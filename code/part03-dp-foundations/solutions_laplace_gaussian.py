@@ -20,6 +20,9 @@ from laplace_gaussian import (
     gaussian_delta,
     gaussian_epsilon,
     laplace_delta,
+    laplace_loss_density,
+    laplace_loss_masses,
+    laplace_mean_loss,
     laplace_scale,
     normal_cdf,
     normal_pdf,
@@ -92,6 +95,19 @@ def vector_mean_l2_rms(d: int, n: int, eps: float, delta: float) -> tuple[float,
     return lap, gau
 
 
+# --- Exercise 7: the privacy loss distribution of the Laplace mechanism ---------------------
+
+
+def integrated_laplace_loss(eps: float, steps: int = 100_000) -> tuple[float, float]:
+    """Total mass and mean of the Laplace loss distribution, with the continuous part by the midpoint rule."""
+    top, bottom, _ = laplace_loss_masses(eps)
+    h = 2 * eps / steps
+    mids = [-eps + (i + 0.5) * h for i in range(steps)]
+    mass = sum(laplace_loss_density(v, eps) for v in mids) * h
+    first = sum(v * laplace_loss_density(v, eps) for v in mids) * h
+    return top + bottom + mass, eps * top - eps * bottom + first
+
+
 def print_table(rng: np.random.Generator) -> None:
     print("[Exercise 1: noisy sum / noisy count]")
     n, mean, eps = 1000, 0.3, 1.0
@@ -145,6 +161,15 @@ def print_table(rng: np.random.Generator) -> None:
     print(
         f"  d=100 n=10000 eps=1 delta=1e-5: Laplace l2 rms={lap:.5f}  Gaussian l2 rms={gau:.5f}  ratio={lap / gau:.2f}"
     )
+
+    print("[Exercise 7: the Laplace privacy loss distribution]")
+    for e in (0.5, 1.0):
+        top, bottom, middle = laplace_loss_masses(e)
+        total, mean = integrated_laplace_loss(e)
+        print(
+            f"  eps={e:g}: atoms {top:.4f} at +eps and {bottom:.4f} at -eps  continuous {middle:.4f}  "
+            f"total mass={total:.4f}  mean loss={mean:.4f}  formula eps + e^-eps - 1={laplace_mean_loss(e):.4f}"
+        )
 
 
 def main() -> None:

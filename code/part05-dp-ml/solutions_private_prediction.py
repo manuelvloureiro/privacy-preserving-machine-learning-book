@@ -22,8 +22,11 @@ from private_prediction import (
     gnmax_epsilon,
     gnmax_sigma,
     icl_epsilon,
+    instability_distance,
     lnmax_scale,
     pure_dd_rdp,
+    stable_epsilon,
+    stable_threshold,
 )
 
 # Figures are build output: _build/figures/<part>/, which the build copies into each book.
@@ -142,6 +145,41 @@ def print_table(rng: np.random.Generator) -> None:
     )
     print(f"no subsampling, eps=1, Q=1000: sigma={gnmax_sigma(1000, 1.0):.1f}")
     print(f"expected number of queries that use one record: {1000 * 0.04:.0f}")
+
+    print("== Exercise 8")
+    gaps = np.array([[0, 0], [5, 4], [6, 4], [7, 4], [55, 45], [135, 115]], dtype=np.int64)
+    dists = instability_distance(gaps)
+    print(
+        "  ".join(
+            f"votes {a}-{b}: gap {a - b} dist {d}" for (a, b), d in zip(gaps.tolist(), dists.tolist(), strict=True)
+        )
+    )
+    for pool in (1000, 10000):
+        t = stable_threshold(1.0, pool, 5e-6)
+        print(f"eps0=1, pool={pool}: t={t:.1f}  smallest gap that reaches it: {smallest_gap(t)}")
+    print(f"4 ln(10)={4 * math.log(10):.1f}")
+
+    print("== Exercise 9")
+    for eps0 in (0.5, 1.0):
+        t = stable_threshold(eps0, 10000, 5e-6)
+        print(
+            f"eps0={eps0:g}, c=20: eps={stable_epsilon(20, eps0, 5e-6):.2f}  t={t:.1f}  smallest gap {smallest_gap(t)}"
+        )
+    print(f"1000 labels with c=20: unstable share at most {unstable_share_for(1000, 20):.4f}")
+
+
+# --- Exercises 8 and 9: stable aggregation -----------------------------------------------------------
+
+
+def smallest_gap(distance: float) -> int:
+    """Smallest gap g with ⌈g/2⌉ - 1 ≥ distance."""
+    return 2 * math.ceil(distance) + 1
+
+
+def unstable_share_for(labels: int, cutoff: int) -> float:
+    """Largest share f of unstable queries for which `cutoff` unstable answers still leave `labels` stable ones
+    in expectation: c(1 - f)/f ≥ labels, so f ≤ c/(c + labels)."""
+    return cutoff / (cutoff + labels)
 
 
 def main() -> None:

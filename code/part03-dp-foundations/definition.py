@@ -138,6 +138,22 @@ def histogram_max_loss(shifts: Sequence[float], b: float) -> float:
     return float(sum(np.max(laplace_log_ratio(grid, s, b)) for s in shifts))
 
 
+# --- Why the bound is a ratio: an additive bound alone fails ------------------------------------
+
+
+def additive_chain_tv(n: int, delta: float) -> float:
+    """Largest total variation between two size-n datasets if neighbours need only be δ-close in TV.
+
+    Any two such datasets are joined by n replacements, and the triangle inequality adds δ per step.
+    """
+    return min(1.0, n * delta)
+
+
+def best_guess_accuracy(tv: float) -> float:
+    """Best probability of telling two equally likely distributions apart: 1/2 + TV/2."""
+    return 0.5 + 0.5 * tv
+
+
 # --- Randomized response --------------------------------------------------------------------------
 
 
@@ -153,7 +169,7 @@ def rr_output(bit: int, eps: float) -> list[float]:
 
 
 def coin_rr_output(bit: int) -> list[float]:
-    """Warner's two-coin protocol: heads, tell the truth; tails, toss again and say yes on heads."""
+    """The two-coin forced-response protocol: heads, tell the truth; tails, toss again and say yes on heads."""
     p_yes = 0.5 * bit + 0.5 * 0.5
     return [1.0 - p_yes, p_yes]
 
@@ -188,6 +204,11 @@ def simulate_rr_estimates(rng: np.random.Generator, pi: float, n: int, eps: floa
     keep = rng.random((reps, n)) < t
     reports = np.where(keep, truth, 1 - truth)
     return np.array([rr_estimate(row, eps) for row in reports])
+
+
+def central_laplace_fraction_sd(n: int, eps: float) -> float:
+    """Standard deviation of a fraction estimated from a count of n people with Lap(1/ε) noise: √2/(εn)."""
+    return math.sqrt(2.0) / (eps * n)
 
 
 # --- Divergence forms: δ(ε) for the three running mechanisms -------------------------------------
@@ -331,6 +352,27 @@ def simulate_exposed(rng: np.random.Generator, n: int, delta: float, trials: int
     return float(np.mean(counts)), float(np.mean(counts > 0))
 
 
+def catastrophic_output(bit: int, eps: float, delta: float) -> list[float]:
+    """With probability δ publish the person's bit itself, otherwise randomized response at level ε.
+
+    Outcomes: [published 0, published 1, report 0, report 1]. The pair of true bits 0 and 1 is
+    exactly (ε, δ)-DP, and all of δ sits on outputs that are impossible under the other bit.
+    """
+    rr = rr_output(bit, eps)
+    published = [1.0 - bit, float(bit)]
+    return [delta * x for x in published] + [(1.0 - delta) * x for x in rr]
+
+
+def loss_distribution(p: Dist, q: Dist) -> list[tuple[float, float]]:
+    """The privacy loss distribution of (P, Q): pairs (loss, probability under P), loss inf where q = 0."""
+    return [(math.log(pi / qi) if qi > 0 else math.inf, pi) for pi, qi in zip(p, q, strict=True) if pi > 0]
+
+
+def loss_tail(p: Dist, q: Dist, c: float) -> float:
+    """Pr_{y~P}[L(y) > c] on a finite outcome set."""
+    return sum(w for loss, w in loss_distribution(p, q) if loss > c)
+
+
 # --- What differential privacy does not protect -------------------------------------------------
 
 
@@ -366,6 +408,14 @@ def print_table(rng: np.random.Generator) -> None:
         f"max_S P(S) - 2Q(S): brute force={max_over_events(a, b, 2.0):.4f}  hockey-stick={hockey_stick(a, b, 2.0):.4f}"
     )
 
+    n_tv = 1000
+    for d in (1e-4, 1e-3):
+        tv = additive_chain_tv(n_tv, d)
+        print(
+            f"additive-only definition, n={n_tv}, delta={d:g}: TV between any two datasets <= {tv:.4f}  "
+            f"best accuracy <= {best_guess_accuracy(tv):.4f}  release-each-record exposure={prob_someone_exposed(n_tv, d):.4f}"
+        )
+
     print("== Randomized response")
     print(
         f"two coins: Pr(yes | yes)={coin_rr_output(1)[1]:.4f}  Pr(yes | no)={coin_rr_output(0)[1]:.4f}  "
@@ -383,6 +433,11 @@ def print_table(rng: np.random.Generator) -> None:
     for e in (0.1, 1.0, LN3):
         print(f"eps={e:.4f}: estimator sd x sqrt(n)={rr_estimator_sd(1, e):.4f}")
     print(f"eps=0.5: estimator sd at n={n}={rr_estimator_sd(n, 0.5):.4f}")
+    lap_sd = central_laplace_fraction_sd(n, LN3)
+    print(
+        f"central Laplace on the count, n={n}, eps=ln3: fraction sd={lap_sd:.5f}  "
+        f"randomized response / central={rr_estimator_sd(n, LN3) / lap_sd:.1f}"
+    )
 
     print("== Divergence forms")
     print(
@@ -451,6 +506,18 @@ def print_table(rng: np.random.Generator) -> None:
         print(f"n={n} delta={d:g}: expected published={n * d:g}  Pr[at least one]={prob_someone_exposed(n, d):.4e}")
     mean_pub, frac = simulate_exposed(rng, n, 1.0 / n, 100_000)
     print(f"simulated delta=1/n, 100000 runs: mean published={mean_pub:.4f}  fraction with one or more={frac:.4f}")
+
+    dg = gaussian_delta(1.0, mu)
+    cat_p, cat_q = catastrophic_output(1, 1.0, dg), catastrophic_output(0, 1.0, dg)
+    print(
+        f"two shapes of delta at eps=1: catastrophic delta={smallest_delta(cat_p, cat_q, 1.0):.3e}  "
+        f"Gaussian delta={dg:.3e}"
+    )
+    print(
+        f"  Pr[L = inf]: catastrophic={loss_tail(cat_p, cat_q, 1e300):.3e}  Gaussian=0  "
+        f"Pr[L > 3]: catastrophic={loss_tail(cat_p, cat_q, 3.0):.3e}  Gaussian={gaussian_loss_tail(3.0, mu):.3e}"
+    )
+    print(f"  bound on Pr[L > 3] from (1, delta) alone={privacy_loss_bad_set_bound(1.0, dg, 3.0):.3e}")
 
     print("== Limits")
     k, e = 5, 1.0
@@ -666,6 +733,45 @@ def plot_posterior() -> Figure:
     return fig
 
 
+def plot_delta_shapes(mu: float = 0.5, eps: float = 1.0) -> Figure:
+    """Tail of the privacy loss for two mechanisms with the same (ε, δ): catastrophic and Gaussian."""
+    dg = gaussian_delta(eps, mu)
+    cat_p, cat_q = catastrophic_output(1, eps, dg), catastrophic_output(0, eps, dg)
+    c = np.linspace(-1.5, 6.0, 751)
+    fig, ax = plt.subplots(figsize=(7.5, 4.5))
+    ax.plot(
+        c,
+        [loss_tail(cat_p, cat_q, float(x)) for x in c],
+        "C3-",
+        label="catastrophic: publish the bit w.p. δ, else randomized response",
+    )
+    ax.plot(
+        c,
+        [gaussian_loss_tail(float(x), mu) for x in c],
+        "C0-",
+        label=rf"graceful: Gaussian count, $\sigma = {1 / mu:g}$",
+    )
+    cb = c[c > eps + 0.05]
+    ax.plot(
+        cb,
+        [min(1.0, privacy_loss_bad_set_bound(eps, dg, float(x))) for x in cb],
+        "k:",
+        label=r"bound from $(\varepsilon, \delta)$ alone: $\delta/(1 - e^{\varepsilon - c})$",
+    )
+    ax.axvline(eps, color="0.6", linewidth=0.8)
+    ax.axhline(dg, color="0.6", linewidth=0.8, linestyle="--")
+    ax.text(5.9, dg * 1.25, r"$\delta$", ha="right", fontsize=10)
+    ax.set_yscale("log")
+    ax.set(
+        xlabel=r"privacy loss level $c$",
+        ylabel=r"$\Pr[L > c]$ under $M(D)$",
+        ylim=(1e-12, 1.5),
+        title=rf"Both are $({eps:g}, {dg:.4f})$-DP; only one fails catastrophically",
+    )
+    ax.legend(fontsize=9, loc="lower left")
+    return fig
+
+
 def plot_release(n: int = 10_000) -> Figure:
     nd = np.logspace(-3, 1.5, 300)
     fig, ax = plt.subplots(figsize=(7.5, 4.4))
@@ -711,6 +817,7 @@ def main() -> None:
         "dpdef_advantage.svg": plot_advantage(rng),
         "dpdef_posterior.svg": plot_posterior(),
         "dpdef_release.svg": plot_release(),
+        "dpdef_delta_shapes.svg": plot_delta_shapes(),
     }
     for name, fig in figures.items():
         fig.tight_layout()

@@ -24,8 +24,10 @@ Rules (PROSE.md explains each, with its source):
    sentence with a formula. Keep formulas and numbers to the few the sentence needs.
 5. **Few new things at once.** At most three new concepts (terms, symbols, acronyms) per paragraph.
    Introduce a concept before the result that uses it, and an example before a generalization when you can.
-6. **Explain, don't list.** Every result comes with the reason it holds, in words. A paragraph that
-   states facts without reasons is a failure even if each fact is right. Every condition a result needs
+6. **Explain, don't list.** Every result comes with the reason it holds, in words; in the practitioner
+   edition, with why it matters and how to use it instead, and theory beyond a sentence of intuition
+   (proof ideas, mechanisms of the argument) is itself a failure there. A paragraph that
+   states facts without reasons or uses is a failure even if each fact is right. Every condition a result needs
    is named as a condition ("it applies only to quantities that cannot be negative"), never stated as a
    fact about the quantity, and the text says why the result needs it.
 7. **No compression.** Don't drop articles, verbs or connectives to save words. Don't chain clauses

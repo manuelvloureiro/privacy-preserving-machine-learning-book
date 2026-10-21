@@ -1,9 +1,9 @@
-"""Check the discrete and floating-point-safe mechanisms of chapter 24 and draw its figures.
+"""Check the discrete and floating-point-safe mechanisms of chapter 25 and draw its figures.
 
     uv run python code/part03-dp-foundations/discrete_mechanisms.py
     uv run python code/part03-dp-foundations/discrete_mechanisms.py --seed 1 --out /tmp/figures
 
-Prints the numbers quoted in 07-discrete-mechanisms.md (they match exactly with the default seed),
+Prints the numbers quoted in 08-discrete-mechanisms.md (they match exactly with the default seed),
 then saves the chapter's figures.
 
 Two halves:

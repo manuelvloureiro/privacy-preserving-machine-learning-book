@@ -61,6 +61,22 @@ def test_selection_matches_section(tmp_path: Path) -> None:
         # Exercises
         "k=3: ln ratio=1.3106  k=1000: 1.9977",
         "gap bound=15.22",
+        # AboveThreshold tightness and Sparse
+        "m=10: max |ln ratio|=0.994011",
+        "m=20: max |ln ratio|=0.999981",
+        "m=40: max |ln ratio|=1.000000",
+        "c=10: pure margin=1032  advanced (delta=1e-6) per-run eps=0.0591 margin=1746",
+        "c=100: pure margin=12161  advanced (delta=1e-6) per-run eps=0.0187 margin=6506",
+        # Applications: the learner
+        "n=1000: excess error EM eps=1=0.0024  eps=0.1=0.0206  ERM=0.0008  bound terms: sampling=0.1456 privacy(eps=1)=0.0198",
+        "alpha=0.05 eps=1: sampling needs n=33913  privacy needs n=793",
+        "alpha=0.05 eps=0.01: sampling needs n=33913  privacy needs n=79236",
+        # Applications: the median
+        "true median=0.9804  45th-55th percentile=[0.9003, 1.0589]",
+        "eps=0.1: Pr[rank gap >= 100]=1.11e-02  E|output - median|=0.0157  bound on rank gap (t=ln 20)=264.5",
+        "eps=1: Pr[rank gap >= 100]=1.31e-21  E|output - median|=0.0013  bound on rank gap (t=ln 20)=26.4",
+        "eps=1, 20000 draws: mean |output - median|=0.0013",
+        "eps=1, range B=1000 instead of 10: E|output - median|=0.0013  bound=35.7",
     ):
         assert expected in out, expected
     assert {f.name for f in tmp_path.iterdir()} == {
@@ -70,4 +86,5 @@ def test_selection_matches_section(tmp_path: Path) -> None:
         "select_gumbel_em.svg",
         "select_svt_path.svg",
         "select_svt_buggy.svg",
+        "select_em_applications.svg",
     }

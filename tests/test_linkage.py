@@ -26,6 +26,12 @@ def test_linkage_matches_section(tmp_path: Path) -> None:
         "bits for 0.9 unique: world=36.1  above log2 n by 3.25",
         "bits for 0.99 unique: world=39.5  above log2 n by 6.64",
         "class sizes [1, 1, 1, 2, 3]: success=0.625",
+        # Hashed identifiers
+        "md5('0')=cfcd208495d565ef66e7dff9f98764da",
+        "six-digit identifiers: space=1000000 (19.9 bits)  hashes computed=1000000  inverted 5 of 5",
+        "taxi: trips=1.73e+08 (27.4 bits)  licences 20.9 bits  medallions 24.4 bits",
+        "ten-digit phone numbers: 33.2 bits",
+        "one trip: pickup minute=525600 (19.0 bits)  pickup square=78000 (16.3 bits)  total=35.3 bits",
         # Synthetic census
         "cum bits=9.31 cells=1280  exact=0.0158  simulated=0.0160 (sd 0.0011)  collision bound=0.0000  "
         "entropy rule=0.0000  uniform cells=0.0004",

@@ -1,19 +1,19 @@
 # Exercises: Local, shuffle and distributed trust models
 
-Exercises for [Local, shuffle and distributed trust models](../../book-full/part03-dp-foundations/08-trust-models.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_trust_models.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_trust_models.py`.
+Exercises for [Local, shuffle and distributed trust models](../../book-full/part03-dp-foundations/09-trust-models.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_trust_models.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_trust_models.py`.
 
 The solutions use the chapter's notation: for differential privacy (DP), $\varepsilon_0$ is the local level of one report and $(\varepsilon, \delta)$ the central guarantee, neighbours differ by replacing one record, and logarithms are natural.
 
-## Warner's forced-response variant {#sec-sol-trust-1}
+## The forced-response variant {#sec-sol-trust-1}
 
-> **Exercise 1.** **Warner's forced-response variant.** Each person answers truthfully with probability $s$ and otherwise reports a fair coin. Show that this is randomized response with keep probability $t = (1 + s)/2$, and find its $\varepsilon_0$. *Check: $s = \frac12$ gives $\varepsilon_0 = \ln 3 = 1.0986$.* *(Local randomizer)*
+> **Exercise 1.** **The forced-response variant.** Each person answers truthfully with probability $s$ and otherwise reports a fair coin. Show that this is randomized response with keep probability $t = (1 + s)/2$, and find its $\varepsilon_0$. *Check: $s = \frac12$ gives $\varepsilon_0 = \ln 3 = 1.0986$.* *(Local randomizer)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The report equals the true bit in two ways.** Either the person answers truthfully (probability $s$), or they toss the coin and it happens to show their bit (probability $(1 - s)\cdot\frac12$). So $\Pr[\text{report} = x] = s + \frac{1-s}{2} = \frac{1+s}{2} = t$, for both values of $x$.
 2. **The report is the flipped bit otherwise,** with probability $1 - t = \frac{1-s}{2}$. A mechanism on one bit is determined by these two numbers, so this is randomized response with keep probability $t$.
 3. **Its level.** As in the table of output probabilities for randomized response, the largest ratio between the two rows is $t/(1 - t)$, so
 $$\varepsilon_0 = \ln\frac{t}{1-t} = \ln\frac{1+s}{1-s}.$$
-4. **Check.** $s = \frac12$ gives $t = 0.75$ and $\varepsilon_0 = \ln 3 = 1.0986$, Warner's two coins. $s = 0.25$ gives $t = 0.625$ and $\varepsilon_0 = 0.5108$; $s = 0.1$ gives $t = 0.55$ and $\varepsilon_0 = 0.2007$.
+4. **Check.** $s = \frac12$ gives $t = 0.75$ and $\varepsilon_0 = \ln 3 = 1.0986$, the two coins of the forced-response design (Boruch, 1971), the form Dwork & Roth present. $s = 0.25$ gives $t = 0.625$ and $\varepsilon_0 = 0.5108$; $s = 0.1$ gives $t = 0.55$ and $\varepsilon_0 = 0.2007$.
 
 *For small $s$, $\varepsilon_0 = \ln\frac{1+s}{1-s} \approx 2s$: the truthful fraction is half the privacy level.*
 :::
@@ -108,4 +108,58 @@ $$\mathbb E[e^{\lambda(G_i - G'_i)}] = (1 - b\lambda)^{-1/n}(1 + b\lambda)^{-1/n
 4. **The cost.** If nobody drops out, the sum carries $100/70 = 1.429$ times the variance needed, so the error is $\sqrt{1.429} = 1.20$ times the central one.
 
 *Over-provisioning trades a fixed accuracy loss for a guarantee that survives the worst case you planned for.*
+:::
+
+## Averaging fresh reports {#sec-sol-trust-8}
+
+> **Exercise 8.** **Averaging fresh reports.** A person reports the same bit every day by randomized response at $\varepsilon_0 = \ln 3$, with fresh randomness each day. An observer starts with even odds. What is the observer's probability that the bit is 1 after 7 ones in 10 days, and after 5 ones in 10 days? After how many days is the majority of the reports wrong with probability below 1%? What changes if the report is memoized? *Check: 0.9878 and 0.5000; 19 days; memoized, the majority stays wrong with probability 0.25.* *(likelihood ratios, binomial tails)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The likelihood ratio.** Each report equals the bit with probability $t = e^{\varepsilon_0}/(1 + e^{\varepsilon_0}) = 3/4$, independently. A sequence with $k$ ones has probability $t^k(1 - t)^{T - k}$ if the bit is 1 and $(1 - t)^kt^{T - k}$ if it is 0. Their ratio is $(t/(1 - t))^{2k - T} = 3^{2k - T}$, the statement of @sec-trust-repeated.
+2. **The posterior.** Bayes' rule multiplies the prior odds by the likelihood ratio. With even prior odds and $k = 7$, $T = 10$, the odds are $3^4 = 81$, so the probability is $81/82 = 0.9878$. With $k = 5$ the ratio is $3^0 = 1$, and the probability stays at 0.5000: a balanced sequence says nothing.
+3. **The majority.** The majority is wrong when more than half of the $T$ reports are flipped, and a tie is broken by a fair coin. The number of flipped reports is binomial with $T$ trials and probability $\frac14$. Computing the tail day by day, it first falls below 0.1 after 7 days, where it is 0.07056. It falls below 0.01 after 19 days, at 0.008903, and below 0.001 after 33 days, at 0.000951.
+4. **Memoized.** With a memoized report, every day repeats the first report. The majority is then just that report, which is wrong with probability $1 - t = 0.25$ however many days pass.
+
+*Fresh noise on a fixed value is averaged away at an exponential rate, which is why basic composition is tight here and why deployments memoize.*
+:::
+
+## RAPPOR's one-report level {#sec-sol-trust-9}
+
+> **Exercise 9.** **RAPPOR's one-report level.** RAPPOR passes each bit $b$ of a Bloom filter, set by a number $h$ of hash functions, through two layers. The permanent layer keeps $b$ with probability $1 - f$, for a parameter $f$, and otherwise replaces it by a fair coin. The instantaneous layer then sends 1 with probability $q$ if the permanent bit is 1, and with probability $p$ if it is 0. Show that a sent bit is 1 with probability $p^* = \frac f2q + (1 - \frac f2)p$ when $b = 0$ and $q^* = (1 - \frac f2)q + \frac f2p$ when $b = 1$, and that one report is $\varepsilon_1$-DP with
+> $$\varepsilon_1 = h\ln\frac{q^*(1 - p^*)}{p^*(1 - q^*)}.$$
+> Evaluate it for the homepage collection, with $h = 2$, $f = 0.75$, $p = 0.5$ and $q = 0.75$. Then evaluate it for the process-name collection, which differs only in $f = 0.5$, and compare both with $\varepsilon_\infty$. *Check: 0.5343 and 1.0743, against $\varepsilon_\infty$ of 2.0433 and 4.3944.* *(composing two randomizers in series)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Through both layers.** If $b = 0$, the permanent bit is 1 with probability $\frac f2$ (the coin came up 1) and 0 otherwise. The sent bit is then 1 with probability $q$ or $p$, so by the law of total probability it is 1 with probability $\frac f2q + (1 - \frac f2)p = p^*$. If $b = 1$, the permanent bit is 1 with probability $1 - \frac f2$, which gives $q^*$ in the same way.
+2. **One bit's ratios.** Since $q > p$, $q^* > p^*$. A sent 1 has ratio $q^*/p^*$ between $b = 1$ and $b = 0$, and a sent 0 has ratio $(1 - p^*)/(1 - q^*)$ the other way round.
+3. **The whole report.** Two values set at most $h$ bits each, so in the worst case $h$ bits go from 1 to 0 and $h$ from 0 to 1, and all other bits cancel. As in unary encoding, the worst outcome sends 1 on the bits that only the first value sets and 0 on the bits that only the second value sets, which multiplies $h$ factors $q^*/p^*$ and $h$ factors $(1 - p^*)/(1 - q^*)$. Its logarithm is $\varepsilon_1$.
+4. **The homepage numbers.** With $f = 0.75$, $p^* = 0.375 \times 0.75 + 0.625 \times 0.5 = 0.59375$ and $q^* = 0.65625$. Then $\varepsilon_1 = 2\ln\frac{0.65625 \times 0.40625}{0.59375 \times 0.34375} = 0.5343$, the value the RAPPOR paper reports. With $f = 0.5$, $p^* = 0.5625$, $q^* = 0.6875$ and $\varepsilon_1 = 1.0743$, again the paper's value.
+5. **Against $\varepsilon_\infty$.** @eq-trust-rappor gives $\varepsilon_\infty = 2.0433$ and $4.3944$. One report is about four times better protected than all reports of the value together, because the instantaneous layer adds noise that averaging over many reports removes, until only the permanent layer is left.
+
+*Two randomizers in series are one randomizer whose probabilities come from the law of total probability, so its level is computed once, from the composed probabilities.*
+:::
+
+## How many buckets? {#sec-sol-trust-10}
+
+> **Exercise 10.** **How many buckets?** Local hashing has the rare-value variance of @eq-trust-lh. Find the best integer number of buckets at $\varepsilon_0 = 1$ and $\varepsilon_0 = 2$, compare its variance with optimized unary encoding and with $k$-ary randomized response over $k = 1{,}000$ values, and say how many bits the bucket takes. *Check: $w = 4$ gives 3.6917 against 3.6827; $w = 8$ gives 0.7246 against 0.7241; $k$-ary randomized response gives 338.9 and 24.6.* *(optimizing a variance over an integer)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The continuous optimum.** Writing $u = w - 1$, the variance is proportional to $(e^{\varepsilon_0} + u)^2/u = e^{2\varepsilon_0}/u + 2e^{\varepsilon_0} + u$. This is convex in $u$ and smallest at $u = e^{\varepsilon_0}$, as step 4 of the derivation in @sec-trust-heavy shows, so the best real $w$ is $e^{\varepsilon_0} + 1$.
+2. **Round to an integer.** A convex function is smallest at one of the two integers around its minimum. At $\varepsilon_0 = 1$, $e + 1 = 3.718$, and the variance is 3.7701 at $w = 3$, 3.6917 at $w = 4$ and 3.8218 at $w = 5$. So $w = 4$, two bits. At $\varepsilon_0 = 2$, $e^2 + 1 = 8.389$, and the variance is 0.7246 at $w = 8$ against 0.7252 at $w = 9$. So $w = 8$, three bits.
+3. **Against the other oracles.** Optimized unary encoding gives 3.6827 and 0.7241, a fraction of a percent better, but with a report of one bit per value. By contrast, $k$-ary randomized response over 1,000 values gives 338.9 and 24.6, because it spreads its signal over the whole domain.
+
+*Local hashing loses almost nothing to the best oracle, as long as the number of buckets follows $\varepsilon_0$ rather than the size of the domain.*
+:::
+
+## A year of $\alpha$-point rounding {#sec-sol-trust-11}
+
+> **Exercise 11.** **A year of $\alpha$-point rounding.** Under $\alpha$-point rounding with $m = 1{,}440$ minutes and $\varepsilon_0 = 1$, each person's daily minutes wobble uniformly by up to $\pm s$ around their own level, independently each day. What fraction of people change their report at least once in 365 days, for $s = 15$ and $s = 60$? With output perturbation at a flip probability $\gamma$ of 0.1, 0.2 or 0.3, what does one round cost, and what does each day on which the kept bit changes cost? *Check: 0.0126 and 0.0503; one round 0.776, 0.569 and 0.374; per change 2.197, 1.386 and 0.847.* *(order statistics, the formula for output perturbation)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **When a report can change.** By item 3 of @sec-trust-repeated, a person's report changes only if the two kept bits differ and the threshold $m - \alpha$ falls between the smallest and largest value they take. The bits differ with probability $1 - 2e/(e + 1)^2 = 0.6068$. The threshold is uniform on $(0, m]$ and independent of the values, so given the band it falls inside with probability equal to the band's width divided by $m$.
+2. **The expected width.** For $T$ independent uniforms on $[-s, s]$, the expected largest minus the expected smallest is $2s(T - 1)/(T + 1)$, because the order statistics of uniforms split the interval into $T + 1$ gaps of equal expected size. With $T = 365$ this is $2s \times 364/366$.
+3. **The fractions.** For $s = 15$, $0.6068 \times 30 \times 364/366 / 1{,}440 = 0.0126$. For $s = 60$, four times the width gives 0.0503. Over a year, about one person in 80 with a steady habit ever changes their report.
+4. **Output perturbation.** @eq-trust-op at $\varepsilon_0 = 1$ gives 0.776, 0.569 and 0.374 for $\gamma = 0.1$, 0.2 and 0.3. Each day on which the kept bit changes contributes at most $\ln((1 - \gamma)/\gamma)$, which is 2.197, 1.386 and 0.847.
+
+*A larger $\gamma$ protects both a single round and the days of change, at the price of a noisier bit and so a less accurate mean.*
 :::

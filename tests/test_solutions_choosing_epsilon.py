@@ -31,5 +31,8 @@ def test_solutions_choosing_epsilon_matches_page(tmp_path: Path) -> None:
         "1 runs at sigma=2.28: RDP eps=1.998  basic 2",
         "3 runs at sigma=2.28: RDP eps=3.675  basic 6",
         "12 runs at sigma=2.28: RDP eps=8.185  basic 24",
+        "likes, sigma=22, 1 URLs: rho=0.00103  eps=0.190  simple eps=0.219",
+        "likes, sigma=22, 5 URLs: rho=0.00517  eps=0.447  simple eps=0.493",
+        "likes, sigma=22, 10 URLs: rho=0.01033  eps=0.647  simple eps=0.700",
     ):
         assert expected in out, expected

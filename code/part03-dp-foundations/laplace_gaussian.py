@@ -143,6 +143,33 @@ def laplace_delta(eps: float, t: float) -> float:
     return max(0.0, 1.0 - math.exp(-(t - eps) / 2))
 
 
+def laplace_loss_masses(eps: float) -> tuple[float, float, float]:
+    """The privacy loss distribution of a Laplace mechanism at a worst-case pair, under M(D).
+
+    Returns (mass of the atom at +ε, mass of the atom at -ε, mass spread continuously over (-ε, ε)):
+    1/2 for outputs beyond f(D), e^{-ε}/2 for outputs beyond f(D'), and the rest in between.
+    """
+    return 0.5, 0.5 * math.exp(-eps), 0.5 * (1.0 - math.exp(-eps))
+
+
+def laplace_loss_density(loss: float, eps: float) -> float:
+    """Density of the continuous part of the Laplace privacy loss on (-ε, ε): e^{(l - ε)/2}/4."""
+    return 0.25 * math.exp((loss - eps) / 2.0) if -eps < loss < eps else 0.0
+
+
+def laplace_mean_loss(eps: float) -> float:
+    """E_{M(D)}[L] = KL(Lap(0, b)‖Lap(Δ, b)) with Δ/b = ε: ε + e^{-ε} - 1."""
+    return eps + math.exp(-eps) - 1.0
+
+
+def simulated_laplace_loss(rng: np.random.Generator, eps: float, m: int) -> tuple[float, float, float]:
+    """Fractions of draws of M(D) = Lap(0, 1/ε) with loss +ε, with loss -ε, and the mean loss (shift 1)."""
+    b = 1.0 / eps
+    y = rng.laplace(0.0, b, size=m)
+    loss = (np.abs(y - 1.0) - np.abs(y)) / b
+    return float(np.mean(y <= 0.0)), float(np.mean(y >= 1.0)), float(np.mean(loss))
+
+
 def event_ratio(rng: np.random.Generator, f_d: float, f_d2: float, b: float, cut: float, m: int) -> tuple[float, float]:
     """Simulated Pr[M(D) ≤ cut] and Pr[M(D') ≤ cut] for a one-dimensional Laplace mechanism."""
     a = float(np.mean(f_d + rng.laplace(0.0, b, size=m) <= cut))
@@ -373,6 +400,16 @@ def print_table(rng: np.random.Generator) -> None:
             f"ratio={lap / gau:.2f}"
         )
 
+    print("[Privacy loss distribution of the Laplace mechanism]")
+    for e in (1.0,):
+        top, bottom, middle = laplace_loss_masses(e)
+        sim_top, sim_bottom, sim_mean = simulated_laplace_loss(rng, e, 1_000_000)
+        print(
+            f"  eps={e:g}: atom at +eps={top:.4f} (simulated {sim_top:.4f})  atom at -eps={bottom:.4f} "
+            f"(simulated {sim_bottom:.4f})  continuous part={middle:.4f}  mean loss={laplace_mean_loss(e):.4f} "
+            f"(simulated {sim_mean:.4f})"
+        )
+
 
 # --- Figures --------------------------------------------------------------------------------
 
@@ -414,6 +451,47 @@ def plot_privacy_loss(eps: float = 1.0, sigma: float = 2.0) -> Figure:
         ax.legend(fontsize=9, loc="upper right")
     for ax in axes[0]:
         ax.legend(fontsize=9, loc="upper right")
+    return fig
+
+
+def plot_loss_distributions(eps: float = 1.0, sigma: float = 2.0) -> Figure:
+    """The distribution of the privacy loss under M(D): Laplace (two atoms and a ramp) against Gaussian (a normal)."""
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharex=True)
+    top, bottom, middle = laplace_loss_masses(eps)
+    ls = [-eps + 2 * eps * i / 400 for i in range(1, 400)]
+    ax = axes[0]
+    ax.plot(ls, [laplace_loss_density(v, eps) for v in ls], "C0", label=f"continuous part, total mass {middle:.4f}")
+    ax.vlines([eps, -eps], 0, [top, bottom], colors="C3", linewidth=3)
+    ax.plot(
+        [eps, -eps], [top, bottom], "C3o", label=f"atoms: {top:.4f} at $+\\varepsilon$, {bottom:.4f} at $-\\varepsilon$"
+    )
+    ax.set(
+        xlabel=r"privacy loss $L$",
+        ylabel="probability (atoms) or density (curve)",
+        ylim=(0, 0.6),
+        title=rf"Laplace, $b = 1/\varepsilon$, $\varepsilon = {eps:g}$: never beyond $\pm\varepsilon$",
+    )
+    ax.legend(fontsize=9, loc="upper left")
+    mu = 1 / sigma
+    gl = [-2.5 + 5.0 * i / 500 for i in range(501)]
+    dens = [normal_pdf(v, mu * mu / 2, mu) for v in gl]
+    ax = axes[1]
+    ax.plot(gl, dens, "C0", label=rf"$L \sim \mathrm{{N}}(\mu^2/2, \mu^2)$, $\mu = {mu:g}$")
+    ax.fill_between(
+        gl,
+        dens,
+        where=[v > eps for v in gl],
+        color="C3",
+        alpha=0.4,
+        label=rf"$L > \varepsilon$: {loss_tail(eps, mu):.4f}",
+    )
+    ax.set(
+        xlabel=r"privacy loss $L$", ylabel="density", title=rf"Gaussian, $\sigma = {sigma:g}$: unbounded, rare far out"
+    )
+    for a in axes:
+        a.axvline(eps, color="0.6", linestyle="--", linewidth=1)
+        a.axvline(-eps, color="0.6", linestyle="--", linewidth=1)
+    ax.legend(fontsize=9, loc="upper left")
     return fig
 
 
@@ -538,6 +616,7 @@ def main() -> None:
     out.mkdir(parents=True, exist_ok=True)
     figures = {
         "lapgauss_privacy_loss.svg": plot_privacy_loss(),
+        "lapgauss_loss_distributions.svg": plot_loss_distributions(),
         "lapgauss_delta_curves.svg": plot_delta_curves(),
         "lapgauss_calibration.svg": plot_calibration(),
         "lapgauss_high_dim.svg": plot_high_dim(rng),

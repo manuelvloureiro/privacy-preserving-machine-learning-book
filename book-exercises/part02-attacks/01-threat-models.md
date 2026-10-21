@@ -96,7 +96,7 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 4. **Normal approximation.** Both standard deviations are about $\sqrt{d/n}$ (the member variance is $(n+1)d/n^2 \approx d/n$). Two normals with equal spread $\sqrt{d/n}$ and means $d/n$ apart are a Gaussian pair with standardized shift $\mu = (d/n)/\sqrt{d/n} = \sqrt{d/n}$, whose TV is $2\Phi(\mu/2) - 1$ ([Divergences](../../book-full/part01-prerequisites/03-divergences.md)). The best threshold attack on the score reaches it.
 5. **Check.** $2\Phi(\frac12\sqrt{0.5}) - 1 = 0.2763$. Simulating the attack over 100,000 games per world gives 0.2771. The likelihood-ratio attack (0.2789) also uses $\|\theta\|^2$ and the target-dependent threshold, which adds a little.
 
-*The advantage depends on $d/n$, the number of parameters per training record. That ratio, not the model's accuracy, decides how much one record moves the model. [Lower bounds](../../book-full/part03-dp-foundations/09-lower-bounds.md) in Part 3 turn this attack into a limit on what any defence can achieve.*
+*The advantage depends on $d/n$, the number of parameters per training record. That ratio, not the model's accuracy, decides how much one record moves the model. [Lower bounds](../../book-full/part03-dp-foundations/10-lower-bounds.md) in Part 3 turn this attack into a limit on what any defence can achieve.*
 :::
 
 ## Mixing hides {#sec-sol-threat-7}

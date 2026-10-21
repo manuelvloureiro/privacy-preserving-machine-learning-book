@@ -17,7 +17,7 @@ Per-example gradient norms are computed without forming per-example gradients ("
 a dense layer, the gradient of record i is the outer product δ_i a_iᵀ, whose norm is ‖δ_i‖ ‖a_i‖.
 
 Public functions used by later chapters: Dataset, Params, make_teacher, make_dataset, init_params,
-forward, accuracy, logistic_losses, clipped_grad_sum, DpsgdConfig, train_dpsgd, ORDERS,
+forward, accuracy, logistic_losses, clipped_grad_sum, microbatch_noise, DpsgdConfig, train_dpsgd, ORDERS,
 subsampled_gaussian_rdp, rdp_curve, epsilon_from_rdp, dpsgd_epsilon, noise_multiplier_for.
 """
 
@@ -49,6 +49,7 @@ from numpy.typing import NDArray
 FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__file__).parent.name
 
 Array = NDArray[np.float64]
+IntArray = NDArray[np.int64]
 
 # The running example.
 D_IN, HIDDEN, TEACHER_HIDDEN = 50, 64, 8
@@ -267,6 +268,30 @@ def clipped_grad_sum(p: Params, x: Array, y: Array, clip: float) -> ClippedSum:
     )
 
 
+def microbatch_clipped_sum(p: Params, x: Array, y: Array, group: IntArray, clip: float) -> tuple[Array, Array]:
+    """Σ_j clip_C(mean of the gradients in microbatch j), with microbatch j holding the sampled records
+    whose group id is j. Group ids are fixed in advance (here the record index mod B/m, standing in for a hash of
+    a record identifier, since no record is ever added or removed in the experiments), so a batch holds about
+    B/m microbatches of about m records, and one record changes one microbatch's clipped mean, by at most 2C."""
+    bw = backward(p, x, y)
+    grads = explicit_grads(bw)
+    ids, inverse, counts = np.unique(group, return_inverse=True, return_counts=True)
+    member = (inverse[None, :] == np.arange(ids.size)[:, None]).astype(np.float64)  # (groups, records)
+    means = (member @ grads) / counts[:, None]
+    norms: Array = np.sqrt((means**2).sum(axis=1))
+    total: Array = (means * np.minimum(1.0, clip / np.maximum(norms, 1e-300))[:, None]).sum(axis=0)
+    h, d1 = p.w1.shape
+    return total[: h * d1].reshape(h, d1), total[h * d1 :]
+
+
+def microbatch_noise(sigma: float, clip: float, batch: float, size: int) -> float:
+    """Noise standard deviation per coordinate on the averaged update with microbatches of `size` records:
+    the sum of clipped microbatch means has sensitivity 2C (C when size is 1), and is divided by the
+    expected number of microbatches, batch/size."""
+    sensitivity = clip if size == 1 else 2 * clip
+    return sigma * sensitivity / (batch / size)
+
+
 # --- DP-SGD --------------------------------------------------------------------------------------
 
 
@@ -277,6 +302,7 @@ class DpsgdConfig:
     clip: float = CLIP_RUN  # clipping norm C (inf for no clipping)
     lr: float = LR_RUN  # step size on the averaged gradient
     steps: int = STEPS_RUN
+    microbatch: int = 1  # records per microbatch; 1 is per-example clipping
 
 
 @dataclass
@@ -302,8 +328,23 @@ def train_dpsgd(
     b_expected = cfg.q * n
     noise_sd = cfg.sigma * cfg.clip if cfg.sigma > 0 else 0.0
     log = TrainLog()
+    if cfg.microbatch > 1:
+        # Microbatches: groups fixed in advance (the index stands in for a hash of a record identifier), so adding
+        # a record changes one group only.
+        # The clipped group means have sensitivity 2C, so the noise is doubled to keep the same ε, and the
+        # sum is divided by the expected number of groups.
+        noise_sd *= 2
+        b_expected /= cfg.microbatch
+    groups: IntArray = np.arange(n, dtype=np.int64) % max(1, round(cfg.q * n / cfg.microbatch))
     for t in range(cfg.steps):
         idx = np.flatnonzero(rng.random(n) < cfg.q)
+        if cfg.microbatch > 1:
+            g1, g2 = microbatch_clipped_sum(p, data.x[idx], data.y[idx], groups[idx], cfg.clip)
+            p = Params(
+                p.w1 - cfg.lr * (g1 + noise_sd * rng.standard_normal(g1.shape)) / b_expected,
+                p.w2 - cfg.lr * (g2 + noise_sd * rng.standard_normal(g2.shape)) / b_expected,
+            )
+            continue
         cs = clipped_grad_sum(p, data.x[idx], data.y[idx], cfg.clip)
         g1, g2 = cs.g1, cs.g2
         if log_every and t % log_every == 0:
@@ -469,6 +510,16 @@ def print_table(rng: np.random.Generator) -> None:
         steps, sigma, _ = batch_size_row(q, 100, N_TRAIN, 4.0, DELTA_RUN)
         accs = [run(rng, task, DpsgdConfig(q=q, sigma=sigma, lr=lr, steps=steps)) for lr in lrs]
         print(f"q={q:g}: " + "  ".join(f"lr={lr:g}: {a:.4f}" for lr, a in zip(lrs, accs, strict=True)))
+
+    print("== Microbatches (sigma=1, eps=6.71, B=100)")
+    b = Q_RUN * N_TRAIN
+    for size in (1, 4, 16):
+        sd = microbatch_noise(SIGMA_RUN, CLIP_RUN, b, size)
+        print(
+            f"microbatch of {size}: noise sd per coordinate={sd:.4f} ({sd / microbatch_noise(SIGMA_RUN, CLIP_RUN, b, 1):.0f}x)"
+        )
+    for size in (4, 16):
+        print(f"microbatch of {size}: test accuracy {run(rng, task, DpsgdConfig(microbatch=size)):.4f}")
 
 
 # --- Figures --------------------------------------------------------------------------------

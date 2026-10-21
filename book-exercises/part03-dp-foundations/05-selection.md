@@ -123,3 +123,43 @@ A million simulated runs at $d = b$ give 0.7308 for the Gumbel noisy max and 0.7
 
 *Neither private argmax dominates the other: which one selects better depends on how many competitors are close to the top. Both have the same privacy guarantee, so the choice is about accuracy on the score profiles you expect.*
 :::
+
+## The Laplace mechanism as an exponential mechanism {#sec-sol-selection-7}
+
+> **Exercise 7.** **The Laplace mechanism as an exponential mechanism.** Take a query $f$ with sensitivity $\Delta = 1$, candidates on the whole real line, and the score $u(D, h) = -|f(D) - h|$ (@sec-sel-apps). Show that the exponential mechanism with the generic weights $e^{\varepsilon u/2}$ adds $\mathrm{Lap}(2/\varepsilon)$ noise, that its normalizer does not depend on $f(D)$, and that its privacy loss is therefore only $\varepsilon/2$. Then drop the 2 and check that the result is the Laplace mechanism at $\varepsilon$. *Check: at $\varepsilon = 1$, with $f(D) = 0$ and $f(D') = 1$, both normalizers are 4.0000 with the 2 and 2.0000 without; the largest log ratio of the densities is 0.5000 and 1.0000; the root-mean-square errors are 2.8284 and 1.4142.* *(Exponential mechanism, the normalizer factor)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The density.** With weights $e^{\varepsilon u/2}$ the density is proportional to $e^{-\varepsilon|h - f(D)|/2}$, the $\mathrm{Lap}(2/\varepsilon)$ density centred at $f(D)$.
+2. **The normalizer.** Substitute $v = h - f(D)$: $Z(D) = \int e^{-\varepsilon|v|/2}\,dv = 2 \times \frac2\varepsilon = \frac4\varepsilon$, whatever $f(D)$ is. At $\varepsilon = 1$ that is 4, and the script's numerical integrals give 4.0000 for both datasets.
+3. **The privacy loss.** The normalizer factor of the proof in @sec-sel-exp is exactly 1, so only the candidate's own factor is left, $e^{\varepsilon(u(D, h) - u(D', h))/2} \le e^{\varepsilon/2}$. The largest log ratio of the two densities, over all $h$, is 0.5000: the generic recipe spends only half its budget.
+4. **Without the 2.** The density is proportional to $e^{-\varepsilon|h - f(D)|}$, the $\mathrm{Lap}(1/\varepsilon)$ density, and the normalizer is $2/\varepsilon$, again independent of the data. The loss is at most $\varepsilon$, and the script finds 1.0000.
+5. **The cost of the 2.** A $\mathrm{Lap}(b)$ variable has root-mean-square size $\sqrt2\,b$: 2.8284 with the 2 and 1.4142 without.
+
+*The factor 2 pays for a normalizer that can move against the candidate. When the scores are a shifted copy of one another, as here, the normalizer cannot move, and the generic recipe adds twice the noise it needs.*
+:::
+
+## Records for a private learner {#sec-sol-selection-8}
+
+> **Exercise 8.** **Records for a private learner.** For the private learner of @eq-sel-learner, find the number of records each term needs for an excess error of $\alpha = 0.05$ at $\beta = 0.05$, for the class of 1,001 thresholds and for a class of $10^6$. Then find the $\varepsilon$ below which the privacy term needs more records than the sampling term. *Check: 33,913 and 793 records at $\varepsilon = 1$ for 1,001 thresholds; 56,015 and 1,345 for $10^6$; privacy dominates below $\varepsilon = 0.0234$.* *(Utility of the exponential mechanism, uniform convergence)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The two requirements.** From step 5 of the derivation, the sampling term needs $n \ge 8\ln(2|C|/\beta)/\alpha^2$ and the privacy term $n \ge 4\ln(|C|/\beta)/(\alpha\varepsilon)$.
+2. **1,001 thresholds.** $\ln(2 \times 1001/0.05) = \ln 40{,}040 = 10.598$, so the sampling term asks for $8 \times 10.598/0.0025 = 33{,}912.4$, that is 33,913 records. $\ln(1001/0.05) = 9.905$, so the privacy term asks for $4 \times 9.905/0.05 = 792.4$, that is 793 records at $\varepsilon = 1$.
+3. **$10^6$ classifiers.** The logarithms become 17.50 and 16.81, and the requirements 56,015 and 1,345. A thousandfold larger class costs 1.65 times more records for sampling and 1.70 times more for privacy.
+4. **When privacy dominates.** The privacy requirement exceeds the sampling one when $4\ln(|C|/\beta)/(\alpha\varepsilon) > 8\ln(2|C|/\beta)/\alpha^2$, that is when $\varepsilon < \alpha\ln(|C|/\beta)/(2\ln(2|C|/\beta))$. For 1,001 thresholds this is $0.05 \times 9.905/(2 \times 10.598) = 0.0234$. At $\varepsilon = 0.01$ the privacy term needs 79,236 records, more than the 33,913 for sampling.
+
+*Since the two logarithms are close, privacy dominates roughly when $\varepsilon < \alpha/2$. At the accuracies machine learning cares about, a few percent, that means strong privacy, $\varepsilon$ around 0.01; at $\varepsilon = 1$ privacy is a small surcharge on the records you need anyway.*
+:::
+
+## Sparse with basic and advanced composition {#sec-sol-selection-9}
+
+> **Exercise 9.** **Sparse with basic and advanced composition.** For $k = 1000$ queries, $\beta = 0.05$, $\varepsilon = 1$ and $\delta = 10^{-6}$, compare the margin of Sparse with basic composition (@eq-sel-sparse-alpha) and with advanced composition, as the number $c$ of answers above grows. Find the smallest $c$ at which advanced composition gives the smaller margin, and explain where it comes from. *Check: advanced composition wins from $c = 29$ (margins 3,240 against 3,218), and at $c = 1000$ the margins are 140,035 and 23,691.* *(Composition of AboveThreshold runs)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Both margins.** Each run gets failure probability $\beta/c$, so both margins are $8(\ln k + \ln(2c/\beta))/\varepsilon_{\text{run}}$. They differ only in the budget of a run: $\varepsilon/c$ with basic composition, and the largest $\varepsilon_0$ whose $c$-fold advanced composition is at most $\varepsilon$ with advanced composition.
+2. **The crossover.** The script compares the two for $c = 1, 2, \dots$ and finds that advanced composition first wins at $c = 29$: the margins are 3,240 (basic) and 3,218 (advanced). At $c = 28$ they are 3,120 and 3,155.
+3. **Why there.** For small $\varepsilon_0$, advanced composition spends about $\varepsilon_0\sqrt{2c\ln(1/\delta)}$, so $\varepsilon_0 \approx \varepsilon/\sqrt{2c\ln(1/\delta)}$. That beats $\varepsilon/c$ once $c > 2\ln(1/\delta) = 27.6$, and the drift term $c\varepsilon_0\tanh(\varepsilon_0/2)$ pushes the crossover to 29.
+4. **Large $c$.** At $c = 1000$ the margins are 140,035 and 23,691: a factor of 5.9, close to $\sqrt{c/(2\ln(1/\delta))} = \sqrt{1000/27.6} = 6.0$.
+
+*This is the same crossover as for advanced composition in [Advanced and optimal composition](../../book-full/part03-dp-foundations/04-composition.md): composing $c$ runs pays $\sqrt c$ instead of $c$, but only once $c$ is large compared with $2\ln(1/\delta)$.*
+:::

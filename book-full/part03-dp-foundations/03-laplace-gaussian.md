@@ -31,7 +31,7 @@ Both rows come straight from the densities. The Laplace density with scale $b$ i
 
 | Result | Where it is used |
 | --- | --- |
-| $\ell_1$ and $\ell_2$ sensitivity of counts, sums, means, histograms | Calibrating every noise-adding mechanism; clipping in [Beyond global sensitivity](06-sensitivity.md) |
+| $\ell_1$ and $\ell_2$ sensitivity of counts, sums, means, histograms | Calibrating every noise-adding mechanism; clipping in [Beyond global sensitivity](07-sensitivity.md) |
 | Laplace mechanism: $\mathrm{Lap}(\Delta_1 f/\varepsilon)$ gives $\varepsilon$-DP | Counts, histograms, low-dimensional statistics; [report-noisy-max](05-selection.md) |
 | Laplace accuracy: error $\le (\Delta_1 f/\varepsilon)\ln(d/\beta)$ | Choosing $\varepsilon$ for a target error |
 | Classic Gaussian calibration $\sigma = \Delta_2 f\sqrt{2\ln(1.25/\delta)}/\varepsilon$ | Reading papers and libraries that still use it |
@@ -116,7 +116,7 @@ Records take values in a domain $\mathcal X$. @tbl-lg-sensitivity gives the sens
 
 ### Interpretation
 
-Sensitivity is a worst case over datasets. It does not depend on the data you hold, only on what the domain allows. That is why it can be computed before looking at the data, and also why it can be large for unbounded data: the sum of arbitrary real numbers has infinite sensitivity, since one record can be as large as it likes. Clipping, in [Beyond global sensitivity](06-sensitivity.md), forces a finite $B$.
+Sensitivity is a worst case over datasets. It does not depend on the data you hold, only on what the domain allows. That is why it can be computed before looking at the data, and also why it can be large for unbounded data: the sum of arbitrary real numbers has infinite sensitivity, since one record can be as large as it likes. Clipping, in [Beyond global sensitivity](07-sensitivity.md), forces a finite $B$.
 
 The neighbouring relation changes the answer by up to a factor of 2. A histogram has $\Delta_1 = 1$ under add/remove and 2 under replace, because replacing is removing one record and adding another. Since the noise is proportional to the sensitivity, a guarantee stated without its neighbouring relation is ambiguous by that factor in $\varepsilon$.
 
@@ -178,6 +178,14 @@ The noise does not depend on $n$. A count gets noise of scale $1/\varepsilon$ wh
 
 The worst case is not rare. For the Laplace mechanism the privacy loss equals $\varepsilon$ on a set of probability $\frac12$ (@fig-lg-privacy-loss, left), the event $S$ of the tightness argument. The guarantee is tight in the strongest sense, not just at some unlikely output.
 
+It helps to look at the privacy loss as a random number. Draw an output from $M(D)$ and compute its loss; the distribution of that number is the **privacy loss distribution**. Part 4's accountants track exactly this distribution, and for the Laplace mechanism it has an unusual shape (@fig-lg-loss-distributions, left).
+
+Take a count with $b = 1/\varepsilon$, so that the two true answers 0 and 1 are $\varepsilon$ apart in units of the scale. Outputs at or below 0 have loss exactly $+\varepsilon$, and they carry probability $\frac12$ under $M(D)$. Outputs at or above 1 have loss exactly $-\varepsilon$, and they carry probability $\frac12e^{-\varepsilon}$, the Laplace tail beyond one unit. Between the two answers, the loss $\varepsilon(1 - 2y)$ falls linearly in $y$, so it spreads the remaining probability $\frac12(1 - e^{-\varepsilon})$ over the interval from $-\varepsilon$ to $\varepsilon$. So the distribution has two atoms, one at each end of that interval, and a continuous ramp between them.
+
+At $\varepsilon = 1$ the two atoms carry 0.5000 and 0.1839, so the ramp carries the remaining 0.3161, and a million simulated outputs put 0.5007 and 0.1841 on the atoms. The average loss is $\varepsilon + e^{-\varepsilon} - 1$, because the average of the privacy loss under $M(D)$ is the Kullback–Leibler divergence of the pair. At $\varepsilon = 1$ it is 0.3679, against 0.3682 in the simulation. The Gaussian mechanism looks nothing like this, since its privacy loss is a normal distribution with no atoms and no end points, as @sec-lg-gauss-classic shows.
+
+![The privacy loss distribution under $M(D)$ for a count, with $\varepsilon = 1$. Left: Laplace noise of scale $1/\varepsilon$. The loss never leaves $[-\varepsilon, \varepsilon]$; it has an atom of probability 0.5000 at $+\varepsilon$, an atom of 0.1839 at $-\varepsilon$, and a continuous ramp of total probability 0.3161 in between (density shown). Right: Gaussian noise of standard deviation 2. The loss is normal with mean $\mu^2/2$ and variance $\mu^2$, here $\mu = 0.5$, and exceeds $\varepsilon$ with probability 0.0401 (shaded).](figures/lapgauss_loss_distributions.svg){#fig-lg-loss-distributions}
+
 The mechanism also satisfies a whole curve of weaker guarantees. Asked for a smaller $\varepsilon' < \varepsilon$, it is not $\varepsilon'$-DP, but it is $(\varepsilon', \delta)$-DP with
 $$\delta = 1 - e^{-(\varepsilon - \varepsilon')/2}.$$
 This is the hockey-stick divergence of a Laplace pair from [Divergences](../part01-prerequisites/03-divergences.md), with shift in units of the scale $t = \Delta_1f/b = \varepsilon$, and Fact 3 explains where it comes from. With $b = 1$ and centres 0 and $t$, the loss is $t$ left of 0 and falls linearly as $t - 2y$ between the centres, so the bad event $\{L > \varepsilon'\}$ is $\{y < (t - \varepsilon')/2\}$. Its mass under $M(D)$ is $1 - \frac12e^{-(t - \varepsilon')/2}$ and under $M(D')$ is $\frac12e^{-(t + \varepsilon')/2}$; multiplying the second by $e^{\varepsilon'}$ gives $\frac12e^{-(t - \varepsilon')/2}$, and the difference is $1 - e^{-(t - \varepsilon')/2}$. @fig-lg-delta-curves draws it as the dashed curve that hits zero at $\varepsilon' = \varepsilon$.
@@ -221,7 +229,7 @@ The plan is to work out the distribution of the privacy loss, which turns out to
 $$L(y) = \frac{\|z - v\|^2 - \|z\|^2}{2\sigma^2} = \frac{\|v\|^2 - 2\langle z, v\rangle}{2\sigma^2}.$$
 The loss depends on $z$ only through the inner product $\langle z, v\rangle = \sum_iz_iv_i$, the component of the noise along the shift. That is a sum of independent normals, so it is normal, with mean 0 and variance $\sum_i\sigma^2v_i^2 = \sigma^2\|v\|^2$. A constant minus a multiple of a normal is normal, so the privacy loss under $M(D)$ is normal, with mean $\|v\|^2/(2\sigma^2)$ and variance $4\sigma^2\|v\|^2/(4\sigma^4) = \|v\|^2/\sigma^2$. Writing $\mu = \|v\|/\sigma$ for the shift measured in standard deviations of the noise,
 $$L \sim \mathcal N\Big(\frac{\mu^2}2, \mu^2\Big), \qquad \mu = \frac{\|v\|}{\sigma}.$$
-This is the one-dimensional result of [Probability distributions](../part01-prerequisites/01-distributions.md) with standardized shift $\mu$; the other $d - 1$ directions of $z$, perpendicular to $v$, do not enter.
+This is the one-dimensional result of [Probability distributions](../part01-prerequisites/01-distributions.md) with standardized shift $\mu$; the other $d - 1$ directions of $z$, perpendicular to $v$, do not enter. Unlike the Laplace loss, it has no atoms and no largest value (@fig-lg-loss-distributions, right).
 2. **Bound $\delta$ by the bad event** (Fact 3). The probability that the loss exceeds $\varepsilon$ is a normal tail. Standardize it, subtracting the mean $\mu^2/2$ and dividing by the standard deviation $\mu$: $L > \varepsilon$ exactly when a standard normal exceeds $(\varepsilon - \mu^2/2)/\mu = \frac\varepsilon\mu - \frac\mu2$. So $\delta \le \Pr[L > \varepsilon] = \Pr\big[\mathcal N(0, 1) > \frac\varepsilon\mu - \frac\mu2\big] = \Phi(-t)$ with $t = \frac\varepsilon\mu - \frac\mu2$, using the symmetry of the normal curve to write the upper tail beyond $t$ as $\Phi(-t)$.
 3. **Take the worst shift.** A larger shift makes the bad event more likely: $t$ decreases as $\mu$ grows, since both $\varepsilon/\mu$ and $-\mu/2$ fall. So the worst neighbouring pair has the largest shift, $\|v\| = \Delta_2f$, that is $\mu = \Delta_2f/\sigma = \varepsilon/c$. Substituting, $t = \varepsilon \cdot c/\varepsilon - \frac{\varepsilon}{2c} = c - \frac{\varepsilon}{2c}$.
 4. **Bound the normal tail.** The Mills-ratio bound of [Concentration inequalities](../part01-prerequisites/02-concentration.md) says $\Phi(-t) \le \varphi(t)/t$ for $t > 0$. The reason is that beyond $t$ every point $z$ has $z/t \ge 1$, so $\int_t^\infty\varphi(z)\,dz \le \int_t^\infty\frac zt\varphi(z)\,dz$, and since the derivative of $\varphi(z)$ is $-z\varphi(z)$, the right side integrates to $\varphi(t)/t$. So $\Phi(-t) \le \frac{e^{-t^2/2}}{t\sqrt{2\pi}}$.
@@ -397,6 +405,7 @@ uv run python code/part03-dp-foundations/laplace_gaussian.py
 | Sensitivities, brute force over all datasets of up to 3 records | Every row of @tbl-lg-sensitivity: e.g. histogram under replace $\ell_1 = 2$, $\ell_2 = 1.4142$; threshold counts $\ell_1 = 3$, $\ell_2 = 1.7321$ |
 | Laplace privacy loss, count, $\varepsilon = 1$ | Ranges over exactly $[-1, 1]$ |
 | Laplace tight event | $\Pr[M(D) \le 0] = 0.5002$, $\Pr[M(D') \le 0] = 0.1838$, ratio 2.7221 against $e = 2.7183$ |
+| Laplace privacy loss distribution, $\varepsilon = 1$ | Atoms 0.5000 at $+\varepsilon$ and 0.1839 at $-\varepsilon$ (simulated 0.5007, 0.1841), ramp 0.3161; mean loss 0.3679 (simulated 0.3682) |
 | Laplace count, $\varepsilon = 0.1$ | Mean absolute error 9.978 (exact 10); 95th percentile 29.85 (bound 29.96) |
 | Laplace histogram, 20 bins | Maximum error above 5.99 in a fraction 0.0464 of releases ($\beta = 0.05$) |
 | Classic proof chain, $\varepsilon = 1$, $\delta = 10^{-5}$ | Exact $\delta$ $4.11\times10^{-8}$; $\Pr[L > \varepsilon]$ $1.06\times10^{-6}$; Mills bound $1.10\times10^{-6}$ |
@@ -433,6 +442,7 @@ $f$ has values in $\mathbb R^d$; $\Delta_1f$, $\Delta_2f$ are its $\ell_1$, $\el
 | Histogram | $\Delta_1 = \Delta_2 = 1$ (add/remove); $2$, $\sqrt2$ (replace) | One record, one bin |
 | Laplace mechanism (@eq-lg-laplace) | $f(D) + \mathrm{Lap}(\Delta_1f/\varepsilon)^{\otimes d}$ is $\varepsilon$-DP | Tight: $L = \varepsilon$ on half the mass |
 | Laplace accuracy | $\Pr[\max_i\lvert Z_i\rvert > b\ln(d/\beta)] \le \beta$; $\mathbb E\lvert Z_i\rvert = b$ | Error independent of $n$ |
+| Privacy loss of Laplace noise | Atoms $\frac12$ at $+\varepsilon$ and $\frac12e^{-\varepsilon}$ at $-\varepsilon$, ramp between; mean $\varepsilon + e^{-\varepsilon} - 1$ | Bounded, so pure DP |
 | Privacy loss of Gaussian noise | $L \sim \mathcal N(\mu^2/2, \mu^2)$ under $M(D)$ | Unbounded, so no pure DP |
 | Bad-event bound | $\delta \le \Pr[L > \varepsilon] = \Phi(\frac\mu2 - \frac\varepsilon\mu)$ | Loose by the term $e^\varepsilon Q(L > \varepsilon)$ |
 | Classic calibration (@eq-lg-classic) | $\sigma = \Delta_2f\sqrt{2\ln(1.25/\delta)}/\varepsilon$, $\varepsilon < 1$ | 1.3–1.7 times too much noise; wrong for large $\varepsilon$ |

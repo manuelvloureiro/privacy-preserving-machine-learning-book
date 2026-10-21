@@ -80,6 +80,14 @@ def retrain_epsilon(months: int, sigma: float, delta: float) -> float:
     return dpsgd_epsilon(Q_RUN, sigma, months * STEPS_RUN, delta)
 
 
+# --- Exercise 7: from actions to users ------------------------------------------------------------
+
+
+def zcdp_epsilon_tight(rho: float, delta: float) -> float:
+    """ε = ρ + √(4ρ ln(√(πρ)/δ)), the conversion of the Facebook URLs release (Bun & Steinke 2016)."""
+    return rho + math.sqrt(4 * rho * math.log(math.sqrt(math.pi * rho) / delta))
+
+
 def print_table(rng: np.random.Generator) -> None:
     del rng  # nothing here is random
     print("== Exercise 1")
@@ -109,6 +117,14 @@ def print_table(rng: np.random.Generator) -> None:
     for months in (1, 3, 12):
         print(
             f"{months} runs at sigma=2.28: RDP eps={retrain_epsilon(months, SIGMA_EPS2, DELTA_RUN):.3f}  basic {2 * months:g}"
+        )
+    print("== Exercise 7")
+    sigma = 22.0
+    for k in (1, 5, 10):
+        rho = k / (2 * sigma**2)
+        print(
+            f"likes, sigma=22, {k} URLs: rho={rho:.5f}  eps={zcdp_epsilon_tight(rho, DELTA_RUN):.3f}  "
+            f"simple eps={zcdp_epsilon(rho, DELTA_RUN):.3f}"
         )
 
 

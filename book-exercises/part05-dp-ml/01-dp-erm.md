@@ -96,3 +96,29 @@ The solutions use the chapter's notation. Empirical risk minimization (ERM) pick
 
 *An approximate solver changes the sensitivity, not just the accuracy. Stop on a gradient check at a tolerance tied to $L/n$, and the privacy proof survives.*
 :::
+
+## Privacy noise as gradient variance {#sec-sol-dperm-8}
+
+> **Exercise 8.** **Privacy noise as gradient variance.** Noisy projected gradient descent without a ridge (@eq-dperm-projected-gd) runs on $n = 1{,}000$ records in $d = 10$ dimensions, in the ball of radius $R = 5$, with $L = 1$, $\varepsilon = 1$, $\delta = 10^{-5}$ and the step rule $T = \lceil n^2\mu^2/(4d)\rceil$. Compute the noise $\sigma$, the extra second moment $d\sigma^2$ that the noise adds to each gradient, and the bound @eq-dperm-convex-bound. Compare it with the bound $RL/\sqrt T$ that the same number of noiseless steps would have. Why is the ratio close to $\sqrt2$, and does it depend on $n$? *Check: $T = 1{,}797$, $d\sigma^2 = 1.0004$, bounds 0.1668 and 0.1179, ratio 1.4144.* *(Second moments of unbiased gradients)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The noise.** With $\mu = 0.2681$, the rule gives $T = \lceil 1{,}000^2 \times 0.2681^2/40\rceil = 1{,}797$, and @eq-dperm-projected-gd gives $\sigma = (2/1{,}000)\sqrt{1{,}797}/0.2681 = 0.3163$.
+2. **The extra second moment.** Each coordinate of the noise has variance $\sigma^2$, so the noise adds $d\sigma^2 = 10 \times 0.3163^2 = 1.0004$ to $\mathbb E\|g_t\|^2$. The noiseless gradient contributes at most $L^2 = 1$, so $G^2 = 2.0004$.
+3. **The two bounds.** Fact 6 gives $RG/\sqrt T = 5\sqrt{2.0004/1{,}797} = 0.1668$. Without noise, $G = L$ and the bound is $5/\sqrt{1{,}797} = 0.1179$.
+4. **The ratio.** It is $\sqrt{G^2/L^2} = \sqrt{2.0004} = 1.4144$. The rule chooses $T$ so that the noise term $4d/(n^2\mu^2)$ equals $1/T$, which is the same as saying that $d\sigma^2 = L^2$. So the noise doubles the second moment, and the bound grows by $\sqrt2$, at every $n$. The rounding up of $T$ is why the ratio is 1.4144 rather than exactly $\sqrt2$.
+
+*The optimizer cannot tell privacy noise from sampling noise: both only raise the second moment of its gradients. The step rule spends exactly as much second moment on privacy as the gradient itself has.*
+:::
+
+## How many steps without a ridge? {#sec-sol-dperm-9}
+
+> **Exercise 9.** **How many steps without a ridge?** In @eq-dperm-convex-bound the noise term does not depend on $T$, so more steps only help. Find the smallest $T$ for which the bound is within 10% of its limit $2RL\sqrt d/(n\mu)$, for $d = 10$, $R = 5$, $L = 1$, $(\varepsilon, \delta) = (1, 10^{-5})$ and $n = 1{,}000$ and $10{,}000$. How many per-record gradient evaluations do these full-batch runs take, and how does that compare with the $n^2$ steps of one record each that Bassily, Smith & Thakurta (2014) use? *Check: $T = 8{,}554$ and $855{,}374$; $8.55 \times 10^6$ and $8.55 \times 10^9$ evaluations, against $10^6$ and $10^8$.* *(Trading steps for accuracy)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The condition.** Write $a = 4d/(n^2\mu^2)$. The bound is $RL\sqrt{1/T + a}$ and its limit is $RL\sqrt a$. Being within 10% means $\sqrt{1/T + a} \le 1.1\sqrt a$, that is $1/T \le (1.1^2 - 1)a = 0.21a$, so $T \ge 1/(0.21a)$.
+2. **Numbers.** For $n = 1{,}000$ the script gives $T = 8{,}554$, with bound 0.1298 against the limit 0.1180. For $n = 10{,}000$, $a$ is a hundred times smaller, so $T = 855{,}374$, with bound 0.0130 against 0.0118.
+3. **Cost.** Each full-batch step evaluates $n$ gradients, so the runs cost $8.55 \times 10^6$ and $8.55 \times 10^9$ evaluations. The number of steps grows like $n^2$ and each costs $n$, so the cost grows like $n^3$.
+4. **One record per step.** Bassily, Smith & Thakurta take about $n^2$ steps that each touch one random record, $10^6$ and $10^8$ evaluations. Each step then uses a gradient estimated from one record, and amplification by subsampling lets each step use less noise; the guarantee is of the same order up to logarithms. At $n = 10{,}000$ that saves a factor of about 85 in computation.
+
+*Without a ridge, accuracy costs computation rather than privacy: the steps are free in budget, and the rate is reached when the optimization error falls below the noise term. Sampling records instead of passing over all of them is what makes that affordable, and it is one of the two ideas behind DP-SGD.*
+:::

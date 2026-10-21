@@ -177,7 +177,7 @@ In row 3, $0.245 = 0.7^2/2!$ is the chance of surviving two flips and $0.0572 = 
 
 ### Interpretation
 
-The coin is exact: no step rounds, and the only randomness is uniform integers. The cost is small and bounded: at most $e$ draws for $\gamma \le 1$, and below $\frac{e}{1 - e^{-1}} + 1 \approx 5.3$ for any $\gamma$ ([Exercise 1](../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.md#sec-sol-discrete-1)). The cost curve in @fig-discrete-bernoulli-exp jumps at each integer. At $\gamma = 1$ the algorithm runs one full $e^{-1}$ coin and then a coin for the fractional part 0, which costs one extra draw when the first coin comes up 1 (probability $e^{-1}$), so the cost goes from $e = 2.7183$ just below 1 to $e + e^{-1} = 3.0862$ at 1. Splitting $\gamma$ differently would smooth this out; it doesn't matter for exactness.
+The coin is exact: no step rounds, and the only randomness is uniform integers. The cost is small and bounded: at most $e$ draws for $\gamma \le 1$, and below $\frac{e}{1 - e^{-1}} + 1 \approx 5.3$ for any $\gamma$ ([Exercise 1](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-1)). The cost curve in @fig-discrete-bernoulli-exp jumps at each integer. At $\gamma = 1$ the algorithm runs one full $e^{-1}$ coin and then a coin for the fractional part 0, which costs one extra draw when the first coin comes up 1 (probability $e^{-1}$), so the cost goes from $e = 2.7183$ just below 1 to $e + e^{-1} = 3.0862$ at 1. Splitting $\gamma$ differently would smooth this out; it doesn't matter for exactness.
 
 ### Example: one coin per proposal
 
@@ -253,7 +253,7 @@ $\Pr[Y = 0] = 0.2835 + 0.2031 = 0.4866$ and $\Pr[Y = 1] = 0.1455 + 0.1043 = 0.24
 
 ### Interpretation
 
-The discrete Laplace gives the same guarantee with less noise. It has the same $\varepsilon$ as the continuous one at the same scale and a slightly smaller variance: 1.8413 against 2 at $b = 1$. [Exercise 3](../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.md#sec-sol-discrete-3) shows the gap tends to $1/6$ as $b$ grows. Rounding $f(D) + \mathrm{Lap}(b)$ to the nearest integer would also be $\varepsilon$-DP in exact arithmetic, as post-processing, but it is not the same distribution, and it needs a floating-point sampler.
+The discrete Laplace gives the same guarantee with less noise. It has the same $\varepsilon$ as the continuous one at the same scale and a slightly smaller variance: 1.8413 against 2 at $b = 1$. [Exercise 3](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-3) shows the gap tends to $1/6$ as $b$ grows. Rounding $f(D) + \mathrm{Lap}(b)$ to the nearest integer would also be $\varepsilon$-DP in exact arithmetic, as post-processing, but it is not the same distribution, and it needs a floating-point sampler.
 
 It is also the best possible mechanism for one count. Ghosh, Roughgarden and Sundararajan (2009) show that for a single count, the geometric mechanism is universally utility-maximizing: every user, whatever their loss function and prior, can post-process its output to do as well as with any other $\varepsilon$-DP mechanism.
 
@@ -331,7 +331,7 @@ $\delta(\varepsilon)$ is close to the continuous curve, not equal to it. The pri
 
 The variance deficit is invisible in practice. Its relative size $1 - \operatorname{Var}X/\sigma^2$ has leading term $8\pi^2\sigma^2e^{-2\pi^2\sigma^2}$, the leading term of @eq-dgauss-var divided by $\sigma^2$. At $\sigma = 1$ that is $8\pi^2e^{-2\pi^2} = 78.96 \times 2.67\times10^{-9}$, so $1 - \operatorname{Var}X/\sigma^2 = 2.11\times10^{-7}$; at $\sigma = 2$ it is at the level of rounding error. Only below $\sigma \approx 0.6$ does the discrete Gaussian concentrate visibly more than $\sigma^2$ suggests: at $\sigma = 0.5$, $\operatorname{Var}X = 0.8601\,\sigma^2$, and at $\sigma = 0.25$ almost all the mass is at 0 (@fig-discrete-gaussian-variance).
 
-Sums are not discrete Gaussians. Unlike the continuous case, the sum of two independent discrete Gaussians is not exactly a discrete Gaussian. For $\sigma \ge 1$ it is very close ([Exercise 6](../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.md#sec-sol-discrete-6)), which is what distributed noise addition, where each client adds its own share of the noise, relies on.
+Sums are not discrete Gaussians. Unlike the continuous case, the sum of two independent discrete Gaussians is not exactly a discrete Gaussian. For $\sigma \ge 1$ it is very close ([Exercise 6](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-6)), which is what distributed noise addition, where each client adds its own share of the noise, relies on.
 
 ![Discrete against continuous Gaussian for sensitivity 1: $\delta(\varepsilon)$ from @eq-dgauss-delta (solid) and the analytic curve of the continuous Gaussian (dashed), for $\sigma = 0.5$, 1 and 2. The discrete curve has a kink at each value of the lattice-valued privacy loss.](figures/discrete_gaussian_delta.svg){#fig-discrete-gaussian-delta}
 
@@ -377,7 +377,7 @@ $$-\frac{|y|}{t} - \frac{(|y| - \sigma^2/t)^2}{2\sigma^2} = -\frac{|y|}{t} - \fr
 The $|y|/t$ terms cancel, and what is left is $e^{-y^2/(2\sigma^2)}$ times a constant. By Fact 2 the output is $\mathcal N_{\mathbb Z}(0, \sigma^2)$.
 2. **The acceptance probability is valid.** The exponent $-(|y| - \sigma^2/t)^2/(2\sigma^2)$ is at most 0, so its exponential is at most 1 and is a probability.
 3. **Everything is rational.** $t$ is an integer, computed as $\lfloor\sqrt{\lfloor\sigma^2\rfloor}\rfloor + 1$ with integer square roots (an integer $n$ has $n^2 \le \sigma^2$ exactly when $n^2 \le \lfloor\sigma^2\rfloor$, so this equals $\lfloor\sigma\rfloor + 1$ without computing $\sigma$). So $\gamma = (|y| - \sigma^2/t)^2/(2\sigma^2)$ is a ratio of integers, and Algorithm 1 applies.
-4. **The acceptance rate.** $A = \sum_y\Pr[Y = y]\,e^{-(|y| - \sigma^2/t)^2/(2\sigma^2)}$, the average acceptance over proposals. With $\Pr[Y = y] = \frac{1 - r}{1 + r}r^{|y|}$, step 1 turns each term into $\frac{1 - r}{1 + r}e^{-\sigma^2/(2t^2)}e^{-y^2/(2\sigma^2)}$, and summing over $y$ gives @eq-dgauss-accept. [Exercise 5](../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.md#sec-sol-discrete-5) derives the limit.
+4. **The acceptance rate.** $A = \sum_y\Pr[Y = y]\,e^{-(|y| - \sigma^2/t)^2/(2\sigma^2)}$, the average acceptance over proposals. With $\Pr[Y = y] = \frac{1 - r}{1 + r}r^{|y|}$, step 1 turns each term into $\frac{1 - r}{1 + r}e^{-\sigma^2/(2t^2)}e^{-y^2/(2\sigma^2)}$, and summing over $y$ gives @eq-dgauss-accept. [Exercise 5](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-5) derives the limit.
 
 **Concretely, for $\sigma^2 = 4$** ($t = \lfloor 2\rfloor + 1 = 3$, $r = e^{-1/3}$, $\frac{1 - r}{1 + r} = 0.1651$). @tbl-discrete-dgauss-walk computes a few rows by hand.
 
@@ -484,4 +484,4 @@ $r = e^{-1/b}$ for the discrete Laplace; $X \sim \mathcal N_{\mathbb Z}(0, \sigm
 - For $\sigma \ge 1$, treat the discrete Gaussian as the continuous one for both accuracy and privacy; check $\delta(\varepsilon)$ with @eq-dgauss-delta when it matters.
 - Exactness of the distribution is not the end: running time that depends on the output is a separate side channel.
 
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/07-discrete-mechanisms.md).
+**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md).

@@ -6,7 +6,7 @@ from pathlib import Path
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
-# The public functions, called as chapter 35 would call them, plus closed-form checks.
+# The public functions, called as chapter 37 would call them, plus closed-form checks.
 PUBLIC_API_CHECK = """
 import math
 from shuffling_iteration import (clones_epsilon, hidden_state_limit_mu, noisy_gd_last_iterate_mu,

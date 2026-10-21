@@ -15,9 +15,15 @@ from pathlib import Path
 import numpy as np
 from definition import (
     LN3,
+    additive_chain_tv,
     advantage_bound,
+    best_guess_accuracy,
+    catastrophic_output,
     laplace_tv,
+    loss_tail,
     max_divergence,
+    privacy_loss_bad_set_bound,
+    prob_someone_exposed,
     product,
     release_records_neighbour,
     rr_delta,
@@ -105,6 +111,13 @@ def laplace_over_bound(eps: float) -> float:
     return laplace_tv(eps) / advantage_bound(eps)
 
 
+# --- Exercise 8: an additive bound alone cannot work ---------------------------------------------
+# additive_chain_tv and best_guess_accuracy live in definition.py.
+
+# --- Exercise 9: a catastrophic mechanism with the Gaussian's (ε, δ) ------------------------------
+# catastrophic_output and loss_tail live in definition.py.
+
+
 def print_table(rng: np.random.Generator) -> None:
     del rng  # nothing random here
     print("== Exercise 1")
@@ -158,6 +171,24 @@ def print_table(rng: np.random.Generator) -> None:
     grid = [i / 1000 for i in range(1, 10_001)]
     worst = min(grid, key=laplace_over_bound)
     print(f"smallest ratio={laplace_over_bound(worst):.4f} at eps={worst:.2f}")
+
+    print("== Exercise 8")
+    n = 1000
+    for d in (1e-4, 1e-3):
+        tv = additive_chain_tv(n, d)
+        print(
+            f"n={n} delta={d:g}: TV bound={tv:.4f}  best accuracy={best_guess_accuracy(tv):.4f}  "
+            f"release-each-record exposure={prob_someone_exposed(n, d):.4f}"
+        )
+
+    print("== Exercise 9")
+    eps, d = 1.0, 0.01
+    p, q = catastrophic_output(1, eps, d), catastrophic_output(0, eps, d)
+    print(
+        f"eps=1 delta=0.01: smallest delta at eps=1={smallest_delta(p, q, eps):.4f}  "
+        f"at eps=0.5={smallest_delta(p, q, 0.5):.4f}  Pr[L = inf]={loss_tail(p, q, 1e300):.4f}  "
+        f"Pr[L > 3]={loss_tail(p, q, 3.0):.4f}  bound={privacy_loss_bad_set_bound(eps, d, 3.0):.4f}"
+    )
 
 
 def main() -> None:

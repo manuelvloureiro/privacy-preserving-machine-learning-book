@@ -2,7 +2,7 @@
 
     uv run python code/part03-dp-foundations/solutions_discrete_mechanisms.py
 
-Prints every number quoted in book-exercises/part03-dp-foundations/07-discrete-mechanisms.md (seed 0). Makes no figures;
+Prints every number quoted in book-exercises/part03-dp-foundations/08-discrete-mechanisms.md (seed 0). Makes no figures;
 --out is accepted and ignored.
 """
 

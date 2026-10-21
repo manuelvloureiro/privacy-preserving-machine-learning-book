@@ -1,4 +1,4 @@
-"""code/part03-dp-foundations/lower_bounds.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/09-lower-bounds.md."""
+"""code/part03-dp-foundations/lower_bounds.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/10-lower-bounds.md."""
 
 import subprocess
 import sys
@@ -29,6 +29,13 @@ def test_lower_bounds_matches_section(tmp_path: Path) -> None:
         "d=100: pure k >= 69.26  approx (delta=1e-06) forces k >= 13",
         "d=1000: pure k >= 693.10  approx (delta=1e-06) forces k >= 13",
         "ln(1/delta)/eps = 13.82",
+        "d=10: (eps, delta) packing lemma forces k >= 7",
+        "d=100: (eps, delta) packing lemma forces k >= 11",
+        "d=1000: (eps, delta) packing lemma forces k >= 11",
+        # Packing for a mean
+        "R=1e+01: m=100  pure n >= 4.55  (eps, delta=1e-06) n >= 4",
+        "R=1e+03: m=10000  pure n >= 9.16  (eps, delta=1e-06) n >= 9",
+        "R=1e+06: m=10000000  pure n >= 16.07  (eps, delta=1e-06) n >= 11",
         # Sample complexity
         "histogram N=1e6, alpha=0.1: private n >= 64  sampling n = 875",
         "histogram N=1e6, alpha=0.01: private n >= 638  sampling n = 87522",

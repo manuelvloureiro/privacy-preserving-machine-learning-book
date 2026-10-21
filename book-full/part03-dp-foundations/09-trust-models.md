@@ -27,10 +27,15 @@ Here is why. A local report has to hide its owner from everyone, including the a
 | Unbiased estimation from randomized reports | Every local frequency estimate; debiasing any linear randomizer |
 | The local lower bound: error $\gtrsim 1/((e^\varepsilon - 1)\sqrt n)$ | Knowing when local DP is hopeless, and why the other models exist |
 | $k$-ary randomized response and unary encoding | Frequency estimation over large domains, as in browser and phone telemetry |
+| Local hashing and heavy hitters by growing prefixes | Short reports for huge domains; finding new words or addresses without a dictionary |
+| The one-bit mean | Numeric telemetry, such as time spent in an app, from one bit per person |
+| Memoization and $\alpha$-point rounding | Collecting the same statistic every day without paying the budget again each day |
 | Amplification by shuffling (Feldman, McMillan & Talwar 2021) | Choosing the local $\varepsilon_0$ that a shuffler turns into a target central $\varepsilon$ |
 | Distributed noise with secure aggregation | Central accuracy without a trusted curator, in federated settings; how collusion erodes it |
 
 : The results of this chapter and where each one is used. {#tbl-trust-uses}
+
+The middle three rows are what deployments need beyond one report about a small domain. A browser or a phone must handle domains too large to list, numbers as well as categories, and the same question asked every day, and three sections after frequency estimation take these up in turn.
 
 The chapter uses the definition, the hockey-stick form and randomized response from [The definition of differential privacy](01-definition.md), post-processing from [Post-processing, group privacy and composition](02-properties.md), and the [Laplace and Gaussian mechanisms](03-laplace-gaussian.md). From Part 1 it uses concentration ([Concentration inequalities](../part01-prerequisites/02-concentration.md)), Pinsker's inequality ([Divergences](../part01-prerequisites/03-divergences.md)) and additive secret sharing ([Cryptography basics](../part01-prerequisites/08-crypto-basics.md)). Each of them is restated where it is used. The derivation of amplification by shuffling belongs to [Privacy accounting](../part04-privacy-accounting/00-introduction.md); here it is a cited result that you compute with.
 
@@ -91,7 +96,7 @@ The idea is that replacing one person's record changes only that person's report
 
 ### Interpretation
 
-The guarantee no longer depends on the curator. A breach of the collector's database, a malicious insider or a subpoena reveals reports, and reports are already private. That is why the large deployments of the 2010s (Google's RAPPOR in Chrome, Apple's telemetry in iOS and macOS) used local DP.
+The guarantee no longer depends on the curator. A breach of the collector's database, a malicious insider or a subpoena reveals reports, and reports are already private. That is why the large deployments of the 2010s used local DP: Google's RAPPOR in Chrome, Apple's telemetry in iOS and macOS, and Microsoft's telemetry in Windows.
 
 But every person pays separately. Each report must hide its owner from everyone, so each carries noise of the size the central mechanism adds once in total. @tbl-trust-who sets out what you trust in each model and what it costs. The error column is derived in the sections below; the local entry follows from the example right after the table, where the standard deviation of a count is $n$ times that of a fraction, $n \cdot 1/(\varepsilon\sqrt n) = \sqrt n/\varepsilon$.
 
@@ -156,11 +161,13 @@ Local noise is a contraction. @eq-trust-kl-contraction says a local randomizer s
 
 The bound is loose by a constant. For one randomized-response report at $\varepsilon_0 = 1$, comparing $\mathrm{Bern}(0.5)$ with $\mathrm{Bern}(0.6)$, the exact KL is 0.00429, and @eq-trust-kl-contraction gives $(e - 1)^2 \times 0.1^2 = 2.952 \times 0.01 = 0.02952$, about seven times more. The slack comes from step 1: it allows every report probability to sit anywhere in the band $[r(y), e^{\varepsilon_0}r(y)]$, and randomized response does not use all of it. Duchi, Jordan & Wainwright (2018) prove the same contraction with a factor 4 and use it for minimax rates (the best worst-case error any estimator can reach) of many local estimation problems; Chan, Shi & Song (2012) prove the matching $\Omega(\sqrt n)$ lower bound for counting.
 
-Interaction does not help much. The derivation allowed each person a different randomizer. Lower bounds of the same order also hold for **sequentially interactive** protocols, in which each person still speaks once but their randomizer may be chosen after seeing the earlier reports.
+Interaction does not help much here. A local protocol is **non-interactive** when everyone sends one report at once. It is **sequentially interactive** when each person still speaks once, but their randomizer may be chosen after seeing the earlier reports. It is **fully interactive** when the analyst may come back to the same person many times. The derivation allowed each person a different randomizer, and lower bounds of the same order also hold for sequentially interactive protocols (Duchi, Jordan & Wainwright 2018). Interaction does matter for some harder tasks, because Kasiviswanathan et al. (2008) give a learning problem that interactive local protocols solve with far fewer people than any non-interactive one.
+
+A $\delta$ helps little in the local model, unlike in the central one. Bun, Nelson & Stemmer (2019) turn any non-interactive local protocol that satisfies $(\varepsilon_0, \delta)$-DP into one that satisfies pure DP with similar accuracy. That is one reason why the local randomizers of this chapter are all pure.
 
 ### Example: how the gap grows
 
-@fig-trust-rr-gap plots the three curves at $\varepsilon = 1$: randomized response, the lower bound, and the central Laplace mechanism, whose error on a fraction is the count's $\sqrt2/\varepsilon$ divided by $n$. At $n = 1{,}000$, randomized response has standard deviation $3.03\times10^{-2}$, the central Laplace mechanism $\sqrt2/1000 = 1.41\times10^{-3}$, a ratio of 21. Dividing the two formulas, the ratio is $e^{1/2}\sqrt n/(\sqrt2(e - 1)) = 0.678\sqrt n$, so it grows like $\sqrt n$: at $n = 100{,}000$ the ratio is 215, and at $n = 10^7$ it is 2146. Each factor of 100 in $n$ multiplies it by $\sqrt{100} = 10$. For a standard deviation of 0.001 at $\varepsilon = 1$, randomized response needs $(e^{1/2}/((e - 1) \times 0.001))^2$, that is 920,674 people, and the central Laplace mechanism needs $\sqrt2/n \le 0.001$, that is 1,415 ([Exercise 3](../../book-exercises/part03-dp-foundations/08-trust-models.md#sec-sol-trust-3)). This is why local DP is used for the most frequent items of very large populations, and almost never for anything finer.
+@fig-trust-rr-gap plots the three curves at $\varepsilon = 1$: randomized response, the lower bound, and the central Laplace mechanism, whose error on a fraction is the count's $\sqrt2/\varepsilon$ divided by $n$. At $n = 1{,}000$, randomized response has standard deviation $3.03\times10^{-2}$, the central Laplace mechanism $\sqrt2/1000 = 1.41\times10^{-3}$, a ratio of 21. Dividing the two formulas, the ratio is $e^{1/2}\sqrt n/(\sqrt2(e - 1)) = 0.678\sqrt n$, so it grows like $\sqrt n$: at $n = 100{,}000$ the ratio is 215, and at $n = 10^7$ it is 2146. Each factor of 100 in $n$ multiplies it by $\sqrt{100} = 10$. For a standard deviation of 0.001 at $\varepsilon = 1$, randomized response needs $(e^{1/2}/((e - 1) \times 0.001))^2$, that is 920,674 people, and the central Laplace mechanism needs $\sqrt2/n \le 0.001$, that is 1,415 ([Exercise 3](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-3)). This is why local DP is used for the most frequent items of very large populations, and almost never for anything finer.
 
 ![Standard deviation of an estimated fraction at $\varepsilon = 1$, against the number of people. Randomized response (line and simulated dots) falls like $1/\sqrt n$ and stays a constant factor above the lower bound for any local protocol; the central Laplace mechanism falls like $1/n$.](figures/trust_rr_gap.svg){#fig-trust-rr-gap}
 
@@ -205,9 +212,9 @@ $k$-ary randomized response beats optimized unary encoding exactly when $k < 3e^
 
 $k$-ary randomized response spreads its noise over the domain. With many values the true one is reported with probability $\approx e^{\varepsilon_0}/k$, so the report is almost uniform and carries little signal. Its rare-value variance has $k$ in the numerator, so it grows linearly in $k$ (@fig-trust-frequency-oracles).
 
-Unary encoding avoids this by paying $\varepsilon_0$ for two bits, once, whatever $k$ is. Its variance does not depend on $k$, at the price of a $k$-bit report. Optimized unary encoding spends the budget asymmetrically: it keeps a 1 only half the time but almost never invents one. That helps because almost all bits of a one-hot vector are 0, so the noise that matters most is the false 1s, and those are the ones it suppresses. For large $k$, hashing schemes (local hashing, Hadamard response) reach the same variance with reports of $O(\log k)$ bits.
+Unary encoding avoids this by paying $\varepsilon_0$ for two bits, once, whatever $k$ is. Its variance does not depend on $k$, at the price of a $k$-bit report. Optimized unary encoding spends the budget asymmetrically: it keeps a 1 only half the time but almost never invents one. That helps because almost all bits of a one-hot vector are 0, so the noise that matters most is the false 1s, and those are the ones it suppresses. For large $k$, hashing reaches the same variance with much shorter reports: local hashing matches optimized unary encoding exactly, and Hadamard response matches it up to a constant factor (@sec-trust-heavy).
 
-RAPPOR shows what a deployment adds. Erlingsson, Pihur & Korolova (2014) deployed a unary encoding over a Bloom filter (a hashed bit vector) in Chrome. It adds a **permanent** randomized response, memoized per value, on top of a fresh one per report. The reason is composition. By basic composition ([Post-processing, group privacy and composition](02-properties.md)), releasing several outputs about the same record, each $\varepsilon_0$-DP, costs the sum of their levels, because the privacy losses of independent releases add. Without memoization, a user who reports the same value every day would pay $\varepsilon_0$ per day, and averaging the reports would reveal the value. With it, the daily reports are fresh noise around a fixed randomized value, and averaging can recover at most that randomized value.
+Unary encoding is also the core of RAPPOR, which Google deployed in Chrome (Erlingsson, Pihur & Korolova 2014). A system that collects every day needs more than a frequency oracle, and @sec-trust-repeated shows what RAPPOR adds.
 
 The variance still hides a $\sqrt n$. Every row of @tbl-trust-oracles must be divided by $n$, and the square root is again of order $1/\sqrt n$: these oracles are optimal local protocols, still with the gap of the previous section.
 
@@ -231,6 +238,172 @@ A keyboard app wants the frequency of each of $k = 128$ emoji at $\varepsilon_0 
 - What is $k$-ary randomized response at $k = 2$, and why does @tbl-trust-oracles give 0.921 for it? *(It is binary randomized response. The rare-value formula becomes $e^{\varepsilon_0}/(e^{\varepsilon_0} - 1)^2$, the randomized-response factor, which is $e/(e - 1)^2 = 0.921$ at $\varepsilon_0 = 1$.)*
 - In unary encoding, why does flipping the two bits of $x$ and $x'$ not cost $2\varepsilon_0$, given that each bit is a randomized response? *(The level $\varepsilon_0$ is defined as the log of the product of the two worst ratios, so it already accounts for both bits. The symmetric scheme gives each bit $\varepsilon_0/2$.)*
 
+## Large and unknown domains: hashing and heavy hitters {#sec-trust-heavy}
+
+### Context
+
+The frequency oracles of the previous section hit two limits in real telemetry. A unary report carries one bit per possible value, so a domain such as all web addresses would need reports of absurd length. And an oracle answers "how frequent is $v$?" only for a value $v$ that the analyst names in advance. A keyboard app that wants to learn new words, slang or common typos cannot name them beforehand. This section removes both limits. Hashing makes the report short, whatever the size of the domain. Growing the answer one prefix at a time then finds the frequent values without a dictionary, which is the **heavy hitters** problem.
+
+### Statement
+
+**Local hashing.** The idea is to shrink the domain before the randomizer sees it. Each person draws a hash function $h$ at random from a public family of functions that map the domain to $w$ buckets. The family is chosen so that two different values land in the same bucket with probability $1/w$ over the draw. The person sends the index of $h$ in the family, together with a $w$-ary randomized response of their bucket $h(x)$. That randomized response uses the probabilities $p$ and $q$ of $k$-ary randomized response, with $w$ in place of $k$. A report **supports** a value $v$ if the bucket it reports equals $h(v)$, computed with the sender's own hash.
+
+Let $C_v$ be the number of reports that support $v$, and $\hat g_v = (C_v/n - q)/(p - q)$ the oracle estimate of @eq-trust-oracle applied to them. The estimate of $f_v$ removes the collisions from $\hat g_v$, and for a rare value its variance has a closed form:
+$$\hat f_v = \frac{w\,\hat g_v - 1}{w - 1}, \qquad \operatorname{Var}\hat f_v\big|_{f_v = 0} = \frac{(e^{\varepsilon_0} + w - 1)^2}{n\,(w - 1)\,(e^{\varepsilon_0} - 1)^2}.$$ {#eq-trust-lh}
+The variance is smallest when the number of buckets is $w = e^{\varepsilon_0} + 1$. There it equals $4e^{\varepsilon_0}/(n(e^{\varepsilon_0} - 1)^2)$, the variance of optimized unary encoding, from a report of about $\log_2 w$ bits plus the index of the hash.
+
+**Heavy hitters by growing prefixes.** Write each value as a string of $L$ symbols from an alphabet of $A$ symbols, and split the people at random into $L$ groups of equal size. Group $\ell$ then reports the first $\ell$ symbols of its string, the **prefix** of length $\ell$, through local hashing. The analyst starts from the $A$ prefixes of length 1. At each level the analyst keeps the candidates whose estimate is above a threshold, extends each kept prefix by every symbol, and moves on to the next group. A frequent string has frequent prefixes, so it can survive every level.
+
+The threshold is set to control false alarms. Suppose that $c_\ell$ candidates are tested at level $\ell$, and that $s$ is the standard deviation of the estimate of a value nobody holds. Write $\Phi(z)$ for the probability that a standard normal variable is below $z$. Then the threshold
+$$\tau_\ell = z_\ell\,s, \qquad\text{where}\quad c_\ell\,\big(1 - \Phi(z_\ell)\big) = \beta,$$ {#eq-trust-threshold}
+admits on average about $\beta$ false candidates at level $\ell$.
+
+### Derivation
+
+The estimator of @eq-trust-lh undoes two shrinkings of the signal, one by the randomized response and one by the collisions, and each is a use of Fact 1. Steps 1 to 5 do this and find the best $w$. Steps 6 and 7 justify the search.
+
+1. **The own bucket.** A person who holds $v$ hashes it to $h(v)$ for sure. A person who holds another value lands in the bucket $h(v)$ with probability $1/w$ over the draw of $h$, by the collision property of the family. So the probability that a person's own bucket is $h(v)$ is
+$$g_v = f_v + \frac{1 - f_v}{w} = \frac1w + f_v\,\frac{w - 1}{w}.$$
+2. **The randomized response (Fact 1).** A report equals $h(v)$ with probability $p$ when the own bucket is $h(v)$, and with probability $q$ otherwise, because the randomized response sends every other bucket with probability $q$. So the expected share of supporting reports is
+$$\mathbb E[C_v/n] = q + g_v(p - q),$$
+and by Fact 1 the oracle estimate $\hat g_v$ is unbiased for $g_v$.
+3. **The collisions (Fact 1 again).** Step 1 says $g_v$ is linear in $f_v$, with offset $1/w$ and slope $(w - 1)/w$. Subtracting the offset and dividing by the slope gives $\hat f_v = (w\hat g_v - 1)/(w - 1)$, unbiased, with $(w/(w-1))^2$ times the variance of $\hat g_v$.
+4. **The variance of a rare value.** At $f_v = 0$, step 1 gives $g_v = 1/w$. With $p - q = (e^{\varepsilon_0} - 1)/(e^{\varepsilon_0} + w - 1)$ and $q = 1/(e^{\varepsilon_0} + w - 1)$, a report then supports $v$ with probability $q + (p - q)/w$, which simplifies to exactly $1/w$. Each support indicator is therefore a Bernoulli variable with variance $(w - 1)/w^2$. Three scalings turn this into the variance of $\hat f_v$. Fact 2 divides it by $n$, step 2 divides it by $(p - q)^2$, and step 3 multiplies it by $w^2/(w - 1)^2$, which leaves $1/(n(w - 1)(p - q)^2)$. Substituting $p - q$ then gives @eq-trust-lh.
+5. **The best width.** Write $u = w - 1$. Divided by $u$, the numerator of @eq-trust-lh is $(e^{\varepsilon_0} + u)^2/u = e^{2\varepsilon_0}/u + 2e^{\varepsilon_0} + u$. The two terms $e^{2\varepsilon_0}/u$ and $u$ have the fixed product $e^{2\varepsilon_0}$. A sum of two positive numbers with a fixed product is smallest when they are equal, here at $u = e^{\varepsilon_0}$, where the whole expression is $4e^{\varepsilon_0}$.
+6. **The threshold.** The estimate of a value nobody holds has mean 0 and standard deviation $s$. It is an average over many independent reports, so by the central limit theorem it is close to normal, and it exceeds $z\,s$ with probability about $1 - \Phi(z)$. By linearity of expectation, the expected number of false alarms among $c_\ell$ such candidates is $c_\ell(1 - \Phi(z))$, and @eq-trust-threshold sets it to $\beta$.
+7. **Why prefixes work.** Each person who holds a string also holds each of its prefixes. So the frequency of a prefix is the sum of the frequencies of all strings that start with it, which is at least the frequency of each of them. A string whose frequency is clearly above every level's threshold therefore has every prefix above its level's threshold too. Each level tests $A$ extensions of each kept prefix, so the number of candidates stays near $A$ times the number of frequent prefixes, instead of the $A^L$ strings of the whole domain.
+
+### Interpretation
+
+Hashing separates the size of the report from the size of the domain. @fig-trust-local-hashing plots @eq-trust-lh against $w$. Too few buckets waste the signal on collisions, and too many spread the randomized response thin, as $k$-ary randomized response does for large $k$. At $w = e^{\varepsilon_0} + 1$ local hashing matches optimized unary encoding exactly, and at the nearest integer almost exactly. At $\varepsilon_0 = 4$, with $w = 56$ buckets, a report needs $\log_2 56 \approx 6$ bits instead of a bit for every value. The price of hashing is the server's work, because it must evaluate each report's hash at every candidate. Hadamard response (Acharya, Sun & Zhang 2019) replaces the random hash by the rows of a Hadamard matrix, which makes that work fast at the cost of a constant factor in variance.
+
+![$n$ times the variance of a rare value's frequency under local hashing, against the number of buckets $w$, at $\varepsilon_0 = 1$ and $\varepsilon_0 = 4$. The dots mark the best width $w = e^{\varepsilon_0} + 1$, where local hashing equals optimized unary encoding (dotted lines).](figures/trust_local_hashing.svg){#fig-trust-local-hashing}
+
+The prefix search needs no list of candidates, which is the point of the TreeHist protocol of Bassily et al. (2017). Testing every string directly would need a threshold that grows with the size of the domain, because @eq-trust-threshold must keep the false alarms of all $A^L$ strings below $\beta$. Splitting the people into $L$ groups has a cost too, because each level sees only $n/L$ people, so its standard deviation is $\sqrt L$ times larger. The estimates also depend on the hash family being large enough. When the family is small, a particular heavy value collides with a particular candidate more or less often than $1/w$ by chance, which biases that candidate's estimate. The example below uses 16,384 hash functions for that reason.
+
+There is a floor that no protocol avoids. Bassily & Smith (2015) show that over a domain of $k$ values, the largest error over all frequencies can be made of order $\sqrt{\ln k / n}/\varepsilon_0$ with short reports, and that no local protocol does better. No local protocol can reliably tell values rarer than that from absent ones, which is the $\sqrt n$ gap again, now with a factor $\sqrt{\ln k}$ for searching a large domain.
+
+Deployed systems use these pieces. RAPPOR's analysis tests a list of candidate strings that the analyst supplies (Erlingsson, Pihur & Korolova 2014), so it cannot discover new values. Apple's Differential Privacy Team (2017) describes a **count-mean sketch**. It hashes each value with one of several hash functions and sends a unary encoding of the bucket, and its Hadamard variant sends a single bit. To discover new words, Apple's **sequence fragment puzzle** has each device send its word through the sketch, together with a privatized fragment of the word and the fragment's position. The fragment carries an 8-bit hash of the whole word, the "puzzle piece", so the server can join frequent fragments with the same hash into candidate words. It is the same idea as growing prefixes, which never searches the whole domain at once.
+
+### Example: words nobody listed
+
+A million people each type one of 200 six-letter words over a 26-letter alphabet, with Zipf frequencies, and report at $\varepsilon_0 = 4$. The domain has $26^6 = 308{,}915{,}776$ strings, far too many to test one by one. Local hashing uses $w = 56$ buckets, the integer nearest $e^4 + 1 = 55.60$. Each of the six levels sees about 166,666 people, so the estimate of an absent prefix has standard deviation $6.75\times10^{-4}$. The first level tests the 26 one-letter prefixes, and no later level tests more than 2,054 candidates. At the last level the threshold of @eq-trust-threshold with $\beta = 0.1$ is $3.80$ standard deviations, a frequency of 0.0026.
+
+The search returns 50 strings, and all 50 are real words. The rarest word found has frequency 0.0033. The most frequent word missed has frequency 0.0035, just above the threshold, lost to noise at one of the six levels (@fig-trust-heavy-hitters). Testing all $26^6$ strings directly would need a threshold of 6.18 standard deviations to keep $\beta = 0.1$. At the prefix search's 3.80 standard deviations, it would raise about 22,418 false alarms.
+
+![The 200 words of the example by rank, with their true frequency (circles, filled when found) and the estimate the prefix search returns for each word it finds (crosses). The dashed line is the threshold at the last level. Words above about 0.3% of users are found, with no dictionary.](figures/trust_heavy_hitters.svg){#fig-trust-heavy-hitters}
+
+### Check yourself
+
+- Why must each person draw their own hash function, rather than everyone using one fixed hash? *(With one fixed hash, every value that collides with $v$ adds its whole frequency to $v$'s estimate, and no debiasing can remove a bias that depends on unknown frequencies. With a fresh hash per person, a collision happens with probability $1/w$ per person, which averages to the known offset of step 1.)*
+- The frequency of a prefix is at least that of every string that starts with it. What can still make the search miss a frequent string? *(Noise. The string is lost if its prefix's estimate falls below the threshold at any one of the $L$ levels, which is what happened to the word of frequency 0.0035.)*
+
+## Numbers in one bit: local mean estimation {#sec-trust-mean}
+
+### Context
+
+Telemetry also collects numbers, such as the minutes spent in an app or the battery a process drains. Each person holds a number $x_i$ between 0 and a known bound $m$, and the analyst wants their mean, written $\mu = \frac1n\sum_ix_i$. This section asks two questions. How accurate can a locally private mean be? And how many bits must each person send? The second question matters on a phone, where every upload costs battery and data.
+
+### Statement
+
+**Laplace reports.** Each person sends $Y_i = x_i + \mathrm{Lap}(m/\varepsilon_0)$, and the analyst averages the reports. This is an $\varepsilon_0$-DP local randomizer, and the average is unbiased with
+$$\operatorname{sd}(\hat\mu) = \frac{\sqrt2\,m}{\varepsilon_0\sqrt n}.$$
+
+**One bit.** Ding, Kulkarni & Yekhanin (2017) send a single bit instead. Its probability of being 1 rises in a straight line with $x_i$, from the lie probability of randomized response at $x_i = 0$ to its truth probability at $x_i = m$:
+$$\Pr[Y_i = 1] = \frac{1}{e^{\varepsilon_0} + 1} + \frac{x_i}{m}\cdot\frac{e^{\varepsilon_0} - 1}{e^{\varepsilon_0} + 1}.$$ {#eq-trust-onebit}
+This is an $\varepsilon_0$-DP local randomizer. The estimate
+$$\hat\mu = \frac mn\sum_{i=1}^n\frac{(e^{\varepsilon_0} + 1)Y_i - 1}{e^{\varepsilon_0} - 1}$$
+is unbiased, and whatever the data,
+$$\operatorname{sd}(\hat\mu) \le \frac{m}{2\sqrt n}\cdot\frac{e^{\varepsilon_0} + 1}{e^{\varepsilon_0} - 1}.$$ {#eq-trust-onebit-sd}
+
+### Derivation
+
+1. **The Laplace reports.** One person's value can change by at most $m$, so the sensitivity of a single record is $m$, and the Laplace mechanism with scale $m/\varepsilon_0$ is $\varepsilon_0$-DP. Each report has mean $x_i$ and variance $2m^2/\varepsilon_0^2$, the variance of $\mathrm{Lap}(m/\varepsilon_0)$. By Fact 2 the average has variance $2m^2/(n\varepsilon_0^2)$.
+2. **The bit is private.** By @eq-trust-onebit, the probability of a 1 lies between $1/(e^{\varepsilon_0} + 1)$ and $e^{\varepsilon_0}/(e^{\varepsilon_0} + 1)$ for every value. So for any two values, the ratio of the two probabilities of a 1 is at most $e^{\varepsilon_0}$. The probability of a 0 is one minus the probability of a 1, so it lies in the same interval and obeys the same bound. That is @eq-trust-ldp for both outcomes.
+3. **The estimate is unbiased (Fact 1).** The mean of $Y_i$ is $a + b\,x_i$ with offset $a = 1/(e^{\varepsilon_0} + 1)$ and slope $b = (e^{\varepsilon_0} - 1)/(m(e^{\varepsilon_0} + 1))$. So Fact 1 says that $(Y_i - a)/b$ is unbiased for $x_i$, and multiplying it out gives the summand of $\hat\mu$. Averaging these unbiased estimates of the $x_i$ then gives an unbiased estimate of their mean.
+4. **Its variance (Fact 2).** Each $Y_i$ is a Bernoulli variable with some probability $\pi_i$, so its variance $\pi_i(1 - \pi_i)$ is at most $1/4$. The summand scales $Y_i$ by $m(e^{\varepsilon_0} + 1)/(e^{\varepsilon_0} - 1)$, which multiplies that variance by the square of the factor. The average then divides the sum of $n$ such variances by $n^2$, and taking the square root gives @eq-trust-onebit-sd.
+
+### Interpretation
+
+Both estimates have error of order $m/(\varepsilon_0\sqrt n)$ for small $\varepsilon_0$. That is the same $\sqrt n$ gap between local and central error that counting showed, since a central mean has error of order $m/(\varepsilon_0 n)$. Duchi, Jordan & Wainwright (2018) show that no local protocol does better than this order. So the choice between the two is about constants and communication.
+
+On communication the bit wins outright. A Laplace report has to carry the value plus its noise, at least about $\log_2 m$ bits at the precision of the data, while the one-bit report carries one bit. On accuracy, the worst case of @eq-trust-onebit-sd is 0.765 times the Laplace standard deviation at $\varepsilon_0 = 1$, and the ratio tends to $1/\sqrt2 = 0.707$ as $\varepsilon_0$ shrinks. The two are equal at $\varepsilon_0 = 2.324$, and above that the Laplace reports are more accurate, because as $\varepsilon_0$ grows the bit's error levels off at $m/(2\sqrt n)$, while the Laplace error keeps falling like $1/\varepsilon_0$.
+
+Both estimates need the bound $m$ to hold. A device whose value exceeds $m$ must clip it to $m$ before randomizing, which biases the mean downward when many people exceed the bound. So $m$ is a design choice, fixed before collection, and a bound set too low trades privacy noise for bias.
+
+The bit is also the building block of Microsoft's telemetry, which @sec-trust-repeated turns into a protocol that reports every six hours.
+
+### Example: minutes in an app
+
+A million people use an app for between 0 and $m = 1{,}440$ minutes a day, the minutes in a day, with a mean of 82.74 minutes. At $\varepsilon_0 = 1$, the exact standard deviation of the one-bit estimate is 1.420 minutes, and @eq-trust-onebit-sd bounds it by 1.558. In 200 simulated collections the estimates average 82.61 minutes with a standard deviation of 1.415. Laplace reports at the same $\varepsilon_0$ would give a standard deviation of 2.036 minutes, and each would need about 11 bits for the value alone, since $2^{11} = 2{,}048$.
+
+### Check yourself
+
+- What does a person who never uses the app send? *(A 1 with probability $1/(e^{\varepsilon_0} + 1)$, which is exactly the lie probability of randomized response for a bit that is 0. At $\varepsilon_0 = 1$ that is $1/(e + 1) = 0.27$.)*
+- Why must the bound $m$ be fixed before collection, and not taken as the largest value in the data? *(The randomizer of every person uses $m$. If $m$ were the largest value, one person's record would change the probabilities of everyone's reports, and the guarantee of @eq-trust-ldp, which is about one report and one record, would no longer hold.)*
+
+## Collecting every day: memoization {#sec-trust-repeated}
+
+### Context
+
+Telemetry asks the same question every day, for example which home page is set, how long the app was used or which emoji was typed. The guarantee of @eq-trust-ldp is about one report, and basic composition ([Post-processing, group privacy and composition](02-properties.md)) says how the cost of many reports adds up. If a person sends $T$ reports about the same record, each $\varepsilon_0$-DP, the reports together are $T\varepsilon_0$-DP, because the privacy losses of independent releases add. This section shows that this is not just a loose bound but a real leak, and then shows the two fixes that deployments use. The first is **memoization**, which reuses one randomized answer. The second is **$\alpha$-point rounding**, which makes memoization work for values that drift.
+
+### Statement
+
+**Fresh reports leak.** Suppose a person reports the same bit every day by randomized response at level $\varepsilon_0$, with fresh randomness each time. After $T$ days, of which $k$ reported a 1, the likelihood ratio between "the bit is 1" and "the bit is 0" is
+$$\frac{\Pr[\text{reports} \mid 1]}{\Pr[\text{reports} \mid 0]} = e^{\varepsilon_0(2k - T)}.$$
+The majority of the $T$ reports is then wrong with a probability that falls exponentially in $T$.
+
+**Memoization.** The person draws one **permanent** randomized response for each value, once, and sends it, possibly through a second randomizer with fresh randomness each day. Then all the reports of a value that does not change are together $\varepsilon_\infty$-DP, where $\varepsilon_\infty$ is the level of the permanent response. In RAPPOR, the value is a Bloom filter (a bit vector in which $h$ hash functions each set one bit), and the permanent response replaces each bit by a fair coin with probability $f$. Its level is
+$$\varepsilon_\infty = 2h\ln\frac{1 - f/2}{f/2}.$$ {#eq-trust-rappor}
+
+**Rounding with a secret offset.** For values in $[0, m]$, each person draws two bits once and keeps them: $b_0$ by @eq-trust-onebit at $x = 0$ and $b_m$ by @eq-trust-onebit at $x = m$. The person also draws a secret offset $\alpha$, uniform on $[0, m)$, once. In each round $t$ they send $b_m$ if $x_t + \alpha \ge m$ and $b_0$ otherwise. Ding, Kulkarni & Yekhanin (2017) call this **$\alpha$-point rounding**, and three things hold:
+
+1. Every single report has exactly the distribution of @eq-trust-onebit, so each round's estimate $\hat\mu$ is unbiased with the variance of @eq-trust-onebit-sd.
+2. The reports depend on the data only through the pattern of days on which $x_t + \alpha \ge m$. With probability
+$$\Pr[b_0 = b_m] = \frac{2e^{\varepsilon_0}}{(e^{\varepsilon_0} + 1)^2}$$
+the two kept bits agree, and then every report is the same bit, whatever the data.
+3. A person whose value stays within a band of width $d$ can change their report only when the threshold $m - \alpha$ falls inside the band. That happens with probability $d/m$, and even then the report changes only if the two bits differ.
+
+**Output perturbation.** Flipping each sent bit with a small probability $\gamma$ hides when a report changes. One round then has level
+$$\varepsilon_0' = \ln\frac{(1 - 2\gamma)\frac{e^{\varepsilon_0}}{e^{\varepsilon_0} + 1} + \gamma}{(1 - 2\gamma)\frac{1}{e^{\varepsilon_0} + 1} + \gamma},$$ {#eq-trust-op}
+and two sequences of values that, for every offset, select different kept bits on at most $D$ days give transcripts whose likelihood ratio is at most $((1 - \gamma)/\gamma)^D$.
+
+### Derivation
+
+1. **Fresh reports.** Each report equals the bit with probability $t = e^{\varepsilon_0}/(1 + e^{\varepsilon_0})$, independently. If the bit is 1, a particular sequence with $k$ ones has probability $t^k(1 - t)^{T - k}$, and if it is 0, the probability is $(1 - t)^kt^{T - k}$. The ratio is $(t/(1 - t))^{2k - T}$, and $t/(1 - t) = e^{\varepsilon_0}$. The majority is wrong when more than half the reports are flipped, a binomial tail with flip probability $1 - t < \frac12$, which falls exponentially in $T$ by the Chernoff bound ([Concentration inequalities](../part01-prerequisites/02-concentration.md)).
+2. **Memoization is post-processing.** All the reports of an unchanged value are a function of the permanent response and of fresh randomness that does not depend on the data. By post-processing, they are as private as the permanent response alone.
+3. **RAPPOR's level.** The permanent response keeps each bit of the Bloom filter with probability $1 - f$ and otherwise replaces it by a fair coin. So a bit that is 1 is reported as 1 with probability $1 - f/2$, and a bit that is 0 with probability $f/2$. Each bit's ratio is therefore at most $(1 - f/2)/(f/2)$. Two values set at most $h$ bits each, so their filters differ in at most $2h$ bits. The other bits have the same distribution under both values and cancel, as in unary encoding, which leaves a product of at most $2h$ ratios. Taking the logarithm gives @eq-trust-rappor.
+4. **The rounding is unbiased.** For a fixed value $x$, the offset $\alpha$ is uniform on $[0, m)$, so the bit for $m$ is chosen with probability
+$$\Pr[x + \alpha \ge m] = \Pr[\alpha \ge m - x] = \frac xm.$$
+The person therefore sends $b_m$ with probability $x/m$ and $b_0$ otherwise, and the kept bits do not depend on $\alpha$. So the report is 1 with probability $(1 - x/m)/(e^{\varepsilon_0} + 1) + (x/m)\,e^{\varepsilon_0}/(e^{\varepsilon_0} + 1)$, which is @eq-trust-onebit. That proves item 1.
+5. **What the reports depend on.** The bits $b_0$, $b_m$ and the offset $\alpha$ are drawn without looking at the data. Each report is then $b_0$ or $b_m$, chosen by whether $x_t + \alpha \ge m$. That proves the first half of item 2. Both kept bits are 1 with probability $e^{\varepsilon_0}/(e^{\varepsilon_0} + 1)^2$, the product of their two probabilities of a 1. Both are 0 with the same probability, so they agree with probability $2e^{\varepsilon_0}/(e^{\varepsilon_0} + 1)^2$.
+6. **Changes.** If every $x_t$ lies in a band $(a, a + d]$, then $x_t + \alpha \ge m$ switches between days only if the threshold $m - \alpha$ lies in the band. Since $m - \alpha$ is uniform on $(0, m]$, that has probability $d/m$. That proves item 3.
+7. **Output perturbation.** After the flip, a bit that was 1 with probability $\pi$ is 1 with probability $\gamma + (1 - 2\gamma)\pi$, which still rises in a straight line with $\pi$. The ratio is largest between the two ends of @eq-trust-onebit, which gives @eq-trust-op. For whole transcripts, fix the kept bits and the offset. On a day where the two sequences send the same kept bit, the sent bit has the same distribution under both and the day cancels. On a day where they differ, the sent bit is the kept bit with probability $1 - \gamma$ and the other with probability $\gamma$, so the day's ratio is at most $(1 - \gamma)/\gamma$. The flips are independent across days, so the ratios multiply. The bound holds for every value of the kept bits and the offset, because the number of differing days is at most $D$ for every offset, so it also holds for their average.
+
+### Interpretation
+
+Composition is tight here, not just an upper bound. At $\varepsilon_0 = \ln 3$, a single report leaves an observer guessing wrong a quarter of the time. After 100 days with 75 ones, the likelihood ratio is $3^{50}$, about $7.18\times10^{23}$. The bit is then no longer in doubt (@fig-trust-repeated, left), because averaging removes fresh noise.
+
+Memoization caps the cost, but only for a value that never changes. A value that changes gets a new permanent response, which costs another $\varepsilon_\infty$, and a value that drifts every day, such as a person's age in days, gets a new one every day. The same happens when the collector asks the same question in another form, for example a value and that value plus one, because the two answers are different values with their own permanent responses, and together they reveal the value twice. RAPPOR's homepage collection used $h = 2$ and $f = 0.75$, so @eq-trust-rappor gives $\varepsilon_\infty = 4\ln(5/3) = 2.043$.
+
+RAPPOR's second layer protects something that $\varepsilon_\infty$ does not measure. The permanent response is a fixed random bit string, and a fixed string identifies its sender as well as a cookie does, because the collector could link all the reports that carry it. So RAPPOR passes the permanent response through a fresh randomized response, an **instantaneous** one, before each report. Each report then looks different, and one report, with both layers, is $\varepsilon_1$-DP with $\varepsilon_1 = 0.5343$ for the homepage parameters, whose instantaneous layer sends 1 with probability 0.75 for a permanent 1 and 0.5 for a permanent 0. That is the value the RAPPOR paper reports ([Exercise 9](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-9) derives it). The instantaneous layer makes reports hard to link, which is a different promise from differential privacy.
+
+Drifting values pose a dilemma that $\alpha$-point rounding resolves. Rounding values to coarse bins before memoizing would keep each person's report fixed while the value stays in its bin. But narrow bins change often and cost new permanent responses, while wide bins add rounding error to every report. The $\alpha$-point scheme uses one bin as wide as the whole range and still adds no bias, because the rounding itself is random, with a secret offset per person. What leaks is the days on which a person's value crosses their secret threshold, and only for the people whose two kept bits differ. Output perturbation then blurs those days, at a cost of $\ln((1 - \gamma)/\gamma)$ for each day the kept bit changes.
+
+So the longitudinal guarantee is about patterns of behaviour, not about each round. Ding, Kulkarni & Yekhanin (2017) state it that way: a person whose behaviour stays within a band reveals nothing new as rounds go by, and a person whose behaviour changes reveals roughly when it changed. Microsoft deployed this protocol in Windows 10 to collect the time spent in each app (their §6). It used $\varepsilon_0 = 1$ every six hours and $\gamma = 0.2$. For these values @eq-trust-op gives 0.569 per round. The paper reports 0.686, a larger and so more conservative bound, and does not explain the difference.
+
+![Left: the probability that the majority of $T$ daily reports of a fixed bit is wrong, at $\varepsilon_0 = \ln 3$ per report. With fresh randomness it falls exponentially; with a memoized report it stays at 0.25. Right: the fraction of people whose report ever changes in 30 days when their daily minutes in an app wobble around their own level, at $\varepsilon_0 = 1$. With $\alpha$-point rounding (formula and simulation) almost nobody's report changes; with a fresh one-bit report almost everybody's does.](figures/trust_repeated.svg){#fig-trust-repeated}
+
+### Example: a month of minutes
+
+Return to the app of @sec-trust-mean, with $m = 1{,}440$ minutes and $\varepsilon_0 = 1$. A person's two kept bits agree with probability $2e/(e + 1)^2 = 0.3932$, and for those people nothing in the reports ever depends on their usage. Suppose that each person's daily minutes wobble uniformly by up to 15 minutes either side of their own level for 30 days. By item 3, the fraction of people whose report ever changes is $(1 - 0.3932)$ times the expected range of their 30 daily values, the largest minus the smallest, divided by $m$. That is 0.0118, and a simulation of 100,000 people gives 0.0119, but with a fresh one-bit report every day it is 1.0000. Accuracy is unchanged: on one simulated day with a million people, the $\alpha$-point estimate is 82.17 minutes against that day's true mean of 82.68, a fresh draw of the population, well within the standard deviation of 1.42 minutes from @sec-trust-mean. With output perturbation at $\gamma = 0.2$, each day on which a person's kept bit changes costs $\ln(0.8/0.2) = 1.386$.
+
+### Check yourself
+
+- A RAPPOR user sets a new homepage at the start of each month for a year. What does basic composition give for the year? *(Twelve distinct values, each with its own permanent response at $\varepsilon_\infty = 2.043$, so at most $12 \times 2.043 = 24.5$.)*
+- Under $\alpha$-point rounding, why does the collector learn nothing about a person whose two kept bits agree? *(Every report is then that one bit, whatever the values $x_t$ and the offset are, so the reports have the same distribution under every sequence of values.)*
+
 ## The shuffle model and amplification by shuffling
 
 ### Context
@@ -239,7 +412,7 @@ The local model loses a factor $\sqrt n$ because each report must hide its owner
 
 ### Statement
 
-The claim is that anonymity amplifies privacy: the more people's reports the target's report is mixed with, the less the multiset reveals about the target, so the central $\varepsilon$ falls as $n$ grows. Erlingsson et al. (2019) showed that shuffling $\varepsilon_0$-DP reports gives central $(\varepsilon, \delta)$-DP with $\varepsilon = O(\varepsilon_0\sqrt{\ln(1/\delta)/n})$ for $\varepsilon_0 < 1$. The bound to compute with is Theorem 3.1 of Feldman, McMillan & Talwar (2021), quoted here with the range spaces of the randomizers left out. In it, $[n] = \{1, \dots, n\}$ and $z_{1:i-1}$ is the list of the first $i - 1$ outputs:
+The claim is that anonymity amplifies privacy: the more people's reports the target's report is mixed with, the less the multiset reveals about the target, so the central $\varepsilon$ falls as $n$ grows. Erlingsson et al. (2019) showed that shuffling $\varepsilon_0$-DP reports gives central $(\varepsilon, \delta)$-DP with $\varepsilon = O(\varepsilon_0\sqrt{\ln(1/\delta)/n})$ when $\varepsilon_0 < \frac12$ (their Theorem 7). That condition excludes the regime that matters most in practice, a large $\varepsilon_0$ that makes each report nearly the truth, and the later theorem below covers it. The bound to compute with is Theorem 3.1 of Feldman, McMillan & Talwar (2021), quoted here with the range spaces of the randomizers left out. In it, $[n] = \{1, \dots, n\}$ and $z_{1:i-1}$ is the list of the first $i - 1$ outputs:
 
 > For any domain $\mathcal D$, let $\mathcal R^{(i)}$ for $i \in [n]$ be a sequence of algorithms such that $\mathcal R^{(i)}(z_{1:i-1}, \cdot)$ is an $\varepsilon_0$-DP local randomizer for all values of auxiliary inputs $z_{1:i-1}$. Let $\mathcal A_s$ be the algorithm that, given a dataset $x_{1:n}$, samples a uniform random permutation $\pi$ over $[n]$, then sequentially computes $z_i = \mathcal R^{(i)}(z_{1:i-1}, x_{\pi(i)})$ for $i \in [n]$ and outputs $z_{1:n}$. Then for any $\delta \in [0, 1]$ such that $\varepsilon_0 \le \log\big(\frac{n}{16\log(2/\delta)}\big)$, $\mathcal A_s$ is $(\varepsilon, \delta)$-DP, where
 
@@ -288,13 +461,15 @@ To turn this into $(\varepsilon, \delta)$, the proof uses the **hockey-stick div
 
 You want central $\varepsilon = 1$ at $\delta = 10^{-6}$. The right-hand side of @eq-trust-fmt increases with $\varepsilon_0$, so the largest allowed $\varepsilon_0$ is where it equals 1, and bisection finds it: halve an interval of $\varepsilon_0$ values, keeping the half where the bound crosses 1. Each person may randomize at $\varepsilon_0 = 3.504$ when $n = 10^4$, at $5.701$ when $n = 10^5$, and at $7.992$ when $n = 10^6$. At $\varepsilon_0 = 7.992$, a single report is almost the true value: $k$-ary randomized response over 8 values keeps the truth with probability $e^{7.992}/(e^{7.992} + 7) = 0.998$. Yet the shuffled collection is $(1, 10^{-6})$-DP. @sec-trust-code shows what this buys in accuracy.
 
+The same numbers describe the protocol of Cheu et al. (2019) for adding up bits. Randomized response at level $\varepsilon_0$ is the same as sending a uniformly random bit with probability $2/(e^{\varepsilon_0} + 1)$ and the true bit otherwise, because a random bit equals the truth half the time. At $\varepsilon_0 = 7.992$ that probability is $6.76\times10^{-4}$. So among a million people only about 676 send a random bit, and everyone else tells the truth. The debiased count has a standard deviation of 18.4 people, against 960 for local randomized response at $\varepsilon_0 = 1$. The shuffle supplies the deniability that the individual reports no longer have, and Cheu et al. show that this approach has error of order $\sqrt{\ln(1/\delta)}/\varepsilon$ on the count, close to the central $1/\varepsilon$.
+
 ### Trust and its limits
 
 The amplification holds only as long as the shuffler does its one job, and three things can undo it.
 
 The first is collusion. If the shuffler colludes with the analyst, the analyst sees who sent what, and the guarantee falls back to the local $\varepsilon_0$ of each report, which may be large. Shuffling is a defence in depth, not a replacement for a reasonable $\varepsilon_0$.
 
-The second is fake senders. If the adversary controls $m$ of the senders, it knows their reports and can remove them from the multiset. Only the $n - m$ honest reports provide clones, so use $n - m$ in place of $n$ in @eq-trust-fmt ([Exercise 5](../../book-exercises/part03-dp-foundations/08-trust-models.md#sec-sol-trust-5)).
+The second is fake senders. If the adversary controls $m$ of the senders, it knows their reports and can remove them from the multiset. Only the $n - m$ honest reports provide clones, so use $n - m$ in place of $n$ in @eq-trust-fmt ([Exercise 5](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-5)).
 
 The third is side channels. The theorem covers only the multiset. Timing, message sizes and the number of messages per person must not reveal anything either, which is why real shufflers batch and pad.
 
@@ -353,11 +528,11 @@ A server aggregates a histogram from users through 100 clients and wants $(\vare
 ### Check yourself
 
 - Why can't each client simply add $\mathcal N(0, \sigma^2)$, the full central noise? *(It would work for privacy, but the sum would carry $n\sigma^2$ of variance, $n$ times too much: that is the local model again, with its $\sqrt n$ loss.)*
-- Is the sum of $n$ independent $\mathrm{Lap}(b/n)$ variables a $\mathrm{Lap}(b)$ variable? *(No. Each has variance $2(b/n)^2$, so the sum has variance $n \cdot 2b^2/n^2 = 2b^2/n$, not $2b^2$, and by the central limit theorem it is close to normal for large $n$. Splitting Laplace noise needs a different decomposition, as a difference of Gamma variables ([Exercise 6](../../book-exercises/part03-dp-foundations/08-trust-models.md#sec-sol-trust-6)).)*
+- Is the sum of $n$ independent $\mathrm{Lap}(b/n)$ variables a $\mathrm{Lap}(b)$ variable? *(No. Each has variance $2(b/n)^2$, so the sum has variance $n \cdot 2b^2/n^2 = 2b^2/n$, not $2b^2$, and by the central limit theorem it is close to normal for large $n$. Splitting Laplace noise needs a different decomposition, as a difference of Gamma variables ([Exercise 6](../../book-exercises/part03-dp-foundations/09-trust-models.md#sec-sol-trust-6)).)*
 
 ## Code: frequency estimation in four trust models {#sec-trust-code}
 
-The script [code/trust_models.py](../../code/part03-dp-foundations/trust_models.py) computes every number in this chapter and draws its figures. Each estimator, bound and accountant is a small typed function. The central comparison estimates a histogram over $k = 8$ values with Zipf frequencies ($f_v \propto 1/(v + 1)$) at the same central guarantee $(\varepsilon, \delta) = (1, 10^{-6})$ under replace in all four models. The four set-ups are:
+The script [code/trust_models.py](../../code/part03-dp-foundations/trust_models.py) computes every number in this chapter and draws its figures. Besides the comparison below, it runs the prefix search of @sec-trust-heavy on a million simulated people, the one-bit mean of @sec-trust-mean, and $\alpha$-point rounding over 30 simulated days. Each estimator, bound and accountant is a small typed function. The central comparison estimates a histogram over $k = 8$ values with Zipf frequencies ($f_v \propto 1/(v + 1)$) at the same central guarantee $(\varepsilon, \delta) = (1, 10^{-6})$ under replace in all four models. The four set-ups are:
 
 - **Central:** the Laplace mechanism on the counts, $\mathrm{Lap}(2/\varepsilon)$ per count (the histogram has $\ell_1$ sensitivity 2 under replace, since one count goes down by 1 and another up by 1). It is pure $\varepsilon$-DP, which is stronger than required.
 - **Distributed:** one-hot vectors plus Skellam shares through secure aggregation, with total variance from the Gaussian calibration at $\Delta_2 = \sqrt2$. The simulation draws the aggregated Skellam noise directly, which Poisson additivity makes exact.
@@ -383,6 +558,10 @@ uv run python code/part03-dp-foundations/trust_models.py
 | Distributed Gaussian, $(1, 10^{-6})$, 100 clients | $\sigma = 5.975$ total, 0.597 per client. $\varepsilon$ with 80%, 50%, 10% honest: 1.128, 1.455, 3.525 |
 | Matched $(1, 10^{-6})$, $k = 8$, $n = 10^3$ | Central $6.40\times10^{-5}$; distributed $2.86\times10^{-4}$; shuffle $9.35\times10^{-3}$; local $2.71\times10^{-2}$ |
 | Matched, $n = 10^4$ | Central $6.40\times10^{-7}$; distributed $2.86\times10^{-6}$; shuffle $4.88\times10^{-5}$; local $2.71\times10^{-3}$ |
+| Local hashing, rare value | $n\cdot\mathrm{Var}$ at the best $w$: 3.6917 ($\varepsilon_0 = 1$, $w = 4$) and 0.0760 ($\varepsilon_0 = 4$, $w = 56$); optimized unary 3.6827 and 0.0760 |
+| Heavy hitters, $n = 10^6$, $\varepsilon_0 = 4$, $26^6$ strings | 50 strings found, all real; rarest found 0.0033; threshold 0.0026; testing every string would raise 22,418 false alarms |
+| One-bit mean, $m = 1{,}440$, $n = 10^6$, $\varepsilon_0 = 1$ | sd 1.420 (bound 1.558; simulated 1.415); Laplace reports 2.036; equal accuracy at $\varepsilon_0 = 2.324$ |
+| Repeated collection | Fresh randomized response at $\ln 3$: 75 ones in 100 days give ratio $7.18\times10^{23}$; RAPPOR $\varepsilon_\infty = 2.043$, $\varepsilon_1 = 0.5343$; $\alpha$-point reports that ever change in 30 days at $\pm15$ minutes: 0.0119 (formula 0.0118) |
 | Matched, $n = 10^5$ | Central $6.40\times10^{-9}$; distributed $2.86\times10^{-8}$; shuffle $4.76\times10^{-7}$; local $2.71\times10^{-4}$ |
 
 : Output of the chapter's script (seed 0). The matched rows give the expected squared $\ell_2$ error of the histogram; the script also prints the simulated values, which agree within the Monte Carlo error of 200 runs. {#tbl-trust-results}
@@ -409,6 +588,11 @@ Every model's guarantee is the same $(\varepsilon, \delta)$, against a different
 - Chan, Shi & Song, "Optimal Lower Bound for Differentially Private Multi-Party Aggregation" (2012): the $\Omega(\sqrt n)$ lower bound for counting without a trusted party.
 - Erlingsson, Pihur & Korolova, "RAPPOR: Randomized Aggregatable Privacy-Preserving Ordinal Response" (CCS 2014): the first large deployment, with memoization.
 - Wang, Blocki, Li & Jha, "Locally Differentially Private Protocols for Frequency Estimation" (USENIX Security 2017): the frequency-oracle framework, optimized unary encoding and local hashing.
+- Bassily & Smith, "Local, Private, Efficient Protocols for Succinct Histograms" (STOC 2015): heavy hitters with short reports, and the matching lower bound on the error.
+- Bassily, Nissim, Stemmer & Thakurta, "Practical Locally Private Heavy Hitters" (NeurIPS 2017), and Bun, Nelson & Stemmer, "Heavy Hitters and the Structure of Local Privacy" (PODS 2018; ACM Transactions on Algorithms 2019): heavy-hitter protocols built by growing prefixes or hashing, and the conversion of approximate local protocols to pure ones.
+- Acharya, Sun & Zhang, "Hadamard Response: Estimating Distributions Privately, Efficiently, and with Little Communication" (AISTATS 2019): frequency estimation with the Hadamard matrix.
+- Apple Differential Privacy Team, "Learning with Privacy at Scale" (Apple Machine Learning Journal, 2017): the count-mean sketch, its Hadamard variant and the sequence fragment puzzle, as deployed in iOS and macOS.
+- Ding, Kulkarni & Yekhanin, "Collecting Telemetry Data Privately" (NeurIPS 2017): the one-bit mean, $\alpha$-point rounding with memoization, output perturbation, and Microsoft's deployment in Windows 10.
 - Bittau et al., "Prochlo: Strong Privacy for Analytics in the Crowd" (2017): the encode–shuffle–analyze architecture.
 - Cheu, Smith, Ullman, Zeber & Zhilyaev, "Distributed Differential Privacy via Shuffling" (EUROCRYPT 2019): the shuffle model as a model of computation, and its separations from local and central.
 - Erlingsson, Feldman, Mironov, Raghunathan, Talwar & Thakurta, "Amplification by Shuffling: From Local to Central Differential Privacy via Anonymity" (SODA 2019): the first amplification theorem.
@@ -430,6 +614,12 @@ Every model's guarantee is the same $(\varepsilon, \delta)$, against a different
 | Frequency oracle | $\hat f_v = (C_v/n - q)/(p - q)$, variance @eq-trust-oracle | Unbiased; exact variance |
 | $k$-ary randomized response | $p = e^{\varepsilon_0}/(e^{\varepsilon_0} + k - 1)$; rare variance $(e^{\varepsilon_0} + k - 2)/(n(e^{\varepsilon_0} - 1)^2)$ | Best for $k < 3e^{\varepsilon_0} + 2$ |
 | Optimized unary encoding | $p = \frac12$, $q = 1/(e^{\varepsilon_0} + 1)$; rare variance $4e^{\varepsilon_0}/(n(e^{\varepsilon_0} - 1)^2)$ | Independent of $k$; $k$-bit reports |
+| Local hashing | Estimate @eq-trust-lh; rare variance $(e^{\varepsilon_0} + w - 1)^2/(n(w - 1)(e^{\varepsilon_0} - 1)^2)$ | Best at $w = e^{\varepsilon_0} + 1$, where it equals optimized unary encoding |
+| Heavy hitters | Grow prefixes level by level; threshold $z\,s$ with $c\,(1 - \Phi(z)) = \beta$ | No dictionary needed; each level sees $n/L$ people |
+| One-bit mean | $\Pr[Y = 1]$ rises linearly in $x$ (@eq-trust-onebit); sd $\le \frac{m}{2\sqrt n}\frac{e^{\varepsilon_0} + 1}{e^{\varepsilon_0} - 1}$ | One bit per person; beats Laplace reports below $\varepsilon_0 = 2.324$ |
+| Fresh reports of one bit | Likelihood ratio $e^{\varepsilon_0(2k - T)}$ after $T$ days | Composition is tight: averaging reveals the bit |
+| Memoization (RAPPOR) | $\varepsilon_\infty = 2h\ln\frac{1 - f/2}{f/2}$ for all reports of one value | Every new value costs another $\varepsilon_\infty$ |
+| $\alpha$-point rounding | Send $b_m$ if $x_t + \alpha \ge m$, else $b_0$ | Unbiased; reports change only when the value crosses a secret threshold |
 | Clones | $R(x) = \frac{e^{-\varepsilon_0}}{2}R(x^0) + \frac{e^{-\varepsilon_0}}{2}R(x^1) + (1 - e^{-\varepsilon_0})\mathrm{LO}(x)$ | The intuition behind amplification |
 | Shuffling (Feldman, McMillan & Talwar 2021) | @eq-trust-fmt, for $\varepsilon_0 \le \ln(n/(16\ln(2/\delta)))$ | $\varepsilon \approx 8\tanh(\varepsilon_0/2)\sqrt{e^{\varepsilon_0}\ln(4/\delta)/n}$; 2.6–4.6 times loose at $n = 10^4$ |
 | Distributed Gaussian | $n$ shares $\mathcal N(0, \sigma^2/n)$ sum to $\mathcal N(0, \sigma^2)$ | $t$ colluders leave $\sigma\sqrt{(n - t)/n}$ |
@@ -443,6 +633,8 @@ Every model's guarantee is the same $(\varepsilon, \delta)$, against a different
 - For frequency estimation, use $k$-ary randomized response when $k < 3e^{\varepsilon_0} + 2$ and optimized unary encoding (or a hashing variant) otherwise. Memoize reports of values that do not change.
 - A shuffler lets each report use a large $\varepsilon_0$, roughly up to $\ln(\varepsilon^2n/\ln(1/\delta))$. Compute the central $\varepsilon$ numerically before deploying; the closed form is several times loose.
 - With distributed noise, decide how many clients may collude or drop out, and over-provision the noise for it.
+- For large or unknown domains, hash the value into about $e^{\varepsilon_0} + 1$ buckets, and find frequent values by growing prefixes rather than by testing a dictionary.
+- When you collect every day, memoize. Fresh noise on an unchanged value is averaged away, and a value that drifts needs $\alpha$-point rounding rather than a new permanent response each day.
 - Always state the trust model next to $(\varepsilon, \delta)$: the same numbers protect against different adversaries.
 
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/08-trust-models.md).
+**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/09-trust-models.md).

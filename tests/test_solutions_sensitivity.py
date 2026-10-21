@@ -1,4 +1,4 @@
-"""code/part03-dp-foundations/solutions_sensitivity.py runs and reproduces the numbers in book-exercises/part03-dp-foundations/06-sensitivity.md."""
+"""code/part03-dp-foundations/solutions_sensitivity.py runs and reproduces the numbers in book-exercises/part03-dp-foundations/07-sensitivity.md."""
 
 import subprocess
 import sys
@@ -40,6 +40,11 @@ def test_solutions_sensitivity_matches_page(tmp_path: Path) -> None:
         "x: A=0,100,100,100,100,100  S*=84.648 at k=1",
         "x': A=100,100,100,100,100,100  S*=100.000 at k=0",
         "ratio S*(x')/S*(x)=1.1814  e^β=1.1814",
+        # Exercise 8
+        "r=901: median |error|=0.1592  smooth Cauchy scale (Exercise 3)=1.599  r=501: 0.0783",
+        # Exercise 9
+        "lead for 0.95: replace=35  add/remove=18",
+        "lead 20: replace distance=9 pass=0.004052  add/remove distance=19 pass=0.9972",
     ):
         assert expected in out, expected
     assert list(tmp_path.iterdir()) == []

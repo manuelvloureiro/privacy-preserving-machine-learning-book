@@ -281,6 +281,41 @@ def gaussian_composed(sigma: float, k: int, delta: float) -> dict[str, float]:
     }
 
 
+# --- Laplace noise in many dimensions -------------------------------------------------------
+
+
+def per_step_epsilon(total: float, k: int, delta: float, route: str) -> float:
+    """The per-step ε0 at which k steps of ε0-DP compose to (total, δ), by bisection.
+
+    route is 'advanced' (the tanh form of advanced composition) or 'optimal' (Kairouz, Oh & Viswanath).
+    """
+    lo, hi = 0.0, total
+    for _ in range(100):
+        mid = (lo + hi) / 2
+        spent = advanced_epsilon_tanh(mid, k, delta) if route == "advanced" else kov_epsilon(mid, 0.0, k, delta)
+        lo, hi = (mid, hi) if spent <= total else (lo, mid)
+    return lo
+
+
+def dense_counts_rms(d: int, eps: float, delta: float) -> dict[str, float]:
+    """Root-mean-square error per count when one record moves each of d counts by up to 1.
+
+    Laplace with the whole vector's ℓ1 sensitivity d (pure DP); Laplace per count at the ε0 that advanced or
+    optimal composition allows for d steps; the Gaussian mechanism with ℓ2 sensitivity √d, exactly calibrated.
+    """
+    mu = 1.0
+    lo, hi = 1e-6, 50.0
+    for _ in range(200):  # largest μ = √d/σ with δ(ε) ≤ δ
+        mu = (lo + hi) / 2
+        lo, hi = (mu, hi) if gaussian_delta(mu, eps) <= delta else (lo, mu)
+    return {
+        "pure": math.sqrt(2) * d / eps,
+        "advanced": math.sqrt(2) / per_step_epsilon(eps, d, delta, "advanced"),
+        "optimal": math.sqrt(2) / per_step_epsilon(eps, d, delta, "optimal"),
+        "gaussian": math.sqrt(d) / lo,
+    }
+
+
 # --- Monte Carlo: Laplace steps and an adaptive analyst ------------------------------------
 
 
@@ -457,6 +492,18 @@ def print_table(rng: np.random.Generator) -> None:
             f"optimal={r['optimal']:.3f}  exact={r['exact']:.3f}"
         )
         print(f"    optimal / exact = {r['optimal'] / r['exact']:.1f}")
+
+    print("[Laplace noise on d dense counts, eps = 1, delta = 1e-5: rms error per count]")
+    for dd in (100, 1000, 10000):
+        r = dense_counts_rms(dd, 1.0, 1e-5)
+        print(
+            f"  d={dd}: pure Laplace={r['pure']:.1f}  Laplace + advanced={r['advanced']:.1f}  "
+            f"Laplace + optimal={r['optimal']:.1f}  Gaussian={r['gaussian']:.1f}"
+        )
+    print(
+        f"  d=1000 per-count eps0: advanced={per_step_epsilon(1.0, 1000, 1e-5, 'advanced'):.5f}  "
+        f"optimal={per_step_epsilon(1.0, 1000, 1e-5, 'optimal'):.5f}"
+    )
 
     print("[Exercises]")
     print(f"  ex1 eps=1: tanh form={rr_mean_loss(1.0):.4f}  DRV={drv_mean_bound(1.0):.4f}  eps^2/2=0.5000")

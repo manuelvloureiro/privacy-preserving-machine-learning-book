@@ -83,3 +83,15 @@ The solutions use the chapter's notation. To give differential privacy (DP), sto
 
 *Privacy cost is not proportional to training time. It is front-loaded by the conversion, grows like $\sqrt T$ over the useful range, and faster for very long runs.*
 :::
+
+## What microbatches cost {#sec-sol-dpsgd-7}
+
+> **Exercise 7.** **What microbatches cost.** Microbatched DP-SGD (@eq-dpsgd-microbatch) clips the mean gradient of groups of $m$ records fixed in advance, and adds noise $2\sigma C$ to keep the accountant's $\varepsilon$. For the running example ($q = 0.01$, $B = 100$, $C = 0.5$, $\sigma = 1$, 10,000 steps, $\varepsilon = 6.71$), find by what factor microbatches of $m = 2$ and $m = 4$ multiply the noise on the averaged update. Per-example DP-SGD with that much more noise would have what $\varepsilon$? Explain the factor 2 in the sensitivity with a two-record example. *Check: factors 4 and 8; per-example DP-SGD with $\sigma = 4$ and 8 has $\varepsilon = 1.035$ and 0.481.* *(Sensitivity of clipped means)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The factor.** The noise per coordinate is $2\sigma C/(B/m) = 2m\,\sigma C/B$, against $\sigma C/B$ for per-example clipping, a factor $2m$: 4 for $m = 2$ and 8 for $m = 4$.
+2. **The same noise, spent per example.** Per-example DP-SGD with noise multiplier 4 or 8 has exactly as much noise on its averaged update as these microbatched runs. The accountant gives it $\varepsilon = 1.035$ and 0.481. So microbatches of 4 buy the accuracy of a run at $\varepsilon \approx 0.5$ while paying $\varepsilon = 6.71$.
+3. **The factor 2.** Take a microbatch with one other record whose gradient is $Cu$ for a unit vector $u$, and add a record whose gradient is $-3Cu$. The mean changes from $Cu$ to $-Cu$, both of length $C$ after clipping, so the clipped mean moves by $2C$. Under per-example clipping the added record contributes its own clipped term, $-Cu$, and the sum moves by only $C$.
+
+*Microbatches make clipping cheaper by making it coarser, and the privacy accounting charges for that twice: fewer clipped terms carry the signal, and each moves by up to $2C$. Vectorized per-example gradients give the speed without the charge.*
+:::

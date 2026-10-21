@@ -158,7 +158,7 @@ This is the backbone: by week 7 you should be able to prove privacy of a new mec
 
 **Exercise:** implement Laplace, Gaussian (classic and analytic calibration), exponential and sparse vector from scratch; then plot ε after k-fold composition of the Gaussian mechanism under basic, advanced and optimal composition.
 
-**In the book:** [Differential privacy foundations](book-full/part03-dp-foundations/00-introduction.md), chapters 18–26, in the order of the bullets above, with the definition and its interpretations in one chapter. The mechanisms are implemented in the scripts of [The Laplace and Gaussian mechanisms](book-full/part03-dp-foundations/03-laplace-gaussian.md) and [Selection](book-full/part03-dp-foundations/05-selection.md), and the composition plot is in [Advanced and optimal composition](book-full/part03-dp-foundations/04-composition.md).
+**In the book:** [Differential privacy foundations](book-full/part03-dp-foundations/00-introduction.md), chapters 18–28, in the order of the bullets above, with the definition and its interpretations in one chapter. The mechanisms are implemented in the scripts of [The Laplace and Gaussian mechanisms](book-full/part03-dp-foundations/03-laplace-gaussian.md) and [Selection](book-full/part03-dp-foundations/05-selection.md), and the composition plot is in [Advanced and optimal composition](book-full/part03-dp-foundations/04-composition.md).
 
 ## Phase 4 — Privacy accounting: Rényi DP and its relatives (weeks 8–10)
 
@@ -209,7 +209,7 @@ This is the backbone: by week 7 you should be able to prove privacy of a new mec
 
 **Exercise:** write an RDP accountant for the Poisson-subsampled Gaussian and check it against Google's `dp_accounting` within 1%. Then, for DP-SGD with q = 0.01, σ = 1 and up to 10,000 steps, plot ε at δ = 10⁻⁵ from four accountants: RDP with Mironov's conversion, RDP with the improved conversion, the GDP central-limit approximation, and PLD, alongside advanced composition applied per step. The gap between the curves is the cost of choosing a loose accountant.
 
-**In the book:** [Privacy accounting](book-full/part04-privacy-accounting/00-introduction.md), chapters 27–35, in the order of the bullets above, with the moments accountant in the Rényi DP chapter. The RDP accountant is built in [Amplification by subsampling](book-full/part04-privacy-accounting/05-subsampling.md) and the four-way comparison is in [Choosing an accountant](book-full/part04-privacy-accounting/09-choosing-an-accountant.md). The check against `dp_accounting` is left to you, since the library is not a dependency of the repository.
+**In the book:** [Privacy accounting](book-full/part04-privacy-accounting/00-introduction.md), chapters 29–37, in the order of the bullets above, with the moments accountant in the Rényi DP chapter. The RDP accountant is built in [Amplification by subsampling](book-full/part04-privacy-accounting/05-subsampling.md) and the four-way comparison is in [Choosing an accountant](book-full/part04-privacy-accounting/09-choosing-an-accountant.md). The check against `dp_accounting` is left to you, since the library is not a dependency of the repository.
 
 ## Phase 5 — DP in ML and auditing (weeks 11–14)
 
@@ -257,7 +257,7 @@ The practical core: train with DP, reason about which ε is defensible, and audi
 
 **Exercise:** implement DP-SGD from scratch in PyTorch (per-sample clipping via `torch.func.vmap`), match Opacus on CIFAR-10 at ε = 8, then audit both models with your Phase 2 LiRA pipeline using inserted canaries.
 
-**In the book:** [Differential privacy in machine learning](book-full/part05-dp-ml/00-introduction.md), chapters 36–45, one per bullet above with three changes: per-sample gradients are a section of the DP-SGD chapter, DP-FTRL and matrix factorization get their own chapter, and PATE moves to the chapter on private prediction and in-context learning. DP-SGD is implemented from scratch in NumPy in [DP-SGD](book-full/part05-dp-ml/02-dp-sgd.md), on a small network that runs in seconds, and audited with inserted canaries in [Auditing private training](book-full/part05-dp-ml/10-auditing.md). The CIFAR-10 run and the comparison with Opacus are left to you, since PyTorch and Opacus are not dependencies of the repository.
+**In the book:** [Differential privacy in machine learning](book-full/part05-dp-ml/00-introduction.md), chapters 38–48, one per bullet above with three changes: per-sample gradients are a section of the DP-SGD chapter, DP-FTRL and matrix factorization get their own chapter, and PATE moves to the chapter on private prediction and in-context learning. DP-SGD is implemented from scratch in NumPy in [DP-SGD](book-full/part05-dp-ml/02-dp-sgd.md), on a small network that runs in seconds, and audited with inserted canaries in [Auditing private training](book-full/part05-dp-ml/10-auditing.md). The CIFAR-10 run and the comparison with Opacus are left to you, since PyTorch and Opacus are not dependencies of the repository.
 
 ## Phase 6 — Synthetic data (weeks 15–17)
 

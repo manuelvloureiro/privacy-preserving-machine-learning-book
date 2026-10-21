@@ -2,7 +2,7 @@
 
     uv run python code/part03-dp-foundations/solutions_trust_models.py
 
-Prints every number quoted in book-exercises/part03-dp-foundations/08-trust-models.md (seed 0 for the one simulation).
+Prints every number quoted in book-exercises/part03-dp-foundations/09-trust-models.md (seed 0 for the one simulation).
 Makes no figures; --out is accepted and ignored.
 
 Conventions as in trust_models.py: replace neighbours, ε0 the local level, (ε, δ) the central one.
@@ -14,14 +14,25 @@ from pathlib import Path
 
 import numpy as np
 from trust_models import (
+    alpha_point_change_theory,
+    averaging_log_ratio,
     bisect,
     central_count_sd,
     collusion_eps,
+    equal_memoized_bits,
     fmt_closed_form,
     fmt_max_eps0,
     gaussian_sigma,
+    krr_probs,
+    lh_best_width,
+    lh_variance,
+    majority_error,
     oracle_variance,
     oue_probs,
+    output_perturbation_eps,
+    rappor_eps_inf,
+    rappor_eps_one,
+    rr_keep,
     rr_variance,
     sue_probs,
 )
@@ -102,6 +113,31 @@ def overprovisioned_client_sigma(
     return sigma / math.sqrt(clients * (1 - drop_fraction))
 
 
+# --- Exercise 8: the averaging attack -----------------------------------------------------------
+
+
+def posterior_of_one(yes: int, days: int, eps: float, prior: float = 0.5) -> float:
+    """Pr[bit = 1 | reports] from the likelihood ratio e^{ε(2k − T)} and the prior odds."""
+    odds = prior / (1 - prior) * math.exp(averaging_log_ratio(yes, days, eps))
+    return odds / (1 + odds)
+
+
+def days_until_majority_error(target: float, eps: float) -> int:
+    """The fewest days of fresh reports after which the majority is wrong with probability below `target`."""
+    days = 1
+    while majority_error(days, eps) >= target:
+        days += 1
+    return days
+
+
+# --- Exercise 9: RAPPOR's one-report level ------------------------------------------------------
+
+
+def rappor_two_layer_probs(f: float, p: float, q: float) -> tuple[float, float]:
+    """Pr[sent bit = 1] when the Bloom-filter bit is 0 (p*) and when it is 1 (q*), through both layers."""
+    return (f / 2) * q + (1 - f / 2) * p, (1 - f / 2) * q + (f / 2) * p
+
+
 # --- The page's numbers -------------------------------------------------------------------------
 
 
@@ -168,6 +204,49 @@ def print_table(rng: np.random.Generator) -> None:
     print(f"  ε reaches 2 when the honest fraction falls to {check:.3f}")
 
 
+def print_table_new() -> None:
+    eps = math.log(3)
+    print("[Exercise 8: fresh randomized response at ε0 = ln 3]")
+    print(
+        f"  7 ones in 10 days: log ratio={averaging_log_ratio(7, 10, eps):.4f}  posterior={posterior_of_one(7, 10, eps):.4f}"
+    )
+    print(f"  5 ones in 10 days: posterior={posterior_of_one(5, 10, eps):.4f}")
+    for target in (0.1, 0.01, 0.001):
+        days = days_until_majority_error(target, eps)
+        print(f"  majority wrong below {target:g} after {days} days ({majority_error(days, eps):.4g})")
+    print(f"  memoized: wrong w.p. {1 - rr_keep(eps):.2f} forever")
+
+    print("[Exercise 9: RAPPOR's one-report level]")
+    for name, f, p, q in (("homepages", 0.75, 0.5, 0.75), ("process names", 0.5, 0.5, 0.75)):
+        p_star, q_star = rappor_two_layer_probs(f, p, q)
+        print(
+            f"  {name}: p*={p_star:.5f}  q*={q_star:.5f}  eps_1={rappor_eps_one(2, f, p, q):.4f}  "
+            f"eps_inf={rappor_eps_inf(2, f):.4f}"
+        )
+
+    print("[Exercise 10: how many buckets]")
+    for e in (1.0, 2.0):
+        w = lh_best_width(e)
+        print(
+            f"  ε0={e:g}: e^ε0+1={math.exp(e) + 1:.3f}  w={w - 1}: {lh_variance(e, w - 1, 1):.4f}  "
+            f"w={w}: {lh_variance(e, w, 1):.4f}  w={w + 1}: {lh_variance(e, w + 1, 1):.4f}  "
+            f"OUE: {oracle_variance(*oue_probs(e), 0.0, 1):.4f}  k-RR at k=1000: {oracle_variance(*krr_probs(e, 1000), 0.0, 1):.1f}  "
+            f"bits for w: {math.log2(w):.2f}"
+        )
+
+    print("[Exercise 11: α-point rounding over a year, m = 1440, ε0 = 1]")
+    for spread in (15.0, 60.0):
+        print(
+            f"  ± {spread:g} min, 365 days: report ever changes w.p. {alpha_point_change_theory(365, spread, 1440.0, 1.0):.4f}"
+        )
+    print(f"  kept bits differ w.p. {1 - equal_memoized_bits(1.0):.4f}")
+    for gamma in (0.1, 0.2, 0.3):
+        print(
+            f"  γ={gamma:g}: one round {output_perturbation_eps(1.0, gamma):.3f}  "
+            f"per day the kept bit differs {math.log((1 - gamma) / gamma):.3f}"
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seed", type=int, default=0)
@@ -175,6 +254,7 @@ def main() -> None:
     args = parser.parse_args()
     seed: int = args.seed
     print_table(np.random.default_rng(seed))
+    print_table_new()
 
 
 if __name__ == "__main__":

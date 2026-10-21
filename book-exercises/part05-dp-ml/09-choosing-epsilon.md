@@ -79,3 +79,16 @@ The solutions use the chapter's notation. A mechanism satisfies differential pri
 
 *State the period with the budget, and account for every release that touched the data, including discarded runs and hyperparameter searches ([Hyperparameter tuning](../../book-full/part05-dp-ml/03-hyperparameter-tuning.md)).*
 :::
+
+## From actions to users {#sec-sol-epsc-7}
+
+> **Exercise 7.** **From actions to users.** The Facebook URLs release adds Gaussian noise with $\sigma = 22$ to the counts of likes, one count per URL and group of users, and sets $k = 5$, the 99th percentile of URLs a user likes. Each like moves one count by 1. Find the zCDP parameter $\rho$ and the $\varepsilon$ at $\delta = 10^{-5}$ for one like, for a user with 5 likes, and for a user with 10 likes. Use the release's conversion $\varepsilon = \rho + \sqrt{4\rho\ln(\sqrt{\pi\rho}/\delta)}$, and compare it with @eq-epsc-zcdp. *Check: $\varepsilon = 0.190$, 0.447 and 0.647; @eq-epsc-zcdp gives 0.219, 0.493 and 0.700.* *(Composition in zCDP, user-level units)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **One like.** The Gaussian mechanism with noise $\sigma$ on a count that one action moves by 1 is $\rho$-zCDP with $\rho = 1/(2\sigma^2) = 1/968 = 0.00103$. The conversion gives $\varepsilon = 0.190$.
+2. **A user with $k$ likes.** Each like is on a different URL, so it moves a different count by one. zCDP composes by adding $\rho$, so the user is $k/(2\sigma^2)$-zCDP: $\rho = 0.00517$ for $k = 5$, which converts to $\varepsilon = 0.447$, the release's user-level target of about 0.45.
+3. **A heavier user.** With 10 likes, $\rho$ doubles to 0.01033 and $\varepsilon$ rises to 0.647. It does not double, because $\varepsilon$ grows roughly like $\sqrt\rho$ when $\rho$ is small.
+4. **The two conversions.** @eq-epsc-zcdp gives 0.219, 0.493 and 0.700. Both conversions are valid bounds. The release's conversion is tighter because it keeps a factor $\sqrt{\pi\rho}$ inside the logarithm, which is below 1 for small $\rho$.
+
+*A per-action guarantee becomes a per-user one only for users whose number of actions you have bounded. Above the bound, the guarantee weakens smoothly rather than failing, and a privacy statement should say how.*
+:::

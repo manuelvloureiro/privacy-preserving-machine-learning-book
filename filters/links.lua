@@ -39,8 +39,11 @@ return {
         if book and where[book] then
           if is_pdf then
             local content = link.content:clone()
-            content:insert(pandoc.Space())
-            content:extend(pandoc.Inlines(where[book]))
+            -- "the full edition's chapter" already says where it is.
+            if not pandoc.utils.stringify(content):find(where[book]:gsub("^in the ", ""), 1, true) then
+              content:insert(pandoc.Space())
+              content:extend(pandoc.Inlines(where[book]))
+            end
             return content
           end
           link.target = ups .. book .. "/" .. path .. ".html" .. anchor

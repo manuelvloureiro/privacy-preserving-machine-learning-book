@@ -20,7 +20,7 @@ Every attack in this part is the same object: a **game** in which a challenger t
 | [Property inference](04-property-inference.md) | Can a model reveal a fact about its training population that no single record reveals? | 3, 4, 9, 10 |
 | [Memorization and training-data extraction](05-memorization-extraction.md) | Can the model be made to emit its training text, and when? | 5, 7, 9, 10 |
 | [Gradient inversion](06-gradient-inversion.md) | What does a gradient computed on private data reveal about that data? | 6, 9 |
-| [Linkage and re-identification](07-linkage-reidentification.md) | When does removing names fail to hide who a record belongs to? | 1, 2, 5, 8, 9 |
+| [Linkage and re-identification](07-linkage-reidentification.md) | When does removing or hashing names fail to hide who a record belongs to? | 1, 2, 5, 8, 9 |
 | [Syntactic anonymity and how it breaks](08-syntactic-anonymity.md) | What do k-anonymity, l-diversity and t-closeness guarantee, and which attacks get past each? | 1, 3, 5, 11, 15 |
 | [Reconstruction attacks](09-reconstruction.md) | How many accurate statistics does it take to rebuild a whole private dataset? | 2, 5, 9 |
 
@@ -32,6 +32,8 @@ Two ideas run through all nine chapters.
 - **The worst case is not the average case.** Attacks succeed first on outliers, on duplicated strings, on unique combinations of attributes and on the one example in a batch that a neuron isolates. An average over records can look harmless while a few records are fully exposed. This is why attacks are reported as the TPR at a low FPR rather than as accuracy or area under the curve (AUC), and why the defence of the next part has to hold for every record and every dataset.
 
 A third idea closes the part and frames what comes after it. Reconstruction attacks show that answering too many statistics too accurately destroys privacy no matter how the answers are computed: this is the **Fundamental Law of Information Recovery**. Some noise is not optional, and the question becomes how little noise is enough.
+
+The second half of the part also tells one story about releasing less. Releasing records with the names removed or replaced by codes fails to linkage. Releasing only coarsened records fails to attacks on the sensitive attribute. Releasing only statistics fails to reconstruction, and adding a fixed amount of noise to each statistic fails once enough of them are asked, as an attack on a deployed query system shows. A few hundred published averages can even reveal whether one person is in the data, the tracing attack of [Lower bounds](../part03-dp-foundations/10-lower-bounds.md). Each step releases less and still fails, which is the motivation for the definition of the next part.
 
 ## How to read this part
 
@@ -78,8 +80,8 @@ By the end of this part you should be able to:
 - explain how a property of the training population can leak when no individual record does;
 - define verbatim, discoverable and extractable memorization, and compute a canary's exposure;
 - recover an input exactly from the gradient of a fully connected layer, and say why averaging a batch does not remove the leak;
-- compute the fraction of a population made unique by a set of quasi-identifiers, and run a Netflix-style de-anonymization;
+- invert a hashed identifier by enumeration, compute the fraction of a population made unique by a set of quasi-identifiers, and run a Netflix-style de-anonymization;
 - say what k-anonymity, l-diversity and t-closeness each guarantee, and break each one with homogeneity, skewness and composition attacks;
-- prove that answers with error $o(\sqrt n)$ to random subset sums allow almost all of a dataset to be reconstructed.
+- prove that answers with error $o(\sqrt n)$ to random subset sums allow almost all of a dataset to be reconstructed, and predict how many queries an attack on a deployed query system needs.
 
 Each of these is a result derived in one of the chapters that follow.

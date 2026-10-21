@@ -10,7 +10,7 @@ This chapter asks when that is the better choice and how to make it work. It ans
 
 ### The one idea: one record, one vote
 
-Split the private records into $k$ disjoint shards, and train one model, a **teacher**, on each. To answer a query $x$, let every teacher vote for a label and release only the label with the most votes after adding noise to the counts. A record lives in exactly one shard, so it influences exactly one teacher, and that teacher casts exactly one vote. Adding or removing the record can therefore move at most one vote from one label to another, whatever the teachers are, however they were trained, and however badly one of them overfits its shard. The privacy proof stops there. It is the subsample-and-aggregate idea of [Beyond global sensitivity](../part03-dp-foundations/06-sensitivity.md#sec-sens-saa), with a vote as the aggregator.
+Split the private records into $k$ disjoint shards, and train one model, a **teacher**, on each. To answer a query $x$, let every teacher vote for a label and release only the label with the most votes after adding noise to the counts. A record lives in exactly one shard, so it influences exactly one teacher, and that teacher casts exactly one vote. Adding or removing the record can therefore move at most one vote from one label to another, whatever the teachers are, however they were trained, and however badly one of them overfits its shard. The privacy proof stops there. It is the subsample-and-aggregate idea of [Beyond global sensitivity](../part03-dp-foundations/07-sensitivity.md#sec-sens-saa), with a vote as the aggregator.
 
 Everything else is about accuracy, and it comes down to one comparison: the **gap** between the top two vote counts against the noise. When the teachers agree, the gap is large and the noisy winner is almost always the true plurality. When they disagree, the noise decides. And the noise must grow like the square root of the number of answered queries, because each answer spends budget. So private prediction is cheap for a few queries on which the teachers agree, and expensive otherwise. @tbl-pate-overview lists the results.
 
@@ -21,6 +21,7 @@ Everything else is about accuracy, and it comes down to one comparison: the **ga
 | Private answers against a private model: the break-even number of queries | Deciding between private prediction and [DP-SGD](02-dp-sgd.md) |
 | PATE: a student trained on privately labelled public data | Turning answers into a model whose use is free |
 | Data-dependent analysis and Confident-GNMax | Paying less for answers the teachers agree on; what must be sanitized |
+| Stable aggregation: distance to instability and sparse vector | Exact labels and a budget fixed in advance, paid only for contested queries |
 | Private in-context learning | Prompting an LLM with private examples |
 
 : The results of this chapter and where each is used. {#tbl-pate-overview}
@@ -29,13 +30,13 @@ Everything else is about accuracy, and it comes down to one comparison: the **ga
 
 **The running example.** The part's neural-network task ([DP-SGD](02-dp-sgd.md)): 50-dimensional standard normal inputs labelled $\pm1$ by a fixed random network, $n = 10{,}000$ private training records. Its 20,000 test records are split in two. The first 10,000 form a **public pool**: their inputs are treated as public and unlabelled, as PATE requires, and their labels are used only to measure how good the private labels are. The last 10,000 form the **evaluation set**, on which every accuracy in this chapter is measured. The teachers are regularized logistic regressions, the model of [Private empirical risk minimization](01-dp-erm.md), each fitted on one shard of consecutive records. Logistic regression is cheap and, on this task, as accurate as the part's network on the same few records.
 
-**How to read this chapter.** Read the toolkit and @sec-pate-noisy-max, which give the mechanism and its cost. @sec-pate-accuracy and @sec-pate-versus answer the question in the title: when private answers beat a private model. @sec-pate-student builds PATE, and @sec-pate-data-dependent the analysis that makes it competitive in practice; the second is the most technical section and can be skimmed for its statement and interpretation. @sec-pate-icl applies everything to in-context learning.
+**How to read this chapter.** Read the toolkit and @sec-pate-noisy-max, which give the mechanism and its cost. @sec-pate-accuracy and @sec-pate-versus answer the question in the title: when private answers beat a private model. @sec-pate-student builds PATE, and @sec-pate-data-dependent the analysis that makes it competitive in practice; the second is the most technical section and can be skimmed for its statement and interpretation. @sec-pate-stable gives the alternative that needs no sanitizing, and why it is rarely used. @sec-pate-icl applies everything to in-context learning.
 
 ## Toolkit: four facts every derivation uses
 
 ### Fact 1 — One record changes one vote
 
-Fix the partition of records into shards *before* looking at the data, by a hash of a record identifier rather than by position. Adding or removing a record then changes one shard, the one its hash points to, and leaves every other shard, and so every other teacher, exactly as it was. That teacher may now vote differently on a query: one count goes down by 1 and another goes up by 1, or nothing changes. The vote histogram $(n_1(x), \dots, n_m(x))$ therefore moves by at most 2 in $\ell_1$ norm, the sum of absolute changes, and by at most $\sqrt{1^2 + 1^2} = \sqrt2$ in $\ell_2$ norm, the Euclidean length of the change. This is the step of subsample-and-aggregate in [Beyond global sensitivity](../part03-dp-foundations/06-sensitivity.md#sec-sens-saa): one record touches one block.
+Fix the partition of records into shards *before* looking at the data, by a hash of a record identifier rather than by position. Adding or removing a record then changes one shard, the one its hash points to, and leaves every other shard, and so every other teacher, exactly as it was. That teacher may now vote differently on a query: one count goes down by 1 and another goes up by 1, or nothing changes. The vote histogram $(n_1(x), \dots, n_m(x))$ therefore moves by at most 2 in $\ell_1$ norm, the sum of absolute changes, and by at most $\sqrt{1^2 + 1^2} = \sqrt2$ in $\ell_2$ norm, the Euclidean length of the change. This is the step of subsample-and-aggregate in [Beyond global sensitivity](../part03-dp-foundations/07-sensitivity.md#sec-sens-saa): one record touches one block.
 
 The partition rule matters. If shards were cut by position, inserting one record at the front would shift every later record into the next shard, change every shard, and possibly change every teacher. The derivations below assume a fixed hash; the script splits the records by position only because they are never added or removed in its experiments.
 
@@ -323,7 +324,7 @@ The pure-DP form shows where all data-dependent bounds come from; the Gaussian f
 
 **Why it helps little here and a lot elsewhere.** The total is a sum over queries, so the saving depends on how many queries have large gaps. With 250 teachers on the running example, only 0.2879 of the public queries have a gap of at least 150, so most answers pay close to full price. On a task where nearly all teachers agree on nearly all inputs, as on handwritten digits, almost every answer is nearly free, and $\varepsilon$ falls by a large factor.
 
-**The data-dependent $\varepsilon$ is itself private information.** It is computed from the votes, so publishing it reveals something about the teachers and so about the data. Worse, its sensitivity is large: one record changes one teacher, and that teacher's votes can change on *every* query, moving every term of the sum. Papernot et al. (2018, Appendix B) therefore release the data-dependent $\varepsilon$ with Gaussian noise scaled to its **smooth sensitivity**, the device of [Beyond global sensitivity](../part03-dp-foundations/06-sensitivity.md#sec-sens-smooth) for functions whose worst-case sensitivity is far above their typical one, and pay for that release too. On MNIST, with 250 teachers of 200 examples, 640 queries, $T = 200$, $\sigma_1 = 150$ and $\sigma_2 = 40$, they report an expected 283 answered queries and a data-dependent $\varepsilon = 2.00$ at $\delta = 10^{-5}$, which becomes $2.52 \pm 0.385$ once sanitized (their Table 2). Without that step, a data-dependent $\varepsilon$ is a measurement, not a guarantee.
+**The data-dependent $\varepsilon$ is itself private information.** It is computed from the votes, so publishing it reveals something about the teachers and so about the data. Worse, its sensitivity is large: one record changes one teacher, and that teacher's votes can change on *every* query, moving every term of the sum. Papernot et al. (2018, Appendix B) therefore release the data-dependent $\varepsilon$ with Gaussian noise scaled to its **smooth sensitivity**, the device of [Beyond global sensitivity](../part03-dp-foundations/07-sensitivity.md#sec-sens-smooth) for functions whose worst-case sensitivity is far above their typical one, and pay for that release too. On MNIST, with 250 teachers of 200 examples, 640 queries, $T = 200$, $\sigma_1 = 150$ and $\sigma_2 = 40$, they report an expected 283 answered queries and a data-dependent $\varepsilon = 2.00$ at $\delta = 10^{-5}$, which becomes $2.52 \pm 0.385$ once sanitized (their Table 2). Without that step, a data-dependent $\varepsilon$ is a measurement, not a guarantee.
 
 **A one-directional bound.** @eq-pate-dd-pure and @eq-pate-dd-gauss bound $D_\alpha(M(D)\|M(D'))$ for the actual dataset $D$ against every neighbour, the direction the accounting of Papernot et al. uses. The exact two-label computation above takes the worse of both directions, and is still below the bound.
 
@@ -362,6 +363,65 @@ At a data-independent $\varepsilon = 3.59$, Confident-GNMax trains a student to 
 
 - Why can't the data-dependent $\varepsilon$ simply be released with noise calibrated to its global sensitivity? *(Its global sensitivity is huge. One record changes one teacher, whose votes may change on every query; on a histogram near a tie, each such change moves that query's cost from almost 0 to the full $\alpha/\sigma^2$, so the worst-case change of the sum is close to the data-independent total.)*
 - In Confident-GNMax, why is $\sigma_1$ chosen much larger than $\sigma_2$? *(The check is paid on every query and the answer only on answered ones. A large $\sigma_1$ makes the frequent cost small; the check only needs to separate strong consensus from weak, which a noisy maximum can do even with a lot of noise when $T$ is set well.)*
+
+## Paying only for disagreement, with a worst-case guarantee {#sec-pate-stable}
+
+### Context
+
+The data-dependent analysis of @sec-pate-data-dependent charges agreed answers less, but the $\varepsilon$ it computes is itself a function of the votes, and publishing it needs a separate private release with smooth sensitivity. There is another way to make agreement cheap. Instead of measuring after the fact how much each answer cost, test privately, before answering, whether the vote is so lopsided that one record cannot overturn it. Release the plurality label exactly when the test passes, and nothing when it fails. Then let only the failures cost budget, by running the tests through the sparse vector technique of [Selection](../part03-dp-foundations/05-selection.md#sec-sel-svt). This is the stability-based aggregation of Thakurta & Smith (2013), which Bassily, Thakkar & Thakurta (2018) apply to PATE. Its guarantee is an ordinary $(\varepsilon, \delta)$ fixed before any vote is seen. What does it cost, and when does it pay?
+
+### Statement
+
+For a query $x$, the **distance to instability** is the largest number $j$ such that changing the votes of *any* $j$ teachers leaves the same label strictly on top. With $g$ the gap between the top two counts,
+$$\operatorname{dist}(x) = \Big\lceil\frac g2\Big\rceil - 1, \quad\text{and } 0 \text{ when } g = 0.$$ {#eq-pate-dist}
+**Stable aggregation** goes through the public queries in order, and asks of each one whether its distance is clearly above a threshold $t$. AboveThreshold halts at the first query whose value is high, and here the procedure should halt at the first query whose distance is low. So it runs AboveThreshold at a budget $\varepsilon_0$ on the negated distances $-\operatorname{dist}(x_i)$ with threshold $-t$. The threshold gets noise $\rho \sim \mathrm{Lap}(2/\varepsilon_0)$ and each query fresh noise $\nu_i \sim \mathrm{Lap}(4/\varepsilon_0)$.
+
+A query with $-\operatorname{dist}(x_i) + \nu_i \ge -t + \rho$ is **unstable**. It gets no label, and the run restarts with fresh threshold noise. Every other query is **stable**, and it gets the exact plurality label, with no noise. The procedure stops after $c$ unstable answers or at the end of the pool of $P$ queries.
+
+The total slack $\delta$ is split in two. One part, $\delta_{\text{bad}}$, bounds the chance that a query with no margin slips through the test, and the other, $\delta'$, goes to the conversion from RDP. Choose the threshold $t$ so that
+$$P\cdot\Pr[\nu - \rho > t] \le \delta_{\text{bad}}, \qquad \Pr[\nu - \rho > t] = \frac{b_1^2e^{-t/b_1} - b_2^2e^{-t/b_2}}{2(b_1^2 - b_2^2)},$$ {#eq-pate-stable-threshold}
+with $b_1 = 4/\varepsilon_0$ and $b_2 = 2/\varepsilon_0$ the two Laplace scales. Then all the released labels together are $(\varepsilon, \delta' + \delta_{\text{bad}})$-DP, where $\varepsilon$ is the better of basic composition, $c\varepsilon_0$, and the conversion at $\delta'$ of $c$ composed $\varepsilon_0$-DP steps,
+$$\varepsilon = \min\Big\{c\varepsilon_0,\ \min_\alpha\Big[c\,\varepsilon_{\mathrm{RR}}(\alpha) + \ln\frac{\alpha - 1}{\alpha} - \frac{\ln\delta' + \ln\alpha}{\alpha - 1}\Big]\Big\},$$ {#eq-pate-stable-eps}
+with $\varepsilon_{\mathrm{RR}}$ the randomized-response curve of Fact 3 at $\varepsilon_0$, the Rényi curve that bounds every $\varepsilon_0$-DP mechanism. The budget does not depend on how many stable labels are released.
+
+### Derivation
+
+1. **The distance.** One changed teacher moves one vote from one label to another, so it lowers the gap by at most 2. After $j$ changes the gap is at least $g - 2j$, and the label stays strictly on top while $g - 2j \ge 1$, that is for $j \le (g - 1)/2$. The largest such whole number is $\lceil g/2\rceil - 1$, which is @eq-pate-dist.
+2. **One record moves every distance by at most 1.** Adding or removing a record changes one teacher (Fact 1), which changes each query's distance by at most 1: if any $j$ changes from $D'$ keep the label on top, then any $j - 1$ changes from $D$ do, because $D$ is one change away from $D'$. This is the distance-to-a-set argument of [Beyond global sensitivity](../part03-dp-foundations/07-sensitivity.md#sec-sens-ptr). So the query values $-\operatorname{dist}(x_i)$ have sensitivity 1, for every query at the same time.
+3. **The stable/unstable answers cost $c$ runs.** Each run of AboveThreshold on sensitivity-1 queries is $\varepsilon_0$-DP, however many queries it reads ([Selection](../part03-dp-foundations/05-selection.md#sec-sel-svt)). There are at most $c$ runs, each started after the previous one's output. Basic composition gives $c\varepsilon_0$ with no slack. Alternatively, Fact 3 gives each run the randomized-response RDP curve, the curves add, and the conversion of Fact 2 at $\delta'$ gives the second term of @eq-pate-stable-eps. Either bound is valid, so the smaller one is.
+4. **Exact labels are safe where the distance is at least 1.** If $\operatorname{dist}(x_i) \ge 1$ on $D$, one change of teacher leaves the same label strictly on top, so the plurality of $x_i$ is the same on $D$ and on its neighbour $D'$. So on such queries the released label is the same on $D$ and $D'$. Whenever every labelled query has distance at least 1 on $D$, the whole output is therefore determined by which queries were declared stable, in the same way for both datasets.
+5. **The only danger is a passed test at distance 0.** Call it the bad event. A query with distance 0 is declared stable when $\nu_i < -t + \rho$, that is $\nu_i - \rho < -t$. The difference of two independent symmetric variables is symmetric, so this has probability $\Pr[\nu - \rho > t]$. A union bound over at most $P$ queries bounds the probability of the bad event by $P\cdot\Pr[\nu - \rho > t] \le \delta_{\text{bad}}$. The tail formula in @eq-pate-stable-threshold comes from integrating the density of a sum of two Laplace variables, and the script checks it by simulation.
+6. **Put the two together.** For any set $S$ of outputs, the probability that the output lands in $S$ on $D$ is at most the probability that it lands in $S$ without the bad event, plus $\delta_{\text{bad}}$. Without the bad event, every labelled query has distance at least 1 on $D$. So the output lands in $S$ only if the stable/unstable answers land in a set $S'$ of answer sequences, defined from $D$, whose stable queries all have distance at least 1 on $D$ and whose labels, the same on $D$ and $D'$ by step 4, put the output in $S$. Step 3 bounds the probability of $S'$ on $D$ by $e^\varepsilon$ times its probability on $D'$, plus $\delta'$. On $D'$, answers in $S'$ produce an output in $S$, because their labels are the same. That gives $(\varepsilon, \delta' + \delta_{\text{bad}})$-DP.
+
+### Interpretation
+
+**Nothing needs sanitizing.** The budget is fixed by $c$, $\varepsilon_0$ and the two $\delta$s before any vote is seen, so it can be published as it is. What depends on the data is how many labels you get for that budget, which is the reverse of the data-dependent analysis, where the labels are fixed and the cost depends on the data. The cutoff $c$ must be fixed in advance for this to hold.
+
+**The labels are exact.** A stable query gets the noiseless plurality, so the student's labels are as good as the ensemble's on every query it receives. Label noise, which hurt the students of @sec-pate-student, is gone. The hard queries near the boundary are skipped, as in Confident-GNMax.
+
+**The threshold is the obstacle.** The test must almost never pass a query at distance 0, over the whole pool, so $t$ grows like $4\ln(P/\delta_{\text{bad}})/\varepsilon_0$. At $\varepsilon_0 = 1$ and a pool of 10,000 queries, that is $t = 84.0$. So a query passes reliably only when the plurality leads by about $2t \approx 170$ votes. On top of that, every unstable answer costs a whole $\varepsilon_0$, and $c$ runs compose almost linearly unless $c$ is in the hundreds. So the method pays only when there are many teachers and they are nearly unanimous on almost every query. Bassily, Thakkar & Thakurta (2018) use it to prove accuracy guarantees for the student under such conditions. Deployed PATE systems use Confident-GNMax with data-dependent accounting instead, and pay for the sanitizing.
+
+### Example: the running example
+
+Take $\varepsilon_0 = 1$, and split the slack equally, $\delta_{\text{bad}} = \delta' = 5 \times 10^{-6}$, so that the total $\delta$ is $10^{-5}$. For a pool of 1,000 queries @eq-pate-stable-threshold gives the threshold $t = 74.8$, and for 10,000 queries it gives 84.0. The tail formula is easy to check, since at $t = 8$ it gives 0.0872 and a million simulated pairs give 0.0866. The budget of @eq-pate-stable-eps is $\varepsilon = 5.00$ for $c = 5$ unstable answers, and 20.00 for $c = 20$, both from basic composition. The composition saves almost nothing at this scale: even 100 unstable answers cost 83.45 rather than 100.
+
+The teachers rarely clear the bar. The running example's pool has 10,000 queries, so the threshold is 84.0. With 250 teachers the largest distance on the pool is 124, and only 0.1996 of the queries have a distance of at least 84.0. With 500 teachers that share is 0.3923. @tbl-pate-stable runs the procedure on the pool.
+
+| Teachers | $\varepsilon_0$ | Cutoff $c$ | Queries read | Labels released | Label accuracy | $\varepsilon$ |
+| --- | --- | --- | --- | --- | --- | --- |
+| 250 | 1 | 20 | 23 | 3 | 1.0000 | 20.00 |
+| 250 | 2 | 20 | 41 | 21 | 0.9524 | 40.00 |
+| 500 | 1 | 20 | 34 | 14 | 1.0000 | 20.00 |
+| 500 | 2 | 20 | 54 | 34 | 0.9412 | 40.00 |
+
+: Stable aggregation on the running example's public pool, $\delta_{\text{bad}} = \delta' = 5 \times 10^{-6}$: queries read before the $c$-th unstable answer, labels released, their accuracy against the true labels, and the budget. {#tbl-pate-stable}
+
+The labels it releases are accurate, but there are only between 3 and 34 of them at a budget of 20 or more, against hundreds of noisy GNMax labels at $\varepsilon = 4$ in @tbl-pate-student. On this task, where most queries fall short of the threshold, the worst-case-safe route is far more expensive than paying for the sanitizing.
+
+### Check yourself
+
+- Why is it safe to release the plurality with no noise at all when the test says "stable"? *(If the query's distance is at least 1, the neighbouring dataset has the same plurality, so the label carries no information that the stable/unstable answer did not. The only risk is a query at distance 0 that passes, which the threshold makes unlikely, at probability $\delta_{\text{bad}}$ over the whole pool.)*
+- Why must the cutoff $c$ be fixed before the run? *(The budget is set by $c$. Choosing $c$ after seeing how many queries turned out unstable would make the budget depend on the votes, the problem this construction avoids.)*
 
 ## Private in-context learning {#sec-pate-icl}
 
@@ -425,7 +485,7 @@ Subsampling makes the noise small: 1,000 answers at $\varepsilon = 1$ need $\sig
 
 ## Code: check every number by computation
 
-The script [code/private_prediction.py](../../code/part05-dp-ml/private_prediction.py) trains the teachers, implements LNMax, GNMax, Confident-GNMax and their accountants (data-independent, the data-dependent bounds of @eq-pate-dd-pure and @eq-pate-dd-gauss, and the exact two-label cost), trains the PATE students and the DP-SGD baselines, and simulates private in-context learning. It imports the running example, the network, DP-SGD and the subsampled-Gaussian accountant from [code/dp_sgd.py](../../code/part05-dp-ml/dp_sgd.py), and the logistic regression from [code/dp_erm.py](../../code/part05-dp-ml/dp_erm.py). From the repository root:
+The script [code/private_prediction.py](../../code/part05-dp-ml/private_prediction.py) trains the teachers, implements LNMax, GNMax, Confident-GNMax, stable aggregation and their accountants (data-independent, the data-dependent bounds of @eq-pate-dd-pure and @eq-pate-dd-gauss, and the exact two-label cost), trains the PATE students and the DP-SGD baselines, and simulates private in-context learning. It imports the running example, the network, DP-SGD and the subsampled-Gaussian accountant from [code/dp_sgd.py](../../code/part05-dp-ml/dp_sgd.py), and the logistic regression from [code/dp_erm.py](../../code/part05-dp-ml/dp_erm.py). From the repository root:
 
 ```bash
 uv run python code/part05-dp-ml/private_prediction.py
@@ -441,6 +501,7 @@ uv run python code/part05-dp-ml/private_prediction.py
 | PATE student, 250 teachers | Best 0.8238 at $\varepsilon = 1$ to 0.9049 at $\varepsilon = 8$; DP-SGD 0.9128 to 0.9605 |
 | Data-dependent analysis | About 20% lower $\varepsilon$ on this task; Theorem 6 above the exact two-label cost |
 | Confident-GNMax | 459 of 1,000 queries answered, student 0.8894 at $\varepsilon = 3.59$ |
+| Stable aggregation | Threshold 84.0 at $\varepsilon_0 = 1$; 14 exact labels for $\varepsilon = 20$ with 500 teachers |
 | In-context learning, stand-in | Membership AUC 0.889 for a 16-shot learner; 0.7780 accuracy for 100 private answers at $\varepsilon = 1$ |
 
 : The script's output with the default seed. {#tbl-pate-code}
@@ -456,6 +517,8 @@ uv run python code/part05-dp-ml/private_prediction.py
 - Nissim, Raskhodnikova & Smith, "Smooth Sensitivity and Sampling in Private Data Analysis" (STOC 2007). Sample-and-aggregate, of which PATE is an instance, and smooth sensitivity.
 - Duan, Dziedzic, Papernot & Boenisch, "Flocks of Stochastic Parrots: Differentially Private Prompt Learning for Large Language Models" (NeurIPS 2023). The membership attack on prompts and PromptPATE.
 - Wu, Panda, Wang & Mittal, "Privacy-Preserving In-Context Learning for Large Language Models" (ICLR 2024). Disjoint exemplar groups with Poisson subsampling and a Gaussian noisy vote for classification; embedding- and keyword-space aggregation for text generation.
+- Thakurta & Smith, "Differentially Private Feature Selection via Stability Arguments, and the Robustness of the Lasso" (COLT 2013). The distance-to-instability test that releases a stable answer exactly.
+- Bassily, Thakkar & Thakurta, "Model-Agnostic Private Learning" (NeurIPS 2018). PATE with stable aggregation and the sparse vector technique, and accuracy guarantees for the student; @sec-pate-stable.
 - Dwork & Feldman, "Privacy-preserving Prediction" (COLT 2018). Private prediction as a learning problem in its own right, with sample-complexity bounds for answering predictions privately.
 - Mironov, "Rényi Differential Privacy" (CSF 2017). The Gaussian mechanism's RDP and composition used throughout.
 - Balle, Barthe, Gaboardi, Hsu & Sato, "Hypothesis Testing Interpretations and Rényi Differential Privacy" (AISTATS 2020). The conversion of @eq-pate-convert.
@@ -477,6 +540,7 @@ $k$ teachers on disjoint shards fixed by a hash, $m$ labels, vote counts $n_i$, 
 | Data-dependent, pure DP | $\frac{1}{\alpha - 1}\ln[(1 - q)^\alpha(1 - e^{\varepsilon_0}q)^{1 - \alpha} + qe^{(\alpha - 1)\varepsilon_0}]$ | $q < e^{-\varepsilon_0}$; must be sanitized to publish |
 | Data-dependent, GNMax | @eq-pate-dd-gauss | Conditions of Theorem 6; must be sanitized |
 | Confident-GNMax | $(P/(2\sigma_1^2) + A/\sigma_2^2)\alpha$ | Budget fixed in advance |
+| Stable aggregation | Exact plurality where $\operatorname{dist} = \lceil g/2\rceil - 1$ passes a sparse-vector test at threshold $t$; $c$ runs of $\varepsilon_0$-DP | $P\Pr[\nu - \rho > t] \le \delta_{\text{bad}}$; $c$ fixed in advance |
 | Private in-context learning | $Q\,\varepsilon_{r,\sigma/\sqrt2}(\alpha)$ | Poisson rate $r$, disjoint groups per query |
 
 : Every result of the chapter. {#tbl-pate-cheat}
@@ -488,6 +552,7 @@ $k$ teachers on disjoint shards fixed by a hash, $m$ labels, vote counts $n_i$, 
 - Use Gaussian noise for more than a handful of answers, Laplace only for one or two.
 - A teacher ensemble is only as good as its noiseless vote; measure that ceiling first.
 - Data-dependent $\varepsilon$ is not a guarantee until it is released privately; report the data-independent one, or pay for the release.
+- Stable aggregation avoids the sanitizing, but only pays with many, nearly unanimous teachers: check what share of your queries clears its threshold first.
 - Never put private exemplars in a prompt that answers users directly; vote over disjoint groups with noise, or distil into a public prompt.
 
 **Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part05-dp-ml/05-private-prediction.md).

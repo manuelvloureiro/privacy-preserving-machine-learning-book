@@ -6,7 +6,7 @@ from pathlib import Path
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
-# The public functions, called as chapter 35 calls them: a Gaussian δ, and the sandwich for a short DP-SGD run.
+# The public functions, called as chapter 37 calls them: a Gaussian δ, and the sandwich for a short DP-SGD run.
 PUBLIC_API_CHECK = """
 import math
 from numerical_accounting import (compose_pld, discretize_subsampled_gaussian_pld, gaussian_pld_delta,

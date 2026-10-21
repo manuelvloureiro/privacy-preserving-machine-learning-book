@@ -328,6 +328,146 @@ def monitoring_stream(k: int = 1000, hit: int = 700, low: float = 400.0, high: f
     return [high if i == hit else low for i in range(k)]
 
 
+def sparse_alpha(k: int, c: int, beta: float, eps: float, sensitivity: float = 1.0) -> float:
+    """Margin of Sparse (c restarts of AboveThreshold at ε/c each): 8cΔ(ln k + ln(2c/β))/ε (Dwork & Roth Thm 3.26)."""
+    return svt_alpha(k, beta / c, eps / c, sensitivity)
+
+
+def advanced_tanh(eps0: float, k: int, delta: float) -> float:
+    """ε0 √(2k ln(1/δ)) + k ε0 tanh(ε0/2): advanced composition of k steps of ε0-DP, at slack δ."""
+    return eps0 * math.sqrt(2 * k * math.log(1 / delta)) + k * eps0 * math.tanh(eps0 / 2)
+
+
+def sparse_run_epsilon(eps: float, c: int, delta: float) -> float:
+    """Largest per-run ε0 whose c-fold advanced composition is at most ε (bisection)."""
+    lo, hi = 0.0, eps
+    for _ in range(100):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if advanced_tanh(mid, c, delta) <= eps else (lo, mid)
+    return lo
+
+
+def sparse_alpha_approx(k: int, c: int, beta: float, eps: float, delta: float, sensitivity: float = 1.0) -> float:
+    """Margin of Sparse when the c runs are composed with advanced composition: (ε, δ)-DP overall."""
+    return svt_alpha(k, beta / c, sparse_run_epsilon(eps, c, delta), sensitivity)
+
+
+# --- Applications: learning by choosing a hypothesis --------------------------------------------
+
+THRESHOLDS = np.linspace(0.0, 1.0, 1001)  # the class C: h_θ(x) = 1[x ≥ θ], θ on a grid of 1001 points
+TRUE_THRESHOLD = 0.3
+LABEL_NOISE = 0.1
+
+
+def threshold_sample(rng: np.random.Generator, n: int) -> tuple[FloatArray, NDArray[np.int64]]:
+    """x uniform on [0, 1]; y = 1[x ≥ 0.3], flipped with probability 0.1."""
+    x = rng.random(n)
+    y = (x >= TRUE_THRESHOLD).astype(np.int64) ^ (rng.random(n) < LABEL_NOISE).astype(np.int64)
+    return x, y
+
+
+def threshold_errors(x: FloatArray, y: NDArray[np.int64]) -> FloatArray:
+    """Training mistakes of every h_θ: positives below θ plus negatives at or above θ."""
+    order = np.argsort(x)
+    xs, ys = x[order], y[order]
+    below = np.searchsorted(xs, THRESHOLDS, side="left")  # records with x < θ
+    pos_cum = np.concatenate([[0], np.cumsum(ys)])
+    neg_cum = np.concatenate([[0], np.cumsum(1 - ys)])
+    return (pos_cum[below] + (neg_cum[-1] - neg_cum[below])).astype(np.float64)
+
+
+def population_excess(theta: FloatArray) -> FloatArray:
+    """err(h_θ) - err(h_0.3) = (1 - 2η)|θ - 0.3| for x uniform and label noise η."""
+    return (1 - 2 * LABEL_NOISE) * np.abs(theta - TRUE_THRESHOLD)
+
+
+def learner_excess(rng: np.random.Generator, n: int, eps: float | None, trials: int) -> float:
+    """Average excess population error of the exponential-mechanism learner (eps None: non-private ERM)."""
+    total = 0.0
+    excess = population_excess(THRESHOLDS)
+    for _ in range(trials):
+        x, y = threshold_sample(rng, n)
+        mistakes = threshold_errors(x, y)
+        if eps is None:
+            best = mistakes == mistakes.min()
+            total += float(excess[best].mean())
+        else:
+            total += float(np.sum(em_probabilities(list(-mistakes), eps) * excess))
+    return total / trials
+
+
+def learner_bound(n: int, eps: float, beta: float, size: int = len(THRESHOLDS)) -> tuple[float, float]:
+    """The two terms of the excess-error bound: 2√(ln(2|C|/β)/(2n)) and 2 ln(|C|/β)/(εn)."""
+    return 2 * math.sqrt(math.log(2 * size / beta) / (2 * n)), 2 * math.log(size / beta) / (eps * n)
+
+
+def learner_samples(alpha: float, eps: float, beta: float, size: int = len(THRESHOLDS)) -> tuple[int, int]:
+    """Records that guarantee excess error α: ⌈8 ln(2|C|/β)/α²⌉ (sampling) and ⌈4 ln(|C|/β)/(αε)⌉ (privacy)."""
+    return math.ceil(8 * math.log(2 * size / beta) / alpha**2), math.ceil(4 * math.log(size / beta) / (alpha * eps))
+
+
+# --- Applications: a private median over an interval -------------------------------------------
+
+NORM_RANGE = 10.0  # the median is searched in [0, B]; B is fixed before looking at the data
+
+
+def gradient_norms(rng: np.random.Generator, n: int) -> FloatArray:
+    """n per-example gradient norms: lognormal with median 1, capped at the range B."""
+    return np.minimum(np.exp(rng.normal(0.0, 0.75, n)), NORM_RANGE)
+
+
+def median_intervals(data: FloatArray, upper: float) -> tuple[FloatArray, FloatArray, FloatArray]:
+    """The n + 1 intervals between sorted points of [0, B]: left ends, lengths, and score -|#below - #above|."""
+    xs = np.sort(data)
+    edges = np.concatenate([[0.0], xs, [upper]])
+    n = len(xs)
+    j = np.arange(n + 1)
+    return edges[:-1], np.diff(edges), -np.abs(2.0 * j - n)
+
+
+def median_interval_probs(data: FloatArray, eps: float, upper: float = NORM_RANGE) -> FloatArray:
+    """Probability that the continuous exponential mechanism lands in each interval: ∝ length × e^{εu/2}."""
+    _, lengths, scores = median_intervals(data, upper)
+    with np.errstate(divide="ignore"):
+        logw = np.log(lengths) + eps * scores / 2
+    w = np.exp(logw - logw.max())
+    return w / w.sum()
+
+
+def sample_median(rng: np.random.Generator, data: FloatArray, eps: float, upper: float = NORM_RANGE) -> float:
+    """Exact sampling: pick an interval with its probability, then a uniform point inside it."""
+    left, lengths, _ = median_intervals(data, upper)
+    j = int(rng.choice(len(lengths), p=median_interval_probs(data, eps, upper)))
+    return float(left[j] + rng.random() * lengths[j])
+
+
+def median_rank_tail(data: FloatArray, eps: float, gap: float, upper: float = NORM_RANGE) -> float:
+    """Pr[|#below - #above| ≥ gap] for the output, exactly."""
+    _, _, scores = median_intervals(data, upper)
+    return float(np.sum(median_interval_probs(data, eps, upper)[-scores >= gap]))
+
+
+def median_rank_bound(data: FloatArray, eps: float, t: float, upper: float = NORM_RANGE) -> float:
+    """The utility bound for the continuous version: (2/ε)(ln(B/L*) + t), L* the length of the best interval."""
+    _, lengths, scores = median_intervals(data, upper)
+    best = float(lengths[scores == scores.max()].sum())
+    return 2 / eps * (math.log(upper / best) + t)
+
+
+def median_expected_abs_error(data: FloatArray, eps: float, upper: float = NORM_RANGE) -> float:
+    """E|output - true median|, exactly: each interval contributes the mean distance of a uniform point."""
+    left, lengths, _ = median_intervals(data, upper)
+    med = float(np.median(data))
+    a, b = left, left + lengths
+    # mean of |u - med| for u uniform on [a, b]
+    inside = (a <= med) & (med <= b)
+    safe = np.where(lengths > 0, lengths, 1.0)
+    mean_in = ((med - a) ** 2 + (b - med) ** 2) / (2 * safe)
+    mean_out = np.abs((a + b) / 2 - med)
+    dist = np.where(inside, mean_in, mean_out)
+    return float(np.sum(median_interval_probs(data, eps, upper) * dist))
+
+
 # --- The table ----------------------------------------------------------------------------------
 
 
@@ -476,6 +616,52 @@ def print_table(rng: np.random.Generator) -> None:
         f"k=1000: {non_monotone_ratio(1000, eps):.4f}"
     )
     print(f"  median by EM, k=101, eps=1, t=ln 20: gap bound={em_gap_threshold(101, eps, math.log(20)):.2f}")
+
+    print("[AboveThreshold tightness, more digits]")
+    for mm in (10, 20, 40):
+        print(f"  m={mm}: max |ln ratio|={above_threshold_max_log_ratio(mm, eps):.6f}")
+
+    print("[Sparse: c answers above, k = 1000 queries, beta = 0.05, eps = 1]")
+    for c in (10, 100):
+        print(
+            f"  c={c}: pure margin={sparse_alpha(1000, c, 0.05, eps):.0f}  "
+            f"advanced (delta=1e-6) per-run eps={sparse_run_epsilon(eps, c, 1e-6):.4f} "
+            f"margin={sparse_alpha_approx(1000, c, 0.05, eps, 1e-6):.0f}"
+        )
+
+    print("[Learning a threshold with the exponential mechanism: |C| = 1001, label noise 0.1, 200 datasets]")
+    for nn in (100, 1000, 10000):
+        stat, priv = learner_bound(nn, eps, 0.05)
+        print(
+            f"  n={nn}: excess error EM eps=1={learner_excess(rng, nn, 1.0, 200):.4f}  "
+            f"eps=0.1={learner_excess(rng, nn, 0.1, 200):.4f}  ERM={learner_excess(rng, nn, None, 200):.4f}  "
+            f"bound terms: sampling={stat:.4f} privacy(eps=1)={priv:.4f}"
+        )
+    for a, e in ((0.05, 1.0), (0.05, 0.01)):
+        stat_n, priv_n = learner_samples(a, e, 0.05)
+        print(f"  alpha={a:g} eps={e:g}: sampling needs n={stat_n:.0f}  privacy needs n={priv_n:.0f}")
+
+    print("[Private median of 1000 gradient norms in [0, 10]]")
+    norms = gradient_norms(rng, 1000)
+    xs = np.sort(norms)
+    print(
+        f"  true median={float(np.median(norms)):.4f}  45th-55th percentile=[{xs[449]:.4f}, {xs[549]:.4f}]  "
+        f"max={xs[-1]:.3f}"
+    )
+    for e in (0.1, 1.0):
+        print(
+            f"  eps={e:g}: Pr[rank gap >= 100]={median_rank_tail(norms, e, 100):.2e}  "
+            f"E|output - median|={median_expected_abs_error(norms, e):.4f}  "
+            f"bound on rank gap (t=ln 20)={median_rank_bound(norms, e, math.log(20)):.1f}"
+        )
+    draws = [sample_median(rng, norms, 1.0) for _ in range(20_000)]
+    print(
+        f"  eps=1, 20000 draws: mean |output - median|={float(np.mean(np.abs(np.asarray(draws) - np.median(norms)))):.4f}"
+    )
+    print(
+        f"  eps=1, range B=1000 instead of 10: E|output - median|={median_expected_abs_error(norms, 1.0, 1000.0):.4f}  "
+        f"bound={median_rank_bound(norms, 1.0, math.log(20), 1000.0):.1f}"
+    )
 
 
 def non_monotone_ratio(k: int, eps: float) -> float:
@@ -673,6 +859,45 @@ def plot_svt_buggy(rng: np.random.Generator, eps: float = 1.0) -> Figure:
     return fig
 
 
+def plot_em_applications(rng: np.random.Generator) -> Figure:
+    fig, (left, right) = plt.subplots(1, 2, figsize=(11, 4.2))
+    ns = [100, 300, 1000, 3000, 10000]
+    for eps, style, label in (
+        (0.1, "o-", r"exponential mechanism, $\varepsilon$ = 0.1"),
+        (1.0, "s-", r"exponential mechanism, $\varepsilon$ = 1"),
+        (None, "^-", "non-private: fewest training mistakes"),
+    ):
+        vals = [learner_excess(rng, n, eps, 100) for n in ns]
+        keep = [i for i, v in enumerate(vals) if v > 0]  # the log axis cannot show an exact 0
+        left.plot([ns[i] for i in keep], [vals[i] for i in keep], style, label=label)
+    left.set(
+        xscale="log",
+        yscale="log",
+        xlabel="training records n",
+        ylabel="excess error over the best threshold",
+        title="Choosing one of 1001 threshold classifiers",
+    )
+    left.legend(fontsize=8)
+    norms = gradient_norms(rng, 1000)
+    right.hist(norms, bins=np.linspace(0.5, 1.5, 41), density=True, color="0.8", label="gradient norms (histogram)")
+    grid = np.linspace(0.5, 1.5, 4001)
+    left_ends, lengths, _ = median_intervals(norms, NORM_RANGE)
+    for eps, color in ((0.1, "C0"), (1.0, "C1")):
+        probs = median_interval_probs(norms, eps)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            dens_int = np.where(lengths > 0, probs / np.where(lengths > 0, lengths, 1.0), 0.0)
+        idx = np.clip(np.searchsorted(left_ends, grid, side="right") - 1, 0, len(lengths) - 1)
+        right.plot(
+            grid, dens_int[idx], color=color, linewidth=1, label=rf"density of the output, $\varepsilon$ = {eps:g}"
+        )
+    right.axvline(float(np.median(norms)), color="C3", linestyle=":", label="true median")
+    right.set(xlabel="gradient norm", ylabel="density", xlim=(0.5, 1.5), title="Private median over [0, 10], zoomed in")
+    right.set_yscale("log")
+    right.set_ylim(1e-2, 1e3)
+    right.legend(fontsize=8)
+    return fig
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seed", type=int, default=0)
@@ -692,6 +917,7 @@ def main() -> None:
         "select_gumbel_em.svg": plot_gumbel_em(rng),
         "select_svt_path.svg": plot_svt_path(rng),
         "select_svt_buggy.svg": plot_svt_buggy(rng),
+        "select_em_applications.svg": plot_em_applications(rng),
     }
     for name, fig in figures.items():
         fig.tight_layout()

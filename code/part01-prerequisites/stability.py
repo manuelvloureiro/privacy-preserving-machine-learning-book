@@ -392,6 +392,61 @@ def bayes_and_cover_hart() -> tuple[float, float]:
     return float(np.minimum(p, 1 - p) @ weight), float((2 * p * (1 - p)) @ weight)
 
 
+# --- Choosing what to measure after looking: reusing a holdout set -------------------------------
+
+
+def fixed_queries_error(n: int, k: int) -> float:
+    """Bound on the expected largest error of k averages of [0, 1] values over n records, fixed in advance.
+
+    Each average minus its mean is sub-Gaussian with variance proxy 1/(4n) (Hoeffding's lemma), and the
+    largest of the 2k variables ±(error) has expectation at most sqrt(2 v ln(2k)) = sqrt(ln(2k) / (2n)).
+    """
+    return math.sqrt(math.log(2 * k) / (2 * n))
+
+
+@dataclass(frozen=True)
+class HoldoutReuse:
+    kept: float  # mean number of features kept
+    feature_error: float  # mean largest error of the d agreement rates, which were fixed in advance
+    reused: float  # mean accuracy of the combined rule, measured on the holdout set that chose it
+    split: float  # mean accuracy when the rule is chosen on one half and measured on the other half
+    true: float  # its accuracy on new data: exactly 1/2, since every feature is independent of the label
+
+
+def combined_rule_accuracy(x_pick: Array, y_pick: Array, x_eval: Array, y_eval: Array) -> tuple[int, float]:
+    """Keep the features whose agreement rate with the label on (x_pick, y_pick) is more than one standard
+    deviation, 1/(2 sqrt(n)), away from 1/2; vote with them, each with the sign it showed; return the number
+    kept and the vote's accuracy on (x_eval, y_eval). Ties are predicted as +1.
+    """
+    n = len(y_pick)
+    agree = (1 + x_pick.T @ y_pick / n) / 2
+    keep = np.abs(agree - 0.5) > 1 / (2 * math.sqrt(n))
+    signs = np.sign(agree[keep] - 0.5)
+    pred = np.where(x_eval[:, keep] @ signs >= 0, 1.0, -1.0)
+    return int(np.count_nonzero(keep)), float(np.count_nonzero(pred == y_eval)) / len(y_eval)
+
+
+def holdout_reuse(rng: np.random.Generator, n: int, d: int, trials: int) -> HoldoutReuse:
+    """Freedman's paradox on a holdout set of n records with d ±1 features, all independent of the ±1 label.
+
+    The analyst measures each feature's agreement rate with the label on the holdout set (d questions
+    fixed in advance), keeps the features that look predictive, combines them into a vote, and measures
+    the vote's accuracy on the same holdout set: a question chosen after looking. The split version
+    chooses on the first half of the records and measures on the second half.
+    """
+    kept, err, reused, split = 0.0, 0.0, 0.0, 0.0
+    half = n // 2
+    for _ in range(trials):
+        y = rng.choice(np.array([-1.0, 1.0]), size=n)
+        x = rng.choice(np.array([-1.0, 1.0]), size=(n, d))
+        err += float(np.max(np.abs((1 + x.T @ y / n) / 2 - 0.5)))
+        m, acc = combined_rule_accuracy(x, y, x, y)
+        kept += m
+        reused += acc
+        split += combined_rule_accuracy(x[:half], y[:half], x[half:], y[half:])[1]
+    return HoldoutReuse(kept / trials, err / trials, reused / trials, split / trials, 0.5)
+
+
 # --- The chapter's table --------------------------------------------------------------------
 
 
@@ -460,6 +515,14 @@ def print_table(rng: np.random.Generator) -> None:
         print(
             f"[0-1 error n={n}] 1-NN train={nn_train:.3f} test={nn_test:.3f}  "
             f"logistic train={lr_train:.3f} test={lr_test:.3f}"
+        )
+
+    for n, d in ((1000, 100), (1000, 1000)):
+        h = holdout_reuse(rng, n, d, trials=100)
+        print(
+            f"[Holdout reuse n={n} d={d}] kept={h.kept:.1f}  largest feature error={h.feature_error:.4f}  "
+            f"fixed-query bound={fixed_queries_error(n, d):.4f}  reused={h.reused:.4f}  split={h.split:.4f}  "
+            f"true={h.true:.1f}"
         )
 
 
@@ -644,6 +707,24 @@ def plot_self_influence(rng: np.random.Generator, n: int = 40) -> Figure:
     return fig
 
 
+def plot_holdout_reuse(rng: np.random.Generator, n: int = 1000) -> Figure:
+    ds = [10, 30, 100, 300, 1000, 3000]
+    res = [holdout_reuse(rng, n, d, trials=20) for d in ds]
+    fig, ax = plt.subplots(figsize=(6, 4))
+    ax.plot(ds, [h.reused for h in res], "o-", color="C3", label="measured on the holdout set that chose it")
+    ax.plot(ds, [h.split for h in res], "s-", color="C0", label="chosen on one half, measured on the other")
+    ax.plot(ds, [0.5 + fixed_queries_error(n, d) for d in ds], ":", color="C2", label="1/2 + fixed-question bound")
+    ax.axhline(0.5, color="k", linestyle="--", label="accuracy on new data = 1/2")
+    ax.set(
+        xscale="log",
+        xlabel="number of features examined d",
+        ylabel="accuracy of the combined vote",
+        title=f"Choosing after looking, n = {n} holdout records",
+    )
+    ax.legend(fontsize=8)
+    return fig
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seed", type=int, default=0)
@@ -665,6 +746,7 @@ def main() -> None:
         "stability_sgd_epochs.svg": plot_sgd_epochs(rng),
         "stability_nearest_neighbour.svg": plot_nearest_neighbour(rng),
         "stability_self_influence.svg": plot_self_influence(rng),
+        "stability_holdout_reuse.svg": plot_holdout_reuse(rng),
     }
     for name, fig in figures.items():
         fig.tight_layout()

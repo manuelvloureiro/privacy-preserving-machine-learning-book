@@ -113,3 +113,19 @@ So the same threshold $\varphi = 1.5$ falsely matches about one outsider in five
 
 *The eccentricity threshold controls false matches only relative to the tail of the null score distribution, which is why it has to be calibrated on outsiders.*
 :::
+
+## Hashed identifiers and taxi trips {#sec-sol-linkage-8}
+
+> **Exercise 8.** **Hashed identifiers and taxi trips.** Driver licence numbers in the taxi release of @sec-link-pseudonyms have six digits, or seven digits starting with 5. (a) How many values is that, how many bits, and how long does it take to hash them all at $10^7$ hashes per second? Compare a random 10-character password over 62 symbols. (b) Treat each trip's pickup as a uniformly random cell: one of 525,600 minutes of the year and one of 78,000 squares of 100 m. Use @eq-link-uniform to find the fraction of the 173 million trips that are unique on their pickup. Why is the true fraction lower, and why does that not save the passengers? *Check: $2\times10^6$ values (20.9 bits) take 0.2 seconds. A password carries 59.5 bits and takes about 2661 years. The unique fraction is 0.9958.* *(Bits, uniqueness)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Count the licences.** There are $10^6$ six-digit numbers and $10^6$ seven-digit numbers starting with 5, so $2\times10^6$ values. That is $\log_2(2\times10^6) = 20.9$ bits.
+2. **Time the dictionary.** At $10^7$ hashes per second, hashing every value takes $2\times10^6/10^7 = 0.2$ seconds. Sorting the hashes and looking up each pseudonym adds little.
+3. **Compare a password.** A random 10-character password over 62 symbols has $62^{10} = 8.39\times10^{17}$ values, 59.5 bits. Hashing all of them at the same rate takes about 2661 years. The hash function is the same in both cases; what differs is how many bits the input carries.
+4. **Count the pickup cells.** There are $525{,}600 \times 78{,}000 = 4.1\times10^{10}$ cells, so the average cell holds $n/M = 173\times10^6/4.1\times10^{10} = 0.00422$ trips.
+5. **Apply @eq-link-uniform.** The fraction unique is about $e^{-0.00422} = 0.9958$.
+6. **Why the true fraction is lower.** Trips are not spread uniformly. They crowd into busy hours and busy places, such as Midtown Manhattan at rush hour, where many trips share a minute and a square. The uniform model overstates uniqueness, as it did for Sweeney's attributes.
+7. **Why that does not save the passengers.** An adversary who knows a pickup usually knows more than its minute and square: the drop-off area, the date, a photograph of the taxi. Each adds bits, and a celebrity photographed outside a hotel is rarely in the crowded cells anyway. Even in a crowded cell, the adversary learns that the trip is one of a handful.
+
+*A hash hides as many bits as its input carries and no more. A single recorded action, like a taxi pickup, carries more bits than it takes to single out one trip among hundreds of millions.*
+:::

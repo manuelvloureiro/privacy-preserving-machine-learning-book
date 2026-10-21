@@ -18,21 +18,23 @@ A randomized algorithm is differentially private when changing one person's reco
 
 | Chapter | The question it answers | Builds on |
 | --- | --- | --- |
-| [The definition of differential privacy](01-definition.md) | What exactly does DP promise, to whom, and what does it not protect? | 3, 4, 9, 10 |
+| [The definition of differential privacy](01-definition.md) | What exactly does DP promise, to whom, and what does it not protect? How do you tell a privacy violation from learning about the population? | 3, 4, 9, 10 |
 | [Post-processing, group privacy and composition](02-properties.md) | Which operations keep a guarantee, and how do guarantees add up? | 3, 18 |
 | [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md) | How much noise does a numerical query need, and what is the exact privacy of Gaussian noise? | 1, 2, 3, 18, 19 |
 | [Advanced and optimal composition](04-composition.md) | How does privacy degrade over many releases, exactly? | 2, 3, 4, 18, 19 |
 | [Selection: exponential mechanism, report-noisy-max, sparse vector](05-selection.md) | How do you privately choose the best of many options, or find the few queries above a threshold? | 1, 2, 18–20 |
-| [Beyond global sensitivity](06-sensitivity.md) | What if the worst case is far from the data you actually have? | 1, 2, 3, 9, 18–20 |
-| [Discrete and floating-point-safe mechanisms](07-discrete-mechanisms.md) | Why do textbook mechanisms break on real computers, and how is that fixed? | 1, 3, 18, 20 |
-| [Local, shuffle and distributed trust models](08-trust-models.md) | What changes when no one is trusted with the raw data? | 2, 8, 9, 18, 20 |
-| [Lower bounds: what privacy costs](09-lower-bounds.md) | How much accuracy must every private mechanism give up? | 2, 4, 5, 10, 17, 18–20 |
+| [Query release and private multiplicative weights](06-query-release.md) | How do you answer millions of linear queries, or publish a synthetic dataset, when noise on every answer would drown them? | 2, 18, 20–22 |
+| [Beyond global sensitivity](07-sensitivity.md) | What if the worst case is far from the data you actually have? | 1, 2, 3, 9, 18–20, 22 |
+| [Discrete and floating-point-safe mechanisms](08-discrete-mechanisms.md) | Why do textbook mechanisms break on real computers, and how is that fixed? | 1, 3, 18, 20 |
+| [Local, shuffle and distributed trust models](09-trust-models.md) | What changes when no one is trusted with the raw data? | 2, 8, 9, 18, 20 |
+| [Lower bounds: what privacy costs](10-lower-bounds.md) | How much accuracy must every private mechanism give up? | 2, 4, 5, 10, 17, 18–20 |
+| [Private mean estimation](11-mean-estimation.md) | How many records does a private estimate of a population mean need, and what does not knowing the range, the dimension or the tails cost? | 1, 2, 20–22, 24, 27 |
 
 : The chapters of this part, the question each one answers, and the earlier chapters it uses, by number (chapters 1–8 are the prerequisites, 9–17 the attacks part). {#tbl-dp-map}
 
 ## How to read this part
 
-**Order.** Chapters 18 to 21 are the core and should be read in order: the definition, the properties that make it usable, the two mechanisms everything else is built from, and advanced and optimal composition, which finishes the story of composition that chapter 19 starts and introduces the privacy loss random variable that the next part uses throughout. Chapters 22 and 23 add mechanisms, for selection and for data whose worst case is far from typical. Chapter 24 is short and practical: read it before you implement any mechanism yourself. Chapter 25 changes who is trusted with the raw data. Chapter 26 is the most theoretical; it ties back to reconstruction and membership attacks and closes the part with what privacy costs.
+**Order.** Chapters 18 to 21 are the core and should be read in order: the definition, the properties that make it usable, the two mechanisms everything else is built from, and advanced and optimal composition, which finishes the story of composition that chapter 19 starts and introduces the privacy loss random variable that the next part uses throughout. Chapter 22 adds mechanisms for selection, and chapter 23 builds on them to answer many queries at once, by releasing synthetic data with private multiplicative weights. Chapter 24 handles data whose worst case is far from typical. Chapter 25 is short and practical: read it before you implement any mechanism yourself. Chapter 26 changes who is trusted with the raw data. Chapter 27 is the most theoretical; it ties back to reconstruction and membership attacks and says what privacy must cost. Chapter 28 closes the part by putting these tools together on the most common statistical task, estimating a mean, and matches each of its error rates with a lower bound from chapter 27.
 
 **Structure of a chapter.** Every chapter has the same shape as in the earlier parts: why it matters, a toolkit, one section per result with a statement, derivation, interpretation, worked example and two *check yourself* questions, then code, references and a cheat sheet. Exercises with worked solutions are collected in the exercise book, a companion website, with a link at the end of each chapter.
 

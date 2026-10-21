@@ -27,7 +27,8 @@ So a lower bound on error is the same thing as an attack on accurate mechanisms.
 | Packing lemma | Pure | Lower bounds for any output that must single out one of many candidates |
 | Mode and histogram bounds | Pure | Showing Laplace histograms and report-noisy-max are optimal |
 | Sample complexity | Pure and approximate | How many records a private analysis needs; when privacy is cheap |
-| Packing fails under $\delta > 0$ | Approximate | Why the Gaussian mechanism can beat every pure-DP mechanism |
+| Packing under $\delta > 0$ | Approximate | Why the Gaussian mechanism can beat every pure-DP mechanism; the $\ln(1/\delta)/\varepsilon$ cost of stability-based releases |
+| Packing for a mean in $[-R, R]$ | Pure and approximate | The $\ln R/\varepsilon$ cost of not knowing where the data lie |
 | Fingerprinting lemma and the $\sqrt d$ bound | Approximate | Optimality of the Gaussian mechanism for many means; the cost of high-dimensional releases |
 | Tracing attack | Any | Membership inference on released statistics; auditing noisy means |
 | Dinur–Nissim as a lower bound | Any | Why every query answered privately must carry noise of order $\sqrt n$ |
@@ -142,6 +143,10 @@ $$\alpha \ge \frac12\left(\frac{\ln\big(N(1 - \beta)\big)}{\varepsilon} - 1\righ
 
 **Approximate DP escapes.** Why does the lemma need $\delta = 0$? Repeat step 1 with $\delta > 0$. Fact 1 now gives $1 - \beta \le e^{k\varepsilon}\Pr[M(D_0) \in G_i] + \delta_k$, so $\Pr[M(D_0) \in G_i] \ge e^{-k\varepsilon}(1 - \beta - \delta_k)$. Using $\delta_k \le k\,e^{(k-1)\varepsilon}\delta$, the subtracted part $e^{-k\varepsilon}\delta_k$ is at most $k\,e^{-\varepsilon}\delta$, so $\Pr[M(D_0) \in G_i] \ge e^{-k\varepsilon}(1 - \beta) - k\,e^{-\varepsilon}\delta$. The first term shrinks exponentially in $k$ and the second grows. Once $e^{-k\varepsilon}$ is smaller than about $k\delta$, the right side is negative, step 1 demands nothing of $M(D_0)$, and the lemma says nothing, however many regions there are. So under approximate DP packing can force $k$ only up to about $\ln(1/\delta)/\varepsilon$. This is not a weakness of the proof, because a mechanism really does better. The stability-based histogram (Vadhan 2017) adds noise only to the bins that are non-empty and releases a bin only if its noisy count clears a threshold of order $\ln(1/\delta)/\varepsilon$. Empty bins are never released, so there is no union bound over all $N$ bins, and its error does not grow with $N$ at all.
 
+**The packing lemma under approximate DP.** The same argument still gives a lower bound, only a capped one. Let $D_0, D_1, \dots, D_m$ and the disjoint sets $G_1, \dots, G_m$ be as in the lemma, but let $M$ be $(\varepsilon, \delta)$-DP. Then at least one of two things holds:
+$$e^{-k\varepsilon}(1 - \beta) \le 2k\delta \qquad\text{or}\qquad m\,e^{-k\varepsilon}(1 - \beta) \le 2.$$ {#eq-lower-packing-approx}
+In words, the group distance $k$ must be at least about $\min\big(\ln m, \ln(1/\delta)\big)/\varepsilon$. The proof takes two lines. The share bound above, with $e^{-\varepsilon} \le 1$, says each region gets at least $e^{-k\varepsilon}(1 - \beta) - k\delta$ of the probability of $M(D_0)$. If the first condition fails, that share is more than half of $e^{-k\varepsilon}(1 - \beta)$, and the $m$ shares must still fit into a total of 1, which is the second condition. For the $2^d$ corners of the marginals section below, at $\varepsilon = 1$, $\delta = 10^{-6}$ and $\beta = 0.05$, @eq-lower-packing-approx forces $k \ge 7$ at $d = 10$ and $k \ge 11$ at $d = 100$ and $d = 1000$. The share bound itself, without the factor 2, forces 7, 13 and 13 ([Exercise 2](../../book-exercises/part03-dp-foundations/10-lower-bounds.md#sec-sol-lower-2)). Either way the cap sits a little below $\ln(10^6) = 13.82$, because the $\delta$ term carries the factor $k$. On the packing datasets of the mode, the [stability-based release](07-sensitivity.md) reaches this cap. It reports the most common value exactly once that value leads by about $2\ln(1/\delta)/\varepsilon$ records, however many values there are, and since one replacement moves the lead by 2, that lead is about $\ln(1/\delta)/\varepsilon$ replacements.
+
 ![$\ell_\infty$ error of $\varepsilon$-DP histograms over $N$ bins at $\varepsilon = 1$, failure probability 0.05. Orange: the Laplace mechanism, exact (line), union bound (dotted, indistinguishable) and simulated (dots). Blue: the packing lower bound; no $\varepsilon$-DP mechanism has an error in the shaded region. Both grow like $\ln N$.](figures/lower_histogram.svg){#fig-lower-histogram}
 
 ### Example: a million ZIP codes
@@ -158,10 +163,27 @@ $$\alpha \ge \frac12\left(\frac{\ln\big(N(1 - \beta)\big)}{\varepsilon} - 1\righ
 
 Each factor of 1000 in $N$ adds $\ln 1000 = 6.9$ to every column that grows like $\ln N$, and half that to the histogram lower bound, which carries the factor $\frac12$.
 
+### Example: a mean known to lie in $[-R, R]$
+
+Packing also prices a question every analyst meets: what does it cost not to know where the data lie? Suppose the records are drawn from a normal distribution with unknown mean $\mu$ and variance 1, and all you know is $|\mu| \le R$. An $\varepsilon$-DP mechanism that returns an estimate closer than $\alpha$ to $\mu$, with probability at least $1 - \beta$ whatever $\mu$ is, needs
+$$n \ge \frac{\ln\big(\lfloor R/\alpha\rfloor(1 - \beta)\big)}{\varepsilon},$$ {#eq-lower-mean-packing}
+where $\lfloor R/\alpha\rfloor$ is $R/\alpha$ rounded down. The cost grows with the logarithm of the range, not the range itself.
+
+The derivation is the packing lemma with random datasets.
+
+1. **Candidates.** Place $m = \lfloor R/\alpha\rfloor$ means $\mu_1, \dots, \mu_m$ in $[-R, R]$, spaced $2R/m \ge 2\alpha$ apart, and let $G_j$ be the open interval of radius $\alpha$ around $\mu_j$. Neighbouring intervals at most touch, so they are disjoint.
+2. **Every dataset is close to a reference.** Fix any reference dataset $D_0$ of size $n$. Any other dataset of size $n$ is at most $n$ replacements away, so group privacy (Fact 1 with $\delta = 0$) gives $\Pr[M(x) \in G_j] \le e^{n\varepsilon}\Pr[M(D_0) \in G_j]$ for every dataset $x$.
+3. **Average over the data.** Draw $x$ from the normal distribution with mean $\mu_j$. Accuracy says that, averaged over $x$ and the mechanism, $\Pr[M(x) \in G_j] \ge 1 - \beta$. Averaging the inequality of step 2 over $x$ leaves its right side unchanged, so $\Pr[M(D_0) \in G_j] \ge (1 - \beta)e^{-n\varepsilon}$.
+4. **Combine** as in the lemma: the $m$ shares fit into a total of 1, so $m(1 - \beta)e^{-n\varepsilon} \le 1$, which is @eq-lower-mean-packing.
+
+At $\alpha = 0.1$, $\beta = 0.05$ and $\varepsilon = 1$, the bound is $n \ge 4.55$ for $R = 10$, $9.16$ for $R = 10^3$ and $16.07$ for $R = 10^6$. These numbers are small because the cost grows only with the logarithm of the range. In $d$ dimensions the same argument charges about $d\ln(R/\alpha)/\varepsilon$ records ([Exercise 8](../../book-exercises/part03-dp-foundations/10-lower-bounds.md#sec-sol-lower-8)).
+
+The obvious estimator clips the data to $[-R, R]$ and adds noise proportional to $R$, so the records it needs for a given error grow linearly in $R$, while packing allows a cost that grows only like $\ln R$. [Private mean estimation](11-mean-estimation.md) closes the gap with a mechanism that first finds the data's rough location with a histogram, at a cost of order $\ln R/\varepsilon$ records. Under approximate DP, @eq-lower-packing-approx caps the bound: at $\delta = 10^{-6}$ it forces only $n \ge 11$ for $R = 10^6$, and a stability-based histogram can indeed find the location with a number of records that does not depend on $R$ at all.
+
 ### Check yourself
 
 - Why do the regions $G_i$ have to be disjoint, and what happens to the lemma if they overlap? *(Disjointness is what lets the shares add up to at most 1 in step 2. If the regions overlap, one output can count for several candidates, and $M(D_0)$ can meet all the demands with less total mass.)*
-- Under replace neighbours a histogram count moves by 1 in two bins. Does the lower bound change? *(Barely: the same datasets work with $D_0$ = $n$ copies of a fixed element, giving $N - 1$ candidates instead of $N$. The Laplace upper bound doubles, because the $\ell_1$ sensitivity is 2. [Exercise 1](../../book-exercises/part03-dp-foundations/09-lower-bounds.md#sec-sol-lower-1) does this.)*
+- Under replace neighbours a histogram count moves by 1 in two bins. Does the lower bound change? *(Barely: the same datasets work with $D_0$ = $n$ copies of a fixed element, giving $N - 1$ candidates instead of $N$. The Laplace upper bound doubles, because the $\ell_1$ sensitivity is 2. [Exercise 1](../../book-exercises/part03-dp-foundations/10-lower-bounds.md#sec-sol-lower-1) does this.)*
 
 ## Sample complexity: how many records privacy costs {#sec-lower-sample}
 
@@ -282,7 +304,7 @@ $$\sum_{i=1}^n\mathbb E Z_i \ge \frac23d - 2\,\mathbb E\|M(D) - \bar x\|_1 \ge \
 
 **The role of $\delta$.** The term $4\delta d$ is harmless only while $\delta \ll 1/\sqrt d$, so that it stays small next to $\sqrt d$. It cannot be removed. A mechanism that publishes each record outright with probability $\delta$ satisfies $(0, \delta)$-DP, because one record's presence changes any event's probability by at most $\delta$ ([The definition of differential privacy](01-definition.md)). If $\delta$ were as large as $1/n$, it would publish about one record on average, and no lower bound of this kind could hold.
 
-**How tight is it?** The $\sqrt d$ rate matches the Gaussian mechanism, but the constants in @eq-lower-fp are poor. At $\alpha = 0.1$, $\beta = 0.05$, $\varepsilon = 1$, $\delta = 10^{-6}$ the bound says $n \ge 5.0$ for $d = 1000$ and $n \ge 15.8$ for $d = 10{,}000$, against 10,836 and 38,570 records for the Gaussian mechanism (@fig-lower-sample-complexity). Three things separate the simple proof from the Gaussian rate. The first is a factor $1/\alpha$: [Exercise 4](../../book-exercises/part03-dp-foundations/09-lower-bounds.md#sec-sol-lower-4) recovers it with a padding argument, and the numbers just quoted already include it. The second is a factor $\sqrt{\ln(1/\delta)}$, which Steinke & Ullman (2016) obtain with a sharper choice of the distribution of $p$, proving $n = \Omega\big(\sqrt{d\ln(1/\delta)}/(\alpha\varepsilon)\big)$. The third is the $\sqrt{\ln d}$ from the union bound in the upper bound, which is a property of $\ell_\infty$ error, not of privacy. With all three, upper and lower bounds agree up to that logarithm.
+**How tight is it?** The $\sqrt d$ rate matches the Gaussian mechanism, but the constants in @eq-lower-fp are poor. At $\alpha = 0.1$, $\beta = 0.05$, $\varepsilon = 1$, $\delta = 10^{-6}$ the bound says $n \ge 5.0$ for $d = 1000$ and $n \ge 15.8$ for $d = 10{,}000$, against 10,836 and 38,570 records for the Gaussian mechanism (@fig-lower-sample-complexity). Three things separate the simple proof from the Gaussian rate. The first is a factor $1/\alpha$: [Exercise 4](../../book-exercises/part03-dp-foundations/10-lower-bounds.md#sec-sol-lower-4) recovers it with a padding argument, and the numbers just quoted already include it. The second is a factor $\sqrt{\ln(1/\delta)}$, which Steinke & Ullman (2016) obtain with a sharper choice of the distribution of $p$, proving $n = \Omega\big(\sqrt{d\ln(1/\delta)}/(\alpha\varepsilon)\big)$. The third is the $\sqrt{\ln d}$ from the union bound in the upper bound, which is a property of $\ell_\infty$ error, not of privacy. With all three, upper and lower bounds agree up to that logarithm.
 
 ![Records needed to release $d$ attribute means to $\ell_\infty$ error 0.1 with probability 0.95, at $\varepsilon = 1$ and $\delta = 10^{-6}$, on log–log axes. Orange: pure DP (Laplace upper bound, packing lower bound), both of slope 1. Blue: approximate DP (Gaussian upper bound, fingerprinting lower bound), both of slope ½. The constants of the fingerprinting bound are loose; the slopes are the point.](figures/lower_sample_complexity.svg){#fig-lower-sample-complexity}
 
@@ -347,7 +369,7 @@ The worst-case TV column is $2\Phi\big(\Delta_2/(2\sigma)\big) - 1$ with $\Delta
 ### Check yourself
 
 - If you double both $n$ and $\sqrt d$, what happens to the tracing advantage without noise? *(Almost nothing: $m/s \approx \frac{2\sqrt d}{3n}/\sqrt{2/15}$ depends on $\sqrt d/n$, apart from the small $8/(15n)$ term.)*
-- The attacker needs $p$. Why is it not enough to replace $p$ by the released $\hat q$ itself? *(Then the score is $\langle\hat q, y - \hat q\rangle$, and the member's own record is part of $\hat q$, so the subtraction cancels part of the signal. A separate reference sample keeps the mean gap $2d/(3n)$, at the cost of extra variance; see [Exercise 6](../../book-exercises/part03-dp-foundations/09-lower-bounds.md#sec-sol-lower-6).)*
+- The attacker needs $p$. Why is it not enough to replace $p$ by the released $\hat q$ itself? *(Then the score is $\langle\hat q, y - \hat q\rangle$, and the member's own record is part of $\hat q$, so the subtraction cancels part of the signal. A separate reference sample keeps the mean gap $2d/(3n)$, at the cost of extra variance; see [Exercise 6](../../book-exercises/part03-dp-foundations/10-lower-bounds.md#sec-sol-lower-6).)*
 
 ## Dinur–Nissim as a lower bound {#sec-lower-dinur-nissim}
 
@@ -369,7 +391,9 @@ By the Dinur–Nissim theorem, in the sharper form of Dwork, McSherry and Talwar
 
 ### Interpretation
 
-**The Gaussian mechanism matches it.** Changing one bit changes by 1 the answer of every query whose subset contains that person, and leaves the others alone. At most $k$ answers change, so the answer vector moves by at most $\sqrt k$ in $\ell_2$ (in fact by about $\sqrt{k/2}$, since each person is in about half of the random subsets). The Gaussian mechanism therefore needs $\sigma$ proportional to $\sqrt k/\mu(\varepsilon, \delta)$, which for $k = 4n$ is $2\sqrt n/\mu$, of order $\sqrt n$. Answering $k$ counting queries costs error of order $\sqrt k$ per query under approximate DP, as the marginals section found for $d$ means. Under pure DP the Laplace mechanism must be calibrated to the $\ell_1$ sensitivity, which is $k$, and so pays error of order $k$ per query, as packing says it must.
+**The Gaussian mechanism matches it.** Changing one bit changes by 1 the answer of every query whose subset contains that person, and leaves the others alone. At most $k$ answers change, so the answer vector moves by at most $\sqrt k$ in $\ell_2$ (in fact by about $\sqrt{k/2}$, since each person is in about half of the random subsets). The Gaussian mechanism therefore needs $\sigma$ proportional to $\sqrt k/\mu(\varepsilon, \delta)$, which for $k = 4n$ is $2\sqrt n/\mu$, of order $\sqrt n$. Answering $k$ counting queries with independent noise costs error of order $\sqrt k$ per query under approximate DP, as the marginals section found for $d$ means. Under pure DP the Laplace mechanism must be calibrated to the $\ell_1$ sensitivity, which is $k$, and so pays error of order $k$ per query, as packing says it must for families of queries as rich as the marginals.
+
+For random subset sums, these two rates are lower bounds only up to about $n$ queries. With more queries than records they stop being the right picture, for two reasons. An error of order $n$ says nothing, because answering $n/2$ to every query already achieves it, and the example below, with $k = 4n$, sits at that edge. More importantly, a mechanism need not noise each answer separately. Mechanisms that build a small private synthetic dataset and answer every query from it, such as SmallDB and private multiplicative weights ([Query release](06-query-release.md)), have per-query errors that grow only like a small power of $\log k$, times factors in $n$ and in the size of the data universe. For random subset sums under approximate DP, private multiplicative weights keeps the error of order $\sqrt n$ up to logarithmic factors for any number of queries polynomial in $n$, which is the Dinur–Nissim bound of this section. Other query families behave differently. For the one-way marginals, whose universe is far larger, the $\sqrt d$ rate of approximate DP stays optimal up to about $n^2$ queries.
 
 **The bound is crude in one way.** It looks only at the fraction of bits recovered, and least squares is not the best attack. So the $\varepsilon$ it implies is far below the $\varepsilon$ the Gaussian mechanism guarantees at the same noise. The true privacy loss of the release lies somewhere between them. Auditing, in a later part, narrows this gap with stronger attacks.
 
@@ -411,7 +435,8 @@ uv run python code/part03-dp-foundations/lower_bounds.py
 | Toolkit, $\varepsilon = 1$ | Advantage at most 0.4621; bit guessed at most 0.7311 of the time; group $\delta_5 = 8.6\times10^{-5}$, $\delta_{20} = 282$ at $\delta = 10^{-6}$ |
 | Mode and histogram, $N = 10^6$ | Lead $k \ge 13.76$ (noisy-max needs 18.44); error $\ge 6.38$ (Laplace 16.79); full table in @tbl-lower-histogram |
 | Simulations at $N = 1000$ | Laplace 95% error 9.84 (exact 9.88); noisy-max failure 0.0228 at lead 11.09 (union bound 0.05) |
-| Packing under $\delta = 10^{-6}$, $2^d$ candidates | Forces $k \ge 7$ at $d = 10$ and $k \ge 13$ at $d = 100$ and $1000$ (pure: 6.88, 69.26, 693.10); $\ln(1/\delta)/\varepsilon = 13.82$ |
+| Packing under $\delta = 10^{-6}$, $2^d$ candidates | Forces $k \ge 7$ at $d = 10$ and $k \ge 13$ at $d = 100$ and $1000$ (pure: 6.88, 69.26, 693.10); @eq-lower-packing-approx: 7, 11, 11; $\ln(1/\delta)/\varepsilon = 13.82$ |
+| Packing for a mean, $\alpha = 0.1$ | $n \ge 4.55$, 9.16, 16.07 for $R = 10$, $10^3$, $10^6$; under $\delta = 10^{-6}$: 4, 9, 11 |
 | Sample complexity, histogram $N = 10^6$ | $\alpha = 0.1$: 64 private, 875 sampling. $\alpha = 0.01$: 638 private, 87,522 sampling |
 | Sample complexity, marginals | @tbl-lower-sample; the Gaussian beats the pure-DP lower bound from $d = 2731$; $\mu(1, 10^{-6}) = 0.2367$ |
 | Fingerprinting lower bound | $n \ge 1.6$, 5.0, 15.8, 50.1 at $d = 10^2, 10^3, 10^4, 10^5$ |
@@ -449,7 +474,8 @@ $\alpha$ is the error, $\beta$ the failure probability, $d$ the number of attrib
 | Packing lemma (pure) | $m$ disjoint good sets, all within $k$ of $D_0$: $k \ge \ln(m(1 - \beta))/\varepsilon$ | — |
 | Mode over $N$ elements (pure) | Lead $k \ge \ln(N(1 - \beta))/\varepsilon$ | Report-noisy-max: $(N - 1)e^{-k\varepsilon}(2 + k\varepsilon)/4 \le \beta$ |
 | Histogram, $\ell_\infty$ (pure) | $\alpha \ge \frac12(\ln(N(1 - \beta))/\varepsilon - 1)$ | Laplace: $\alpha \le \ln(N/\beta)/\varepsilon$ |
-| Packing under $\delta > 0$ | Forces at most $k \approx \ln(1/\delta)/\varepsilon$ | Stability-based histogram |
+| Packing under $\delta > 0$ | $e^{-k\varepsilon}(1 - \beta) \le 2k\delta$ or $m e^{-k\varepsilon}(1 - \beta) \le 2$: $k \gtrsim \min(\ln m, \ln(1/\delta))/\varepsilon$ | Stability-based histogram and release |
+| Mean with $\lvert\mu\rvert \le R$ (pure) | $n \ge \ln(\lfloor R/\alpha\rfloor(1 - \beta))/\varepsilon$ | Coarse histogram, then fine ([Private mean estimation](11-mean-estimation.md)) |
 | Histogram, records | $n \ge (\ln(N(1 - \beta)) - \varepsilon)/(2\alpha\varepsilon)$; sampling needs $\approx\ln(2N/\beta)/(2\alpha^2)$ | Laplace |
 | $d$ marginals (pure) | $n \gtrsim d\ln2/(\alpha\varepsilon)$ | Laplace: $n = 2d\ln(d/\beta)/(\alpha\varepsilon)$ |
 | Fingerprinting lemma | $\mathbb E[f\sum_i(x_i - p)] = 2\mathbb E[pf] \ge \frac23 - 2\mathbb E\lvert f - \bar x\rvert$ | — |
@@ -465,8 +491,9 @@ $\alpha$ is the error, $\beta$ the failure probability, $d$ the number of attrib
 - A lower bound on error is an attack on accurate mechanisms plus DP's limit on attacks.
 - Pure DP pays $\ln(\text{number of candidates})/\varepsilon$; for $d$-dimensional outputs that is linear in $d$.
 - Approximate DP pays about $\sqrt d$ for $d$ statistics, and $\delta$ must stay far below $1/n$ for that to mean anything.
-- Answering $k$ counting queries privately costs error about $\sqrt k$ per query with $\delta > 0$, and about $k$ without.
+- Answering $k \lesssim n$ counting queries with independent noise costs error about $\sqrt k$ per query with $\delta > 0$, and about $k$ without. With many more queries than records, answering from a private synthetic dataset can do much better, with error that grows only like a small power of $\log k$ ([Query release](06-query-release.md)).
+- Not knowing where the data lie costs only $\ln(R/\alpha)/\varepsilon$ records under pure DP, and at most about $\ln(1/\delta)/\varepsilon$ under approximate DP.
 - Privacy is an additive cost in the number of records: it matters most for coarse answers at small $\varepsilon$.
-- Aggregates over many attributes are not safe by being aggregates: without noise, tracing reaches advantage 0.5 once $d \approx 0.56\,n^2$ ([Exercise 5](../../book-exercises/part03-dp-foundations/09-lower-bounds.md#sec-sol-lower-5)). Noise of order $\sqrt d/n$ stops it.
+- Aggregates over many attributes are not safe by being aggregates: without noise, tracing reaches advantage 0.5 once $d \approx 0.56\,n^2$ ([Exercise 5](../../book-exercises/part03-dp-foundations/10-lower-bounds.md#sec-sol-lower-5)). Noise of order $\sqrt d/n$ stops it.
 
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/09-lower-bounds.md).
+**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/10-lower-bounds.md).

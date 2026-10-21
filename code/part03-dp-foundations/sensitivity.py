@@ -3,7 +3,7 @@
     uv run python code/part03-dp-foundations/sensitivity.py
     uv run python code/part03-dp-foundations/sensitivity.py --seed 1 --out /tmp/figures
 
-Prints the numbers quoted in 06-sensitivity.md (they match exactly with the default seed),
+Prints the numbers quoted in 07-sensitivity.md (they match exactly with the default seed),
 then saves the chapter's figures.
 
 Conventions: datasets have a fixed size n (the replace-one-record neighbouring relation), the
@@ -233,6 +233,83 @@ def ptr_pass_probability(dist: float, eps: float, delta: float) -> float:
     return 1 - 0.5 * math.exp(-gap) if gap >= 0 else 0.5 * math.exp(gap)
 
 
+# --- Inverse sensitivity: the median by the exponential mechanism ---------------------------
+
+
+def inverse_sensitivity_pieces(x: Array | tuple[float, ...], lam: float) -> tuple[Array, Array]:
+    """Lengths of the intervals (x_i, x_{i+1}), i = 0..n, of the padded data, and len(D, t) on each.
+
+    len(D, t), the fewest records to change so that the median becomes t, is i - m + 1 on
+    (x_i, x_{i+1}) for i ≥ m and m - i for i < m, with x_0 = 0, x_{n+1} = Λ and m = (n + 1)/2.
+    """
+    xs = np.sort(np.asarray(x, dtype=np.float64))
+    n = len(xs)
+    m = (n + 1) // 2
+    p = np.concatenate([[0.0], xs, [lam]])
+    i = np.arange(n + 1)
+    lens = np.where(i >= m, i - m + 1, m - i).astype(np.float64)
+    return np.diff(p), lens
+
+
+def inverse_sensitivity_probabilities(x: Array | tuple[float, ...], lam: float, eps: float) -> Array:
+    """Probability of each interval: length × e^{-ε len/2}, normalized (the exponential mechanism, Δ = 1)."""
+    lengths, lens = inverse_sensitivity_pieces(x, lam)
+    logw = np.log(np.maximum(lengths, 1e-300)) - eps * lens / 2
+    w = np.where(lengths > 0, np.exp(logw - logw.max()), 0.0)
+    return w / w.sum()
+
+
+def inverse_sensitivity_median_abs_error(x: Array | tuple[float, ...], lam: float, eps: float) -> float:
+    """Exact median of |t - median(D)| for the inverse-sensitivity release, by bisection on its CDF."""
+    xs = np.sort(np.asarray(x, dtype=np.float64))
+    n = len(xs)
+    med = float(xs[(n + 1) // 2 - 1])
+    p = np.concatenate([[0.0], xs, [lam]])
+    probs = inverse_sensitivity_probabilities(x, lam, eps)
+    lengths = np.diff(p)
+
+    def cdf(r: float) -> float:
+        lo = np.clip(med - r, p[:-1], p[1:])
+        hi = np.clip(med + r, p[:-1], p[1:])
+        frac = np.where(lengths > 0, (hi - lo) / np.maximum(lengths, 1e-300), 0.0)
+        return float(np.sum(probs * frac))
+
+    a, b = 0.0, lam
+    for _ in range(200):
+        mid = (a + b) / 2
+        if cdf(mid) < 0.5:
+            a = mid
+        else:
+            b = mid
+    return (a + b) / 2
+
+
+def inverse_sensitivity_sample(rng: np.random.Generator, x: Array, lam: float, eps: float, size: int) -> Array:
+    p = np.concatenate([[0.0], np.sort(x), [lam]])
+    j = rng.choice(len(p) - 1, size=size, p=inverse_sensitivity_probabilities(x, lam, eps))
+    return p[j] + rng.uniform(size=size) * (p[j + 1] - p[j])
+
+
+# --- Stability-based release: the mode ------------------------------------------------------
+
+
+def mode_stability_distance(gap: int) -> int:
+    """max(0, ⌈g/2⌉ - 1) for a lead g of the top count over the runner-up (replace neighbours).
+
+    One replaced record moves the lead by at most 2, so this has sensitivity 1, and it is 0
+    whenever some neighbour has a different mode (then g ≤ 2).
+    """
+    return max(0, math.ceil(gap / 2) - 1)
+
+
+def mode_gap_for_pass(prob: float, eps: float, delta: float) -> int:
+    """Smallest lead g whose stability release answers with probability at least `prob`."""
+    g = 0
+    while ptr_pass_probability(mode_stability_distance(g), eps, delta) < prob:
+        g += 1
+    return g
+
+
 # --- Subsample-and-aggregate: the rate of an exponential distribution -----------------------
 
 
@@ -451,6 +528,27 @@ def print_table(rng: np.random.Generator) -> None:
         c = optimal_clip(n_big, EPS)
         print(f"  n={n_big}: C*={c:.1f}  rmse={clip_error(c, n_big, EPS).rmse:.4f}")
 
+    print(f"[Inverse sensitivity, walkthrough x={WALK_X}, Λ={WALK_MAX}, ε=1]")
+    lengths, lens = inverse_sensitivity_pieces(tuple(float(v) for v in WALK_X), WALK_MAX)
+    probs = inverse_sensitivity_probabilities(tuple(float(v) for v in WALK_X), WALK_MAX, EPS)
+    print("  lengths: " + " ".join(f"{v:g}" for v in lengths))
+    print("  len:     " + " ".join(f"{v:g}" for v in lens))
+    print("  probs:   " + " ".join(f"{v:.4f}" for v in probs))
+    print(f"  Pr[3 <= t <= 6]={float(probs[2] + probs[3]):.4f}")
+    print(f"[Inverse sensitivity, median of n={n} ages, ε=1]")
+    inv = inverse_sensitivity_median_abs_error(x, AGE_MAX, EPS)
+    draws = inverse_sensitivity_sample(rng, x, AGE_MAX, EPS, 200_000)
+    sim_inv = float(np.median(np.abs(draws - r.median)))
+    print(f"  median |error|={inv:.4f}  simulated={sim_inv:.4f}  Cauchy smooth={r.cauchy_scale:.3f}  LS={r.local:.4f}")
+    inv_small = inverse_sensitivity_median_abs_error(small, AGE_MAX, EPS)
+    print(f"  n=101: median |error|={inv_small:.3f}")
+
+    print("[Stability-based release of the mode, ε=1, δ=1e-6]")
+    for gap in (10, 30, 40, 60):
+        dist = mode_stability_distance(gap)
+        print(f"  lead={gap}: distance={dist}  pass probability={ptr_pass_probability(dist, EPS, DELTA):.4g}")
+    print(f"  lead needed for pass probability 0.95: {mode_gap_for_pass(0.95, EPS, DELTA)}")
+
 
 # --- Figures --------------------------------------------------------------------------------
 
@@ -522,11 +620,13 @@ def plot_methods_vs_n(rng: np.random.Generator, datasets: int = 10) -> Figure:
     """Median |error| of each way of releasing the median, and the pass rate of propose-test-release."""
     ns = [11, 21, 51, 101, 201, 501, 1001, 2001]
     rows: list[tuple[float, float, float, float, float]] = []
+    inv_rows: list[float] = []
     for n in ns:
         c: list[float] = []
         lap: list[float] = []
         local: list[float] = []
         ptr: list[float] = []
+        inv: list[float] = []
         for _ in range(datasets):
             x = ages(rng, n)
             r = median_release(x, AGE_MAX, EPS, DELTA)
@@ -535,6 +635,8 @@ def plot_methods_vs_n(rng: np.random.Generator, datasets: int = 10) -> Figure:
             local.append(math.log(2) * r.local / EPS)
             dist = distance_to_instability(median_a_profile(x, AGE_MAX), 1.0)
             ptr.append(ptr_pass_probability(dist, EPS, DELTA))
+            inv.append(inverse_sensitivity_median_abs_error(x, AGE_MAX, EPS))
+        inv_rows.append(float(np.mean(inv)))
         rows.append(
             (
                 float(np.mean(c)),
@@ -544,11 +646,12 @@ def plot_methods_vs_n(rng: np.random.Generator, datasets: int = 10) -> Figure:
                 math.log(2) * AGE_MAX / EPS,
             )
         )
-    fig, (left, right) = plt.subplots(1, 2, figsize=(10, 4))
+    fig, (left, right) = plt.subplots(1, 2, figsize=(10, 5))
     left.plot(ns, [r[4] for r in rows], "k--", label="global sensitivity, Laplace")
     left.plot(ns, [r[0] for r in rows], "o-", label=r"smooth, Cauchy ($\delta = 0$)")
     left.plot(ns, [r[1] for r in rows], "s-", label=r"smooth, Laplace ($\delta = 10^{-6}$)")
     left.axhline(math.log(2) * 1.0 / EPS, color="C2", linestyle="-.", label="propose-test-release, b = 1, if it passes")
+    left.plot(ns, inv_rows, "^-", color="C4", label=r"inverse sensitivity ($\delta = 0$)")
     left.plot(ns, [r[2] for r in rows], ":", color="gray", label="local sensitivity (not private)")
     left.set(
         xscale="log",
@@ -557,7 +660,7 @@ def plot_methods_vs_n(rng: np.random.Generator, datasets: int = 10) -> Figure:
         ylabel="median |noise| (years)",
         title=r"Releasing the median age, $\varepsilon = 1$",
     )
-    left.legend(fontsize=8)
+    left.legend(fontsize=7, loc="upper center", bbox_to_anchor=(0.5, -0.17), ncol=2)
     right.plot(ns, [r[3] for r in rows], "o-", color="C2")
     right.set(
         xscale="log",

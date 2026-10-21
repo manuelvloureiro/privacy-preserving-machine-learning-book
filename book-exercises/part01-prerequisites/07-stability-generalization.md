@@ -254,3 +254,18 @@ Both predictions hold (@tbl-sol-stability-generalization-noise). The gap falls b
 
 *The gap is driven by the examples whose label could have gone either way; less label noise means fewer of them to memorize.*
 :::
+
+## The best of $k$ models on a validation set {#sec-sol-stability-generalization-9}
+
+> **Exercise 9.** **The best of $k$ models on a validation set.** You trained $k = 100$ models on other data, and each is right on a new example with probability $p = 0.8$, independently of the others. You score them on a validation set of $m = 1{,}000$ examples and report the best score. Using the derivation of @eq-stability-fixed-questions, show that the winner's validation accuracy overstates its true accuracy by at most $\sqrt{\ln k/(2m)}$ on average. Compare this bound with a simulation and with a normal approximation, and show that scoring the winner again on a fresh test set of $m$ examples removes the bias. *Check: the bound is 0.0480; the simulated bias is 0.0313 and the normal approximation 0.0317; on the fresh test set the bias is $-0.0001 \pm 0.0002$.* *(Maximal inequality)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **One model.** The validation accuracy of model $j$ is an average of $m$ independent values, 1 for a right prediction and 0 for a wrong one. Write $Z_j$ for its accuracy minus $p$. By Hoeffding's lemma, $\mathbb E\,e^{\lambda Z_j} \le e^{\lambda^2/(8m)}$ for every $\lambda$. The models were trained on other data, so each is fixed before the validation set is drawn, and the lemma applies.
+2. **The winner.** The winner's score minus $p$ is $\max_jZ_j$, because all models have the same true accuracy. Only the largest value matters, so the maximum runs over $k$ variables, not the $2k$ of @eq-stability-fixed-questions, which also covered errors in the other direction.
+3. **The bound.** Step 2 of the chapter's derivation, with $k$ in place of $2k$, gives $\mathbb E\max_jZ_j \le \sqrt{\ln k/(2m)} = \sqrt{\ln 100/2{,}000} = 0.0480$.
+4. **Simulation.** The script draws each model's validation score as a binomial count of right predictions out of 1,000, with success probability 0.8, for 4,000 validation sets. The winner's score exceeds 0.8 by 0.0313 on average.
+5. **Normal approximation.** Each score has standard deviation $\sqrt{p(1 - p)/m} = 0.01265$. The largest of 100 independent standard normals has mean 2.5076, computed by numerical integration, so the largest score exceeds $p$ by about $2.5076 \times 0.01265 = 0.0317$. The bound of step 3 is larger mainly because Hoeffding's lemma uses the worst variance, $\frac14$ per example, while the true variance is $p(1 - p) = 0.16$.
+6. **Fresh test set.** The winner is chosen before the test set is drawn, so on the test set it is a fixed model, and its test accuracy is an unbiased estimate of $p$. The simulation gives a bias of $-0.0001 \pm 0.0002$.
+
+*Choosing among models that are fixed in advance costs only $\sqrt{\ln k}$. The bias is real, about 3 points here, but a fresh measurement of the single winner removes it.*
+:::

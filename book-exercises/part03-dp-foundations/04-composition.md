@@ -121,3 +121,16 @@ With the $\tanh$ mean term, the same steps give $k > 2\ln(1/\delta')/(1 - \tanh(
 
 *With different $\varepsilon_i$ the loss takes $2^k$ distinct values in general, not $k + 1$. For two steps you can list them; for many, the exact computation is #P-complete, as Murtagh & Vadhan showed.*
 :::
+
+## Laplace noise in many dimensions {#sec-sol-composition-8}
+
+> **Exercise 8.** **Laplace noise in many dimensions.** One record can move each of $d$ counts by up to 1. Release each count with its own Laplace noise of scale $1/\varepsilon_0$ and compose the $d$ steps with the $\tanh$ form of advanced composition (@eq-comp-advanced-tanh) at $\delta = 10^{-5}$. Show that $\varepsilon_0 = \varepsilon/(2\sqrt{2d\ln(1/\delta)})$ keeps the total at most $\varepsilon$ when $\varepsilon \le 8\ln(1/\delta)$, so the error per count grows like $\sqrt d$. At $\varepsilon = 1$, compare this closed form with the largest $\varepsilon_0$ the formula allows. *Check: at $d = 1000$ the closed form gives $\varepsilon_0 = 0.00330$, which spends 0.5054 of the budget, and a root-mean-square error of 429.2; the largest $\varepsilon_0$ is 0.00645, with error 219.2.* *(Advanced composition, budgeting)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The first term.** With $\varepsilon_0 = \varepsilon/(2\sqrt{2d\ln(1/\delta)})$, the term $\varepsilon_0\sqrt{2d\ln(1/\delta)}$ is exactly $\varepsilon/2$.
+2. **The drift term.** Since $\tanh y \le y$, the term $d\varepsilon_0\tanh(\varepsilon_0/2)$ is at most $d\varepsilon_0^2/2 = d\varepsilon^2/(16d\ln(1/\delta)) = \varepsilon^2/(16\ln(1/\delta))$. This is at most $\varepsilon/2$ when $\varepsilon \le 8\ln(1/\delta)$, which at $\delta = 10^{-5}$ allows any $\varepsilon$ up to 92.
+3. **The error.** A $\mathrm{Lap}(1/\varepsilon_0)$ count has root-mean-square error $\sqrt2/\varepsilon_0 = 2\sqrt2\sqrt{2d\ln(1/\delta)}/\varepsilon$, which grows like $\sqrt d$.
+4. **Numbers.** At $\varepsilon = 1$ and $d = 1000$, $\varepsilon_0 = 1/(2\sqrt{2000\ln 10^5}) = 0.00330$, and advanced composition charges $0.5054$ for the $d$ steps: the closed form wastes about half the budget, because its drift term is tiny. Its error is 429.2. The largest $\varepsilon_0$ that keeps the total at 1, found by bisection, is 0.00645, with error 219.2, the value of @tbl-comp-dense. At $d = 100$ and $10{,}000$ the closed form gives 135.7 and 1,357.2, against 69.3 and 693.0.
+
+*A closed-form budget is easy to state and safe, but it can leave half the budget unused. When the per-step mechanism is fixed, solve for the largest step budget, or better, compute the exact composition.*
+:::

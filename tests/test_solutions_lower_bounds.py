@@ -1,4 +1,4 @@
-"""code/part03-dp-foundations/solutions_lower_bounds.py runs and reproduces the numbers in book-exercises/part03-dp-foundations/09-lower-bounds.md."""
+"""code/part03-dp-foundations/solutions_lower_bounds.py runs and reproduces the numbers in book-exercises/part03-dp-foundations/10-lower-bounds.md."""
 
 import subprocess
 import sys
@@ -42,6 +42,10 @@ def test_solutions_lower_bounds_matches_page(tmp_path: Path) -> None:
         "r=0.9, delta=1e-6: eps >= 2.1972",
         "r=0.99: eps >= 4.5951",
         "eps=1 allows at most r = 0.7311",
+        # Exercise 8
+        "d=1: ln m >= 8.52  pure n >= 8.47  (eps, delta=1e-6) n >= 8",
+        "d=10: ln m >= 85.17  pure n >= 85.12  (eps, delta=1e-6) n >= 11",
+        "d=100: ln m >= 851.72  pure n >= 851.67  (eps, delta=1e-6) n >= 11",
     ):
         assert expected in out
     assert list(tmp_path.iterdir()) == []

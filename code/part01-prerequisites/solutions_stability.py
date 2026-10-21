@@ -359,6 +359,46 @@ def print_table(rng: np.random.Generator) -> None:
         f"with trend={s.along:.3f}  share against={s.share_against:.3f}  train={s.train:.4f}  test={s.test:.4f}"
     )
 
+    k, m, p = 100, 1000, 0.8
+    bias, bias_se, fresh, fresh_se = best_of_k_validation(rng, k, m, p, trials=4000)
+    sd = math.sqrt(p * (1 - p) / m)
+    emax = expected_max_std_normal(k)
+    print(
+        f"[Ex9 k={k} m={m} p={p}] bound sqrt(ln k/(2m))={math.sqrt(math.log(k) / (2 * m)):.4f}  "
+        f"simulated bias={bias:.4f}±{bias_se:.4f}  normal approx={emax:.4f}*{sd:.5f}={emax * sd:.4f}  "
+        f"fresh test bias={fresh:.4f}±{fresh_se:.4f}"
+    )
+
+
+# --- Exercise 9: the best of k models on a validation set ------------------------------------
+
+
+def expected_max_std_normal(k: int, grid: int = 200_001, lim: float = 10.0) -> float:
+    """E[max of k independent standard normals] = ∫ x k φ(x) Φ(x)^(k-1) dx, by the trapezoidal rule."""
+    x = np.linspace(-lim, lim, grid)
+    phi = np.exp(-(x**2) / 2) / math.sqrt(2 * math.pi)
+    cdf = np.array([0.5 * (1 + math.erf(float(t) / math.sqrt(2))) for t in x])
+    f = x * k * phi * cdf ** (k - 1)
+    return float(np.sum((f[1:] + f[:-1]) / 2 * np.diff(x)))
+
+
+def best_of_k_validation(
+    rng: np.random.Generator, k: int, m: int, p: float, trials: int
+) -> tuple[float, float, float, float]:
+    """Mean and standard error of the winner's validation accuracy minus p, and of its accuracy on a fresh
+    test set of m records minus p. Each model is right on each record independently with probability p.
+    """
+    val = rng.binomial(m, p, size=(trials, k)) / m
+    winner_val = val.max(axis=1) - p
+    fresh = rng.binomial(m, p, size=trials) / m - p  # the winner is a fixed model for the fresh records
+    se = math.sqrt(trials)
+    return (
+        float(np.mean(winner_val)),
+        float(np.std(winner_val, ddof=1)) / se,
+        float(np.mean(fresh)),
+        float(np.std(fresh, ddof=1)) / se,
+    )
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)

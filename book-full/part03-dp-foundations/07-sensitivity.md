@@ -4,7 +4,7 @@
 
 The [Laplace and Gaussian mechanisms](03-laplace-gaussian.md) answer a numeric query $f$ by adding random noise to the true answer, and they set the size of that noise by the **global sensitivity**: the most that changing one record can move $f$, looking at *every* pair of neighbouring datasets that could exist, not just at yours. In symbols, $\Delta f = \max_{D \simeq D'}|f(D) - f(D')|$, where $D \simeq D'$ means the two datasets are neighbours. For counts and bounded sums this is the right scale: one person changes a count by at most 1, whatever the data. For many other statistics it is hopeless, for three different reasons.
 
-The first is that the worst case can be absurd. The **median** of ages in $[0, 100]$ has global sensitivity 100. To see it, take a dataset in which half the people are 0 and half are 100, with one more person at 0 so that the median is 0. Replacing that one person by a 100-year-old moves the median from one end to the other. So the Laplace mechanism must add noise of scale $100/\varepsilon$, which swamps any real answer, even though no realistic dataset of ages looks like this. The second is that the worst case can be infinite. The **mean of unbounded data** (incomes, session lengths, gradient norms) can be moved arbitrarily far by one record, because that record can be arbitrarily large, so no amount of Laplace noise makes it private. The third is that the worst case can be unknown. For a **statistic you can only compute**, such as an estimator fitted by an algorithm, nobody knows how to bound how far one record moves it.
+The first is that the worst case can be absurd. The **median** of ages in $[0, 100]$ has global sensitivity 100. To see it, take a dataset in which half the people are 0 and half are 100, with one more person at 0 so that the median is 0. Replacing that one person by a 100-year-old moves the median from one end to the other. So the Laplace mechanism must add noise of scale $100/\varepsilon$, which swamps any real answer, even though no realistic dataset of ages looks like this. The second is that the worst case can be infinite. The **mean of unbounded data** (incomes, session lengths, gradient norms) can be moved arbitrarily far by one record, because that record can be arbitrarily large, so no amount of Laplace noise makes it private. The trouble goes deeper than the Laplace mechanism. Under the strict form of differential privacy, with no slack, no mechanism at all can estimate the mean of arbitrary unbounded data with a finite worst-case error, because infinitely many datasets with means far apart all lie within $n$ changes of each other, which is the packing argument of [Lower bounds](10-lower-bounds.md). What rescues the mean is an assumption about how the data were drawn, and [Private mean estimation](11-mean-estimation.md) uses one to find the range of the data privately. The third is that the worst case can be unknown. For a **statistic you can only compute**, such as an estimator fitted by an algorithm, nobody knows how to bound how far one record moves it.
 
 Yet on the dataset you actually hold, the median of 1,001 ages typically moves by a tenth of a year when one person changes, because with that many people the ages near the middle are packed tightly together. That is the **local sensitivity**, and it is hundreds of times smaller than the global one. This chapter asks: **can you add noise on the scale of the data you have, rather than the worst dataset there could be, and still satisfy differential privacy (DP)?**
 
@@ -16,6 +16,8 @@ If you calibrate noise to the local sensitivity of your dataset, the *size* of t
 
 - **Smooth sensitivity** replaces the local sensitivity by an upper bound that changes slowly between neighbours, so that the noise scale leaks little.
 - **Propose-test-release** proposes a noise scale, and privately tests whether the dataset is far from any dataset where that scale would be too small.
+- **Inverse sensitivity** drops the noise scale altogether: it samples each candidate answer with a probability that falls exponentially in the number of records you would have to change to make it the true answer.
+- **Stability-based release** handles statistics with discrete answers: it tests privately that no few changes can flip the answer, and then releases the answer exactly.
 - **Subsample-and-aggregate** makes the sensitivity small by construction: run the statistic on disjoint blocks and privately combine the block answers, each of which one record can affect only once.
 - **Clipping** forces bounded sensitivity on unbounded data, at the price of a bias that you trade against the noise.
 
@@ -26,7 +28,9 @@ If you calibrate noise to the local sensitivity of your dataset, the *size* of t
 | Local sensitivity and its leak | Why "noise proportional to how sensitive *this* dataset is" fails | The motivation for everything below |
 | Smooth sensitivity and admissible noise | Data-dependent noise with a proof: Cauchy-like noise for $\varepsilon$-DP, Laplace for $(\varepsilon,\delta)$-DP | Private medians, quantiles and robust statistics |
 | Smooth sensitivity of the median | An exact $O(n^2)$ formula | Private quantiles; choosing clip bounds |
-| Propose-test-release | Release with small noise if the data are stable, refuse otherwise | Robust statistics (Dwork & Lei 2009); stability-based release |
+| Propose-test-release | Release with small noise if the data are stable, refuse otherwise | Robust statistics (Dwork & Lei 2009) |
+| Inverse sensitivity | Pure DP with no noise scale: the exponential mechanism with "changes needed" as the penalty | Private medians and quantiles; choosing clip bounds |
+| Stability-based release | An exact answer for a discrete statistic when it is stable | The most common value; private selection on top of subsample-and-aggregate; stability-based histograms |
 | Subsample-and-aggregate | Privacy for a black-box statistic | Private model training by ensembles of teachers; estimators without known sensitivity |
 | Clipping | Bounded sensitivity for unbounded data, and the bias–variance trade-off of the clip bound | Private means and sums; per-example gradient clipping in private training |
 
@@ -53,7 +57,7 @@ So if the privacy loss exceeds $\varepsilon$ only with probability $\delta$, the
 
 A question of the form "how many records would have to change before something bad happens?" has an answer that one record can change by at most 1. Formally, for any set $\mathcal B$ of datasets (the "bad" ones), let $\operatorname{dist}(D, \mathcal B) = \min_{D'' \in \mathcal B} d(D, D'')$ be the number of changes needed to reach the nearest of them. Then $|\operatorname{dist}(D, \mathcal B) - \operatorname{dist}(D', \mathcal B)| \le 1$ for $D \simeq D'$.
 
-The reason is that a path from $D'$ to a bad dataset can always go through $D$ first, at the cost of one extra step. In terms of the Hamming distance, which satisfies the triangle inequality, $d(D', D'') \le d(D', D) + d(D, D'') = 1 + d(D, D'')$ for every $D''$. Minimizing both sides over $D'' \in \mathcal B$ gives $\operatorname{dist}(D', \mathcal B) \le 1 + \operatorname{dist}(D, \mathcal B)$, and the same argument with $D$ and $D'$ exchanged gives the other direction. So such a count can be released with $\mathrm{Lap}(1/\varepsilon)$ noise by Fact 1. Propose-test-release is built on it.
+The reason is that a path from $D'$ to a bad dataset can always go through $D$ first, at the cost of one extra step. In terms of the Hamming distance, which satisfies the triangle inequality, $d(D', D'') \le d(D', D) + d(D, D'') = 1 + d(D, D'')$ for every $D''$. Minimizing both sides over $D'' \in \mathcal B$ gives $\operatorname{dist}(D', \mathcal B) \le 1 + \operatorname{dist}(D, \mathcal B)$, and the same argument with $D$ and $D'$ exchanged gives the other direction. So such a count can be released with $\mathrm{Lap}(1/\varepsilon)$ noise by Fact 1. Propose-test-release, inverse sensitivity and the stability-based release are all built on it.
 
 ### Fact 4 — Changing $k$ records moves each order statistic by at most $k$ places
 
@@ -268,12 +272,103 @@ Compared with smooth sensitivity, propose-test-release needs only the distance t
 
 On the 1,001 ages, propose $b = 1$ year. The first $k$ with $A^{(k)} > 1$ is $k = 21$, so $\operatorname{dist}_1(D) = 21$, comfortably above the threshold $13.82$. The test fails only if the noise drops the distance by more than $21 - 13.82$, which a $\mathrm{Lap}(1)$ draw does with probability $\frac12e^{-(21 - 13.82)}$. So the pass probability is $1 - \frac12e^{-(21 - 13.82)} = 0.999621$, and the release has noise $\mathrm{Lap}(1)$, with median absolute error $\ln 2 = 0.693$ years at a total budget of $2\varepsilon = 2$. On a sample of 101 ages, $\operatorname{dist}_1 = 1$, and the test passes only if the noise adds more than $13.82 - 1$, which has probability $\frac12e^{-(13.82 - 1)} = 1.36\times10^{-6}$: there, one year is far too optimistic a proposal. @fig-sens-methods-vs-n (right) shows the pass probability switching from 0 to 1 between $n = 500$ and $n = 1000$.
 
-![Left: median absolute noise when releasing the median age with $\varepsilon = 1$, by global sensitivity, smooth sensitivity with Cauchy noise and with Laplace noise ($\delta = 10^{-6}$), and propose-test-release with $b = 1$ when it passes, averaged over 10 synthetic datasets per $n$. The dotted line is the non-private local sensitivity. Right: the probability that propose-test-release with $b = 1$ answers.](figures/sens_methods_vs_n.svg){#fig-sens-methods-vs-n}
+![Left: median absolute noise when releasing the median age with $\varepsilon = 1$, by global sensitivity, smooth sensitivity with Cauchy noise and with Laplace noise ($\delta = 10^{-6}$), propose-test-release with $b = 1$ when it passes, and inverse sensitivity (@sec-sens-inverse), averaged over 10 synthetic datasets per $n$. The dotted line is the non-private local sensitivity. Right: the probability that propose-test-release with $b = 1$ answers.](figures/sens_methods_vs_n.svg){#fig-sens-methods-vs-n}
 
 ### Check yourself
 
 - Why does step 3 need *both* local sensitivities to exceed $b$, and why is that automatic? *(If either were at most $b$, the pair would fall into case 1. It is automatic because $|f(D) - f(D')|$ is one of the terms in the maximum defining each local sensitivity.)*
 - Why does propose-test-release cost $2\varepsilon$ while smooth sensitivity costs $\varepsilon$? *(It runs two Laplace mechanisms, one for the test and one for the release, and composes them. Smooth sensitivity folds the cost of a data-dependent scale into the single noise draw.)*
+
+## Inverse sensitivity {#sec-sens-inverse}
+
+### Context
+
+Smooth sensitivity and propose-test-release keep the shape "true answer plus noise", and all their effort goes into choosing the noise scale safely. Inverse sensitivity (Asi & Duchi 2020) drops that shape. Instead, for each candidate output $t$ it asks how many records you would have to change before the statistic equals $t$. Then it samples $t$ with the [exponential mechanism](05-selection.md), using that count as a penalty, so outputs that need many changes become exponentially unlikely. The count is a "how many changes" question, so by Fact 3 one record moves it by at most 1, and no smooth bound, test or refusal is needed.
+
+### Statement
+
+The **inverse sensitivity** of $f$ at $D$ toward an output $t$ is the number of records you must change to make $f$ equal to $t$:
+$$\mathrm{len}_f(D, t) = \min\{d(D, D'') : f(D'') = t\}.$$
+The **inverse-sensitivity mechanism** samples $t$ from the set of possible outputs, which for the statistics of this chapter is the interval $[0, \Lambda]$, with the density
+$$p_D(t) = \frac{e^{-\varepsilon\,\mathrm{len}_f(D, t)/2}}{\int_0^\Lambda e^{-\varepsilon\,\mathrm{len}_f(D, s)/2}\,ds}.$$ {#eq-sens-inverse}
+It is $\varepsilon$-DP whenever every possible output is the value of $f$ on some dataset, so that every count is finite.
+
+For the median the count has a closed form. Take $n$ odd, so that the median is the single value of rank $m = (n + 1)/2$, and sort and pad the data as in Fact 4, with $x_0 = 0$ and $x_{n+1} = \Lambda$. For a candidate $t$ in the open gap $(x_i, x_{i+1})$ between two consecutive sorted values, the count is the number of steps from that gap to the median:
+$$\mathrm{len}_{\mathrm{med}}(D, t) = \begin{cases} m - i & \text{if } i < m,\\ i - m + 1 & \text{if } i \ge m.\end{cases}$$ {#eq-sens-inverse-median}
+So the density is a staircase. It is flat on each gap and falls by a factor $e^{-\varepsilon/2}$ for each step away from the median, and the probability of a gap is its length times its height.
+
+### Derivation
+
+1. **The penalty has sensitivity 1.** The count $\mathrm{len}_f(D, t)$ is the distance from $D$ to the set of datasets on which $f$ equals $t$. By Fact 3 a distance to a set changes by at most 1 between neighbours, and this holds for every $t$ at once. The set must not be empty, which is why every output must be reachable. For the median, $n$ copies of $t$ reach $t$.
+2. **Privacy.** @eq-sens-inverse is the exponential mechanism with score $u(D, t) = -\mathrm{len}_f(D, t)$, sensitivity $\Delta = 1$, and length on $[0, \Lambda]$ as the base measure. Its proof in [Selection](05-selection.md) bounds two factors. One record moves the weight $e^{\varepsilon u/2}$ of the output $t$ by at most $e^{\varepsilon/2}$, and it moves the total weight in the denominator by at most $e^{\varepsilon/2}$ too. So the ratio of the two densities at every $t$ is at most $e^\varepsilon$, and integrating over any set of outputs gives $\varepsilon$-DP, as in Fact 1.
+3. **The count above the median.** Take $t$ in the gap $(x_i, x_{i+1})$ with $i \ge m$, so exactly $i$ values of $D$ lie below $t$. For the median of a dataset to be $t$, at most $m - 1$ of its values can lie below $t$, and one must equal $t$. Each change removes at most one value from below $t$, so at least $i - (m - 1) = i - m + 1$ changes are needed. That many are enough: move one of the values below $t$ to $t$ itself and $i - m$ others to $\Lambda$. Then $m - 1$ values lie below $t$ and the $m$-th smallest is $t$.
+4. **The count below the median** follows by reflecting every value, $x \mapsto \Lambda - x$, which turns a gap below the median into one above it. The gap $(x_i, x_{i+1})$ with $i < m$ becomes the gap with index $n - i \ge m$, and step 3 gives $(n - i) - m + 1 = m - i$, using $n + 1 = 2m$.
+
+### Interpretation
+
+Smooth sensitivity had to keep its noise scale from leaking, but here there is no noise scale at all. The data shape the whole output density, through the lengths of the gaps, but by step 2 that density changes by at most a factor $e^\varepsilon$ between neighbours. Where the data are dense, the gaps near the median are short, so the mass that sits within a few steps of the median also sits within a short distance of it. The error is therefore a few gaps, the spacing of the data near the median, times a factor that grows with $1/\varepsilon$. Asi & Duchi (2020) show that, up to logarithmic factors, no $\varepsilon$-DP mechanism does much better on a dataset and its close neighbours together. So the method is near-optimal dataset by dataset, not only in the worst case.
+
+The method has two limits. The first is the two outer gaps, $(0, x_1)$ and $(x_n, \Lambda)$, which can be long and are $m$ steps away. Each gets a weight of its length times $e^{-\varepsilon m/2}$, against a total weight set by the short gaps near the median, so its probability is about $e^{-\varepsilon(m-1)/2}$ times the ratio of its length to those gaps. That is negligible for a thousand points but not for eleven, which is the same failure on tiny datasets as smooth sensitivity's. The second is that the count must be computed. Closed forms like @eq-sens-inverse-median are known for medians, quantiles and a few other statistics. For a general $f$, Asi & Duchi study approximations of the count that keep the guarantee. [Exercise 8](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sensitivity-8) extends the count to any quantile.
+
+### Example: the walkthrough and the median age
+
+Take the walkthrough dataset $D = (1, 3, 4, 6, 9)$ on $[0, 10]$ again, with $\varepsilon = 1$, so $m = 3$. @tbl-sens-inverse lists its six gaps, the count from @eq-sens-inverse-median, and each gap's probability, its length times $e^{-\mathrm{len}/2}$ divided by the total. The two gaps next to the median, $(3, 4)$ and $(4, 6)$, are one change away. Together they get probability $0.1477 + 0.2955 = 0.4432$.
+
+| Gap | $(0, 1)$ | $(1, 3)$ | $(3, 4)$ | $(4, 6)$ | $(6, 9)$ | $(9, 10)$ |
+| --- | --- | --- | --- | --- | --- | --- |
+| Length | 1 | 2 | 1 | 2 | 3 | 1 |
+| $\mathrm{len}_{\mathrm{med}}(D, t)$ | 3 | 2 | 1 | 1 | 2 | 3 |
+| Probability | 0.0544 | 0.1792 | 0.1477 | 0.2955 | 0.2688 | 0.0544 |
+
+: The inverse-sensitivity release of the median of $D = (1, 3, 4, 6, 9)$ on $[0, 10]$ with $\varepsilon = 1$: each gap between sorted values, the number of changes that make a point of it the median, and its probability. {#tbl-sens-inverse}
+
+On the 1,001 ages of the previous sections the result is striking. Computed exactly from the density, the median absolute error of the release is 0.0783 years, and 200,000 simulated draws give 0.0784. That is pure $\varepsilon$-DP with $\varepsilon = 1$, it never refuses, and it is twelve times more accurate than smooth sensitivity with Cauchy noise, whose median error is 0.979. It is even below the local sensitivity, 0.1386. That is no contradiction, because the local sensitivity is the larger of the two gaps next to the median, a worst case over one change, while a typical release lands only a few short gaps from the median. @fig-sens-methods-vs-n shows the same ordering at every dataset size. On 101 ages the error grows to 0.696 years, because the gaps are ten times wider.
+
+### Check yourself
+
+- Why does the exponential mechanism here keep the factor 2 in $e^{-\varepsilon\,\mathrm{len}/2}$? *(The scores are not monotone. One change can bring the median one step closer to some outputs and one step further from others, so the weight of an output and the total weight can move in opposite directions, and each can use up $e^{\varepsilon/2}$.)*
+- What happens to the release if every value of $D$ is the same, so that most gaps have length 0? *(The empty gaps get probability 0, and the mass sits on the two outer gaps, $m$ steps away on either side of the common value. Both have count $m$, so the release is uniform on $[0, \Lambda]$ and says nothing about the common value.)*
+
+## Stability-based release {#sec-sens-stable}
+
+### Context
+
+Some statistics take discrete values: the most common diagnosis, the model a selection procedure picks, the majority vote of the blocks in subsample-and-aggregate (the next section, @sec-sens-saa). On most datasets one record cannot change them at all, so their local sensitivity is 0. Propose-test-release with the proposal $b = 0$ handles them. You test privately that the data are far from any dataset where one change flips the answer, and if they are, you release the answer exactly, with no noise at all. This is the **stability-based release** (Dwork & Roth 2014, ch. 7; Thakurta & Smith 2013).
+
+### Statement
+
+Let $f$ be the discrete statistic to release, and let $s$ be a **stability score**: a function of the data with sensitivity 1 that equals 0 on every dataset that has a neighbour where $f$ gives a different answer. Fact 3 provides one: the distance to the set of such datasets. The **stability-based release** outputs
+$$M(D) = \begin{cases}\bot & \text{if } s(D) + \mathrm{Lap}(1/\varepsilon) \le \ln(1/\delta)/\varepsilon,\\ f(D) & \text{otherwise,}\end{cases}$$ {#eq-sens-stable}
+and it is $(\varepsilon, \delta/2)$-DP.
+
+Here $\bot$ is a refusal to answer. For the **mode** of a categorical dataset, the most frequent value with ties broken by a fixed order of the values, write $g$ for its lead, the top count minus the second-highest count. Under replacement,
+$$s(D) = \max\big(0,\ \lceil g/2\rceil - 1\big)$$ {#eq-sens-stable-mode}
+satisfies both conditions on $s$, where $\lceil g/2\rceil$ rounds $g/2$ up to an integer. It halves the lead because one replacement can move the lead by 2, and it subtracts 1 because a lead of 2 or less can already be overturned by one change.
+
+### Derivation
+
+The proof is that of propose-test-release, with one difference: when the answers agree, nothing is released that depends on the data apart from the test.
+
+1. **The test is $\varepsilon$-DP.** The score $s$ has sensitivity 1, so adding $\mathrm{Lap}(1/\varepsilon)$ is the Laplace mechanism (Fact 1), and comparing the noisy value with a threshold is post-processing.
+2. **Neighbours with the same answer, $f(D) = f(D')$.** The release is the same function of the test's outcome on both: $\bot$ if the test fails, the common answer if it passes. So it is post-processing of an $\varepsilon$-DP output, and it is $\varepsilon$-DP on this pair. Propose-test-release paid a second $\varepsilon$ here for its noisy answer, which this release does not add.
+3. **Neighbours with different answers.** Then $s(D) = 0$ and $s(D') = 0$ by assumption, since each has a neighbour with a different answer, and the test passes only if the noise exceeds $\ln(1/\delta)/\varepsilon$, which has probability $\frac12e^{-\ln(1/\delta)} = \delta/2$. Step 4 of the propose-test-release derivation then gives $\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta/2$ for every set $S$ of outputs.
+4. **The mode's $s$ has sensitivity 1.** One replacement lowers one count by at most 1 and raises another by at most 1, so the largest and the second-largest counts each move by at most 1, and the lead $g$ by at most 2. Halving and rounding up turns a move of 2 into a move of at most 1, since $\lceil (g + 2)/2\rceil = \lceil g/2\rceil + 1$, and taking the maximum with 0 keeps that.
+5. **The mode's $s$ is 0 where the answer can flip.** Write $c_1$ for the count of the mode and $c_2$ for the second-highest count. If $g \ge 3$, then after one change the old mode still has at least $c_1 - 1$ records, and every other value has at most $c_2 + 1 \le c_1 - 2$. So the mode cannot change. A dataset whose neighbour has a different mode therefore has $g \le 2$, and then $\lceil g/2\rceil - 1 \le 0$.
+
+### Interpretation
+
+The release is exact. When the test passes, you get the true answer, and the whole cost of privacy is the chance of a refusal. That chance depends on the lead, not on the number of possible values. The test needs $s(D)$ to be about $\ln(1/\delta)/\varepsilon$, so the mode must lead by about $2\ln(1/\delta)/\varepsilon$ records, whether there are ten categories or a billion. Under pure DP, by contrast, a lower bound proved later by packing ([Lower bounds](10-lower-bounds.md)) says that choosing among $N$ possible values needs a lead of about $\ln N/\varepsilon$. So the stability-based release, which needs $\delta > 0$, removes the dependence on $N$, and this is how approximate DP gets around the packing bound. The stability-based histogram, described in the lower-bounds chapter, applies the same idea to every bin.
+
+The release combines naturally with subsample-and-aggregate. Run a selection procedure on each of $B$ disjoint blocks of the data, split by a partition fixed in advance, and release the most common block answer by @eq-sens-stable. One replaced record changes one block answer, so it moves the counts of the block answers as a replaced record would. When the procedure is stable, most blocks agree and the answer comes out exact (Thakurta & Smith 2013 use this to select features).
+
+### Example: the most common value
+
+Take $\varepsilon = 1$ and $\delta = 10^{-6}$, so the threshold is $\ln(10^6) = 13.82$. A lead of 10 records gives $s = 4$, far below the threshold, so the release answers with probability only $2.73\times10^{-5}$. Raising the lead to 30 gives $s = 14$, just above the threshold, and an answer with probability 0.5842, while a lead of 40 gives $s = 19$ and probability 0.9972. So the smallest lead that answers with probability at least 0.95 is 35, whatever the number of categories. Under add/remove neighbours a record moves the lead by only 1, and the lead needed halves ([Exercise 9](../../book-exercises/part03-dp-foundations/07-sensitivity.md#sec-sol-sensitivity-9)).
+
+### Check yourself
+
+- Why does the stability-based release cost $\varepsilon$ while propose-test-release costs $2\varepsilon$? *(When neighbours have the same answer, the release is a function of the test alone. Propose-test-release also releases a noisy value that differs between the neighbours, which costs a second $\varepsilon$.)*
+- Is releasing $f(D)$ exactly safe on a dataset whose neighbour has a different answer? *(Only because it rarely happens: there $s = 0$, and the test passes with probability $\delta/2$. That rare exact release is what $\delta$ pays for.)*
 
 ## Subsample-and-aggregate {#sec-sens-saa}
 
@@ -359,9 +454,9 @@ $$\Pr[X > C]\Big(\mathbb E[(X - C)_+] - \frac{C - \mathbb E[\min(X, C)]}{n}\Big)
 
 The bias does not shrink with $n$, but the noise does. So the best $C$ grows with $n$: with more data you can afford to clip less. For large $n$ the sampling part of @eq-sens-clip-opt, which has an extra $1/n$, drops out, and the condition reads $\Pr[X > C]\,\mathbb E[(X - C)_+] \approx 2C/(n\varepsilon)^2$. The right side shrinks as $n\varepsilon$ grows, so the left side must shrink too, which pushes $C$ out into the tail.
 
-The bias has a sign. Clipping only from above always lowers values, so it always underestimates. For data on both sides of zero, clipping to $[-C, C]$ cuts off mass on both sides, and the two cuts cancel only for distributions symmetric about 0, so only those are estimated without bias.
+The bias has a sign. Clipping only from above always lowers values, so it always underestimates. For data on both sides of a centre $c$, clipping to $[c - C, c + C]$ cuts off mass on both sides. The two cuts cancel exactly when the distribution is symmetric about $c$, and they can also happen to balance for some asymmetric ones. What matters is where the clip interval sits, not where 0 is. A clip interval centred far from the bulk of the data cuts one side much more than the other, which is why the centre itself is usually estimated privately first, the subject of [Private mean estimation](11-mean-estimation.md).
 
-Choosing $C$ is itself a data-dependent decision. Setting $C$ to the observed maximum, or to the empirical 99th percentile, makes the noise scale a function of the data, and the leak of @sec-sens-local returns. Choose $C$ from domain knowledge, or spend part of the budget on a private quantile: the [exponential mechanism](05-selection.md), or the smooth-sensitivity and propose-test-release methods above applied to an order statistic.
+Choosing $C$ is itself a data-dependent decision. Setting $C$ to the observed maximum, or to the empirical 99th percentile, makes the noise scale a function of the data, and the leak of @sec-sens-local returns. Choose $C$ from domain knowledge, or spend part of the budget on a private quantile: the [exponential mechanism](05-selection.md), inverse sensitivity (@sec-sens-inverse), or the smooth-sensitivity and propose-test-release methods above applied to an order statistic.
 
 Clipping is the honest version of "bounded data". Every "assume $x \in [0, \Lambda]$" in earlier chapters is a clip in disguise, and its bias is the price of that assumption.
 
@@ -380,7 +475,7 @@ Every term of @eq-sens-clip-error needs averages of $X$ and $X^2$ over the value
 
 : Error of the clipped private mean of log-normal incomes, $n = 1000$, $\varepsilon = 1$, for four clip bounds: the three terms of @eq-sens-clip-error, their combination, and a simulation with 5,000 repetitions. {#tbl-sens-clip}
 
-Clipping at the median is a disaster: half the incomes are cut back, and the bias of 23 dwarfs everything. The optimum, $C^* = 331.34$, cuts off only 0.4% of the population and has total error $1.666$, only 1% above the standard deviation $1.649$ of the unclipped, non-private mean (the ratio is $1.666/1.649 \approx 1.01$). Above the optimum, the noise takes over: its standard deviation $\sqrt2\,C/(n\varepsilon)$ grows linearly in $C$, reaching $1.414$ at $C = 1000$ (@fig-sens-clip-tradeoff, left). The optimum grows with $n$, as the interpretation predicted: $177.5$ at $n = 100$, $557.3$ at $n = 10{,}000$ and $876.3$ at $n = 100{,}000$ (@fig-sens-clip-tradeoff, right).
+Clipping at the median is a disaster: half the incomes are cut back, and the bias of 23 dwarfs everything. The optimum, $C^* = 331.34$, cuts off only 0.4% of the population and has total error $1.666$, only 1% above the standard deviation $1.649$ of the unclipped, non-private mean (the ratio is $1.666/1.649 \approx 1.01$). The simulated error at the optimum happens to print as 1.649 too. That is a coincidence of the 5,000 repetitions, whose own standard error is about 1%, and the formula's 1.666 is the value to trust: privacy costs a little here, not nothing. Above the optimum, the noise takes over: its standard deviation $\sqrt2\,C/(n\varepsilon)$ grows linearly in $C$, reaching $1.414$ at $C = 1000$ (@fig-sens-clip-tradeoff, left). The optimum grows with $n$, as the interpretation predicted: $177.5$ at $n = 100$, $557.3$ at $n = 10{,}000$ and $876.3$ at $n = 100{,}000$ (@fig-sens-clip-tradeoff, right).
 
 ![Left: root-mean-square error of the clipped private mean of log-normal incomes against the clip bound $C$, with its bias, noise and sampling components and simulated points; the dotted line marks the optimum $C^* = 331$. Right: the optimal clip bound as a function of the dataset size.](figures/sens_clip_tradeoff.svg){#fig-sens-clip-tradeoff}
 
@@ -391,7 +486,7 @@ Clipping at the median is a disaster: half the incomes are cut back, and the bia
 
 ## Code: check every number by computation
 
-The script [code/sensitivity.py](../../code/part03-dp-foundations/sensitivity.py) computes every number in this chapter and draws its figures. Local and smooth sensitivity, the noise parameters, propose-test-release, subsample-and-aggregate and the clipped mean are each small typed functions; the table calls them once and the figures loop over them. From the repository root:
+The script [code/sensitivity.py](../../code/part03-dp-foundations/sensitivity.py) computes every number in this chapter and draws its figures. Local and smooth sensitivity, the noise parameters, propose-test-release, inverse sensitivity, the stability-based release, subsample-and-aggregate and the clipped mean are each small typed functions; the table calls them once and the figures loop over them. From the repository root:
 
 ```bash
 uv run python code/part03-dp-foundations/sensitivity.py
@@ -407,20 +502,24 @@ uv run python code/part03-dp-foundations/sensitivity.py
 | Median of 1,001 ages | local sensitivity 0.1386; Cauchy scale 0.979 (simulated median error 0.980); Laplace median error 0.713; global 69.31 |
 | Propose-test-release, $b = 1$ | $n = 1001$: distance 21, pass probability 0.999621; $n = 101$: distance 1, pass probability $1.36\times10^{-6}$ |
 | Subsample-and-aggregate, exponential rate | Best $B = 250$ on the grid, error 0.0396, against 0.0100 without privacy |
-| Clipped mean of incomes, $n = 1000$ | $C^* = 331.34$, error 1.666 (simulated 1.649); 99th percentile 1.767; median 23.417 |
+| Inverse sensitivity | Walkthrough gaps next to the median: probability 0.4432; 1,001 ages: median error 0.0783 (simulated 0.0784); 101 ages: 0.696 |
+| Stability-based release of the mode | Pass probability 0.5842 at a lead of 30, 0.9972 at 40; lead 35 for probability 0.95 |
+| Clipped mean of incomes, $n = 1000$ | $C^* = 331.34$, error 1.666 (simulated 1.649, within its 1% Monte Carlo error of 1.666); 99th percentile 1.767; median 23.417 |
 
 : Results of the chapter's script with seed 0. {#tbl-sens-results}
 
 [tests/test_sensitivity.py](../../tests/test_sensitivity.py) checks that the output still matches this table.
 
-**What to take from it.** The first lesson is that a data-dependent noise scale can leak more than the answer: in the leak example both datasets have the same median, so the whole $\delta = 0.477$ comes from the spread of the noise. The repair for the median rests on an exact formula, and the $O(n^2)$ formula for $A^{(k)}$ matches brute force at every distance $k$, so the smooth sensitivities it produces can be trusted. With it, smooth sensitivity and propose-test-release buy about two orders of magnitude over global sensitivity for the median of a thousand points, though they lose to it on tiny datasets, where a few changes can open a gap across the whole range. Finally, every method ends in a bias–noise trade-off you can compute: the number of blocks and the clip bound both have optima you can find in closed form before touching the data.
+**What to take from it.** The first lesson is that a data-dependent noise scale can leak more than the answer: in the leak example both datasets have the same median, so the whole $\delta = 0.477$ comes from the spread of the noise. The repair for the median rests on an exact formula, and the $O(n^2)$ formula for $A^{(k)}$ matches brute force at every distance $k$, so the smooth sensitivities it produces can be trusted. With it, smooth sensitivity and propose-test-release buy about two orders of magnitude over global sensitivity for the median of a thousand points, though they lose to it on tiny datasets, where a few changes can open a gap across the whole range. Inverse sensitivity does better still, by another factor of twelve on the ages, because it never has to pay for a noise scale. Finally, every method ends in a bias–noise trade-off you can compute: the number of blocks and the clip bound both have optima you can find in closed form before touching the data.
 
 ## References
 
 - Nissim, Raskhodnikova & Smith, "Smooth Sensitivity and Sampling in Private Data Analysis" (STOC 2007; full version on the authors' pages): local and smooth sensitivity, admissible noise (Lemmas 2.6–2.9), the median (Proposition 3.4) and the original sample-and-aggregate framework
 - Dwork & Lei, "Differential Privacy and Robust Statistics" (STOC 2009): propose-test-release, and private robust estimators of scale, location and regression built on it
-- Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014), ch. 7: propose-test-release and subsample-and-aggregate in textbook form
+- Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014), ch. 7: propose-test-release, stability-based release and subsample-and-aggregate in textbook form
 - Near & Abuah, *Programming Differential Privacy*, chapter on local sensitivity: the same ideas with short code
+- Asi & Duchi, "Instance-optimality in Differential Privacy via Approximate Inverse Sensitivity Mechanisms" (NeurIPS 2020): the inverse-sensitivity mechanism and its near-optimality on every dataset
+- Thakurta & Smith, "Differentially Private Feature Selection via Stability Arguments, and the Robustness of the Lasso" (COLT 2013): stability-based release, used for model selection
 - Smith, "Privacy-Preserving Statistical Estimation with Optimal Convergence Rates" (STOC 2011): subsample-and-aggregate for asymptotically normal estimators
 - Bun & Steinke, "Average-Case Averages: Private Algorithms for Smooth Sensitivity and Mean Estimation" (NeurIPS 2019): better noise distributions for smooth sensitivity, under concentrated DP
 - Amin, Kulesza, Muñoz Medina & Vassilvitskii, "Bounding User Contributions: A Bias-Variance Trade-off in Differential Privacy" (ICML 2019): the clipping trade-off when users contribute many records
@@ -439,6 +538,8 @@ uv run python code/part03-dp-foundations/sensitivity.py
 | Cauchy-like noise | $f + (S/\alpha)Z$, $h \propto 1/(1 + \lvert z\rvert^\gamma)$, $\gamma\alpha + (\gamma + 1)\beta \le \varepsilon$; Cauchy: $6S^*_{\varepsilon/6}/\varepsilon$ | $\varepsilon$ |
 | Laplace noise | $f + (S/\alpha)\,\mathrm{Lap}(1)$, $\beta + e^\beta\alpha + (e^\beta - 1)\ln(1/\delta) \le \varepsilon$ | $(\varepsilon, \delta)$ |
 | Propose-test-release | $\bot$ if $\operatorname{dist}_b + \mathrm{Lap}(1/\varepsilon) \le \ln(1/\delta)/\varepsilon$, else $f + \mathrm{Lap}(b/\varepsilon)$ | $(2\varepsilon, \delta/2)$ |
+| Inverse sensitivity | Density $\propto e^{-\varepsilon\,\mathrm{len}_f(D, t)/2}$; median: $\mathrm{len}$ is the number of steps from the gap to the median | $\varepsilon$ |
+| Stability-based release | $\bot$ if $s + \mathrm{Lap}(1/\varepsilon) \le \ln(1/\delta)/\varepsilon$, else $f(D)$ exactly; mode: $s = \max(0, \lceil g/2\rceil - 1)$ | $(\varepsilon, \delta/2)$ |
 | Subsample-and-aggregate | Mean of $B$ clipped block outputs $+ \mathrm{Lap}(R/(B\varepsilon))$; error = bias of small blocks + sampling + noise | $\varepsilon$ |
 | Clipped mean | $\frac1n\sum\min(x_i, C) + \mathrm{Lap}(C/(n\varepsilon))$; bias $\mathbb E[(X - C)_+]$ | $\varepsilon$ |
 
@@ -446,9 +547,10 @@ uv run python code/part03-dp-foundations/sensitivity.py
 
 **Rules of thumb**
 
-- If the noise scale depends on the data, ask what the noise scale reveals. If you cannot answer, use one of the four repairs.
+- If the noise scale depends on the data, ask what the noise scale reveals. If you cannot answer, use one of the repairs of this chapter.
 - Pure DP with a data-dependent scale needs polynomial tails; light tails need $\delta$ and a much smaller $\beta \approx \varepsilon/(2\ln(1/\delta))$.
-- Smooth sensitivity pays off once the data are dense around the statistic: for the median, once $n$ is in the hundreds.
+- Smooth sensitivity pays off once the data are dense around the statistic: for the median, once $n$ is in the hundreds. For medians and quantiles, inverse sensitivity is simpler and more accurate.
+- A discrete answer that is stable can be released exactly, at the cost of $\varepsilon$ and a refusal when the lead is below about $2\ln(1/\delta)/\varepsilon$.
 - Choose clip bounds and block counts before looking at the data, by the error formula, or with a separate slice of the privacy budget.
 
-**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/06-sensitivity.md).
+**Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/07-sensitivity.md).

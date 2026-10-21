@@ -78,7 +78,7 @@ The solutions use the chapter's notation. To give differential privacy (DP) to p
 1. **One query.** With $\tilde q = \frac12\operatorname{erfc}(g/80)$, @eq-pate-dd-gauss gives 0.00123 at $g = 150$ and 0.00135 at $g = 148$, a ratio of 1.096. At $g = 200$ the ratio is 1.130, and at $g = 250$, 1.165: the relative change grows with the gap, because the cost falls faster than exponentially in the gap.
 2. **All queries.** One record changes one teacher, and that teacher may switch sides on every query, so every term of the sum can move at once. The local sensitivity of the total, how much it changes for this dataset's neighbours, is a sum of $Q$ such changes, each small in absolute terms.
 3. **Global sensitivity.** Over all datasets, the worst case includes histograms near a tie, where the answer is decided by one teacher and the cost jumps between nearly 0 and the full $\alpha/\sigma^2$. The global sensitivity of the total is then close to the data-independent total itself, and noise of that size would make the released $\varepsilon$ useless.
-4. **The fix.** Smooth sensitivity ([Beyond global sensitivity](../../book-full/part03-dp-foundations/06-sensitivity.md#sec-sens-smooth)) scales the noise to how much the total can change near the actual dataset, discounted with distance, which on a dataset with strong consensus is small. This is what Papernot et al. (2018) do; in the chapter's example, switching all of one teacher's votes on 1,000 queries moves the data-dependent $\varepsilon$ only from 4.375 to 4.389.
+4. **The fix.** Smooth sensitivity ([Beyond global sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md#sec-sens-smooth)) scales the noise to how much the total can change near the actual dataset, discounted with distance, which on a dataset with strong consensus is small. This is what Papernot et al. (2018) do; in the chapter's example, switching all of one teacher's votes on 1,000 queries moves the data-dependent $\varepsilon$ only from 4.375 to 4.389.
 
 *A data-dependent cost is a statistic of the private data like any other. It is cheap to release only because its local behaviour is tame, and that has to be proved and paid for, not assumed.*
 :::
@@ -94,4 +94,30 @@ The solutions use the chapter's notation. To give differential privacy (DP) to p
 4. **Participation.** A record is drawn with probability 0.04 per query, so it takes part in $1{,}000 \times 0.04 = 40$ queries on average.
 
 *Subsampling helps for two reasons: each record takes part in only 40 of the 1,000 answers, and when it does not, its absence is hidden among the random draws. But the noise must still be compared with the vote gaps of an ensemble of only 25 voters, which is why the stand-in's accuracy falls anyway. With a large language model, whose votes agree far more, the same noise costs much less accuracy.*
+:::
+
+## Distance to instability and the threshold {#sec-sol-pate-8}
+
+> **Exercise 8.** **Distance to instability and the threshold.** Compute the distance to instability of @eq-pate-dist for the two-label votes 0–0, 5–4, 6–4, 7–4, 55–45 and 135–115, and say for each why one more changed teacher would or would not be safe. Then find the threshold $t$ of @eq-pate-stable-threshold at $\varepsilon_0 = 1$ and $\delta_{\text{bad}} = 5 \times 10^{-6}$ for pools of 1,000 and 10,000 queries, and the smallest gap whose distance reaches it. Why does a tenfold larger pool raise $t$ by about $4\ln 10$? *Check: distances 0, 0, 0, 1, 4, 9; $t = 74.8$ and 84.0; gaps 151 and 171; $4\ln 10 = 9.2$.* *(Distances to a set; union bounds)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **The distances.** The gaps are 0, 1, 2, 3, 10 and 20, so $\lceil g/2\rceil - 1$ gives 0, 0, 0, 1, 4 and 9 (0 for a tie). With 5–4, one teacher moving from the leader to the other label makes it 4–5, and the leader changes. With 6–4, one move makes it 5–5, a tie that the argmax may break either way, so the distance is still 0. With 7–4, one move gives 6–5 and the leader stays strictly on top, but a second move gives 5–6. In general each move costs the leader 2 votes of gap.
+2. **The thresholds.** Bisection on $P\cdot\Pr[\nu - \rho > t] \le 5 \times 10^{-6}$, with $\nu \sim \mathrm{Lap}(4)$ and $\rho \sim \mathrm{Lap}(2)$, gives $t = 74.8$ for $P = 1{,}000$ and $t = 84.0$ for $P = 10{,}000$.
+3. **The gaps.** The distance must be at least $t$, so at least $\lceil t\rceil$, which needs $\lceil g/2\rceil \ge \lceil t\rceil + 1$, that is $g \ge 2\lceil t\rceil + 1$: gaps of 151 and 171.
+4. **The pool size.** For large $t$ the tail is dominated by its slower term, about $\frac23e^{-t\varepsilon_0/4}$. Multiplying the pool by 10 requires the tail to fall by 10, so $t$ grows by $4\ln 10/\varepsilon_0 = 9.2$, which matches $84.0 - 74.8$.
+
+*The threshold protects every query of the pool at once, so it grows with the logarithm of the pool, and it is measured in teachers. An ensemble whose typical gap is smaller than about $2t$ cannot use stable aggregation, however good its teachers are.*
+:::
+
+## What stable aggregation needs {#sec-sol-pate-9}
+
+> **Exercise 9.** **What stable aggregation needs.** You want 1,000 exact labels from stable aggregation with a cutoff of $c = 20$ unstable answers, a pool of 10,000 queries and $\delta_{\text{bad}} = \delta' = 5 \times 10^{-6}$. Compute the budget and the smallest passing gap at $\varepsilon_0 = 0.5$ and $\varepsilon_0 = 1$. Suppose a share $f$ of the queries is unstable, in the sense that the test says so. How small must $f$ be for 20 unstable answers to leave 1,000 labelled queries on average? What does that say about the number of teachers? *Check: $\varepsilon = 9.93$ with gap 339, and 20.00 with gap 171; $f \le 0.0196$.* *(Sparse vector; planning a budget)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Budgets.** Twenty runs of $\varepsilon_0$-DP AboveThreshold compose by @eq-pate-stable-eps to $\varepsilon = 9.93$ at $\varepsilon_0 = 0.5$ and 20.00 at $\varepsilon_0 = 1$. At this scale the composition is almost linear, about $20\varepsilon_0$.
+2. **Gaps.** The thresholds are $t = 168.1$ and 84.0, so by Exercise 8 the plurality must lead by at least 339 and 171 votes.
+3. **The share of unstable queries.** Before each unstable answer the procedure labels on average $(1 - f)/f$ stable queries, so $c$ unstable answers leave about $c(1 - f)/f$ labels. Setting this to at least 1,000 gives $f \le c/(c + 1{,}000) = 20/1{,}020 = 0.0196$.
+4. **Teachers.** Fewer than 2% of the queries may fall short of a lead of 171 votes at $\varepsilon = 20$, or of 339 votes at $\varepsilon = 9.93$. Since the gap cannot exceed the number of teachers, that takes several hundred teachers, nearly unanimous on 98% of the queries. The running example's 500 teachers clear a distance of 84 on only 0.3923 of the pool.
+
+*Stable aggregation buys a budget fixed in advance and exact labels, and it pays with a demand on consensus that few tasks meet. Measure the share of queries that clear the threshold on public or held-out data before choosing it.*
 :::

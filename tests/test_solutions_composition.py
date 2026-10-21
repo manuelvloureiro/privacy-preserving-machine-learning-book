@@ -48,6 +48,10 @@ def test_solutions_composition_matches_page(tmp_path: Path) -> None:
         "delta(0)=1/2",
         "delta(ln 3/2)=3/8",
         "delta(ln 2)=1/3",
+        # Exercise 8
+        "d=100: closed-form eps0=0.01042  spends=0.5054  rms=135.7  largest eps0=0.02041  rms=69.3",
+        "d=1000: closed-form eps0=0.00330  spends=0.5054  rms=429.2  largest eps0=0.00645  rms=219.2",
+        "d=10000: closed-form eps0=0.00104  spends=0.5054  rms=1357.2  largest eps0=0.00204  rms=693.0",
     ):
         assert expected in out, expected
     assert list(tmp_path.iterdir()) == []

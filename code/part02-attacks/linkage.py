@@ -12,6 +12,7 @@ A person is unique when nobody else shares their cell. Logarithms are base 2 for
 """
 
 import argparse
+import hashlib
 import math
 from collections.abc import Sequence
 from dataclasses import dataclass
@@ -437,6 +438,32 @@ POPULATION = 10_000  # the synthetic census of the uniqueness section
 BIG_POPULATION = 100_000  # the synthetic census of the sampling section
 SAMPLING_ATTRIBUTES = 7  # sampling section: the first seven attributes
 USERS, OUTSIDERS, ITEMS = 5_000, 500, 4_000  # the synthetic ratings
+# --- Pseudonyms: hashed identifiers ------------------------------------------------------------
+
+TAXI_TRIPS = 173e6  # trips in the 2013 New York City taxi release
+LICENCES = 2e6  # possible hack licence numbers (six or seven digits), as Pandurangan counted them
+MEDALLIONS = 22e6  # possible medallion numbers under their few fixed patterns
+MINUTES_PER_YEAR = 365 * 24 * 60
+CITY_KM2 = 780.0  # land area of New York City, about
+GRID_KM2 = 0.01  # a 100 m × 100 m square
+
+
+def md5_hex(text: str) -> str:
+    """The MD5 hash of a string, as 32 hexadecimal characters: how the 2013 taxi release replaced identifiers."""
+    return hashlib.md5(text.encode()).hexdigest()
+
+
+def dictionary_attack(hashes: Sequence[str], candidates: Sequence[str]) -> tuple[dict[str, str], int]:
+    """Invert unkeyed hashes by hashing every candidate identifier once. Returns (hash → identifier found, hashes computed)."""
+    wanted = set(hashes)
+    found: dict[str, str] = {}
+    for candidate in candidates:
+        h = md5_hex(candidate)
+        if h in wanted:
+            found[h] = candidate
+    return found, len(candidates)
+
+
 AUX_SIZES = list(range(1, 11))
 PHI = 1.5  # Narayanan–Shmatikov's eccentricity threshold
 
@@ -465,6 +492,27 @@ def print_table(rng: np.random.Generator) -> None:
     print("[Linkage success on the toy release]")
     sizes = [1, 1, 1, 2, 3]
     print(f"  class sizes {sizes}: success={linkage_success(sizes):.3f} (= {len(sizes)}/{sum(sizes)})")
+
+    print("[Hashed identifiers]")
+    print(f"  md5('0')={md5_hex('0')}")
+    six_digits = [f"{k:06d}" for k in range(10**6)]
+    secret_ids = ["004211", "318990", "500017", "771234", "999998"]
+    found, tried = dictionary_attack([md5_hex(i) for i in secret_ids], six_digits)
+    print(
+        f"  six-digit identifiers: space={len(six_digits)} ({math.log2(len(six_digits)):.1f} bits)  "
+        f"hashes computed={tried}  inverted {len(found)} of {len(secret_ids)}"
+    )
+    print(
+        f"  taxi: trips={TAXI_TRIPS:.3g} ({math.log2(TAXI_TRIPS):.1f} bits)  licences {math.log2(LICENCES):.1f} bits  "
+        f"medallions {math.log2(MEDALLIONS):.1f} bits"
+    )
+    print(f"  ten-digit phone numbers: {math.log2(1e10):.1f} bits")
+    minute_bits = math.log2(MINUTES_PER_YEAR)
+    place_bits = math.log2(CITY_KM2 / GRID_KM2)
+    print(
+        f"  one trip: pickup minute={MINUTES_PER_YEAR} ({minute_bits:.1f} bits)  "
+        f"pickup square={CITY_KM2 / GRID_KM2:.0f} ({place_bits:.1f} bits)  total={minute_bits + place_bits:.1f} bits"
+    )
 
     print(f"[Synthetic census, n = {POPULATION}]")
     cum_bits = 0.0

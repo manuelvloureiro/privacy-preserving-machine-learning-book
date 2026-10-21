@@ -24,8 +24,11 @@ from selection import (
     gumbel_max_mean,
     laplace_rnm_probabilities,
     laplace_sf,
+    learner_samples,
     non_monotone_ratio,
     report_noisy_max,
+    sparse_alpha,
+    sparse_alpha_approx,
     svt_alpha,
     two_candidate_best,
 )
@@ -189,6 +192,37 @@ def print_table(rng: np.random.Generator) -> None:
         f"  50 models, eps=1, scale 2: EM Pr[best]={float(p_em[0]):.4f} E[gap]={float(np.sum(p_em * (u.max() - u))):.2f}  "
         f"Laplace Pr[best]={float(p_lap[0]):.4f} E[gap]={float(np.sum(p_lap * (u.max() - u))):.2f}"
     )
+
+    print("[Exercise 7: the Laplace mechanism as an exponential mechanism, eps = 1, Delta = 1]")
+    grid = np.linspace(-60.0, 61.0, 1_210_001)
+    step = float(grid[1] - grid[0])
+    for scale, name in ((2.0, "generic e^(eps u/2)"), (1.0, "without the 2")):
+        dens_d = np.exp(-np.abs(grid - 0.0) / scale)
+        dens_d2 = np.exp(-np.abs(grid - 1.0) / scale)
+        z_d, z_d2 = float(dens_d.sum() * step), float(dens_d2.sum() * step)
+        ratio = float(np.max(np.abs(np.log(dens_d / z_d) - np.log(dens_d2 / z_d2))))
+        print(
+            f"  {name}: Z(D)={z_d:.4f}  Z(D')={z_d2:.4f}  largest |ln density ratio|={ratio:.4f}  "
+            f"rms error={math.sqrt(2) * scale:.4f}"
+        )
+
+    print("[Exercise 8: records for the threshold learner, beta = 0.05]")
+    for size, a, e in ((1001, 0.05, 1.0), (10**6, 0.05, 1.0), (1001, 0.05, 0.01)):
+        stat, priv = learner_samples(a, e, 0.05, size)
+        print(f"  |C|={size} alpha={a:g} eps={e:g}: sampling={stat:.0f}  privacy={priv:.0f}")
+    size = 1001
+    crit = 0.05 * math.log(size / 0.05) / (2 * math.log(2 * size / 0.05))
+    print(f"  privacy dominates below eps={crit:.4f} (alpha=0.05, |C|=1001)")
+
+    print("[Exercise 9: Sparse with basic and advanced composition, k = 1000, beta = 0.05, eps = 1, delta = 1e-6]")
+    cross = next(
+        c for c in range(1, 1000) if sparse_alpha_approx(1000, c, 0.05, 1.0, 1e-6) < sparse_alpha(1000, c, 0.05, 1.0)
+    )
+    print(f"  advanced beats basic from c={cross}")
+    for c in (cross - 1, cross, 1000):
+        print(
+            f"  c={c}: basic={sparse_alpha(1000, c, 0.05, 1.0):.0f}  advanced={sparse_alpha_approx(1000, c, 0.05, 1.0, 1e-6):.0f}"
+        )
 
 
 def main() -> None:

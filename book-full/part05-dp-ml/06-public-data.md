@@ -53,7 +53,7 @@ For a layer that maps an input $a \in \mathbb R^{d_{\text{in}}}$ to $Wa$, the gr
 
 ### Context
 
-Every bound on private learning in this part grows with the dimension. [Private empirical risk minimization](01-dp-erm.md) shows that the best excess risk achievable under $(\varepsilon, \delta)$-DP grows like $\sqrt d$ for convex Lipschitz losses and like $d$ for strongly convex ones, and that a matching lower bound holds. The noise in DP-SGD has length $\sigma C\sqrt k/B$, growing with the number of trainable weights. Yet large pretrained language models with hundreds of millions of weights are fine-tuned privately with good results. How much does each trainable direction really cost, and what decides it?
+Every bound on private learning in this part grows with the dimension. [Private empirical risk minimization](01-dp-erm.md#sec-dperm-convex) shows that the best excess risk achievable under $(\varepsilon, \delta)$-DP grows like $\sqrt d$ for convex Lipschitz losses and like $d$ for strongly convex ones. Matching lower bounds hold up to logarithmic factors. The noise in DP-SGD has length $\sigma C\sqrt k/B$, growing with the number of trainable weights. Yet large pretrained language models with hundreds of millions of weights are fine-tuned privately with good results. How much does each trainable direction really cost, and what decides it?
 
 ### Statement
 
@@ -124,13 +124,13 @@ Let $\phi(x) \in \mathbb R^k$ be the frozen features, computed from public data 
 1. The per-record gradient has length at most $\|\phi(x)\|$. For $k - 1$ tanh features and a constant 1, $\|\phi(x)\| \le \sqrt k$, so the loss is $\sqrt k$-Lipschitz in $w$ and clipping is optional.
 2. The excess risk of a private probe splits into a **feature gap** and a **privacy cost**:
 $$R(\tilde w) - R_{\text{best}} = \underbrace{R(w^\phi) - R_{\text{best}}}_{\text{features}} + \underbrace{R(\tilde w) - R(w^\phi)}_{\text{privacy}},$$ {#eq-pub-probe-split}
-where $R$ is the risk, $R_{\text{best}}$ the best risk of any model, and $w^\phi$ the best linear model on the features $\phi$. The first term does not depend on $n$ or $\varepsilon$. The second is private convex ERM in $k$ dimensions, whose best rate for losses that are $L$-Lipschitz over a ball of radius $R_w$ is $\tilde\Theta\big(LR_w\sqrt{k\ln(1/\delta)}/(n\varepsilon)\big)$ (Bassily, Smith & Thakurta 2014).
+where $R$ is the risk, $R_{\text{best}}$ the best risk of any model, and $w^\phi$ the best linear model on the features $\phi$. The first term does not depend on $n$ or $\varepsilon$. The second is private convex ERM in $k$ dimensions. Take losses that are $L$-Lipschitz over a ball of radius $R_w$. Noisy projected gradient descent keeps the privacy cost below a constant times $LR_w\sqrt{k\ln(1/\delta)}/(n\varepsilon)$. No private algorithm can do better than order $LR_w\sqrt k/(n\varepsilon)$ (Bassily, Smith & Thakurta 2014).
 
 ### Derivation
 
 1. **The gradient bound.** $\nabla_w\ell = \ell'(m)\,y\,\phi(x)$ with $m = y\langle w, \phi(x)\rangle$ the margin and $\ell'(m) = -1/(1 + e^m) \in (-1, 0)$. So $\|\nabla_w\ell\| \le \|\phi(x)\|$. Each tanh activation lies in $(-1, 1)$, so $\|\phi(x)\|^2 < (k - 1) + 1 = k$.
 2. **The split.** Add and subtract $R(w^\phi)$. The first difference compares two non-private quantities and contains no noise.
-3. **The privacy term.** By Fact 3, $\phi$ is a fixed function, so the probe is an ordinary convex ERM problem on the transformed records $(\phi(x_i), y_i)$, with dimension $k$ and Lipschitz constant $\sqrt k$ or the clipping norm. The rate is the one [Private empirical risk minimization](01-dp-erm.md#sec-dperm-compare) states, proved by Bassily, Smith & Thakurta (2014), and noisy gradient descent attains it. The Lipschitz constant and the dimension enter through the noise $\propto L\sqrt k$ that every private method must add.
+3. **The privacy term.** By Fact 3, $\phi$ is a fixed function, so the probe is an ordinary convex ERM problem on the transformed records $(\phi(x_i), y_i)$, with dimension $k$ and Lipschitz constant $\sqrt k$ or the clipping norm. The upper bound is the one [Private empirical risk minimization](01-dp-erm.md#sec-dperm-convex) derives for noisy projected gradient descent, and the lower bound is Bassily, Smith & Thakurta's (2014). The Lipschitz constant and the dimension enter through the noise $\propto L\sqrt k$ that every private method must add.
 
 ### Interpretation
 
@@ -323,7 +323,7 @@ Let $\mathcal A(D_{\text{pub}}, D)$ pretrain on $D_{\text{pub}}$ without privacy
 
 **Distribution shift.** Public data help as much as they resemble the private task. Benchmarks in which the "private" set is a standard dataset whose distribution is close to well-curated public data, for example two collections of natural images, can overstate what the method will do on genuinely sensitive data, which is often unlike anything public: medical images, rare languages, internal logs. @tbl-pub-run used a public task close to the private one by design; [Exercise 5](../../book-exercises/part05-dp-ml/06-public-data.md#sec-sol-pub-5) shows the gain shrinking, and for the last layer turning into a loss against training from scratch, as the public teacher drifts away.
 
-**Public is not the same as non-sensitive.** Even when every pretraining record is public, a model trained on them can reproduce them, link them, or make inferences about people that the original publication did not allow. And large pretrained models are often too large to fine-tune locally, so the private data are sent to whoever has the compute, which is a trust question DP does not address ([Trust models](../part03-dp-foundations/08-trust-models.md)).
+**Public is not the same as non-sensitive.** Even when every pretraining record is public, a model trained on them can reproduce them, link them, or make inferences about people that the original publication did not allow. And large pretrained models are often too large to fine-tune locally, so the private data are sent to whoever has the compute, which is a trust question DP does not address ([Trust models](../part03-dp-foundations/09-trust-models.md)).
 
 **What to report.** State what the public data are, how they were obtained, whether overlap with the private data was checked (deduplication against the private set is the minimum), and that the $(\varepsilon, \delta)$ covers the private dataset given the pretrained model. Any choice made by looking at private data, such as which public model to start from or the step size, is part of the private computation and must be accounted for.
 
@@ -388,7 +388,7 @@ $p$ weights, $k$ trainable; noise standard deviation $s = \sigma C/B$ per coordi
 | Noise cost of $T$ steps | $\approx\frac{\eta s^2}{4}d_{\text{eff}}$, $d_{\text{eff}} = \sum_j(1 - (1 - \eta h_j)^{2T})$ | Quadratic loss near the start, $\eta h_j \ll 1$ |
 | Effective dimension | $d_{\text{eff}} \le \min(k, 2\eta T\operatorname{tr}H)$ | — |
 | Linear probe | Private convex ERM in $k$ dimensions, $L \le \sqrt k$ for bounded features | Features computed from public data |
-| Probe error | Feature gap (fixed) + privacy cost $\tilde\Theta(\sqrt{k\ln(1/\delta)}/(n\varepsilon))$ | Convex, Lipschitz |
+| Probe error | Feature gap (fixed) + privacy cost of order $\sqrt k/(n\varepsilon)$, up to $\sqrt{\ln(1/\delta)}$ and logarithms | Convex, Lipschitz |
 | LoRA weights | $r(d_{\text{in}} + d_{\text{out}})$ per matrix | Rank $r$ |
 | LoRA gradients | $\nabla_U = \delta(V^\top a)^\top$, $\nabla_V = a(U^\top\delta)^\top$ | Ghost norms apply |
 | Projection | Same $(\varepsilon, \delta)$; break-even $(s\sqrt m/(\sqrt{f_m}\|\bar m\|))^2$; bias $1 - f_m$ | Subspace from public data only |

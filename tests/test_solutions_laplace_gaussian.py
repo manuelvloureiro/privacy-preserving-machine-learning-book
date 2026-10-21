@@ -33,6 +33,9 @@ def test_solutions_laplace_gaussian_matches_page(tmp_path: Path) -> None:
         "basic composition: eps=17.3818",
         # Exercise 6
         "Laplace l2 rms=0.02828  Gaussian l2 rms=0.00746  ratio=3.79",
+        # Exercise 7
+        "eps=0.5: atoms 0.5000 at +eps and 0.3033 at -eps  continuous 0.1967  total mass=1.0000  mean loss=0.1065",
+        "eps=1: atoms 0.5000 at +eps and 0.1839 at -eps  continuous 0.3161  total mass=1.0000  mean loss=0.3679",
     ):
         assert expected in out
     assert list(tmp_path.iterdir()) == []

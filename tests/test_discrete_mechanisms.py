@@ -1,4 +1,4 @@
-"""code/part03-dp-foundations/discrete_mechanisms.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/07-discrete-mechanisms.md."""
+"""code/part03-dp-foundations/discrete_mechanisms.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/08-discrete-mechanisms.md."""
 
 import subprocess
 import sys

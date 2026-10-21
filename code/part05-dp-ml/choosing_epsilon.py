@@ -416,6 +416,48 @@ def rappor_eps_inf(hashes: int, f: float) -> float:
     return 2 * hashes * math.log((1 - f / 2) / (f / 2))
 
 
+def zcdp_epsilon_tight(rho: float, delta: float) -> float:
+    """The conversion the Facebook URLs release uses: ε = ρ + √(4ρ ln(√(πρ)/δ)) (Bun & Steinke 2016, Lemma 3.6 form)."""
+    return rho + math.sqrt(4 * rho * math.log(math.sqrt(math.pi * rho) / delta))
+
+
+def group_zcdp(actions: int, sigma: float) -> float:
+    """ρ of k count queries, each moved by at most 1 by one user, under N(0, σ²) noise: k/(2σ²)."""
+    return actions / (2 * sigma**2)
+
+
+# Facebook Privacy-Protected Full URLs Data Set (Messing et al. 2020), table of the privacy section:
+# action, k = the (DP) 99th percentile of distinct URLs per user for that action, σ of the Gaussian noise.
+FACEBOOK_ACTIONS: tuple[tuple[str, int, float], ...] = (
+    ("views", 51_914, 2228.0),
+    ("clicks", 17, 40.0),
+    ("shares", 2, 14.0),
+    ("likes", 5, 22.0),
+    ("comments", 1, 10.0),
+)
+
+
+def output_perturbation_eps(eps: float, gamma: float) -> float:
+    """Ding, Kulkarni & Yekhanin (2017), Theorem 6: one round of 1BitMean whose bit is then flipped w.p. γ."""
+    e = math.exp(eps)
+    return math.log(((1 - 2 * gamma) * e / (e + 1) + gamma) / ((1 - 2 * gamma) / (e + 1) + gamma))
+
+
+def ding_all_apps(eps: float) -> float:
+    """Ding et al., Theorem 7: one round over all apps, whose usage adds up to at most m, costs ε + e^ε − 1."""
+    return eps + math.expm1(eps)
+
+
+def averaging_attack_success(eps_per: float, days: int = 30, tolerance: float = 0.5) -> float:
+    """LinkedIn's attack: the mean of `days` answers with Lap(2/ε) noise lands within `tolerance` of the count.
+
+    The source's normal approximation: the mean has sd 2√2/(ε√days), so the probability is
+    Pr[|N(0, 1)| ≤ tolerance · ε √days / (2√2)].
+    """
+    z = tolerance * eps_per * math.sqrt(days) / (2 * math.sqrt(2))
+    return math.erf(z / math.sqrt(2))
+
+
 # --- An actual attack on trained models -------------------------------------------------------
 
 
@@ -533,6 +575,23 @@ def print_table(rng: np.random.Generator) -> None:
     print(
         f"a user-day budget of 1 over a year: {365 * 1.0:g};  Apple QuickType 2 x 8 per day over 90 days: {2 * 8 * 90}"
     )
+    print(f"rho=0.005, delta=1e-5: simple conversion {zcdp_epsilon(0.005, 1e-5):.3f}")
+    for name, k, sigma in FACEBOOK_ACTIONS:
+        rho, rho_user = group_zcdp(1, sigma), group_zcdp(k, sigma)
+        print(
+            f"Facebook {name}: k={k} sigma={sigma:g}  per action rho={rho:.2g} eps={zcdp_epsilon_tight(rho, 1e-5):.2f}  "
+            f"user rho={rho_user:.4f} eps={zcdp_epsilon_tight(rho_user, 1e-5):.3f}"
+        )
+    print(
+        f"Microsoft: eps=1, gamma=0.2: Theorem 6 gives {output_perturbation_eps(1.0, 0.2):.3f} (paper reports 0.686); "
+        f"all apps from 0.686: {ding_all_apps(0.686):.3f}; four rounds a day at 0.686: {4 * 0.686:.3f}"
+    )
+    print(f"LinkedIn: eps_per=0.15, 30 days: averaging attack succeeds w.p. {averaging_attack_success(0.15):.3f}")
+    print(
+        "monthly totals for users whose records change: "
+        f"RAPPOR 0.534 x 48 x 30 = {0.534 * 48 * 30:.1f}  Microsoft 0.686 x 4 x 30 = {0.686 * 4 * 30:.1f}  "
+        f"Apple Safari domains 4 x 2 x 30 = {4 * 2 * 30}  Apple emoji 4 x 30 = {4 * 30}"
+    )
 
     print("== A loss-threshold attack on models trained at each budget (one run each)")
     for e in EPS_GRID:
@@ -645,7 +704,7 @@ def plot_accuracy_risk() -> Figure:
     eps_list = sorted(ACCURACY_CH37)
     fig, axes = plt.subplots(1, 2, figsize=(10, 4.0))
     accs = [ACCURACY_CH37[e] for e in eps_list]
-    axes[0].semilogx(eps_list, accs, marker="o", color="black", label="DP-SGD (chapter 37)")
+    axes[0].semilogx(eps_list, accs, marker="o", color="black", label="DP-SGD (chapter 39)")
     axes[0].axhline(ACCURACY_NONPRIVATE_CH37, color="tab:gray", ls="--", label="non-private")
     axes[0].set_xticks(eps_list, [f"{e:g}" for e in eps_list])
     axes[0].minorticks_off()

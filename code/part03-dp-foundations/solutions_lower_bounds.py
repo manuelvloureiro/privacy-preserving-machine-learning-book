@@ -2,7 +2,7 @@
 
     uv run python code/part03-dp-foundations/solutions_lower_bounds.py
 
-Prints every number quoted in book-exercises/part03-dp-foundations/09-lower-bounds.md with seed 0 (only exercise 6 is random).
+Prints every number quoted in book-exercises/part03-dp-foundations/10-lower-bounds.md with seed 0 (only exercise 6 is random).
 Makes no figures; --out is accepted and ignored.
 
 Conventions as in lower_bounds.py: records in {-1, +1}^d with attribute means p ~ U[-1, 1]^d,
@@ -20,6 +20,7 @@ from lower_bounds import (
     EPS,
     TRACE_D,
     TRACE_N,
+    approx_packing_lemma_k,
     approx_packing_min_k,
     best_advantage,
     bisect,
@@ -128,6 +129,14 @@ def reference_predicted_advantage(n: int, d: int, m: int) -> float:
 # --- The page's numbers ---------------------------------------------------------------------
 
 
+# --- Exercise 8: packing for a mean in d dimensions ----------------------------------------------
+
+
+def ball_packing_log_count(d: int, r: float, alpha: float) -> float:
+    """ln of the volume bound (R/(2α))^d on a maximal set of means in the R-ball spaced more than 2α apart."""
+    return d * math.log(r / (2 * alpha))
+
+
 def print_table(rng: np.random.Generator) -> None:
     n_bins = 10**6
     print("[Exercise 1: histograms under replace neighbours]")
@@ -185,6 +194,14 @@ def print_table(rng: np.random.Generator) -> None:
     print(f"  r=0.9, delta=1e-6: eps >= {dn_eps_lower(0.9, DELTA):.4f}")
     print(f"  r=0.99: eps >= {dn_eps_lower(0.99, DELTA):.4f}")
     print(f"  eps=1 allows at most r = {dp_bit_accuracy_bound(1.0, DELTA):.4f}")
+
+    print("[Exercise 8: packing for a mean in d dimensions, R=1000, alpha=0.1, eps=1, beta=0.05]")
+    for d in (1, 10, 100):
+        log_m = ball_packing_log_count(d, 1000.0, 0.1)
+        print(
+            f"  d={d}: ln m >= {log_m:.2f}  pure n >= {(log_m + math.log1p(-0.05)) / 1.0:.2f}  "
+            f"(eps, delta=1e-6) n >= {approx_packing_lemma_k(log_m, 1.0, DELTA, 0.05)}"
+        )
 
 
 def main() -> None:

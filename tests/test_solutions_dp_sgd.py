@@ -35,5 +35,8 @@ def test_solutions_dp_sgd_matches_page(tmp_path: Path) -> None:
         "q=0.01, sigma=1: steps until eps=1: 5",
         "q=0.01, sigma=1: steps until eps=2: 882",
         "q=0.01, sigma=1: steps until eps=4: 3859",
+        # Exercise 7
+        "microbatch of 2: noise ratio 4  per-example DP-SGD with sigma=4: eps=1.035",
+        "microbatch of 4: noise ratio 8  per-example DP-SGD with sigma=8: eps=0.481",
     ):
         assert expected in out, expected

@@ -46,6 +46,19 @@ def test_solutions_selection_matches_page(tmp_path: Path) -> None:
         "d/b=4: EM=0.9820  Laplace=0.9725",
         "d/b=1 simulated: Gumbel=0.7308  Laplace=0.7239",
         "50 models, eps=1, scale 2: EM Pr[best]=0.3935 E[gap]=1.54  Laplace Pr[best]=0.4241 E[gap]=1.40",
+        # Exercise 7
+        "generic e^(eps u/2): Z(D)=4.0000  Z(D')=4.0000  largest |ln density ratio|=0.5000  rms error=2.8284",
+        "without the 2: Z(D)=2.0000  Z(D')=2.0000  largest |ln density ratio|=1.0000  rms error=1.4142",
+        # Exercise 8
+        "|C|=1001 alpha=0.05 eps=1: sampling=33913  privacy=793",
+        "|C|=1000000 alpha=0.05 eps=1: sampling=56015  privacy=1345",
+        "|C|=1001 alpha=0.05 eps=0.01: sampling=33913  privacy=79236",
+        "privacy dominates below eps=0.0234 (alpha=0.05, |C|=1001)",
+        # Exercise 9
+        "advanced beats basic from c=29",
+        "c=28: basic=3120  advanced=3155",
+        "c=29: basic=3240  advanced=3218",
+        "c=1000: basic=140035  advanced=23691",
     ):
         assert expected in out, expected
     assert list(tmp_path.iterdir()) == []

@@ -10,10 +10,11 @@ The running example: regularized logistic regression, J(w; D) = (1/n) Σ ln(1 + 
 on n examples with x uniform on the unit sphere of R^d (so the loss is 1-Lipschitz in w) and labels
 drawn from a logistic model. Neighbouring datasets differ by replacing one example. Three ways of
 making the trained weights private are compared: noise on the output, noise in the objective and
-noise on every gradient.
+noise on every gradient; the last is also run without a ridge, over a ball of weights.
 
 Public functions used by later chapters: sigmoid, LogisticData, make_logistic_data, logistic_objective,
-logistic_grad, fit_logistic, excess_risk, normal_cdf, gaussian_delta, gaussian_mu, gaussian_sigma.
+logistic_grad, fit_logistic, excess_risk, normal_cdf, gaussian_delta, gaussian_mu, gaussian_sigma,
+project_ball.
 """
 
 import os
@@ -336,6 +337,88 @@ def noisy_gd_lr(lam: float) -> float:
     return 1.0 / (C_LOGISTIC + lam)
 
 
+# --- Section: noisy projected gradient descent without strong convexity ------------------------
+
+R_BALL = 5.0  # radius of the ball of weights; the running example's true weights have length 5
+NS_CONVEX: tuple[int, ...] = (300, 1_000, 3_000)
+TRIALS_CONVEX = 5
+
+
+def project_ball(w: Array, radius: float) -> Array:
+    """The closest point of the ball ‖w‖ ≤ radius: shrink w back to the sphere if it left the ball."""
+    norm = float(np.linalg.norm(w))
+    return w if norm <= radius else w * (radius / norm)
+
+
+def constrained_minimizer(data: LogisticData, radius: float, steps: int = 5000) -> Array:
+    """argmin of the unregularized logistic objective over the ball, by projected gradient descent with step 1/β."""
+    w = project_ball(fit_logistic(data, 1e-9), radius)
+    for _ in range(steps):
+        w = project_ball(w - logistic_grad(w, data, 0.0) / C_LOGISTIC, radius)
+    return w
+
+
+def convex_steps_rule(n: int, d: int, eps: float, delta: float) -> int:
+    """T = ⌈n² μ²/(4d)⌉, where the optimization term 1/T of the bound falls to the noise term 4d/(n² μ²)."""
+    mu = gaussian_mu(eps, delta)
+    return math.ceil(n**2 * mu**2 / (4 * d))
+
+
+def convex_bound(n: int, d: int, steps: int, radius: float, eps: float, delta: float, lipschitz: float = 1.0) -> float:
+    """RG/√T with G² = L² + dσ²: projected SGD's guarantee for gradients with second moment G²."""
+    sigma = noisy_gd_sigma(n, steps, eps, delta, lipschitz)
+    return radius * math.sqrt((lipschitz**2 + d * sigma**2) / steps)
+
+
+def convex_limit(n: int, d: int, radius: float, eps: float, delta: float, lipschitz: float = 1.0) -> float:
+    """The bound as T grows without limit: 2RL√d/(nμ)."""
+    return 2 * radius * lipschitz * math.sqrt(d) / (n * gaussian_mu(eps, delta))
+
+
+def noisy_projected_gd(
+    rng: np.random.Generator, data: LogisticData, radius: float, eps: float, delta: float, steps: int
+) -> Array:
+    """Full-batch projected gradient descent on the unregularized objective, Gaussian noise on every gradient,
+    step R/(G√T); returns the average of the iterates w_1, ..., w_T (w_1 = 0)."""
+    n, d = int(data.x.shape[0]), int(data.x.shape[1])
+    sigma = noisy_gd_sigma(n, steps, eps, delta)
+    lr = radius / (math.sqrt(1 + d * sigma**2) * math.sqrt(steps))
+    w: Array = np.zeros(d)
+    total: Array = np.zeros(d)
+    for _ in range(steps):
+        total += w
+        w = project_ball(w - lr * (logistic_grad(w, data, 0.0) + sigma * rng.standard_normal(d)), radius)
+    return total / steps
+
+
+@dataclass(frozen=True)
+class ConvexResult:
+    n: int
+    steps: int
+    sigma: float
+    measured: float  # mean excess risk J(w̄) - min over the ball of J, over the trials
+    bound: float
+
+
+def convex_experiment(
+    rng: np.random.Generator, n: int, d: int, radius: float, eps: float, delta: float, trials: int
+) -> ConvexResult:
+    steps = convex_steps_rule(n, d, eps, delta)
+    vals: list[float] = []
+    for _ in range(trials):
+        data = make_logistic_data(rng, n)
+        w_star = constrained_minimizer(data, radius)
+        w_bar = noisy_projected_gd(rng, data, radius, eps, delta, steps)
+        vals.append(excess_risk(w_bar, w_star, data, 0.0))
+    return ConvexResult(
+        n,
+        steps,
+        noisy_gd_sigma(n, steps, eps, delta),
+        float(np.mean(vals)),
+        convex_bound(n, d, steps, radius, eps, delta),
+    )
+
+
 # --- Comparison across n ----------------------------------------------------------------------
 
 
@@ -550,6 +633,38 @@ def print_table(rng: np.random.Generator) -> None:
     vals = noisy_gd_vs_steps(rng, 10_000, LAM_RUN, EPS_RUN, DELTA_RUN, steps_list, 10)
     print("  ".join(f"T={s}: {v:.3e}" for s, v in zip(steps_list, vals, strict=True)))
 
+    print("== Noisy projected gradient descent without a ridge (ball of radius 5)")
+    mu = gaussian_mu(EPS_RUN, DELTA_RUN)
+    print(
+        f"classic ratio eps/sqrt(2 ln(1.25/delta))={EPS_RUN / math.sqrt(2 * math.log(1.25 / DELTA_RUN)):.4f}  exact mu={mu:.4f}"
+    )
+    n_ex = 1_000
+    steps_ex = convex_steps_rule(n_ex, D_RUN, EPS_RUN, DELTA_RUN)
+    sigma_ex = noisy_gd_sigma(n_ex, steps_ex, EPS_RUN, DELTA_RUN)
+    print(
+        f"n={n_ex}: T={steps_ex}  sigma={sigma_ex:.4f}  G^2=1+d sigma^2={1 + D_RUN * sigma_ex**2:.4f}  "
+        f"step={R_BALL / (math.sqrt(1 + D_RUN * sigma_ex**2) * math.sqrt(steps_ex)):.4f}  "
+        f"bound={convex_bound(n_ex, D_RUN, steps_ex, R_BALL, EPS_RUN, DELTA_RUN):.4f}  "
+        f"limit 2RL sqrt(d)/(n mu)={convex_limit(n_ex, D_RUN, R_BALL, EPS_RUN, DELTA_RUN):.4f}"
+    )
+    for steps in (100, 1_000, 10_000, 100_000):
+        print(f"n={n_ex}, T={steps}: bound={convex_bound(n_ex, D_RUN, steps, R_BALL, EPS_RUN, DELTA_RUN):.4f}")
+    convex = [convex_experiment(rng, n, D_RUN, R_BALL, EPS_RUN, DELTA_RUN, TRIALS_CONVEX) for n in NS_CONVEX]
+    for c in convex:
+        print(
+            f"n={c.n}: T={c.steps}  sigma={c.sigma:.4f}  measured={c.measured:.3e}  bound={c.bound:.3e}  "
+            f"ratio={c.bound / c.measured:.1f}"
+        )
+    print(
+        f"log-log slope against n: measured {loglog_slope(NS_CONVEX, [c.measured for c in convex]):.2f}  "
+        f"bound {loglog_slope(NS_CONVEX, [c.bound for c in convex]):.2f}"
+    )
+    for d in (10, 40, 160):
+        print(
+            f"d={d}, n=10000: limit={convex_limit(10_000, d, R_BALL, EPS_RUN, DELTA_RUN):.4f}  "
+            f"T rule={convex_steps_rule(10_000, d, EPS_RUN, DELTA_RUN)}"
+        )
+
 
 # --- Figures --------------------------------------------------------------------------------
 
@@ -683,6 +798,20 @@ def plot_noisy_gd_steps(rng: np.random.Generator) -> Figure:
     return fig
 
 
+def plot_convex(rng: np.random.Generator) -> Figure:
+    """Noisy projected GD without a ridge: measured excess risk against the bound RG/√T, against n."""
+    ns = (300, 1_000, 3_000)
+    results = [convex_experiment(rng, n, D_RUN, R_BALL, EPS_RUN, DELTA_RUN, 3) for n in ns]
+    fig, ax = plt.subplots(figsize=(6.5, 4.2))
+    ax.loglog(ns, [c.bound for c in results], marker="s", color="tab:gray", ls="--", label=r"bound $RG/\sqrt{T}$")
+    ax.loglog(ns, [c.measured for c in results], marker="o", color="black", label="measured excess risk")
+    ax.set_xlabel("training examples $n$")
+    ax.set_ylabel("excess risk over the best weights in the ball")
+    ax.set_title(r"No ridge, ball $R = 5$, $d = 10$, $(1, 10^{-5})$-DP")
+    ax.legend()
+    return fig
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seed", type=int, default=0)
@@ -700,6 +829,7 @@ def main() -> None:
         "erm_objective_density.svg": plot_objective_density(),
         "erm_comparison.svg": plot_comparison(fig_rng),
         "erm_noisy_gd_steps.svg": plot_noisy_gd_steps(fig_rng),
+        "erm_convex.svg": plot_convex(fig_rng),
     }
     for name, fig in figures.items():
         fig.tight_layout()

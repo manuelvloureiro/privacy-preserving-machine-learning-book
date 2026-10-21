@@ -130,3 +130,34 @@ $$u = \sqrt{\frac{n\ln(2m/\eta)}{2p^2}} = \sqrt{\frac{500\ln80\,000}{2 \times 0.
 
 *Published statistics are rarely independent. Before withholding a number to protect a table, check whether the rest of the table implies it; most of the time it does.*
 :::
+
+## Queries for a deployed system {#sec-sol-reconstruction-9}
+
+> **Exercise 9.** **Queries for a deployed system.** The attack of @sec-recon-diffix targets $n = 142$ records with digit-predicate queries. Each query includes some fraction $\rho$ of the records, and the average of $\rho(1 - \rho)$ over the queries, the information $v$ of @eq-recon-diffix, is 0.2, and the system adds noise of standard deviation $\sigma = 4$. Using @eq-recon-diffix, how many queries does least squares need to recover 99% of the bits? How many would it need if every query included each record with probability $\frac12$? *Check: 1875 and 1529. In simulation, 1875 digit-predicate queries recover 0.9923 of the bits against 0.9900 predicted.* *(Least squares, inclusion rate)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Set the prediction to 0.99.** @eq-recon-diffix reaches 0.99 when $\sqrt{v(m - n - 1)}/(2\sigma) = \Phi^{-1}(0.99) = 2.3263$.
+2. **Solve for $m$.** Squaring and rearranging gives
+$$m = n + 1 + \frac{\big(2\sigma\,\Phi^{-1}(0.99)\big)^2}{v}.$$
+With $\sigma = 4$, the numerator is $(8 \times 2.3263)^2 = 346.4$.
+3. **Digit-predicate queries.** With $v = 0.2$, $m = 143 + 346.4/0.2 = 1874.8$, so 1875 queries, about half of the 3,500 that Cohen and Nissim asked.
+4. **Fair-coin queries.** With $v = \frac14$, $m = 143 + 346.4/0.25 = 1528.4$, so 1529. Queries that include a fifth of the records carry less information each, so the attacker needs about 350 more of them.
+5. **Simulation.** The script draws 142 identifiers, answers the first 1875 of the 3,500 predicates in a random order, and decodes by least squares. Over 20 runs it recovers 0.9923 of the bits, close to the predicted 0.9900.
+
+*An attacker who knows the noise level can budget the attack in advance: the number of queries grows with the square of the noise and falls with the information $v$ each query carries.*
+:::
+
+## Noise that grows with the number of queries {#sec-sol-reconstruction-10}
+
+> **Exercise 10.** **Noise that grows with the number of queries.** A designer wants least squares to recover at most 75% of $n = 73$ bits, against digit-predicate queries with $v = 0.2$. What noise standard deviation does that take if the attacker asks 3,500 queries, and what if it asks 35,000? What does this say about a system that fixes its noise in advance? *Check: 19.4 and 62.0, a ratio of 3.19.* *(Fundamental Law)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Solve the prediction for $\sigma$.** Setting @eq-recon-diffix to 0.75 gives
+$$\sigma = \frac{\sqrt{v(m - n - 1)}}{2\,\Phi^{-1}(0.75)},$$
+where $\Phi^{-1}(0.75) = 0.6745$ is the point below which a standard normal falls with probability 0.75.
+2. **At 3,500 queries.** The square root is $\sqrt{0.2 \times 3426} = 26.18$, and $26.18/(2 \times 0.6745) = 19.4$.
+3. **At 35,000 queries.** The square root is $\sqrt{0.2 \times 34\,926} = 83.58$, and $83.58/1.349 = 62.0$.
+4. **The ratio.** It is $\sqrt{34\,926/3426} = 3.19$: ten times as many queries need $\sqrt{10}$ times as much noise, almost exactly.
+
+*No fixed noise level is safe against an attacker whose number of queries is not fixed. The noise has to grow like the square root of the number of queries answered, which is what a privacy budget spent across queries arranges.*
+:::

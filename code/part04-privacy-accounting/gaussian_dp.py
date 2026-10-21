@@ -435,7 +435,7 @@ def subsampled_gaussian_eps_bracket(
     """Numerical lower and upper values of ε at δ for k steps of the Poisson-subsampled Gaussian.
 
     Takes the worse of the two neighbouring directions. Losses beyond ±width are aliased, which is
-    harmless here because the composed loss stays far inside. A preview of chapter 32's accountants.
+    harmless here because the composed loss stays far inside. A preview of chapter 34's accountants.
     """
     size = int(2 * width / h)
     brackets: list[tuple[float, float]] = [(0.0, 0.0) for _ in steps]

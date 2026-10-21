@@ -2,289 +2,127 @@
 
 ## Why this matters
 
-Most of the random numbers in a private machine-learning system are either counts or draws of noise. The number of mistakes a model makes on a test set is a count, and so is the size of a randomly sampled minibatch. The noise a system adds on purpose is the other kind, usually drawn from a normal or a Laplace distribution. Before you can trust any of these numbers, you need to know where each one usually lands and how rare its large values are.
+Most of the random numbers in a machine-learning system are either counts or draws of noise. The number of mistakes a model makes on a test set is a count, and so is the size of a randomly sampled minibatch. The noise a system adds on purpose is the other kind, usually drawn from a Laplace or a normal distribution. Before you trust any of these numbers, you need to know where each one usually lands and how rare its large values are.
 
-A handful of distribution families covers almost every case. They are not unrelated formulas, because each is built from simpler ones. Counting the successes in a series of coin flips gives the binomial, and when each flip rarely succeeds, the binomial becomes the Poisson. Waiting for the first of those rare successes gives the exponential, and placing two exponentials back to back gives the Laplace. Adding many small independent pieces, whatever their own distribution, gives the normal. So each family's average and spread follow from its pieces, and this chapter explains each fact that way.
+A handful of families covers almost every case. For a count, you need its spread, so that you can size a test set. For noise, you need its tail, so that you can calibrate its scale to an error bar.
 
-The chapter ends with a question that later chapters keep asking. Noise is added to one of two values that differ by a known amount, and an observer sees only the result. How strongly can that result make the observer favour one value over the other? With normal noise, some observations settle the question almost for certain. With Laplace noise, however, no observation can make one value more than a fixed factor more likely than the other. The difference lies in the tails. The normal's chances fall off much faster far from the centre, and that makes its extreme observations far more telling.
+## Means, variances and the square-root law {#sec-dist-moments}
 
-## Mean and variance {#sec-dist-moments}
-
-The **mean** of a random quantity $X$, written $\mathbb E[X]$, is the long-run average of many independent draws of it. It says where a distribution sits, but not how wide it is, and that width is what the **variance** measures. It squares each draw's distance from the mean, so that distances on either side count the same, and averages these squares. It is often easier to compute as the mean of the square minus the square of the mean:
+The **mean** of a random quantity $X$, written $\mathbb E[X]$, is the long-run average of many independent draws of it. The **variance** measures the spread around it, as the average squared distance from the mean:
 $$\operatorname{Var}(X) = \mathbb E\big[(X - \mathbb E X)^2\big] = \mathbb E[X^2] - (\mathbb E X)^2.$$
-The **standard deviation**, written $\sigma$, is the square root of the variance. It is in the same units as the quantity, so it is the number to compare with the mean. For a fair die, for example, the mean is 3.5 and the variance is about 2.92. Its standard deviation is then about 1.71, which is the typical size of a roll's distance from the mean.
+The **standard deviation** $\sigma$ is its square root, in the same units as the quantity, so it is the number to compare with the mean.
 
-Three rules cover almost every calculation in this chapter. The first rule says that the mean of a sum is the sum of the means, and it holds even when the quantities depend on each other. That is because an average weighs each outcome by its chance. At each outcome the sum is just the two values added, so the weighted total splits into two separate averages. The second rule says what scaling does to the spread. Multiplying a quantity by a constant $c$ multiplies every distance from the mean by $c$, and squaring turns that factor into $c^2$. So scaling by $c$ multiplies the variance by $c^2$.
-
-The third rule says that when a quantity $X$ is independent of a second quantity $Y$, their variances add:
+Three rules cover almost every calculation. The mean of a sum is the sum of the means, always. Scaling a quantity by a constant $c$ multiplies its variance by $c^2$. And when two quantities are independent, their variances add:
 $$\operatorname{Var}(X + Y) = \operatorname{Var}(X) + \operatorname{Var}(Y).$$
-In general the variance of a sum has an extra term, the **covariance**, which measures how much the two quantities tend to move together. Independence makes the covariance zero, which leaves only the two variances. But without independence the rule can fail. Add a quantity to an exact copy of itself, for example, and the sum is twice the quantity. By the second rule its variance is then four times the original, not twice.
+Without independence the last rule fails. Add a quantity to an exact copy of itself, and the variance of the sum is four times the original, not twice.
 
-The second and third rules together say how fast an average becomes precise. Take some number $n$ of independent draws and average them. By the third rule, their sum has $n$ times the variance of one draw, and by the second rule, dividing the sum by $n$ then divides that variance by $n^2$. So the average has the variance of one draw divided by $n$, and its standard deviation is that of one draw divided by $\sqrt n$. Four times as much data therefore only halves the error.
+Together, the second and third rules give the square-root law. An average of $n$ independent draws has the variance of one draw divided by $n$, so its standard deviation is that of one draw divided by $\sqrt n$. The law breaks when the draws are not independent, for example when one user contributes many rows, so count independent units, not rows.
 
-## Tails and the moment generating function {#sec-dist-tails}
+## Counts and rates: binomial and Poisson {#sec-dist-counts}
 
-The mean and the variance describe the bulk of a distribution, but a guarantee that must hold except in rare cases depends instead on the **tail**. That is the chance $\Pr[X \ge t]$ that the quantity reaches a threshold $t$ far from the mean. What matters is how fast the tail shrinks as the threshold grows, and three shapes recur in this book. Take the threshold $t = 5$, for example. A polynomial decay such as $1/t^2$ gives 0.04 there. An exponential decay such as $e^{-t}$ is already down to about $6.7\times10^{-3}$. A Gaussian decay such as $e^{-t^2/2}$ falls much further still, to about $3.7\times10^{-6}$.
-
-The gap widens quickly as the threshold grows, because the exponent of the Gaussian decay grows like $t^2$ and that of the exponential decay only like $t$. Among the families defined below, the exponential and Laplace distributions have exponential tails, and the normal distribution has a Gaussian tail.
-
-One function connects a distribution to its tail and also makes sums of independent quantities easy. The **moment generating function** (MGF) of $X$ is the average of $e^{\lambda X}$:
-$$M_X(\lambda) = \mathbb E\big[e^{\lambda X}\big].$$
-The number $\lambda$ is not a parameter of the distribution but a dial that you set. When $\lambda$ is positive, the weight $e^{\lambda X}$ grows exponentially with the quantity, so large values dominate the average. So the larger you set the dial, the further into the right tail the MGF looks. A negative dial would look at the left tail instead, so bounds on the right tail use positive values.
-
-A coin shows how an MGF is computed. Take a quantity that is 1 with some probability $p$ and 0 otherwise. Its weight is $e^0 = 1$ at the outcome 0 and $e^\lambda$ at the outcome 1, and the MGF averages these two weights:
-$$(1 - p) + pe^\lambda = 1 + p(e^\lambda - 1).$$
-The factor $e^\lambda$, the weight of the outcome 1, will reappear in every count below.
-
-Two properties of the MGF matter in practice. The first is that adding independent quantities multiplies their MGFs:
-$$M_{X+Y}(\lambda) = M_X(\lambda)\,M_Y(\lambda) \quad\text{when $X$ and $Y$ are independent}.$$
-The reason is that the exponential of a sum is the product of the exponentials, and independence lets the average of that product split into the product of the averages. Without independence the average need not split, and the rule can fail. A standard theorem, which the full edition cites, adds that two distributions whose MGFs are finite and equal for every dial in some interval around zero are the same distribution. Finiteness matters because two different heavy-tailed distributions can both have an infinite MGF at every positive dial, and agreeing there says nothing. So when the MGF of a sum matches a known family's MGF near zero, the sum belongs to that family.
-
-The second property links the MGF to the tail. For every positive $\lambda$,
-$$\Pr[X \ge t] \le M_X(\lambda)\,e^{-\lambda t}.$$
-Because the dial is positive, the weight $e^{\lambda X}$ grows with the quantity, so whenever the quantity reaches the threshold, the weight is at least $e^{\lambda t}$. The weight is also never negative, so the other outcomes cannot pull its average below what these outcomes contribute. The MGF is therefore at least $e^{\lambda t}$ times the chance of reaching the threshold, and dividing both sides by $e^{\lambda t}$ gives the bound. It follows that if the MGF is finite for some positive dial, the tail shrinks at least exponentially. A **heavy-tailed** distribution, whose tail shrinks more slowly than every exponential, has an infinite MGF for every positive dial, and then the bound says nothing. [Concentration inequalities](02-concentration.md) turns this bound into error bars by choosing the dial well.
-
-## Counts: Bernoulli and binomial {#sec-dist-counts}
-
-The simplest random quantity is a yes-or-no outcome, such as whether a test example is misclassified. A **Bernoulli** variable is 1 with probability $p$ and 0 otherwise, so its mean is $p$. Because it is 0 or 1, it also equals its own square, and the average of its square is $p$ as well. The variance, the mean of the square minus the square of the mean, is therefore
-$$p - p^2 = p(1-p).$$
-
-Count the yeses over $n$ independent trials and you get a **binomial** count, written $\mathrm{Binomial}(n, p)$. Any one sequence with $k$ yeses has probability $p^k(1-p)^{n-k}$, because independent trials multiply their probabilities. There are $\binom nk$ such sequences, one for each choice of which trials say yes. So the count $S$ equals $k$ with probability
-$$\Pr[S = k] = \binom nk p^k(1-p)^{n-k}, \qquad k = 0, 1, \dots, n.$$
-For the mean and the variance, it is easier to write the count as a sum of $n$ independent Bernoulli trials and apply the rules for sums. The mean is then $np$, and because the trials are independent, the variance is $np(1-p)$. For the same reason, the MGF of the count is the product of $n$ coin MGFs:
-$$M_S(\lambda) = \big(1 + p(e^\lambda - 1)\big)^n.$$
-
-The variance of one trial, $p(1-p)$, is zero when the outcome is certain either way and largest at $p = 1/2$, where it equals a quarter. So in absolute terms, a rate near zero is measured much more precisely than a rate near one half. Hoeffding's inequality, a bound in [Concentration inequalities](02-concentration.md) that knows only that each trial lies between 0 and 1, must assume the worst case of a quarter. It is therefore loose when rates are small.
-
-Every measured rate, such as accuracy or a false-positive rate, is a binomial count divided by $n$. By the scaling rule, the measured rate has mean $p$ and variance $p(1-p)/n$, so its standard deviation is
+A yes-or-no outcome, such as whether a test example is misclassified, is a **Bernoulli** variable. It is 1 with probability $p$, so its mean is $p$ and its variance is $p(1-p)$. Counting the yeses over $n$ independent trials gives a **binomial** count, with mean $np$ and variance $np(1-p)$. Every measured rate, such as accuracy or a false-positive rate, is such a count divided by $n$, so its standard deviation is
 $$\sqrt{\frac{p(1-p)}{n}}.$$
 
-Suppose a classifier makes a mistake on each test example independently with probability 0.05. On 2,000 test examples it then makes 100 mistakes on average. The standard deviation of that count is about 9.7, and dividing by the number of examples turns it into about 0.005 for the error rate. So the measured error rate is typically within about half a percentage point of the true 5%.
+This formula is how you size a test set. Suppose a classifier errs on each of 2,000 test examples independently with probability 0.05. Then the measured error rate is typically within about half a percentage point of the true 5%. But if the true error rate is 0.001, the same test set expects only 2 mistakes, so the relative error of the count is about 70%. So what sets the relative precision is the expected number of events $np$, not $n$.
 
-Now lower the true error rate to 0.001. The same test set then expects only 2 mistakes, with a standard deviation of about 1.4. Relative to the count, that error is now about 70%. The test set can also easily show no mistakes at all, which happens with chance $0.999^{2000}$. A small chance of failure repeated many times behaves like an exponential, since $(1-p)^n$ is close to $e^{-np}$ when $p$ is small. So the chance of a clean test set is about $e^{-2}$, or one in seven. What sets the relative precision, then, is the expected number of mistakes, not the number of test examples.
+That is also why the normal approximation to a binomial count needs its variance $np(1-p)$ to be about 10 or more, and fails for rare events. The snippet in @sec-dist-code turns a target precision into a test-set size. For a relative standard deviation of 10%, a 5% error rate needs 1,900 examples, while a 0.1% rate needs 99,900.
 
-## Rare events: Poisson {#sec-dist-poisson}
+When the trials are many and each is rare, the binomial depends almost only on the expected count, written $\mu$. It then becomes the **Poisson distribution** $\mathrm{Poisson}(\mu)$. Its variance equals its mean, so its relative spread is $1/\sqrt\mu$, and independent Poisson counts add up to a Poisson count. The main use in this book is the batch size under Poisson sampling, where each example joins a batch independently with a sampling probability $q$. Out of $n$ examples, the batch size is then binomial with mean $qn$. It is close to $\mathrm{Poisson}(qn)$, so its standard deviation is about $\sqrt{qn}$. For example, when each of 60,000 examples joins with probability 0.01, the standard deviation is about 24.5. A batch of 550 or 650 is then unremarkable.
 
-Many counts, such as an accurate model's mistakes on a large test set, add up many trials that each rarely succeed. Write $\mu$ for the expected count, which is $np$. When the trials are many and each success is rare, the binomial depends almost only on $\mu$. That is because each part of the binomial formula has a simple limit when $p$ is small. A particular set of $k$ trials all succeed with chance $p^k$. When there are many more trials than successes, there are about $n^k/k!$ such sets, so together they contribute about $\mu^k/k!$. Meanwhile, all the other trials fail with chance close to $e^{-\mu}$, because $(1-p)^n$ is close to $e^{-np}$. Only $\mu$ survives in either limit.
+So code that assumes a fixed batch size under this kind of sampling, such as a preallocated buffer or a per-batch average over a constant, is wrong. You can simulate the sizes with NumPy's `rng.binomial(n, q)` or `rng.poisson(q * n)`.
 
-Holding $\mu$ fixed as the number of trials grows gives the **Poisson distribution** $\mathrm{Poisson}(\mu)$. A Poisson count $N$ equals a whole number $k$ with probability
-$$\Pr[N = k] = e^{-\mu}\frac{\mu^k}{k!}.$$
-@fig-poisson-limit shows how fast the binomial approaches the Poisson.
+The waiting time until the first rare event follows the **exponential distribution** $\mathrm{Exp}(b)$, whose mean is the scale $b$. In this book it serves mainly as half of a Laplace distribution. The size of a Laplace draw is exponential, and the difference of two independent exponential draws is a Laplace draw, which is one way to sample it.
 
-![$\mathrm{Binomial}(n, 5/n)$ for $n = 10$ and 100 against $\mathrm{Poisson}(5)$ and its normal approximation. At $n = 100$ the binomial and the Poisson almost coincide.](figures/poisson_limit.svg){#fig-poisson-limit}
+## Tails and heavy tails {#sec-dist-tails}
 
-A Poisson count has its variance equal to its mean. The reason is that in the binomial variance $np(1-p)$, the factor $1 - p$ tends to 1 as the trials become rare, which leaves only $\mu$. So the standard deviation is $\sqrt\mu$, and the spread relative to the mean is $1/\sqrt\mu$, which is small only once you expect many events. With a mean of 4, for example, the standard deviation is 2. A count of 0 or 8, two standard deviations away, is then unremarkable.
+The mean and the variance describe the bulk of a distribution, but a guarantee that must hold except in rare cases depends on the **tail**, the chance of landing far from the mean. The Laplace tail shrinks exponentially with the distance, and the normal tail shrinks much faster, like the exponential of the squared distance. The tail bounds of [Concentration inequalities](02-concentration.md) work through the **moment generating function**, the average of $e^{\lambda X}$ for a number $\lambda$ you choose. A **heavy-tailed** quantity, such as an unclipped loss or gradient, has none, so those bounds do not apply to it, which is one reason to clip values before adding noise.
 
-The MGF of a Poisson count $N$ is
-$$M_N(\lambda) = \exp\big(\mu(e^\lambda - 1)\big).$$
-It is the limit of the binomial MGF $(1 + p(e^\lambda - 1))^n$, for the same reason that $(1-p)^n$ tends to $e^{-np}$. Multiplying the MGFs of two independent Poisson counts adds their exponents, and the result is again a Poisson MGF. So a sum of independent Poisson counts is a Poisson count whose mean is the sum of their means.
+## Laplace and normal noise {#sec-dist-noise}
 
-The same MGF also bounds every count of independent yes-or-no outcomes. The line $1 + x$ touches the curve $e^x$ at zero, and the curve bends upward away from it, so $1 + x \le e^x$ everywhere. Putting $x = p(e^\lambda - 1)$ into this inequality turns its left side into the coin's MGF. Its right side becomes $\exp(p(e^\lambda - 1))$, the Poisson MGF with mean $p$. Now take independent coins, each with its own probability, and let $\mu$ be the sum of their probabilities. The MGF of their total $S$ is the product of their MGFs, and each factor is at most its Poisson bound. Multiplying the bounds adds their exponents, so the total's MGF is at most the Poisson MGF with mean $\mu$:
-$$M_S(\lambda) \le \exp\big(\mu(e^\lambda - 1)\big).$$
-The Chernoff bound in [Concentration inequalities](02-concentration.md) starts from this fact.
+The two standard noise distributions are the Laplace and the normal. The **Laplace distribution** $\mathrm{Lap}(b)$ with scale $b$ is an exponential density mirrored around zero. Its variance is $2b^2$, so its standard deviation is $\sqrt2\,b$, not $b$. A draw $X$ lands at least a distance $t$ from zero with probability
+$$\Pr[|X| \ge t] = e^{-t/b}.$$
+Setting this chance to 5% gives the 95% half-width $b\ln 20$, about three scales, which `scipy.stats.laplace(scale=b).ppf(0.975)` computes. So a count reported with Laplace noise of scale 2 is within 5.99 of the true count with 95% probability. The **normal distribution** has a mean $\mu$ and a standard deviation $\sigma$, written $\mathcal N(\mu, \sigma^2)$. Its 95% half-width is $1.96\sigma$, from `scipy.stats.norm.ppf(0.975)`.
 
-A Poisson count is skewed to the right, since it cannot go below zero but can run far above its mean. For every $k$, the chance that it equals exactly $k$ is at most
-$$\Pr[N = k] \le \Big(\frac{e\mu}{k}\Big)^k.$$
-The reason is that $k!$ is always at least $(k/e)^k$. Dividing $\mu^k$ by it therefore gives at most $(e\mu/k)^k$, and the factor $e^{-\mu}$ only lowers the chance further. This bound says something only once $k$ exceeds $e\mu$, where its base drops below 1. Beyond that point it falls faster than any exponential decay, but more slowly than a Gaussian decay with the same variance.
-
-Some training procedures form each minibatch by including each of 60,000 examples independently with probability 0.01. The batch size is then a binomial count with many unlikely trials, so it is very close to $\mathrm{Poisson}(600)$. Its mean is 600 and its standard deviation is about 24.5. Batch sizes between 550 and 650, about two standard deviations on either side, are therefore typical. [Concentration inequalities](02-concentration.md) shows how rarely a batch leaves the range of 600 plus or minus 20%.
-
-## Waiting times: exponential {#sec-dist-exponential}
-
-The Poisson counts how many rare events fall in a window of time, while the exponential answers how long you wait for the first one. For this book it is mainly a building block of the Laplace distribution.
-
-The exponential comes from the same construction as the Poisson. Chop time into short slots, and let each slot hold an event independently with a small probability. Write $b$ for the average time between events, the **scale**. Write $m$ for the number of slots per unit of time. Each slot then holds an event with probability $1/(bm)$, which keeps the expected number of events per unit of time at $1/b$. Now take a time $t$, which spans $tm$ slots. The wait $T$ exceeds that time when all of them are empty, so these are $tm$ independent trials that all fail, and together they expect $t/b$ events. As in the Poisson limit, the chance that they all fail tends to $e^{-t/b}$ as the slots shrink:
-$$\Pr[T > t] = e^{-t/b}, \qquad t \ge 0.$$ {#eq-exponential-survival}
-
-@fig-exponential-limit shows the limit for a scale of 2. With one slot per unit of time, each slot holds an event with probability one half, so the chance of waiting past $t$ halves at every whole number. With five slots per unit of time, this staircase already hugs the limiting curve.
-
-![$\Pr[T_n > t]$ for the slotted waiting time with $b = 2$ and $n = 1$ or $5$ slots per unit of time, against the exponential tail $e^{-t/2}$.](figures/exponential_limit.svg){#fig-exponential-limit}
-
-The **exponential distribution** $\mathrm{Exp}(b)$ is the distribution of this wait, and its density at a waiting time $y$ is
-$$f(y) = \frac1b e^{-y/b}, \qquad y \ge 0.$$
-Its mean is the scale $b$, so $b$ really is the average wait, and its variance is $b^2$. Some libraries take the rate $1/b$ instead, while NumPy's `rng.exponential(b)` takes the scale, so check before you trust a noise level.
-
-The exponential's MGF is finite only for dials below $1/b$, where it equals
-$$M_T(\lambda) = \frac{1}{1 - b\lambda}.$$
-The MGF averages the weight $e^{\lambda y}$ against the density $e^{-y/b}$. Once the dial reaches $1/b$, the density no longer shrinks faster than the weight grows, so the average is infinite. An MGF that exists only on part of the line is the mark of an exponential tail.
-
-The exponential also forgets how long you have waited. If you have already waited a time $s$ without an event, the chance of waiting at least $t$ more is the same as from scratch:
-$$\Pr[T \ge s + t \mid T \ge s] = \Pr[T \ge t].$$
-The slots after time $s$ are independent of the empty slots before it, so the wait starts afresh. This **memorylessness** rests on that independence. Suppose instead that a run of empty slots made the next slot more or less likely to hold an event. A long quiet spell would then carry information about the remaining wait, and the exponential would be the wrong model. Among continuous distributions, the exponential is the only one that is memoryless.
-
-A deployed classifier serves 50 requests per second and misclassifies each one independently with probability $10^{-4}$. Mistakes then arrive at a rate of 0.005 per second, so the time to the first mistake is about exponential, with a scale of 200 seconds. A clean window of ten minutes lasts three scales, which gives it a probability of $e^{-3}$, about 0.050. And by memorylessness, after 10 clean minutes you still expect to wait 200 seconds for the first mistake.
-
-## Laplace {#sec-dist-laplace}
-
-The Laplace distribution is symmetric noise with exponential tails, and one of the two standard noise distributions in later parts of this book. Its density is an exponential density on each side of a centre $\mu$, mirrored, with each side carrying half the probability. With scale $b$, written $\mathrm{Lap}(\mu, b)$, the density is
-$$f(x) = \frac{1}{2b}e^{-|x - \mu|/b}.$$
-This chapter writes $\mathrm{Lap}(b)$ when the centre is zero.
-
-Most facts about the Laplace follow from the exponential. To see why, take the centre to be zero. The density then has the same value at $x$ and at $-x$, so the size $|X|$ of a draw collects the density from both sides. Its density is therefore $\frac1be^{-x/b}$ for every size $x \ge 0$, which is exactly the $\mathrm{Exp}(b)$ density.
-
-The two-sided tail is therefore the exponential tail,
-$$\Pr[|X| \ge t] = e^{-t/b},$$
-and each side carries half of it. The average size of a draw is likewise $b$, the exponential's mean. For the variance, recall that the average square of a quantity is its variance plus its squared mean, which for the exponential is $b^2 + b^2 = 2b^2$. A Laplace draw has the same square as its size, and its mean is zero by symmetry, so its variance is also $2b^2$. Turned around, a Laplace distribution with standard deviation $\sigma$ has scale $\sigma/\sqrt2$.
-
-Each side has an exponential tail, so, as for the exponential, the MGF is finite only for $|\lambda| < 1/b$. There it equals
-$$M_X(\lambda) = \frac{1}{1 - b^2\lambda^2}.$$
-
-The same picture suggests how to build a Laplace draw. Take two independent exponential draws and subtract the second from the first, so that the first supplies the right half and the second, negated, supplies the left half. The MGFs confirm it, because the product $1/(1 - b\lambda)$ times $1/(1 + b\lambda)$ is the Laplace MGF. On a million samples, the difference has a cumulative distribution function (CDF) within 0.0006 of the Laplace CDF, and @fig-difference-of-exponentials shows the fit.
-
-![Histogram of $\mathrm{Exp}(1) - \mathrm{Exp}(1)$ samples against the $\mathrm{Lap}(0, 1)$ density.](figures/difference_of_exponentials.svg){#fig-difference-of-exponentials}
-
-@fig-laplace-vs-normal puts a Laplace distribution with scale 1 and a normal distribution side by side, both with variance 2. On a linear scale the Laplace has a sharp peak at zero and fatter tails, and a log scale shows why. Taking the logarithm of a density undoes the exponential and leaves the exponent, plus a constant from the factor in front. So the normal's log density is a parabola, while the Laplace's log density is two straight lines. Far enough out, a parabola always falls below a line, so the normal's tails are much lighter. A Laplace draw, for example, lands at least three scales from zero with probability $e^{-3}$, about 0.050. A normal draw with the same variance gets that far with probability about 0.034, and further out the gap grows quickly.
+@fig-laplace-vs-normal compares the two at the same variance. On a log scale the normal's density is a parabola and the Laplace's is two straight lines, so the Laplace has a sharper peak and much heavier tails.
 
 ![Normal and Laplace densities with variance 2, on linear and log scales. The log of the normal density is a parabola; the log of the Laplace density is two straight lines.](figures/laplace_vs_normal.svg){#fig-laplace-vs-normal}
 
-The Laplace also explains absolute-error regression. Suppose each target is a linear function of its features plus independent Laplace noise. Then the logarithm of the likelihood is the sum of the log densities of the errors. Each of these is a constant minus the absolute error divided by $b$, so the most likely fit is the one with the smallest sum of absolute errors. Normal noise leads in the same way to least squares. With no features, the fit is the median, which ignores how far out an extreme point lies and so resists outliers.
+Calibrating noise means solving the tail for the scale. Say the noise must stay within a width $t$ of zero, except with a failure probability $\beta$. Then the Laplace scale and the normal standard deviation can be at most
+$$b = \frac{t}{\ln(1/\beta)}, \qquad \sigma = \frac{t}{z_{1-\beta/2}},$$
+where $z_{1-\beta/2}$ is the normal quantile at $1 - \beta/2$. @tbl-dist-multipliers shows that the two multipliers grow very differently as $\beta$ shrinks.
 
-## Normal {#sec-dist-normal}
+| Failure probability $\beta$ | 0.05 | $10^{-3}$ | $10^{-6}$ |
+| --- | --- | --- | --- |
+| Normal, $z_{1-\beta/2}$ standard deviations | 1.96 | 3.29 | 4.89 |
+| Laplace, $\ln(1/\beta)$ scales | 3.00 | 6.91 | 13.82 |
 
-The normal distribution appears whenever many small independent effects add up, and it is the default model for measurement noise. With mean $\mu$ and standard deviation $\sigma$, the normal distribution is written $\mathcal N(\mu, \sigma^2)$. Its density is
-$$f(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}.$$
-Subtracting the mean and dividing by the standard deviation turns any normal quantity into a **standard normal**, with mean 0 and variance 1. Write $\Phi(t)$ for the chance that a standard normal lands below $t$. Every normal probability reduces to it, since the chance that $X$ lands below $x$ is
-$$\Pr[X \le x] = \Phi\Big(\frac{x - \mu}{\sigma}\Big).$$ The function $\Phi$ has no closed form, so code computes it from the complementary error function, as @sec-dist-code shows.
+: How many standard deviations or scales a noise draw stays within, except with probability $\beta$. {#tbl-dist-multipliers}
 
-The normal MGF is finite for every $\lambda$, and it equals
-$$M_X(\lambda) = e^{\mu\lambda + \sigma^2\lambda^2/2}.$$
-It is finite because, in the exponent, the weight grows along a straight line while the density falls along a parabola, and the parabola always wins.
-
-The exponent of the MGF is quadratic in $\lambda$, and that makes normal noise easy to combine. Scaling a quantity by a factor $a$ is the same, inside its MGF, as turning the dial to $a\lambda$, while adding independent quantities multiplies their MGFs, which adds the exponents. Both operations keep the exponent quadratic, so a weighted sum of independent normal quantities is again normal. Its mean is the weighted sum of the means, and its variance is the sum of the variances, each multiplied by its squared weight:
+The two families also combine differently. A weighted sum of independent normal quantities is again normal, with the weighted means added and the variances added with squared weights:
 $$\sum_i a_iX_i \sim \mathcal N\Big(\sum_i a_i\mu_i,\ \sum_i a_i^2\sigma_i^2\Big).$$
-Among distributions with finite variance, only the normal keeps every weighted sum of independent copies in its own family, once a shift and a rescaling are allowed. This is a classical result of Lévy. The Laplace, for example, fails the test, because the sum of two independent Laplace draws has the MGF $1/(1 - b^2\lambda^2)^2$, which is not a Laplace MGF.
+So the total noise of many noisy normal measurements is one normal draw that you can analyse exactly. A sum of Laplace draws is not Laplace, and its error bar needs the bound in [Concentration inequalities](02-concentration.md). Either way, a noisy mean computed as a noisy sum divided by $n$ has its noise standard deviation divided by $n$, on top of the sampling spread of the data itself.
+
+The most common bug with these distributions is a mismatched parameter. With `rng = numpy.random.default_rng(seed)`, NumPy's `rng.laplace(0, b, size)` and SciPy's `scipy.stats.laplace(scale=b)` take the scale $b$, whose standard deviation is $b\sqrt2$. By contrast, NumPy's `rng.normal(loc, scale)`, Python's `random.gauss(mu, sigma)` and `scipy.stats.norm(scale=...)` take the standard deviation, never the variance. So before you trust a noise level, check which one a call expects, and draw a million samples to confirm the variance.
 
 ## Normal noise in many dimensions {#sec-dist-highdim}
 
-Noise is often added to a whole vector at once, such as a model's parameters. Such noise is written $X \sim \mathcal N(0, \sigma^2I_d)$ when it is a vector of $d$ independent coordinates, each normal with mean 0 and variance $\sigma^2$. The identity matrix $I_d$ in the notation records that the coordinates are independent and alike. Two facts about such a vector are used constantly.
+Noise is often added to a whole vector, such as a model's parameters, as $d$ independent normal coordinates with standard deviation $\sigma$ each. Along any direction fixed in advance, this noise is a single draw from $\mathcal N(0, \sigma^2)$. Yet the vector's length is large and predictable, close to $\sigma\sqrt d$. For example, with a million parameters and a standard deviation of 0.01 on each, the noise vector has a length of about 10. So judge high-dimensional noise by its effect along the directions you care about, not by its total length.
 
-The first fact is that the noise looks the same in every direction. Project the vector onto a fixed direction, given by a unit vector whose squared entries add up to 1. The projection is a weighted sum of independent normal coordinates, so it is normal with variance $\sigma^2$ times the sum of the squared weights, which is just $\sigma^2$. So along any direction fixed in advance, the noise is a single draw from $\mathcal N(0, \sigma^2)$. The direction must not depend on the noise, though, because along the noise's own direction the projection is the vector's full length.
-
-The second fact is that this length is large and predictable. The squared length is a sum of $d$ independent and alike squared coordinates, each with mean $\sigma^2$, so its mean is $d\sigma^2$. By the rules for sums, its standard deviation divided by its mean is $\sqrt{2/d}$, and taking a square root halves a small relative deviation. So the length itself sits close to $\sigma\sqrt d$, with a relative spread of about $1/\sqrt{2d}$. A normal vector in high dimension is almost never near the origin and lives on a thin shell (@tbl-gaussian-norms and @fig-gaussian-norms).
-
-| $d$ | 1 | 10 | 100 | 1,000 | 10,000 |
-| --- | --- | --- | --- | --- | --- |
-| mean of $\|X\|/\sqrt d$ | 0.802 | 0.977 | 0.998 | 1.000 | 1.000 |
-| std of $\|X\|/\sqrt d$ | 0.611 | 0.220 | 0.069 | 0.022 | 0.007 |
-
-: Mean and standard deviation of $\|X\|/\sqrt d$ over 2,000 draws of $X \sim \mathcal N(0, I_d)$. {#tbl-gaussian-norms}
-
-![Histograms of $\|X\|/\sqrt d$ for $X \sim \mathcal N(0, I_d)$ and $d$ from 1 to 10,000.](figures/gaussian_norms.svg){#fig-gaussian-norms}
-
-Take a model with a million parameters and noise of standard deviation 0.01 on each. The noise vector has a length of about $0.01 \times 1000 = 10$, with a relative spread under 0.1%. Yet along any fixed direction it is only a draw from $\mathcal N(0, 0.01^2)$.
+The same picture explains noisy gradient descent. Suppose each example's gradient is clipped to a length of at most $C$, and normal noise with standard deviation $\sigma C$ per coordinate is added to the sum of a batch of $B$ clipped gradients. The noise vector then has length about $\sigma C\sqrt d$, which can dwarf the clipped sum, whose length is at most $BC$. Along the gradient's own direction, though, the noise is only $\sigma C$. Dividing the sum by the batch size divides both, leaving per-coordinate noise $\sigma C/B$ on the averaged gradient, so larger batches shrink the noise relative to the signal.
 
 ## The central limit theorem {#sec-dist-clt}
 
-The **central limit theorem** (CLT) explains why the normal distribution is everywhere. Write $S_n$ for a sum of $n$ independent draws from one distribution. Suppose each draw has mean $\mu$ and finite variance $\sigma^2$. The sum then has mean $n\mu$ and standard deviation $\sigma\sqrt n$, so subtracting the mean and dividing by the standard deviation gives a quantity with mean 0 and variance 1:
-$$Z_n = \frac{S_n - n\mu}{\sigma\sqrt n}.$$
-The CLT says that, whatever the distribution of each draw, the shape of this standardized sum approaches the standard normal as $n$ grows. The variance must be finite, because the standardization divides by it.
-
-The theorem is easiest to see from a badly skewed distribution, such as the exponential. @fig-clt-exponential shows the standardized sum of $n$ exponential draws. At $n = 1$ it is the exponential itself, with a hard wall where the draw is zero, while by $n = 30$ the curve is close to the standard normal. A small lean remains, though.
-
-![The standardized sum of $n$ independent $\mathrm{Exp}(1)$ variables for $n = 1, 2, 5, 30$: histogram of 50,000 simulated sums, the exact density from $\mathrm{Gamma}(n, 1)$, and the $\mathcal N(0, 1)$ density. The skewed exponential becomes a normal step by step.](figures/clt_exponential.svg){#fig-clt-exponential}
-
-The leftover lean is measured by the **skewness**, the average cubed deviation from the mean divided by the cube of the standard deviation:
-$$\frac{\mathbb E\big[(X - \mathbb E X)^3\big]}{\sigma^3}.$$
-Cubed deviations keep their sign, positive above the mean and negative below it, so a long right tail makes the skewness positive. A normal distribution is symmetric, so its skewness is zero, while one exponential draw with scale 1 has skewness 2. Cubed deviations add over independent draws, just as squared ones do. So a sum of $n$ draws has an average cubed deviation of $2n$, while the cube of its standard deviation is $n^{3/2}$. Their ratio, the skewness of the sum, is $2/\sqrt n$, which falls only like $1/\sqrt n$. The largest gap between the sum's CDF and the normal CDF falls at the same rate (@tbl-clt-exponential).
-
-| $n$ | Skewness $2/\sqrt n$ | Largest CDF gap to $\mathcal N(0, 1)$ |
-| --- | --- | --- |
-| 1 | 2.000 | 0.1587 |
-| 2 | 1.414 | 0.0945 |
-| 5 | 0.894 | 0.0596 |
-| 30 | 0.365 | 0.0243 |
-
-: How far the standardized sum of $n$ $\mathrm{Exp}(1)$ variables is from $\mathcal N(0, 1)$. The CDF gap is the maximum of $|F_n(z) - \Phi(z)|$ over $z \in [-5, 5]$ in steps of 0.01. {#tbl-clt-exponential}
-
-Multiply each gap by $\sqrt n$ and the product settles near 0.133, so the error decays like $1/\sqrt n$. The Berry–Esseen theorem says that this rate holds in general, provided the average cubed distance of a draw from its mean is finite. Its bound on the gap grows with that cubed distance, so the more skewed the draws, the more of them you need. A common rule of thumb says that the normal approximation to a binomial count is reasonable once its variance $np(1-p)$ is about 10 or more. The normal curve also fits the Poisson in @fig-poisson-limit. That is because a Poisson count with mean 5 is a sum of five independent Poisson counts with mean 1, so the CLT already applies to it.
-
-The CLT describes the bulk of the distribution, not its far tails. The error it controls is an absolute error of order $1/\sqrt n$, while a tail probability that a guarantee depends on can be far smaller than that. In the far tail, the normal approximation can therefore be wrong by a large factor. Bounding such tails is the job of [Concentration inequalities](02-concentration.md).
+The **central limit theorem** says that a standardized sum of many independent draws with finite variance looks normal, whatever each draw's distribution, which is what justifies a normal error bar on an average. The approach is slow for skewed data. For a sum of 30 exponential draws, the largest gap between its distribution function and the normal one is still 0.0243. And it describes the bulk, so for small tail probabilities use [Concentration inequalities](02-concentration.md) instead.
 
 ## A density against its shifted copy {#sec-dist-shift}
 
-Suppose you see a noisy measurement $x$, which is an unknown value plus noise $X$. The noise has a density, written $f$, centred at zero, and the unknown value can only be zero or a known **shift** $s$. How strongly can one observation favour one candidate over the other?
-
-If the value is zero, the observation has the density $f(x)$. If the value is $s$, it has the density $f(x - s)$, the same curve moved sideways by the shift. The ratio of the two densities at the observation says how many times more likely it is if the value is zero than if it is the shift. Its logarithm is the **log ratio**:
-$$L(x) = \ln f(x) - \ln f(x - s).$$
-A positive log ratio favours zero, and a negative one favours the shift. If the log ratio is bounded, no single observation can make one candidate much more likely than the other. If it is unbounded, some observations settle the question almost for certain.
-
-The answer comes from the shapes of the two log densities in @fig-laplace-vs-normal. For normal noise with standard deviation $\sigma$, the log density is a parabola, and both copies have the same curvature. Subtracting them cancels the squared terms and leaves a straight line:
-$$L(x) = \frac{s^2 - 2sx}{2\sigma^2}.$$
-A line with a nonzero slope has no bound, so for normal noise the log ratio grows without limit as the observation moves out.
-
-The Laplace's log density is $-|x|/b$ plus a constant, so up to the constant it is a distance from the centre divided by the scale. The constant cancels in the log ratio, which leaves the difference of two such distances. Moving the centre by the shift changes the distance from any point by at most the size of the shift. So the log ratio can never exceed $|s|/b$ in size:
-$$L(x) = \frac{|x - s| - |x|}{b}, \qquad |L(x)| \le \frac{|s|}{b}.$$
-The bound is reached, not just approached. For a positive shift, every observation outside the stretch between the two centres is exactly $s$ closer to one centre than to the other. Between the centres, the log ratio falls along a straight line from one limit to the other.
-
-@tbl-shifted-log-ratio puts numbers on both formulas, with the shift and both noise scales set to 1. Both log ratios are zero at the midpoint, where the candidates are equally plausible, but further out they part ways. At $x = 10$ the normal log ratio is $-9.5$. That makes the observation about 13,360 times more likely under the shifted candidate. The Laplace, by contrast, never says more than about 2.72 times, however far out the observation lies (@fig-shifted-log-ratio).
-
-| $x$ | $-2$ | $0$ | $0.5$ | $1$ | $3$ | $10$ |
-| --- | --- | --- | --- | --- | --- | --- |
-| Normal, $L(x) = (1 - 2x)/2$ | 2.5 | 0.5 | 0 | $-0.5$ | $-2.5$ | $-9.5$ |
-| Laplace, $L(x) = \lvert x - 1\rvert - \lvert x\rvert$ | 1 | 1 | 0 | $-1$ | $-1$ | $-1$ |
-
-: The log ratio of a density and its copy shifted by $s = 1$, for $\mathcal N(0, 1)$ and $\mathrm{Lap}(1)$. {#tbl-shifted-log-ratio}
-
-![The log ratio $L(x)$ of a density and its copy shifted by $s = 1$: a straight line for the standard normal, clipped at $\pm1$ for $\mathrm{Lap}(1)$.](figures/shifted_log_ratio.svg){#fig-shifted-log-ratio}
-
-So the two Laplace copies stay within a fixed factor of each other everywhere, while the two normal copies do not. Unbounded does not mean often large, though, because the extreme ratios sit in tails that carry very little probability. The next three chapters make this precise. [Concentration inequalities](02-concentration.md) bounds how rare those observations are, and [Divergences](03-divergences.md) averages the log ratio. [Hypothesis testing](04-hypothesis-testing.md) says what an observer can decide from it.
+Later parts keep asking how strongly one noisy observation can favour one underlying value over another that differs by a shift $s$. The answer is the ratio of the noise density to its shifted copy at the observation. Laplace noise with scale $b$ caps this ratio at $e^{|s|/b}$, so no observation is very telling. Normal noise leaves it unbounded, so an observation far out in the tail can be overwhelming, although such observations are rare. With the shift and both scales set to 1, for example, Laplace noise never favours either value by more than a factor of about 2.72. Later parts rely on this difference, and [Divergences](03-divergences.md) averages this ratio.
 
 ## Code {#sec-dist-code}
 
-Normal tails need care in code. Far out, $\Phi(t)$ is so close to 1 that computing the tail as one minus $\Phi(t)$ loses every digit and returns zero. The complementary error function avoids this by computing the small tail directly. The snippet also checks the tails from @sec-dist-laplace.
+The snippet prints the noise multipliers of @tbl-dist-multipliers and sizes a test set.
 
 ```python
-from math import erfc, exp, sqrt
+import math
+from statistics import NormalDist
 
 
-def normal_cdf(x: float) -> float:
-    """Chance that a standard normal lands below x."""
-    return 0.5 * erfc(-x / sqrt(2))
+def normal_multiplier(beta: float) -> float:
+    """Number of standard deviations a normal draw stays within, except with probability beta."""
+    return NormalDist().inv_cdf(1 - beta / 2)
 
 
-def normal_tail(t: float) -> float:
-    """Chance that a standard normal lands at or above t, computed without subtraction."""
-    return 0.5 * erfc(t / sqrt(2))
+def test_set_size(p: float, relative: float) -> int:
+    """Test examples needed for a measured rate near p to have this relative standard deviation."""
+    return math.ceil((1 - p) / (p * relative**2))
 
 
-def laplace_two_sided_tail(t: float, b: float) -> float:
-    """Chance that a Lap(b) draw lands at least t from zero."""
-    return exp(-t / b)
-
-
-print(f"{1 - normal_cdf(10.0):.3e}")  # 0.000e+00
-print(f"{normal_tail(10.0):.3e}")  # 7.620e-24
-# Same variance 2: Laplace scale 1 against normal sigma sqrt(2), at three Laplace scales.
-print(f"{laplace_two_sided_tail(3.0, 1.0):.3f} {2 * normal_tail(3.0 / sqrt(2)):.3f}")  # 0.050 0.034
+print(f"{normal_multiplier(0.05):.2f} {normal_multiplier(1e-3):.2f} {normal_multiplier(1e-6):.2f}")  # 1.96 3.29 4.89
+print(f"{math.log(1 / 0.05):.2f} {math.log(1 / 1e-3):.2f} {math.log(1 / 1e-6):.2f}")  # 3.00 6.91 13.82
+print(test_set_size(0.05, 0.1), test_set_size(0.001, 0.1))  # 1900 99900
 ```
-
-The full edition's script, [distributions.py](../../code/part01-prerequisites/distributions.py), draws every figure in this chapter and checks each mean and variance against a million samples. Run it from the repository root with `uv run python code/part01-prerequisites/distributions.py`.
 
 ## Cheat sheet
 
-| Distribution | Density or probability of $k$ | Mean | Variance | MGF | Tail |
-| --- | --- | --- | --- | --- | --- |
-| $\mathrm{Bernoulli}(p)$ | 1 with probability $p$, else 0 | $p$ | $p(1-p)$ | $1 + p(e^\lambda - 1)$ | — |
-| $\mathrm{Binomial}(n, p)$ | $\binom nk p^k(1-p)^{n-k}$ | $np$ | $np(1-p)$ | $(1 + p(e^\lambda - 1))^n$ | Chernoff, see [Concentration inequalities](02-concentration.md) |
-| $\mathrm{Poisson}(\mu)$ | $e^{-\mu}\mu^k/k!$ | $\mu$ | $\mu$ | $e^{\mu(e^\lambda - 1)}$ | $\Pr[N = k] \le (e\mu/k)^k$, the chance of the single value $k$ |
-| $\mathrm{Exp}(b)$ | $\frac1be^{-y/b}$, $y \ge 0$ | $b$ | $b^2$ | $\frac{1}{1 - b\lambda}$, $\lambda < \frac1b$ | $e^{-t/b}$ |
-| $\mathrm{Lap}(\mu, b)$ | $\frac{1}{2b}e^{-\lvert x-\mu\rvert/b}$ | $\mu$ | $2b^2$ | $\frac{e^{\mu\lambda}}{1 - b^2\lambda^2}$, $\lvert\lambda\rvert < \frac1b$ | $\Pr[\lvert X - \mu\rvert \ge t] = e^{-t/b}$ |
-| $\mathcal N(\mu, \sigma^2)$ | $\frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}$ | $\mu$ | $\sigma^2$ | $e^{\mu\lambda + \sigma^2\lambda^2/2}$ | $\Pr[X - \mu \ge t] \le \frac12e^{-t^2/(2\sigma^2)}$ for $t \ge 0$ |
+| Distribution | Mean | Variance | Tail | Library parameter |
+| --- | --- | --- | --- | --- |
+| $\mathrm{Binomial}(n, p)$ | $np$ | $np(1-p)$ | Chernoff bound | $n$, $p$ |
+| $\mathrm{Poisson}(\mu)$ | $\mu$ | $\mu$ | Chernoff bound | the mean $\mu$ |
+| $\mathrm{Lap}(b)$ | $0$ | $2b^2$ | $\Pr[\lvert X\rvert \ge t] = e^{-t/b}$ | scale $b$, not the standard deviation |
+| $\mathcal N(\mu, \sigma^2)$ | $\mu$ | $\sigma^2$ | $\Pr[X - \mu \ge t] \le \frac12e^{-t^2/(2\sigma^2)}$ | standard deviation $\sigma$, not the variance |
 
-: The families of this chapter: density or probability, mean, variance, MGF and tail. {#tbl-distributions-cheat-sheet}
+: The families of this chapter, with what library calls usually expect. {#tbl-distributions-cheat-sheet}
 
 **Rules of thumb**
 
-- Means always add. Variances add only for independent quantities, so an average of $n$ independent draws has its standard deviation divided by $\sqrt n$.
-- A measured rate has standard deviation $\sqrt{p(1-p)/n}$. Its relative precision is set by the expected count $np$, not by $n$.
-- Normal noise in $d$ dimensions has length about $\sigma\sqrt d$, but only $\mathcal N(0, \sigma^2)$ along any direction fixed in advance.
-- The CLT describes the bulk, with an error of order $1/\sqrt n$. Don't use it for small tail probabilities.
-- For a shift $s$, the Laplace log ratio is at most $|s|/b$. The normal log ratio is unbounded, but large only in tails that carry very little probability.
+- Variances add only for independent quantities, so count independent units, not rows.
+- Size a test set by the expected number of events $np$, not by $n$, and don't use the normal approximation when $np$ is small.
+- A Laplace scale $b$ is not its standard deviation, which is $\sqrt2\,b$, and NumPy's normal `scale` is the standard deviation, not the variance.
+- Under Poisson sampling the batch size varies, with standard deviation about $\sqrt{qn}$.
 
 ## Further reading
 
-- Blitzstein & Hwang, *Introduction to Probability* (2nd ed., 2019), ch. 3–5 and 7: every distribution here, with worked examples, and the proof that the MGF determines the distribution.
-- Wasserman, *All of Statistics* (2004), ch. 2–3: a compact reference.
+- Blitzstein & Hwang, *Introduction to Probability* (2nd ed., 2019), ch. 3–5 and 7: every distribution here, with worked examples.
 - Vershynin, *High-Dimensional Probability* (2018), §3.1: why the length of a normal vector concentrates.
 
-**Derivations.** Every result in this chapter is derived step by step in [the full edition's chapter](../../book-full/part01-prerequisites/01-distributions.md), except the central limit theorem, the Berry–Esseen bound, Lévy's result and the fact that the MGF determines the distribution, which it cites. The normal tail bound in the cheat sheet is derived in [the full edition's concentration chapter](../../book-full/part01-prerequisites/02-concentration.md).
+**Derivations.** Every result here is derived step by step in [the full edition's chapter](../../book-full/part01-prerequisites/01-distributions.md).

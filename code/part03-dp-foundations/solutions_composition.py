@@ -20,6 +20,7 @@ from composition import (
     advanced_epsilon,
     advanced_epsilon_tanh,
     basic_epsilon,
+    dense_counts_rms,
     drv_mean_bound,
     gaussian_delta,
     gaussian_epsilon,
@@ -27,6 +28,7 @@ from composition import (
     kov_delta,
     kov_epsilon,
     max_loss,
+    per_step_epsilon,
     product_pair,
     rr_channel,
     rr_keep,
@@ -166,6 +168,15 @@ def print_table(rng: np.random.Generator) -> None:
         f"  homogeneous at eps=ln 3, k=2: delta(0)={kov_delta(math.log(3), 0.0, 2, 0.0):.4f}; "
         f"at eps=ln 2: {kov_delta(math.log(2), 0.0, 2, 0.0):.4f}"
     )
+
+    print("[Exercise 8: Laplace noise on d dense counts, eps = 1, delta = 1e-5]")
+    for dd in (100, 1000, 10000):
+        closed = 1.0 / (2 * math.sqrt(2 * dd * math.log(1e5)))
+        print(
+            f"  d={dd}: closed-form eps0={closed:.5f}  spends={advanced_epsilon_tanh(closed, dd, 1e-5):.4f}  "
+            f"rms={math.sqrt(2) / closed:.1f}  largest eps0={per_step_epsilon(1.0, dd, 1e-5, 'advanced'):.5f}  "
+            f"rms={dense_counts_rms(dd, 1.0, 1e-5)['advanced']:.1f}"
+        )
 
 
 def main() -> None:

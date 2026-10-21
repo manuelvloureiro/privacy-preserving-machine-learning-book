@@ -83,6 +83,14 @@ def test_choosing_epsilon_matches_chapter(tmp_path: Path) -> None:
         "rho=2.63: eps at delta=1e-10 by rho + 2 sqrt(rho ln(1/delta)) = 18.194",
         "rho=0.81: eps at delta=1e-10 by rho + 2 sqrt(rho ln(1/delta)) = 9.447",
         "RAPPOR h=2, f=0.75: eps_inf=2.043",
+        "Facebook views: k=51914 sigma=2228  per action rho=1e-07 eps=0.00  user rho=0.0052 eps=0.450",
+        "Facebook clicks: k=17 sigma=40  per action rho=0.00031 eps=0.10  user rho=0.0053 eps=0.454",
+        (
+            "Microsoft: eps=1, gamma=0.2: Theorem 6 gives 0.569 (paper reports 0.686); all apps from 0.686: 1.672; "
+            "four rounds a day at 0.686: 2.744"
+        ),
+        "LinkedIn: eps_per=0.15, 30 days: averaging attack succeeds w.p. 0.115",
+        "RAPPOR 0.534 x 48 x 30 = 769.0  Microsoft 0.686 x 4 x 30 = 82.3  Apple Safari domains 4 x 2 x 30 = 240",
         # Attack
         "eps=0.5: accuracy 0.8186  TPR@0.001=0.0010  TPR@0.01=0.0102  TPR@0.1=0.0989  advantage 0.0155",
         "eps=1: accuracy 0.9266  TPR@0.001=0.0013  TPR@0.01=0.0108  TPR@0.1=0.1019  advantage 0.0085",

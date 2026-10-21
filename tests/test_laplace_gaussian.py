@@ -56,10 +56,14 @@ def test_laplace_gaussian_matches_section(tmp_path: Path) -> None:
         "d=10: Laplace rms=14.14 (simulated 14.09)  Gaussian rms=11.80 (simulated 11.78)  ratio=1.20",
         "d=100: Laplace rms=141.42 (simulated 141.07)  Gaussian rms=37.31 (simulated 37.28)  ratio=3.79",
         "d=1000: Laplace rms=1414.21 (simulated 1412.90)  Gaussian rms=117.97 (simulated 118.11)  ratio=11.99",
+        # Privacy loss distribution of the Laplace mechanism
+        "eps=1: atom at +eps=0.5000 (simulated 0.5007)  atom at -eps=0.1839 (simulated 0.1841)  continuous part=0.3161  "
+        "mean loss=0.3679 (simulated 0.3682)",
     ):
         assert expected in out
     assert {f.name for f in tmp_path.iterdir()} == {
         "lapgauss_privacy_loss.svg",
+        "lapgauss_loss_distributions.svg",
         "lapgauss_delta_curves.svg",
         "lapgauss_calibration.svg",
         "lapgauss_high_dim.svg",

@@ -1,6 +1,6 @@
 # Exercises: Beyond global sensitivity
 
-Exercises for [Beyond global sensitivity](../../book-full/part03-dp-foundations/06-sensitivity.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_sensitivity.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_sensitivity.py`.
+Exercises for [Beyond global sensitivity](../../book-full/part03-dp-foundations/07-sensitivity.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_sensitivity.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_sensitivity.py`.
 
 The solutions use the chapter's notation. Datasets have a fixed size $n$, neighbours differ in one replaced record, $d$ is the Hamming distance, and $\varepsilon$, $\delta$ are the parameters of differential privacy (DP). Sorted values are $x_1 \le \dots \le x_n$ in $[0, \Lambda]$, padded with $x_i = 0$ for $i \le 0$ and $x_i = \Lambda$ for $i > n$. $A^{(k)}(D)$ is the largest local sensitivity within distance $k$ of $D$, and $S^*_\beta(D) = \max_k e^{-k\beta}A^{(k)}(D)$. "The ages" are the chapter's 1,001 synthetic ages (seed 0), with $\Lambda = 100$ and $\varepsilon = 1$.
 
@@ -121,4 +121,30 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 6. **Why it is tight.** $D$'s largest discounted term is $D'$ itself, one step away. So $S^*(D)$ is $S^*(D')$ discounted by exactly one factor $e^{-\beta}$, which is step 2 of the chapter's smoothness proof holding with equality.
 
 *Compare with local sensitivity, which jumps from 0 to 100 on this pair and makes the release on $D$ deterministic. Smooth sensitivity sees $D'$ coming and already adds noise of scale 84.6/α on $D$.*
+:::
+
+## Inverse sensitivity for a quantile {#sec-sol-sensitivity-8}
+
+> **Exercise 8.** **Inverse sensitivity for a quantile.** Generalize @eq-sens-inverse-median from the median to the $r$-th order statistic: show that a candidate $t$ in the gap $(x_i, x_{i+1})$ needs $r - i$ changes when $i < r$ and $i - r + 1$ when $i \ge r$. Then release the 90th percentile of the ages ($r = 901$) with $\varepsilon = 1$ and compare its median absolute error with the smooth-sensitivity noise scale of Exercise 3. *Check: 0.1592 years, against 1.599; for $r = 501$ the formula gives back the chapter's 0.0783.* *(Inverse sensitivity)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Above the target rank.** Take $t$ in $(x_i, x_{i+1})$ with $i \ge r$, so $i$ values lie below $t$. For the $r$-th smallest value of a dataset to be $t$, at most $r - 1$ values can lie below $t$ and one must equal $t$. Each change removes at most one value from below $t$, so at least $i - r + 1$ changes are needed. That many suffice: move one value from below $t$ to $t$ and the other $i - r$ to $\Lambda$.
+2. **Below the target rank.** Take $t$ in $(x_i, x_{i+1})$ with $i < r$, so $n - i$ values lie above $t$. The $r$-th smallest equals $t$ only if at most $n - r$ values lie above $t$, and one equals $t$. So at least $(n - i) - (n - r) = r - i$ changes are needed, and moving one value from above $t$ to $t$ and the rest to 0 shows they suffice. For $r = m$ this is @eq-sens-inverse-median, without the reflection argument, which needed $n + 1 = 2m$.
+3. **Privacy.** Each count is a distance to a set of datasets, so Fact 3 gives sensitivity 1 and the release is the chapter's exponential mechanism, $\varepsilon$-DP for every $r$.
+4. **The numbers.** The script weights each gap by its length times $e^{-\varepsilon\,\mathrm{len}/2}$, with $\varepsilon = 1$, and finds the median of the distance from $x_{901}$ by bisection. The median absolute error is 0.1592 years, against the noise scale 1.599 of smooth sensitivity with Cauchy noise, which is also its median absolute error, since a standard Cauchy variable has median absolute value 1. At $r = 501$ the same code gives 0.0783, the chapter's value for the median.
+
+*The 90th percentile sits where the ages are sparser than at the median, so its gaps are wider and its error is about twice the median's. Smooth sensitivity loses by a factor of ten here, as it did at the median.*
+:::
+
+## The stable mode under add/remove {#sec-sol-sensitivity-9}
+
+> **Exercise 9.** **The stable mode under add/remove.** Under add/remove neighbours, one dataset has one more record than the other. Show that $s(D) = \max(0, g - 1)$, with $g$ the lead of the mode, works for the stability-based release of the mode, and find the smallest lead that answers with probability 0.95 at $\varepsilon = 1$ and $\delta = 10^{-6}$. Why is it about half the 35 records needed under replacement? *Check: a lead of 18 records; at a lead of 20 the release answers with probability 0.9972 under add/remove, and 0.004052 under replacement.* *(Stability-based release)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **Sensitivity.** Adding or removing one record changes one count by 1. The largest and second-largest counts then each move by at most 1, and since only one count changes, at most one of them moves. So the lead moves by at most 1, and so does $\max(0, g - 1)$.
+2. **Zero where the answer can flip.** If $g \ge 2$, one change leaves the old mode ahead by at least $g - 1 \ge 1$, so the mode cannot change. A dataset whose neighbour has a different mode therefore has $g \le 1$, where $s = 0$.
+3. **The lead for 0.95.** The release answers when $s + \mathrm{Lap}(1/\varepsilon) > \ln(1/\delta)/\varepsilon = 13.82$. For $s$ above the threshold the probability is $1 - \frac12e^{-(s - 13.82)}$, which reaches 0.95 at $s = 13.82 + \ln 10 = 16.12$. So $g - 1 \ge 17$, and the script confirms that the smallest lead is 18.
+4. **At a lead of 20.** Add/remove gives $s = 19$ and probability 0.9972. Replacement gives $s = \lceil 20/2\rceil - 1 = 9$, below the threshold, and probability 0.004052.
+
+*One replacement is one removal and one addition, so it can move the lead by 2 where add/remove moves it by 1. The score must halve the lead, which doubles the lead the release needs.*
 :::

@@ -350,6 +350,62 @@ def confident_dd_epsilon(pool: int, answered_votes: IntArray, s1: float, s2: flo
     return epsilon_from_rdp([c + v for c, v in zip(check, answers, strict=True)], delta)[0]
 
 
+# --- Stability-based aggregation: distance to instability and the sparse vector technique -----------
+
+
+def instability_distance(votes: IntArray) -> IntArray:
+    """The most teachers whose votes can change while the same label stays strictly on top.
+
+    One changed teacher moves the gap g between the top two counts by at most 2, so the plurality is safe
+    for j changes when g - 2j ≥ 1: the distance is ⌈g/2⌉ - 1 (0 when g = 0)."""
+    top2 = np.sort(votes, axis=1)[:, -2:]
+    gap = top2[:, 1] - top2[:, 0]
+    return np.maximum((gap + 1) // 2 - 1, 0).astype(np.int64)
+
+
+def laplace_difference_tail(t: float, b1: float, b2: float) -> float:
+    """Pr[ν - ρ > t] for independent ν ~ Lap(b1), ρ ~ Lap(b2), b1 ≠ b2, t ≥ 0."""
+    return (b1**2 * math.exp(-t / b1) - b2**2 * math.exp(-t / b2)) / (2 * (b1**2 - b2**2))
+
+
+def stable_threshold(eps0: float, pool: int, delta_bad: float) -> float:
+    """Smallest threshold t on the distance such that, over `pool` queries, an unstable query (distance 0) is
+    declared stable with probability at most delta_bad: pool · Pr[ν - ρ > t] ≤ delta_bad, with the noises of
+    AboveThreshold at budget ε0, ρ ~ Lap(2/ε0) and ν ~ Lap(4/ε0)."""
+    return bisect(lambda t: pool * laplace_difference_tail(t, 4 / eps0, 2 / eps0) <= delta_bad, 0.0, 1e5)
+
+
+@dataclass(frozen=True)
+class StableRun:
+    answered: NDArray[np.bool_]  # True where the exact plurality was released
+    processed: int  # queries examined before the c-th "unstable" answer or the end of the pool
+    unstable: int  # number of "unstable" answers, at most the cutoff
+
+
+def stable_aggregate(rng: np.random.Generator, dist: IntArray, eps0: float, threshold: float, cutoff: int) -> StableRun:
+    """Sparse vector over the queries -dist_i with threshold -t: each run of AboveThreshold (budget ε0) stops at
+    the first query whose noisy distance falls below the noisy threshold ("unstable", no label); every other
+    query gets the exact plurality label. Stops after `cutoff` unstable answers."""
+    answered = np.zeros(dist.size, dtype=np.bool_)
+    rho = rng.laplace(0.0, 2 / eps0)
+    unstable = 0
+    i = 0
+    while i < dist.size and unstable < cutoff:
+        if -float(dist[i]) + rng.laplace(0.0, 4 / eps0) >= -threshold + rho:
+            unstable += 1
+            rho = rng.laplace(0.0, 2 / eps0)
+        else:
+            answered[i] = True
+        i += 1
+    return StableRun(answered, i, unstable)
+
+
+def stable_epsilon(cutoff: int, eps0: float, delta: float) -> float:
+    """ε of `cutoff` runs of ε0-DP AboveThreshold: the better of basic composition, c·ε0 with no δ, and the
+    randomized-response RDP curve composed and converted at δ (the finite grid of orders can overshoot c·ε0)."""
+    return min(cutoff * eps0, epsilon_from_rdp([cutoff * rr_rdp(a, eps0) for a in ORDERS], delta)[0])
+
+
 # --- The student --------------------------------------------------------------------------------
 
 
@@ -633,6 +689,37 @@ def print_table(rng: np.random.Generator) -> None:
             f"student prompt with {n_pub} public exemplars, eps=1: sigma={s:.1f}  "
             f"label acc {agreement(labels, split.pool.y[:n_pub]):.4f}  accuracy {sign_accuracy(student, ev):.4f}"
         )
+
+    print("== Stability-based aggregation with the sparse vector technique (delta_bad=5e-6, conversion delta=5e-6)")
+    b1, b2 = 4.0, 2.0
+    sims = rng.laplace(0.0, b1, 1_000_000) - rng.laplace(0.0, b2, 1_000_000)
+    print(
+        f"eps0=1: Pr[nu - rho > 8] formula={laplace_difference_tail(8.0, b1, b2):.4f}  "
+        f"simulated={float(np.mean(sims > 8.0)):.4f}"
+    )
+    for eps0 in (0.5, 1.0, 2.0):
+        ts = "  ".join(f"pool={q}: t={stable_threshold(eps0, q, 5e-6):.1f}" for q in (1000, 10000))
+        eps_c = "  ".join(f"c={c}: {stable_epsilon(c, eps0, 5e-6):.2f}" for c in (1, 5, 20, 100))
+        print(f"eps0={eps0:g}: {ts}  eps for c unstable answers: {eps_c}")
+    for k in (250, 500):
+        votes_k = pool_votes if k == K_STUDENT else votes_for(train_teachers(split.private, k), split.pool.x)
+        dist = instability_distance(votes_k)
+        plural_k: IntArray = np.argmax(votes_k, axis=1).astype(np.int64)
+        truth = label_index(split.pool.y)
+        fracs = "  ".join(
+            f"t={stable_threshold(e, N_PUBLIC, 5e-6):.1f}: {float(np.mean(dist >= stable_threshold(e, N_PUBLIC, 5e-6))):.4f}"
+            for e in (1.0, 2.0)
+        )
+        print(f"k={k}: largest distance {int(dist.max())}  fraction of pool with distance >= t: {fracs}")
+        for eps0, cutoff in ((1.0, 5), (1.0, 20), (2.0, 5), (2.0, 20)):
+            run_k = stable_aggregate(rng, dist, eps0, stable_threshold(eps0, N_PUBLIC, 5e-6), cutoff)
+            ans = np.flatnonzero(run_k.answered)
+            right: NDArray[np.bool_] = plural_k[ans] == truth[ans]
+            acc = float(np.mean(right)) if ans.size else float("nan")
+            print(
+                f"k={k}, eps0={eps0:g}, c={cutoff}: processed {run_k.processed}  labelled {ans.size}  "
+                f"label acc {acc:.4f}  eps={stable_epsilon(cutoff, eps0, 5e-6):.2f}"
+            )
 
 
 def example_queries(votes: IntArray) -> list[int]:

@@ -234,6 +234,268 @@ def simulate_local(rng: np.random.Generator, counts: IntArray, eps: float) -> Fl
     return simulate_unary(rng, counts, *oue_probs(eps))
 
 
+# --- Large and unknown domains: local hashing and heavy hitters ---------------------------------
+
+HASH_PRIME = 2_147_483_647  # 2^31 − 1, a prime larger than every encoded value
+
+
+def lh_variance(eps: float, w: float, n: int) -> float:
+    """Var of a local-hashing frequency estimate for a rare value (f = 0), with w hash buckets.
+
+    Each user hashes their value with a random hash into w buckets and sends the bucket through
+    w-ary randomized response. The variance is (e^ε + w − 1)² / (n (w − 1)(e^ε − 1)²).
+    """
+    return (math.exp(eps) + w - 1) ** 2 / (n * (w - 1) * math.expm1(eps) ** 2)
+
+
+def lh_best_width(eps: float) -> int:
+    """The integer number of buckets w ≥ 2 with the smallest local-hashing variance; near e^ε + 1."""
+    lo = max(2, math.floor(math.exp(eps) + 1))
+    return min((lo, lo + 1), key=lambda w: lh_variance(eps, w, 1))
+
+
+def hash_family(rng: np.random.Generator, size: int) -> tuple[IntArray, IntArray]:
+    """`size` random members (a, b) of the family h(x) = ((a x + b) mod P) mod w."""
+    a = rng.integers(1, HASH_PRIME, size=size, dtype=np.int64)
+    b = rng.integers(0, HASH_PRIME, size=size, dtype=np.int64)
+    return a, b
+
+
+def hash_values(a: IntArray, b: IntArray, x: IntArray, w: int) -> IntArray:
+    """h_{a,b}(x) for matching arrays of hash parameters and values; a·x < 2^62 fits in int64."""
+    return ((a * x + b) % HASH_PRIME) % w
+
+
+def simulate_lh(
+    rng: np.random.Generator, values: IntArray, candidates: IntArray, eps: float, w: int, family: int
+) -> FloatArray:
+    """Local hashing with a shared family of `family` hash functions; estimated frequency of each candidate.
+
+    User i draws hash j_i, sends (j_i, w-ary RR of h_{j_i}(x_i)). The server counts, for each
+    candidate v, the reports y_i = h_{j_i}(v), and debiases twice: once for the randomized response
+    (Fact 1), once for the 1/w chance that another value hashes to v's bucket.
+    """
+    n = len(values)
+    a, b = hash_family(rng, family)
+    j = rng.integers(0, family, size=n)
+    buckets = hash_values(a[j], b[j], values, w)
+    p, q = krr_probs(eps, w)
+    keep = rng.random(n) < p
+    other = (buckets + rng.integers(1, w, size=n)) % w  # a uniformly random different bucket
+    reports = np.where(keep, buckets, other)
+    table = np.zeros((family, w), dtype=np.int64)  # table[j, y] = number of users with hash j who sent y
+    np.add.at(table, (j, reports), 1)
+    estimates = np.empty(len(candidates))
+    for c, v in enumerate(candidates):
+        support = table[np.arange(family), hash_values(a, b, np.full(family, v), w)].sum() / n
+        g = (support - q) / (p - q)  # estimated fraction of users whose own hash puts them in v's bucket
+        estimates[c] = (w * g - 1) / (w - 1)  # remove the 1/w collisions of the other values
+    return estimates
+
+
+def false_alarm_z(candidates: int, beta: float) -> float:
+    """The threshold, in standard deviations, at which `candidates` pure-noise estimates give β false alarms.
+
+    Each estimate of a value nobody holds is close to normal with mean 0, so the expected number
+    above z standard deviations is candidates · (1 − Φ(z)); solve that for β.
+    """
+    return bisect(lambda z: candidates * (1 - normal_cdf(z)) - beta, 0.0, 40.0)
+
+
+def word_population(
+    rng: np.random.Generator, n: int, words: int, alphabet: int, length: int
+) -> tuple[IntArray, IntArray]:
+    """n users holding one of `words` random strings with Zipf frequencies ∝ 1/rank; returns (vocabulary, values).
+
+    A string of `length` symbols from an alphabet of size `alphabet` is encoded as a base-`alphabet` integer.
+    """
+    vocab = rng.choice(alphabet**length, size=words, replace=False).astype(np.int64)
+    counts = population_counts(n, words)
+    values = np.repeat(vocab, counts)
+    rng.shuffle(values)
+    return vocab, values
+
+
+def prefix_heavy_hitters(
+    rng: np.random.Generator,
+    values: IntArray,
+    eps: float,
+    alphabet: int,
+    length: int,
+    beta: float = 0.1,
+    family: int = 1024,
+) -> tuple[list[tuple[int, float]], list[int]]:
+    """Find frequent strings without a dictionary, by growing prefixes one symbol at a time.
+
+    Users are split into `length` groups. Group ℓ reports the prefix of length ℓ of its string by local
+    hashing. Each level keeps the candidates whose estimate is above the false-alarm threshold and
+    extends each by every symbol. Returns the strings found with their estimated frequencies, and
+    the number of candidates tested at each level.
+    """
+    w = lh_best_width(eps)
+    groups = rng.integers(0, length, size=len(values))
+    kept = np.zeros(1, dtype=np.int64)  # the empty prefix
+    tested: list[int] = []
+    found: list[tuple[int, float]] = []
+    for level in range(1, length + 1):
+        candidates = (kept[:, None] * alphabet + np.arange(alphabet)[None, :]).ravel()
+        tested.append(len(candidates))
+        members = values[groups == level - 1]
+        prefixes = members // alphabet ** (length - level)
+        estimates = simulate_lh(rng, prefixes, candidates, eps, w, family)
+        sd = math.sqrt(lh_variance(eps, w, len(members)))
+        above = estimates > false_alarm_z(len(candidates), beta) * sd
+        kept = candidates[above]
+        if level == length:
+            found = [(int(v), float(e)) for v, e in zip(candidates[above], estimates[above], strict=True)]
+    return found, tested
+
+
+# --- Numbers from one bit: local mean estimation -------------------------------------------------
+
+
+def one_bit_prob(x: float, m: float, eps: float) -> float:
+    """1BitMean (Ding, Kulkarni & Yekhanin 2017): send 1 w.p. 1/(e^ε + 1) + (x/m)(e^ε − 1)/(e^ε + 1)."""
+    e = math.exp(eps)
+    return 1 / (e + 1) + (x / m) * (e - 1) / (e + 1)
+
+
+def one_bit_estimate(mean_report: float, m: float, eps: float) -> float:
+    """Unbiased mean from the mean of the bits: m ((e^ε + 1) Ȳ − 1)/(e^ε − 1)."""
+    e = math.exp(eps)
+    return m * ((e + 1) * mean_report - 1) / (e - 1)
+
+
+def one_bit_sd(values: FloatArray, m: float, eps: float) -> float:
+    """Exact sd of the 1BitMean estimate: (m (e^ε + 1)/(e^ε − 1)) √(Σ π_i (1 − π_i)) / n."""
+    e = math.exp(eps)
+    pi = 1 / (e + 1) + (values / m) * (e - 1) / (e + 1)
+    return m * (e + 1) / (e - 1) * math.sqrt(float((pi * (1 - pi)).sum())) / len(values)
+
+
+def one_bit_sd_bound(n: int, m: float, eps: float) -> float:
+    """The worst case over the data, π = 1/2 for everyone: m (e^ε + 1) / (2 (e^ε − 1) √n)."""
+    return m * (math.exp(eps) + 1) / (2 * math.expm1(eps) * math.sqrt(n))
+
+
+def local_laplace_mean_sd(n: int, m: float, eps: float) -> float:
+    """Each user sends x + Lap(m/ε); the mean of the reports has sd √2 m / (ε √n)."""
+    return math.sqrt(2) * m / (eps * math.sqrt(n))
+
+
+def one_bit_laplace_crossover() -> float:
+    """The ε at which the worst-case 1-bit sd equals the Laplace sd; below it one bit is more accurate."""
+    return bisect(lambda e: one_bit_sd_bound(1, 1.0, e) / local_laplace_mean_sd(1, 1.0, e) - 1, 0.1, 10.0)
+
+
+def usage_minutes(rng: np.random.Generator, n: int, m: float) -> FloatArray:
+    """Daily minutes in an app for n users: a log-normal around an hour, clipped to [0, m]."""
+    return np.clip(rng.lognormal(math.log(60.0), 0.8, size=n), 0.0, m)
+
+
+def simulate_one_bit(rng: np.random.Generator, values: FloatArray, m: float, eps: float, trials: int) -> FloatArray:
+    """`trials` 1BitMean estimates of the mean of `values`."""
+    e = math.exp(eps)
+    pi = 1 / (e + 1) + (values / m) * (e - 1) / (e + 1)
+    means = np.array([float((rng.random(len(values)) < pi).mean()) for _ in range(trials)])
+    return m * ((e + 1) * means - 1) / (e - 1)
+
+
+# --- Collecting repeatedly: memoization and α-point rounding ------------------------------------
+
+
+def averaging_log_ratio(yes: int, days: int, eps: float) -> float:
+    """ln of Pr[reports | bit 1] / Pr[reports | bit 0] for `yes` ones in `days` fresh randomized responses."""
+    return (2 * yes - days) * eps
+
+
+def majority_error(days: int, eps: float) -> float:
+    """Probability that the majority of `days` fresh randomized responses is wrong (ties split evenly)."""
+    pmf = binomial_pmf(days, 1 - rr_keep(eps))  # number of flipped reports
+    wrong = float(pmf[days // 2 + 1 :].sum())
+    if days % 2 == 0:
+        wrong += 0.5 * float(pmf[days // 2])
+    return wrong
+
+
+def rappor_eps_inf(hashes: int, f: float) -> float:
+    """RAPPOR's bound for all reports of one value: ε∞ = 2h ln((1 − f/2)/(f/2))."""
+    return 2 * hashes * math.log((1 - f / 2) / (f / 2))
+
+
+def rappor_eps_one(hashes: int, f: float, p: float, q: float) -> float:
+    """RAPPOR's bound for one report, permanent and instantaneous layers together: ε1 = h ln(q*(1 − p*)/(p*(1 − q*)))."""
+    p_star = 0.5 * f * (p + q) + (1 - f) * p
+    q_star = 0.5 * f * (p + q) + (1 - f) * q
+    return hashes * math.log(q_star * (1 - p_star) / (p_star * (1 - q_star)))
+
+
+def alpha_point_reports(b0: IntArray, bm: IntArray, alpha: FloatArray, x: FloatArray, m: float) -> IntArray:
+    """α-point rounding with memoization: report the memoized bit for m if x + α ≥ m, else the one for 0."""
+    return np.where(x + alpha >= m, bm, b0)
+
+
+def memoized_bits(rng: np.random.Generator, n: int, m: float, eps: float) -> tuple[IntArray, IntArray, FloatArray]:
+    """Each user's two memoized 1BitMean bits, for the values 0 and m, and their secret offset α ~ U[0, m)."""
+    b0 = (rng.random(n) < one_bit_prob(0.0, m, eps)).astype(np.int64)
+    bm = (rng.random(n) < one_bit_prob(m, m, eps)).astype(np.int64)
+    return b0, bm, rng.uniform(0.0, m, size=n)
+
+
+def equal_memoized_bits(eps: float) -> float:
+    """Probability that a user's two memoized bits agree, 2e^ε/(e^ε + 1)²: then no report ever depends on the data."""
+    e = math.exp(eps)
+    return 2 * e / (e + 1) ** 2
+
+
+def drifting_usage(rng: np.random.Generator, n: int, days: int, spread: float, m: float) -> FloatArray:
+    """n users × days: a personal base level from usage_minutes, plus a uniform daily wobble of ± spread."""
+    base = usage_minutes(rng, n, m)
+    wobble = rng.uniform(-spread, spread, size=(days, n))
+    return np.clip(base[None, :] + wobble, 0.0, m)
+
+
+def changed_fraction(reports: IntArray) -> float:
+    """Fraction of users (columns) whose report changes at least once over the days (rows)."""
+    return float((reports != reports[0][None, :]).any(axis=0).mean())
+
+
+def alpha_point_changes(rng: np.random.Generator, n: int, days: int, spread: float, m: float, eps: float) -> float:
+    """Fraction of users whose α-point report ever changes when their usage wobbles by ± spread."""
+    x = drifting_usage(rng, n, days, spread, m)
+    b0, bm, alpha = memoized_bits(rng, n, m, eps)
+    return changed_fraction(alpha_point_reports(b0[None, :], bm[None, :], alpha[None, :], x, m))
+
+
+def expected_range(days: int, spread: float) -> float:
+    """E[max − min] of `days` independent uniforms on [−spread, spread]: 2 spread (days − 1)/(days + 1)."""
+    return 2 * spread * (days - 1) / (days + 1)
+
+
+def alpha_point_change_theory(days: int, spread: float, m: float, eps: float) -> float:
+    """A report changes only if the two memoized bits differ and the threshold m − α falls inside the wobble."""
+    return (1 - equal_memoized_bits(eps)) * expected_range(days, spread) / m
+
+
+def fresh_changes(rng: np.random.Generator, n: int, days: int, spread: float, m: float, eps: float) -> float:
+    """The same for a fresh 1BitMean report every day."""
+    x = drifting_usage(rng, n, days, spread, m)
+    e = math.exp(eps)
+    pi = 1 / (e + 1) + (x / m) * (e - 1) / (e + 1)
+    return changed_fraction((rng.random(x.shape) < pi).astype(np.int64))
+
+
+def output_perturbation_eps(eps: float, gamma: float) -> float:
+    """One round of 1BitMean whose bit is then flipped w.p. γ (Ding et al., Theorem 6)."""
+    e = math.exp(eps)
+    return math.log(((1 - 2 * gamma) * e / (e + 1) + gamma) / ((1 - 2 * gamma) / (e + 1) + gamma))
+
+
+def shuffle_random_bit_prob(eps0: float) -> float:
+    """Binary randomized response at ε0 written as "send a uniform random bit w.p. 2/(e^ε0 + 1), else the truth"."""
+    return 2 / (math.exp(eps0) + 1)
+
+
 # --- Central baselines -------------------------------------------------------------------------
 
 
@@ -547,6 +809,88 @@ def print_table(rng: np.random.Generator) -> None:
         )
         print(f"  n={m}: {cells}")
 
+    print("[Local hashing: n · Var for a rare value]")
+    for e in (1.0, 4.0):
+        w = lh_best_width(e)
+        print(
+            f"  ε={e:g}: e^ε + 1={math.exp(e) + 1:.2f}  best w={w}  local hashing={lh_variance(e, w, 1):.4f}  "
+            f"optimized unary={oracle_variance(*oue_probs(e), 0.0, 1):.4f}  w=2: {lh_variance(e, 2, 1):.4f}"
+        )
+
+    n, words, alphabet, length, eps = 1_000_000, 200, 26, 6, 4.0
+    print(f"[Heavy hitters: n={n}, {words} words of {length} letters, ε={eps:g}, prefixes grown one letter at a time]")
+    vocab, values = word_population(rng, n, words, alphabet, length)
+    found, tested = prefix_heavy_hitters(rng, values, eps, alphabet, length, family=16_384)
+    freqs = dict(zip(vocab.tolist(), (population_counts(n, words) / n).tolist(), strict=True))
+    hits = [v for v, _ in found if v in freqs]
+    w = lh_best_width(eps)
+    group = n // length
+    sd = math.sqrt(lh_variance(eps, w, group))
+    z_last = false_alarm_z(tested[-1], 0.1)
+    z_all = false_alarm_z(alphabet**length, 0.1)
+    print(f"  w={w}  users per level≈{group}  sd of one estimate={sd:.2e}  candidates per level={tested}")
+    print(f"  found {len(found)} strings: {len(hits)} real words, {len(found) - len(hits)} false")
+    missed = max((f for v, f in freqs.items() if v not in hits), default=0.0)
+    print(
+        f"  smallest frequency found={min(freqs[v] for v in hits):.4f}  largest missed={missed:.4f}  "
+        f"last-level threshold={z_last:.2f} sd={z_last * sd:.4f}"
+    )
+    print(
+        f"  testing all {alphabet**length} strings instead: threshold {z_all:.2f} sd={z_all * sd:.4f}; "
+        f"at the prefix threshold it would expect {alphabet**length * (1 - normal_cdf(z_last)):.0f} false alarms"
+    )
+
+    m, n, eps = 1440.0, 1_000_000, 1.0
+    print(f"[Local mean of minutes in [0, {m:g}], n={n}, ε={eps:g}]")
+    x = usage_minutes(rng, n, m)
+    est = simulate_one_bit(rng, x, m, eps, 200)
+    print(
+        f"  true mean={x.mean():.2f}  1-bit sd={one_bit_sd(x, m, eps):.3f} (worst case {one_bit_sd_bound(n, m, eps):.3f}; "
+        f"simulated mean {est.mean():.2f}, sd {est.std():.3f})  Laplace sd={local_laplace_mean_sd(n, m, eps):.3f}"
+    )
+    print(
+        f"  worst-case 1-bit / Laplace sd={one_bit_sd_bound(n, m, eps) / local_laplace_mean_sd(n, m, eps):.3f}  "
+        f"as ε→0: {one_bit_sd_bound(n, m, 1e-6) / local_laplace_mean_sd(n, m, 1e-6):.3f}  "
+        f"equal at ε={one_bit_laplace_crossover():.3f}"
+    )
+
+    eps = math.log(3)
+    print("[Repeated collection]")
+    ratio = averaging_log_ratio(75, 100, eps)
+    print(f"  fresh RR at ln 3, 75 ones in 100 days: log ratio={ratio:.2f}  ratio={math.exp(ratio):.3g}")
+    for days in (1, 5, 25, 101):
+        print(f"  days={days}: majority of fresh reports wrong w.p. {majority_error(days, eps):.3g}")
+    print(
+        f"  RAPPOR homepages (h=2, f=0.75, p=0.5, q=0.75): eps_inf={rappor_eps_inf(2, 0.75):.3f}  "
+        f"eps_1={rappor_eps_one(2, 0.75, 0.5, 0.75):.4f}"
+    )
+    m, days = 1440.0, 30
+    print(f"  α-point rounding, ε=1: memoized bits agree w.p. {equal_memoized_bits(1.0):.4f}")
+    for spread in (5.0, 15.0, 30.0):
+        sim = alpha_point_changes(rng, 100_000, days, spread, m, 1.0)
+        fresh = fresh_changes(rng, 100_000, days, spread, m, 1.0)
+        print(
+            f"  ± {spread:g} min over {days} days: report ever changes α-point={sim:.4f} "
+            f"(theory {alpha_point_change_theory(days, spread, m, 1.0):.4f})  fresh={fresh:.4f}"
+        )
+    b0, bm, alpha = memoized_bits(rng, n, m, 1.0)
+    x = usage_minutes(rng, n, m)
+    day = alpha_point_reports(b0, bm, alpha, x, m)
+    print(
+        f"  one day, n={n}: true mean={x.mean():.2f}  α-point estimate={one_bit_estimate(float(day.mean()), m, 1.0):.2f}"
+    )
+    print(
+        f"  output perturbation γ=0.2 on ε=1: one round {output_perturbation_eps(1.0, 0.2):.3f}  "
+        f"per round where the memoized bit differs ln(0.8/0.2)={math.log(0.8 / 0.2):.3f}"
+    )
+
+    eps0 = fmt_max_eps0(1.0, 1_000_000, 1e-6)
+    p_rand = shuffle_random_bit_prob(eps0)
+    print(
+        f"[Shuffled bits at ε0={eps0:.3f}, n=10^6] random bit w.p. {p_rand:.2e}  expected random senders={1e6 * p_rand:.0f}  "
+        f"count sd={1e6 * math.sqrt(rr_variance(1_000_000, eps0)):.1f}  local at ε0=1: {1e6 * math.sqrt(rr_variance(1_000_000, 1.0)):.0f}"
+    )
+
 
 # --- Figures ------------------------------------------------------------------------------------
 
@@ -743,6 +1087,100 @@ def plot_collusion(delta: float = 1e-6) -> Figure:
     return fig
 
 
+def plot_local_hashing() -> Figure:
+    widths = list(range(2, 400))
+    fig, ax = plt.subplots(figsize=(7, 4.3))
+    for i, eps in enumerate((1.0, 4.0)):
+        ax.loglog(
+            widths,
+            [lh_variance(eps, w, 1) for w in widths],
+            color=f"C{i}",
+            label=rf"local hashing, $\varepsilon = {eps:g}$",
+        )
+        ax.axhline(
+            oracle_variance(*oue_probs(eps), 0.0, 1), color=f"C{i}", linestyle=":", label="optimized unary encoding"
+        )
+        best = math.exp(eps) + 1
+        ax.plot([best], [lh_variance(eps, best, 1)], "o", color=f"C{i}")
+    ax.set(
+        xlabel="number of hash buckets w",
+        ylabel=r"$n\cdot\mathrm{Var}$ of a rare value's frequency",
+        title=r"Local hashing matches unary encoding at $w = e^\varepsilon + 1$ (dots)",
+    )
+    ax.legend(fontsize=8)
+    return fig
+
+
+def plot_heavy_hitters(rng: np.random.Generator) -> Figure:
+    n, words, alphabet, length, eps = 1_000_000, 200, 26, 6, 4.0
+    vocab, values = word_population(rng, n, words, alphabet, length)
+    found, tested = prefix_heavy_hitters(rng, values, eps, alphabet, length, family=16_384)
+    true = population_counts(n, words) / n
+    est = dict(found)
+    ranks = np.arange(1, words + 1)
+    hit = np.array([int(v) in est for v in vocab.tolist()])
+    sd = math.sqrt(lh_variance(eps, lh_best_width(eps), n // length))
+    fig, ax = plt.subplots(figsize=(7.5, 4.5))
+    ax.loglog(ranks[hit], true[hit], "o", color="C0", label="word found (true frequency)")
+    ax.loglog(ranks[~hit], true[~hit], "o", mfc="none", color="0.6", label="word missed")
+    ax.loglog(ranks[hit], [est[int(v)] for v in vocab[hit].tolist()], "x", color="C3", label="estimated frequency")
+    ax.axhline(false_alarm_z(tested[-1], 0.1) * sd, color="0.3", linestyle="--", label="threshold at the last level")
+    ax.set(
+        xlabel="rank of the word",
+        ylabel="fraction of users",
+        title=rf"Heavy hitters without a dictionary: $n = 10^6$, $\varepsilon = {eps:g}$, $26^6$ possible strings",
+    )
+    ax.legend(fontsize=8)
+    return fig
+
+
+def plot_repeated(rng: np.random.Generator) -> Figure:
+    fig, (a0, a1) = plt.subplots(1, 2, figsize=(11.5, 4.3))
+    days = list(range(1, 61))
+    eps = math.log(3)
+    a0.semilogy(days, [majority_error(d, eps) for d in days], label="fresh randomized response every day")
+    a0.semilogy(days, [1 - rr_keep(eps)] * len(days), label="memoized: the same report every day")
+    a0.set(
+        xlabel="days of reports",
+        ylabel="probability the majority vote is wrong",
+        ylim=(1e-6, 1),
+        title=r"Guessing a fixed bit, $\varepsilon_0 = \ln 3$ per report",
+    )
+    a0.legend(fontsize=8)
+    m, horizon = 1440.0, 30
+    spreads = [2.5, 5.0, 10.0, 15.0, 20.0, 30.0]
+    grid = np.linspace(1, 30, 59)
+    a1.plot(
+        grid,
+        [alpha_point_change_theory(horizon, float(s), m, 1.0) for s in grid],
+        color="C0",
+        label=r"$\alpha$-point rounding, formula",
+    )
+    a1.plot(
+        spreads,
+        [alpha_point_changes(rng, 50_000, horizon, s, m, 1.0) for s in spreads],
+        "o",
+        color="C0",
+        label="simulated",
+    )
+    a1.plot(
+        spreads,
+        [fresh_changes(rng, 50_000, horizon, s, m, 1.0) for s in spreads],
+        "s",
+        color="C1",
+        label="fresh 1-bit report every day",
+    )
+    a1.set(
+        xlabel="daily wobble of usage (± minutes)",
+        ylabel="fraction of users whose report ever changes",
+        yscale="log",
+        ylim=(1e-3, 2),
+        title=rf"{horizon} days of minutes in an app, $\varepsilon = 1$",
+    )
+    a1.legend(fontsize=8)
+    return fig
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seed", type=int, default=0)
@@ -763,6 +1201,9 @@ def main() -> None:
         "trust_shuffle_bound.svg": plot_shuffle_bound(),
         "trust_matched_error.svg": plot_matched_error(rng),
         "trust_collusion.svg": plot_collusion(),
+        "trust_local_hashing.svg": plot_local_hashing(),
+        "trust_heavy_hitters.svg": plot_heavy_hitters(rng),
+        "trust_repeated.svg": plot_repeated(rng),
     }
     for name, fig in figures.items():
         fig.tight_layout()

@@ -7,11 +7,11 @@ Prints the numbers quoted in 09-choosing-an-accountant.md (they match exactly wi
 then saves the chapter's figures. Takes two to three minutes, almost all of it in PLD compositions.
 
 Nothing is re-implemented here: every accountant is imported from the chapter that derives it.
-  per-step amplification + basic/advanced composition  subsampling.py   (chapter 31)
-  RDP with Mironov's or the improved conversion        subsampling.py   (chapters 27, 28, 31)
-  RDP with the optimal conversion                      rdp_conversions.py (chapter 28)
-  the GDP central-limit approximation                  gaussian_dp.py   (chapter 30)
-  pessimistic / optimistic PLD                         numerical_accounting.py (chapter 32)
+  per-step amplification + basic/advanced composition  subsampling.py   (chapter 33)
+  RDP with Mironov's or the improved conversion        subsampling.py   (chapters 29, 30, 33)
+  RDP with the optimal conversion                      rdp_conversions.py (chapter 30)
+  the GDP central-limit approximation                  gaussian_dp.py   (chapter 32)
+  pessimistic / optimistic PLD                         numerical_accounting.py (chapter 34)
 
 Conventions: q is the sampling rate, never a density; σ is the noise multiplier; k the number of steps;
 neighbours are add/remove unless stated; Poisson sampling unless stated.
@@ -70,7 +70,7 @@ FIGURES = Path(__file__).resolve().parents[2] / "_build" / "figures" / Path(__fi
 # The running example of the part.
 Q_RUN, SIGMA_RUN, DELTA_RUN = 0.01, 1.0, 1e-5
 STEPS: tuple[int, ...] = (1, 10, 100, 1000, 10_000)
-H = 1e-5  # PLD grid width, as in chapter 32: the sandwich width is k h
+H = 1e-5  # PLD grid width, as in chapter 34: the sandwich width is k h
 TARGETS: tuple[float, ...] = (1.0, 3.0, 8.0)  # target ε for the inverse problem, at k = 10,000
 N_RECORDS = 50_000  # dataset size for the reporting example (q n = 500 records per batch on average)
 DIRECTIONS = ("remove", "add")
@@ -105,7 +105,7 @@ BOUNDS = frozenset({"basic", "advanced", "rdp-mironov", "rdp-improved", "rdp-opt
 def composed_plds(
     q: float, sigma: float, ks: tuple[int, ...], h: float, pessimistic: bool
 ) -> dict[int, tuple[PLD, PLD]]:
-    """The (remove, add) PLDs of k Poisson-subsampled Gaussian steps for each k in ks (chapter 32's accountant)."""
+    """The (remove, add) PLDs of k Poisson-subsampled Gaussian steps for each k in ks (chapter 34's accountant)."""
     per_direction = {
         d: compose_pld_many(discretize_subsampled_gaussian_pld(q, sigma, h, pessimistic, d), ks) for d in DIRECTIONS
     }
@@ -135,7 +135,7 @@ def pld_eps_single(q: float, sigma: float, steps: int, delta: float, h: float, p
 
 
 def rdp_optimal_eps(q: float, sigma: float, steps: int, delta: float) -> float:
-    """RDP composed over k steps, converted with the optimal conversion of chapter 28 (through tests)."""
+    """RDP composed over k steps, converted with the optimal conversion of chapter 30 (through tests)."""
     curve = subsampled_gaussian_rdp_curve(q, sigma)
     return rdp_to_dp_tradeoff(ORDERS, [steps * e for e in curve], delta)
 
@@ -290,7 +290,7 @@ def randomized_response_comparison(eps0: float, steps: int, delta: float) -> tup
     """k-fold ε0-randomized response (pure DP): exact ε (its PLD is finite), RDP improved, zCDP, advanced.
 
     RDP uses the exact randomized-response curve; zCDP uses the smallest ρ = ε0 tanh(ε0/2) per step
-    (chapter 29) and the improved conversion; advanced composition is Dwork–Rothblum–Vadhan with δ' = δ.
+    (chapter 31) and the improved conversion; advanced composition is Dwork–Rothblum–Vadhan with δ' = δ.
     """
     exact = eps_from_delta_profile(lambda e: rr_exact_delta(eps0, steps, e), delta)
     rdp = rdp_to_dp_improved(ORDERS, [steps * randomized_response_rdp(a, eps0) for a in ORDERS], delta)[0]

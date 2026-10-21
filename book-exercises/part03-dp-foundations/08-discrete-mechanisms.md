@@ -1,6 +1,6 @@
 # Exercises: Discrete and floating-point-safe mechanisms
 
-Exercises for [Discrete and floating-point-safe mechanisms](../../book-full/part03-dp-foundations/07-discrete-mechanisms.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_discrete_mechanisms.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_discrete_mechanisms.py`.
+Exercises for [Discrete and floating-point-safe mechanisms](../../book-full/part03-dp-foundations/08-discrete-mechanisms.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_discrete_mechanisms.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_discrete_mechanisms.py`.
 
 The solutions use the chapter's notation. $\mathrm{Lap}_{\mathbb Z}(b)$ is the discrete Laplace with probability mass function (PMF) $\frac{1 - r}{1 + r}r^{|z|}$ and $r = e^{-1/b}$; $\mathcal N_{\mathbb Z}(0, \sigma^2)$ is the discrete Gaussian; Algorithms 1–3 are the samplers of Canonne, Kamath and Steinke (2020). Exercise 7 is about differential privacy (DP), and exercise 6 measures the distance between two PMFs in total variation (TV).
 

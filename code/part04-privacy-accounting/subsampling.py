@@ -8,7 +8,7 @@ then saves the chapter's figures.
 
 Conventions: q is the sampling rate, never a density. For the subsampled Gaussian, P0 = N(0, σ²)
 is the output without the record and P1 = N(1, σ²) the output with it (ℓ2 sensitivity 1), so the
-subsampled pair is the mixture Pq = (1 - q)P0 + qP1 against P0 (the "remove" pair of chapter 32).
+subsampled pair is the mixture Pq = (1 - q)P0 + qP1 against P0 (the "remove" pair of chapter 34).
 In code the names mu0/mu1 are kept for P0/P1. Logs are natural.
 
 Public functions used by later chapters: ORDERS, amplify_eps_delta, subsampled_gaussian_rdp,

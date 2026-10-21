@@ -69,6 +69,12 @@ def test_dp_sgd_matches_chapter(tmp_path: Path) -> None:
         "q=0.01: lr=0.5: 0.9522  lr=1: 0.9569  lr=2: 0.9465",
         "q=0.03: lr=1: 0.9591  lr=2: 0.9565  lr=4: 0.9577",
         "q=0.1: lr=2: 0.9589  lr=4: 0.9565  lr=8: 0.9576",
+        # Microbatches
+        "microbatch of 1: noise sd per coordinate=0.0050 (1x)",
+        "microbatch of 4: noise sd per coordinate=0.0400 (8x)",
+        "microbatch of 16: noise sd per coordinate=0.1600 (32x)",
+        "microbatch of 4: test accuracy 0.9336",
+        "microbatch of 16: test accuracy 0.7459",
     ):
         assert expected in out, expected
     for name in ("dpsgd_privacy_accuracy.svg", "dpsgd_training.svg", "dpsgd_clipping.svg", "dpsgd_batch_size.svg"):

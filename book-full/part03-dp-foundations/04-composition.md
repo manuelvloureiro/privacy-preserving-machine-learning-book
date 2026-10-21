@@ -153,6 +153,8 @@ This gives a rule of thumb for budgeting. To be $(\varepsilon_{\text{total}}, \d
 
 The bound is loose in three places. Azuma assumes each increment could have the largest variance its range allows, $\varepsilon^2$, as if the loss were always at one end of its range or the other. The mean bound of Fact 3 is a factor 2 too large for small $\varepsilon$. And Fact 1's tail bound $\Pr[L > \varepsilon']$ counts every output above $\varepsilon'$ in full, ignoring the factor $(1 - e^{\varepsilon' - L})$ that discounts outputs just above it. Together these make the guarantee far more conservative than it says: at $k = 100$, $\varepsilon = 0.1$, the exact $\delta$ at the advanced $\varepsilon' = 5.85$ is $1.96\times10^{-9}$, not $10^{-5}$.
 
+There is a second route to the same theorem, without martingales. The optimal-composition section (@sec-comp-optimal) shows that every $(\varepsilon, \delta)$-DP step is a post-processing of four-point randomized response, and that an adaptive run of $k$ steps is a post-processing of $k$ *independent* draws of it. Adaptivity then disappears from the analysis. Split the outputs of those $k$ draws into three events. In the first, some draw announces the dataset, which happens with probability at most $k\delta$. In the second, no draw announces it but the sum of the $k$ independent $\pm\varepsilon$ losses lands more than $\varepsilon\sqrt{2k\ln(1/\delta')}$ above its mean, which Hoeffding's inequality for independent terms bounds by $\delta'$. On everything else the loss is at most $\varepsilon'$. The three events show where each part of $k\delta + \delta'$ comes from. The Azuma route is still worth having, because it works directly on any sequence of mechanisms, and the privacy filters of [Adaptive composition](../part04-privacy-accounting/08-adaptive-composition.md) build on it.
+
 ### Example: a hundred counts at $\varepsilon = 0.1$
 
 Take $k = 100$, $\varepsilon = 0.1$ and $\delta' = 10^{-5}$. The Azuma term is $0.1\sqrt{200\ln10^5} = 0.1\sqrt{2302.6} = 4.7985$, and the mean term is $100 \times 0.1(e^{0.1} - 1) = 1.0517$, so $\varepsilon' = 5.8502$. With the $\tanh$ mean term, $100 \times 0.1\tanh(0.05) = 0.4996$ and $\varepsilon' = 4.7985 + 0.4996 = 5.2981$. Basic composition gives 10, and the optimal answer of the next section is 4.3068. @tbl-comp-vs-k compares the bounds over $k$, and @fig-comp-epsilon-vs-k plots them.
@@ -167,6 +169,18 @@ Take $k = 100$, $\varepsilon = 0.1$ and $\delta' = 10^{-5}$. The Azuma term is $
 : Total $\varepsilon'$ at $\delta' = 10^{-5}$ for $k$ mechanisms that are each $0.1$-DP. {#tbl-comp-vs-k}
 
 At $k = 10$, both advanced bounds are worse than basic composition, because $k = 10$ is below the crossover at 29; the optimal bound is slightly better, 0.994 against 1. At $k = 10{,}000$ the order of the terms flips. The Azuma term is $0.1\sqrt{20{,}000\ln10^5} = 48$, while the cruder mean term $k\varepsilon(e^\varepsilon - 1) = 1{,}000 \times 0.105$ costs 105 of the 153, against $1{,}000\tanh(0.05) = 50$ for the $\tanh$ form. There the mean term matters more than the Azuma term, as the previous paragraph predicts: $\varepsilon\sqrt k = 10$ is well above 1.
+
+*Laplace noise in many dimensions.* Advanced composition also explains where the Gaussian mechanism's advantage in high dimension comes from. Take $d$ dense counts, where one record can move every count by 1, at $\varepsilon = 1$ and $\delta = 10^{-5}$. The Laplace mechanism on the whole vector must use its $\ell_1$ sensitivity $d$, so each count gets noise of scale $d/\varepsilon$ and root-mean-square error $\sqrt2\,d/\varepsilon$. But you can also treat the $d$ counts as $d$ separate Laplace mechanisms, each at a small $\varepsilon_0$, and compose them. Advanced composition allows $\varepsilon_0 = 0.00645$ for $d = 1000$, and optimal composition $\varepsilon_0 = 0.00849$; each count then has error $\sqrt2/\varepsilon_0$. @tbl-comp-dense compares these with the Gaussian mechanism, calibrated exactly to the $\ell_2$ sensitivity $\sqrt d$ as in [The Laplace and Gaussian mechanisms](03-laplace-gaussian.md#sec-lg-high-dim).
+
+| $d$ | Laplace, pure DP | Laplace, advanced composition | Laplace, optimal composition | Gaussian |
+| --- | --- | --- | --- | --- |
+| 100 | 141.4 | 69.3 | 52.3 | 37.3 |
+| 1,000 | 1,414.2 | 219.2 | 166.6 | 118.0 |
+| 10,000 | 14,142.1 | 693.0 | 527.5 | 373.1 |
+
+: Root-mean-square error per count when one record moves each of $d$ counts by up to 1, at $\varepsilon = 1$ and, except in the first column, $\delta = 10^{-5}$. {#tbl-comp-dense}
+
+Composed Laplace noise grows like $\sqrt d$, as the Gaussian does: each tenfold increase in $d$ multiplies it by about 3.2. It stays within a factor of 1.9 of the Gaussian, while pure-DP Laplace noise falls behind by a factor of 38 at $d = 10{,}000$. So the $\sqrt d$ gain comes from allowing $\delta > 0$, through composition, and not from the shape of the Gaussian density. The Gaussian is still better by a constant factor, because its privacy loss is itself normal and composes exactly.
 
 ![Total $\varepsilon'$ at $\delta = 10^{-5}$ after $k$ compositions of $\varepsilon$-DP mechanisms, for $\varepsilon = 0.1$ (left) and $\varepsilon = 0.5$ (right), on log axes. Basic composition grows like $k$; advanced and optimal composition grow like $\sqrt k$ until the mean term takes over. The optimal curve is never above any other.](figures/comp_epsilon_vs_k.svg){#fig-comp-epsilon-vs-k}
 
@@ -274,9 +288,9 @@ In practice the next query depends on the last answer. An analyst looks at a noi
 
 ### Statement
 
-**The $k$-fold adaptive composition experiment** (Dwork, Rothblum & Vadhan, 2010). An adversary interacts with one of two neighbouring datasets, $D$ or $D'$, for $k$ rounds. In round $i$ it chooses a mechanism $M_i$ from a class of $(\varepsilon, \delta)$-DP mechanisms, as any function of the outputs $y_1, \dots, y_{i-1}$ so far, and receives $y_i \sim M_i(D)$ or $M_i(D')$. Its view is $V = (y_1, \dots, y_k)$.
+**The $k$-fold adaptive composition experiment** (Dwork, Rothblum & Vadhan, 2010). An adversary plays $k$ rounds against a hidden bit $b$, which is 0 or 1 and is fixed for the whole run. In round $i$ it looks at the outputs $y_1, \dots, y_{i-1}$ so far. As any function of them, it chooses a pair of neighbouring datasets $D_i^0 \simeq D_i^1$ and a mechanism $M_i$ from a class of $(\varepsilon, \delta)$-DP mechanisms, and it receives the output $y_i \sim M_i(D_i^b)$. Everything the adversary sees, its **view**, is the sequence $V = (y_1, \dots, y_k)$. The question is how well the view can reveal $b$. Because the pair may change from round to round, the experiment covers one person whose record sits in many different databases, each queried by a different mechanism. The special case in which every round uses the same pair, $D_i^0 = D$ and $D_i^1 = D'$, is the one the derivations of this chapter write out.
 
-Every guarantee of this chapter holds for this experiment. For every adversary, the views on $D$ and on $D'$ satisfy each of the following:
+Every guarantee of this chapter holds for this experiment. For every adversary, the views under $b = 0$ and under $b = 1$ satisfy each of the following:
 
 - basic composition: $(k\varepsilon, k\delta)$-DP;
 - advanced composition: $(\varepsilon', k\delta + \delta')$-DP with $\varepsilon'$ from @eq-comp-advanced or @eq-comp-advanced-tanh;
@@ -288,7 +302,7 @@ The parameters $k$, $\varepsilon$ and $\delta$ must be fixed before the interact
 
 Each theorem was proved in a form that covers adaptivity. The reason is the same each time: every argument looked at one step at a time, given the history so far, and once the history is fixed, so is the adversary's choice.
 
-1. **The loss of the view is a sum** (Fact 2), with each term $L_i(y_i \mid y_{<i})$ computed for the mechanism chosen after $y_{<i}$. The adversary's choice is a function of $y_{<i}$, so it is fixed once the history is, and the chain rule of Fact 2 applies unchanged.
+1. **The loss of the view is a sum** (Fact 2), with each term $L_i(y_i \mid y_{<i})$ computed for the mechanism and the pair of datasets chosen after $y_{<i}$. The adversary's choice is a function of $y_{<i}$, so it is fixed once the history is, and the chain rule of Fact 2 applies unchanged. Nothing in Facts 1–3 needs the pair to be the same in every round: each step only needs its own pair to be neighbours.
 2. **Basic composition.** For every history, step $i$ is $(\varepsilon, \delta)$-DP. For $\delta = 0$, $|L_i| \le \varepsilon$ pointwise, so $|L| \le k\varepsilon$. For $\delta > 0$, use the reduction of step 4 below: the run is a post-processing of $k$ four-point pairs, a flag shows with probability at most $k\delta$, and otherwise $|L| \le k\varepsilon$, so $\delta(k\varepsilon) \le k\delta$.
 3. **Advanced composition.** Azuma's inequality needs only conditional statements, given the past: a conditional mean of zero and a range of fixed length. That is the setting of steps 2–5 of the advanced-composition derivation.
 4. **Optimal composition.** Step 2 of the composition derivation in @sec-comp-optimal builds the adaptive run from the four-point product with history-dependent channels.
@@ -344,6 +358,7 @@ uv run python code/part03-dp-foundations/composition.py
 | $\varepsilon = 0.01$, $k = 100{,}000$, $\delta' = 10^{-6}$ | Optimal 19.4228; advanced ($\tanh$) 21.6225 |
 | Gaussian, $\sigma = 5$, $k = 100$, $\delta = 10^{-5}$ | Basic 93.178; advanced 89.843; optimal 76.223; exact 9.997 |
 | Gaussian, $\sigma = 20$, $k = 1{,}000$, $\delta = 10^{-5}$ | Basic 238.578; advanced 68.008; optimal 62.720; exact 7.511 |
+| Dense counts, $\varepsilon = 1$, $\delta = 10^{-5}$ | @tbl-comp-dense; per-count $\varepsilon_0$ at $d = 1000$: 0.00645 (advanced), 0.00849 (optimal) |
 
 : The script's output with the default seed. {#tbl-comp-code}
 
@@ -385,5 +400,6 @@ $L = \ln\frac{p_{M(D)}(Y)}{p_{M(D')}(Y)}$ with $Y \sim M(D)$ is the privacy loss
 - If all you know is each step's $(\varepsilon, \delta)$, compute the optimal bound exactly in log space; it costs nothing.
 - If you know the mechanism, compose its whole privacy curve instead: the per-step $(\varepsilon, \delta)$ summary can be off by a factor of 8.
 - Adaptive choice of queries is free; adaptive choice of privacy parameters, or stopping rules that look at the raw data, are not.
+- Many Laplace steps composed with $\delta > 0$ cost like $\sqrt d$, as the Gaussian does; the $\sqrt d$ comes from $\delta$, not from the noise shape.
 
 **Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/04-composition.md).

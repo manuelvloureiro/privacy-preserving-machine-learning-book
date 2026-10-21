@@ -49,5 +49,8 @@ def test_solutions_stability_matches_page(tmp_path: Path) -> None:
         "[Ex8 signal=20] P(against trend)=Bayes error=0.079",
         "gap=0.0896±0.0051  mean influence=0.0918±0.0016  against trend=0.254  with trend=0.077  "
         "share against=0.082  train=0.3083  test=0.3979",
+        # Exercise 9
+        "[Ex9 k=100 m=1000 p=0.8] bound sqrt(ln k/(2m))=0.0480  simulated bias=0.0313±0.0001  "
+        "normal approx=2.5076*0.01265=0.0317  fresh test bias=-0.0001±0.0002",
     ):
         assert expected in out, expected

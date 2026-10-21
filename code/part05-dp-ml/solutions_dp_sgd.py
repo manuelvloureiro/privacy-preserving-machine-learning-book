@@ -11,7 +11,7 @@ import math
 from pathlib import Path
 
 import numpy as np
-from dp_sgd import CLIP_RUN, N_TRAIN, Q_RUN, bisect, dpsgd_epsilon, noise_multiplier_for
+from dp_sgd import CLIP_RUN, N_TRAIN, Q_RUN, bisect, dpsgd_epsilon, microbatch_noise, noise_multiplier_for
 from numpy.typing import NDArray
 
 # Figures are build output: _build/figures/<part>/, which the build copies into each book.
@@ -141,6 +141,15 @@ def print_table(rng: np.random.Generator) -> None:
         print(f"q=0.01, sigma=1, T={steps}: eps={dpsgd_epsilon(0.01, 1.0, steps, 1e-5):.2f}")
     for eps in (1.0, 2.0, 4.0):
         print(f"q=0.01, sigma=1: steps until eps={eps:g}: {steps_for_eps(eps, 0.01, 1.0, 1e-5)}")
+
+    print("== Exercise 7")
+    batch = Q_RUN * N_TRAIN
+    for size in (2, 4):
+        ratio = microbatch_noise(1.0, CLIP_RUN, batch, size) / microbatch_noise(1.0, CLIP_RUN, batch, 1)
+        print(
+            f"microbatch of {size}: noise ratio {ratio:.0f}  per-example DP-SGD with sigma={ratio:.0f}: "
+            f"eps={dpsgd_epsilon(Q_RUN, ratio, 10_000, 1e-5):.3f}"
+        )
 
 
 def main() -> None:

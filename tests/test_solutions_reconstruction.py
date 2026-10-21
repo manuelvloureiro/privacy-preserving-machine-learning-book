@@ -41,6 +41,12 @@ def test_solutions_reconstruction_matches_page(tmp_path: Path) -> None:
         # Exercise 8
         "sums: total=240  female=121  male=119  female + male=240",
         "withhold married mean: 45 blocks, 7 patterns, true pattern share 0.51",
+        # Exercise 9
+        "n=142 sigma=4 v=0.2: m=1874.8  so 1875 queries",
+        "n=142 sigma=4 v=0.25: m=1528.4  so 1529 queries",
+        "digit-predicate queries, m=1875: simulated=0.9923 over 20 runs  predicted (v=0.2)=0.9900",
+        # Exercise 10
+        "n=73 v=0.2: sigma for 75% at m=3500: 19.4  at m=35000: 62.0  ratio=3.19",
     ):
         assert expected in out
     for group in ("total", "female", "male", "black", "white"):

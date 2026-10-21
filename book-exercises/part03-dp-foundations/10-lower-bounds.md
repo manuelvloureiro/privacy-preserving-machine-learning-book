@@ -1,6 +1,6 @@
 # Exercises: Lower bounds: what privacy costs
 
-Exercises for [Lower bounds: what privacy costs](../../book-full/part03-dp-foundations/09-lower-bounds.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_lower_bounds.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_lower_bounds.py`.
+Exercises for [Lower bounds: what privacy costs](../../book-full/part03-dp-foundations/10-lower-bounds.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_lower_bounds.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_lower_bounds.py`.
 
 The solutions use the chapter's notation. $M$ is a differential privacy (DP) mechanism, $\alpha$ an error and $\beta$ a failure probability, and the random dataset of the fingerprinting section has attribute means $p_j$ uniform on $[-1, 1]$ and records $x_i \in \{\pm1\}^d$ with $\mathbb E[x_{ij} \mid p] = p_j$. The examples use $\varepsilon = 1$, $\beta = 0.05$ and $\delta = 10^{-6}$.
 
@@ -114,4 +114,18 @@ Work with one coordinate and drop the index $j$. Given $p$, the dataset, the ref
 5. **Conversely,** at $\varepsilon = 1$ no attack can recover more than $(e + 10^{-6})/(e + 1) = 0.7311$ of the bits.
 
 *Each extra "nine" in the recovery rate adds about $\ln 10 = 2.3$ to the $\varepsilon$ the attack proves. The $10^{-6}$ barely matters here; $\delta$ would need to be comparable to $1 - r$ to change the answer.*
+:::
+
+## Packing for a mean in many dimensions {#sec-sol-lower-8}
+
+> **Exercise 8.** **Packing for a mean in many dimensions.** Extend @eq-lower-mean-packing to normal records in $d$ dimensions whose mean has length at most $R$, with error measured by length. Show that some $m \ge (R/(2\alpha))^d$ candidate means are pairwise more than $2\alpha$ apart, and conclude that an $\varepsilon$-DP mechanism needs $n \ge \big(d\ln(R/(2\alpha)) + \ln(1 - \beta)\big)/\varepsilon$. Evaluate at $R = 1000$, $\alpha = 0.1$, $\beta = 0.05$, $\varepsilon = 1$ for $d = 1$, 10 and 100, and compare with the capped lemma @eq-lower-packing-approx at $\delta = 10^{-6}$. *Check: 8.47, 85.12 and 851.67 records under pure DP; 8, 11 and 11 under approximate DP.* *(Packing, volume arguments)*
+
+::: {.callout-tip collapse="true" title="Solution"}
+1. **A maximal separated set.** Pick means in the ball of radius $R$ one at a time, each more than $2\alpha$ from all earlier ones, until no more fit. Then every point of the ball is within $2\alpha$ of some chosen mean, otherwise it could have been added.
+2. **Count them by volume.** So the balls of radius $2\alpha$ around the $m$ chosen means cover the ball of radius $R$. Volume in $d$ dimensions scales like the radius to the power $d$, so $m(2\alpha)^d \ge R^d$, that is $m \ge (R/(2\alpha))^d$.
+3. **Disjoint regions.** The open balls of radius $\alpha$ around the chosen means are disjoint, because their centres are more than $2\alpha$ apart. An estimate within $\alpha$ of $\mu_j$ lands in the $j$-th of them.
+4. **Apply the argument of @eq-lower-mean-packing.** Any two datasets of size $n$ are within $n$ replacements, so averaging group privacy over data drawn with mean $\mu_j$ gives a share of at least $(1 - \beta)e^{-n\varepsilon}$ for each region under a fixed reference dataset. The $m$ shares fit into 1, so $n\varepsilon \ge \ln m + \ln(1 - \beta) \ge d\ln(R/(2\alpha)) + \ln(1 - \beta)$.
+5. **The numbers.** $\ln(1000/0.2) = 8.517$, so the bound is 8.47, 85.12 and 851.67 records for $d = 1$, 10 and 100. The capped lemma @eq-lower-packing-approx, with the same $\ln m$ and $\beta$ and $k = n$, forces only 8, 11 and 11.
+
+*Under pure DP, not knowing where a $d$-dimensional mean lies costs about $d\ln(R/\alpha)/\varepsilon$ records. Under approximate DP packing caps that cost near $\ln(1/\delta)/\varepsilon$, and the shrinking balls of [Private mean estimation](../../book-full/part03-dp-foundations/11-mean-estimation.md), an approximate-DP mechanism, pay about $\sqrt d\ln R/\varepsilon$ records for the range. At $d = 1$ the volume bound, 8.47, is weaker than the 9.16 of @eq-lower-mean-packing, because a volume count loses a constant factor inside the logarithm.*
 :::

@@ -16,10 +16,12 @@ from pathlib import Path
 import numpy as np
 from reconstruction import (
     BLOCK,
+    DIFFIX_SIGMA,
     GROUPS,
     IntArray,
     all_subsets,
     consistent_blocks,
+    diffix_attack,
     escape_threshold,
     exponential_attack_worst_case,
     fraction_agreeing,
@@ -29,7 +31,9 @@ from reconstruction import (
     least_squares_decode,
     lp_queries_needed,
     ls_predicted_fraction,
+    ls_predicted_fraction_rate,
     ls_recovery,
+    normal_quantile,
     paley_zygmund_escape,
     pattern_summary,
     publish,
@@ -41,6 +45,7 @@ from reconstruction import (
     rounded_answer_values,
     rounding_curator_attack,
     sampling_curator,
+    sigma_for_recovery,
     withhold,
 )
 
@@ -88,6 +93,14 @@ def sherman_morrison_error(n: int, b: float) -> float:
     direct = np.linalg.inv(np.eye(n) + b * ones)
     formula = np.eye(n) - b / (1 + n * b) * ones
     return float(np.max(np.abs(direct - formula)))
+
+
+# --- Exercises 9 and 10: the deployed query system ---------------------------------------------
+
+
+def queries_for_fraction(n: int, sigma: float, v: float, fraction: float) -> float:
+    """The m at which Φ(√(v(m − n − 1))/(2σ)) reaches `fraction`: m = n + 1 + (2σ Φ⁻¹(fraction))²/v."""
+    return n + 1 + (2 * sigma * normal_quantile(fraction)) ** 2 / v
 
 
 def print_table(rng: np.random.Generator) -> None:
@@ -164,6 +177,29 @@ def print_table(rng: np.random.Generator) -> None:
         print(f"  withhold {group} mean: {len(found)} blocks, {patterns} patterns, true pattern share {share:.2f}")
 
 
+def print_diffix(rng: np.random.Generator) -> None:
+    print("== Exercise 9: queries for 99% recovery ==")
+    n, v = 142, 0.2
+    for rate_v in (v, 0.25):
+        m = queries_for_fraction(n, DIFFIX_SIGMA, rate_v, 0.99)
+        print(f"  n={n} sigma=4 v={rate_v}: m={m:.1f}  so {math.ceil(m)} queries")
+    m = math.ceil(queries_for_fraction(n, DIFFIX_SIGMA, v, 0.99))
+    reps = 20
+    total = 0.0
+    for _ in range(reps):
+        wrong, _v = diffix_attack(rng, n, [m], DIFFIX_SIGMA)
+        total += 1 - wrong[0] / n
+    print(
+        f"  digit-predicate queries, m={m}: simulated={total / reps:.4f} over {reps} runs  "
+        f"predicted (v=0.2)={ls_predicted_fraction_rate(n, m, DIFFIX_SIGMA, v):.4f}"
+    )
+
+    print("== Exercise 10: noise that grows with the number of queries ==")
+    n = 73
+    s1, s2 = sigma_for_recovery(n, 3500, v, 0.75), sigma_for_recovery(n, 35_000, v, 0.75)
+    print(f"  n={n} v={v}: sigma for 75% at m=3500: {s1:.1f}  at m=35000: {s2:.1f}  ratio={s2 / s1:.2f}")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seed", type=int, default=0)
@@ -171,6 +207,7 @@ def main() -> None:
     args = parser.parse_args()
     seed: int = args.seed
     print_table(np.random.default_rng(seed))
+    print_diffix(np.random.default_rng(seed + 2))  # its own stream, so the earlier numbers stay as they were
 
 
 if __name__ == "__main__":

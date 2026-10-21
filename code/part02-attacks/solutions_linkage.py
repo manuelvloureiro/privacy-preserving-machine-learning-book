@@ -12,6 +12,10 @@ from pathlib import Path
 
 import numpy as np
 from linkage import (
+    CITY_KM2,
+    GRID_KM2,
+    MINUTES_PER_YEAR,
+    TAXI_TRIPS,
     WORLD,
     bits_for_unique_fraction,
     cell_counts,
@@ -153,6 +157,21 @@ def print_table(rng: np.random.Generator) -> None:
         f"normal={false_match_rate(rng, n, phi, 20_000, 'normal'):.4f}"
     )
     print(f"  normal approximation exp(-phi sqrt(2 ln n))={math.exp(-phi * math.sqrt(2 * math.log(n))):.4f}")
+
+    print("== Exercise 8: hashed identifiers and taxi trips ==")
+    rate = 1e7  # hashes per second, the exercise's assumption
+    licences = 10**6 + 10**6  # six-digit numbers, and seven-digit numbers starting with 5
+    passwords = 62**10
+    print(
+        f"  licences={licences} ({math.log2(licences):.1f} bits)  seconds at 1e7/s={licences / rate:.1f}  "
+        f"passwords 62^10={passwords:.3g} ({math.log2(passwords):.1f} bits)  "
+        f"years={passwords / rate / (365 * 24 * 3600):.0f}"
+    )
+    cells = MINUTES_PER_YEAR * CITY_KM2 / GRID_KM2
+    print(
+        f"  trips: cells={cells:.3g}  n/M={TAXI_TRIPS / cells:.5f}  "
+        f"unique fraction under uniform cells={uniform_unique_fraction(TAXI_TRIPS, cells):.4f}"
+    )
 
 
 def main() -> None:

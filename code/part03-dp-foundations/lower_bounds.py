@@ -3,7 +3,7 @@
     uv run python code/part03-dp-foundations/lower_bounds.py
     uv run python code/part03-dp-foundations/lower_bounds.py --seed 1 --out /tmp/figures
 
-Prints the numbers quoted in 09-lower-bounds.md (they match exactly with the default seed),
+Prints the numbers quoted in 10-lower-bounds.md (they match exactly with the default seed),
 then saves the chapter's figures.
 
 Conventions: ε, δ are the privacy parameters, β the failure probability of an accuracy guarantee
@@ -151,6 +151,26 @@ def approx_packing_min_k(log_m: float, eps: float, delta: float, beta: float) ->
         if floor <= 0 or log_m + math.log(floor) <= 0:
             return k
         k += 1
+
+
+def approx_packing_lemma_k(log_m: float, eps: float, delta: float, beta: float) -> int:
+    """Smallest k allowed by the (ε, δ) packing lemma: e^{-kε}(1 - β) ≤ 2kδ or m e^{-kε}(1 - β) ≤ 2."""
+    k = 1
+    while True:
+        share = math.exp(-k * eps) * (1 - beta)
+        if share <= 2 * k * delta or log_m + math.log(share / 2) <= 0:
+            return k
+        k += 1
+
+
+def mean_packing_candidates(r: float, alpha: float) -> int:
+    """Means spaced 2R/m ≥ 2α apart in [-R, R]: m = ⌊R/α⌋ disjoint open balls of radius α."""
+    return math.floor(r / alpha)
+
+
+def mean_packing_min_n(r: float, alpha: float, eps: float, beta: float) -> float:
+    """Pure DP: n ≥ ln(⌊R/α⌋(1 - β))/ε, since any two datasets of size n are within n replacements."""
+    return packing_min_k(math.log(mean_packing_candidates(r, alpha)), eps, beta)
 
 
 # --- Sample complexity -----------------------------------------------------------------------
@@ -414,6 +434,17 @@ def print_table(rng: np.random.Generator) -> None:
             f"approx (delta={DELTA:g}) forces k >= {approx_packing_min_k(d * math.log(2), EPS, DELTA, BETA)}"
         )
     print(f"  ln(1/delta)/eps = {math.log(1 / DELTA) / EPS:.2f}")
+    for d in (10, 100, 1000):
+        print(
+            f"  d={d}: (eps, delta) packing lemma forces k >= {approx_packing_lemma_k(d * math.log(2), EPS, DELTA, BETA)}"
+        )
+    print(f"[Packing for a mean: |mu| <= R, error < alpha={ALPHA:g}, eps = {EPS:g}, beta = {BETA:g}]")
+    for r in (10.0, 1e3, 1e6):
+        m = mean_packing_candidates(r, ALPHA)
+        print(
+            f"  R={r:.0e}: m={m}  pure n >= {mean_packing_min_n(r, ALPHA, EPS, BETA):.2f}  "
+            f"(eps, delta={DELTA:g}) n >= {approx_packing_lemma_k(math.log(m), EPS, DELTA, BETA)}"
+        )
 
     print(f"[Sample complexity, eps = {EPS:g}, beta = {BETA:g}]")
     n_bins = 10**6

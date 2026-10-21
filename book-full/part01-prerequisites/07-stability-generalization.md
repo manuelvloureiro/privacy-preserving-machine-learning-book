@@ -22,6 +22,7 @@ Where each result is used (@tbl-stability-uses):
 | Regularized ERM, $\beta = 2L^2/(\lambda n)$ | Choosing $\lambda$; bounding how far one example moves a trained model |
 | SGD, $\beta \le (2L^2/n)\sum_t\eta_t$ | Step sizes, number of epochs, early stopping |
 | Unstable algorithms ($\beta = 1$) | Recognizing models whose training error says nothing about test error |
+| Questions fixed in advance cost $\ln k$; questions chosen after looking can be badly biased | Reusing a validation or test set; sample splitting |
 
 : Results of this chapter and where they are used. {#tbl-stability-uses}
 
@@ -84,7 +85,7 @@ To use it you set a failure probability $\delta$ and solve for the matching $t$.
 
 In this chapter $\beta$ always denotes a stability parameter, and $\delta$ the failure probability.
 
-## Risk, empirical risk and the gap
+## Risk, empirical risk and the gap {#sec-stability-risk}
 
 ### Context
 
@@ -472,6 +473,68 @@ To see which examples carry the gap, split them by whether the label goes with t
 - Uniform stability bounds every $\mathrm{mem}_i$. Why is it a stronger requirement than a small expected gap? *(A small gap only needs the average to be small. A few heavily memorized examples are compatible with a small gap but not with small uniform stability.)*
 - Why does regularization shrink the self-influence of atypical examples the most? *(It caps how far any one example can pull the weights, $2L/(\lambda n)$, and atypical examples are the ones that pull hardest.)*
 
+## Choosing what to measure after looking {#sec-stability-adaptive}
+
+### Context
+
+Everything so far concerns a model trained on one set of examples and judged on new data. A **holdout set** is a sample kept aside for judging models. For a model fixed before it was drawn, its loss is unbiased (@sec-stability-risk), so it seems to solve the judging problem. In practice, though, a holdout set is rarely used once. You look at its verdict, change a feature or a setting, and ask it again. Each new question then depends on the earlier answers, and so on the holdout set itself. The guarantee for a fixed model no longer covers such a question, for the same reason the training loss of a trained model is biased: the data that judge a choice also helped to make it.
+
+### Statement
+
+Write $H = (z_1, \dots, z_n)$ for a holdout set of $n$ examples drawn independently from $\mathcal D$. A **question** is a function $q$ that maps one example to a number between 0 and 1, such as "is this example classified correctly by a given model?". Its answer on the holdout set is the average of its values there, and its true value is the average over new data:
+$$q(H) = \frac1n\sum_{i=1}^n q(z_i), \qquad q(\mathcal D) = \mathbb E_{z\sim\mathcal D}\,q(z).$$ Suppose you ask $k$ questions $q_1, \dots, q_k$. Three cases differ in how the questions were chosen.
+
+**Questions fixed in advance.** If all $k$ questions were chosen before $H$ was drawn, the largest error among their answers is small on average over the draw of $H$, and it grows only with the logarithm of $k$:
+$$\mathbb E\Big[\max_{j\le k}\big|q_j(H) - q_j(\mathcal D)\big|\Big] \le \sqrt{\frac{\ln(2k)}{2n}}.$$ {#eq-stability-fixed-questions}
+
+**Questions chosen after looking.** If question $j$ may depend on the answers to questions $1, \dots, j - 1$, no bound that grows slowly with $k$ holds in general. In the example below, a holdout set of 1,000 examples answers 1,000 questions fixed in advance and then one chosen from their answers. That last answer is off by 0.31, while the bound @eq-stability-fixed-questions would allow about 0.06 on average if it were fixed in advance.
+
+**Sample splitting.** If question $j$ is answered on its own part $H_j$ of $n/k$ examples, which no earlier answer used, the bound holds again, in any order and however the questions were chosen. The price is a factor $k$ inside the square root, because each answer sees only $n/k$ examples:
+$$\mathbb E\Big[\max_{j\le k}\big|q_j(H_j) - q_j(\mathcal D)\big|\Big] \le \sqrt{\frac{k\ln(2k)}{2n}}.$$ {#eq-stability-splitting}
+
+### Derivation
+
+1. **One average.** Take a fixed question $q$ and write $Z = q(H) - q(\mathcal D)$ for the error of its answer. This error is an average of $n$ independent values in $[0, 1]$, minus their common mean. Hoeffding's lemma ([Concentration inequalities](02-concentration.md)) bounds the moment generating function of each centred value, scaled by $1/n$, by $e^{\lambda^2/(8n^2)}$, and independence multiplies the $n$ bounds. For every real $\lambda$,
+$$\mathbb E\,e^{\lambda Z} \le e^{\lambda^2/(8n)},$$
+and since $\lambda$ may be negative, the same bound holds for $-Z$.
+2. **The largest of many.** Write $Z_j = q_j(H) - q_j(\mathcal D)$ for the error of question $j$, and apply step 1 to the $2k$ variables $\pm Z_j$, whose maximum, written $\max$ below, is the largest error. For $\lambda > 0$, Jensen's inequality for the convex function $e^x$ moves the expectation outside the exponential, and the exponential of a maximum is at most the sum of the exponentials. Together,
+$$e^{\lambda\,\mathbb E\max} \le \mathbb E\,e^{\lambda\max} \le \sum_{\text{all } 2k}\mathbb E\,e^{\lambda(\pm Z_j)} \le 2k\,e^{\lambda^2/(8n)}.$$
+Taking logarithms and dividing by $\lambda$ bounds the expected maximum by a sum of two terms,
+$$\mathbb E\max \le \frac{\ln(2k)}{\lambda} + \frac{\lambda}{8n},$$
+and the two terms are equal, each $\sqrt{\ln(2k)/(8n)}$, when $\lambda = \sqrt{8n\ln(2k)}$. Their sum is then
+$$\mathbb E\max \le 2\sqrt{\frac{\ln(2k)}{8n}} = \sqrt{\frac{\ln(2k)}{2n}},$$
+which is @eq-stability-fixed-questions. This step never uses independence between the questions, only step 1 for each one.
+3. **Where looking breaks it.** Step 1 needs $q$ to be fixed while the examples are drawn, so that $q(z_1), \dots, q(z_n)$ are independent draws with mean $q(\mathcal D)$. A question chosen from earlier answers depends on $H$. Then its values on the examples of $H$ are not typical draws, exactly as $\ell(A(S), z_i)$ was not in @sec-stability-risk, and step 1 fails.
+4. **Splitting restores it.** Fix the parts $H_1, \dots, H_{j-1}$ that earlier answers used, and any randomness of the analyst, which must be independent of the holdout set. Question $q_j$, which is chosen from those answers only, is then fixed, and $H_j$ is independent of it, so step 1 holds given those parts, with $n/k$ examples in place of $n$. Averaging over the earlier parts keeps the inequality, since it holds for each of their values, so each $\pm Z_j$ satisfies step 1 without conditioning. Step 2 then applies as before, with $n/k$ in place of $n$, which is @eq-stability-splitting.
+
+### Interpretation
+
+A question chosen with the holdout set's help is a model trained on the holdout set. The person or program that picks the questions, together with the answers, is a learning algorithm whose input is $H$, and the answer to its final question is that algorithm's training loss. So it is optimistic, as a training loss is, and for the same reason. The examples whose answers shaped the choice are no longer typical draws from the choice's point of view.
+
+Sample splitting removes the bias by never letting an example answer a question it helped to choose. The data it needs grow like $k\ln(2k)$, roughly in proportion to $k$, against $\ln(2k)$ for questions fixed in advance. Between the two lies a middle ground: if the questions come in $r$ rounds, and each round is fixed before its answers are seen, one part per round suffices. The factor $k$ in front of $\ln(2k)$ in @eq-stability-splitting then becomes $r$, by the same argument with rounds in place of questions. The classical rule is the case of a single round: keep a test set for one final verdict, and use it once. [Exercise 9](../../book-exercises/part01-prerequisites/07-stability-generalization.md#sec-sol-stability-generalization-9) computes how optimistic the best of 100 models fixed in advance looks on a validation set, a holdout set used to choose among models, and shows that one fresh measurement removes the optimism.
+
+Since the analyst is a learning algorithm run on $H$, a stable analyst would have a small bias, by @eq-stability-expected. That does not rescue the reused holdout set in practice, because the choices an analyst makes ("keep the feature if it looks predictive") are thresholds, and a threshold can flip when one example changes, which makes it as unstable as 1-NN. A later chapter shows how to reuse one holdout set safely for many more adaptively chosen questions than splitting allows, using a randomized form of the stability defined here.
+
+### Example: Freedman's paradox on a holdout set
+
+The chapter's script builds a holdout set of $n = 1{,}000$ examples with $d$ features, each $+1$ or $-1$ at random, and a label that is also random and independent of every feature. No rule can beat an accuracy of $\frac12$ on new data. An analyst measures, on the holdout set, how often each feature agrees with the label, which is $d$ questions fixed in advance. The analyst keeps the features whose agreement rate is more than one standard deviation away from $\frac12$. For an average of $n$ fair coin flips that standard deviation is $\sqrt{1/(4n)} = 0.0158$. Each kept feature votes $+1$ or $-1$, flipped if it agreed with the label less than half the time. The majority wins, and a tie counts as $+1$. Then the analyst asks one more question: the vote's accuracy on the same holdout set. @tbl-stability-adaptive averages 100 repetitions.
+
+| Features $d$ | Kept | Largest error of the $d$ fixed questions | Bound @eq-stability-fixed-questions | Vote, measured on $H$ | Vote, chosen on one half and measured on the other | Vote on new data |
+| --- | --- | --- | --- | --- | --- | --- |
+| 100 | 33.3 | 0.0436 | 0.0515 | 0.6080 | 0.5032 | 0.5 |
+| 1,000 | 325.9 | 0.0538 | 0.0616 | 0.8053 | 0.5018 | 0.5 |
+
+: A holdout set of 1,000 examples reused for a question chosen after looking, averaged over 100 repetitions. Every feature is independent of the label, so the true accuracy of any vote is $\frac12$. {#tbl-stability-adaptive}
+
+The $d$ questions fixed in advance behave as @eq-stability-fixed-questions says: their largest error stays below the bound. The one question chosen after looking is off by 0.31 with 1,000 features. The reason is that every kept feature agrees with the holdout labels slightly more often than chance, and the vote adds these small agreements up, example by example. Splitting the holdout set into halves, one to choose the features and one to measure the vote, brings the measured accuracy back to $\frac12$ (@fig-stability-holdout-reuse). This is Freedman's paradox (Freedman 1983), first described for screening regression variables. Hastie, Tibshirani & Friedman (2009, §7.10.2) give the same warning for cross-validation, under the title "the wrong and the right way" to do it.
+
+![Accuracy of the combined vote against the number of features examined, for a holdout set of 1,000 examples and labels independent of every feature. Measured on the holdout set that chose the features, the accuracy climbs far above $\frac12$. Chosen on one half and measured on the other, it stays at $\frac12$, within the fixed-question bound.](figures/stability_holdout_reuse.svg){#fig-stability-holdout-reuse}
+
+### Check yourself
+
+- You trained 50 models on data other than $H$ and report the best one's accuracy on a holdout set $H$ of $n$ examples. Is that a question fixed in advance? *(The 50 accuracy questions are, since no model depends on $H$. Picking the largest answer is then covered by @eq-stability-fixed-questions with $k = 50$. The bound stops applying only when later models are built from earlier holdout answers.)*
+- In the example, why does splitting into two halves suffice, although the analyst asks $d + 1$ questions? *(The questions come in two rounds. The $d$ agreement questions are fixed in advance, and the vote is fixed once they are answered. One part per round is enough.)*
+
 ## Code: check every bound by simulation {#sec-stability-code}
 
 The script [code/stability.py](../../code/part01-prerequisites/stability.py) draws every figure in this chapter and computes the numbers quoted in it. The running example has features $x$ uniform on the unit sphere in $\mathbb R^{10}$ and labels with $\Pr[y = 1 \mid x] = \sigma(5x_1)$. The model is logistic regression without intercept, fitted by Newton's method with backtracking. Because $\|x\| = 1$, the logistic loss is 1-Lipschitz and $\frac14$-smooth. The test loss of a model is computed without sampling error. The features are spread evenly over the sphere and the label depends only on $x_1$, so rotating the other nine coordinates changes nothing; the test loss therefore depends only on $w_1$ and the norm of the other coordinates of $w$. That makes it a two-dimensional integral, done on a grid. From the repository root:
@@ -491,12 +554,13 @@ uv run python code/part01-prerequisites/stability.py
 | Self-influence, $n = 40$ | $\lambda = 0.01$: gap $0.1482 \pm 0.0073$, self-influence $0.1422 \pm 0.0025$. $\lambda = 0.1$: $0.0420 \pm 0.0017$ and $0.0416 \pm 0.0003$ |
 | SGD, $n = 100$, $\eta = 0.25$ (@tbl-stability-sgd) | Gap 0.036 after 1 epoch, 0.121 after 40; bound 0.5 and 20.0 |
 | 1-NN against logistic (@tbl-stability-nn) | 1-NN test error 0.404 → 0.352 with train error 0; limit 0.338; Bayes 0.250 |
+| Reused holdout set, $n = 1{,}000$ (@tbl-stability-adaptive) | Vote over noise features: 0.8053 measured on the holdout set that chose it, 0.5018 with a split, 0.5 on new data |
 
 : Summary of the script's output. {#tbl-stability-code}
 
 [tests/test_stability.py](../../tests/test_stability.py) checks that the output still matches the numbers in this chapter.
 
-**What to take from it.** The $1/(\lambda n)$ scaling holds, but the constant is loose: replace-one changes and gaps follow $1/(\lambda n)$ closely when $\lambda \ge 0.1$ (with weaker regularization the data's own curvature makes them smaller still), yet sit between 4 and 36 times below the bound, because the bound takes the worst case at every step. The identity, unlike the bounds, is exact: the average self-influence matches the measured gap within simulation error. The SGD bound gets the direction right and the size wrong: the gap grows with training time, but the divergence between coupled runs saturates while the bound grows linearly. Finally, memorizers do not generalize their training error: 1-NN has training error 0 and test error 0.35, while regularized logistic regression has train and test errors that meet.
+**What to take from it.** The $1/(\lambda n)$ scaling holds, but the constant is loose: replace-one changes and gaps follow $1/(\lambda n)$ closely when $\lambda \ge 0.1$ (with weaker regularization the data's own curvature makes them smaller still), yet sit between 4 and 36 times below the bound, because the bound takes the worst case at every step. The identity, unlike the bounds, is exact: the average self-influence matches the measured gap within simulation error. The SGD bound gets the direction right and the size wrong: the gap grows with training time, but the divergence between coupled runs saturates while the bound grows linearly. Memorizers do not generalize their training error: 1-NN has training error 0 and test error 0.35, while regularized logistic regression has train and test errors that meet. Finally, a holdout set that helped choose a question is a training set for that question: its answer can be off by 0.3 while every question fixed in advance stays within the bound.
 
 ## References
 
@@ -512,6 +576,8 @@ uv run python code/part01-prerequisites/stability.py
 - Feldman, "Does Learning Require Memorization? A Short Tale about a Long Tail" (STOC 2020): why memorizing rare examples can be necessary for accuracy
 - Feldman & Zhang, "What Neural Networks Memorize and Why" (NeurIPS 2020): memorization scores measured on image benchmarks
 - Zhang, Bengio, Hardt, Recht & Vinyals, "Understanding Deep Learning Requires Rethinking Generalization" (ICLR 2017): networks fit random labels
+- Freedman, "A Note on Screening Regression Equations" (The American Statistician 1983): selecting variables and testing them on the same data, the paradox of @sec-stability-adaptive
+- Hastie, Tibshirani & Friedman, *The Elements of Statistical Learning* (2nd ed. 2009), §7.10.2: "the wrong and the right way to do cross-validation", the same trap in model selection
 
 ## Cheat sheet
 
@@ -526,6 +592,8 @@ uv run python code/part01-prerequisites/stability.py
 | Regularized ERM | Convex, $L$-Lipschitz loss, $\frac\lambda2\lVert w\rVert^2$ | $\lVert\Delta w\rVert \le 2L/(\lambda n)$, $\beta = 2L^2/(\lambda n)$ |
 | SGD (Hardt–Recht–Singer) | Convex, $\rho$-smooth, $L$-Lipschitz, $\eta_t \le 2/\rho$ | $\beta \le (2L^2/n)\sum_t\eta_t$ |
 | 1-NN, lookup table | 0-1 loss | $\beta = 1$; training error 0 |
+| Questions fixed in advance | $k$ questions with values in $[0, 1]$, chosen before $H$ is drawn | $\mathbb E\max_j\lvert q_j(H) - q_j(\mathcal D)\rvert \le \sqrt{\ln(2k)/(2n)}$ |
+| Sample splitting | Question $j$ answered on its own $n/k$ examples | $\mathbb E\max_j\lvert q_j(H_j) - q_j(\mathcal D)\rvert \le \sqrt{k\ln(2k)/(2n)}$ |
 
 : Every result of the chapter. {#tbl-stability-cheat}
 
@@ -535,5 +603,6 @@ uv run python code/part01-prerequisites/stability.py
 - Regularization strength and training time are the two stability knobs: $\beta \propto 1/\lambda$ for ERM, $\beta \propto \eta T$ for SGD.
 - Training error 0 is a warning, not a result: it means the model may depend entirely on individual examples.
 - The examples a model memorizes most are the atypical ones.
+- A holdout set that helped choose a question is a training set for it. Give each round of choices its own data, and use the final test set once.
 
 **Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part01-prerequisites/07-stability-generalization.md).
