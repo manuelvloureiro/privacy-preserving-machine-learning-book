@@ -1,0 +1,9 @@
+import torch
+
+class ModuleValidator:
+    @classmethod
+    def validate(cls, module: torch.nn.Module, *, strict: bool = False) -> list[Exception]: ...
+    @classmethod
+    def is_valid(cls, module: torch.nn.Module) -> bool: ...
+    @classmethod
+    def fix(cls, module: torch.nn.Module) -> torch.nn.Module: ...

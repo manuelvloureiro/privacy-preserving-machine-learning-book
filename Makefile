@@ -9,7 +9,9 @@
 
 OUT       := _book
 BUILD     := _build
-SCRIPTS   := $(wildcard code/*/*.py)
+# The chapter scripts that draw figures. The practitioner workflows (practitioner_*.py) are slow, need the
+# datasets in data/ and draw no figures, so their tests run them instead (pytest marker `libs`).
+SCRIPTS   := $(foreach f,$(wildcard code/*/*.py),$(if $(findstring /practitioner_,$(f)),,$(f)))
 QUARTO    := uv run quarto
 PDF_full         := $(OUT)/Privacy-Preserving-Machine-Learning.pdf
 PDF_practitioner := $(OUT)/Privacy-Preserving-Machine-Learning-Practitioner.pdf
@@ -29,7 +31,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
              newcomputermodern dejavu
 
 .DEFAULT_GOAL := help
-.PHONY: help setup hooks tex-deps figures figures-force full full-pdf exercises practitioner practitioner-pdf \
+.PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf \
         website pdf book preview publish terms-check acronyms index-candidates prose prose-check format test typecheck check all clean
 
 help: ## List the targets
@@ -44,6 +46,9 @@ hooks: ## Use the git hooks in .githooks/ (format staged files; reject commit me
 tex-deps: ## Install the LaTeX packages the PDF needs (also needs rsvg-convert: apt install librsvg2-bin)
 	$(TLMGR) --repository $(CTAN) install $(TEX_PKGS)
 	@command -v rsvg-convert >/dev/null || echo "rsvg-convert not found: sudo apt install librsvg2-bin"
+
+datasets: ## Download the public datasets the practitioner scripts use into data/ (git-ignored), once
+	uv run python code/practitioner_datasets.py fetch
 
 # Figures are not committed: each script in code/<folder>/ writes its SVGs into
 # $(BUILD)/figures/<folder>/, deterministically (seeded, no timestamps), and staging copies them into
@@ -180,13 +185,16 @@ format: ## Format all Python with ruff, as VSCode and the pre-commit hook do
 	uv run ruff check --fix --exit-zero --quiet .
 	uv run ruff format .
 
-test: ## Run the tests
+test: datasets ## Run the tests, including the practitioner libraries' (marker `libs`)
 	uv run pytest
+
+test-fast: ## Run the tests without the practitioner libraries' (no torch, Opacus, OpenDP, ...)
+	uv run pytest -m "not libs"
 
 typecheck: ## Run strict pyright
 	uv run pyright
 
-check: test typecheck terms-check website ## Tests, type checks, the acronym check and a clean render of every website
+check: test typecheck terms-check prose-check website ## Tests, type checks, the acronym and prose checks and a clean render of every website
 
 all: check pdf ## Check everything, then build the PDFs too
 

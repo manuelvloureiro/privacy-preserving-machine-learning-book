@@ -90,4 +90,6 @@ uv run pyright
 make website                          # a chapter that fails to render, or warns, is a broken chapter
 ```
 
+**The practitioner edition's code** runs real libraries (Opacus, CPU PyTorch, `dp-accounting`, OpenDP, diffprivlib, `peft`, `transformers`, scikit-learn, SciPy), pinned in the `practitioner` dependency group, which `uv` installs by default. Its tests are marked `libs`; `make test-fast` skips them. The workflow scripts `code/<part>/practitioner_<topic>.py` read public datasets through `code/practitioner_datasets.py`, which caches them in `data/` (git-ignored); `make datasets` fills the cache and `make test` runs it first. These scripts draw no figures, so `make figures` skips them. Untyped libraries are typed by hand-written stubs in `typings/`. `tests/test_practitioner_excerpts.py` checks that every code block on a practitioner page is a snippet, a `text` or `bash` block, or an excerpt that matches a marked region of a script. [AGENTS.md](AGENTS.md) has the rules.
+
 Prose quality has its own process, [PROSE.md](PROSE.md): `make prose BOOK=... PAGE=...` reports hard-to-read sentences, `make prose-check BOOK=...` gates a book, and `tests/test_prose.py` keeps the checks calibrated to passages the author accepted or rejected.

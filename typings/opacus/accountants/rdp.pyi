@@ -1,0 +1,6 @@
+from opacus.accountants.accountant import IAccountant
+
+class RDPAccountant(IAccountant):
+    DEFAULT_ALPHAS: list[float]
+    def get_privacy_spent(self, *, delta: float, alphas: list[float] | None = None) -> tuple[float, float]: ...
+    def get_epsilon(self, delta: float, alphas: list[float] | None = None) -> float: ...
