@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>29&nbsp; Concentrated differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>31&nbsp; Concentrated differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -348,26 +348,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -384,55 +396,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -449,61 +461,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -541,25 +559,24 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">29.1</span> Why this matters</a></li>
-  <li><a href="#sec-cdp-definition" id="toc-sec-cdp-definition" class="nav-link" data-scroll-target="#sec-cdp-definition"><span class="header-section-number">29.2</span> The definition of zCDP</a></li>
-  <li><a href="#sec-cdp-pure" id="toc-sec-cdp-pure" class="nav-link" data-scroll-target="#sec-cdp-pure"><span class="header-section-number">29.3</span> Pure DP steps in a zCDP budget</a></li>
-  <li><a href="#sec-cdp-conversion" id="toc-sec-cdp-conversion" class="nav-link" data-scroll-target="#sec-cdp-conversion"><span class="header-section-number">29.4</span> From zCDP to (ε, δ)</a></li>
-  <li><a href="#sec-cdp-group" id="toc-sec-cdp-group" class="nav-link" data-scroll-target="#sec-cdp-group"><span class="header-section-number">29.5</span> Group privacy</a></li>
-  <li><a href="#sec-cdp-tcdp" id="toc-sec-cdp-tcdp" class="nav-link" data-scroll-target="#sec-cdp-tcdp"><span class="header-section-number">29.6</span> Subsampling: why DP-SGD is not accounted in zCDP</a></li>
-  <li><a href="#sec-cdp-approx" id="toc-sec-cdp-approx" class="nav-link" data-scroll-target="#sec-cdp-approx"><span class="header-section-number">29.7</span> Approximate zCDP</a></li>
-  <li><a href="#sec-cdp-code" id="toc-sec-cdp-code" class="nav-link" data-scroll-target="#sec-cdp-code"><span class="header-section-number">29.8</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">29.9</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">29.10</span> Further reading</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">31.1</span> Why this matters</a></li>
+  <li><a href="#sec-cdp-definition" id="toc-sec-cdp-definition" class="nav-link" data-scroll-target="#sec-cdp-definition"><span class="header-section-number">31.2</span> The zCDP ledger</a></li>
+  <li><a href="#sec-cdp-pure" id="toc-sec-cdp-pure" class="nav-link" data-scroll-target="#sec-cdp-pure"><span class="header-section-number">31.3</span> Charging other kinds of step</a></li>
+  <li><a href="#sec-cdp-conversion" id="toc-sec-cdp-conversion" class="nav-link" data-scroll-target="#sec-cdp-conversion"><span class="header-section-number">31.4</span> From ρ to (ε, δ)</a></li>
+  <li><a href="#sec-cdp-group" id="toc-sec-cdp-group" class="nav-link" data-scroll-target="#sec-cdp-group"><span class="header-section-number">31.5</span> Groups and approximate zCDP</a></li>
+  <li><a href="#sec-cdp-tcdp" id="toc-sec-cdp-tcdp" class="nav-link" data-scroll-target="#sec-cdp-tcdp"><span class="header-section-number">31.6</span> Subsampled steps: keep them out of zCDP</a></li>
+  <li><a href="#sec-cdp-code" id="toc-sec-cdp-code" class="nav-link" data-scroll-target="#sec-cdp-code"><span class="header-section-number">31.7</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">31.8</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">31.9</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></h1>
+<h1 class="title"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></h1>
 </div>
 
 
@@ -576,43 +593,86 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="29.1">
-<h2 data-number="29.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">29.1</span> Why this matters</h2>
-<p>You run a pipeline of Gaussian releases, such as noisy counts, answers in a query system or noisy marginals for synthetic data, and you want to keep the differential privacy (DP) budget as one number that you add to as you go. <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a> describes each mechanism by a curve: its <strong>Rényi differential privacy (RDP) curve</strong> <span class="math inline">\(\varepsilon(\alpha)\)</span> gives, for each order <span class="math inline">\(\alpha &gt; 1\)</span>, the largest Rényi divergence between the outputs on <strong>neighbouring</strong> datasets, which differ in one person’s record. Composition adds the curves. For the Gaussian mechanism with noise multiplier <span class="math inline">\(\sigma\)</span>, the noise standard deviation in units of the sensitivity, the curve is a straight line through the origin, <span class="math inline">\(\varepsilon(\alpha) = \alpha/(2\sigma^2)\)</span>. A line through the origin is fixed by its slope, so for Gaussian noise one number already carries everything.</p>
-<p><strong>Zero-concentrated differential privacy (zCDP)</strong>, the most widely used form of concentrated differential privacy (CDP), turns that observation into a definition: describe any mechanism by the slope of a line through the origin that lies above its RDP curve. Lines add to a line, so composition is addition of slopes, and converting a line to <span class="math inline">\((\varepsilon, \delta)\)</span> has a closed form. The rest of the chapter asks one question: how well does a line fit the curve? For the Gaussian, exactly. For pure DP mechanisms with large <span class="math inline">\(\varepsilon\)</span>, badly. For the subsampled steps of differentially private stochastic gradient descent (SGD), DP-SGD for short, it fits so badly that zCDP is the wrong tool.</p>
+<section id="why-this-matters" class="level2" data-number="31.1">
+<h2 data-number="31.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">31.1</span> Why this matters</h2>
+<p>Suppose you run a pipeline of Gaussian releases, such as noisy counts or the noisy marginals behind a synthetic dataset. You would like to keep its differential privacy (DP) budget as a single number that you add to after each release. <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a> describes each mechanism by a whole curve, its <strong>Rényi differential privacy (RDP) curve</strong>, with one value for each order of the Rényi divergence. The Gaussian mechanism’s curve is a straight line through the origin, so one number, its slope, carries all of it.</p>
+<p><strong>Zero-concentrated differential privacy (zCDP)</strong> is the bookkeeping built on that number, and it is the most widely used form of concentrated differential privacy (CDP). It is the right ledger for releases built from Gaussian noise on the full data. It is the wrong ledger for training on subsampled minibatches, because it throws away almost all of the privacy that subsampling buys.</p>
 </section>
-<section id="sec-cdp-definition" class="level2" data-number="29.2">
-<h2 data-number="29.2" class="anchored" data-anchor-id="sec-cdp-definition"><span class="header-section-number">29.2</span> The definition of zCDP</h2>
-<p>A mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\(\rho\)</span>-zCDP</strong> if its RDP curve lies under the line of slope <span class="math inline">\(\rho\)</span>: for all neighbours <span class="math inline">\(D \simeq D'\)</span> and all orders <span class="math inline">\(\alpha &gt; 1\)</span>, <span id="eq-cdp-def"><span class="math display">\[D_\alpha\big(M(D)\,\|\,M(D')\big) \le \rho\alpha. \tag{29.1}\]</span></span> Because RDP curves add under composition, so do the lines above them: a <span class="math inline">\(\rho_1\)</span>-zCDP step followed by a <span class="math inline">\(\rho_2\)</span>-zCDP step is <span class="math inline">\((\rho_1 + \rho_2)\)</span>-zCDP, even when the second step is chosen after seeing the first one’s output. Post-processing cannot increase a divergence, so it cannot increase <span class="math inline">\(\rho\)</span> either.</p>
-<p>The Gaussian mechanism, which adds <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> to a query with <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta\)</span>, is <span class="math inline">\(\Delta^2/(2\sigma^2)\)</span>-zCDP, and the line is its exact curve. The reason also explains the name. The <strong>privacy loss</strong> of an output is the log of how much more likely it is under <span class="math inline">\(D\)</span> than under <span class="math inline">\(D'\)</span>. For two normal densities with the same variance, that log-ratio is a linear function of the output, and a linear function of a normal variable is normal: with <span class="math inline">\(\Delta = 1\)</span> the loss has mean <span class="math inline">\(1/(2\sigma^2) = \rho\)</span> and variance <span class="math inline">\(1/\sigma^2 = 2\rho\)</span>. zCDP in general says the privacy loss has tails no heavier than this normal variable, “concentrated” around a small mean.</p>
-<p>With <span class="math inline">\(\sigma = 1\)</span> one Gaussian step is <span class="math inline">\(0.5\)</span>-zCDP and ten are <span class="math inline">\(5\)</span>-zCDP; with <span class="math inline">\(\sigma = 2\)</span> a step costs <span class="math inline">\(0.125\)</span>. Halving the noise multiplier multiplies <span class="math inline">\(\rho\)</span> by four, because <span class="math inline">\(\rho\)</span> goes with the square of the shift in units of the noise. The 2020 United States Census TopDown algorithm is built this way (Abowd et al.&nbsp;2022): it measures many noisy queries with the discrete Gaussian mechanism (<a href="../part03-dp-foundations/07-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>), adds up the <span class="math inline">\(\rho\)</span>’s, and converts to <span class="math inline">\((\varepsilon, \delta)\)</span> once, at the end. For Gaussian noise the line loses nothing, so the only approximation is that final conversion.</p>
-<p>Two warnings. <span class="math inline">\(\rho\)</span> is not <span class="math inline">\(\varepsilon\)</span>: <span class="math inline">\(\rho = 0.5\)</span> is about <span class="math inline">\(\varepsilon = 4.7\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> (<a href="#sec-cdp-conversion" class="quarto-xref"><span>Section 29.4</span></a>). And the ledger covers only what passed through the noise: the Census Bureau released some statistics, the <strong>invariants</strong>, exactly; they were never charged to <span class="math inline">\(\rho\)</span>, and they sit outside the guarantee.</p>
+<section id="sec-cdp-definition" class="level2" data-number="31.2">
+<h2 data-number="31.2" class="anchored" data-anchor-id="sec-cdp-definition"><span class="header-section-number">31.2</span> The zCDP ledger</h2>
+<p>A mechanism is zCDP when its RDP curve lies under a line through the origin. To state it, write <span class="math inline">\(D_\alpha\)</span> for the Rényi divergence of order <span class="math inline">\(\alpha\)</span>, and call two datasets neighbours when they differ in one person’s record. Then a mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\(\rho\)</span>-zCDP</strong> if, for all neighbouring datasets and all orders above 1, <span id="eq-cdp-def"><span class="math display">\[D_\alpha\big(M(D)\,\|\,M(D')\big) \le \rho\alpha. \tag{31.1}\]</span></span> Two properties make this a ledger. Composition adds the slopes, even when each step is chosen after seeing the earlier outputs, and processing an output never raises its <span class="math inline">\(\rho\)</span>.</p>
+<p>The Gaussian mechanism is the case the definition was built for. Write <span class="math inline">\(\sigma\)</span> for the standard deviation of its noise and <span class="math inline">\(\Delta\)</span> for the query’s <span class="math inline">\(\ell_2\)</span> sensitivity, the most one record can move the query’s value. Its RDP curve is exactly a line, so one step costs <span id="eq-auto-03concentrateddp-1"><span class="math display">\[\rho = \frac{\Delta^2}{2\sigma^2}. \tag{31.2}\]</span></span> With the noise multiplier convention, which measures <span class="math inline">\(\sigma\)</span> in units of the sensitivity, a step with <span class="math inline">\(\sigma = 1\)</span> costs <span class="math inline">\(0.5\)</span>. Doubling the noise multiplier cuts the cost to a quarter.</p>
+<p>The best-known user is the 2020 United States Census TopDown algorithm (Abowd et al.&nbsp;2022). It answers many queries with the discrete Gaussian mechanism (<a href="../part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>), which keeps counts as integers. Among libraries, Tumult Analytics offers a <code>RhoZCDPBudget</code>. In OpenDP, <code>dp.c.make_zCDP_to_approxDP</code> turns a zCDP measurement into one with a privacy profile, and <code>dp.c.make_fix_delta</code> then fixes the slack so that you can read off the privacy level.</p>
+<p>The Census example carries two warnings. First, <span class="math inline">\(\rho\)</span> is not the privacy parameter <span class="math inline">\(\varepsilon\)</span> of an <span class="math inline">\((\varepsilon, \delta)\)</span> guarantee, where <span class="math inline">\(\delta\)</span> is the slack. A <span class="math inline">\(0.5\)</span>-zCDP step converts to about <span class="math inline">\(\varepsilon = 4.7\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> (<a href="#sec-cdp-conversion" class="quarto-xref"><span>Section 31.4</span></a>), so a reader who mistakes one for the other badly overrates the protection. Second, <span class="math inline">\(\rho\)</span> covers only what passed through the noise. The Census Bureau released some statistics exactly, as a matter of policy, and these <strong>invariants</strong> sit outside the guarantee. A report should list such exact releases next to the budget.</p>
 </section>
-<section id="sec-cdp-pure" class="level2" data-number="29.3">
-<h2 data-number="29.3" class="anchored" data-anchor-id="sec-cdp-pure"><span class="header-section-number">29.3</span> Pure DP steps in a zCDP budget</h2>
-<p>A Laplace count, a randomized-response bit or an exponential-mechanism selection is pure <span class="math inline">\(\varepsilon\)</span>-DP, and to put it in the same ledger you need its <span class="math inline">\(\rho\)</span>. Pure DP means every output’s probability changes by at most a factor <span class="math inline">\(e^\varepsilon\)</span>, so its privacy loss is confined to <span class="math inline">\([-\varepsilon, \varepsilon]\)</span>. A bounded random variable has light tails, at most as heavy as a normal’s, so the step should be zCDP with <span class="math inline">\(\rho\)</span> of order <span class="math inline">\(\varepsilon^2\)</span>. Bun &amp; Steinke (2016) show that every <span class="math inline">\(\varepsilon\)</span>-DP mechanism is <span class="math inline">\((\varepsilon^2/2)\)</span>-zCDP. The exponential mechanism does four times better, <span class="math inline">\(\varepsilon^2/8\)</span>, because its privacy loss lies in an interval of length <span class="math inline">\(\varepsilon\)</span> rather than <span class="math inline">\(2\varepsilon\)</span>, and the tail bound goes with the square of the length (Cesar &amp; Rogers 2021).</p>
-<p>So a Laplace count at <span class="math inline">\(\varepsilon = 0.1\)</span> costs <span class="math inline">\(0.005\)</span>. The constant <span class="math inline">\(\varepsilon^2/2\)</span> is the right one only as <span class="math inline">\(\varepsilon \to 0\)</span>. Randomized response, which reports a bit truthfully with probability <span class="math inline">\(e^\varepsilon/(1 + e^\varepsilon)\)</span>, is the worst <span class="math inline">\(\varepsilon\)</span>-DP mechanism at every order, and its smallest valid slope is <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span>: <span class="math inline">\(0.4621\)</span> at <span class="math inline">\(\varepsilon = 1\)</span>, against <span class="math inline">\(\varepsilon^2/2 = 0.5000\)</span>.</p>
-<p>The trouble is at large orders. No Rényi divergence can exceed the largest log-ratio of probabilities, so the RDP curve of a pure DP step flattens at <span class="math inline">\(\varepsilon\)</span>, while a line keeps rising. The curve therefore lies under both, <span id="eq-cdp-pure"><span class="math display">\[\varepsilon(\alpha) \le \min\Big(\varepsilon,\ \frac{\alpha\varepsilon^2}{2}\Big), \tag{29.2}\]</span></span> and a zCDP accountant can keep only the line. For randomized response at <span class="math inline">\(\varepsilon = 1\)</span> the line is close near <span class="math inline">\(\alpha = 1\)</span>, but at <span class="math inline">\(\alpha = 50\)</span> it says 25 where the exact curve is 0.9936; the cap is within 1% there (<a href="#fig-cdp-rr-line" class="quarto-xref">Figure&nbsp;<span>29.1</span></a>, left).</p>
-<div id="fig-cdp-rr-line" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-cdp-rr-line-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/concentrated_dp_rr_line.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cdp-rr-line-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;29.1: The RDP curve of randomized response (black) against the zCDP line <span class="math inline">\(\alpha\varepsilon^2/2\)</span> (dashed), the sharp line <span class="math inline">\(\alpha\varepsilon\tanh(\varepsilon/2)\)</span> (dash-dotted) and the pure-DP cap <span class="math inline">\(\varepsilon\)</span> (dotted), for <span class="math inline">\(\varepsilon = 1\)</span> (left) and <span class="math inline">\(\varepsilon = 3\)</span> (right). At <span class="math inline">\(\varepsilon = 3\)</span> even the sharp line crosses the cap almost at once.
+<section id="sec-cdp-pure" class="level2" data-number="31.3">
+<h2 data-number="31.3" class="anchored" data-anchor-id="sec-cdp-pure"><span class="header-section-number">31.3</span> Charging other kinds of step</h2>
+<p>A real pipeline mixes mechanisms, and <a href="#tbl-cdp-charge" class="quarto-xref">Table&nbsp;<span>31.1</span></a> gives the charge in <span class="math inline">\(\rho\)</span> for the common ones.</p>
+<div id="tbl-cdp-charge" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cdp-charge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;31.1: What each kind of step costs in a zCDP ledger.
 </figcaption>
+<div aria-describedby="tbl-cdp-charge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Charge in <span class="math inline">\(\rho\)</span></th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Gaussian, sensitivity <span class="math inline">\(\Delta\)</span>, noise <span class="math inline">\(\sigma\)</span></td>
+<td><span class="math inline">\(\Delta^2/(2\sigma^2)\)</span></td>
+<td>Exact</td>
+</tr>
+<tr class="even">
+<td>Any pure <span class="math inline">\(\varepsilon\)</span>-DP step</td>
+<td><span class="math inline">\(\varepsilon^2/2\)</span>, or sharply <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span></td>
+<td>Poor fit once <span class="math inline">\(\varepsilon \ge 2\)</span></td>
+</tr>
+<tr class="odd">
+<td>Exponential mechanism at <span class="math inline">\(\varepsilon\)</span></td>
+<td><span class="math inline">\(\varepsilon^2/8\)</span></td>
+<td>Four times cheaper</td>
+</tr>
+<tr class="even">
+<td>An <span class="math inline">\((\varepsilon, \delta)\)</span>-DP step</td>
+<td><span class="math inline">\(\varepsilon^2/2\)</span>, plus <span class="math inline">\(\delta\)</span> in a second column</td>
+<td>Approximate zCDP, <a href="#sec-cdp-group" class="quarto-xref"><span>Section 31.5</span></a></td>
+</tr>
+<tr class="odd">
+<td>Any step, for a group of <span class="math inline">\(m\)</span> records</td>
+<td><span class="math inline">\(m^2\)</span> times the step’s <span class="math inline">\(\rho\)</span></td>
+<td>Exact for the Gaussian</td>
+</tr>
+<tr class="even">
+<td>Poisson-subsampled Gaussian</td>
+<td><span class="math inline">\(1/(2\sigma^2)\)</span>, whatever the sampling rate</td>
+<td>No amplification, <a href="#sec-cdp-tcdp" class="quarto-xref"><span>Section 31.6</span></a></td>
+</tr>
+</tbody>
+</table>
+</div>
 </figure>
 </div>
-<p>The larger <span class="math inline">\(\varepsilon\)</span> is, the sooner the line crosses the cap, since it does so at <span class="math inline">\(\alpha = 2/\varepsilon\)</span>. At <span class="math inline">\(\varepsilon = 3\)</span> the slope <span class="math inline">\(\varepsilon^2/2 = 4.5\)</span> is already above the cap at <span class="math inline">\(\alpha = 1\)</span>, so the line is worse than plain <span class="math inline">\(\varepsilon\)</span> at every order (<a href="#fig-cdp-rr-line" class="quarto-xref">Figure&nbsp;<span>29.1</span></a>, right). Charging a large-<span class="math inline">\(\varepsilon\)</span> step in <span class="math inline">\(\rho\)</span> then makes it more expensive than it is: a <span class="math inline">\(5\)</span>-DP step charged <span class="math inline">\(12.5\)</span> converts to a worse <span class="math inline">\(\varepsilon\)</span> than the 5 you started with. This is the usual situation in local DP, where each user randomizes their own data. Keep such steps as <span class="math inline">\(\varepsilon\)</span> or as an RDP curve; an RDP accountant can charge them the exact curve of randomized response, below both bounds.</p>
+<p>A pure <span class="math inline">\(\varepsilon\)</span>-DP step, such as a Laplace count or a randomized-response bit, changes the probability of any output by at most a factor <span class="math inline">\(e^\varepsilon\)</span> between neighbours. The sharp charge <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span> is the smallest that holds for all such steps, because randomized response is the worst case, and at <span class="math inline">\(\varepsilon = 1\)</span> it is 0.4621. The exponential mechanism’s charge of <span class="math inline">\(\varepsilon^2/8\)</span> is due to Cesar and Rogers (2021).</p>
+<p>The general rule breaks down for large <span class="math inline">\(\varepsilon\)</span>. A pure DP step’s RDP curve never rises above <span class="math inline">\(\varepsilon\)</span>, while the line keeps climbing and passes that cap at order <span class="math inline">\(2/\varepsilon\)</span>. So a <span class="math inline">\(5\)</span>-DP step charged <span class="math inline">\(\varepsilon^2/2 = 12.5\)</span> sits above its own cap at every order. Converting that charge back gives a worse <span class="math inline">\(\varepsilon\)</span> than the 5 you started with, so keep such steps in RDP, where an accountant can charge them the exact curve of randomized response.</p>
 </section>
-<section id="sec-cdp-conversion" class="level2" data-number="29.4">
-<h2 data-number="29.4" class="anchored" data-anchor-id="sec-cdp-conversion"><span class="header-section-number">29.4</span> From zCDP to (ε, δ)</h2>
-<p>Whatever you account in, you report <span class="math inline">\((\varepsilon, \delta)\)</span>. The conversion of <a href="../part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ)</a> gives a valid <span class="math inline">\(\varepsilon\)</span> at every order, and you take the best. Write <span class="math inline">\(\ell = \ln(1/\delta)\)</span>. For a line the conversion at order <span class="math inline">\(\alpha\)</span> is <span class="math inline">\(\rho\alpha + \ell/(\alpha - 1)\)</span>: the first term grows with the order and the second shrinks, so the best order balances them, at <span class="math inline">\(\alpha^* = 1 + \sqrt{\ell/\rho}\)</span>. Substituting gives the <strong>simple conversion</strong> (Bun &amp; Steinke 2016), <span id="eq-cdp-simple"><span class="math display">\[\varepsilon = \rho + 2\sqrt{\rho\,\ell}. \tag{29.3}\]</span></span></p>
-<p>Modern accountants use the sharper <strong>improved conversion</strong> of Canonne, Kamath &amp; Steinke (2020), which adds two correction terms at each order and is minimized numerically: <span id="eq-cdp-improved"><span class="math display">\[\varepsilon = \min_{\alpha &gt; 1}\left[\rho\alpha + \frac{\ell}{\alpha - 1} + \ln\Big(1 - \frac1\alpha\Big) - \frac{\ln\alpha}{\alpha - 1}\right]. \tag{29.4}\]</span></span> How much do the two lose? For a Gaussian the line is the exact RDP curve, so any gap between the reported and the true <span class="math inline">\(\varepsilon\)</span> comes from the conversion alone, and the true value is known in closed form (<a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>). One Gaussian step with <span class="math inline">\(\sigma = 1\)</span> is <span class="math inline">\(\rho = 0.5\)</span>. At <span class="math inline">\(\delta = 10^{-5}\)</span>, where <span class="math inline">\(\ell = 11.5129\)</span>, the simple formula gives 5.299, the improved conversion 4.728, and the exact value is 4.377: the simple formula is 21% too large and the improved one 8% (<a href="#tbl-cdp-conversion" class="quarto-xref">Table&nbsp;<span>29.1</span></a>, <a href="#fig-cdp-conversion" class="quarto-xref">Figure&nbsp;<span>29.2</span></a>).</p>
+<section id="sec-cdp-conversion" class="level2" data-number="31.4">
+<h2 data-number="31.4" class="anchored" data-anchor-id="sec-cdp-conversion"><span class="header-section-number">31.4</span> From ρ to (ε, δ)</h2>
+<p>You always report <span class="math inline">\((\varepsilon, \delta)\)</span> in the end. Write <span class="math inline">\(\ell\)</span> for <span class="math inline">\(\ln(1/\delta)\)</span>. Applying <a href="../part04-privacy-accounting/02-rdp-conversions.html">Mironov’s conversion</a> to a line gives the <strong>simple conversion</strong> of Bun and Steinke (2016). It says that a <span class="math inline">\(\rho\)</span>-zCDP mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span id="eq-cdp-simple"><span class="math display">\[\varepsilon = \rho + 2\sqrt{\rho\,\ell}. \tag{31.3}\]</span></span> The <strong>improved conversion</strong> of Canonne, Kamath and Steinke (2020) adds two negative correction terms at each order. It has no closed form, so you minimize it numerically, as the code below does. For the Gaussian the true <span class="math inline">\(\varepsilon\)</span> is also known, from its privacy profile in <a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>. <a href="#tbl-cdp-conversion" class="quarto-xref">Table&nbsp;<span>31.2</span></a> compares the three.</p>
 <div id="tbl-cdp-conversion" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cdp-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;29.1: <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> for a <span class="math inline">\(\rho\)</span>-zCDP mechanism: simple and improved conversions, and the exact <span class="math inline">\(\varepsilon\)</span> of the Gaussian mechanism with the same <span class="math inline">\(\rho\)</span>.
+Table&nbsp;31.2: <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> for a <span class="math inline">\(\rho\)</span>-zCDP mechanism: the simple and improved conversions, and the exact <span class="math inline">\(\varepsilon\)</span> of the Gaussian mechanism with the same <span class="math inline">\(\rho\)</span>.
 </figcaption>
 <div aria-describedby="tbl-cdp-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -625,141 +685,100 @@ Table&nbsp;29.1: <span class="math inline">\(\varepsilon\)</span> at <span class
 <thead>
 <tr class="header">
 <th><span class="math inline">\(\rho\)</span></th>
-<th>Simple <a href="#eq-cdp-simple" class="quarto-xref">Equation&nbsp;<span>29.3</span></a></th>
-<th>Improved <a href="#eq-cdp-improved" class="quarto-xref">Equation&nbsp;<span>29.4</span></a></th>
+<th>Simple <a href="#eq-cdp-simple" class="quarto-xref">Equation&nbsp;<span>31.3</span></a></th>
+<th>Improved</th>
 <th>Exact, Gaussian with the same <span class="math inline">\(\rho\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>0.01</td>
-<td>0.689</td>
-<td>0.546</td>
-<td>0.497</td>
-</tr>
-<tr class="even">
 <td>0.1</td>
 <td>2.246</td>
 <td>1.914</td>
 <td>1.760</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>0.5</td>
 <td>5.299</td>
 <td>4.728</td>
 <td>4.377</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>1</td>
 <td>7.786</td>
 <td>7.077</td>
 <td>6.573</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>5</td>
 <td>20.174</td>
 <td>19.047</td>
 <td>17.857</td>
-</tr>
-<tr class="even">
-<td>50</td>
-<td>97.985</td>
-<td>96.035</td>
-<td>91.817</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<div id="fig-cdp-conversion" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-cdp-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/concentrated_dp_conversion.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cdp-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;29.2: Left: <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> for a <span class="math inline">\(\rho\)</span>-zCDP mechanism, from the simple formula, the improved conversion, and the exact value for the Gaussian mechanism with <span class="math inline">\(\mu = \sqrt{2\rho}\)</span>. Right: each conversion divided by the exact Gaussian value; both gaps shrink in relative terms as <span class="math inline">\(\rho\)</span> grows.
-</figcaption>
-</figure>
-</div>
-<p>So two systems with the same <span class="math inline">\(\rho = 0.5\)</span> can quote 5.299 and 4.728 only because they used different conversions; say which one you used. For a pipeline made only of Gaussian mechanisms on the full data, report the exact value.</p>
-<p>To calibrate, run the simple conversion backwards. A target <span class="math inline">\((\varepsilon, \delta)\)</span> is met by any <span id="eq-cdp-inverse"><span class="math display">\[\rho \le \Big(\sqrt{\varepsilon + \ell} - \sqrt{\ell}\Big)^2, \tag{29.5}\]</span></span> and the noise multiplier is then <span class="math inline">\(\sigma = 1/\sqrt{2\rho}\)</span>. A single Gaussian step at <span class="math inline">\((1, 10^{-5})\)</span> needs <span class="math inline">\(\rho = 0.02082\)</span>, that is <span class="math inline">\(\sigma = 4.901\)</span>.</p>
-<p>Because the map from <span class="math inline">\(\rho\)</span> to <span class="math inline">\(\varepsilon\)</span> is not linear, <span class="math inline">\(\varepsilon\)</span> does not add and there is no clean “<span class="math inline">\(\varepsilon\)</span> left”: with a budget of <span class="math inline">\(\rho = 1\)</span>, the whole run is <span class="math inline">\(7.077\)</span>-DP by the improved conversion however you split it. Add in <span class="math inline">\(\rho\)</span>, and convert once, at the end.</p>
+<p>At <span class="math inline">\(\rho = 0.5\)</span>, the simple formula overshoots the truth by 21%, and the improved one by 8%. So use the improved conversion, or the exact Gaussian profile when every step is Gaussian.</p>
+<p>For calibration you run the conversion backwards, from a target <span class="math inline">\((\varepsilon, \delta)\)</span> to the largest total <span class="math inline">\(\rho\)</span> that meets it. Solving the simple conversion for <span class="math inline">\(\rho\)</span> shows that the target is met by any <span id="eq-cdp-inverse"><span class="math display">\[\rho \le \Big(\sqrt{\varepsilon + \ell} - \sqrt{\ell}\Big)^2. \tag{31.4}\]</span></span> Then split <span class="math inline">\(\rho\)</span> over the queries. If query number <span class="math inline">\(i\)</span> has <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_i\)</span> and spends <span class="math inline">\(\rho_i\)</span>, its noise needs the standard deviation <span id="eq-auto-03concentrateddp-2"><span class="math display">\[\sigma_i = \frac{\Delta_i}{\sqrt{2\rho_i}}. \tag{31.5}\]</span></span> For example, a release that must be <span class="math inline">\((1, 10^{-5})\)</span>-DP may spend at most <span class="math inline">\(\rho = 0.02082\)</span>. A single query of sensitivity 1 then needs <span class="math inline">\(\sigma = 4.901\)</span>. If you split the same budget equally over four queries, each gets a quarter of <span class="math inline">\(\rho\)</span> and so needs twice the noise, 9.801.</p>
+<p>That recipe works because the split happens in <span class="math inline">\(\rho\)</span>, which adds, and never in <span class="math inline">\(\varepsilon\)</span>, which does not. Suppose you have a budget of <span class="math inline">\(\rho = 1\)</span> and have spent half of it. Each half alone converts to 4.728, and two of those are far more than the whole run’s 7.077, because the conversion grows like the square root of <span class="math inline">\(\rho\)</span>. So keep budgets in <span class="math inline">\(\rho\)</span>, subtract in <span class="math inline">\(\rho\)</span>, and convert once, at the end. In OpenDP, <code>dp.binary_search_param</code> does the last step of calibration for you, by searching for the noise scale that meets a target. Use the <span class="math inline">\(\ell_2\)</span> sensitivity here, because the <span class="math inline">\(\ell_1\)</span> sensitivity of a vector query is never smaller and so overpays in noise.</p>
 </section>
-<section id="sec-cdp-group" class="level2" data-number="29.5">
-<h2 data-number="29.5" class="anchored" data-anchor-id="sec-cdp-group"><span class="header-section-number">29.5</span> Group privacy</h2>
-<p>A household, or a user with several records, differs from a neighbouring dataset in <span class="math inline">\(m\)</span> records rather than one. For the Gaussian, the group moves the query’s value <span class="math inline">\(m\)</span> times as far, and its RDP grows with the square of the shift. zCDP inherits exactly this: a <span class="math inline">\(\rho\)</span>-zCDP mechanism is <span class="math inline">\(m^2\rho\)</span>-zCDP for datasets that differ in <span class="math inline">\(m\)</span> records (Bun &amp; Steinke 2016), with equality for the Gaussian.</p>
-<p>Quadratic growth is the same price as pure DP’s <span class="math inline">\(m\varepsilon\)</span>, translated: with <span class="math inline">\(\rho \approx \varepsilon^2/2\)</span>, <span class="math inline">\(m^2\rho \approx (m\varepsilon)^2/2\)</span>. A user who contributes up to 4 records to a <span class="math inline">\(0.1\)</span>-zCDP release is protected at <span class="math inline">\(\rho = 4^2 \times 0.1 = 1.6\)</span>. For the Gaussian with <span class="math inline">\(\sigma = 1\)</span>, a group of 2 costs <span class="math inline">\(\rho = 2\)</span>, or <span class="math inline">\(\varepsilon = 10.725\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, and a group of 8 costs <span class="math inline">\(\rho = 32\)</span>, or <span class="math inline">\(\varepsilon = 68.616\)</span>. If users contribute many records, bound each user’s contribution before adding noise and account at the user level.</p>
+<section id="sec-cdp-group" class="level2" data-number="31.5">
+<h2 data-number="31.5" class="anchored" data-anchor-id="sec-cdp-group"><span class="header-section-number">31.5</span> Groups and approximate zCDP</h2>
+<p>A household, a user with many records or a hospital contributes several records, so you may need the guarantee for a group. Take a <span class="math inline">\(\rho\)</span>-zCDP mechanism <span class="math inline">\(M\)</span> and two datasets that differ in <span class="math inline">\(m\)</span> records. Bun and Steinke (2016) show that <span id="eq-cdp-group"><span class="math display">\[D_\alpha\big(M(D)\,\|\,M(D')\big) \le m^2\rho\,\alpha. \tag{31.6}\]</span></span> The square is exact for the Gaussian, since a group shifts the query <span class="math inline">\(m\)</span> times as far. For example, a user with 4 records in a <span class="math inline">\(0.1\)</span>-zCDP release is protected at <span class="math inline">\(\rho = 1.6\)</span>. Plain RDP’s group bound is much weaker (<a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>).</p>
+<p>Some useful mechanisms, such as propose-test-release and stability-based histograms, are <span class="math inline">\((\varepsilon, \delta)\)</span>-DP but cannot be zCDP at all. <strong>Approximate zCDP</strong> keeps them in the ledger by adding a second column. Each such step adds <span class="math inline">\(\varepsilon^2/2\)</span> to <span class="math inline">\(\rho\)</span> and its slack to the second column, and at the end the second column’s total is added to the <span class="math inline">\(\delta\)</span> of the conversion.</p>
 </section>
-<section id="sec-cdp-tcdp" class="level2" data-number="29.6">
-<h2 data-number="29.6" class="anchored" data-anchor-id="sec-cdp-tcdp"><span class="header-section-number">29.6</span> Subsampling: why DP-SGD is not accounted in zCDP</h2>
-<p>DP-SGD runs each step on a Poisson sample: each record enters the batch independently with probability <span class="math inline">\(q\)</span>. A record is usually not in the batch, so the step’s RDP curve is tiny at small orders. For the part’s running example, <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>, it stays around <span class="math inline">\(10^{-4}\alpha\)</span> up to <span class="math inline">\(\alpha = 8\)</span> (<a href="#fig-cdp-subsampled" class="quarto-xref">Figure&nbsp;<span>29.3</span></a>).</p>
-<p>High orders, however, weigh the rarest and most revealing outputs. For the subsampled step those come from the event that the record was in the batch, where it pays the full Gaussian loss. So at large orders the curve bends up, and its slope approaches that of the unsubsampled line <span class="math inline">\(\alpha/(2\sigma^2)\)</span> (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a> explains the bend). A line through the origin above the whole curve must be as steep as the curve at infinity. For the Poisson-subsampled Gaussian, at any <span class="math inline">\(q\)</span>, the smallest valid <span class="math inline">\(\rho\)</span> is therefore <span class="math inline">\(1/(2\sigma^2)\)</span>, exactly what the step would cost without subsampling. zCDP throws away all of the amplification.</p>
-<div id="fig-cdp-subsampled" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-cdp-subsampled-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/concentrated_dp_subsampled.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-cdp-subsampled-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;29.3: The RDP curve of one Poisson-subsampled Gaussian step with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, on integer orders (black), against the best zCDP line <span class="math inline">\(\rho\alpha\)</span> with <span class="math inline">\(\rho = 0.5\)</span> (red dashed), which is the unsubsampled Gaussian’s line, and the tCDP line on orders up to <span class="math inline">\(\omega = 8\)</span> (blue). Both axes are logarithmic.
-</figcaption>
-</figure>
-</div>
-<p>With <span class="math inline">\(k = 10{,}000\)</span> steps and <span class="math inline">\(\delta = 10^{-5}\)</span>, zCDP must charge <span class="math inline">\(\rho = 0.5\)</span> per step, so <span class="math inline">\(\rho = 5000\)</span> in total and <span class="math inline">\(\varepsilon = 5479.9\)</span> by the simple formula, or <span class="math inline">\(5475.8\)</span> with the improved conversion. RDP accounting of the same run, on integer orders, gives <span class="math inline">\(7.469\)</span> with Mironov’s conversion and <span class="math inline">\(6.719\)</span> with the improved one. Both are upper bounds, but RDP kept the part of the curve the conversion uses: the small orders. The composed curve is <span class="math inline">\(k\varepsilon(\alpha)\)</span>, and the conversion looks for the order where <span class="math inline">\(k\varepsilon(\alpha) + \ell/(\alpha - 1)\)</span> is smallest. Below the bend the first term is small, so the conversion pushes the order up until the bend makes the curve expensive, and stops early: here the best integer order is 4. The large orders that set the zCDP slope are never used.</p>
-<p><strong>Truncated concentrated differential privacy (tCDP)</strong> keeps one number per step but asks for the line only on orders up to a cut-off <span class="math inline">\(\omega\)</span> (Bun, Dwork, Rothblum &amp; Steinke 2018). Steps compose to <span class="math inline">\((\sum_i\rho_i, \min_i\omega_i)\)</span>, and the conversion is the simple one when its best order lies below <span class="math inline">\(\omega\)</span>, otherwise order <span class="math inline">\(\omega\)</span>: <span id="eq-cdp-tcdp-conv"><span class="math display">\[\varepsilon = \begin{cases}\rho + 2\sqrt{\rho\,\ell} &amp; \text{if } \ell \le (\omega - 1)^2\rho,\\[2pt] \rho\omega + \dfrac{\ell}{\omega - 1} &amp; \text{otherwise.}\end{cases} \tag{29.6}\]</span></span> On orders up to <span class="math inline">\(\omega = 8\)</span>, the per-step slope is <span class="math inline">\(1.1171 \times 10^{-4}\)</span>, against zCDP’s 0.5. With <span class="math inline">\(\omega = 4\)</span>, tCDP gives <span class="math inline">\(7.469\)</span>, the same as RDP with Mironov’s conversion, because both end up converting at order 4. But once <span class="math inline">\(\omega\)</span> passes the bend near <span class="math inline">\(\alpha = 10\)</span>, the slope must cover the steep part, and tCDP collapses towards zCDP: 80.252 with <span class="math inline">\(\omega = 10\)</span>, 2228.027 with <span class="math inline">\(\omega = 16\)</span>.</p>
-<p>So never account a subsampled mechanism in zCDP. If a pipeline mixes Gaussian releases with a DP-SGD run, keep it all in RDP: a <span class="math inline">\(\rho\)</span>-zCDP step is just the RDP curve <span class="math inline">\(\rho\alpha\)</span> and joins an RDP ledger without loss. Nor is tCDP a practical substitute: RDP does at least as well as any choice of <span class="math inline">\(\omega\)</span>, and tCDP’s general subsampling theorem is loose: with <span class="math inline">\(\sigma = \sqrt5\)</span> and a 1% sample it gives <span class="math inline">\(\varepsilon = 9.037\)</span> where RDP gives <span class="math inline">\(2.046\)</span>. That comparison is only indicative: the tCDP theorem assumes fixed-size batches and replace-one neighbours, while the RDP curve assumes Poisson sampling and add/remove (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>).</p>
+<section id="sec-cdp-tcdp" class="level2" data-number="31.6">
+<h2 data-number="31.6" class="anchored" data-anchor-id="sec-cdp-tcdp"><span class="header-section-number">31.6</span> Subsampled steps: keep them out of zCDP</h2>
+<p>Differentially private stochastic gradient descent (SGD), DP-SGD for short, runs each step on a Poisson sample of the data. Each record enters the batch independently with probability <span class="math inline">\(q\)</span>, the sampling rate, and this makes a step far more private than the Gaussian mechanism inside it (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>). But zCDP cannot see the gain. The subsampled step’s RDP curve is tiny at small orders and bends up towards the unsubsampled line at large ones. A line that covers the whole curve must therefore have slope <span class="math inline">\(1/(2\sigma^2)\)</span>, whatever the sampling rate.</p>
+<p>The cost of ignoring this is enormous. On this part’s running example of 10,000 steps with <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>, zCDP reports <span class="math inline">\(\varepsilon = 5475.8\)</span>. RDP accounting of the same run gives 6.719, because the conversion only uses the small orders where the curve is still tiny.</p>
+<p><strong>Truncated concentrated differential privacy (tCDP)</strong> asks for the line only on low orders, so it sees some of the amplification. It is rarely used, because it does no better than RDP.</p>
+<p>So if a pipeline mixes Gaussian releases with a DP-SGD run, keep all of it in RDP. A <span class="math inline">\(\rho\)</span>-zCDP step is just the RDP line <span class="math inline">\(\rho\alpha\)</span>, so it joins an RDP ledger without loss. In Google’s <code>dp_accounting</code> library, for example, you add it to an <code>RdpAccountant</code> as a <code>GaussianDpEvent</code> with noise multiplier <span class="math inline">\(1/\sqrt{2\rho}\)</span>. The training steps go in next to it as a <code>PoissonSampledDpEvent</code>.</p>
 </section>
-<section id="sec-cdp-approx" class="level2" data-number="29.7">
-<h2 data-number="29.7" class="anchored" data-anchor-id="sec-cdp-approx"><span class="header-section-number">29.7</span> Approximate zCDP</h2>
-<p>Some useful mechanisms, such as stability-based histograms, are <span class="math inline">\((\varepsilon, \delta)\)</span>-DP but cannot be zCDP at all: zCDP’s strong group privacy rules them out. Approximate zCDP lets zCDP fail on an event of probability <span class="math inline">\(\delta_a\)</span>, so one ledger holds two columns. An <span class="math inline">\((\varepsilon, \delta)\)</span>-DP step enters as <span class="math inline">\(\rho = \varepsilon^2/2\)</span> and <span class="math inline">\(\delta_a = \delta\)</span>. The <span class="math inline">\(\rho\)</span> column adds and converts as usual; the <span class="math inline">\(\delta_a\)</span> column adds up to at most <span class="math inline">\(\sum_i\delta_i\)</span>, like <span class="math inline">\(\delta\)</span> in basic composition. At the end the pipeline is <span class="math inline">\((\varepsilon, \delta_a + (1 - \delta_a)\delta')\)</span>-DP, where <span class="math inline">\(\varepsilon\)</span> is any zCDP conversion of <span class="math inline">\(\rho\)</span> at <span class="math inline">\(\delta'\)</span> (Bun &amp; Steinke 2016).</p>
-<p>The gain comes from the first column. Ten stability-based steps, each <span class="math inline">\((0.5, 10^{-7})\)</span>-DP, and ten Gaussian steps with <span class="math inline">\(\sigma = 1\)</span> give <span class="math inline">\(\rho = 10 \times 0.125 + 10 \times 0.5 = 6.25\)</span> and <span class="math inline">\(\delta_a = 1.0000 \times 10^{-6}\)</span>, so <span class="math inline">\(\varepsilon = 22.100\)</span> at total <span class="math inline">\(\delta = 10^{-5}\)</span>. Composing the stability steps separately, by basic composition, gives <span class="math inline">\(19.119 + 5 = 24.119\)</span>: in the unified ledger each <span class="math inline">\(\varepsilon = 0.5\)</span> step costs <span class="math inline">\(\varepsilon^2/2\)</span> in <span class="math inline">\(\rho\)</span> rather than its full <span class="math inline">\(\varepsilon\)</span>. A Gaussian step put in the <span class="math inline">\(\delta_a\)</span> column would waste <span class="math inline">\(\delta\)</span> for nothing.</p>
-</section>
-<section id="sec-cdp-code" class="level2" data-number="29.8">
-<h2 data-number="29.8" class="anchored" data-anchor-id="sec-cdp-code"><span class="header-section-number">29.8</span> Code</h2>
-<p>The whole zCDP ledger is a few lines: charge each Gaussian step its <span class="math inline">\(\rho\)</span>, add, convert once. The improved conversion is minimized over the same grid of 20,001 orders that the full edition uses.</p>
+<section id="sec-cdp-code" class="level2" data-number="31.7">
+<h2 data-number="31.7" class="anchored" data-anchor-id="sec-cdp-code"><span class="header-section-number">31.7</span> Code</h2>
+<p>The whole zCDP ledger is a few lines of code. You charge each Gaussian step its <span class="math inline">\(\rho\)</span>, add the charges, and convert once, and the last line splits a budget over four queries.</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> log, sqrt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zcdp_gaussian(sigma: <span class="bu">float</span>, sensitivity: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""rho of one Gaussian step; compose steps by adding their rho."""</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sensitivity<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> sigma<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sensitivity<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> sigma<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zcdp_to_eps_simple(rho: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rho <span class="op">+</span> <span class="dv">2</span> <span class="op">*</span> sqrt(rho <span class="op">*</span> log(<span class="dv">1</span> <span class="op">/</span> delta))</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zcdp_to_eps_improved(rho: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Improved conversion, minimized over 20,001 log-spaced orders in (1, 1 + 1e4]."""</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="bu">float</span>(<span class="st">"inf"</span>)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20001</span>):</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        alpha <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> <span class="dv">10</span> <span class="op">**</span> (<span class="op">-</span><span class="dv">4</span> <span class="op">+</span> <span class="dv">8</span> <span class="op">*</span> i <span class="op">/</span> <span class="dv">20000</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        eps <span class="op">=</span> rho <span class="op">*</span> alpha <span class="op">+</span> log(<span class="dv">1</span> <span class="op">/</span> delta) <span class="op">/</span> (alpha <span class="op">-</span> <span class="dv">1</span>) <span class="op">+</span> log(<span class="dv">1</span> <span class="op">-</span> <span class="dv">1</span> <span class="op">/</span> alpha) <span class="op">-</span> log(alpha) <span class="op">/</span> (alpha <span class="op">-</span> <span class="dv">1</span>)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>        best <span class="op">=</span> <span class="bu">min</span>(best, eps)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zcdp_to_eps_improved(rho: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Minimized over 20,001 log-spaced orders, the full edition's fine grid."""</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="bu">float</span>(<span class="st">"inf"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20001</span>):</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        alpha <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> <span class="dv">10</span> <span class="op">**</span> (<span class="op">-</span><span class="dv">4</span> <span class="op">+</span> <span class="dv">8</span> <span class="op">*</span> i <span class="op">/</span> <span class="dv">20000</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        eps <span class="op">=</span> rho <span class="op">*</span> alpha <span class="op">+</span> log(<span class="dv">1</span> <span class="op">/</span> delta) <span class="op">/</span> (alpha <span class="op">-</span> <span class="dv">1</span>) <span class="op">+</span> log(<span class="dv">1</span> <span class="op">-</span> <span class="dv">1</span> <span class="op">/</span> alpha) <span class="op">-</span> log(alpha) <span class="op">/</span> (alpha <span class="op">-</span> <span class="dv">1</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        best <span class="op">=</span> <span class="bu">min</span>(best, eps)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rho_for_target(eps: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Largest rho whose simple conversion stays within eps at delta."""</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (sqrt(eps <span class="op">+</span> log(<span class="dv">1</span> <span class="op">/</span> delta)) <span class="op">-</span> sqrt(log(<span class="dv">1</span> <span class="op">/</span> delta))) <span class="op">**</span> <span class="dv">2</span></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rho_for_target(eps: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Largest rho whose simple conversion stays within eps at delta."""</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (sqrt(eps <span class="op">+</span> log(<span class="dv">1</span> <span class="op">/</span> delta)) <span class="op">-</span> sqrt(log(<span class="dv">1</span> <span class="op">/</span> delta))) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigma_for_rho(rho: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> sqrt(<span class="dv">2</span> <span class="op">*</span> rho)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>rho <span class="op">=</span> <span class="dv">10</span> <span class="op">*</span> zcdp_gaussian(sigma<span class="op">=</span><span class="fl">1.0</span>)  <span class="co"># ten Gaussian steps with sigma = 1</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>rho<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 5.0</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>zcdp_to_eps_simple(rho, <span class="fl">1e-5</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 20.174</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>zcdp_to_eps_improved(rho, <span class="fl">1e-5</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 19.047</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> rho_for_target(<span class="fl">1.0</span>, <span class="fl">1e-5</span>)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>r<span class="sc">:.5f}</span><span class="ss"> </span><span class="sc">{</span><span class="dv">1</span> <span class="op">/</span> sqrt(<span class="dv">2</span> <span class="op">*</span> r)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.02082 4.901</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The full edition’s script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part04-privacy-accounting/concentrated_dp.py">concentrated_dp.py</a>, computes every number in this chapter, including the subsampled curve and the tCDP values:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part04-privacy-accounting/concentrated_dp.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>rho <span class="op">=</span> <span class="dv">10</span> <span class="op">*</span> zcdp_gaussian(sigma<span class="op">=</span><span class="fl">1.0</span>)  <span class="co"># ten Gaussian steps with sigma = 1</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>rho<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 5.0</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>zcdp_to_eps_improved(rho, <span class="fl">1e-5</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 19.047</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>budget <span class="op">=</span> rho_for_target(<span class="fl">1.0</span>, <span class="fl">1e-5</span>)  <span class="co"># the whole release must be (1, 1e-5)-DP</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>budget<span class="sc">:.5f}</span><span class="ss"> </span><span class="sc">{</span>sigma_for_rho(budget)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.02082 4.901</span></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>sigma_for_rho(budget <span class="op">/</span> <span class="dv">4</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 9.801</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="cheat-sheet" class="level2" data-number="29.9">
-<h2 data-number="29.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">29.9</span> Cheat sheet</h2>
-<p>Here <span class="math inline">\(\ell = \ln(1/\delta)\)</span>.</p>
+<section id="cheat-sheet" class="level2" data-number="31.8">
+<h2 data-number="31.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">31.8</span> Cheat sheet</h2>
+<p>Here <span class="math inline">\(\ell\)</span> stands for <span class="math inline">\(\ln(1/\delta)\)</span>.</p>
 <div id="tbl-cdp-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cdp-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;29.2: The results of this chapter.
+Table&nbsp;31.3: The tasks of this chapter; <a href="#tbl-cdp-charge" class="quarto-xref">Table&nbsp;<span>31.1</span></a> gives the charge of each kind of step.
 </figcaption>
 <div aria-describedby="tbl-cdp-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -770,61 +789,36 @@ Table&nbsp;29.2: The results of this chapter.
 </colgroup>
 <thead>
 <tr class="header">
-<th>Result</th>
+<th>Task</th>
 <th>Formula</th>
 <th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">\(\rho\)</span>-zCDP</td>
-<td><span class="math inline">\(D_\alpha \le \rho\alpha\)</span> for all <span class="math inline">\(\alpha &gt; 1\)</span></td>
-<td>RDP restricted to a line</td>
-</tr>
-<tr class="even">
-<td>Gaussian mechanism</td>
+<td>Charge a Gaussian step</td>
 <td><span class="math inline">\(\rho = \Delta^2/(2\sigma^2)\)</span></td>
-<td>Exact: the line is the curve</td>
-</tr>
-<tr class="odd">
-<td>Composition, post-processing</td>
-<td><span class="math inline">\(\rho\)</span>’s add; processing keeps <span class="math inline">\(\rho\)</span></td>
-<td>Also for adaptive steps</td>
+<td>Exact</td>
 </tr>
 <tr class="even">
-<td>Pure DP step</td>
-<td><span class="math inline">\(\varepsilon^2/2\)</span>, sharply <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span>; exponential mechanism <span class="math inline">\(\varepsilon^2/8\)</span></td>
-<td>Poor fit for large <span class="math inline">\(\varepsilon\)</span></td>
+<td>Convert</td>
+<td>Improved conversion, or <span class="math inline">\(\rho + 2\sqrt{\rho\ell}\)</span></td>
+<td>8% and 21% above exact at <span class="math inline">\(\rho = 0.5\)</span></td>
 </tr>
 <tr class="odd">
-<td>To <span class="math inline">\((\varepsilon, \delta)\)</span>, simple</td>
-<td><span class="math inline">\(\rho + 2\sqrt{\rho\ell}\)</span></td>
-<td>21% above exact at <span class="math inline">\(\rho = 0.5\)</span></td>
+<td>Calibrate</td>
+<td><span class="math inline">\(\rho = (\sqrt{\varepsilon + \ell} - \sqrt\ell)^2\)</span>, then <span class="math inline">\(\sigma_i = \Delta_i/\sqrt{2\rho_i}\)</span></td>
+<td>Split the budget in <span class="math inline">\(\rho\)</span></td>
 </tr>
 <tr class="even">
-<td>To <span class="math inline">\((\varepsilon, \delta)\)</span>, improved</td>
-<td><span class="math inline">\(\min_\alpha[\rho\alpha + \ell/(\alpha-1) + \ln(1 - 1/\alpha) - \ln\alpha/(\alpha-1)]\)</span></td>
-<td>8% above exact at <span class="math inline">\(\rho = 0.5\)</span></td>
-</tr>
-<tr class="odd">
-<td>Calibration</td>
-<td><span class="math inline">\(\rho = (\sqrt{\varepsilon + \ell} - \sqrt\ell)^2\)</span>, <span class="math inline">\(\sigma = 1/\sqrt{2\rho}\)</span></td>
-<td>Through the simple conversion</td>
-</tr>
-<tr class="even">
-<td>Group of <span class="math inline">\(m\)</span></td>
+<td>Protect a group of <span class="math inline">\(m\)</span></td>
 <td><span class="math inline">\(m^2\rho\)</span></td>
 <td>Exact for the Gaussian</td>
 </tr>
 <tr class="odd">
-<td>Subsampled Gaussian</td>
-<td><span class="math inline">\(\rho = 1/(2\sigma^2)\)</span> whatever <span class="math inline">\(q\)</span></td>
-<td>No amplification: use RDP</td>
-</tr>
-<tr class="even">
-<td>Approximate zCDP</td>
-<td><span class="math inline">\(\rho\)</span> adds, <span class="math inline">\(\delta_a\)</span> adds; <span class="math inline">\((\varepsilon(\rho, \delta'), \delta_a + \delta')\)</span>-DP</td>
-<td>For steps that are only <span class="math inline">\((\varepsilon, \delta)\)</span>-DP</td>
+<td>Account a subsampled step</td>
+<td>Not in zCDP</td>
+<td>Use RDP or a privacy loss distribution</td>
 </tr>
 </tbody>
 </table>
@@ -834,20 +828,20 @@ Table&nbsp;29.2: The results of this chapter.
 <p><strong>Rules of thumb</strong></p>
 <ul>
 <li>Keep budgets in <span class="math inline">\(\rho\)</span>, which adds, and convert to <span class="math inline">\((\varepsilon, \delta)\)</span> once, at the end, with the improved conversion.</li>
-<li>One Gaussian step with <span class="math inline">\(\sigma = 1\)</span> costs <span class="math inline">\(\rho = 0.5\)</span>, about <span class="math inline">\(\varepsilon = 4.7\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>.</li>
-<li>Charge a small-<span class="math inline">\(\varepsilon\)</span> pure DP step <span class="math inline">\(\varepsilon^2/2\)</span>; for <span class="math inline">\(\varepsilon\)</span> of 2 or more, keep its <span class="math inline">\(\varepsilon\)</span> or its RDP curve.</li>
-<li>Never account a subsampled mechanism, such as a DP-SGD step, in zCDP. Use RDP or a privacy loss distribution.</li>
+<li>Never report <span class="math inline">\(\rho\)</span> as if it were <span class="math inline">\(\varepsilon\)</span>. A <span class="math inline">\(0.5\)</span>-zCDP step is about <span class="math inline">\(4.7\)</span>-DP at <span class="math inline">\(\delta = 10^{-5}\)</span>.</li>
+<li>Report the conversion you used, and any statistics released exactly.</li>
+<li>Calibrate Gaussian noise with the <span class="math inline">\(\ell_2\)</span> sensitivity, not the <span class="math inline">\(\ell_1\)</span>.</li>
+<li>Charge a pure DP step <span class="math inline">\(\varepsilon^2/2\)</span> only for small <span class="math inline">\(\varepsilon\)</span>. From about 2 up, keep it in RDP at its own <span class="math inline">\(\varepsilon\)</span>.</li>
+<li>A pipeline with any DP-SGD in it belongs in RDP or a numerical accountant, not in zCDP.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="29.10">
-<h2 data-number="29.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">29.10</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="31.9">
+<h2 data-number="31.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">31.9</span> Further reading</h2>
 <ul>
-<li>Bun &amp; Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (TCC 2016): the definition, the Gaussian and pure-DP conversions, group privacy and approximate zCDP. Sections 1–3 are the core.</li>
-<li>Canonne, Kamath &amp; Steinke, “The Discrete Gaussian for Differential Privacy” (NeurIPS 2020): the discrete Gaussian with its zCDP guarantee, and the improved conversion with a stable way to compute it.</li>
-<li>Bun, Dwork, Rothblum &amp; Steinke, “Composable and Versatile Privacy via Truncated CDP” (STOC 2018): truncated CDP and its subsampling theorem.</li>
-<li>Abowd et al., “The 2020 Census Disclosure Avoidance System TopDown Algorithm” (Harvard Data Science Review, 2022): zCDP accounting at national scale, and the role of invariants.</li>
+<li>Bun &amp; Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (TCC 2016): the definition and every rule of this chapter, in Sections 1–3.</li>
+<li>Canonne, Kamath &amp; Steinke, “The Discrete Gaussian for Differential Privacy” (NeurIPS 2020): the discrete Gaussian and the improved conversion.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">the full edition’s chapter</a>.</p>
 
 
 </section>
@@ -1256,12 +1250,12 @@ Table&nbsp;29.2: The results of this chapter.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="pagination-link" aria-label="From Rényi DP to (ε, δ) and to tests">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="pagination-link" aria-label="f-DP and Gaussian differential privacy">
-        <span class="nav-page-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

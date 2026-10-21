@@ -37,7 +37,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../part04-privacy-accounting/01-renyi-dp.html" rel="next">
-<link href="../part03-dp-foundations/09-lower-bounds.html" rel="prev">
+<link href="../part03-dp-foundations/11-mean-estimation.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -313,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -349,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -414,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -501,17 +519,8 @@ window.Quarto = {
 </nav>
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">Table of contents</h2>
-   
-  <ul>
-  <li><a href="#the-common-thread" id="toc-the-common-thread" class="nav-link active" data-scroll-target="#the-common-thread">The common thread</a></li>
-  <li><a href="#the-running-example" id="toc-the-running-example" class="nav-link" data-scroll-target="#the-running-example">The running example</a></li>
-  <li><a href="#how-to-read-this-part" id="toc-how-to-read-this-part" class="nav-link" data-scroll-target="#how-to-read-this-part">How to read this part</a></li>
-  <li><a href="#what-you-will-be-able-to-do" id="toc-what-you-will-be-able-to-do" class="nav-link" data-scroll-target="#what-you-will-be-able-to-do">What you will be able to do</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -535,29 +544,14 @@ window.Quarto = {
 </header>
 
 
-<p>The <a href="../part03-dp-foundations/00-introduction.html">previous part</a> defined differential privacy (DP), built the basic mechanisms and showed how <span class="math inline">\((\varepsilon, \delta)\)</span> guarantees add up when mechanisms run one after another. That is enough for a handful of releases, not for training a model, which runs thousands of noisy steps, each on a random subset of the data, and must then state one <span class="math inline">\(\varepsilon\)</span>. No single theorem gives that number. It comes from an <strong>accountant</strong>, a procedure that tracks a summary of each step’s privacy loss, combines the summaries, and converts the result into the <span class="math inline">\((\varepsilon, \delta)\)</span> you report. Two accountants given the same training run can report values of <span class="math inline">\(\varepsilon\)</span> that differ by a large factor, and both can be correct upper bounds; only the tighter one tells you what the noise bought.</p>
-<p>Read this part if you train models with DP, or review or audit a model that claims an <span class="math inline">\(\varepsilon\)</span>. It assumes <a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a>: the definition, the privacy loss of an output, the Gaussian mechanism and its exact curve <span class="math inline">\(\delta(\varepsilon)\)</span>, and composition. Each chapter restates in a sentence what it uses.</p>
-<section id="the-common-thread" class="level2">
-<h2 class="anchored" data-anchor-id="the-common-thread">The common thread</h2>
-<p>The privacy loss of an output is the log of how much more likely that output is with your record than without it. Over a run, the per-step losses add, so for the loss itself composition is easy. For <span class="math inline">\((\varepsilon, \delta)\)</span> it is hard, because a pair of numbers is one point of a whole curve and forgets almost everything about how the loss is distributed. Composing points pays for that lost information at every step. Every accountant in this part makes the same move instead: <strong>track a richer summary of the privacy loss, one that composes simply, and convert to <span class="math inline">\((\varepsilon, \delta)\)</span> only once, at the end.</strong></p>
-<p>The chapters differ in the summary they keep, and their order follows from it. The first two introduce Rényi differential privacy (RDP), the summary most libraries use: a curve of exponential moments of the loss that adds up step by step, and the conversion that turns the final curve into the reported pair. Every later chapter starts from that curve, so they come first. Concentrated DP then squeezes the curve into one number <span class="math inline">\(\rho\)</span>, which describes Gaussian noise exactly and many other mechanisms only loosely, and f-DP goes the other way, keeping the whole trade-off between an attacker’s false positives and missed detections, which reads directly as attack power.</p>
-<p>None of these summaries yet explains why training is private at all. The differentially private version of stochastic gradient descent (SGD), DP-SGD, clips each example’s gradient and adds Gaussian noise, and if every step used the whole dataset its guarantee would be useless. It is private because each step touches a random fraction of the records, so most steps don’t see a given record at all. Amplification by subsampling turns that into a much smaller per-step loss. It is a separate question from the summary, since it decides which pair of output distributions you account for, and it must match how the training code really samples its data. Numerical accounting then keeps the whole distribution of the loss and composes it with a discretization error it bounds, which makes it the tool that checks every other accountant. These two chapters are the practical core, in that order, because the numerical accountant takes the subsampled step as its input.</p>
-<p>The last chapters handle departures from that setting. Shuffling instead of sampling, or releasing only the final model, can give extra privacy, but only under assumptions the code has to meet. Budgets chosen while training runs, or privacy spent differently per record, break the assumption that each step’s bound is fixed in advance, and need filters and odometers. The final chapter puts the pieces together.</p>
-</section>
-<section id="the-running-example" class="level2">
-<h2 class="anchored" data-anchor-id="the-running-example">The running example</h2>
-<p>Every chapter that can compute it reports the same number: the <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of DP-SGD with Poisson sampling rate <span class="math inline">\(q = 0.01\)</span>, noise multiplier <span class="math inline">\(\sigma = 1\)</span> and up to <span class="math inline">\(k = 10{,}000\)</span> steps. That is about one hundred epochs at a typical setting. A single Gaussian mechanism with <span class="math inline">\(\sigma = 1\)</span> serves as the small example. Watching the same number move from chapter to chapter shows what each tool gains, and <a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a> puts all the values side by side.</p>
-</section>
-<section id="how-to-read-this-part" class="level2">
-<h2 class="anchored" data-anchor-id="how-to-read-this-part">How to read this part</h2>
-<p>Read the <a href="../part04-privacy-accounting/01-renyi-dp.html">RDP</a> and <a href="../part04-privacy-accounting/02-rdp-conversions.html">conversion</a> chapters first, then <a href="../part04-privacy-accounting/05-subsampling.html">subsampling</a> and <a href="../part04-privacy-accounting/06-numerical-accounting.html">numerical accounting</a>. The chapters on <a href="../part04-privacy-accounting/03-concentrated-dp.html">concentrated DP</a> and <a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP</a> explain the other summaries you will meet in papers and libraries. Read <a href="../part04-privacy-accounting/07-shuffling-iteration.html">shuffling and iteration</a> if your code shuffles instead of sampling or releases only the final model, <a href="../part04-privacy-accounting/08-adaptive-composition.html">adaptive composition</a> if your budgets are chosen during training, and the last chapter last. The derivations are in the full edition.</p>
-</section>
-<section id="what-you-will-be-able-to-do" class="level2">
-<h2 class="anchored" data-anchor-id="what-you-will-be-able-to-do">What you will be able to do</h2>
-<p>By the end of this part you will be able to compute the RDP curve of a Gaussian training step, compose a run of them and convert the result with the right conversion. You will know what each summary keeps and loses, how much subsampling buys and which sampling scheme it assumes, and how to check any accountant against a numerical one. And for a DP-SGD run you will be able to pick an accountant, state its assumptions, and report <span class="math inline">\(\varepsilon\)</span> in a way someone else can check.</p>
+<p>A model trained with stochastic gradient descent (SGD) under differential privacy (DP), the method called DP-SGD, takes thousands of noisy steps, each on a random batch. The guarantee you report is a privacy level <span class="math inline">\(\varepsilon\)</span> with a small slack <span class="math inline">\(\delta\)</span>, the chance that the promise fails for a person (<a href="../part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting</a> defines it exactly). The composition theorems of Part 3 are far too loose for thousands of steps. An <strong>accountant</strong> does better, because it tracks a richer summary of each step’s privacy cost that composes tightly, and converts the total to <span class="math inline">\((\varepsilon, \delta)\)</span> once, at the end.</p>
+<p>One DP-SGD run is the running example. Each step samples each example with probability 0.01 and adds noise with multiplier 1. After 10,000 steps, advanced composition certifies <span class="math inline">\(\varepsilon = 24{,}379.55\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. But a privacy loss distribution accountant certifies only 6.24 for the same run (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>). So an <span class="math inline">\(\varepsilon\)</span> means nothing until you name the accountant that produced it, which is also why libraries and papers can disagree about the same run.</p>
+<p>If you train with DP-SGD, read four chapters. <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a> is the curve that most accountants track. <a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a> shows how much a random batch helps, provided the data loader samples the way the accountant assumes. <a href="../part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a> computes the tightest <span class="math inline">\(\varepsilon\)</span> available, and <a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a> turns the part into a decision guide.</p>
+<p>The other chapters serve narrower needs. <a href="../part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a> explains the conversion behind every Rényi number. <a href="../part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a> budgets analytics queries with one number. <a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a> reads a guarantee as a limit on attacks. <a href="../part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a> and <a href="../part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition</a> cover shuffled pipelines and budgets decided during training.</p>
+<p>The part uses the accountants of three libraries, Opacus, Google’s <code>dp_accounting</code> and Microsoft’s <code>prv_accountant</code>. Each chapter ends with a link to the full edition, which derives every result.</p>
+<p>By the end, you will be able to account for a DP-SGD run with a library and check it against a second one. Above all, you will report <span class="math inline">\(\varepsilon\)</span> with the accountant that produced it, so that someone else can reproduce it.</p>
 
 
-</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -962,13 +956,13 @@ window.Quarto = {
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part03-dp-foundations/09-lower-bounds.html" class="pagination-link" aria-label="Lower bounds: what privacy costs">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span>
+      <a href="../part03-dp-foundations/11-mean-estimation.html" class="pagination-link" aria-label="Private mean estimation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part04-privacy-accounting/01-renyi-dp.html" class="pagination-link" aria-label="Rényi differential privacy">
-        <span class="nav-page-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

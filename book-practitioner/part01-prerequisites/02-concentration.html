@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -313,26 +348,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -349,55 +396,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -414,61 +461,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -507,14 +560,15 @@ window.Quarto = {
    
   <ul>
   <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">2.1</span> Why this matters</a></li>
-  <li><a href="#sec-conc-chebyshev" id="toc-sec-conc-chebyshev" class="nav-link" data-scroll-target="#sec-conc-chebyshev"><span class="header-section-number">2.2</span> Knowing only the variance: Markov and Chebyshev</a></li>
-  <li><a href="#sec-conc-noise" id="toc-sec-conc-noise" class="nav-link" data-scroll-target="#sec-conc-noise"><span class="header-section-number">2.3</span> Normal and Laplace noise</a></li>
-  <li><a href="#sec-conc-union" id="toc-sec-conc-union" class="nav-link" data-scroll-target="#sec-conc-union"><span class="header-section-number">2.4</span> Many quantities at once: the union bound</a></li>
+  <li><a href="#sec-conc-chebyshev" id="toc-sec-conc-chebyshev" class="nav-link" data-scroll-target="#sec-conc-chebyshev"><span class="header-section-number">2.2</span> Mean or variance only: Markov and Chebyshev</a></li>
+  <li><a href="#sec-conc-noise" id="toc-sec-conc-noise" class="nav-link" data-scroll-target="#sec-conc-noise"><span class="header-section-number">2.3</span> Noise you added: Laplace and Gaussian</a></li>
+  <li><a href="#sec-conc-union" id="toc-sec-conc-union" class="nav-link" data-scroll-target="#sec-conc-union"><span class="header-section-number">2.4</span> Many numbers at once: the union bound</a></li>
   <li><a href="#sec-conc-chernoff" id="toc-sec-conc-chernoff" class="nav-link" data-scroll-target="#sec-conc-chernoff"><span class="header-section-number">2.5</span> Counts: the Chernoff bound</a></li>
-  <li><a href="#sec-conc-hoeffding" id="toc-sec-conc-hoeffding" class="nav-link" data-scroll-target="#sec-conc-hoeffding"><span class="header-section-number">2.6</span> Averages of bounded quantities: Hoeffding and Bernstein</a></li>
-  <li><a href="#sec-conc-mcdiarmid" id="toc-sec-conc-mcdiarmid" class="nav-link" data-scroll-target="#sec-conc-mcdiarmid"><span class="header-section-number">2.7</span> Functions of many inputs: McDiarmid and Azuma</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">2.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">2.9</span> Further reading</a></li>
+  <li><a href="#sec-conc-hoeffding" id="toc-sec-conc-hoeffding" class="nav-link" data-scroll-target="#sec-conc-hoeffding"><span class="header-section-number">2.6</span> Averages of bounded values: Hoeffding, Bernstein, Clopper–Pearson</a></li>
+  <li><a href="#sec-conc-mcdiarmid" id="toc-sec-conc-mcdiarmid" class="nav-link" data-scroll-target="#sec-conc-mcdiarmid"><span class="header-section-number">2.7</span> Functions and adaptive processes: McDiarmid and Azuma</a></li>
+  <li><a href="#sec-conc-code" id="toc-sec-conc-code" class="nav-link" data-scroll-target="#sec-conc-code"><span class="header-section-number">2.8</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">2.9</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">2.10</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
@@ -542,154 +596,100 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">2.1</span> Why this matters</h2>
-<p>Almost every number in a private system is random. Some are random by design, like the noise a mechanism adds to a count. Others are random because of how they were measured. An error rate depends on which examples happened to land in the test set, and the size of a randomly sampled minibatch changes from one step to the next. Before you rely on any of these numbers, you need to know how far it can stray from the value you actually care about.</p>
-<p>A concentration inequality answers that question. It tells you how wide to make an interval around your estimate so that the true value falls outside it only rarely, say once in a thousand runs. This chapter calls that rare event a failure, and the chance of it the <strong>failure probability</strong>, written <span class="math inline">\(\beta\)</span>. It calls the distance from the estimate to either end of the interval the <strong>width</strong>, so the interval reaches one width on each side.</p>
-<p>How wide the interval must be depends on how much you know about the random quantity. If you know only its variance, the width grows quickly as you ask for a smaller failure probability. If you also know the shape of its distribution far from the centre, the width grows very slowly. For a 95% interval the difference is modest, under a factor of two in the examples below. But later parts of this book often ask for failure probabilities of one in a hundred thousand or less. At one in a million, knowing that shape can make an interval a hundred times narrower. This chapter shows how to use everything you know.</p>
+<p>Almost every number in a machine-learning system is random. Some are random by design, like noise deliberately added to a published count, and others because of how they were measured, like an error rate on a test set. Before you publish or act on such a number, you need an error bar for it. And before you collect data, you need to know how much data buys the error bar you want.</p>
+<p>A concentration inequality gives you both. It bounds the chance that a random quantity lands more than some distance from its mean. This chapter calls that event a failure, its chance the <strong>failure probability</strong> <span class="math inline">\(\beta\)</span>, and the distance the <strong>width</strong>. You use every inequality the same way: fix <span class="math inline">\(\beta\)</span> and solve for the width, or fix the width and solve for the number of samples. Which inequality to use depends on what you know about the quantity, and the more you know, the narrower the error bar. At <span class="math inline">\(\beta = 0.05\)</span> the choice matters little, but at the one-in-a-million level that later chapters need, the wrong choice makes an error bar a hundred times too wide.</p>
 </section>
 <section id="sec-conc-chebyshev" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="sec-conc-chebyshev"><span class="header-section-number">2.2</span> Knowing only the variance: Markov and Chebyshev</h2>
-<p>Every bound in this chapter starts from <strong>Markov’s inequality</strong>. It applies only to quantities that cannot be negative, such as a waiting time, a count or a squared error. For such a quantity, knowing the average alone limits how often it can be large. Suppose customers wait 2 minutes at a counter on average. Then at most a quarter of them can wait 8 minutes or more. If more than a quarter did, those customers alone would push the average above 2 minutes, and no customer can have a negative wait that pulls it back down. In general, take a quantity <span class="math inline">\(X\)</span> that cannot be negative, and write <span class="math inline">\(\mathbb E[X]\)</span> for its average. For any positive threshold <span class="math inline">\(a\)</span>, Markov’s inequality says that <span id="eq-auto-02concentration-1"><span class="math display">\[\Pr[X \ge a] \le \frac{\mathbb E[X]}{a}. \tag{2.1}\]</span></span> In the example, an average of 2 minutes and a threshold of 8 give the bound of a quarter.</p>
-<p>The requirement that the quantity cannot be negative is what makes the argument work. A quantity that can be negative can balance a large value with negative ones, and then its average says nothing about how often it is large. A gain that averages zero, for example, could be large and positive half the time and equally large and negative the other half.</p>
-<p>On its own, Markov’s inequality is rarely useful, because it ignores how spread out the quantity is. What makes it useful is that you can apply it to other quantities built from <span class="math inline">\(X\)</span>, and the first of these is the squared distance from the mean. Write <span class="math inline">\(\mu\)</span> for the mean of <span class="math inline">\(X\)</span> and <span class="math inline">\(\sigma^2\)</span> for its variance, the average squared distance from <span class="math inline">\(\mu\)</span>. A squared distance is never negative, so Markov’s inequality applies to it, with <span class="math inline">\(\sigma^2\)</span> as the average. Now pick a distance <span class="math inline">\(t\)</span>. Being at least <span class="math inline">\(t\)</span> from the mean is the same as having a squared distance of at least <span class="math inline">\(t^2\)</span>, so the chance of it is at most <span class="math inline">\(\sigma^2/t^2\)</span>. This is <strong>Chebyshev’s inequality</strong>: <span id="eq-auto-02concentration-2"><span class="math display">\[\Pr[|X - \mu| \ge t] \le \frac{\sigma^2}{t^2}. \tag{2.2}\]</span></span></p>
-<p>To turn the bound into an interval, set the right side equal to <span class="math inline">\(\beta\)</span> and solve for <span class="math inline">\(t\)</span>, which gives <span class="math inline">\(t = \sigma/\sqrt\beta\)</span>. So with probability at least <span class="math inline">\(1 - \beta\)</span>, the quantity lies within <span class="math inline">\(\sigma/\sqrt\beta\)</span> of its mean. The same works for an average of <span class="math inline">\(n\)</span> independent samples. Averaging divides the variance by <span class="math inline">\(n\)</span>, so the width becomes <span class="math inline">\(\sigma/\sqrt{n\beta}\)</span>.</p>
-<p>Chebyshev’s bound is weak because it must hold for every distribution with the given variance, including those that hide their spread in a rare spike far from the mean. To cover such spikes, the width has to grow like <span class="math inline">\(1/\sqrt\beta\)</span> as the failure probability falls. Most noise is better behaved than that, because its <strong>tail</strong>, the chance of landing far from the centre, falls off quickly. For a quantity whose tail falls off like a normal distribution’s, the width is only <span class="math inline">\(\sigma\sqrt{2\ln(1/\beta)}\)</span>, and the next section shows where this comes from. <a href="#tbl-width-price" class="quarto-xref">Table&nbsp;<span>2.1</span></a> compares the two widths.</p>
-<div id="tbl-width-price" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-width-price-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.1: Width needed to fail with probability at most <span class="math inline">\(\beta\)</span>, in standard deviations.
-</figcaption>
-<div aria-describedby="tbl-width-price-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Failure probability <span class="math inline">\(\beta\)</span></th>
-<th>Chebyshev, <span class="math inline">\(1/\sqrt\beta\)</span></th>
-<th>Normal-shaped tail, <span class="math inline">\(\sqrt{2\ln(1/\beta)}\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><span class="math inline">\(0.05\)</span></td>
-<td>4.5</td>
-<td>2.4</td>
-</tr>
-<tr class="even">
-<td><span class="math inline">\(10^{-3}\)</span></td>
-<td>31.6</td>
-<td>3.7</td>
-</tr>
-<tr class="odd">
-<td><span class="math inline">\(10^{-6}\)</span></td>
-<td>1,000</td>
-<td>5.3</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p>At a failure probability of 5%, Chebyshev needs 4.5 standard deviations, and the normal-shaped tail needs about half as many. At one in a million the gap becomes enormous, since Chebyshev needs 1,000 standard deviations where the normal-shaped tail needs 5.3. So Chebyshev’s inequality is fine for a quick 95% error bar, and useless when failures must be very rare.</p>
+<h2 data-number="2.2" class="anchored" data-anchor-id="sec-conc-chebyshev"><span class="header-section-number">2.2</span> Mean or variance only: Markov and Chebyshev</h2>
+<p><strong>Markov’s inequality</strong> needs only the average of a quantity <span class="math inline">\(X\)</span> that cannot be negative, such as a cost or a latency. It bounds the chance that <span class="math inline">\(X\)</span> reaches a threshold <span class="math inline">\(a\)</span>: <span id="eq-auto-02concentration-1"><span class="math display">\[\Pr[X \ge a] \le \frac{\mathbb E[X]}{a}. \tag{2.1}\]</span></span> Setting the right side to <span class="math inline">\(\beta\)</span> says that <span class="math inline">\(X\)</span> stays below <span class="math inline">\(\mathbb E[X]/\beta\)</span> except with probability <span class="math inline">\(\beta\)</span>. If requests take 2 ms on average, at most a quarter take 8 ms or more. The condition matters, because a quantity that can be negative can hide large values behind negative ones.</p>
+<p><strong>Chebyshev’s inequality</strong> adds the variance. Write <span class="math inline">\(\mu\)</span> for the mean and <span class="math inline">\(\sigma^2\)</span> for the variance. The chance of landing a distance <span class="math inline">\(t\)</span> from the mean is then <span id="eq-auto-02concentration-2"><span class="math display">\[\Pr[|X - \mu| \ge t] \le \frac{\sigma^2}{t^2}. \tag{2.2}\]</span></span> So the width is <span class="math inline">\(\sigma/\sqrt\beta\)</span>. For an average of <span class="math inline">\(n\)</span> independent samples, divide it by <span class="math inline">\(\sqrt n\)</span>. It holds for every distribution, which makes it safe when you distrust the shape of the data. The price is steep at small <span class="math inline">\(\beta\)</span>, though. At a 95% level it asks for 4.5 standard deviations where a normal-shaped tail needs 2.4. At one in a million, it asks for 1,000 where the normal needs 5.3. So use it for a quick 95% error bar and for nothing stricter.</p>
 </section>
 <section id="sec-conc-noise" class="level2" data-number="2.3">
-<h2 data-number="2.3" class="anchored" data-anchor-id="sec-conc-noise"><span class="header-section-number">2.3</span> Normal and Laplace noise</h2>
-<p>When you know the distribution of the noise, you don’t need a general inequality. You can read the width directly off the distribution’s tail. The two noise distributions this book uses most are the Laplace and the normal distributions (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>), both centred at zero.</p>
-<p>Laplace noise, written <span class="math inline">\(\mathrm{Lap}(b)\)</span>, has a scale <span class="math inline">\(b\)</span> that sets its typical size. Its tail has an exact formula, which says how likely a draw <span class="math inline">\(L\)</span> is to land more than a distance <span class="math inline">\(t\)</span> from zero: <span id="eq-auto-02concentration-3"><span class="math display">\[\Pr[|L| &gt; t] = e^{-t/b}. \tag{2.3}\]</span></span> Setting this chance equal to <span class="math inline">\(\beta\)</span> and solving for <span class="math inline">\(t\)</span> gives the width, so with probability <span class="math inline">\(1 - \beta\)</span> the noise stays within <span class="math inline">\(b\ln(1/\beta)\)</span> of zero.</p>
-<p>Chebyshev’s inequality would use only the variance of Laplace noise, which is <span class="math inline">\(2b^2\)</span>, and it pays for that. For scale 1 and a 95% interval, it gives a width of about 6.3, while the exact tail gives about 3.0. At a failure probability of one in a million, the gap grows to 1,414 against 13.8. So ignoring the shape of the noise makes the interval a hundred times wider.</p>
-<p>Normal noise with standard deviation <span class="math inline">\(\sigma\)</span> has no simple formula for its tail, but a simple bound on it is enough to compute the width. For a draw <span class="math inline">\(Z\)</span> of that noise, it says <span id="eq-auto-02concentration-4"><span class="math display">\[\Pr[|Z| &gt; t] \le e^{-t^2/(2\sigma^2)}. \tag{2.4}\]</span></span> Solving for <span class="math inline">\(t\)</span> in the same way gives the width <span class="math inline">\(\sigma\sqrt{2\ln(1/\beta)}\)</span> from <a href="#tbl-width-price" class="quarto-xref">Table&nbsp;<span>2.1</span></a>.</p>
-<p>The shapes of the two tails explain why the widths grow at different rates. The Laplace tail falls like <span class="math inline">\(e^{-t}\)</span>, so its width grows like <span class="math inline">\(\ln(1/\beta)\)</span>. The normal tail falls faster, like <span class="math inline">\(e^{-t^2}\)</span>, so only the squared width grows like <span class="math inline">\(\ln(1/\beta)\)</span>. That leaves the width itself growing like the square root of the logarithm, which is very slowly indeed.</p>
-<p>Sometimes you add noisy values together, for example to compute a total from several noisy counts. Write <span class="math inline">\(S\)</span> for the sum of <span class="math inline">\(k\)</span> independent Laplace draws with scale <span class="math inline">\(b\)</span>. Near its centre the sum looks like a normal distribution, as the central limit theorem (CLT) predicts. Far from the centre, though, its tail keeps the slow decay of a single Laplace draw, like <span class="math inline">\(e^{-t}\)</span> rather than <span class="math inline">\(e^{-t^2}\)</span>. A bound that is valid everywhere has to describe both regions: <span id="eq-auto-02concentration-5"><span class="math display">\[\Pr[S \ge t] \le \exp\Big(-\min\Big(\frac{t^2}{8kb^2}, \frac{t}{4b}\Big)\Big). \tag{2.5}\]</span></span> The constants come from the derivation in the full edition. What matters here is the shape. Up to <span class="math inline">\(t = 2kb\)</span>, where the two terms inside the minimum are equal, the first term is the smaller one, and the bound has the normal shape. Beyond that point the second term takes over, and the bound falls only like <span class="math inline">\(e^{-t}\)</span>, as a Laplace tail does.</p>
-<p>The difference matters whenever you need a guarantee. Take 10 draws with scale 1, and approximate their sum by a normal distribution with the same mean and variance. That approximation says the sum reaches 20 with probability <span class="math inline">\(3.9\times10^{-6}\)</span>, but simulation gives <span class="math inline">\(3.4\times10^{-5}\)</span>, about nine times more (<a href="#fig-laplace-sum" class="quarto-xref">Figure&nbsp;<span>2.1</span></a>). A system that trusted the approximation would therefore fail nine times as often as it promised. The bound above gives <span class="math inline">\(6.7\times10^{-3}\)</span> at the same point, which is far from the truth but never below it. So when the answer must be a guarantee, use a bound, not the CLT.</p>
-<div id="fig-laplace-sum" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-laplace-sum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/laplace_sum.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laplace-sum-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.1: Empirical tail of a sum of 10 <span class="math inline">\(\mathrm{Lap}(1)\)</span> draws, against the bound above and the normal approximation, which badly underestimates the far tail.
-</figcaption>
-</figure>
-</div>
+<h2 data-number="2.3" class="anchored" data-anchor-id="sec-conc-noise"><span class="header-section-number">2.3</span> Noise you added: Laplace and Gaussian</h2>
+<p>When the randomness is noise you added yourself, you know its distribution exactly, so you read the width off its tail and need no inequality. Laplace noise with scale <span class="math inline">\(b\)</span> stays within its width <span id="eq-auto-02concentration-3"><span class="math display">\[b\ln(1/\beta) \tag{2.3}\]</span></span> of zero, except with probability <span class="math inline">\(\beta\)</span>. For normal noise with standard deviation <span class="math inline">\(\sigma\)</span>, multiply <span class="math inline">\(\sigma\)</span> by the normal quantile at <span class="math inline">\(1-\beta/2\)</span>, which is 1.96 at 95%. The bound <span class="math inline">\(\sigma\sqrt{2\ln(1/\beta)}\)</span> is a convenient upper limit for mental arithmetic. In code, <code>scipy.stats.laplace.isf</code> and <code>scipy.stats.norm.isf</code> give the exact quantiles, as does the standard-library snippet in <a href="#sec-conc-code" class="quarto-xref"><span>Section 2.8</span></a>.</p>
+<p>The typical use is the error bar you publish with a noisy count. If the count carries Laplace noise of scale 2, the published value is within 5.99 of the true one with 95% probability. Later parts choose the noise scale; this chapter only reads off its error bar. Publish that number next to the count, because an analyst who treats it as exact will over-read small differences.</p>
+<p>A sum of <span class="math inline">\(k\)</span> noisy counts needs care. Near its centre the total noise looks normal, with standard deviation <span class="math inline">\(b\sqrt{2k}\)</span>, but its far tail decays like a single Laplace draw, so the normal approximation understates rare failures. For a sum of 10 draws, it understates the chance of a large total about ninefold. A valid one-sided width is the larger of <span id="eq-auto-02concentration-4"><span class="math display">\[\sqrt{8kb^2\ln(1/\beta)} \quad\text{and}\quad 4b\ln(1/\beta). \tag{2.4}\]</span></span> For two sides, use <span class="math inline">\(\beta/2\)</span>, which gives 17.18 at 95% for 10 counts of scale 1. If that is too wide, simulate the noise a million times and read off the quantile, since you know its distribution exactly.</p>
 </section>
 <section id="sec-conc-union" class="level2" data-number="2.4">
-<h2 data-number="2.4" class="anchored" data-anchor-id="sec-conc-union"><span class="header-section-number">2.4</span> Many quantities at once: the union bound</h2>
-<p>Often you need many random quantities to stay close to their targets at the same time. A system might release <span class="math inline">\(k\)</span> noisy counts and need every one of them to be accurate. The <strong>union bound</strong> handles this. It says that the chance that at least one of several events happens is at most the sum of their separate chances. The sum can overcount, because an outcome in which two events happen is counted twice, but it never misses an outcome. So if you want all <span class="math inline">\(k\)</span> counts to be accurate except with probability <span class="math inline">\(\beta\)</span>, ask each one to fail with probability at most <span class="math inline">\(\beta/k\)</span>.</p>
-<p>Dividing the failure probability by <span class="math inline">\(k\)</span> costs little, because the widths depend on it only through a logarithm, and the logarithm turns the division into an addition: <span id="eq-auto-02concentration-6"><span class="math display">\[\ln\frac{k}{\beta} = \ln k + \ln\frac1\beta. \tag{2.6}\]</span></span> All <span class="math inline">\(k\)</span> Laplace draws then stay within <span class="math inline">\(b\ln(k/\beta)\)</span> of zero, and all <span class="math inline">\(k\)</span> normal draws within <span class="math inline">\(\sigma\sqrt{2\ln(k/\beta)}\)</span>. Because the number of quantities enters only through a logarithm, controlling many of them at once is cheap.</p>
-<p>The union bound looks crude, but for rare, independent failures it is nearly exact. When the failures are independent and each is rare, two at once are rarer still, so the double counting adds almost nothing. For an example, take 100 Laplace draws with scale 1, and look at the one furthest from zero. With a failure probability of 0.05, the union bound gives the width <span class="math inline">\(\ln(100/0.05) = 7.60\)</span>. In simulation, the draw furthest from zero lands beyond 7.60 in 4.86% of runs, just under the 5% the bound allows (<a href="#fig-laplace-max" class="quarto-xref">Figure&nbsp;<span>2.2</span></a>). The bound is far less exact when the failures are correlated. If all <span class="math inline">\(k\)</span> events were the same event, the sum would count it <span class="math inline">\(k\)</span> times.</p>
-<div id="fig-laplace-max" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-laplace-max-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/laplace_max.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-laplace-max-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.2: Left: the width <span class="math inline">\(b\ln(k/\beta)\)</span> for the draw furthest from zero among <span class="math inline">\(k\)</span> Laplace draws grows like <span class="math inline">\(\ln k\)</span>. Right: the simulated probability that this draw lands beyond the width stays near <span class="math inline">\(\beta = 0.05\)</span> for every <span class="math inline">\(k\)</span>.
-</figcaption>
-</figure>
-</div>
+<h2 data-number="2.4" class="anchored" data-anchor-id="sec-conc-union"><span class="header-section-number">2.4</span> Many numbers at once: the union bound</h2>
+<p>A dashboard of <span class="math inline">\(k\)</span> noisy counts should be right everywhere at once, not just count by count. The <strong>union bound</strong> says the chance that any of several failures happens is at most the sum of their chances. So give each count the failure probability <span class="math inline">\(\beta/k\)</span>. Because the widths above depend on <span class="math inline">\(\beta\)</span> only through a logarithm, this is cheap. For 1,000 counts with Laplace scale 2, the width that covers them all is 19.81, against 5.99 for one. The union bound needs no independence, so it is always valid, and for rare independent failures it is nearly exact.</p>
 </section>
 <section id="sec-conc-chernoff" class="level2" data-number="2.5">
 <h2 data-number="2.5" class="anchored" data-anchor-id="sec-conc-chernoff"><span class="header-section-number">2.5</span> Counts: the Chernoff bound</h2>
-<p>Many quantities in machine learning are counts, such as the errors on a test set, the examples in a sampled minibatch or the records that match a query. A count adds up many yes-or-no outcomes. When you need a very small failure probability, Chebyshev’s bound for a count is far too loose. The <strong>Chernoff bound</strong> does much better, with a tail that falls exponentially, by adding one more idea. It assumes that the outcomes are independent of one another, and the calculation below shows where it needs this.</p>
-<p>The idea is to apply Markov’s inequality to <span class="math inline">\(e^{\lambda X}\)</span> instead of to <span class="math inline">\(X\)</span> itself, where <span class="math inline">\(\lambda\)</span> is a positive number you are free to choose. The exponential keeps the order of values, so <span class="math inline">\(X\)</span> is at least <span class="math inline">\(t\)</span> exactly when <span class="math inline">\(e^{\lambda X}\)</span> is at least <span class="math inline">\(e^{\lambda t}\)</span>. Markov’s inequality then gives <span id="eq-auto-02concentration-7"><span class="math display">\[\Pr[X \ge t] \le \frac{\mathbb E[e^{\lambda X}]}{e^{\lambda t}}. \tag{2.7}\]</span></span> The exponential turns a modest gap between <span class="math inline">\(X\)</span> and <span class="math inline">\(t\)</span> into a huge gap between <span class="math inline">\(e^{\lambda X}\)</span> and <span class="math inline">\(e^{\lambda t}\)</span>. The threshold on the bottom of the fraction is then far above the typical values on top, so the bound becomes small. The bound holds for every positive <span class="math inline">\(\lambda\)</span>, and you pick the one that makes it smallest. For a count, the average on top, <span class="math inline">\(\mathbb E[e^{\lambda X}]\)</span>, is also easy to compute, because the exponential of a sum is a product of exponentials. This is where independence comes in. For independent outcomes, the average of that product is the product of the averages, one factor per outcome.</p>
-<p>Carrying out this calculation for a count <span class="math inline">\(S\)</span> gives a bound in terms of two numbers. The first is the expected count, written <span class="math inline">\(\mu\)</span>. The second is the relative deviation you ask about, written <span class="math inline">\(\delta\)</span>, so that <span class="math inline">\(\delta = 0.2\)</span> means 20% above or below <span class="math inline">\(\mu\)</span>. The two Chernoff bounds are <span id="eq-auto-02concentration-8"><span class="math display">\[\Pr[S \ge (1+\delta)\mu] \le \exp\Big(-\frac{\delta^2\mu}{2+\delta}\Big), \qquad \Pr[S \le (1-\delta)\mu] \le \exp\Big(-\frac{\delta^2\mu}{2}\Big). \tag{2.8}\]</span></span> The first bounds the chance that the count overshoots its mean by the fraction <span class="math inline">\(\delta\)</span>. The second bounds the chance that it undershoots, and holds for <span class="math inline">\(\delta\)</span> between 0 and 1. For small <span class="math inline">\(\delta\)</span>, setting either bound to <span class="math inline">\(\beta\)</span> gives a one-sided width of about <span class="math inline">\(\sqrt{2\mu\ln(1/\beta)}\)</span>.</p>
-<p>The exponent contains the expected count <span class="math inline">\(\mu\)</span>, not the number of trials, and this has a cost and a benefit. The cost is that a count of rare events has a small error relative to its mean only once you expect many of them. For example, a million trials that each succeed with probability one in a million expect a single success. That count is far from concentrated, since no success at all and two successes are both common outcomes.</p>
-<p>The benefit is that the calculation works with each outcome’s own probability before adding them up into <span class="math inline">\(\mu\)</span>. An outcome that is a yes with probability <span class="math inline">\(p\)</span> has variance <span class="math inline">\(p(1-p)\)</span>, which is about <span class="math inline">\(p\)</span> when <span class="math inline">\(p\)</span> is small. The variance of a count is the sum of its outcomes’ variances, so a count of rare events has a variance of about <span class="math inline">\(\mu\)</span>. The Chernoff bound adapts to that small variance. A bound that knew only that each outcome is 0 or 1 would have to assume the largest variance such an outcome can have, which is 0.25. The next section shows how much that costs.</p>
-<p>The overshoot and undershoot bounds also differ. For large <span class="math inline">\(\delta\)</span>, the exponent of the overshoot bound grows like <span class="math inline">\(\delta\mu\)</span> rather than <span class="math inline">\(\delta^2\mu\)</span>, so the overshoot bound falls more slowly. Counts have long right tails, like the Poisson distribution, so a count can overshoot its mean by a lot far more easily than it can undershoot it.</p>
-<p>Here is how the bound is used in practice. A training loop forms each minibatch by including each of 60,000 examples independently with probability 0.01. The batch size is a count with expected value <span class="math inline">\(\mu = 600\)</span>. If your code or your analysis assumes a batch size near 600, you need to know how often that assumption fails. With <span class="math inline">\(\delta = 0.2\)</span>, the overshoot bound says a batch is more than 20% too large with probability at most <span class="math inline">\(1.8\times10^{-5}\)</span>. The undershoot bound gives <span class="math inline">\(6.1\times10^{-6}\)</span> for a batch more than 20% too small. Adding the two, a single batch leaves the range <span class="math inline">\(600 \pm 20\%\)</span> with probability about <span class="math inline">\(2.4\times10^{-5}\)</span>. Over 1,000 training steps, the union bound multiplies this by 1,000, so the chance that any batch leaves the range is about 0.024.</p>
+<p>Batch sizes under random sampling, the records that match a query and the errors on a test set are all counts of independent yes-or-no outcomes. Write <span class="math inline">\(\mu\)</span> for the mean of a count <span class="math inline">\(S\)</span>, and <span class="math inline">\(\delta\)</span> for a relative deviation between 0 and 1. The <strong>Chernoff bound</strong> then says <span id="eq-auto-02concentration-5"><span class="math display">\[\Pr[S \ge (1+\delta)\mu] \le e^{-\delta^2\mu/(2+\delta)}, \qquad \Pr[S \le (1-\delta)\mu] \le e^{-\delta^2\mu/2}. \tag{2.5}\]</span></span> For example, suppose each example joins a batch with probability 0.01, so that the batch size has mean 600. It leaves <span class="math inline">\(600 \pm 20\%\)</span> with probability at most <span class="math inline">\(2.4\times10^{-5}\)</span> per step. Over 1,000 steps, that is about 0.024. That is good enough for sizing memory, but code that silently assumes a fixed batch size will still break on the rare large batch, so handle it explicitly.</p>
+<p>Two things go wrong in practice. The bound depends on the expected count, not on the number of trials, so a count of rare events has a wide relative error bar however many trials you run. And it needs independence: with several rows per user, count users.</p>
 </section>
 <section id="sec-conc-hoeffding" class="level2" data-number="2.6">
-<h2 data-number="2.6" class="anchored" data-anchor-id="sec-conc-hoeffding"><span class="header-section-number">2.6</span> Averages of bounded quantities: Hoeffding and Bernstein</h2>
-<p>Often you know neither the distribution nor the variance, only the range. A loss clipped to lie between 0 and 1 is one example, and a 0/1 indicator of a mistake is another. Knowing the range already tells you a lot. A quantity confined to an interval cannot have a heavy tail, one that reaches far out with sizable probability, because it cannot go past the ends at all. Its variance cannot be large either. The most spread-out quantity on an interval puts half its probability on each end, like a fair coin, and its variance is a quarter of the squared length of the interval.</p>
-<p><strong>Hoeffding’s inequality</strong> turns this into a width for an average. Take <span class="math inline">\(n\)</span> independent quantities, each in the same interval from <span class="math inline">\(a\)</span> to <span class="math inline">\(b\)</span>. Write <span class="math inline">\(\bar X_n\)</span> for their average and <span class="math inline">\(\mu\)</span> for its expected value. Hoeffding’s inequality says that the average has a normal-shaped tail, as if each quantity had the largest variance its range allows. With probability at least <span class="math inline">\(1-\beta\)</span>, <span id="eq-auto-02concentration-9"><span class="math display">\[|\bar X_n - \mu| &lt; (b - a)\sqrt{\frac{\ln(2/\beta)}{2n}}. \tag{2.9}\]</span></span> The 2 inside the logarithm appears because the interval has two sides, and each side is allowed half the failure probability. The width shrinks like <span class="math inline">\(1/\sqrt n\)</span> as you add samples. As you lower the failure probability, it grows only like the square root of a logarithm, as for normal noise.</p>
-<p>The most common use is to compare a model’s error on its training data with its <strong>true error</strong>, its average loss on new data from the same source. For one fixed model, the training error is an average of <span class="math inline">\(n\)</span> losses between 0 and 1, so Hoeffding’s inequality applies directly. A learner, however, picks its model after seeing the data. The model it picks is the one that looks best on the training data, which makes it the one whose training error is most likely to be too optimistic. So the bound must hold for every model the learner might pick.</p>
-<p>Suppose the candidates form a finite set <span class="math inline">\(H\)</span>, and write <span class="math inline">\(|H|\)</span> for their number. The union bound over all of them puts an extra <span class="math inline">\(\ln|H|\)</span> inside the logarithm. With probability at least <span class="math inline">\(1-\beta\)</span>, every candidate’s training error is then within <span id="eq-auto-02concentration-10"><span class="math display">\[\sqrt{\frac{\ln(2|H|/\beta)}{2n}} \tag{2.10}\]</span></span> of its true error. Because the number of candidates enters only through its logarithm, even a huge set of them costs little.</p>
-<p>Knowing only the range is Hoeffding’s strength, since there is nothing to estimate. It is also its weakness, because the inequality assumes the largest variance that the range allows. A 0/1 quantity that is rarely 1 has a much smaller variance than that. The gap is therefore widest exactly when you measure small rates, such as a false-positive rate.</p>
-<p>Suppose a classifier makes 1 false positive on 1,000 negative examples, and you want a 95% upper bound on its true false-positive rate. An upper bound needs only one side of the interval, so it uses <span class="math inline">\(\ln(1/\beta)\)</span> in place of <span class="math inline">\(\ln(2/\beta)\)</span>. With <span class="math inline">\(n = 1{,}000\)</span>, this one-sided Hoeffding bound adds about 0.039 to the measured rate, so the added width alone is about 40 times the rate you measured. The culprit is the variance Hoeffding’s inequality assumes, which is 0.25, the variance of a fair coin. A single 0/1 outcome that is 1 with probability near 0.001 has a variance of only about 0.001.</p>
-<p><strong>Bernstein’s inequality</strong> fixes this by using the variance. Write <span class="math inline">\(\sigma^2\)</span> for the variance of each quantity, and <span class="math inline">\(M\)</span> for the largest distance it can be from its mean. Then the one-sided width is about <span id="eq-auto-02concentration-11"><span class="math display">\[\sqrt{\frac{2\sigma^2\ln(1/\beta)}{n}} + \frac{2M\ln(1/\beta)}{3n}. \tag{2.11}\]</span></span> The first term is the normal-shaped width, computed with the true variance. The second term pays for the range, but it shrinks like <span class="math inline">\(1/n\)</span> instead of <span class="math inline">\(1/\sqrt n\)</span>. For the classifier, take <span class="math inline">\(M = 1\)</span> and estimate the variance as 0.001. Bernstein’s inequality then adds about 0.0045, against Hoeffding’s 0.039. This calculation is only a heuristic, because the variance was estimated from the same data. A rigorous version, empirical Bernstein, gives a wider interval.</p>
-<p>The exact answer comes from the binomial distribution itself, through the Clopper–Pearson interval. Its one-sided 95% upper bound on the rate is 0.0047, a little below the measured rate plus Bernstein’s 0.0045. The same number is the upper end of a two-sided 90% interval, which is how <a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a> computes it.</p>
-<p><a href="#fig-bernoulli-tails" class="quarto-xref">Figure&nbsp;<span>2.3</span></a> shows the cost of ignoring the variance on a second example. It averages 200 yes-or-no outcomes (Bernoulli variables), each a yes with probability 0.1, and asks how likely the average is to reach 0.15. Hoeffding’s inequality bounds that chance by 0.37. Chebyshev’s inequality does better here, with 0.18, because it uses the variance. At this moderate deviation its <span class="math inline">\(1/t^2\)</span> has not yet fallen far behind an exponential tail, so knowing the variance counts for more than knowing the tail’s shape. The Chernoff bound uses both and gets 0.135. Even that is far above the true chance of about <span class="math inline">\(9.6\times10^{-3}\)</span>, because a bound must cover every case its assumptions allow.</p>
-<div id="fig-bernoulli-tails" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-bernoulli-tails-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/bernoulli_tails.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bernoulli-tails-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.3: Empirical tail of the mean of 200 Bernoulli(0.1) variables against the Markov, Chebyshev, Hoeffding and Chernoff bounds.
-</figcaption>
-</figure>
-</div>
+<h2 data-number="2.6" class="anchored" data-anchor-id="sec-conc-hoeffding"><span class="header-section-number">2.6</span> Averages of bounded values: Hoeffding, Bernstein, Clopper–Pearson</h2>
+<p>Often you know only that each value lies in an interval of length <span class="math inline">\(R\)</span>, as for a clipped loss or a 0/1 mistake. Then <strong>Hoeffding’s inequality</strong> bounds the error of an average of <span class="math inline">\(n\)</span> independent values. With probability <span class="math inline">\(1-\beta\)</span>, the average is within <span id="eq-auto-02concentration-6"><span class="math display">\[R\sqrt{\frac{\ln(2/\beta)}{2n}} \tag{2.6}\]</span></span> of its mean. Its main use is planning, because it needs nothing you don’t know in advance. Solving for <span class="math inline">\(n\)</span> gives <span id="eq-auto-02concentration-7"><span class="math display">\[n \ge \frac{R^2\ln(2/\beta)}{2t^2} \tag{2.7}\]</span></span> for a width <span class="math inline">\(t\)</span>, so measuring accuracy to within one percentage point at 95% takes 18,445 test examples. When you pick the best of <span class="math inline">\(m\)</span> models on a validation set, replace <span class="math inline">\(\beta\)</span> by <span class="math inline">\(\beta/m\)</span>, because the winner is the one most likely to look too good.</p>
+<p>Hoeffding’s inequality is too loose for small rates, because it assumes the largest variance the range allows. For a classifier with 1 false positive in 1,000 negatives, it adds 0.039 to the measured rate. <strong>Bernstein’s inequality</strong> uses the variance <span class="math inline">\(\sigma^2\)</span> instead, with a one-sided width of about <span id="eq-auto-02concentration-8"><span class="math display">\[\sqrt{\frac{2\sigma^2\ln(1/\beta)}{n}} + \frac{2\ln(1/\beta)}{3n} \tag{2.8}\]</span></span> for values in <span class="math inline">\([0, 1]\)</span>, and adds only 0.0045 here. Plugging in a variance estimated from the same data is a heuristic, though. For rates, use the exact binomial answer instead, the <strong>Clopper–Pearson</strong> interval. For the classifier, its 95% upper bound is 0.0047. With no errors at all it would be 0.0030, the “rule of three”: zero failures in <span class="math inline">\(n\)</span> trials bound the rate by about <span class="math inline">\(3/n\)</span>. Plan with Hoeffding and report with Clopper–Pearson (<a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>).</p>
 </section>
 <section id="sec-conc-mcdiarmid" class="level2" data-number="2.7">
-<h2 data-number="2.7" class="anchored" data-anchor-id="sec-conc-mcdiarmid"><span class="header-section-number">2.7</span> Functions of many inputs: McDiarmid and Azuma</h2>
-<p>So far, every quantity was a sum of independent pieces. Two common situations break this. A trained model’s error is a complicated function of its training data, not a sum. And in a sequential procedure, each step can depend on what happened before, so the pieces are not independent. Concentration still holds in both situations, provided that no single input or step can move the result by much.</p>
-<p>Start with a function <span class="math inline">\(f\)</span> of independent inputs <span class="math inline">\(X_1, \dots, X_n\)</span>, and write <span class="math inline">\(X\)</span> for all of them together. Suppose that changing only the <span class="math inline">\(i\)</span>-th input, with the others held fixed, moves the result by at most an amount <span class="math inline">\(c_i\)</span>. <strong>McDiarmid’s inequality</strong> says that the result then concentrates around its average as tightly as a sum of pieces with ranges <span class="math inline">\(c_i\)</span> would: <span id="eq-auto-02concentration-12"><span class="math display">\[\Pr[f(X) - \mathbb E f(X) \ge t] \le \exp\Big(-\frac{2t^2}{\sum_ic_i^2}\Big). \tag{2.12}\]</span></span></p>
-<p>The reason is easiest to see if you reveal the inputs one at a time and keep a running best guess of the result. Before you see any input, the best guess is the average result. After you see the first input, it is the average over the inputs you have not seen yet, with the first one fixed. Each revealed input updates the guess in this way, and after the last one the guess is the result itself. So the deviation you want to bound is the sum of <span class="math inline">\(n\)</span> updates.</p>
-<p>Two facts about these updates make the sum concentrate. First, an update is zero on average. Before you see an input, you cannot predict which way it will move your guess, or that prediction would already be part of the guess. Second, the <span class="math inline">\(i\)</span>-th update is small. Changing the <span class="math inline">\(i\)</span>-th input moves the result by at most <span class="math inline">\(c_i\)</span>, so it moves the guess by at most <span class="math inline">\(c_i\)</span> too. The updates are not independent, since each one depends on the inputs before it. The next paragraphs explain why the two facts are enough anyway.</p>
-<p>For the training error of a fixed model, with losses between 0 and 1, changing one example moves the average by at most <span class="math inline">\(1/n\)</span>. With <span class="math inline">\(c_i = 1/n\)</span> for every input, McDiarmid’s inequality gives back Hoeffding’s bound. Its real use is for functions that are not averages, such as the error of a model retrained on the data, and <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a> uses it that way. The amount <span class="math inline">\(c_i\)</span> must hold for every possible change to the <span class="math inline">\(i\)</span>-th input, not just for typical ones, because the argument charges each input its largest possible move. This per-record influence returns in later parts under the name sensitivity.</p>
-<p>Hoeffding’s inequality was stated for independent pieces, but its conclusion needs less. It is enough that each piece averages zero given everything before it, and lies in a short interval. A running total whose steps average zero given the past is called a <strong>martingale</strong>, and <strong>Azuma’s inequality</strong> bounds how far it drifts. Suppose the <span class="math inline">\(k\)</span>-th step always lies in an interval of length <span class="math inline">\(d_k\)</span>, and write <span class="math inline">\(D\)</span> for the total drift. Then the chance that it drifts upward by <span class="math inline">\(t\)</span> or more is at most <span id="eq-auto-02concentration-13"><span class="math display">\[\Pr[D \ge t] \le \exp\Big(-\frac{2t^2}{\sum_kd_k^2}\Big), \tag{2.13}\]</span></span> which is McDiarmid’s bound with the step lengths <span class="math inline">\(d_k\)</span> in place of the influences <span class="math inline">\(c_i\)</span>.</p>
-<p>Azuma’s inequality covers procedures that adapt as they go. As an example, flip a coin 200 times, and let each flip depend on the one before. If the previous flip was heads, flip a coin that lands heads with probability 0.7. Otherwise, including for the first flip, use a coin that lands heads with probability 0.3. Because the flips depend on each other, Hoeffding’s inequality does not apply, but you can still bound the drift. To get it, count the heads, and subtract the number of heads you would expect from the coins you chose. Each step of the drift is then the flip’s outcome, 1 or 0, minus the chosen coin’s probability of heads. Given the past, a step averages zero and lies in an interval of length 1. Azuma’s inequality bounds the chance of an upward drift of 20 or more by <span class="math inline">\(1.83\times10^{-2}\)</span>, while simulation gives <span class="math inline">\(1.12\times10^{-3}\)</span> (<a href="#fig-azuma-adaptive" class="quarto-xref">Figure&nbsp;<span>2.4</span></a>).</p>
-<div id="fig-azuma-adaptive" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-azuma-adaptive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/azuma_adaptive.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-azuma-adaptive-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2.4: Empirical tail of the drift in the adaptive coin game against the Azuma bound.
-</figcaption>
-</figure>
-</div>
-<p>The bound is loose partly for the same reason as Hoeffding’s. It assumes that each step has the largest variance its interval allows, which is 0.25. The true variance of each step is 0.21 for either coin, since <span class="math inline">\(0.7 \times 0.3 = 0.3 \times 0.7\)</span>.</p>
+<h2 data-number="2.7" class="anchored" data-anchor-id="sec-conc-mcdiarmid"><span class="header-section-number">2.7</span> Functions and adaptive processes: McDiarmid and Azuma</h2>
+<p><strong>McDiarmid’s inequality</strong> extends Hoeffding’s to any function of independent inputs, as long as changing one input, the <span class="math inline">\(i\)</span>-th, moves the result by at most <span class="math inline">\(c_i\)</span>. The tail is then <span class="math inline">\(\exp(-2t^2/\sum_i c_i^2)\)</span>, and <a href="../part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a> uses it for the error of a retrained model. The <span class="math inline">\(c_i\)</span> is the worst-case influence of one record, a quantity later parts return to.</p>
+<p><strong>Azuma’s inequality</strong> gives the same tail for a running total whose steps may depend on the past but have expected value zero given it, a <strong>martingale</strong>, with <span class="math inline">\(c_i\)</span> replaced by the length of each step’s interval. Use it when an analyst or a training loop picks each step after seeing the last, which breaks the independence the other bounds need.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="2.8">
-<h2 data-number="2.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">2.8</span> Cheat sheet</h2>
+<section id="sec-conc-code" class="level2" data-number="2.8">
+<h2 data-number="2.8" class="anchored" data-anchor-id="sec-conc-code"><span class="header-section-number">2.8</span> Code</h2>
+<p>The functions below compute the widths, sample sizes and rate bounds of this chapter, and print the numbers quoted above.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> statistics <span class="im">import</span> NormalDist</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> laplace_width(b: <span class="bu">float</span>, beta: <span class="bu">float</span>, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""All k draws of Lap(b) noise stay within this distance of zero, except with probability beta."""</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> b <span class="op">*</span> math.log(k <span class="op">/</span> beta)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gaussian_width(sigma: <span class="bu">float</span>, beta: <span class="bu">float</span>, k: <span class="bu">int</span> <span class="op">=</span> <span class="dv">1</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The same for N(0, sigma^2) noise, from the exact normal quantile."""</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sigma <span class="op">*</span> NormalDist().inv_cdf(<span class="dv">1</span> <span class="op">-</span> beta <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> k))</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> laplace_sum_width(k: <span class="bu">int</span>, b: <span class="bu">float</span>, beta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Two-sided width for the sum of k independent Lap(b) noise draws, from the bound."""</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    log_term <span class="op">=</span> math.log(<span class="dv">2</span> <span class="op">/</span> beta)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">max</span>(math.sqrt(<span class="dv">8</span> <span class="op">*</span> k <span class="op">*</span> b<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> log_term), <span class="dv">4</span> <span class="op">*</span> b <span class="op">*</span> log_term)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> chernoff_two_sided(mu: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Chance that a count with mean mu lands more than a fraction delta from it (delta &lt;= 1)."""</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.exp(<span class="op">-</span>(delta<span class="op">**</span><span class="dv">2</span>) <span class="op">*</span> mu <span class="op">/</span> (<span class="dv">2</span> <span class="op">+</span> delta)) <span class="op">+</span> math.exp(<span class="op">-</span>(delta<span class="op">**</span><span class="dv">2</span>) <span class="op">*</span> mu <span class="op">/</span> <span class="dv">2</span>)</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hoeffding_n(width: <span class="bu">float</span>, beta: <span class="bu">float</span>, value_range: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Samples needed for an average to be within width of its mean, except with probability beta."""</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.ceil(value_range<span class="op">**</span><span class="dv">2</span> <span class="op">*</span> math.log(<span class="dv">2</span> <span class="op">/</span> beta) <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> width<span class="op">**</span><span class="dv">2</span>))</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rate_upper_bound(errors: <span class="bu">int</span>, n: <span class="bu">int</span>, beta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Exact (Clopper-Pearson) one-sided upper bound on a rate measured as errors out of n."""</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> cdf(p: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">sum</span>(math.comb(n, i) <span class="op">*</span> p<span class="op">**</span>i <span class="op">*</span> (<span class="dv">1</span> <span class="op">-</span> p) <span class="op">**</span> (n <span class="op">-</span> i) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(errors <span class="op">+</span> <span class="dv">1</span>))</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> errors <span class="op">/</span> n, <span class="fl">1.0</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        mid <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        lo, hi <span class="op">=</span> (mid, hi) <span class="cf">if</span> cdf(mid) <span class="op">&gt;</span> beta <span class="cf">else</span> (lo, mid)</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> hi</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>laplace_width(<span class="dv">2</span>, <span class="fl">0.05</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 5.99</span></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>laplace_width(<span class="dv">2</span>, <span class="fl">0.05</span>, k<span class="op">=</span><span class="dv">1000</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 19.81</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>gaussian_width(<span class="dv">2</span>, <span class="fl">0.05</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 3.92</span></span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>laplace_sum_width(<span class="dv">10</span>, <span class="dv">1</span>, <span class="fl">0.05</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 17.18</span></span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>chernoff_two_sided(<span class="dv">600</span>, <span class="fl">0.2</span>)<span class="sc">:.1e}</span><span class="ss">"</span>)  <span class="co"># 2.4e-05</span></span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(hoeffding_n(<span class="fl">0.01</span>, <span class="fl">0.05</span>))  <span class="co"># 18445</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>rate_upper_bound(<span class="dv">1</span>, <span class="dv">1000</span>, <span class="fl">0.05</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.0047</span></span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>rate_upper_bound(<span class="dv">0</span>, <span class="dv">1000</span>, <span class="fl">0.05</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.0030</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="cheat-sheet" class="level2" data-number="2.9">
+<h2 data-number="2.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">2.9</span> Cheat sheet</h2>
 <div id="tbl-concentration-cheat-sheet" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-concentration-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2.2: The widths of this chapter’s bounds. Rows marked two-sided already cover both sides. To make a one-sided width two-sided, replace <span class="math inline">\(\beta\)</span> by <span class="math inline">\(\beta/2\)</span>.
+Table&nbsp;2.1: Which bound to use, and the width it gives. Two-sided unless marked; for two sides from a one-sided width, use <span class="math inline">\(\beta/2\)</span>.
 </figcaption>
 <div aria-describedby="tbl-concentration-cheat-sheet-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -700,51 +700,66 @@ Table&nbsp;2.2: The widths of this chapter’s bounds. Rows marked two-sided alr
 </colgroup>
 <thead>
 <tr class="header">
-<th>Bound</th>
-<th>What you need to know</th>
-<th>Width at failure probability <span class="math inline">\(\beta\)</span> (Markov: a threshold)</th>
+<th>What you know</th>
+<th>Use</th>
+<th>Width at failure probability <span class="math inline">\(\beta\)</span></th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td><span class="math inline">\(X \ge 0\)</span> and its mean</td>
 <td>Markov</td>
-<td><span class="math inline">\(X \ge 0\)</span>, mean <span class="math inline">\(\mu\)</span></td>
-<td>Threshold <span class="math inline">\(\mu/\beta\)</span></td>
+<td>Stays below <span class="math inline">\(\mathbb E[X]/\beta\)</span></td>
 </tr>
 <tr class="even">
+<td>The variance <span class="math inline">\(\sigma^2\)</span></td>
 <td>Chebyshev</td>
-<td>Variance <span class="math inline">\(\sigma^2\)</span></td>
-<td><span class="math inline">\(\sigma/\sqrt\beta\)</span> (two-sided)</td>
+<td><span class="math inline">\(\sigma/\sqrt\beta\)</span>; only for a quick 95% bar</td>
 </tr>
 <tr class="odd">
-<td>Normal noise <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span></td>
-<td>The distribution</td>
-<td><span class="math inline">\(\sigma\sqrt{2\ln(1/\beta)}\)</span> (two-sided); <span class="math inline">\(k\)</span> draws: <span class="math inline">\(\sigma\sqrt{2\ln(k/\beta)}\)</span></td>
-</tr>
-<tr class="even">
 <td>Laplace noise <span class="math inline">\(\mathrm{Lap}(b)\)</span></td>
-<td>The distribution</td>
-<td><span class="math inline">\(b\ln(1/\beta)\)</span> (two-sided); <span class="math inline">\(k\)</span> draws: <span class="math inline">\(b\ln(k/\beta)\)</span></td>
+<td>Its exact tail</td>
+<td><span class="math inline">\(b\ln(1/\beta)\)</span>; <span class="math inline">\(k\)</span> draws: <span class="math inline">\(b\ln(k/\beta)\)</span></td>
+</tr>
+<tr class="even">
+<td>Normal noise <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span></td>
+<td>Its exact quantile</td>
+<td><span class="math inline">\(\sigma \cdot z_{1-\beta/2}\)</span>, at most <span class="math inline">\(\sigma\sqrt{2\ln(1/\beta)}\)</span></td>
 </tr>
 <tr class="odd">
+<td>A sum of <span class="math inline">\(k\)</span> Laplace draws</td>
+<td>The sum bound, or simulation</td>
+<td><span class="math inline">\(\max\big(\sqrt{8kb^2\ln(1/\beta)},\ 4b\ln(1/\beta)\big)\)</span>, one-sided</td>
+</tr>
+<tr class="even">
+<td>A count with mean <span class="math inline">\(\mu\)</span></td>
 <td>Chernoff</td>
-<td>A count of independent outcomes, mean <span class="math inline">\(\mu\)</span></td>
-<td><span class="math inline">\(\approx\sqrt{2\mu\ln(1/\beta)}\)</span> for small deviations (one-sided)</td>
-</tr>
-<tr class="even">
-<td>Hoeffding</td>
-<td>An average of <span class="math inline">\(n\)</span> independent values in <span class="math inline">\([a, b]\)</span></td>
-<td><span class="math inline">\((b-a)\sqrt{\ln(1/\beta)/(2n)}\)</span> (one-sided)</td>
+<td><span class="math inline">\(\approx\sqrt{2\mu\ln(1/\beta)}\)</span>, one-sided</td>
 </tr>
 <tr class="odd">
-<td>Bernstein</td>
-<td>An average of <span class="math inline">\(n\)</span> independent values with variance <span class="math inline">\(\sigma^2\)</span> and largest deviation <span class="math inline">\(M\)</span></td>
-<td><span class="math inline">\(\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)\)</span> (one-sided)</td>
+<td>An average of <span class="math inline">\(n\)</span> values in a range <span class="math inline">\(R\)</span></td>
+<td>Hoeffding</td>
+<td><span class="math inline">\(R\sqrt{\ln(2/\beta)/(2n)}\)</span>; plan <span class="math inline">\(n\)</span> with it</td>
 </tr>
 <tr class="even">
-<td>McDiarmid, Azuma</td>
-<td>Influences <span class="math inline">\(c_i\)</span>, or step lengths <span class="math inline">\(d_k\)</span></td>
-<td><span class="math inline">\(\sqrt{\sum_i c_i^2\ln(1/\beta)/2}\)</span>, with <span class="math inline">\(d_k\)</span> in place of <span class="math inline">\(c_i\)</span> for Azuma (one-sided)</td>
+<td>The same, with a small variance</td>
+<td>Bernstein</td>
+<td><span class="math inline">\(\sqrt{2\sigma^2\ln(1/\beta)/n} + 2\ln(1/\beta)/(3n)\)</span>, one-sided</td>
+</tr>
+<tr class="odd">
+<td>A rate: errors out of <span class="math inline">\(n\)</span></td>
+<td>Clopper–Pearson</td>
+<td>Exact; zero errors give about <span class="math inline">\(3/n\)</span> at 95%</td>
+</tr>
+<tr class="even">
+<td>One input moves <span class="math inline">\(f\)</span> by at most <span class="math inline">\(c_i\)</span></td>
+<td>McDiarmid</td>
+<td><span class="math inline">\(\sqrt{\sum_i c_i^2\ln(1/\beta)/2}\)</span>, one-sided</td>
+</tr>
+<tr class="odd">
+<td>Adaptive steps of length <span class="math inline">\(d_k\)</span></td>
+<td>Azuma</td>
+<td><span class="math inline">\(\sqrt{\sum_k d_k^2\ln(1/\beta)/2}\)</span>, one-sided</td>
 </tr>
 </tbody>
 </table>
@@ -753,19 +768,23 @@ Table&nbsp;2.2: The widths of this chapter’s bounds. Rows marked two-sided alr
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>If you know only the variance, the width grows like <span class="math inline">\(1/\sqrt\beta\)</span>. With a normal-shaped tail it grows like <span class="math inline">\(\sqrt{\ln(1/\beta)}\)</span>, and with a Laplace-shaped tail like <span class="math inline">\(\ln(1/\beta)\)</span>.</li>
-<li>To control <span class="math inline">\(k\)</span> quantities at once, add <span class="math inline">\(\ln k\)</span> inside the logarithm.</li>
-<li>If the variance is far below what the range allows, use Chernoff, Bernstein or an exact interval, not Hoeffding.</li>
+<li>Use the most you know: an exact distribution beats any bound. Knowing only the variance costs a width growing like <span class="math inline">\(1/\sqrt\beta\)</span>, a normal-shaped tail like <span class="math inline">\(\sqrt{\ln(1/\beta)}\)</span>, and a Laplace-shaped tail like <span class="math inline">\(\ln(1/\beta)\)</span>.</li>
+<li>Publish the error bar with every noisy number.</li>
+<li>For <span class="math inline">\(k\)</span> numbers at once, divide <span class="math inline">\(\beta\)</span> by <span class="math inline">\(k\)</span>.</li>
+<li>Match the sides: a one-sided width covers only one direction, so for a two-sided error bar use <span class="math inline">\(\beta/2\)</span>.</li>
+<li>Hoeffding needs bounded values: clip unbounded data first, and use the clipping range as <span class="math inline">\(R\)</span>.</li>
+<li>Plan sample sizes with Hoeffding; report rates with Clopper–Pearson.</li>
+<li>Never use the normal approximation for a guarantee in the far tail.</li>
+<li>Independence is a condition: with several records per person, count people.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="2.9">
-<h2 data-number="2.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">2.9</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="2.10">
+<h2 data-number="2.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">2.10</span> Further reading</h2>
 <ul>
-<li>Mitzenmacher &amp; Upfal, <em>Probability and Computing</em>, ch.&nbsp;4: the clearest Chernoff chapter, with computer-science examples.</li>
-<li>Vershynin, <em>High-Dimensional Probability</em> (2018), ch.&nbsp;2: sub-Gaussian and sub-exponential variables in depth.</li>
-<li>Boucheron, Lugosi &amp; Massart, <em>Concentration Inequalities</em> (2013), ch.&nbsp;2 and 6: reference depth, including the derivation of Bernstein’s inequality.</li>
+<li>Mitzenmacher &amp; Upfal, <em>Probability and Computing</em>, ch.&nbsp;4: Chernoff bounds with computer-science examples.</li>
+<li>Boucheron, Lugosi &amp; Massart, <em>Concentration Inequalities</em> (2013): the reference, including Bernstein’s inequality.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter except Bernstein’s inequality is derived step by step in <a href="../../book-full/part01-prerequisites/02-concentration.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result here except Bernstein’s inequality is derived step by step in <a href="../../book-full/part01-prerequisites/02-concentration.html">the full edition’s chapter</a>.</p>
 
 
 </section>

@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Appendix C — Accounting for DP-SGD – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../appendix-derivations/04-conversions.html" rel="next">
+<link href="../appendix-derivations/02-composition.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix-derivations/01-calibration.html">Appendices</a></li><li class="breadcrumb-item"><a href="../appendix-derivations/03-dp-sgd.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/01-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">How much noise to add</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/02-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Composing private releases</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/03-dp-sgd.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/04-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">What ε means, and converting between definitions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/05-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Sums, limits and counting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/06-tails-tests-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Tail bounds, tests and divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/07-optimization-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Optimization and estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/08-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Random matrices and factorizations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/09-cryptography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/10-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/11-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">K</span>&nbsp; <span class="chapter-title">Composition of trade-off functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/12-amplification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">L</span>&nbsp; <span class="chapter-title">Subsampling, shuffling and iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/13-private-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">M</span>&nbsp; <span class="chapter-title">Private learning and tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/14-auditing-adaptivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">N</span>&nbsp; <span class="chapter-title">Auditing, reconstruction and adaptive analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">P</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-apx-sgd-clipping" id="toc-sec-apx-sgd-clipping" class="nav-link active" data-scroll-target="#sec-apx-sgd-clipping"><span class="header-section-number">C.1</span> Clipping gives the sum a sensitivity</a>
+  <ul class="collapse">
+  <li><a href="#the-question" id="toc-the-question" class="nav-link" data-scroll-target="#the-question"><span class="header-section-number">C.1.1</span> The question</a></li>
+  <li><a href="#the-answer" id="toc-the-answer" class="nav-link" data-scroll-target="#the-answer"><span class="header-section-number">C.1.2</span> The answer</a></li>
+  <li><a href="#a-worked-example" id="toc-a-worked-example" class="nav-link" data-scroll-target="#a-worked-example"><span class="header-section-number">C.1.3</span> A worked example</a></li>
+  <li><a href="#why-it-works" id="toc-why-it-works" class="nav-link" data-scroll-target="#why-it-works"><span class="header-section-number">C.1.4</span> Why it works</a></li>
+  <li><a href="#checking-it" id="toc-checking-it" class="nav-link" data-scroll-target="#checking-it"><span class="header-section-number">C.1.5</span> Checking it</a></li>
+  <li><a href="#recipe-and-pitfalls" id="toc-recipe-and-pitfalls" class="nav-link" data-scroll-target="#recipe-and-pitfalls"><span class="header-section-number">C.1.6</span> Recipe and pitfalls</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-sgd-step" id="toc-sec-apx-sgd-step" class="nav-link" data-scroll-target="#sec-apx-sgd-step"><span class="header-section-number">C.2</span> One noisy step is a Gaussian mechanism</a>
+  <ul class="collapse">
+  <li><a href="#the-question-1" id="toc-the-question-1" class="nav-link" data-scroll-target="#the-question-1"><span class="header-section-number">C.2.1</span> The question</a></li>
+  <li><a href="#the-answer-1" id="toc-the-answer-1" class="nav-link" data-scroll-target="#the-answer-1"><span class="header-section-number">C.2.2</span> The answer</a></li>
+  <li><a href="#a-worked-example-1" id="toc-a-worked-example-1" class="nav-link" data-scroll-target="#a-worked-example-1"><span class="header-section-number">C.2.3</span> A worked example</a></li>
+  <li><a href="#why-it-works-1" id="toc-why-it-works-1" class="nav-link" data-scroll-target="#why-it-works-1"><span class="header-section-number">C.2.4</span> Why it works</a></li>
+  <li><a href="#checking-it-1" id="toc-checking-it-1" class="nav-link" data-scroll-target="#checking-it-1"><span class="header-section-number">C.2.5</span> Checking it</a></li>
+  <li><a href="#recipe-and-pitfalls-1" id="toc-recipe-and-pitfalls-1" class="nav-link" data-scroll-target="#recipe-and-pitfalls-1"><span class="header-section-number">C.2.6</span> Recipe and pitfalls</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-sgd-subsampling" id="toc-sec-apx-sgd-subsampling" class="nav-link" data-scroll-target="#sec-apx-sgd-subsampling"><span class="header-section-number">C.3</span> Random batches make each step cheaper</a>
+  <ul class="collapse">
+  <li><a href="#the-question-2" id="toc-the-question-2" class="nav-link" data-scroll-target="#the-question-2"><span class="header-section-number">C.3.1</span> The question</a></li>
+  <li><a href="#the-answer-2" id="toc-the-answer-2" class="nav-link" data-scroll-target="#the-answer-2"><span class="header-section-number">C.3.2</span> The answer</a></li>
+  <li><a href="#a-worked-example-2" id="toc-a-worked-example-2" class="nav-link" data-scroll-target="#a-worked-example-2"><span class="header-section-number">C.3.3</span> A worked example</a></li>
+  <li><a href="#why-it-works-2" id="toc-why-it-works-2" class="nav-link" data-scroll-target="#why-it-works-2"><span class="header-section-number">C.3.4</span> Why it works</a></li>
+  <li><a href="#checking-it-2" id="toc-checking-it-2" class="nav-link" data-scroll-target="#checking-it-2"><span class="header-section-number">C.3.5</span> Checking it</a></li>
+  <li><a href="#recipe-and-pitfalls-2" id="toc-recipe-and-pitfalls-2" class="nav-link" data-scroll-target="#recipe-and-pitfalls-2"><span class="header-section-number">C.3.6</span> Recipe and pitfalls</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-sgd-rdp" id="toc-sec-apx-sgd-rdp" class="nav-link" data-scroll-target="#sec-apx-sgd-rdp"><span class="header-section-number">C.4</span> The Rényi curve of a sampled Gaussian step</a>
+  <ul class="collapse">
+  <li><a href="#the-question-3" id="toc-the-question-3" class="nav-link" data-scroll-target="#the-question-3"><span class="header-section-number">C.4.1</span> The question</a></li>
+  <li><a href="#the-answer-3" id="toc-the-answer-3" class="nav-link" data-scroll-target="#the-answer-3"><span class="header-section-number">C.4.2</span> The answer</a></li>
+  <li><a href="#a-worked-example-3" id="toc-a-worked-example-3" class="nav-link" data-scroll-target="#a-worked-example-3"><span class="header-section-number">C.4.3</span> A worked example</a></li>
+  <li><a href="#why-it-works-3" id="toc-why-it-works-3" class="nav-link" data-scroll-target="#why-it-works-3"><span class="header-section-number">C.4.4</span> Why it works</a></li>
+  <li><a href="#checking-it-3" id="toc-checking-it-3" class="nav-link" data-scroll-target="#checking-it-3"><span class="header-section-number">C.4.5</span> Checking it</a></li>
+  <li><a href="#recipe-and-pitfalls-3" id="toc-recipe-and-pitfalls-3" class="nav-link" data-scroll-target="#recipe-and-pitfalls-3"><span class="header-section-number">C.4.6</span> Recipe and pitfalls</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-sgd-accounting" id="toc-sec-apx-sgd-accounting" class="nav-link" data-scroll-target="#sec-apx-sgd-accounting"><span class="header-section-number">C.5</span> From batch, noise and epochs to the final ε</a>
+  <ul class="collapse">
+  <li><a href="#the-question-4" id="toc-the-question-4" class="nav-link" data-scroll-target="#the-question-4"><span class="header-section-number">C.5.1</span> The question</a></li>
+  <li><a href="#the-answer-4" id="toc-the-answer-4" class="nav-link" data-scroll-target="#the-answer-4"><span class="header-section-number">C.5.2</span> The answer</a></li>
+  <li><a href="#a-worked-example-4" id="toc-a-worked-example-4" class="nav-link" data-scroll-target="#a-worked-example-4"><span class="header-section-number">C.5.3</span> A worked example</a></li>
+  <li><a href="#why-it-works-4" id="toc-why-it-works-4" class="nav-link" data-scroll-target="#why-it-works-4"><span class="header-section-number">C.5.4</span> Why it works</a></li>
+  <li><a href="#checking-it-4" id="toc-checking-it-4" class="nav-link" data-scroll-target="#checking-it-4"><span class="header-section-number">C.5.5</span> Checking it</a></li>
+  <li><a href="#recipe-and-pitfalls-4" id="toc-recipe-and-pitfalls-4" class="nav-link" data-scroll-target="#recipe-and-pitfalls-4"><span class="header-section-number">C.5.6</span> Recipe and pitfalls</a></li>
+  </ul></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">C.6</span> Code</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">C.7</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix-derivations/01-calibration.html">Appendices</a></li><li class="breadcrumb-item"><a href="../appendix-derivations/03-dp-sgd.html"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Appendix C — Accounting for DP-SGD</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This appendix follows one training run from the clipped gradient to its final guarantee of differential privacy (DP). The run is stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, which is called DP-SGD. A training algorithm is <strong>differentially private</strong> when adding or removing one record changes the probability of any set of outcomes by at most a factor <span class="math inline">\(e^\varepsilon\)</span>, plus a small slack <span class="math inline">\(\delta\)</span>. The <strong>sensitivity</strong> of a computation is the most that one record can move its result. The <strong>Gaussian mechanism</strong> adds normal noise to such a result, and its privacy depends only on the sensitivity divided by the noise’s standard deviation. Appendix <a href="01-calibration.html#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a> derives the Gaussian mechanism’s exact guarantee, and <a href="02-composition.html#sec-apx-ccomp-rdp" class="quarto-xref"><span>Section B.4</span></a> derives the Rényi divergence, the tool that adds up the cost of many steps. This page uses both and restates each where it is needed.</p>
+<p>The five sections answer the questions a practitioner asks, in the order a training run raises them. Clipping fixes the sensitivity, and the noise then turns each step into a Gaussian mechanism. Random batches make each step cheaper, and a curve built from the Rényi divergence measures that cheaper step exactly. Finally, an accountant adds the steps up and converts the total into one <span class="math inline">\((\varepsilon, \delta)\)</span>. Every number uses the book’s running example, so you can check each one against the chapters. It trains on 10,000 records for 100 epochs. Each batch is drawn at random and holds 100 records on average, and the run and reports its guarantee at <span class="math inline">\(\delta = 10^{-5}\)</span>. <a href="#tbl-apx-sgd-map" class="quarto-xref">Table&nbsp;<span>C.1</span></a> maps each section to the chapter sections that use its formula.</p>
+<div id="tbl-apx-sgd-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-sgd-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;C.1: The five derivations of this appendix and the chapter sections that use them.
+</figcaption>
+<div aria-describedby="tbl-apx-sgd-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Section</th>
+<th>Formula it derives</th>
+<th>Used in</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#sec-apx-sgd-clipping" class="quarto-xref"><span>Section C.1</span></a></td>
+<td>the clipped sum has sensitivity <span class="math inline">\(C\)</span></td>
+<td><a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-algorithm" class="quarto-xref"><span>Section 39.3</span></a>, <a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-microbatch" class="quarto-xref"><span>Section 39.7</span></a>, <a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes" class="quarto-xref"><span>Section 33.4</span></a></td>
+</tr>
+<tr class="even">
+<td><a href="#sec-apx-sgd-step" class="quarto-xref"><span>Section C.2</span></a></td>
+<td>one step has ratio <span class="math inline">\(1/\sigma\)</span>; <span class="math inline">\(T\)</span> unsampled steps have <span class="math inline">\(\sqrt T/\sigma\)</span></td>
+<td><a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-algorithm" class="quarto-xref"><span>Section 39.3</span></a>, <a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-batch" class="quarto-xref"><span>Section 39.5</span></a>, <a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.6</span></a></td>
+</tr>
+<tr class="odd">
+<td><a href="#sec-apx-sgd-subsampling" class="quarto-xref"><span>Section C.3</span></a></td>
+<td><span class="math inline">\(\varepsilon' = \ln\big(1 + q(e^\varepsilon - 1)\big)\)</span></td>
+<td><a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-eps-delta" class="quarto-xref"><span>Section 33.3</span></a></td>
+</tr>
+<tr class="even">
+<td><a href="#sec-apx-sgd-rdp" class="quarto-xref"><span>Section C.4</span></a></td>
+<td>the binomial sum for the subsampled Gaussian’s Rényi curve</td>
+<td><a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-rdp-gaussian" class="quarto-xref"><span>Section 33.5</span></a>, <a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-small-q" class="quarto-xref"><span>Section 33.6</span></a>, <a href="../part05-dp-ml/02-dp-sgd.html#eq-dpsgd-rdp" class="quarto-xref">Equation&nbsp;<span>39.1</span></a></td>
+</tr>
+<tr class="odd">
+<td><a href="#sec-apx-sgd-accounting" class="quarto-xref"><span>Section C.5</span></a></td>
+<td><span class="math inline">\(\varepsilon = \min_\alpha\big[T\varepsilon(\alpha) + \ln(1/\delta)/(\alpha - 1)\big]\)</span></td>
+<td><a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-dpsgd" class="quarto-xref"><span>Section 33.7</span></a>, <a href="../part04-privacy-accounting/01-renyi-dp.html#sec-rdp-conversion" class="quarto-xref"><span>Section 29.8</span></a>, <a href="../part04-privacy-accounting/09-choosing-an-accountant.html#sec-choose-inverse" class="quarto-xref"><span>Section 37.3</span></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The notation is that of the DP-SGD chapter, and each symbol is introduced where it first appears. Two datasets are <strong>neighbours</strong> when one of them is the other with one record added. Write <span class="math inline">\(D\)</span> for a dataset and <span class="math inline">\(D' = D \cup \{x\}\)</span> for the same dataset with the record <span class="math inline">\(x\)</span> added. This <strong>add/remove</strong> relation is the one the book uses for DP-SGD. The reason is the way DP-SGD draws its batches, by an independent coin flip for each record, so that adding a record simply adds one more coin (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-neighbours" class="quarto-xref"><span>Section 18.3</span></a>, and <a href="#sec-apx-sgd-subsampling" class="quarto-xref"><span>Section C.3</span></a>).</p>
+<section id="sec-apx-sgd-clipping" class="level2" data-number="C.1">
+<h2 data-number="C.1" class="anchored" data-anchor-id="sec-apx-sgd-clipping"><span class="header-section-number">C.1</span> Clipping gives the sum a sensitivity</h2>
+<section id="the-question" class="level3" data-number="C.1.1">
+<h3 data-number="C.1.1" class="anchored" data-anchor-id="the-question"><span class="header-section-number">C.1.1</span> The question</h3>
+<p>The noise has to hide any one record’s contribution, so you need a bound on how far one record can move the sum of gradients. But a gradient can have any length. A mislabelled example far from the decision boundary can have a gradient a thousand times longer than a typical one, and nothing about the model bounds it. How do you get a bound that holds for every model and every record?</p>
+</section>
+<section id="the-answer" class="level3" data-number="C.1.2">
+<h3 data-number="C.1.2" class="anchored" data-anchor-id="the-answer"><span class="header-section-number">C.1.2</span> The answer</h3>
+<p>Write <span class="math inline">\(g_i\)</span> for the <strong>per-example gradient</strong> of record <span class="math inline">\(i\)</span>, the gradient of that record’s own loss at the current weights. You rescale each one so that its length is at most a number <span class="math inline">\(C\)</span> that you choose, the <strong>clipping norm</strong>. Rescaling keeps the direction and caps the length: <span id="eq-apx-sgd-clip"><span class="math display">\[\bar g_i = g_i\min\Big(1, \frac{C}{\|g_i\|}\Big), \qquad S(D) = \sum_{i \in D}\bar g_i. \tag{C.1}\]</span></span> Here <span class="math inline">\(\|g_i\|\)</span> is the Euclidean length of the gradient and <span class="math inline">\(S(D)\)</span> is the <strong>clipped sum</strong> over the records of a dataset <span class="math inline">\(D\)</span>. Its <span class="math inline">\(\ell_2\)</span> sensitivity is the largest length of <span class="math inline">\(S(D') - S(D)\)</span> over neighbouring datasets, and it is <span id="eq-apx-sgd-sens"><span class="math display">\[\Delta_2 S = C \quad\text{under add/remove}, \qquad \Delta_2 S = 2C \quad\text{under replace-one}. \tag{C.2}\]</span></span> Under <strong>replace-one</strong>, the other common relation, neighbouring datasets have the same size and differ in the value of one record. The book uses the add/remove relation for DP-SGD, so the sensitivity is <span class="math inline">\(C\)</span>.</p>
+</section>
+<section id="a-worked-example" class="level3" data-number="C.1.3">
+<h3 data-number="C.1.3" class="anchored" data-anchor-id="a-worked-example"><span class="header-section-number">C.1.3</span> A worked example</h3>
+<p>Take <span class="math inline">\(C = 1\)</span> and a dataset <span class="math inline">\(D\)</span> of two records with two-dimensional gradients. The first is <span class="math inline">\((3, 4)\)</span>, of length 5, so clipping divides it by 5 and gives <span class="math inline">\((0.60, 0.80)\)</span>. The second is <span class="math inline">\((0.3, -0.4)\)</span>, of length 0.5, which is shorter than <span class="math inline">\(C\)</span> and stays as it is. The clipped sum is <span class="math inline">\(S(D) = (0.90, 0.40)\)</span>.</p>
+<p>Now add a third record <span class="math inline">\(x\)</span> with gradient <span class="math inline">\((-2.4, 0.7)\)</span>, of length 2.5. Clipping divides it by 2.5 and gives <span class="math inline">\((-0.96, 0.28)\)</span>, so <span class="math inline">\(S(D') = (-0.06, 0.68)\)</span>. The sum moved by <span class="math inline">\((-0.96, 0.28)\)</span>, which is exactly the new record’s clipped gradient. Its length is <span class="math inline">\(\sqrt{0.96^2 + 0.28^2} = 1.00\)</span>, which is <span class="math inline">\(C\)</span>.</p>
+<p>Under the replace relation, change the first record’s gradient from <span class="math inline">\((3, 4)\)</span> to <span class="math inline">\((-3, -4)\)</span> instead. Its clipped term goes from <span class="math inline">\((0.60, 0.80)\)</span> to <span class="math inline">\((-0.60, -0.80)\)</span>, so the sum becomes <span class="math inline">\((-0.30, -1.20)\)</span>. It moved by <span class="math inline">\((-1.20, -1.60)\)</span>, of length 2.00, which is <span class="math inline">\(2C\)</span>.</p>
+</section>
+<section id="why-it-works" class="level3" data-number="C.1.4">
+<h3 data-number="C.1.4" class="anchored" data-anchor-id="why-it-works"><span class="header-section-number">C.1.4</span> Why it works</h3>
+<ol type="1">
+<li><strong>A clipped gradient has length at most <span class="math inline">\(C\)</span>.</strong> If <span class="math inline">\(\|g_i\| \le C\)</span>, the factor <span class="math inline">\(\min(1, C/\|g_i\|)\)</span> is 1 and the gradient is unchanged. Otherwise the factor is <span class="math inline">\(C/\|g_i\|\)</span>, and the length becomes <span class="math inline">\(\|g_i\| \cdot C/\|g_i\| = C\)</span>. Either way <span class="math inline">\(\|\bar g_i\| \le C\)</span>, and the direction is the same because the factor is positive.</li>
+<li><strong>The other records’ terms do not change.</strong> Each record’s gradient is computed from that record alone and from the current weights. The weights come from the earlier noisy steps, which are already released, so they are fixed when this step runs. Adding <span class="math inline">\(x\)</span> therefore leaves every other term of the sum exactly as it was.</li>
+<li><strong>Add/remove: the sum moves by one clipped gradient.</strong> By step 2, <span class="math inline">\(S(D') - S(D) = \bar g_x\)</span>, and by step 1 its length is at most <span class="math inline">\(C\)</span>. That is the first half of <a href="#eq-apx-sgd-sens" class="quarto-xref">Equation&nbsp;<span>C.2</span></a>.</li>
+<li><strong>Replace-one: the sum moves by a difference of two.</strong> If record <span class="math inline">\(x\)</span> is replaced by <span class="math inline">\(x'\)</span>, the sum moves by <span class="math inline">\(\bar g_{x'} - \bar g_x\)</span>. The triangle inequality says that the length of a difference is at most the sum of the lengths, so it is at most <span class="math inline">\(C + C = 2C\)</span>. The worked example reaches <span class="math inline">\(2C\)</span>, because two gradients that point in opposite directions give the largest difference.</li>
+</ol>
+<p>Nothing in these steps used the loss, the architecture or the data. That is why clipping gives a sensitivity for every model.</p>
+</section>
+<section id="checking-it" class="level3" data-number="C.1.5">
+<h3 data-number="C.1.5" class="anchored" data-anchor-id="checking-it"><span class="header-section-number">C.1.5</span> Checking it</h3>
+<p>This appendix’s script, described in the Code section at the end, draws 20,000 random datasets of five two-dimensional gradients, with lengths that are often far above <span class="math inline">\(C\)</span>, and a random new record for each. The largest change of the clipped sum, in units of <span class="math inline">\(C\)</span>, is 1.0000 when the record is added and 2.0000 when it replaces another. Both bounds are reached, so neither can be improved.</p>
+<p><a href="#fig-apx-sgd-clipping" class="quarto-xref">Figure&nbsp;<span>C.1</span></a> shows the mechanism. On the left, each gradient outside the circle of radius <span class="math inline">\(C\)</span> is pulled back onto it, along its own direction, and those inside are left alone. On the right, adding one record moves the clipped sum by that record’s clipped gradient, so the new sum always lands inside a circle of radius <span class="math inline">\(C\)</span> around the old one.</p>
+<div id="fig-apx-sgd-clipping" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-sgd-clipping-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sgd_clipping.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-sgd-clipping-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;C.1: Left: nine random per-example gradients (grey) and the same gradients after clipping to norm <span class="math inline">\(C = 1\)</span> (blue), with the ball of radius <span class="math inline">\(C\)</span> dashed. Right: the clipped sum on <span class="math inline">\(D\)</span> and on <span class="math inline">\(D\)</span> plus one record, with the circle of radius <span class="math inline">\(C\)</span> around the first, inside which the second must land.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="recipe-and-pitfalls" class="level3" data-number="C.1.6">
+<h3 data-number="C.1.6" class="anchored" data-anchor-id="recipe-and-pitfalls"><span class="header-section-number">C.1.6</span> Recipe and pitfalls</h3>
+<p>Clip every per-example gradient to a norm <span class="math inline">\(C\)</span> that is fixed before training, and the sum has sensitivity <span class="math inline">\(C\)</span> under add/remove. The clipping norm is not a privacy parameter. The next section sets the noise to <span class="math inline">\(\sigma C\)</span>, a fixed multiple <span class="math inline">\(\sigma\)</span> of the clipping norm. So a larger <span class="math inline">\(C\)</span> means more noise in the same proportion, and the two changes cancel in <span class="math inline">\(\varepsilon\)</span> (<a href="#sec-apx-sgd-step" class="quarto-xref"><span>Section C.2</span></a>). The clipping norm affects only accuracy, which <a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-clipping" class="quarto-xref"><span>Section 39.4</span></a> studies.</p>
+<p>Step 2 is where implementations break the argument. Batch normalization makes each record’s gradient depend on the other records in the batch, so one record can move every term of the sum. A clipping norm computed from the current batch, such as its median gradient length, has the same flaw in another place. The noise level then depends on the data, so it can itself reveal something about the records.</p>
+<p>Two other cases double the sensitivity. Clipping the mean gradient of a group of records, a microbatch, has sensitivity <span class="math inline">\(2C\)</span>. The group’s clipped mean is a vector of length at most <span class="math inline">\(C\)</span> both before and after one member is added, and the two vectors can point in opposite directions, as in the replace example above (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-microbatch" class="quarto-xref"><span>Section 39.7</span></a>). The replace relation also has sensitivity <span class="math inline">\(2C\)</span>. In both cases the program that adds up the privacy cost, the <strong>accountant</strong>, must be told, because it assumes <span class="math inline">\(C\)</span> (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes" class="quarto-xref"><span>Section 33.4</span></a>).</p>
+</section>
+</section>
+<section id="sec-apx-sgd-step" class="level2" data-number="C.2">
+<h2 data-number="C.2" class="anchored" data-anchor-id="sec-apx-sgd-step"><span class="header-section-number">C.2</span> One noisy step is a Gaussian mechanism</h2>
+<section id="the-question-1" class="level3" data-number="C.2.1">
+<h3 data-number="C.2.1" class="anchored" data-anchor-id="the-question-1"><span class="header-section-number">C.2.1</span> The question</h3>
+<p>Each step releases the clipped sum plus noise. How much noise makes that one step private, and what do the rest of the update and the later steps cost?</p>
+</section>
+<section id="the-answer-1" class="level3" data-number="C.2.2">
+<h3 data-number="C.2.2" class="anchored" data-anchor-id="the-answer-1"><span class="header-section-number">C.2.2</span> The answer</h3>
+<p>DP-SGD adds normal noise to the clipped sum, independently in every coordinate. Its standard deviation is <span class="math inline">\(\sigma C\)</span>, where the number <span class="math inline">\(\sigma\)</span> is the <strong>noise multiplier</strong>, the noise’s standard deviation in units of the sensitivity. So step number <span class="math inline">\(t\)</span> of training releases <span id="eq-auto-03dpsgd-1"><span class="math display">\[G_t = S + \xi_t, \qquad \xi_t \sim \mathcal N(0, \sigma^2C^2I). \tag{C.3}\]</span></span> Here <span class="math inline">\(I\)</span> is the identity matrix, which says that the noise <span class="math inline">\(\xi_t\)</span> has the same spread in every direction.</p>
+<p>A Gaussian mechanism is described by one ratio, the sensitivity divided by the noise’s standard deviation, which the book calls <span class="math inline">\(\mu\)</span>. For one step it is <span id="eq-auto-03dpsgd-2"><span class="math display">\[\mu = \frac{\Delta_2 S}{\sigma C} = \frac{C}{\sigma C} = \frac1\sigma. \tag{C.4}\]</span></span> A larger ratio means the two output distributions overlap less, so an observer can tell them apart more easily. The exact trade-off between <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> is the probability mass where the distribution with the record exceeds <span class="math inline">\(e^\varepsilon\)</span> times the one without it. For the mechanism with ratio <span class="math inline">\(\mu\)</span> that mass gives the condition <span id="eq-apx-sgd-gauss-delta"><span class="math display">\[\delta \ge \delta_\mu(\varepsilon) = \Phi\Big(\frac\mu2 - \frac\varepsilon\mu\Big) - e^\varepsilon\,\Phi\Big(-\frac\mu2 - \frac\varepsilon\mu\Big), \tag{C.5}\]</span></span> where <span class="math inline">\(\Phi(z)\)</span> is the probability that a standard normal variable is at most <span class="math inline">\(z\)</span> (<a href="../part03-dp-foundations/03-laplace-gaussian.html#sec-lg-analytic" class="quarto-xref"><span>Section 20.6</span></a>, and <a href="01-calibration.html#sec-apx-cal-gauss-exact" class="quarto-xref"><span>Section A.7</span></a> for a derivation from scratch). Without sampling, every record is used in every step. If the run has <span class="math inline">\(T\)</span> steps, they act together like one Gaussian mechanism with ratio <span id="eq-auto-03dpsgd-3"><span class="math display">\[\mu_T = \frac{\sqrt T}{\sigma}. \tag{C.6}\]</span></span></p>
+</section>
+<section id="a-worked-example-1" class="level3" data-number="C.2.3">
+<h3 data-number="C.2.3" class="anchored" data-anchor-id="a-worked-example-1"><span class="header-section-number">C.2.3</span> A worked example</h3>
+<p>Take <span class="math inline">\(\sigma = 1\)</span>, so one step has <span class="math inline">\(\mu = 1\)</span>. Solving <a href="#eq-apx-sgd-gauss-delta" class="quarto-xref">Equation&nbsp;<span>C.5</span></a> for <span class="math inline">\(\delta = 10^{-5}\)</span> gives <span class="math inline">\(\varepsilon = 4.38\)</span> for a single step, which is already a large privacy cost. The cost grows quickly with the number of steps if every record is used in each one. For example, 100 steps have <span class="math inline">\(\mu_T = \sqrt{100} = 10\)</span> and <span class="math inline">\(\varepsilon = 91.82\)</span>, and the running example’s 10,000 steps have <span class="math inline">\(\mu_T = 100\)</span> and <span class="math inline">\(\varepsilon = 5425.51\)</span>. Nobody would report such a number, and the next two sections show how random batches bring it down to single digits.</p>
+<p>The DP-SGD chapter has a full-batch row in <a href="../part05-dp-ml/02-dp-sgd.html#tbl-dpsgd-batch" class="quarto-xref">Table&nbsp;<span>39.4</span></a>, where every batch is the whole dataset, so its 100 epochs are 100 steps. For a target of <span class="math inline">\(\varepsilon = 4\)</span> that row uses <span class="math inline">\(\sigma = 10.8\)</span>. So <span class="math inline">\(\mu_T = \sqrt{100}/10.8 = 0.926\)</span>, and the script gives <span class="math inline">\(\varepsilon = 4.005\)</span>, the target up to the rounding of <span class="math inline">\(\sigma\)</span>.</p>
+</section>
+<section id="why-it-works-1" class="level3" data-number="C.2.4">
+<h3 data-number="C.2.4" class="anchored" data-anchor-id="why-it-works-1"><span class="header-section-number">C.2.4</span> Why it works</h3>
+<ol type="1">
+<li><strong>Only the ratio matters.</strong> Compare the noisy sum on <span class="math inline">\(D\)</span> and on <span class="math inline">\(D'\)</span>. The two are normal distributions with the same spread, centred <span class="math inline">\(\Delta\)</span> apart, where <span class="math inline">\(\Delta\)</span> is the length of <span class="math inline">\(S(D') - S(D)\)</span>. Rotate the space so that this shift lies along the first axis. The noise has the same spread in every direction, so rotating it leaves it unchanged. Every other coordinate then has the same noise on both datasets and tells an observer nothing. What is left is one coordinate, <span class="math inline">\(\mathcal N(0, \sigma^2C^2)\)</span> against <span class="math inline">\(\mathcal N(\Delta, \sigma^2C^2)\)</span>. Dividing the output by <span class="math inline">\(\sigma C\)</span> changes no probability of any event, so this is the pair <span class="math inline">\(\mathcal N(0, 1)\)</span> against <span class="math inline">\(\mathcal N(\Delta/(\sigma C), 1)\)</span>.</li>
+<li><strong>The worst shift gives ratio <span class="math inline">\(1/\sigma\)</span>.</strong> By <a href="#sec-apx-sgd-clipping" class="quarto-xref"><span>Section C.1</span></a> the shift is at most <span class="math inline">\(C\)</span>, so the ratio is at most <span class="math inline">\(C/(\sigma C) = 1/\sigma\)</span>. A smaller ratio is never less private, because the two distributions then overlap more. Notice that the clipping norm cancels, which is why it is not a privacy parameter.</li>
+<li><strong>The rest of the update is free.</strong> The step size, the division by the expected batch size <span class="math inline">\(B\)</span>, momentum, Adam and the new weights are all computed from <span class="math inline">\(G_t\)</span> and from earlier released values, without looking at the data again. Such a computation is called <strong>post-processing</strong>, and it cannot reveal more than its input. The reason is that an attacker who sees <span class="math inline">\(G_t\)</span> could run the same computation herself, so any event about the processed output is an event about <span class="math inline">\(G_t\)</span>, and its probability obeys the same bound (<a href="../part03-dp-foundations/02-properties.html#sec-dpprop-post" class="quarto-xref"><span>Section 19.3</span></a>).</li>
+<li><strong>Unsampled steps add up like one Gaussian.</strong> The <strong>privacy loss</strong> of an output <span class="math inline">\(y\)</span> is the logarithm of how much more likely <span class="math inline">\(y\)</span> is on <span class="math inline">\(D'\)</span> than on <span class="math inline">\(D\)</span>. For the pair <span class="math inline">\(\mathcal N(\mu, 1)\)</span> against <span class="math inline">\(\mathcal N(0, 1)\)</span>, the loss is <span id="eq-auto-03dpsgd-4"><span class="math display">\[\ln\frac{e^{-(y - \mu)^2/2}}{e^{-y^2/2}} = \mu y - \frac{\mu^2}2. \tag{C.7}\]</span></span> With <span class="math inline">\(y \sim \mathcal N(\mu, 1)\)</span>, this is a normal variable with mean <span class="math inline">\(\mu^2/2\)</span> and variance <span class="math inline">\(\mu^2\)</span>. Each step draws fresh noise, independent of the earlier steps. So over <span class="math inline">\(T\)</span> steps the joint likelihood ratio is the product of the steps’ ratios, and the losses add. Each step’s loss has this same distribution whatever happened before, so the sum is normal with mean <span class="math inline">\(T\mu^2/2\)</span> and variance <span class="math inline">\(T\mu^2\)</span>. That is exactly the loss of one Gaussian mechanism with ratio <span class="math inline">\(\sqrt T\mu = \sqrt T/\sigma\)</span>. Since <span class="math inline">\(\delta\)</span> for a given <span class="math inline">\(\varepsilon\)</span> is computed from the distribution of the loss alone, the two have the same guarantee, and <a href="02-composition.html#sec-apx-ccomp-gaussian" class="quarto-xref"><span>Section B.3</span></a> proves it in full.</li>
+</ol>
+</section>
+<section id="checking-it-1" class="level3" data-number="C.2.5">
+<h3 data-number="C.2.5" class="anchored" data-anchor-id="checking-it-1"><span class="header-section-number">C.2.5</span> Checking it</h3>
+<p>The full-batch check above recovers the chapter’s <span class="math inline">\(\varepsilon = 4\)</span> to three digits. It also confirms step 4, because the chapter solved its row for 100 composed steps, while here the 100 steps are one Gaussian with <span class="math inline">\(\mu_T = 10/\sigma\)</span>. The script solves <a href="#eq-apx-sgd-gauss-delta" class="quarto-xref">Equation&nbsp;<span>C.5</span></a> by bisection on <span class="math inline">\(\varepsilon\)</span>, working with logarithms, because at <span class="math inline">\(\mu_T = 100\)</span> both terms underflow to zero in ordinary arithmetic. The value at 10,000 steps, 5425.51, agrees with the 5425.5 quoted in <a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>.</p>
+</section>
+<section id="recipe-and-pitfalls-1" class="level3" data-number="C.2.6">
+<h3 data-number="C.2.6" class="anchored" data-anchor-id="recipe-and-pitfalls-1"><span class="header-section-number">C.2.6</span> Recipe and pitfalls</h3>
+<p>Set the noise to <span class="math inline">\(\sigma C\)</span>, and one step is a Gaussian mechanism with ratio <span class="math inline">\(1/\sigma\)</span>, whatever <span class="math inline">\(C\)</span> is. Keep everything after the noise a function of the noisy sum and of public numbers. Dividing by the number of records actually in the batch is the common mistake here, because that count depends on the data and changes when <span class="math inline">\(x\)</span> is added. Divide by the expected batch size <span class="math inline">\(B\)</span> instead, the sampling rate times the number of records, which is public. And never compose unsampled steps for a long run, because <span class="math inline">\(\varepsilon\)</span> grows at least like <span class="math inline">\(\mu_T^2/2 = T/(2\sigma^2)\)</span>, the average privacy loss, and reaches the thousands.</p>
+</section>
+</section>
+<section id="sec-apx-sgd-subsampling" class="level2" data-number="C.3">
+<h2 data-number="C.3" class="anchored" data-anchor-id="sec-apx-sgd-subsampling"><span class="header-section-number">C.3</span> Random batches make each step cheaper</h2>
+<section id="the-question-2" class="level3" data-number="C.3.1">
+<h3 data-number="C.3.1" class="anchored" data-anchor-id="the-question-2"><span class="header-section-number">C.3.1</span> The question</h3>
+<p>DP-SGD does not use every record in every step. Each step draws a random batch, and with <span class="math inline">\(q = 0.01\)</span> your record is in it only one time in a hundred. How much cheaper is a step that probably did not see you?</p>
+</section>
+<section id="the-answer-2" class="level3" data-number="C.3.2">
+<h3 data-number="C.3.2" class="anchored" data-anchor-id="the-answer-2"><span class="header-section-number">C.3.2</span> The answer</h3>
+<p>Under <strong>Poisson sampling</strong>, each record enters the batch independently with probability <span class="math inline">\(q\)</span>, the <strong>sampling rate</strong>, by its own coin flip. If a step is <span class="math inline">\(\varepsilon\)</span>-DP when it runs on whatever batch it is given, then the step run on a Poisson sample is <span class="math inline">\(\varepsilon'\)</span>-DP under add/remove, with <span id="eq-apx-sgd-amplify"><span class="math display">\[\varepsilon' = \ln\big(1 + q(e^\varepsilon - 1)\big). \tag{C.8}\]</span></span> This is <strong>amplification by subsampling</strong>. When <span class="math inline">\(\varepsilon\)</span> is small, <span class="math inline">\(e^\varepsilon - 1\)</span> is close to <span class="math inline">\(\varepsilon\)</span>, and the logarithm of a number close to 1 is close to that number minus 1. So for small <span class="math inline">\(\varepsilon\)</span> <span id="eq-auto-03dpsgd-5"><span class="math display">\[\varepsilon' \approx q\varepsilon, \tag{C.9}\]</span></span> and the step becomes about <span class="math inline">\(1/q\)</span> times cheaper. When the step also has a slack <span class="math inline">\(\delta\)</span>, the same argument shrinks that slack to <span class="math inline">\(q\delta\)</span> (<a href="../part04-privacy-accounting/05-subsampling.html#eq-sub-amplify" class="quarto-xref">Equation&nbsp;<span>33.5</span></a>).</p>
+</section>
+<section id="a-worked-example-2" class="level3" data-number="C.3.3">
+<h3 data-number="C.3.3" class="anchored" data-anchor-id="a-worked-example-2"><span class="header-section-number">C.3.3</span> A worked example</h3>
+<p>Take <span class="math inline">\(q = 0.01\)</span> and a step with <span class="math inline">\(\varepsilon = 1\)</span>. Then <span class="math inline">\(e - 1 = 1.71828\)</span>, so <span class="math inline">\(1 + q(e^\varepsilon - 1) = 1.017183\)</span> and <span class="math inline">\(\varepsilon' = \ln 1.017183 = 0.017037\)</span>. The step costs about 0.017 instead of 1, almost <span class="math inline">\(q\varepsilon = 0.01\)</span>. <a href="#tbl-apx-sgd-amp" class="quarto-xref">Table&nbsp;<span>C.2</span></a> shows how the saving shrinks for larger <span class="math inline">\(\varepsilon\)</span>.</p>
+<div id="tbl-apx-sgd-amp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-sgd-amp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;C.2: Amplification by Poisson sampling at rate <span class="math inline">\(q = 0.01\)</span>. For small <span class="math inline">\(\varepsilon\)</span> the cost shrinks by about <span class="math inline">\(q\)</span>; for large <span class="math inline">\(\varepsilon\)</span> it only drops by about <span class="math inline">\(\ln(1/q) = 4.6\)</span>.
+</figcaption>
+<div aria-describedby="tbl-apx-sgd-amp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Base <span class="math inline">\(\varepsilon\)</span></th>
+<th>0.1</th>
+<th>1</th>
+<th>5</th>
+<th>10</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sampled <span class="math inline">\(\varepsilon'\)</span>, <span class="math inline">\(q = 0.01\)</span></td>
+<td>0.0011</td>
+<td>0.0170</td>
+<td>0.9059</td>
+<td>5.3993</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(q\varepsilon\)</span></td>
+<td>0.0010</td>
+<td>0.0100</td>
+<td>0.0500</td>
+<td>0.1000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="why-it-works-2" class="level3" data-number="C.3.4">
+<h3 data-number="C.3.4" class="anchored" data-anchor-id="why-it-works-2"><span class="header-section-number">C.3.4</span> Why it works</h3>
+<p>The idea is that with probability <span class="math inline">\(1 - q\)</span> your record is not used, and then the output has exactly the distribution it would have without you. Only the remaining fraction <span class="math inline">\(q\)</span> of the time can the output differ. So every likelihood ratio becomes a weighted average of 1, with weight <span class="math inline">\(1 - q\)</span>, and the old ratio, with weight <span class="math inline">\(q\)</span>.</p>
+<p>A tiny case shows it. Suppose a step’s output <span class="math inline">\(y\)</span> is three times as likely when your record is used. Under sampling, <span class="math inline">\(y\)</span>’s probability with you in the dataset is <span class="math inline">\((1 - q) \cdot p + q \cdot 3p\)</span>, where <span class="math inline">\(p\)</span> is its probability without you. With <span class="math inline">\(q = 0.01\)</span> that is <span class="math inline">\(0.99p + 0.03p = 1.02p\)</span>, so the ratio has fallen from 3 to 1.02. Here are the steps in general.</p>
+<ol type="1">
+<li><strong>Fix everyone else’s coin.</strong> Let <span class="math inline">\(U\)</span> be the set of other records that were drawn. Each record has its own coin, so given <span class="math inline">\(U\)</span>, record <span class="math inline">\(x\)</span> is drawn with probability <span class="math inline">\(q\)</span>, independently of <span class="math inline">\(U\)</span>.</li>
+<li><strong>Write both outputs given <span class="math inline">\(U\)</span>.</strong> Let <span class="math inline">\(P_0\)</span> be the output distribution of the step run on <span class="math inline">\(U\)</span>, and <span class="math inline">\(P_1\)</span> that of the step run on <span class="math inline">\(U \cup \{x\}\)</span>. On <span class="math inline">\(D\)</span> the output is drawn from <span class="math inline">\(P_0\)</span>. On <span class="math inline">\(D'\)</span> it is drawn from <span class="math inline">\(P_0\)</span> when the coin of <span class="math inline">\(x\)</span> says no, and from <span class="math inline">\(P_1\)</span> when it says yes. So for every set of outputs <span class="math inline">\(A\)</span>, <span id="eq-auto-03dpsgd-6"><span class="math display">\[P_{D'}(A \mid U) = (1 - q)P_0(A) + qP_1(A). \tag{C.10}\]</span></span></li>
+<li><strong>Use the step’s own guarantee.</strong> The sets <span class="math inline">\(U\)</span> and <span class="math inline">\(U \cup \{x\}\)</span> are neighbours, and the step is <span class="math inline">\(\varepsilon\)</span>-DP, so <span class="math inline">\(P_1(A) \le e^\varepsilon P_0(A)\)</span> for every <span class="math inline">\(A\)</span>.</li>
+<li><strong>Put it into the mixture.</strong> Replacing <span class="math inline">\(P_1(A)\)</span> by the larger <span class="math inline">\(e^\varepsilon P_0(A)\)</span> gives <span id="eq-auto-03dpsgd-7"><span class="math display">\[P_{D'}(A \mid U) \le (1 - q)P_0(A) + qe^\varepsilon P_0(A) = \big(1 + q(e^\varepsilon - 1)\big)P_0(A). \tag{C.11}\]</span></span></li>
+<li><strong>Average over <span class="math inline">\(U\)</span>.</strong> Both datasets draw the other records’ coins with the same probabilities. The bound of step 4 holds for every <span class="math inline">\(U\)</span> with the same factor, so it holds for the averages over <span class="math inline">\(U\)</span> too. This is <a href="#eq-apx-sgd-amplify" class="quarto-xref">Equation&nbsp;<span>C.8</span></a> in the direction “<span class="math inline">\(D'\)</span> against <span class="math inline">\(D\)</span>”.</li>
+<li><strong>Check the other direction.</strong> DP also needs <span class="math inline">\(P_D(A) \le e^{\varepsilon'}P_{D'}(A)\)</span>. The step’s guarantee holds with either dataset first, so it also gives <span class="math inline">\(P_1(A) \ge e^{-\varepsilon}P_0(A)\)</span>, so the mixture is at least <span class="math inline">\((1 - q + qe^{-\varepsilon})P_0(A)\)</span>. Dividing, <span class="math inline">\(P_0(A) \le P_{D'}(A)/(1 - q + qe^{-\varepsilon})\)</span>. To compare the two factors, write <span class="math inline">\(a = e^\varepsilon\)</span> and multiply out: <span id="eq-auto-03dpsgd-8"><span class="math display">\[\big(1 - q + q/a\big)\big(1 + q(a - 1)\big) = 1 + q(1 - q)\frac{(a - 1)^2}{a} \ge 1. \tag{C.12}\]</span></span> So <span class="math inline">\(1/(1 - q + qe^{-\varepsilon}) \le 1 + q(e^\varepsilon - 1)\)</span>, and this direction is never the worse one.</li>
+</ol>
+</section>
+<section id="checking-it-2" class="level3" data-number="C.3.5">
+<h3 data-number="C.3.5" class="anchored" data-anchor-id="checking-it-2"><span class="header-section-number">C.3.5</span> Checking it</h3>
+<p>The script takes a count with Laplace noise, whose density falls like <span class="math inline">\(e^{-\varepsilon|y - \text{count}|}\)</span>, with <span class="math inline">\(\varepsilon = 1\)</span>. Adding the record moves the count by 1, so the noisy count’s density ratio between “used” and “not used” ranges from <span class="math inline">\(e^{-1}\)</span> to <span class="math inline">\(e\)</span>. It computes the mixture’s likelihood ratio on a grid of outputs. At <span class="math inline">\(q = 0.01\)</span> the largest log ratio, with the record against without it, is 0.017037, equal to <a href="#eq-apx-sgd-amplify" class="quarto-xref">Equation&nbsp;<span>C.8</span></a>, so the bound is reached and cannot be improved. The other direction’s largest log ratio is 0.006341, smaller, as step 6 says. <a href="#fig-apx-sgd-subsampling" class="quarto-xref">Figure&nbsp;<span>C.2</span></a> shows the same at <span class="math inline">\(q = 0.1\)</span>, where the effect is easier to see. The ratio without sampling climbs to <span class="math inline">\(e\)</span>, while the mixture’s ratio stays below <span class="math inline">\(1 + 0.1(e - 1) = 1.172\)</span>.</p>
+<div id="fig-apx-sgd-subsampling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-sgd-subsampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sgd_subsampling_ratio.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-sgd-subsampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;C.2: Left: a Laplace count with <span class="math inline">\(\varepsilon = 1\)</span> without the record (<span class="math inline">\(P_0\)</span>), with the record used (<span class="math inline">\(P_1\)</span>), and the Poisson-sampled output with the record, the mixture <span class="math inline">\(0.9P_0 + 0.1P_1\)</span> (dashed). Right: the likelihood ratios <span class="math inline">\(P_1/P_0\)</span> and mixture<span class="math inline">\(/P_0\)</span> against the output, with the bounds <span class="math inline">\(e^\varepsilon\)</span> and <span class="math inline">\(1 + q(e^\varepsilon - 1)\)</span> dotted.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="recipe-and-pitfalls-2" class="level3" data-number="C.3.6">
+<h3 data-number="C.3.6" class="anchored" data-anchor-id="recipe-and-pitfalls-2"><span class="header-section-number">C.3.6</span> Recipe and pitfalls</h3>
+<p>For a step that is <span class="math inline">\(\varepsilon\)</span>-DP on its batch, Poisson sampling at rate <span class="math inline">\(q\)</span> makes it <span class="math inline">\(\ln(1 + q(e^\varepsilon - 1))\)</span>-DP. For small <span class="math inline">\(\varepsilon\)</span> this is about <span class="math inline">\(q\varepsilon\)</span>. For large <span class="math inline">\(\varepsilon\)</span> it is about <span class="math inline">\(\varepsilon - \ln(1/q)\)</span>, because when the record is drawn, which happens with probability <span class="math inline">\(q\)</span>, it is fully exposed.</p>
+<p>The proof needs Poisson sampling, because step 1 needs an independent coin for your record. A batch of exactly <span class="math inline">\(B\)</span> records drawn at random has no such coin. When your record enters such a batch it pushes another one out, which is a replacement, so the analysis needs the replace relation and twice the sensitivity. Shuffling the data and cutting it into batches is worse, because then your record is in exactly one batch per epoch and is never “not used” (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes" class="quarto-xref"><span>Section 33.4</span></a>).</p>
+<p>Finally, do not add up these per-step numbers over a long run. The slacks add up too, so with 10,000 steps each step may only have a tiny share of <span class="math inline">\(\delta\)</span>. A Gaussian step with a tiny <span class="math inline">\(\delta\)</span> needs a large <span class="math inline">\(\varepsilon\)</span>, and there amplification only subtracts <span class="math inline">\(\ln(1/q)\)</span>. <a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-dpsgd" class="quarto-xref"><span>Section 33.7</span></a> shows that the total runs into the thousands, and the next section gives the quantity that composes well.</p>
+</section>
+</section>
+<section id="sec-apx-sgd-rdp" class="level2" data-number="C.4">
+<h2 data-number="C.4" class="anchored" data-anchor-id="sec-apx-sgd-rdp"><span class="header-section-number">C.4</span> The Rényi curve of a sampled Gaussian step</h2>
+<section id="the-question-3" class="level3" data-number="C.4.1">
+<h3 data-number="C.4.1" class="anchored" data-anchor-id="the-question-3"><span class="header-section-number">C.4.1</span> The question</h3>
+<p>A single <span class="math inline">\((\varepsilon, \delta)\)</span> pair says how often the privacy loss is large, but not how large it gets when it is, so pairs add up badly over 10,000 steps. A curve that summarizes the whole distribution of the loss composes by simple addition. What is that curve for one sampled Gaussian step?</p>
+</section>
+<section id="the-answer-3" class="level3" data-number="C.4.2">
+<h3 data-number="C.4.2" class="anchored" data-anchor-id="the-answer-3"><span class="header-section-number">C.4.2</span> The answer</h3>
+<p>The <strong>Rényi divergence</strong> of order <span class="math inline">\(\alpha &gt; 1\)</span> between two distributions <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> is a log-average of a power of their likelihood ratio, <span id="eq-auto-03dpsgd-9"><span class="math display">\[D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\mathbb E_{y \sim Q}\Big[\Big(\frac{P(y)}{Q(y)}\Big)^\alpha\Big]. \tag{C.13}\]</span></span> A mechanism has <strong>Rényi differential privacy (RDP)</strong> curve <span class="math inline">\(\varepsilon(\alpha)\)</span> when this divergence between its outputs on any two neighbouring datasets is at most <span class="math inline">\(\varepsilon(\alpha)\)</span>, for every order <span class="math inline">\(\alpha\)</span>. A larger order weights large ratios more heavily. For the plain Gaussian mechanism with noise multiplier <span class="math inline">\(\sigma\)</span> the curve is the straight line <span class="math inline">\(\alpha/(2\sigma^2)\)</span> (<a href="02-composition.html#sec-apx-ccomp-rdp" class="quarto-xref"><span>Section B.4</span></a>).</p>
+<p>For one DP-SGD step, divide the noisy sum by <span class="math inline">\(C\)</span>. Then the output without the record is <span class="math inline">\(P_0 = \mathcal N(0, \sigma^2)\)</span>, and with the record it is the mixture <span class="math inline">\(P_q = (1 - q)P_0 + qP_1\)</span> with <span class="math inline">\(P_1 = \mathcal N(1, \sigma^2)\)</span>. This one-dimensional pair is the worst case, as the derivation below explains. Its RDP curve is <span class="math inline">\(\varepsilon_{q,\sigma}(\alpha) = D_\alpha(P_q\|P_0)\)</span>, and for integer <span class="math inline">\(\alpha\)</span> it is a finite sum, <span id="eq-apx-sgd-rdp"><span class="math display">\[\varepsilon_{q,\sigma}(\alpha) = \frac{1}{\alpha - 1}\ln A_\alpha, \qquad A_\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^je^{(j^2 - j)/(2\sigma^2)}. \tag{C.14}\]</span></span> Here <span class="math inline">\(\binom\alpha j\)</span> is the binomial coefficient, the number of ways to choose <span class="math inline">\(j\)</span> of <span class="math inline">\(\alpha\)</span> factors. For small <span class="math inline">\(q\)</span> the curve is close to its leading term, <span id="eq-apx-sgd-small-q"><span class="math display">\[\varepsilon_{q,\sigma}(\alpha) \approx \frac{\alpha q^2\big(e^{1/\sigma^2} - 1\big)}{2} \approx \frac{\alpha q^2}{2\sigma^2}\quad\text{for large }\sigma. \tag{C.15}\]</span></span></p>
+</section>
+<section id="a-worked-example-3" class="level3" data-number="C.4.3">
+<h3 data-number="C.4.3" class="anchored" data-anchor-id="a-worked-example-3"><span class="header-section-number">C.4.3</span> A worked example</h3>
+<p>Take the running example, <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>, at order <span class="math inline">\(\alpha = 2\)</span>. The sum has three terms, one for each <span class="math inline">\(j\)</span> (<a href="#tbl-apx-sgd-alpha2" class="quarto-xref">Table&nbsp;<span>C.3</span></a>).</p>
+<div id="tbl-apx-sgd-alpha2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-sgd-alpha2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;C.3: The three terms of <span class="math inline">\(A_2\)</span> for <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>.
+</figcaption>
+<div aria-describedby="tbl-apx-sgd-alpha2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(j\)</span></th>
+<th><span class="math inline">\(\binom 2j(1 - q)^{2-j}q^j\)</span></th>
+<th><span class="math inline">\(e^{(j^2 - j)/2}\)</span></th>
+<th>Term</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td><span class="math inline">\(0.99^2 = 0.9801\)</span></td>
+<td>1</td>
+<td>0.980100</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td><span class="math inline">\(2 \times 0.99 \times 0.01 = 0.0198\)</span></td>
+<td>1</td>
+<td>0.019800</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td><span class="math inline">\(0.01^2 = 0.0001\)</span></td>
+<td><span class="math inline">\(e = 2.718\)</span></td>
+<td>0.000272</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>They add up to <span class="math inline">\(A_2 = 1.00017183\)</span>, so <span class="math inline">\(\varepsilon_{q,\sigma}(2) = \ln A_2/(2 - 1) = 1.7181 \times 10^{-4}\)</span>. Without sampling the curve at <span class="math inline">\(\alpha = 2\)</span> is <span class="math inline">\(2/(2\sigma^2) = 1\)</span>, so sampling made this order almost six thousand times cheaper.</p>
+</section>
+<section id="why-it-works-3" class="level3" data-number="C.4.4">
+<h3 data-number="C.4.4" class="anchored" data-anchor-id="why-it-works-3"><span class="header-section-number">C.4.4</span> Why it works</h3>
+<p>First, why one dimension and one shift of exactly 1 is enough. Given which other records were drawn, the step’s output with the record is a mixture of “not drawn” and “drawn”, as in <a href="#sec-apx-sgd-subsampling" class="quarto-xref"><span>Section C.3</span></a>. As in <a href="#sec-apx-sgd-step" class="quarto-xref"><span>Section C.2</span></a>, rotating the space leaves one coordinate in which the two components differ, by at most <span class="math inline">\(C\)</span>, and a smaller shift is never worse. Averaging over the other records’ coins cannot increase the divergence. The reason is that the average of <span class="math inline">\((P/Q)^\alpha\)</span> weighted by <span class="math inline">\(Q\)</span> is a convex function of the pair <span class="math inline">\((P, Q)\)</span>, so a mixture of pairs is never further apart than the worst pair in it. <a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-rdp-gaussian" class="quarto-xref"><span>Section 33.5</span></a> gives these reduction steps in full, so what remains is the pair <span class="math inline">\(P_q\)</span> and <span class="math inline">\(P_0\)</span>. The derivation then takes five steps.</p>
+<ol type="1">
+<li><strong>Write the mixture’s ratio.</strong> Dividing the mixture by <span class="math inline">\(P_0\)</span> gives <span class="math inline">\(P_q/P_0 = (1 - q) + q\,r\)</span>, where <span class="math inline">\(r = P_1/P_0\)</span> is the Gaussian likelihood ratio. The normalizing constants cancel, and <span id="eq-auto-03dpsgd-10"><span class="math display">\[r(y) = \frac{e^{-(y - 1)^2/(2\sigma^2)}}{e^{-y^2/(2\sigma^2)}} = e^{(2y - 1)/(2\sigma^2)}. \tag{C.16}\]</span></span> So by the definition, <span class="math inline">\(A_\alpha = \mathbb E_{y \sim P_0}\big[(1 - q + q\,r(y))^\alpha\big]\)</span>.</li>
+<li><strong>Expand the power.</strong> For a whole number <span class="math inline">\(\alpha\)</span>, the binomial theorem expands the power of a sum of two numbers into <span class="math inline">\(\alpha + 1\)</span> terms. At <span class="math inline">\(\alpha = 2\)</span> it is the familiar <span class="math inline">\((a + b)^2 = a^2 + 2ab + b^2\)</span>. Here the two numbers are <span class="math inline">\(1 - q\)</span> and <span class="math inline">\(qr\)</span>, so <span id="eq-auto-03dpsgd-11"><span class="math display">\[(1 - q + qr)^\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^jr^j. \tag{C.17}\]</span></span></li>
+<li><strong>Average term by term.</strong> The average of a sum is the sum of the averages, and <span class="math inline">\((1 - q)^{\alpha - j}q^j\)</span> is a constant. So <span class="math inline">\(A_\alpha\)</span> is the same sum with each <span class="math inline">\(r^j\)</span> replaced by its average <span class="math inline">\(\mathbb E[r^j]\)</span> under <span class="math inline">\(P_0\)</span>.</li>
+<li><strong>Each average is a Gaussian moment generating function (MGF).</strong> The MGF of a random variable <span class="math inline">\(y\)</span> is the average of <span class="math inline">\(e^{sy}\)</span>, as a function of a number <span class="math inline">\(s\)</span>. For <span class="math inline">\(y \sim \mathcal N(0, \sigma^2)\)</span> it is <span id="eq-auto-03dpsgd-12"><span class="math display">\[\mathbb E[e^{sy}] = e^{s^2\sigma^2/2}. \tag{C.18}\]</span></span> To see why, complete the square in the exponent of the integrand, <span class="math inline">\(sy - y^2/(2\sigma^2) = -(y - s\sigma^2)^2/(2\sigma^2) + s^2\sigma^2/2\)</span>. After you take out the constant <span class="math inline">\(e^{s^2\sigma^2/2}\)</span>, what is left is a normal density centred at <span class="math inline">\(s\sigma^2\)</span>, and it integrates to 1. Now <span class="math inline">\(r^j = e^{-j/(2\sigma^2)}e^{(j/\sigma^2)y}\)</span>, so taking <span class="math inline">\(s = j/\sigma^2\)</span> gives <span id="eq-auto-03dpsgd-13"><span class="math display">\[\mathbb E[r^j] = e^{-j/(2\sigma^2)}\,e^{j^2/(2\sigma^2)} = e^{(j^2 - j)/(2\sigma^2)}. \tag{C.19}\]</span></span> For example, at <span class="math inline">\(j = 2\)</span> and <span class="math inline">\(\sigma = 1\)</span> this is <span class="math inline">\(e^{-1} \cdot e^{2} = e\)</span>, the factor in the last row of <a href="#tbl-apx-sgd-alpha2" class="quarto-xref">Table&nbsp;<span>C.3</span></a>.</li>
+<li><strong>Assemble.</strong> Putting each average back into the sum gives <span class="math inline">\(A_\alpha\)</span> of <a href="#eq-apx-sgd-rdp" class="quarto-xref">Equation&nbsp;<span>C.14</span></a>, and dividing its logarithm by <span class="math inline">\(\alpha - 1\)</span> gives the curve.</li>
+</ol>
+<p>The small-<span class="math inline">\(q\)</span> form comes from looking at which terms matter. Without the exponential factors, the terms add up to <span class="math inline">\((1 - q + q)^\alpha = 1\)</span>. The factors for <span class="math inline">\(j = 0\)</span> and <span class="math inline">\(j = 1\)</span> are <span class="math inline">\(e^0 = 1\)</span>, so those two terms cost nothing, and <span id="eq-auto-03dpsgd-14"><span class="math display">\[A_\alpha = 1 + \sum_{j=2}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^j\big(e^{(j^2 - j)/(2\sigma^2)} - 1\big). \tag{C.20}\]</span></span> For small <span class="math inline">\(q\)</span> the <span class="math inline">\(j = 2\)</span> term dominates, because every later term carries <span class="math inline">\(q^3\)</span> or a higher power. That term is about <span class="math inline">\(\frac{\alpha(\alpha - 1)}2q^2(e^{1/\sigma^2} - 1)\)</span>, so <span class="math inline">\(A_\alpha\)</span> is 1 plus a small number. The logarithm of 1 plus a small number is close to that small number, so dividing by <span class="math inline">\(\alpha - 1\)</span> gives <a href="#eq-apx-sgd-small-q" class="quarto-xref">Equation&nbsp;<span>C.15</span></a>. Its second form follows because <span class="math inline">\(e^{1/\sigma^2} - 1\)</span> is close to <span class="math inline">\(1/\sigma^2\)</span> when <span class="math inline">\(\sigma\)</span> is large. Both forms are approximations, not bounds. You will also see the curve quoted as <span class="math inline">\(q^2\alpha/\sigma^2\)</span>, which is the leading term of the upper bound Abadi et al.&nbsp;(2016) proved for small <span class="math inline">\(q\)</span>, and about twice <a href="#eq-apx-sgd-small-q" class="quarto-xref">Equation&nbsp;<span>C.15</span></a> for large <span class="math inline">\(\sigma\)</span> (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-small-q" class="quarto-xref"><span>Section 33.6</span></a>).</p>
+<p>Last, the direction. The guarantee must hold with either dataset first, so the curve is the larger of <span class="math inline">\(D_\alpha(P_q\|P_0)\)</span> and <span class="math inline">\(D_\alpha(P_0\|P_q)\)</span>. The first one puts the dataset with the record first, and it is called the <strong>remove</strong> direction. It is always the larger for the subsampled Gaussian, which is why accountants compute only it. Appendix <a href="12-amplification.html#sec-apx-amp-direction" class="quarto-xref"><span>Section L.1</span></a> derives this step by step, and the script checks it below.</p>
+</section>
+<section id="checking-it-3" class="level3" data-number="C.4.5">
+<h3 data-number="C.4.5" class="anchored" data-anchor-id="checking-it-3"><span class="header-section-number">C.4.5</span> Checking it</h3>
+<p>The curve can be computed in two independent ways, and the script does both: by the binomial sum, and by averaging <span class="math inline">\((1 - q + qr)^\alpha\)</span> numerically on a fine grid of outputs. At <span class="math inline">\(\alpha = 2\)</span>, 8 and 32 the two agree to all seven printed digits: <span class="math inline">\(1.718134 \times 10^{-4}\)</span>, <span class="math inline">\(8.936439 \times 10^{-4}\)</span> and <span class="math inline">\(11.24628\)</span>. A Monte Carlo average of <span class="math inline">\(r^2\)</span> over two million normal draws gives 2.7084, against the exact <span class="math inline">\(e = 2.7183\)</span>. The other direction is smaller at each of the three orders: <span class="math inline">\(1.6022 \times 10^{-4}\)</span>, <span class="math inline">\(5.7239 \times 10^{-4}\)</span> and <span class="math inline">\(1.6923 \times 10^{-3}\)</span>.</p>
+<p><a href="#tbl-apx-sgd-small-q" class="quarto-xref">Table&nbsp;<span>C.4</span></a> compares the exact curve with its small-<span class="math inline">\(q\)</span> form at the running example’s <span class="math inline">\(q\)</span> and <span class="math inline">\(\sigma\)</span>.</p>
+<div id="tbl-apx-sgd-small-q" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-sgd-small-q-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;C.4: The RDP curve of one DP-SGD step with <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, against its small-<span class="math inline">\(q\)</span> form and against no sampling.
+</figcaption>
+<div aria-describedby="tbl-apx-sgd-small-q-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\alpha\)</span></th>
+<th>2</th>
+<th>4</th>
+<th>8</th>
+<th>16</th>
+<th>32</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Exact <a href="#eq-apx-sgd-rdp" class="quarto-xref">Equation&nbsp;<span>C.14</span></a></td>
+<td><span class="math inline">\(1.7181 \times 10^{-4}\)</span></td>
+<td><span class="math inline">\(3.6315 \times 10^{-4}\)</span></td>
+<td><span class="math inline">\(8.9364 \times 10^{-4}\)</span></td>
+<td>3.0879</td>
+<td>11.246</td>
+</tr>
+<tr class="even">
+<td>Small-<span class="math inline">\(q\)</span> form <a href="#eq-apx-sgd-small-q" class="quarto-xref">Equation&nbsp;<span>C.15</span></a></td>
+<td><span class="math inline">\(1.7183 \times 10^{-4}\)</span></td>
+<td><span class="math inline">\(3.4366 \times 10^{-4}\)</span></td>
+<td><span class="math inline">\(6.8731 \times 10^{-4}\)</span></td>
+<td><span class="math inline">\(1.3746 \times 10^{-3}\)</span></td>
+<td><span class="math inline">\(2.7493 \times 10^{-3}\)</span></td>
+</tr>
+<tr class="odd">
+<td>Exact / small-<span class="math inline">\(q\)</span></td>
+<td>1.00</td>
+<td>1.06</td>
+<td>1.30</td>
+<td>2246.32</td>
+<td>4090.67</td>
+</tr>
+<tr class="even">
+<td>No sampling, <span class="math inline">\(\alpha/(2\sigma^2)\)</span></td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+<td>8</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Up to <span class="math inline">\(\alpha = 8\)</span> the approximation is within 30%, but then it fails abruptly, and at <span class="math inline">\(\alpha = 16\)</span> it is 2246 times too small. <a href="#fig-apx-sgd-rdp" class="quarto-xref">Figure&nbsp;<span>C.3</span></a> shows why. The terms with large <span class="math inline">\(j\)</span> grow like <span class="math inline">\(q^je^{j^2/(2\sigma^2)}\)</span>, and the last one overtakes the <span class="math inline">\(j = 2\)</span> term near <span class="math inline">\(\alpha = 2\sigma^2\ln(1/q)\)</span> (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-small-q" class="quarto-xref"><span>Section 33.6</span></a>). So the exact curve follows the small-<span class="math inline">\(q\)</span> line, then climbs steeply near <span class="math inline">\(\alpha = 2\sigma^2\ln(1/q) = 9.2\)</span> and runs toward the unsampled line. At high orders the divergence looks at the rare outputs where the record was clearly used, and there sampling saves only about <span class="math inline">\(\ln(1/q)\)</span>. With more noise the approximation holds further: at <span class="math inline">\(\alpha = 8\)</span> the exact curve is 1.019 times the small-<span class="math inline">\(q\)</span> form for <span class="math inline">\(\sigma = 2\)</span> and 1.004 times for <span class="math inline">\(\sigma = 4\)</span>.</p>
+<div id="fig-apx-sgd-rdp" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-sgd-rdp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sgd_rdp_curve.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-sgd-rdp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;C.3: The RDP curve of one DP-SGD step against the order <span class="math inline">\(\alpha\)</span>, on log scales, for <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>: exact (black), the small-<span class="math inline">\(q\)</span> term <span class="math inline">\(\alpha q^2(e^{1/\sigma^2} - 1)/2\)</span> (dashed) and no sampling, <span class="math inline">\(\alpha/(2\sigma^2)\)</span>. The dotted line marks <span class="math inline">\(\alpha = 2\sigma^2\ln(1/q)\)</span>, where the small-<span class="math inline">\(q\)</span> form breaks.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="recipe-and-pitfalls-3" class="level3" data-number="C.4.6">
+<h3 data-number="C.4.6" class="anchored" data-anchor-id="recipe-and-pitfalls-3"><span class="header-section-number">C.4.6</span> Recipe and pitfalls</h3>
+<p>For integer orders, compute <a href="#eq-apx-sgd-rdp" class="quarto-xref">Equation&nbsp;<span>C.14</span></a> with logarithms, since the terms span many orders of magnitude. For orders between the integers, average <span class="math inline">\((1 - q + qr)^\alpha\)</span> numerically, as the chapters’ accountants do. Use <a href="#eq-apx-sgd-small-q" class="quarto-xref">Equation&nbsp;<span>C.15</span></a> only for estimates at orders below <span class="math inline">\(2\sigma^2\ln(1/q)\)</span>, never as the curve itself.</p>
+<p>The curve assumes Poisson sampling and the add/remove relation, like <a href="#sec-apx-sgd-subsampling" class="quarto-xref"><span>Section C.3</span></a>. It also assumes the sensitivity is exactly the clipping norm. If something in your code makes the sensitivity <span class="math inline">\(2C\)</span>, such as microbatches or the replace relation, give the accountant the noise multiplier <span class="math inline">\(\sigma/2\)</span> instead of <span class="math inline">\(\sigma\)</span>, because the ratio is then <span class="math inline">\(2C/(\sigma C) = 1/(\sigma/2)\)</span>.</p>
+</section>
+</section>
+<section id="sec-apx-sgd-accounting" class="level2" data-number="C.5">
+<h2 data-number="C.5" class="anchored" data-anchor-id="sec-apx-sgd-accounting"><span class="header-section-number">C.5</span> From batch, noise and epochs to the final ε</h2>
+<section id="the-question-4" class="level3" data-number="C.5.1">
+<h3 data-number="C.5.1" class="anchored" data-anchor-id="the-question-4"><span class="header-section-number">C.5.1</span> The question</h3>
+<p>You train with <span class="math inline">\(n\)</span> records, an expected batch of <span class="math inline">\(B\)</span>, noise multiplier <span class="math inline">\(\sigma\)</span> and a number of epochs <span class="math inline">\(E\)</span>. What <span class="math inline">\((\varepsilon, \delta)\)</span> do you report? And the reverse question, which a practitioner asks more often: for a target <span class="math inline">\(\varepsilon\)</span>, how much noise do you need?</p>
+</section>
+<section id="the-answer-4" class="level3" data-number="C.5.2">
+<h3 data-number="C.5.2" class="anchored" data-anchor-id="the-answer-4"><span class="header-section-number">C.5.2</span> The answer</h3>
+<p>The sampling rate is <span class="math inline">\(q = B/n\)</span>, and one epoch is <span class="math inline">\(n/B = 1/q\)</span> steps, so there are <span class="math inline">\(T = E\,n/B\)</span> steps in all. The RDP accountant multiplies the per-step curve by <span class="math inline">\(T\)</span> and converts it to <span class="math inline">\((\varepsilon, \delta)\)</span> at the best order, using Mironov’s conversion: <span id="eq-apx-sgd-convert"><span class="math display">\[\varepsilon = \min_{\alpha}\Big[T\,\varepsilon_{q,\sigma}(\alpha) + \frac{\ln(1/\delta)}{\alpha - 1}\Big]. \tag{C.21}\]</span></span> The second term is the price of converting, which this page calls the conversion <strong>toll</strong>. The minimum runs over a grid of orders. The book’s grid has the orders from 1.1 to 10.9 in steps of 0.1, followed by whole orders up to 512. It takes <span class="math inline">\(\varepsilon_{q,\sigma}(\alpha)\)</span> from <a href="#eq-apx-sgd-rdp" class="quarto-xref">Equation&nbsp;<span>C.14</span></a> at whole orders and from the numerical average between them.</p>
+</section>
+<section id="a-worked-example-4" class="level3" data-number="C.5.3">
+<h3 data-number="C.5.3" class="anchored" data-anchor-id="a-worked-example-4"><span class="header-section-number">C.5.3</span> A worked example</h3>
+<p>The running example has <span class="math inline">\(n = 10{,}000\)</span> records and <span class="math inline">\(B = 100\)</span>, so the sampling rate is <span class="math inline">\(q = 0.01\)</span>. Each of its 100 epochs has 100 steps, so <span class="math inline">\(T = 10{,}000\)</span>. The script finds that the best order is <span class="math inline">\(\alpha = 4.3\)</span>, where one step costs <span class="math inline">\(\varepsilon_{q,\sigma}(4.3) = 3.9400 \times 10^{-4}\)</span>. Multiplying by the 10,000 steps gives a composed curve of 3.9400 at that order. The conversion then adds <span class="math inline">\(\ln(10^5)/(4.3 - 1) = 11.5129/3.3 = 3.4888\)</span>. So <span class="math inline">\(\varepsilon = 3.9400 + 3.4888 = 7.4287\)</span>, which you would report as <span class="math inline">\((7.43, 10^{-5})\)</span>. <a href="#tbl-apx-sgd-epochs" class="quarto-xref">Table&nbsp;<span>C.5</span></a> gives <span class="math inline">\(\varepsilon\)</span> after each number of epochs.</p>
+<div id="tbl-apx-sgd-epochs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;C.5: The <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>) after each number of epochs. “Every record in every step” composes unsampled Gaussian steps exactly (<a href="#sec-apx-sgd-step" class="quarto-xref"><span>Section C.2</span></a>); the RDP columns use Mironov’s conversion, <a href="#eq-apx-sgd-convert" class="quarto-xref">Equation&nbsp;<span>C.21</span></a>, and the improved conversion of Balle et al.&nbsp;(2020).
+</figcaption>
+<div aria-describedby="tbl-apx-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Epochs</th>
+<th>Steps <span class="math inline">\(T\)</span></th>
+<th>Every record in every step</th>
+<th>RDP, Mironov</th>
+<th>Best order for Mironov</th>
+<th>RDP, improved</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>100</td>
+<td>91.8</td>
+<td>1.61</td>
+<td>8.9</td>
+<td>1.21</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>500</td>
+<td>344.5</td>
+<td>2.07</td>
+<td>8.3</td>
+<td>1.65</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>1,000</td>
+<td>633.9</td>
+<td>2.54</td>
+<td>7.9</td>
+<td>2.10</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>2,000</td>
+<td>1189.8</td>
+<td>3.34</td>
+<td>7.2</td>
+<td>2.87</td>
+</tr>
+<tr class="odd">
+<td>50</td>
+<td>5,000</td>
+<td>2800.6</td>
+<td>5.18</td>
+<td>5.5</td>
+<td>4.59</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td>10,000</td>
+<td>5425.5</td>
+<td>7.43</td>
+<td>4.3</td>
+<td>6.71</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Sampling turns thousands into single digits. The <strong>improved conversion</strong> of <a href="../part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ)</a> subtracts two small corrections from the conversion term <span class="math inline">\(\ln(1/\delta)/(\alpha - 1)\)</span> and gives 6.71 at 100 epochs, the number the chapters report. A <strong>privacy loss distribution (PLD)</strong> accountant tracks the whole distribution of the loss instead of one curve, and <a href="../part04-privacy-accounting/06-numerical-accounting.html#sec-num-dpsgd" class="quarto-xref"><span>Section 34.8</span></a> reports 6.2377 for the same run as its upper bound.</p>
+</section>
+<section id="why-it-works-4" class="level3" data-number="C.5.4">
+<h3 data-number="C.5.4" class="anchored" data-anchor-id="why-it-works-4"><span class="header-section-number">C.5.4</span> Why it works</h3>
+<ol type="1">
+<li><strong>The curves add.</strong> By the definition, the Rényi divergence of the whole run is set by the average of the <span class="math inline">\(\alpha\)</span>-th power of its likelihood ratio, and step 2 below writes that as the average of <span class="math inline">\(e^{(\alpha - 1)L}\)</span> for the privacy loss <span class="math inline">\(L\)</span>. The run’s likelihood ratio is the product of the steps’ ratios, so <span class="math inline">\(e^{(\alpha - 1)L}\)</span> is a product of per-step factors. Average this product one step at a time, starting from the last. With everything before it held fixed, the last step is a subsampled Gaussian step, so its factor averages to at most <span class="math inline">\(e^{(\alpha - 1)\varepsilon_{q,\sigma}(\alpha)}\)</span>, whatever the earlier steps did. That number is a constant, so it comes out of the average, and the next step is treated the same way. After <span class="math inline">\(T\)</span> steps the average is at most <span class="math inline">\(e^{(\alpha - 1)T\varepsilon_{q,\sigma}(\alpha)}\)</span>, so the composed curve is <span class="math inline">\(T\varepsilon_{q,\sigma}(\alpha)\)</span>, even though each step depends on the earlier ones (<a href="02-composition.html#sec-apx-ccomp-rdp" class="quarto-xref"><span>Section B.4</span></a>).</li>
+<li><strong>The average of a power is the Rényi divergence.</strong> Let <span class="math inline">\(L\)</span> be the privacy loss, <span class="math inline">\(\ln(P(y)/Q(y))\)</span> with <span class="math inline">\(y\)</span> drawn from <span class="math inline">\(P\)</span>, where <span class="math inline">\(P\)</span> is the output distribution on the dataset with the record. Then <span id="eq-auto-03dpsgd-15"><span class="math display">\[\mathbb E_{y \sim P}\big[e^{(\alpha - 1)L}\big] = \int P\Big(\frac PQ\Big)^{\alpha - 1}dy = \int Q\Big(\frac PQ\Big)^\alpha dy = e^{(\alpha - 1)D_\alpha(P\|Q)}. \tag{C.22}\]</span></span></li>
+<li><strong>Markov’s inequality bounds the chance of a large loss.</strong> For a variable that cannot be negative, the chance that it is at least <span class="math inline">\(a\)</span> is at most its average divided by <span class="math inline">\(a\)</span>. Apply it to <span class="math inline">\(e^{(\alpha - 1)L}\)</span> at the level <span class="math inline">\(a = e^{(\alpha - 1)\varepsilon}\)</span>. With step 2 and the composed curve of step 1, this gives <span id="eq-auto-03dpsgd-16"><span class="math display">\[\Pr[L &gt; \varepsilon] \le e^{(\alpha - 1)(T\varepsilon_{q,\sigma}(\alpha) - \varepsilon)}. \tag{C.23}\]</span></span></li>
+<li><strong>A rare large loss is all that <span class="math inline">\(\delta\)</span> has to cover.</strong> Split any set of outputs <span class="math inline">\(A\)</span> into the outputs where the loss is at most <span class="math inline">\(\varepsilon\)</span> and those where it is larger. On the first part, <span class="math inline">\(P\)</span> is at most <span class="math inline">\(e^\varepsilon\)</span> times <span class="math inline">\(Q\)</span>, by the definition of <span class="math inline">\(L\)</span>. The second part has probability at most the chance of a loss above <span class="math inline">\(\varepsilon\)</span>. Adding the two parts, <span id="eq-auto-03dpsgd-17"><span class="math display">\[P(A) \le e^\varepsilon Q(A) + \Pr[L &gt; \varepsilon], \tag{C.24}\]</span></span> so the run is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP as soon as the chance of a loss above <span class="math inline">\(\varepsilon\)</span> is at most <span class="math inline">\(\delta\)</span>.</li>
+<li><strong>Solve for <span class="math inline">\(\varepsilon\)</span>.</strong> Set the bound of step 3 equal to <span class="math inline">\(\delta\)</span>, take logarithms and divide by <span class="math inline">\(\alpha - 1\)</span>. This gives <span id="eq-auto-03dpsgd-18"><span class="math display">\[\varepsilon = T\varepsilon_{q,\sigma}(\alpha) + \frac{\ln(1/\delta)}{\alpha - 1}. \tag{C.25}\]</span></span> It holds at every order, so the smallest value over the orders also holds, which is <a href="#eq-apx-sgd-convert" class="quarto-xref">Equation&nbsp;<span>C.21</span></a>. Appendix <a href="04-conversions.html#sec-apx-conv-rdp" class="quarto-xref"><span>Section D.3</span></a> derives the conversion, and its improved form, in more detail.</li>
+</ol>
+<p>The minimum sits between the extremes because the two terms pull in opposite directions. <a href="#fig-apx-sgd-conversion" class="quarto-xref">Figure&nbsp;<span>C.4</span></a> shows them for the running example. The composed curve <span class="math inline">\(T\varepsilon_{q,\sigma}(\alpha)\)</span> rises with the order, slowly at first and then steeply past <span class="math inline">\(\alpha \approx 8\)</span>, where the curve leaves its small-<span class="math inline">\(q\)</span> form. The conversion toll <span class="math inline">\(\ln(1/\delta)/(\alpha - 1)\)</span> falls. Their sum is smallest at <span class="math inline">\(\alpha = 4.3\)</span>, where it is 7.43. A longer run makes the first term larger and pushes the best order down, from 8.9 after one epoch to 4.3 after 100.</p>
+<div id="fig-apx-sgd-conversion" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-sgd-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sgd_conversion.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-sgd-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;C.4: The two terms of <a href="#eq-apx-sgd-convert" class="quarto-xref">Equation&nbsp;<span>C.21</span></a> for the running example after <span class="math inline">\(T = 10{,}000\)</span> steps, against the order <span class="math inline">\(\alpha\)</span>: the composed curve <span class="math inline">\(T\varepsilon(\alpha)\)</span>, the conversion toll <span class="math inline">\(\ln(1/\delta)/(\alpha - 1)\)</span>, and their sum, with its minimum, <span class="math inline">\(\varepsilon = 7.43\)</span> at <span class="math inline">\(\alpha = 4.3\)</span>, marked.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="checking-it-4" class="level3" data-number="C.5.5">
+<h3 data-number="C.5.5" class="anchored" data-anchor-id="checking-it-4"><span class="header-section-number">C.5.5</span> Checking it</h3>
+<p>The script’s accountant reproduces the chapters’ numbers to every printed digit: 7.4287 with Mironov’s conversion and 6.71 with the improved one, as in <a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-dpsgd" class="quarto-xref"><span>Section 33.7</span></a>. Restricting the grid to whole orders, where <a href="#eq-apx-sgd-rdp" class="quarto-xref">Equation&nbsp;<span>C.14</span></a> is exact, costs little, giving 7.4692 at <span class="math inline">\(\alpha = 4\)</span>. <a href="#fig-apx-sgd-epochs" class="quarto-xref">Figure&nbsp;<span>C.5</span></a> plots <span class="math inline">\(\varepsilon\)</span> against the number of epochs. Without sampling it grows nearly in proportion to the number of steps, while the RDP accountant grows slowly. The PLD upper bounds from <a href="../part04-privacy-accounting/06-numerical-accounting.html#sec-num-dpsgd" class="quarto-xref"><span>Section 34.8</span></a>, marked as crosses, sit below the RDP curves. A PLD bound is proved for every pair of neighbouring datasets, like the RDP bound, and it is the tightest such number for this run. Both are therefore valid guarantees, and with the improved conversion RDP overstates <span class="math inline">\(\varepsilon\)</span> by about 8% at 100 epochs, since <span class="math inline">\(6.71/6.24 = 1.08\)</span>.</p>
+<div id="fig-apx-sgd-epochs" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sgd_eps_epochs.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-sgd-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;C.5: The <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example against the number of epochs, on log scales: every record in every step (exact Gaussian composition), the subsampled run with the RDP accountant under Mironov’s and the improved conversion, and the PLD upper bound that Part 4’s numerical accountant reports (crosses).
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="recipe-and-pitfalls-4" class="level3" data-number="C.5.6">
+<h3 data-number="C.5.6" class="anchored" data-anchor-id="recipe-and-pitfalls-4"><span class="header-section-number">C.5.6</span> Recipe and pitfalls</h3>
+<p>To get <span class="math inline">\(\varepsilon\)</span> from a training configuration, follow these steps.</p>
+<ol type="1">
+<li>Compute the sampling rate <span class="math inline">\(q = B/n\)</span> and the number of steps <span class="math inline">\(T = E\,n/B\)</span>.</li>
+<li>Compute the per-step curve <span class="math inline">\(\varepsilon_{q,\sigma}(\alpha)\)</span> on a grid of orders, with <a href="#eq-apx-sgd-rdp" class="quarto-xref">Equation&nbsp;<span>C.14</span></a> at whole orders.</li>
+<li>Multiply the curve by <span class="math inline">\(T\)</span>.</li>
+<li>At each order add the toll <span class="math inline">\(\ln(1/\delta)/(\alpha - 1)\)</span>, or use the improved conversion, and report the smallest value with its <span class="math inline">\(\delta\)</span>.</li>
+</ol>
+<p>To go the other way, from a target <span class="math inline">\(\varepsilon\)</span> to a noise multiplier, search over <span class="math inline">\(\sigma\)</span>. More noise never makes a step less private, so <span class="math inline">\(\varepsilon\)</span> falls as <span class="math inline">\(\sigma\)</span> grows, and bisection finds the smallest <span class="math inline">\(\sigma\)</span> that meets the target. <a href="#tbl-apx-sgd-sigma" class="quarto-xref">Table&nbsp;<span>C.6</span></a> shows the result for the running example’s <span class="math inline">\(q\)</span> and <span class="math inline">\(T\)</span>. The improved column matches <a href="../part05-dp-ml/02-dp-sgd.html#tbl-dpsgd-sigma" class="quarto-xref">Table&nbsp;<span>39.2</span></a> of the DP-SGD chapter.</p>
+<div id="tbl-apx-sgd-sigma" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-sgd-sigma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;C.6: The noise multiplier needed for each target <span class="math inline">\(\varepsilon\)</span> with <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(T = 10{,}000\)</span> steps, found by bisection on <span class="math inline">\(\sigma\)</span>.
+</figcaption>
+<div aria-describedby="tbl-apx-sgd-sigma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Target <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span></th>
+<th>1</th>
+<th>2</th>
+<th>4</th>
+<th>8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\sigma\)</span>, Mironov’s conversion</td>
+<td>4.974</td>
+<td>2.617</td>
+<td>1.484</td>
+<td>0.962</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\sigma\)</span>, improved conversion</td>
+<td>4.126</td>
+<td>2.278</td>
+<td>1.358</td>
+<td>0.917</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Most mistakes in reported numbers come from a mismatch between the accountant and the code, not from the accountant itself. Five are common.</p>
+<ul>
+<li><strong>Sampling must be Poisson, or the analysis must match the sampler.</strong> The whole saving rests on the independent coin of <a href="#sec-apx-sgd-subsampling" class="quarto-xref"><span>Section C.3</span></a>. If the code draws batches of exactly <span class="math inline">\(B\)</span> records, a new record pushes another one out, so the sum has sensitivity <span class="math inline">\(2C\)</span> and the accountant needs <span class="math inline">\(\sigma/2\)</span>. For the running example that gives <span class="math inline">\(\varepsilon = 47.42\)</span> instead of 6.71, with the improved conversion. Shuffling and cutting into batches has no simple amplification at all (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes" class="quarto-xref"><span>Section 33.4</span></a>).</li>
+<li><strong>State the neighbouring relation.</strong> The numbers here are for adding or removing one record. A replace-one guarantee is a different statement and needs twice the sensitivity.</li>
+<li><strong>The clipping norm is not a privacy parameter.</strong> Changing <span class="math inline">\(C\)</span> changes accuracy, not <span class="math inline">\(\varepsilon\)</span>, because the noise scales with it. A paper that reports <span class="math inline">\(C\)</span> in place of <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(q\)</span> and <span class="math inline">\(T\)</span> has not said how private the model is.</li>
+<li><strong>Report <span class="math inline">\(\varepsilon\)</span> with <span class="math inline">\(\delta\)</span>.</strong> The same run is <span class="math inline">\((5.89, 10^{-3})\)</span>, <span class="math inline">\((7.43, 10^{-5})\)</span> and <span class="math inline">\((8.71, 10^{-7})\)</span> under Mironov’s conversion. An <span class="math inline">\(\varepsilon\)</span> without its <span class="math inline">\(\delta\)</span> means nothing, and <span class="math inline">\(\delta\)</span> should be well below <span class="math inline">\(1/n = 10^{-4}\)</span>. A mechanism that published one random record in full would satisfy <span class="math inline">\(\delta = 1/n\)</span>, so a larger <span class="math inline">\(\delta\)</span> allows a real leak.</li>
+<li><strong>Count every run, including tuning.</strong> Each training run that looks at the private data spends budget, including the runs you discard. Choosing the best of several runs by a score computed on private data leaks more than one run does (<a href="../part05-dp-ml/03-hyperparameter-tuning.html#sec-hpt-leak" class="quarto-xref"><span>Section 40.3</span></a>, and <a href="13-private-learning.html#sec-apx-learn-tuning" class="quarto-xref"><span>Section M.3</span></a> for the derivation).</li>
+</ul>
+</section>
+</section>
+<section id="code" class="level2" data-number="C.6">
+<h2 data-number="C.6" class="anchored" data-anchor-id="code"><span class="header-section-number">C.6</span> Code</h2>
+<p>The script <code>apx_core_dp_sgd.py</code> computes every number on this page and draws its figures. It rewrites the accountant in a few dozen lines rather than importing the chapters’ code, so it is an independent check. It clips random gradients to test the sensitivity, solves the exact Gaussian curve with logarithms, checks amplification on a Laplace count, computes the subsampled Gaussian’s curve by the binomial sum and by numerical averaging, and converts it to <span class="math inline">\(\varepsilon\)</span> and back to <span class="math inline">\(\sigma\)</span>. From the repository root, run:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/appendix-derivations/apx_core_dp_sgd.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The script is <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/appendix-derivations/apx_core_dp_sgd.py">code/appendix-derivations/apx_core_dp_sgd.py</a>, and <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_appendix_core_dp_sgd.py">tests/test_appendix_core_dp_sgd.py</a> checks that its output still matches this page. <a href="#tbl-apx-sgd-code" class="quarto-xref">Table&nbsp;<span>C.7</span></a> summarizes the output with the default seed.</p>
+<div id="tbl-apx-sgd-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-sgd-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;C.7: The script’s output with the default seed.
+</figcaption>
+<div aria-describedby="tbl-apx-sgd-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Clipped sum, 20,000 random datasets</td>
+<td>Largest change: <span class="math inline">\(1.0000\,C\)</span> (add/remove), <span class="math inline">\(2.0000\,C\)</span> (replace)</td>
+</tr>
+<tr class="even">
+<td>Unsampled Gaussian steps, <span class="math inline">\(\sigma = 1\)</span></td>
+<td><span class="math inline">\(\varepsilon = 4.38\)</span>, 91.82 and 5425.51 after 1, 100 and 10,000 steps</td>
+</tr>
+<tr class="odd">
+<td>Full batch, <span class="math inline">\(\sigma = 10.8\)</span>, 100 steps</td>
+<td><span class="math inline">\(\varepsilon = 4.005\)</span>, the chapter’s target of 4</td>
+</tr>
+<tr class="even">
+<td>Amplification, Laplace count, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(q = 0.01\)</span></td>
+<td>Largest log ratio 0.017037, equal to the formula; other direction 0.006341</td>
+</tr>
+<tr class="odd">
+<td>Subsampled Gaussian, <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span></td>
+<td>Binomial sum and numerical average agree to seven digits; remove direction larger</td>
+</tr>
+<tr class="even">
+<td>Small-<span class="math inline">\(q\)</span> form</td>
+<td>Within 30% up to <span class="math inline">\(\alpha = 8\)</span>; 2246 times too small at <span class="math inline">\(\alpha = 16\)</span></td>
+</tr>
+<tr class="odd">
+<td>Running example, 100 epochs</td>
+<td><span class="math inline">\(\varepsilon = 7.43\)</span> (Mironov, <span class="math inline">\(\alpha = 4.3\)</span>), 6.71 (improved)</td>
+</tr>
+<tr class="even">
+<td>Noise for <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td><span class="math inline">\(\sigma = 4.974\)</span> (Mironov), 4.126 (improved)</td>
+</tr>
+<tr class="odd">
+<td>Fixed-size batches</td>
+<td><span class="math inline">\(\varepsilon = 47.42\)</span> against 6.71 for Poisson</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The main thing to take from it is how much each idea is worth on the running example. Clipping and the noise make one step cost <span class="math inline">\(\varepsilon = 4.38\)</span>, so 10,000 steps without sampling cost 5425.51. Sampling, measured by the Rényi curve and converted once, brings the same run down to 7.43, and the improved conversion to 6.71. Two independent ways of computing the curve agree to seven digits, so the remaining gap to the PLD accountant comes from the conversion and from keeping only a curve, not from numerical error.</p>
+</section>
+<section id="references" class="level2" data-number="C.7">
+<h2 data-number="C.7" class="anchored" data-anchor-id="references"><span class="header-section-number">C.7</span> References</h2>
+<ul>
+<li>Abadi, Chu, Goodfellow, McMahan, Mironov, Talwar &amp; Zhang, “Deep Learning with Differential Privacy” (CCS 2016). DP-SGD with per-example clipping, and the moments accountant, which is the RDP accountant of <a href="#sec-apx-sgd-accounting" class="quarto-xref"><span>Section C.5</span></a> in another notation.</li>
+<li>Mironov, “Rényi Differential Privacy” (CSF 2017). The definition of RDP, its composition and the conversion of <a href="#eq-apx-sgd-convert" class="quarto-xref">Equation&nbsp;<span>C.21</span></a>.</li>
+<li>Mironov, Talwar &amp; Zhang, “Rényi Differential Privacy of the Sampled Gaussian Mechanism” (arXiv 2019). The reduction to one dimension, the dominance of the remove direction and the binomial sum of <a href="#eq-apx-sgd-rdp" class="quarto-xref">Equation&nbsp;<span>C.14</span></a>.</li>
+<li>Balle, Barthe &amp; Gaboardi, “Privacy Amplification by Subsampling: Tight Analyses via Couplings and Divergences” (NeurIPS 2018). The tight amplification of <a href="#eq-apx-sgd-amplify" class="quarto-xref">Equation&nbsp;<span>C.8</span></a>, with <span class="math inline">\(\delta\)</span>, and the other sampling schemes.</li>
+<li>Balle, Barthe, Gaboardi, Hsu &amp; Sato, “Hypothesis Testing Interpretations and Rényi Differential Privacy” (AISTATS 2020). The improved conversion behind the 6.71.</li>
+<li>Ponomareva et al., “How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy” (JAIR 2023). What to clip, how to choose the knobs and what to report, for practitioners.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../appendix-derivations/02-composition.html" class="pagination-link" aria-label="Composing private releases">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Composing private releases</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../appendix-derivations/04-conversions.html" class="pagination-link" aria-label="What ε means, and converting between definitions">
+        <span class="nav-page-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">What ε means, and converting between definitions</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

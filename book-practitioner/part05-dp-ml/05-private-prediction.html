@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>40&nbsp; Private prediction: PATE and in-context learning – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>42&nbsp; Private prediction: PATE and in-context learning – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -25,41 +25,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -152,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/05-private-prediction.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/05-private-prediction.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -348,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -384,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -449,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -541,25 +524,25 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">40.1</span> Why this matters</a></li>
-  <li><a href="#sec-pate-noisy-max" id="toc-sec-pate-noisy-max" class="nav-link" data-scroll-target="#sec-pate-noisy-max"><span class="header-section-number">40.2</span> The noisy vote and its cost</a></li>
-  <li><a href="#sec-pate-accuracy" id="toc-sec-pate-accuracy" class="nav-link" data-scroll-target="#sec-pate-accuracy"><span class="header-section-number">40.3</span> When a noisy vote is accurate</a></li>
-  <li><a href="#sec-pate-versus" id="toc-sec-pate-versus" class="nav-link" data-scroll-target="#sec-pate-versus"><span class="header-section-number">40.4</span> Private answers against a private model</a></li>
-  <li><a href="#sec-pate-student" id="toc-sec-pate-student" class="nav-link" data-scroll-target="#sec-pate-student"><span class="header-section-number">40.5</span> PATE: from answers to a model</a></li>
-  <li><a href="#sec-pate-data-dependent" id="toc-sec-pate-data-dependent" class="nav-link" data-scroll-target="#sec-pate-data-dependent"><span class="header-section-number">40.6</span> Paying less when the teachers agree</a></li>
-  <li><a href="#sec-pate-icl" id="toc-sec-pate-icl" class="nav-link" data-scroll-target="#sec-pate-icl"><span class="header-section-number">40.7</span> Private in-context learning</a></li>
-  <li><a href="#sec-pate-code" id="toc-sec-pate-code" class="nav-link" data-scroll-target="#sec-pate-code"><span class="header-section-number">40.8</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">40.9</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">40.10</span> Further reading</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">42.1</span> Why this matters</a></li>
+  <li><a href="#sec-pate-noisy-max" id="toc-sec-pate-noisy-max" class="nav-link" data-scroll-target="#sec-pate-noisy-max"><span class="header-section-number">42.2</span> The noisy vote: GNMax</a></li>
+  <li><a href="#sec-pate-accuracy" id="toc-sec-pate-accuracy" class="nav-link" data-scroll-target="#sec-pate-accuracy"><span class="header-section-number">42.3</span> How accurate a noisy vote is</a></li>
+  <li><a href="#sec-pate-versus" id="toc-sec-pate-versus" class="nav-link" data-scroll-target="#sec-pate-versus"><span class="header-section-number">42.4</span> Private answers or a private model</a></li>
+  <li><a href="#sec-pate-student" id="toc-sec-pate-student" class="nav-link" data-scroll-target="#sec-pate-student"><span class="header-section-number">42.5</span> PATE: from private answers to a private model</a></li>
+  <li><a href="#sec-pate-data-dependent" id="toc-sec-pate-data-dependent" class="nav-link" data-scroll-target="#sec-pate-data-dependent"><span class="header-section-number">42.6</span> Data-dependent accounting and Confident-GNMax</a></li>
+  <li><a href="#sec-pate-icl" id="toc-sec-pate-icl" class="nav-link" data-scroll-target="#sec-pate-icl"><span class="header-section-number">42.7</span> Private in-context learning</a></li>
+  <li><a href="#sec-pate-code" id="toc-sec-pate-code" class="nav-link" data-scroll-target="#sec-pate-code"><span class="header-section-number">42.8</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">42.9</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">42.10</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/05-private-prediction.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/05-private-prediction.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></h1>
+<h1 class="title"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></h1>
 </div>
 
 
@@ -576,35 +559,27 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="40.1">
-<h2 data-number="40.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">40.1</span> Why this matters</h2>
-<p>Training with differential privacy (DP) by stochastic gradient descent (SGD) with clipped, noisy gradients, called DP-SGD (<a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>), makes the weights private, and after that every use of the model is free: answering a query is post-processing of the weights. But you pay during training, and you must own the training loop. Sometimes you cannot. The model may be a large language model (LLM) you can prompt but not train, a model without gradients such as a decision forest, or a tool that will answer a few dozen questions in its whole life, for which a private training run is overkill.</p>
-<p>The alternative is to train ordinary models, <strong>never release them</strong>, and make each <em>answer</em> private instead. The idea that makes this work is one record, one vote. Split the private records into <span class="math inline">\(k\)</span> disjoint shards and train one model, a <strong>teacher</strong>, on each. To answer a query, let every teacher vote for a label, add noise to the vote counts, and release only the winning label. A record lives in one shard, so it can change one teacher and so one vote, however that teacher was trained and however badly it overfits. That is the whole privacy argument. The accuracy argument is about the <strong>gap</strong> between the top two vote counts against the noise, and the noise must grow with the number of answers. Private prediction is therefore cheap for a few queries on which the teachers agree, and expensive otherwise. The method that turns those answers into a releasable model is private aggregation of teacher ensembles (PATE), due to Papernot et al.&nbsp;(2017).</p>
+<section id="why-this-matters" class="level2" data-number="42.1">
+<h2 data-number="42.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">42.1</span> Why this matters</h2>
+<p>Training a model with differential privacy (DP) by stochastic gradient descent (SGD), as <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> does, makes every later query free, but you must own the training loop. The model may be a large language model (LLM) that you can prompt but not train, or one that answers only a few dozen questions in its life. In those cases you can train ordinary models, keep them secret, and make each <em>answer</em> private instead.</p>
+<p>The idea is “one record, one vote”. You split the private records into <span class="math inline">\(k\)</span> disjoint shards, train one model, a <strong>teacher</strong>, on each, and release a noisy winner of their vote. Because a record lives in one shard, it can change only one vote. This chapter says when such answers beat a private model, how private aggregation of teacher ensembles (PATE) turns them into a free-to-use model, and how the vote protects an LLM’s prompt.</p>
 </section>
-<section id="sec-pate-noisy-max" class="level2" data-number="40.2">
-<h2 data-number="40.2" class="anchored" data-anchor-id="sec-pate-noisy-max"><span class="header-section-number">40.2</span> The noisy vote and its cost</h2>
-<p>Fix the partition before looking at the data, by a hash of a record identifier rather than by position. Then adding or removing a record changes exactly one shard and one teacher, and that teacher’s vote can move from one label to another: one count goes down by 1 and another goes up by 1. The vote histogram moves by at most <span class="math inline">\(\sqrt2\)</span> in Euclidean length. If shards were cut by position, inserting one record at the front would shift every later record into the next shard and could change every teacher; the guarantee would be gone.</p>
-<p>Two mechanisms release the label. <strong>LNMax</strong> adds Laplace noise of scale <span class="math inline">\(b\)</span> to each count and releases the index of the largest noisy count. It is report-noisy-max (<a href="../part03-dp-foundations/05-selection.html">Selection</a>) on scores that one record moves by at most 1 each, in opposite directions, so each answer is <span class="math inline">\((2/b)\)</span>-DP. <strong>GNMax</strong> adds Gaussian noise of standard deviation <span class="math inline">\(\sigma\)</span> to each count instead. Adding the noise is the Gaussian mechanism on a vector of sensitivity <span class="math inline">\(\sqrt2\)</span>, and taking the argmax is post-processing, so in Rényi differential privacy (RDP), the accounting whose curves simply add under composition (<a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>), each answer costs <span class="math inline">\(\alpha/\sigma^2\)</span> at order <span class="math inline">\(\alpha\)</span> (Papernot et al.&nbsp;2018). <span class="math inline">\(Q\)</span> answers cost <span class="math inline">\(Q\alpha/\sigma^2\)</span>, even when each query is chosen after seeing the earlier answers. That curve is a line whose slope is <span class="math inline">\(Q/\sigma^2\)</span>, and a line converts to an <span class="math inline">\((\varepsilon, \delta)\)</span> that depends only on its slope. Call <span class="math inline">\(\rho(\varepsilon, \delta)\)</span> the largest slope that still converts to your budget; then the noise you need is <span id="eq-pate-sigma"><span class="math display">\[\sigma = \sqrt{\frac{Q}{\rho(\varepsilon, \delta)}}. \tag{40.1}\]</span></span> At <span class="math inline">\(\delta = 10^{-5}\)</span>, <span class="math inline">\(\rho = 0.0306\)</span> for <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(0.3731\)</span> for <span class="math inline">\(\varepsilon = 4\)</span>.</p>
-<p>Three consequences follow from this formula. First, the noise grows like <span class="math inline">\(\sqrt Q\)</span>: a hundred times more answers need ten times more noise. Second, neither <span class="math inline">\(k\)</span> nor anything about the teachers appears in it. A teacher can be a network trained without noise, a decision forest or a human annotator who saw one shard; only the noise and the number of answers set the cost. The noise can be large in absolute terms because the counts are large: with 250 teachers, noise of standard deviation 40 is noticeable but not overwhelming. Third, release only the label. Publishing the noisy counts too would release a whole vector, and the data-dependent analysis below needs the label alone.</p>
+<section id="sec-pate-noisy-max" class="level2" data-number="42.2">
+<h2 data-number="42.2" class="anchored" data-anchor-id="sec-pate-noisy-max"><span class="header-section-number">42.2</span> The noisy vote: GNMax</h2>
+<p>Assign records to shards by a fixed rule chosen before looking at the data, such as a hash of a record identifier, or of a user identifier if the privacy unit is a user. Adding or removing a record then changes one teacher, which can move one vote from one label to another. The list of vote counts, the <strong>vote histogram</strong>, therefore moves by at most <span class="math inline">\(\sqrt2\)</span> in Euclidean length. The fixed rule is a condition, because if you cut shards by position in a file, inserting one record shifts every later record and can change every teacher. Likewise, if one person’s records land in several shards, that person moves several votes.</p>
+<p><strong>GNMax</strong> (Papernot et al.&nbsp;2018) adds Gaussian noise to each count and releases only the label with the largest noisy count. Write <span class="math inline">\(\sigma\)</span> for the noise’s standard deviation. Rényi differential privacy (RDP) describes a mechanism by its privacy loss <span class="math inline">\(\varepsilon(\alpha)\)</span> at each order <span class="math inline">\(\alpha\)</span> (<a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>). In those terms each answer costs a straight line: <span id="eq-auto-05privateprediction-1"><span class="math display">\[\varepsilon(\alpha) = \frac{\alpha}{\sigma^2}. \tag{42.1}\]</span></span> The lines of <span class="math inline">\(Q\)</span> answers add up, even when each query is chosen after seeing the earlier answers. Now write <span class="math inline">\(\rho(\varepsilon, \delta)\)</span> for the largest slope whose line still converts to your target, a privacy loss <span class="math inline">\(\varepsilon\)</span> with slack <span class="math inline">\(\delta\)</span> (<a href="../part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ)</a>). The noise that <span class="math inline">\(Q\)</span> answers need is then <span id="eq-pate-sigma"><span class="math display">\[\sigma = \sqrt{\frac{Q}{\rho(\varepsilon, \delta)}}. \tag{42.2}\]</span></span> This chapter uses <span class="math inline">\(\delta = 10^{-5}\)</span> throughout. A budget of <span class="math inline">\(\varepsilon = 1\)</span> then allows a slope of 0.0306, and <span class="math inline">\(\varepsilon = 4\)</span> allows 0.3731.</p>
 <div id="tbl-pate-noise" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pate-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;40.1: Noise per count for <span class="math inline">\(Q\)</span> answers at <span class="math inline">\((\varepsilon, 10^{-5})\)</span>, from the RDP accountant; Laplace answers are charged the RDP curve of randomized response, the worst pure-DP mechanism.
+Table&nbsp;42.1: Noise per count for <span class="math inline">\(Q\)</span> answers at <span class="math inline">\((\varepsilon, 10^{-5})\)</span>, from the RDP accountant.
 </figcaption>
 <div aria-describedby="tbl-pate-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Budget</th>
 <th>Answers <span class="math inline">\(Q\)</span></th>
 <th>GNMax <span class="math inline">\(\sigma\)</span></th>
-<th>LNMax standard deviation <span class="math inline">\(\sqrt2b\)</span></th>
 </tr>
 </thead>
 <tbody>
@@ -612,80 +587,53 @@ Table&nbsp;40.1: Noise per count for <span class="math inline">\(Q\)</span> answ
 <td><span class="math inline">\(\varepsilon = 1\)</span></td>
 <td>1</td>
 <td>5.72</td>
-<td>2.85</td>
 </tr>
 <tr class="even">
 <td></td>
 <td>100</td>
 <td>57.2</td>
-<td>113</td>
 </tr>
 <tr class="odd">
 <td></td>
 <td>1,000</td>
 <td>181</td>
-<td>361</td>
 </tr>
 <tr class="even">
 <td></td>
 <td>10,000</td>
 <td>572</td>
-<td>1,140</td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\varepsilon = 4\)</span></td>
 <td>1</td>
 <td>1.64</td>
-<td>0.709</td>
 </tr>
 <tr class="even">
-<td></td>
-<td>100</td>
-<td>16.4</td>
-<td>32.1</td>
-</tr>
-<tr class="odd">
 <td></td>
 <td>1,000</td>
 <td>51.8</td>
-<td>103</td>
-</tr>
-<tr class="even">
-<td></td>
-<td>10,000</td>
-<td>164</td>
-<td>327</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p><a href="#tbl-pate-noise" class="quarto-xref">Table&nbsp;<span>40.1</span></a> shows why GNMax is the default. LNMax is analysed as a pure-DP step, which is cheap for one answer, and indeed needs less noise there. But the Gaussian’s privacy loss is itself Gaussian and composes without slack, so from 100 answers on GNMax needs about half the noise. The RDP accountant is not exact here: at the <span class="math inline">\(\sigma\)</span> it picks for <span class="math inline">\(\varepsilon = 1\)</span>, the exact <span class="math inline">\(\varepsilon\)</span> of a Gaussian histogram is 0.915, so the accountant overstates the cost by about 9%.</p>
+<p>Two facts follow from <a href="#eq-pate-sigma" class="quarto-xref">Equation&nbsp;<span>42.2</span></a>. The noise grows like the square root of the number of answers, and it does not depend on the teachers at all. So a teacher can be any model, or even a human annotator who saw one shard. The original PATE used <strong>LNMax</strong>, with Laplace noise. It needs less noise for a single answer, but about twice as much from 100 answers on, so use GNMax for anything beyond one or two answers.</p>
+<p>Publishing the noisy counts as well as the label releases a whole vector, which the analysis does not cover. And since a gap can never exceed the number of teachers, the noise for 10,000 answers at <span class="math inline">\(\varepsilon = 1\)</span> swamps any ensemble with fewer than a few thousand teachers.</p>
 </section>
-<section id="sec-pate-accuracy" class="level2" data-number="40.3">
-<h2 data-number="40.3" class="anchored" data-anchor-id="sec-pate-accuracy"><span class="header-section-number">40.3</span> When a noisy vote is accurate</h2>
-<p>On two labels, GNMax returns the plurality label when the noise difference between the two counts does not overturn the gap <span class="math inline">\(g\)</span>. The difference of two independent Gaussians of standard deviation <span class="math inline">\(\sigma\)</span> is a Gaussian of standard deviation <span class="math inline">\(\sqrt2\sigma\)</span>, so the plurality wins with probability <span class="math inline">\(\Phi(g/(\sqrt2\sigma))\)</span>, where <span class="math inline">\(\Phi\)</span> is the standard normal distribution function. With more labels, the probability of losing to any competitor is at most the sum of the probabilities of losing to each, a union bound that is exact on two labels and loose when several labels are nearly tied with the winner.</p>
-<p>The part’s running example makes this concrete: 50-dimensional Gaussian inputs labelled <span class="math inline">\(\pm1\)</span> by a fixed random network, 10,000 private records, teachers that are regularized logistic regressions on one shard each. With <span class="math inline">\(k = 100\)</span> teachers and the noise for 1,000 answers at <span class="math inline">\(\varepsilon = 4\)</span>, <span class="math inline">\(\sigma = 51.8\)</span>, a query on which 98 teachers vote one way, a gap of 96, gets the plurality label with probability 0.9051. One split 70 to 30 gets it with probability 0.7076, and one split 52 to 48 with probability 0.5218, barely better than a coin (<a href="#fig-pate-votes" class="quarto-xref">Figure&nbsp;<span>40.1</span></a>).</p>
-<div id="fig-pate-votes" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-pate-votes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/pate_votes.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pate-votes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;40.1: Left three panels: the votes of 100 teachers on three public queries, with bars of one noise standard deviation (<span class="math inline">\(\sigma = 51.8\)</span>, the GNMax noise for 1,000 answers at <span class="math inline">\(\varepsilon = 4\)</span>); the title gives the probability that the noisy vote returns the plurality label. Right: across all 10,000 public queries, the fraction of the 100 teachers voting <span class="math inline">\(+1\)</span>.
-</figcaption>
-</figure>
-</div>
-<p>How many teachers? More teachers multiply the gap by <span class="math inline">\(k\)</span> while the noise stays fixed, but each teacher sees fewer records and agrees less with the others. On the running example the second effect is weaker than you might fear. Going from 25 teachers of 400 records to 500 teachers of 20, each teacher’s accuracy falls from 0.8954 to 0.6459, but the noiseless plurality vote hardly moves, staying between 0.9336 and 0.9403: a majority of many weak, nearly independent voters is right far more often than any one of them. The median gap grows in absolute terms, from 25 to 138, and since the noise does not depend on <span class="math inline">\(k\)</span>, more teachers win. With 100 answers at <span class="math inline">\(\varepsilon = 4\)</span>, 500 teachers answer with accuracy 0.9237, about a point below their noiseless vote. With 1,000 answers at <span class="math inline">\(\varepsilon = 1\)</span>, even 500 teachers fall to 0.6987. Note the ceiling: noise can only pull answers towards a coin flip, so no private answer beats the noiseless vote, and on queries the teachers find hard any noise makes the answer close to random.</p>
+<section id="sec-pate-accuracy" class="level2" data-number="42.3">
+<h2 data-number="42.3" class="anchored" data-anchor-id="sec-pate-accuracy"><span class="header-section-number">42.3</span> How accurate a noisy vote is</h2>
+<p>On two labels, the noisy vote returns the plurality label unless the difference of the two noises exceeds the <strong>gap</strong> <span class="math inline">\(g\)</span> between the two counts. That difference is Gaussian with standard deviation <span class="math inline">\(\sqrt2\sigma\)</span>, so the plurality wins with probability <span id="eq-pate-two-class"><span class="math display">\[\Pr[\text{plurality}] = \Phi\Big(\frac{g}{\sqrt2\,\sigma}\Big), \tag{42.3}\]</span></span> where <span class="math inline">\(\Phi\)</span> is the standard normal distribution function. The noiseless plurality is a ceiling, because noise can only pull an answer toward a coin flip.</p>
+<p>Take this part’s running example from <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, whose 10,000 private records have two labels, and split them among 100 teachers. With the noise for 1,000 answers at <span class="math inline">\(\varepsilon = 4\)</span>, a lopsided vote of 98 to 2 returns the plurality with probability 0.9051. But a close vote of 52 to 48 does so with probability 0.5218, barely better than a coin.</p>
+<p>More teachers mean smaller shards and weaker teachers, so the right number is found by measuring. On the running example, shrinking the shards to 20 records cuts a teacher’s accuracy to 0.6459. Yet the noiseless plurality stays between 0.9336 and 0.9403, because weak teachers err nearly independently. The gaps therefore grow with the number of teachers, and 500 teachers did best. So add teachers as long as the median gap keeps growing, and measure the noiseless vote first, since no budget gets you above it.</p>
 </section>
-<section id="sec-pate-versus" class="level2" data-number="40.4">
-<h2 data-number="40.4" class="anchored" data-anchor-id="sec-pate-versus"><span class="header-section-number">40.4</span> Private answers against a private model</h2>
-<p>You have one budget. Spend it on DP-SGD, and the model’s accuracy is fixed however many queries it answers. Spend it on answers, and accuracy starts near the noiseless ensemble and, on this task, falls towards a coin flip as <span class="math inline">\(Q\)</span> grows, because <span class="math inline">\(\sigma\)</span> grows like <span class="math inline">\(\sqrt Q\)</span>. A falling curve crosses a constant at most once, so there is a break-even number of queries <span class="math inline">\(Q^*\)</span> below which private answers win.</p>
+<section id="sec-pate-versus" class="level2" data-number="42.4">
+<h2 data-number="42.4" class="anchored" data-anchor-id="sec-pate-versus"><span class="header-section-number">42.4</span> Private answers or a private model</h2>
+<p>The same budget can train a private model, whose answers are free, or pay for answers one at a time. A private model’s accuracy does not depend on the number of queries, while the vote’s falls as answers accumulate. So private answers are at least as accurate up to a <strong>break-even</strong> number of queries <span class="math inline">\(Q^*(\varepsilon)\)</span>, and the private model wins beyond it.</p>
 <div id="tbl-pate-breakeven" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pate-breakeven-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;40.2: DP-SGD on the running example against private answers by GNMax: the largest number of queries for which the answers’ expected accuracy is at least the private model’s.
+Table&nbsp;42.2: DP-SGD on the running example against GNMax answers: the largest number of queries for which the answers’ expected accuracy is at least the private model’s.
 </figcaption>
 <div aria-describedby="tbl-pate-breakeven-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -698,39 +646,33 @@ Table&nbsp;40.2: DP-SGD on the running example against private answers by GNMax:
 <thead>
 <tr class="header">
 <th><span class="math inline">\(\varepsilon\)</span></th>
-<th>DP-SGD accuracy (2 runs)</th>
+<th>DP-SGD accuracy</th>
 <th>Break-even <span class="math inline">\(Q^*\)</span></th>
-<th>Best <span class="math inline">\(k\)</span></th>
+<th>Best number of teachers</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>0.5</td>
-<td><span class="math inline">\(0.8164 \pm 0.0060\)</span></td>
+<td>0.8164</td>
 <td>58</td>
 <td>500</td>
 </tr>
 <tr class="even">
 <td>1</td>
-<td><span class="math inline">\(0.9128 \pm 0.0207\)</span></td>
+<td>0.9128</td>
 <td>18</td>
 <td>500</td>
 </tr>
 <tr class="odd">
 <td>2</td>
-<td><span class="math inline">\(0.9438 \pm 0.0039\)</span></td>
+<td>0.9438</td>
 <td>0</td>
 <td>—</td>
 </tr>
 <tr class="even">
 <td>4</td>
-<td><span class="math inline">\(0.9573 \pm 0.0024\)</span></td>
-<td>0</td>
-<td>—</td>
-</tr>
-<tr class="odd">
-<td>8</td>
-<td><span class="math inline">\(0.9605 \pm 0.0004\)</span></td>
+<td>0.9573</td>
 <td>0</td>
 <td>—</td>
 </tr>
@@ -739,103 +681,38 @@ Table&nbsp;40.2: DP-SGD on the running example against private answers by GNMax:
 </div>
 </figure>
 </div>
-<p>On the running example (<a href="#tbl-pate-breakeven" class="quarto-xref">Table&nbsp;<span>40.2</span></a>), at <span class="math inline">\(\varepsilon = 0.5\)</span>, where DP-SGD reaches only 0.8164, 500 teachers answer up to 58 queries more accurately than the private model, and at <span class="math inline">\(\varepsilon = 1\)</span> up to 18. From <span class="math inline">\(\varepsilon = 2\)</span> on, DP-SGD beats even a single noiseless vote, because the ensemble’s ceiling is below DP-SGD’s 0.9438 (<a href="#fig-pate-answers" class="quarto-xref">Figure&nbsp;<span>40.2</span></a>). The pattern is general: private prediction wins at small budgets, where DP-SGD loses much, and for few queries. Two things the comparison leaves out cut the other way. If you cannot run DP-SGD at all, because the model is behind an interface or the data cannot be pooled, the comparison is with nothing. And private prediction runs <span class="math inline">\(k\)</span> models on every query, while DP-SGD trains once.</p>
-<div id="fig-pate-answers" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-pate-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/pate_answers.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pate-answers-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;40.2: Expected accuracy of <span class="math inline">\(Q\)</span> private answers by GNMax against <span class="math inline">\(Q\)</span>, for 25, 100 and 500 teachers, at <span class="math inline">\(\varepsilon = 1\)</span> (left) and <span class="math inline">\(\varepsilon = 4\)</span> (right), <span class="math inline">\(\delta = 10^{-5}\)</span>. The dashed line is a DP-SGD model trained at the same budget, whose accuracy does not depend on the number of queries.
-</figcaption>
-</figure>
-</div>
+<p>At small budgets DP-SGD loses a lot of accuracy, so the vote wins a window of queries, but from <span class="math inline">\(\varepsilon = 2\)</span> on DP-SGD beats even the ensemble’s ceiling. To decide for your task, estimate the private model’s accuracy at your budget, and compute the vote’s expected accuracy from <a href="#eq-pate-two-class" class="quarto-xref">Equation&nbsp;<span>42.3</span></a> and the teachers’ gaps on held-out queries. Then compare them at your expected number of queries.</p>
+<p>The table assumes you <em>can</em> run DP-SGD, which is false for LLMs behind an interface.</p>
 </section>
-<section id="sec-pate-student" class="level2" data-number="40.5">
-<h2 data-number="40.5" class="anchored" data-anchor-id="sec-pate-student"><span class="header-section-number">40.5</span> PATE: from answers to a model</h2>
-<p>Answers cost budget forever; a model costs it once. PATE spends the budget on labelling <span class="math inline">\(Q\)</span> <em>public, unlabelled</em> inputs with GNMax, then trains a <strong>student</strong> on them and releases only the student. The student’s training reads public inputs and the <span class="math inline">\(Q\)</span> noisy labels and nothing else, so it is post-processing: its weights and every prediction it ever makes cost exactly the <span class="math inline">\(Q\)</span> answers, whatever its size, training algorithm or number of predictions. The student may choose which inputs to have labelled after seeing earlier labels, since the composition allows adaptive queries.</p>
-<p>Three things limit the student: it learns from <span class="math inline">\(Q\)</span> examples rather than <span class="math inline">\(n\)</span>, some of its labels are wrong, and the plurality vote has its ceiling. More labels mean more noise per label, so for each <span class="math inline">\(\varepsilon\)</span> there is a best <span class="math inline">\(Q\)</span>. On the running example, with 250 teachers and the part’s network as student, the best student reaches 0.8238 at <span class="math inline">\(\varepsilon = 1\)</span> and 0.8898 at <span class="math inline">\(\varepsilon = 4\)</span>, against 0.9128 and 0.9573 for DP-SGD, which wins at every budget. The best <span class="math inline">\(Q\)</span> was chosen by looking at test accuracy, itself a leak that <a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a> shows how to pay for. The reasons PATE loses here are the conditions under which it wins elsewhere: the task is binary, so a wrong label is as damaging as it can be; the teachers are weak and often disagree; the student needs thousands of labels; and DP-SGD does well even at <span class="math inline">\(\varepsilon = 1\)</span>. On a handwritten-digit benchmark (MNIST), where teachers agree on most inputs, Papernot et al.&nbsp;(2018) report a student with 98.5% accuracy against a non-private 99.2%, at <span class="math inline">\(\varepsilon = 1.97\)</span> with 286 answered queries.</p>
-<p>PATE needs public inputs from the same distribution as the private data, which are plentiful for images or text and absent for medical records, and they must really be public: an input that is someone else’s private record is protected by nothing. And the teachers are non-private models that must stay secret. An attacker who steals one can attack its shard directly, so PATE moves the trust from the training algorithm to the server that holds the teachers.</p>
+<section id="sec-pate-student" class="level2" data-number="42.5">
+<h2 data-number="42.5" class="anchored" data-anchor-id="sec-pate-student"><span class="header-section-number">42.5</span> PATE: from private answers to a private model</h2>
+<p>PATE spends the budget once. It labels <span class="math inline">\(Q\)</span> <em>public, unlabelled</em> inputs with GNMax answers and trains a new model, the <strong>student</strong>, on them. The student is released and the teachers never are. Its weights and predictions cost exactly what the <span class="math inline">\(Q\)</span> answers cost.</p>
+<p>The recipe has four conditions. You need public inputs from the same distribution as the private data, which is easy for images or text and impossible for most medical records. The pool must really be public, because nothing protects an input that is someone’s private record. The number of labels needs tuning, since more labels mean more noise on each. And the teachers stay on a server you trust, because they are non-private models open to every attack of <a href="../part02-attacks/00-introduction.html">Part 2</a>.</p>
+<p>On the running example, PATE loses to DP-SGD at every budget measured. At <span class="math inline">\(\varepsilon = 4\)</span>, the best student of 250 teachers reaches 0.8898, against 0.9573 for DP-SGD. The weak teachers often disagree, and PATE wins only where teachers agree on most inputs and the student also learns from unlabelled inputs. On handwritten digits, Papernot et al.&nbsp;(2018) report a student within one point of the non-private accuracy.</p>
 </section>
-<section id="sec-pate-data-dependent" class="level2" data-number="40.6">
-<h2 data-number="40.6" class="anchored" data-anchor-id="sec-pate-data-dependent"><span class="header-section-number">40.6</span> Paying less when the teachers agree</h2>
-<p>The cost <span class="math inline">\(\alpha/\sigma^2\)</span> is a worst case over vote histograms, including ties that one teacher decides. When 249 of 250 teachers agree, one record cannot realistically change the answer, and the <strong>data-dependent analysis</strong> of Papernot et al.&nbsp;charges such a query less: its cost is roughly proportional to the probability that the noise overturns the plurality. <a href="#fig-pate-dd-cost" class="quarto-xref">Figure&nbsp;<span>40.3</span></a> shows it for one answer with <span class="math inline">\(\sigma = 40\)</span> at order 8. Up to a gap of about 100 the bound is no better than the data-independent 0.005; then it falls steeply, to <span class="math inline">\(1.23 \times 10^{-3}\)</span> at a gap of 150. The bound is valid but not tight: the exact cost on two labels is five times lower at that gap.</p>
-<div id="fig-pate-dd-cost" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-pate-dd-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/pate_dd_cost.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pate-dd-cost-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;40.3: The RDP cost at order 8 of one GNMax answer with <span class="math inline">\(\sigma = 40\)</span>, against the gap between the two vote counts, on a log scale: the data-independent <span class="math inline">\(\alpha/\sigma^2\)</span>, the data-dependent bound of Papernot et al.&nbsp;(2018), and the exact data-dependent cost on two labels.
-</figcaption>
-</figure>
-</div>
-<p>The total saving depends on how many queries have large gaps. On the running example only 0.2879 of the public queries have a gap of at least 150 with 250 teachers, so 1,000 answers with <span class="math inline">\(\sigma = 40\)</span> cost <span class="math inline">\(\varepsilon = 4.37\)</span> instead of 5.38 at <span class="math inline">\(\delta = 10^{-5}\)</span>, about 20% less. On tasks where nearly every teacher agrees on nearly every input, almost every answer is nearly free. <strong>Confident-GNMax</strong> exploits this by design: it first checks, with a noisy maximum count of large noise <span class="math inline">\(\sigma_1\)</span>, whether the consensus clears a threshold, and answers with GNMax only if it does. The check costs a little on every query, the answer only on the confident ones, which are also the ones more likely to be right. The price is that the student never sees labels near the decision boundary. On the running example it answered 459 of 1,000 queries and trained a student to 0.8894 at a data-independent <span class="math inline">\(\varepsilon = 3.59\)</span>, about what plain GNMax reached at <span class="math inline">\(\varepsilon = 4\)</span>.</p>
-<p>There is a trap. The data-dependent <span class="math inline">\(\varepsilon\)</span> is computed from the votes, so it is itself private information, and its sensitivity is large: one record changes one teacher, whose votes may change on every query. Papernot et al.&nbsp;publish it only after adding noise calibrated to its smooth sensitivity, and pay for that release; on MNIST their data-dependent <span class="math inline">\(\varepsilon = 2.00\)</span> becomes <span class="math inline">\(2.52 \pm 0.385\)</span> once sanitized. Until it is sanitized, a data-dependent <span class="math inline">\(\varepsilon\)</span> is a measurement, not a guarantee. Report the data-independent value, or pay for the release.</p>
+<section id="sec-pate-data-dependent" class="level2" data-number="42.6">
+<h2 data-number="42.6" class="anchored" data-anchor-id="sec-pate-data-dependent"><span class="header-section-number">42.6</span> Data-dependent accounting and Confident-GNMax</h2>
+<p>The cost <span class="math inline">\(\alpha/\sigma^2\)</span> is a worst case over all vote histograms. But when nearly all teachers agree, one record almost never changes the answer, and a <strong>data-dependent analysis</strong> (Papernot et al.&nbsp;2018) charges such a query far less. On tasks where teachers are nearly unanimous, as on digits, <span class="math inline">\(\varepsilon\)</span> falls by a large factor. On the running example the saving is only about 20%, because few queries have large gaps.</p>
+<p>The trap is that a data-dependent <span class="math inline">\(\varepsilon\)</span> is computed from the votes, so publishing it leaks information about the data. Papernot et al.&nbsp;release it with noise scaled to its smooth sensitivity (<a href="../part03-dp-foundations/07-sensitivity.html#sec-sens-smooth">Beyond global sensitivity</a>) and pay for that release. Until it is released privately, a data-dependent <span class="math inline">\(\varepsilon\)</span> is a measurement, not a guarantee.</p>
+<p>Two refinements exist. <strong>Confident-GNMax</strong> answers only the queries on which a noisy check finds the teachers in agreement, which gave a student of 0.8894 on the running example, a small gain over plain GNMax. <strong>Stable aggregation</strong> (Bassily, Thakkar &amp; Thakurta 2018) releases the exact plurality of lopsided votes, but it is mainly a tool for proofs.</p>
 </section>
-<section id="sec-pate-icl" class="level2" data-number="40.7">
-<h2 data-number="40.7" class="anchored" data-anchor-id="sec-pate-icl"><span class="header-section-number">40.7</span> Private in-context learning</h2>
-<p>An LLM learns a task from a few labelled examples, the <strong>exemplars</strong>, placed in its prompt. If the exemplars are private, every answer is computed from them. Duan et al.&nbsp;(2023) showed a membership inference attack (MIA) on GPT-3 prompted with one private example: the model’s probability for the correct label is markedly higher on the example in the prompt. The script’s stand-in learner shows the same: the attack’s area under the curve (AUC), the chance a member scores above a non-member, is 1.000 against a 1-shot learner and 0.889 against a 16-shot one. Putting private exemplars in a prompt that answers users directly protects nothing.</p>
-<p>The fix is PATE with prompts as teachers (Wu et al.&nbsp;2024; Duan et al.&nbsp;2023). Split the exemplars into disjoint groups by a fixed rule, prompt the model once per group with the query, and release the GNMax label. One exemplar changes one prompt and so one vote, whatever the LLM computes, and the cost is exactly that of GNMax. Wu et al.&nbsp;also draw a fresh Poisson sample of the exemplars for each query, each record kept with probability <span class="math inline">\(r\)</span>; a record is then absent from most queries, and the cost is that of the subsampled Gaussian of <a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a> with rate <span class="math inline">\(r\)</span> and noise multiplier <span class="math inline">\(\sigma/\sqrt2\)</span>, the same accountant DP-SGD uses. The <span class="math inline">\(\sqrt2\)</span> is the vote histogram’s sensitivity. Within one query the groups must still be disjoint, or a record in two groups moves two votes. <strong>PromptPATE</strong> (Duan et al.) instead labels a few public inputs this way and deploys them as the exemplars of one public prompt, the student in prompt form, free to use forever.</p>
-<p>This is where private prediction is strongest. A prompted LLM knows most of the task from pretraining, so its votes with different exemplars agree far more than independently trained small models do, and high agreement is exactly what makes answers accurate and data-dependent costs small. The papers report, on a movie-review sentiment task with GPT-3 models, 92.7% accuracy at <span class="math inline">\((\varepsilon, \delta) = (0.147, 10^{-6})\)</span> with PromptPATE against 95.2% without privacy (Duan et al.), and 91.97% at <span class="math inline">\(\varepsilon = 1\)</span> for 10,000 queries each answered by ten 4-shot prompts, against 91.89% for one non-private 4-shot prompt (Wu et al.). The script’s stand-in learner has no pretraining at all, so it shows the accounting, not the accuracy. Subsampling makes its noise small: 1,000 answers at <span class="math inline">\(\varepsilon = 1\)</span> need <span class="math inline">\(\sigma = 7.39\)</span> with <span class="math inline">\(r = 0.04\)</span>, against 181 without, yet with only 25 voters its accuracy still falls from 0.8090 to 0.6800 (<a href="#fig-pate-icl" class="quarto-xref">Figure&nbsp;<span>40.4</span></a>).</p>
-<div id="fig-pate-icl" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-pate-icl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/pate_icl.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pate-icl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;40.4: Accuracy of private answers from the stand-in in-context learner against the number of queries answered at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\varepsilon = 4\)</span> (<span class="math inline">\(\delta = 10^{-5}\)</span>), with 25 groups of about 16 exemplars drawn per query at rate 0.04. The dashed line is the vote without noise and the dotted line a single 16-shot learner.
-</figcaption>
-</figure>
-</div>
+<section id="sec-pate-icl" class="level2" data-number="42.7">
+<h2 data-number="42.7" class="anchored" data-anchor-id="sec-pate-icl"><span class="header-section-number">42.7</span> Private in-context learning</h2>
+<p>An LLM can learn a task from labelled examples placed in its prompt, called <strong>exemplars</strong>. If the exemplars are private, the answers leak them. Duan et al.&nbsp;(2023) show that GPT-3, prompted with one private example, favours that example’s correct label enough for a membership inference attack.</p>
+<p>The fix is private prediction with prompts as teachers (Duan et al.&nbsp;2023; Wu et al.&nbsp;2024). You split the private exemplars into disjoint groups by a fixed rule such as a hash, prompt the model once per group with the query, and release the GNMax label of the answers. So each answer costs <span class="math inline">\(\alpha/\sigma^2\)</span> as before, whatever the LLM computes.</p>
+<p>Wu et al.&nbsp;also draw a fresh Poisson sample of the exemplars for each query, at a sampling rate <span class="math inline">\(r\)</span>, and split only the sample into groups. So each answer costs the subsampled Gaussian of <a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, whose noise multiplier here is <span class="math inline">\(\sigma/\sqrt2\)</span>. If <span class="math inline">\(\varepsilon_{r,s}(\alpha)\)</span> is that curve at rate <span class="math inline">\(r\)</span> and multiplier <span class="math inline">\(s\)</span>, then <span class="math inline">\(Q\)</span> answers cost <span id="eq-pate-icl"><span class="math display">\[\varepsilon(\alpha) = Q\,\varepsilon_{r,\,\sigma/\sqrt2}(\alpha). \tag{42.4}\]</span></span> Within one query the groups must still be disjoint, or one record would move two votes. Subsampling cuts the noise sharply, from 181 to 7.39 in the full edition’s simulation of 1,000 answers at <span class="math inline">\(\varepsilon = 1\)</span>.</p>
+<p>In-context learning is where private prediction is strongest, because prompted LLMs agree with each other far more than small models do. Wu et al.&nbsp;report 91.97% sentiment accuracy at <span class="math inline">\(\varepsilon = 1\)</span>, about as good as one non-private prompt. <strong>PromptPATE</strong> (Duan et al.) goes one step further, as PATE does. It labels a few public inputs privately and uses them as the exemplars of one public prompt, which then answers any number of queries at no further cost. Check whether a reported <span class="math inline">\(\varepsilon\)</span> for it is data-dependent before treating it as a guarantee.</p>
 </section>
-<section id="sec-pate-code" class="level2" data-number="40.8">
-<h2 data-number="40.8" class="anchored" data-anchor-id="sec-pate-code"><span class="header-section-number">40.8</span> Code</h2>
-<p>This snippet answers the two questions to ask before deploying a noisy vote: how much noise <span class="math inline">\(Q\)</span> answers need (<a href="#eq-pate-sigma" class="quarto-xref">Equation&nbsp;<span>40.1</span></a>, with <span class="math inline">\(\rho\)</span> found by searching the RDP conversion over orders), and how often a vote with a given gap survives it.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> erfc, log, sqrt</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> eps_of_line(rho: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""(eps, delta) of the RDP line rho * alpha, by the improved conversion at the best order."""</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    orders <span class="op">=</span> [<span class="dv">1</span> <span class="op">+</span> j <span class="op">/</span> <span class="dv">100</span> <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, <span class="dv">6_000</span>)]</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">min</span>(rho <span class="op">*</span> a <span class="op">+</span> log((a <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> a) <span class="op">-</span> (log(delta) <span class="op">+</span> log(a)) <span class="op">/</span> (a <span class="op">-</span> <span class="dv">1</span>) <span class="cf">for</span> a <span class="kw">in</span> orders)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> largest_slope(eps: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The largest rho whose RDP line rho * alpha converts to (eps, delta), by bisection."""</span></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> <span class="fl">1e-6</span>, <span class="fl">10.0</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">60</span>):</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        mid <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        lo, hi <span class="op">=</span> (mid, hi) <span class="cf">if</span> eps_of_line(mid, delta) <span class="op">&lt;=</span> eps <span class="cf">else</span> (lo, mid)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lo</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gnmax_sigma(answers: <span class="bu">int</span>, eps: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Noise per vote count so that `answers` GNMax answers cost (eps, delta) in total."""</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sqrt(answers <span class="op">/</span> largest_slope(eps, delta))</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> p_plurality(gap: <span class="bu">float</span>, sigma: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Probability that a two-label GNMax vote returns the plurality label."""</span></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">-</span> <span class="fl">0.5</span> <span class="op">*</span> erfc(gap <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> sigma))</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>largest_slope(<span class="fl">1.0</span>, <span class="fl">1e-5</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.0306</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>gnmax_sigma(<span class="dv">100</span>, <span class="fl">1.0</span>, <span class="fl">1e-5</span>)<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 57.2</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>gnmax_sigma(<span class="dv">10_000</span>, <span class="fl">1.0</span>, <span class="fl">1e-5</span>)<span class="sc">:.0f}</span><span class="ss">"</span>)  <span class="co"># 572</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> gnmax_sigma(<span class="dv">1000</span>, <span class="fl">4.0</span>, <span class="fl">1e-5</span>)</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>sigma<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 51.8</span></span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>p_plurality(<span class="dv">96</span>, sigma)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.9051</span></span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>p_plurality(<span class="dv">4</span>, sigma)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.5218</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The full edition’s script trains the teachers, students and DP-SGD baselines, implements the data-dependent accountants and Confident-GNMax, and simulates in-context learning:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/private_prediction.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="sec-pate-code" class="level2" data-number="42.8">
+<h2 data-number="42.8" class="anchored" data-anchor-id="sec-pate-code"><span class="header-section-number">42.8</span> Code</h2>
+<p>The vote itself is a few lines of NumPy: count each label, add Gaussian noise to the counts and take the largest. Account for the answers with a maintained library rather than by hand. In Google’s <code>dp_accounting</code>, one GNMax answer is a <code>GaussianDpEvent</code> whose noise multiplier is <span class="math inline">\(\sigma/\sqrt2\)</span>. Compose <span class="math inline">\(Q\)</span> of them with <code>SelfComposedDpEvent</code>, or wrap each in a <code>PoissonSampledDpEvent</code> for subsampled in-context learning. Then read <span class="math inline">\(\varepsilon\)</span> off an <code>RdpAccountant</code> or a <code>PLDAccountant</code>. The full edition’s script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/private_prediction.py">private_prediction.py</a> reproduces this chapter’s numbers.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="40.9">
-<h2 data-number="40.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">40.9</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="42.9">
+<h2 data-number="42.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">42.9</span> Cheat sheet</h2>
 <div id="tbl-pate-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pate-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;40.3: The results of this chapter.
+Table&nbsp;42.3: Which private-prediction tool for which situation; GNMax noise is <span class="math inline">\(\sigma = \sqrt{Q/\rho(\varepsilon, \delta)}\)</span>.
 </figcaption>
 <div aria-describedby="tbl-pate-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -846,71 +723,54 @@ Table&nbsp;40.3: The results of this chapter.
 </colgroup>
 <thead>
 <tr class="header">
-<th>Result</th>
-<th>Formula</th>
-<th>Notes</th>
+<th>Situation</th>
+<th>Use</th>
+<th>Watch out for</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>One record, one vote</td>
-<td>Histogram moves by <span class="math inline">\(\sqrt2\)</span> in <span class="math inline">\(\ell_2\)</span></td>
-<td>Shards fixed by a hash, not by position</td>
+<td>Few queries, small budget, or a model you cannot train privately</td>
+<td>GNMax over teachers on hashed shards</td>
+<td>Release the label only; noise grows like <span class="math inline">\(\sqrt Q\)</span></td>
 </tr>
 <tr class="even">
-<td>LNMax</td>
-<td><span class="math inline">\((2/b)\)</span>-DP per answer</td>
-<td>Best for one or two answers only</td>
-</tr>
-<tr class="odd">
-<td>GNMax</td>
-<td><span class="math inline">\(\alpha/\sigma^2\)</span> RDP per answer</td>
-<td>Release the label only; adaptive queries allowed</td>
-</tr>
-<tr class="even">
-<td>Noise for <span class="math inline">\(Q\)</span> answers</td>
-<td><span class="math inline">\(\sigma = \sqrt{Q/\rho(\varepsilon, \delta)}\)</span>; <span class="math inline">\(\rho = 0.0306\)</span> at <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span></td>
-<td>Independent of <span class="math inline">\(k\)</span></td>
-</tr>
-<tr class="odd">
-<td>Accuracy, two labels</td>
-<td><span class="math inline">\(\Phi(g/(\sqrt2\sigma))\)</span></td>
-<td>Capped by the noiseless vote</td>
-</tr>
-<tr class="even">
-<td>Answers against a model</td>
-<td>Answers win for <span class="math inline">\(Q &lt; Q^*(\varepsilon)\)</span></td>
-<td>58 at <span class="math inline">\(\varepsilon = 0.5\)</span>, none from <span class="math inline">\(\varepsilon = 2\)</span>, running example</td>
-</tr>
-<tr class="odd">
+<td>Many queries, public unlabelled inputs available</td>
 <td>PATE student</td>
-<td>Costs its <span class="math inline">\(Q\)</span> labels; predictions free</td>
-<td>Needs public inputs; teachers stay secret</td>
-</tr>
-<tr class="even">
-<td>Data-dependent <span class="math inline">\(\varepsilon\)</span></td>
-<td>Small when gaps are large</td>
-<td>Not a guarantee until sanitized</td>
+<td>Teachers stay secret; tune the number of labels</td>
 </tr>
 <tr class="odd">
-<td>Private in-context learning</td>
-<td>GNMax over disjoint exemplar groups; subsampled Gaussian with <span class="math inline">\(\sigma/\sqrt2\)</span> under Poisson sampling</td>
-<td>Never put private exemplars in a public-facing prompt</td>
+<td>Private exemplars in a prompt</td>
+<td>Vote over disjoint groups, or PromptPATE</td>
+<td>Never let one prompt with private exemplars answer users</td>
+</tr>
+<tr class="even">
+<td>Many queries, DP-SGD possible, <span class="math inline">\(\varepsilon \ge 2\)</span></td>
+<td>A private model</td>
+<td>On the running example the vote never wins there</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-</section>
-<section id="further-reading" class="level2" data-number="40.10">
-<h2 data-number="40.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">40.10</span> Further reading</h2>
+<p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Papernot, Song, Mironov, Raghunathan, Talwar &amp; Erlingsson, “Scalable Private Learning with PATE” (ICLR 2018): GNMax, the data-dependent analysis, Confident-GNMax and how to sanitize the data-dependent <span class="math inline">\(\varepsilon\)</span>.</li>
-<li>Papernot, Abadi, Erlingsson, Goodfellow &amp; Talwar, “Semi-supervised Knowledge Transfer for Deep Learning from Private Training Data” (ICLR 2017): the original PATE, with LNMax and semi-supervised students.</li>
-<li>Duan, Dziedzic, Papernot &amp; Boenisch, “Flocks of Stochastic Parrots” (NeurIPS 2023), and Wu, Panda, Wang &amp; Mittal, “Privacy-Preserving In-Context Learning for Large Language Models” (ICLR 2024): the attack on prompts, PromptPATE, and subsampled voting over exemplar groups, including text generation.</li>
+<li>Count your queries before choosing between private answers and a private model.</li>
+<li>Measure the noiseless vote first, because it caps every private answer.</li>
+<li>Add teachers as long as the vote gaps grow.</li>
+<li>Assign shards and exemplar groups by a hash, never by position.</li>
+<li>Report the data-independent <span class="math inline">\(\varepsilon\)</span>, or pay for a private release of the data-dependent one.</li>
+<li>Fix the number of answers <span class="math inline">\(Q\)</span> in advance and stop answering when it is reached, since an open-ended query stream has no guarantee.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part05-dp-ml/05-private-prediction.html">the full edition’s chapter</a>.</p>
+</section>
+<section id="further-reading" class="level2" data-number="42.10">
+<h2 data-number="42.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">42.10</span> Further reading</h2>
+<ul>
+<li>Papernot, Song, Mironov, Raghunathan, Talwar &amp; Erlingsson, “Scalable Private Learning with PATE” (ICLR 2018): GNMax, the data-dependent analysis and Confident-GNMax.</li>
+<li>Duan, Dziedzic, Papernot &amp; Boenisch, “Flocks of Stochastic Parrots” (NeurIPS 2023), and Wu, Panda, Wang &amp; Mittal, “Privacy-Preserving In-Context Learning for Large Language Models” (ICLR 2024): attacks on prompts, PromptPATE and subsampled voting.</li>
+</ul>
+<p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part05-dp-ml/05-private-prediction.html">the full edition’s chapter</a>.</p>
 
 
 </section>
@@ -1319,12 +1179,12 @@ Table&nbsp;40.3: The results of this chapter.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="pagination-link" aria-label="DP-FTRL and matrix factorization">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/06-public-data.html" class="pagination-link" aria-label="Public data and private fine-tuning">
-        <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

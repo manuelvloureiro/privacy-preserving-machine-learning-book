@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>42&nbsp; Exercises: User-level differential privacy – Privacy-Preserving Machine Learning: Exercises</title>
+<title>44&nbsp; Exercises: User-level differential privacy – Privacy-Preserving Machine Learning: Exercises</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -117,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -313,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -349,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -414,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Exercises: Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -483,21 +501,21 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-ulvl-1" id="toc-sec-sol-ulvl-1" class="nav-link active" data-scroll-target="#sec-sol-ulvl-1"><span class="header-section-number">42.1</span> Group privacy at a small δ</a></li>
-  <li><a href="#sec-sol-ulvl-2" id="toc-sec-sol-ulvl-2" class="nav-link" data-scroll-target="#sec-sol-ulvl-2"><span class="header-section-number">42.2</span> When group privacy gives nothing</a></li>
-  <li><a href="#sec-sol-ulvl-3" id="toc-sec-sol-ulvl-3" class="nav-link" data-scroll-target="#sec-sol-ulvl-3"><span class="header-section-number">42.3</span> The second moment and the rate-kq rule</a></li>
-  <li><a href="#sec-sol-ulvl-4" id="toc-sec-sol-ulvl-4" class="nav-link" data-scroll-target="#sec-sol-ulvl-4"><span class="header-section-number">42.4</span> Per-record clipping inside user-level sampling</a></li>
-  <li><a href="#sec-sol-ulvl-5" id="toc-sec-sol-ulvl-5" class="nav-link" data-scroll-target="#sec-sol-ulvl-5"><span class="header-section-number">42.5</span> Averaging or summing before clipping</a></li>
-  <li><a href="#sec-sol-ulvl-6" id="toc-sec-sol-ulvl-6" class="nav-link" data-scroll-target="#sec-sol-ulvl-6"><span class="header-section-number">42.6</span> Capping contributions to a count</a></li>
+  <li><a href="#sec-sol-ulvl-1" id="toc-sec-sol-ulvl-1" class="nav-link active" data-scroll-target="#sec-sol-ulvl-1"><span class="header-section-number">44.1</span> Group privacy at a small δ</a></li>
+  <li><a href="#sec-sol-ulvl-2" id="toc-sec-sol-ulvl-2" class="nav-link" data-scroll-target="#sec-sol-ulvl-2"><span class="header-section-number">44.2</span> When group privacy gives nothing</a></li>
+  <li><a href="#sec-sol-ulvl-3" id="toc-sec-sol-ulvl-3" class="nav-link" data-scroll-target="#sec-sol-ulvl-3"><span class="header-section-number">44.3</span> The second moment and the rate-kq rule</a></li>
+  <li><a href="#sec-sol-ulvl-4" id="toc-sec-sol-ulvl-4" class="nav-link" data-scroll-target="#sec-sol-ulvl-4"><span class="header-section-number">44.4</span> Per-record clipping inside user-level sampling</a></li>
+  <li><a href="#sec-sol-ulvl-5" id="toc-sec-sol-ulvl-5" class="nav-link" data-scroll-target="#sec-sol-ulvl-5"><span class="header-section-number">44.5</span> Averaging or summing before clipping</a></li>
+  <li><a href="#sec-sol-ulvl-6" id="toc-sec-sol-ulvl-6" class="nav-link" data-scroll-target="#sec-sol-ulvl-6"><span class="header-section-number">44.6</span> Capping contributions to a count</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></h1>
+<h1 class="title"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></h1>
 </div>
 
 
@@ -516,10 +534,10 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part05-dp-ml/07-user-level.html">the chapter on user-level differential privacy</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part05-dp-ml/solutions_user_level.py</code> computes every number quoted here; run it with <code>uv run python code/part05-dp-ml/solutions_user_level.py</code>.</p>
 <p>The solutions use the chapter’s notation. A guarantee of differential privacy (DP) is <strong>example-level</strong> when neighbouring datasets differ in one record and <strong>user-level</strong> when they differ in all the records of one user. Stochastic gradient descent (SGD) with per-example clipping and Gaussian noise is DP-SGD; <span class="math inline">\(q\)</span> is its Poisson sampling rate, <span class="math inline">\(\sigma\)</span> its noise multiplier, <span class="math inline">\(C\)</span> its clipping norm and <span class="math inline">\(T\)</span> its number of steps. A user has <span class="math inline">\(k\)</span> records, and <span class="math inline">\(M \sim \mathrm{Binomial}(k, q)\)</span> of them land in a batch. Rényi differential privacy (RDP) is the accountant’s currency. The running example’s model is example-level <span class="math inline">\((6.71, 10^{-5})\)</span>-DP, from <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(T = 10{,}000\)</span>, and its population has 1,000 users with between 1 and 348 records each.</p>
-<section id="sec-sol-ulvl-1" class="level2" data-number="42.1">
-<h2 data-number="42.1" class="anchored" data-anchor-id="sec-sol-ulvl-1"><span class="header-section-number">42.1</span> Group privacy at a small δ</h2>
+<section id="sec-sol-ulvl-1" class="level2" data-number="44.1">
+<h2 data-number="44.1" class="anchored" data-anchor-id="sec-sol-ulvl-1"><span class="header-section-number">44.1</span> Group privacy at a small δ</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 1.</strong> <strong>Group privacy at a small δ.</strong> A mechanism is example-level <span class="math inline">\((1, 10^{-6})\)</span>-DP. Using <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-group">Equation&nbsp;42.1</a>, give the user-level guarantee for users with 2, 5 and 10 records. For which of them is the guarantee meaningful if the dataset has 10,000 users? <em>Check: <span class="math inline">\(\delta_2 = 3.718 \times 10^{-6}\)</span>, <span class="math inline">\(\delta_5 = 8.579 \times 10^{-5}\)</span>, <span class="math inline">\(\delta_{10} = 0.01282\)</span>.</em> <em>(The geometric sum of group privacy)</em></p>
+<p><strong>Exercise 1.</strong> <strong>Group privacy at a small δ.</strong> A mechanism is example-level <span class="math inline">\((1, 10^{-6})\)</span>-DP. Using <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-group">Equation&nbsp;44.1</a>, give the user-level guarantee for users with 2, 5 and 10 records. For which of them is the guarantee meaningful if the dataset has 10,000 users? <em>Check: <span class="math inline">\(\delta_2 = 3.718 \times 10^{-6}\)</span>, <span class="math inline">\(\delta_5 = 8.579 \times 10^{-5}\)</span>, <span class="math inline">\(\delta_{10} = 0.01282\)</span>.</em> <em>(The geometric sum of group privacy)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -545,10 +563,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-ulvl-2" class="level2" data-number="42.2">
-<h2 data-number="42.2" class="anchored" data-anchor-id="sec-sol-ulvl-2"><span class="header-section-number">42.2</span> When group privacy gives nothing</h2>
+<section id="sec-sol-ulvl-2" class="level2" data-number="44.2">
+<h2 data-number="44.2" class="anchored" data-anchor-id="sec-sol-ulvl-2"><span class="header-section-number">44.2</span> When group privacy gives nothing</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>When group privacy gives nothing.</strong> The running example’s accountant can convert its RDP curve to <span class="math inline">\((\varepsilon_{\text{rec}}, \delta_{\text{rec}})\)</span> at any <span class="math inline">\(\delta_{\text{rec}}\)</span>. For <span class="math inline">\(\delta_{\text{rec}} = 10^{-5}\)</span>, <span class="math inline">\(10^{-10}\)</span>, <span class="math inline">\(10^{-20}\)</span>, <span class="math inline">\(10^{-50}\)</span> and <span class="math inline">\(10^{-100}\)</span>, compute <span class="math inline">\(\varepsilon_{\text{rec}}\)</span> and the user’s <span class="math inline">\(\delta_k\)</span> from <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-group">Equation&nbsp;42.1</a> for <span class="math inline">\(k = 2\)</span>, 5 and 10. Explain why group privacy yields a user-level <span class="math inline">\((\varepsilon, 10^{-5})\)</span> guarantee for <span class="math inline">\(k = 2\)</span> and 5 but none for <span class="math inline">\(k = 10\)</span>. <em>Check: <span class="math inline">\(\varepsilon_{\text{rec}} = 6.71\)</span>, 9.78, 14.31, 24.94 and 41.02; for <span class="math inline">\(k = 10\)</span>, <span class="math inline">\(\log_{10}\delta_{10}\)</span> grows from 21.2 to 60.3.</em> <em>(A race between δ and e^{(k−1)ε})</em></p>
+<p><strong>Exercise 2.</strong> <strong>When group privacy gives nothing.</strong> The running example’s accountant can convert its RDP curve to <span class="math inline">\((\varepsilon_{\text{rec}}, \delta_{\text{rec}})\)</span> at any <span class="math inline">\(\delta_{\text{rec}}\)</span>. For <span class="math inline">\(\delta_{\text{rec}} = 10^{-5}\)</span>, <span class="math inline">\(10^{-10}\)</span>, <span class="math inline">\(10^{-20}\)</span>, <span class="math inline">\(10^{-50}\)</span> and <span class="math inline">\(10^{-100}\)</span>, compute <span class="math inline">\(\varepsilon_{\text{rec}}\)</span> and the user’s <span class="math inline">\(\delta_k\)</span> from <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-group">Equation&nbsp;44.1</a> for <span class="math inline">\(k = 2\)</span>, 5 and 10. Explain why group privacy yields a user-level <span class="math inline">\((\varepsilon, 10^{-5})\)</span> guarantee for <span class="math inline">\(k = 2\)</span> and 5 but none for <span class="math inline">\(k = 10\)</span>. <em>Check: <span class="math inline">\(\varepsilon_{\text{rec}} = 6.71\)</span>, 9.78, 14.31, 24.94 and 41.02; for <span class="math inline">\(k = 10\)</span>, <span class="math inline">\(\log_{10}\delta_{10}\)</span> grows from 21.2 to 60.3.</em> <em>(A race between δ and e^{(k−1)ε})</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -569,7 +587,7 @@ window.Quarto = {
 <div id="tbl-sol-ulvl-race" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-ulvl-race-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;42.1: The user’s δ from group privacy, as a function of the record-level δ at which the accountant is converted. Values above 1 are no guarantee.
+Table&nbsp;44.1: The user’s δ from group privacy, as a function of the record-level δ at which the accountant is converted. Values above 1 are no guarantee.
 </figcaption>
 <div aria-describedby="tbl-sol-ulvl-race-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -638,10 +656,10 @@ Table&nbsp;42.1: The user’s δ from group privacy, as a function of the record
 </div>
 </div>
 </section>
-<section id="sec-sol-ulvl-3" class="level2" data-number="42.3">
-<h2 data-number="42.3" class="anchored" data-anchor-id="sec-sol-ulvl-3"><span class="header-section-number">42.3</span> The second moment and the rate-kq rule</h2>
+<section id="sec-sol-ulvl-3" class="level2" data-number="44.3">
+<h2 data-number="44.3" class="anchored" data-anchor-id="sec-sol-ulvl-3"><span class="header-section-number">44.3</span> The second moment and the rate-kq rule</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>The second moment and the rate-kq rule.</strong> At order <span class="math inline">\(\alpha = 2\)</span>, <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-pair">Equation&nbsp;42.7</a> says <span class="math inline">\(A_2 = \mathbb E[e^{M_1M_2/\sigma^2}]\)</span> for two independent copies of <span class="math inline">\(M \sim \mathrm{Binomial}(k, q)\)</span>. Compute <span class="math inline">\(\varepsilon(2) = \ln A_2\)</span> for <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(k = 2\)</span>, 5 and 10, and compare with <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-rate">Equation&nbsp;42.8</a>’s single record at rate <span class="math inline">\(kq\)</span>, <span class="math inline">\(\ln(1 + (kq)^2(e^{1/\sigma^2} - 1))\)</span>. Explain the result for <span class="math inline">\(k = 10\)</span>. <em>Check: ratios 1.0177, 1.0793 and 469.</em> <em>(Moments of a mixture)</em></p>
+<p><strong>Exercise 3.</strong> <strong>The second moment and the rate-kq rule.</strong> At order <span class="math inline">\(\alpha = 2\)</span>, <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-pair">Equation&nbsp;44.7</a> says <span class="math inline">\(A_2 = \mathbb E[e^{M_1M_2/\sigma^2}]\)</span> for two independent copies of <span class="math inline">\(M \sim \mathrm{Binomial}(k, q)\)</span>. Compute <span class="math inline">\(\varepsilon(2) = \ln A_2\)</span> for <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(k = 2\)</span>, 5 and 10, and compare with <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-rate">Equation&nbsp;44.8</a>’s single record at rate <span class="math inline">\(kq\)</span>, <span class="math inline">\(\ln(1 + (kq)^2(e^{1/\sigma^2} - 1))\)</span>. Explain the result for <span class="math inline">\(k = 10\)</span>. <em>Check: ratios 1.0177, 1.0793 and 469.</em> <em>(Moments of a mixture)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -660,17 +678,17 @@ Table&nbsp;42.1: The user’s δ from group privacy, as a function of the record
 <li><strong>Rate <span class="math inline">\(kq\)</span>.</strong> <span class="math inline">\(\ln(1 + (kq)^2(e - 1))\)</span> gives <span class="math inline">\(6.870766 \times 10^{-4}\)</span>, <span class="math inline">\(4.286504 \times 10^{-3}\)</span> and <span class="math inline">\(1.703686 \times 10^{-2}\)</span>.</li>
 <li><strong>Ratios.</strong> 1.0177, 1.0793 and 469. For <span class="math inline">\(k = 2\)</span> and 5 the rule is good to 2% and 8%: the terms it drops, with <span class="math inline">\(ab \ge 2\)</span>, have probability of order <span class="math inline">\((kq)^3\)</span> or smaller.</li>
 <li><strong>What breaks at <span class="math inline">\(k = 10\)</span>.</strong> The term <span class="math inline">\(a = b = k\)</span>, both batches drawing all of the user’s records, has probability <span class="math inline">\(q^{2k}\)</span> and factor <span class="math inline">\(e^{k^2/\sigma^2}\)</span>. For <span class="math inline">\(k = 10\)</span> that is <span class="math inline">\(10^{-40}e^{100} \approx e^{7.90}\)</span>, larger than everything else together: the exact <span class="math inline">\(\ln A_2 = 7.99\)</span> is almost entirely this one term. A tiny probability cannot cancel a factor that grows like <span class="math inline">\(e^{k^2}\)</span>.</li>
-<li><strong>Consequence.</strong> At <span class="math inline">\(\sigma = 1\)</span>, low orders of the user’s curve are dominated by the rare steps that draw all of a heavy user’s records together. The accountant then moves to orders close to 1, as <a href="../../book-full/part05-dp-ml/07-user-level.html#tbl-ulvl-k">Table&nbsp;42.2</a> shows (best order 1.3 for <span class="math inline">\(k = 10\)</span>).</li>
+<li><strong>Consequence.</strong> At <span class="math inline">\(\sigma = 1\)</span>, low orders of the user’s curve are dominated by the rare steps that draw all of a heavy user’s records together. The accountant then moves to orders close to 1, as <a href="../../book-full/part05-dp-ml/07-user-level.html#tbl-ulvl-k">Table&nbsp;44.2</a> shows (best order 1.3 for <span class="math inline">\(k = 10\)</span>).</li>
 </ol>
 <p><em>The all-records-drawn term <span class="math inline">\(q^{2k}e^{k^2/\sigma^2}\)</span> exceeds 1 when <span class="math inline">\(k^2/\sigma^2 &gt; 2k\ln(1/q)\)</span>, that is <span class="math inline">\(k &gt; 2\sigma^2\ln(1/q)\)</span>, which is 9.2 for <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>. Well below that size the rate-<span class="math inline">\(kq\)</span> rule is a good quick estimate; near or above it only the accountant is reliable.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-ulvl-4" class="level2" data-number="42.4">
-<h2 data-number="42.4" class="anchored" data-anchor-id="sec-sol-ulvl-4"><span class="header-section-number">42.4</span> Per-record clipping inside user-level sampling</h2>
+<section id="sec-sol-ulvl-4" class="level2" data-number="44.4">
+<h2 data-number="44.4" class="anchored" data-anchor-id="sec-sol-ulvl-4"><span class="header-section-number">44.4</span> Per-record clipping inside user-level sampling</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>Per-record clipping inside user-level sampling.</strong> User-level DP-SGD with <span class="math inline">\(q = 0.1\)</span>, <span class="math inline">\(T = 1{,}000\)</span> and per-user clipping needs <span class="math inline">\(\sigma = 3.78\)</span> for <span class="math inline">\(\varepsilon = 4\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. Instead, you clip each record to <span class="math inline">\(C\)</span> and sum at most <span class="math inline">\(k\)</span> records per user. Using <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-together">Equation&nbsp;42.12</a>, what noise multiplier gives the same guarantee for <span class="math inline">\(k = 2\)</span> and <span class="math inline">\(k = 5\)</span>? Verify numerically at <span class="math inline">\(\alpha = 3\)</span>. <em>Check: 7.56 and 18.9.</em> <em>(Rescaling a Gaussian mechanism)</em></p>
+<p><strong>Exercise 4.</strong> <strong>Per-record clipping inside user-level sampling.</strong> User-level DP-SGD with <span class="math inline">\(q = 0.1\)</span>, <span class="math inline">\(T = 1{,}000\)</span> and per-user clipping needs <span class="math inline">\(\sigma = 3.78\)</span> for <span class="math inline">\(\varepsilon = 4\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. Instead, you clip each record to <span class="math inline">\(C\)</span> and sum at most <span class="math inline">\(k\)</span> records per user. Using <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-together">Equation&nbsp;44.12</a>, what noise multiplier gives the same guarantee for <span class="math inline">\(k = 2\)</span> and <span class="math inline">\(k = 5\)</span>? Verify numerically at <span class="math inline">\(\alpha = 3\)</span>. <em>Check: 7.56 and 18.9.</em> <em>(Rescaling a Gaussian mechanism)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -686,7 +704,7 @@ Table&nbsp;42.1: The user’s δ from group privacy, as a function of the record
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><strong>The sensitivity.</strong> A user’s sum of at most <span class="math inline">\(k\)</span> clipped records has length at most <span class="math inline">\(kC\)</span>, and the user is sampled whole with probability <span class="math inline">\(q\)</span>.</li>
-<li><strong>Rescale.</strong> Dividing the noisy sum by <span class="math inline">\(k\)</span> is invertible, so it changes no divergence. After it, the shift is at most <span class="math inline">\(C\)</span> and the noise is <span class="math inline">\(\sigma C/k\)</span>: a mechanism with noise multiplier <span class="math inline">\(\sigma/k\)</span>. That is <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-together">Equation&nbsp;42.12</a>.</li>
+<li><strong>Rescale.</strong> Dividing the noisy sum by <span class="math inline">\(k\)</span> is invertible, so it changes no divergence. After it, the shift is at most <span class="math inline">\(C\)</span> and the noise is <span class="math inline">\(\sigma C/k\)</span>: a mechanism with noise multiplier <span class="math inline">\(\sigma/k\)</span>. That is <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-together">Equation&nbsp;44.12</a>.</li>
 <li><strong>Match the guarantee.</strong> To be as private as per-user clipping with <span class="math inline">\(\sigma = 3.78\)</span>, the noise multiplier must satisfy <span class="math inline">\(\sigma/k = 3.78\)</span>: <span class="math inline">\(\sigma = 7.56\)</span> for <span class="math inline">\(k = 2\)</span> and <span class="math inline">\(18.9\)</span> for <span class="math inline">\(k = 5\)</span>.</li>
 <li><strong>Check.</strong> At <span class="math inline">\(\alpha = 3\)</span>, the binomial sum with <span class="math inline">\(k = 2\)</span> and <span class="math inline">\(\sigma = 7.56\)</span>, and with <span class="math inline">\(k = 1\)</span> and <span class="math inline">\(\sigma = 3.78\)</span>, both give <span class="math inline">\(1.094286 \times 10^{-3}\)</span>; so does <span class="math inline">\(k = 5\)</span> with <span class="math inline">\(\sigma = 18.9\)</span>.</li>
 </ol>
@@ -695,10 +713,10 @@ Table&nbsp;42.1: The user’s δ from group privacy, as a function of the record
 </div>
 </div>
 </section>
-<section id="sec-sol-ulvl-5" class="level2" data-number="42.5">
-<h2 data-number="42.5" class="anchored" data-anchor-id="sec-sol-ulvl-5"><span class="header-section-number">42.5</span> Averaging or summing before clipping</h2>
+<section id="sec-sol-ulvl-5" class="level2" data-number="44.5">
+<h2 data-number="44.5" class="anchored" data-anchor-id="sec-sol-ulvl-5"><span class="header-section-number">44.5</span> Averaging or summing before clipping</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 5.</strong> <strong>Averaging or summing before clipping.</strong> Three users have 1, 10 and 348 records, and every record of every user has the same gradient <span class="math inline">\(g\)</span> with <span class="math inline">\(\|g\| = 0.01\)</span>. With <span class="math inline">\(C = 0.5\)</span>, compute the length of each user’s clipped contribution when the per-user vector is (i) the average of the user’s gradients and (ii) their sum. Relate the answers to <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-expected">Equation&nbsp;42.13</a>. <em>Check: (i) 0.01 for all three; (ii) 0.01, 0.1 and 0.5.</em> <em>(Weights in the expected update)</em></p>
+<p><strong>Exercise 5.</strong> <strong>Averaging or summing before clipping.</strong> Three users have 1, 10 and 348 records, and every record of every user has the same gradient <span class="math inline">\(g\)</span> with <span class="math inline">\(\|g\| = 0.01\)</span>. With <span class="math inline">\(C = 0.5\)</span>, compute the length of each user’s clipped contribution when the per-user vector is (i) the average of the user’s gradients and (ii) their sum. Relate the answers to <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-expected">Equation&nbsp;44.13</a>. <em>Check: (i) 0.01 for all three; (ii) 0.01, 0.1 and 0.5.</em> <em>(Weights in the expected update)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
@@ -715,7 +733,7 @@ Table&nbsp;42.1: The user’s δ from group privacy, as a function of the record
 <ol type="1">
 <li><strong>Average then clip.</strong> Every user’s average is <span class="math inline">\(g\)</span>, of length <span class="math inline">\(0.01 &lt; C\)</span>, so nothing is clipped and each user contributes 0.01. Every user has the same weight, whatever their size.</li>
 <li><strong>Sum then clip.</strong> The sums have lengths 0.01, 0.1 and 3.48. The first two are below <span class="math inline">\(C\)</span> and are kept; the third is clipped to 0.5.</li>
-<li><strong>Weights.</strong> With averaging, the expected update is <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-expected">Equation&nbsp;42.13</a>: each user counts <span class="math inline">\(1/U\)</span>. With summing, users below the clip count in proportion to their records, as in example-level training, and users above it count <span class="math inline">\(C/\|g\|\)</span> records’ worth: here the 348-record user counts as 50 records, not 348.</li>
+<li><strong>Weights.</strong> With averaging, the expected update is <a href="../../book-full/part05-dp-ml/07-user-level.html#eq-ulvl-expected">Equation&nbsp;44.13</a>: each user counts <span class="math inline">\(1/U\)</span>. With summing, users below the clip count in proportion to their records, as in example-level training, and users above it count <span class="math inline">\(C/\|g\|\)</span> records’ worth: here the 348-record user counts as 50 records, not 348.</li>
 <li><strong>Privacy.</strong> Both are valid user-level DP-SGD: each user’s vector is computed from their own records and clipped to <span class="math inline">\(C\)</span>, so the guarantee is the same.</li>
 </ol>
 <p><em>Between equal weights per user and equal weights per record there is a continuum, set by how a user’s vector is formed and by <span class="math inline">\(C\)</span>. It is a modelling choice, made inside the per-user computation, and it costs no privacy.</em></p>
@@ -723,8 +741,8 @@ Table&nbsp;42.1: The user’s δ from group privacy, as a function of the record
 </div>
 </div>
 </section>
-<section id="sec-sol-ulvl-6" class="level2" data-number="42.6">
-<h2 data-number="42.6" class="anchored" data-anchor-id="sec-sol-ulvl-6"><span class="header-section-number">42.6</span> Capping contributions to a count</h2>
+<section id="sec-sol-ulvl-6" class="level2" data-number="44.6">
+<h2 data-number="44.6" class="anchored" data-anchor-id="sec-sol-ulvl-6"><span class="header-section-number">44.6</span> Capping contributions to a count</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>Capping contributions to a count.</strong> You release the number of records in the running example’s population, <span class="math inline">\(n = 10{,}000\)</span>, with user-level <span class="math inline">\((1, 10^{-5})\)</span>-DP. Cap each user at <span class="math inline">\(k\)</span> records, so the true capped count is <span class="math inline">\(n_k = \sum_u\min(n_u, k)\)</span> and its user-level sensitivity is <span class="math inline">\(k\)</span>, and add Gaussian noise of standard deviation <span class="math inline">\(k\)</span> times the noise for sensitivity 1. Taking the error of the estimate of <span class="math inline">\(n\)</span> as <span class="math inline">\(\sqrt{(n - n_k)^2 + \text{noise variance}}\)</span>, find the best cap. <em>Check: noise 3.731 per unit of sensitivity; best <span class="math inline">\(k = 158\)</span> with error 698.6; no cap (<span class="math inline">\(k = 348\)</span>) gives 1,298.3.</em> <em>(The bias–variance trade-off of Amin et al.)</em></p>
 </blockquote>
@@ -1158,12 +1176,12 @@ Table&nbsp;42.1: The user’s δ from group privacy, as a function of the record
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/06-public-data.html" class="pagination-link" aria-label="Exercises: Public data and private fine-tuning">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/08-disparate-impact.html" class="pagination-link" aria-label="Exercises: Disparate impact">
-        <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

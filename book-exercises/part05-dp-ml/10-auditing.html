@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>45&nbsp; Exercises: Auditing private training – Privacy-Preserving Machine Learning: Exercises</title>
+<title>47&nbsp; Exercises: Auditing private training – Privacy-Preserving Machine Learning: Exercises</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -36,6 +36,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../part05-dp-ml/11-adaptive-data-analysis.html" rel="next">
 <link href="../part05-dp-ml/09-choosing-epsilon.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -116,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/10-auditing.html"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/10-auditing.html"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -312,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -348,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -413,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Exercises: Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -482,21 +501,21 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-audit-1" id="toc-sec-sol-audit-1" class="nav-link active" data-scroll-target="#sec-sol-audit-1"><span class="header-section-number">45.1</span> Both inequalities</a></li>
-  <li><a href="#sec-sol-audit-2" id="toc-sec-sol-audit-2" class="nav-link" data-scroll-target="#sec-sol-audit-2"><span class="header-section-number">45.2</span> The ceiling of an audit</a></li>
-  <li><a href="#sec-sol-audit-3" id="toc-sec-sol-audit-3" class="nav-link" data-scroll-target="#sec-sol-audit-3"><span class="header-section-number">45.3</span> Where ε lives</a></li>
-  <li><a href="#sec-sol-audit-4" id="toc-sec-sol-audit-4" class="nav-link" data-scroll-target="#sec-sol-audit-4"><span class="header-section-number">45.4</span> What the sum of projections loses</a></li>
-  <li><a href="#sec-sol-audit-5" id="toc-sec-sol-audit-5" class="nav-link" data-scroll-target="#sec-sol-audit-5"><span class="header-section-number">45.5</span> How many canaries one run needs</a></li>
-  <li><a href="#sec-sol-audit-6" id="toc-sec-sol-audit-6" class="nav-link" data-scroll-target="#sec-sol-audit-6"><span class="header-section-number">45.6</span> Randomized response meets the bound</a></li>
+  <li><a href="#sec-sol-audit-1" id="toc-sec-sol-audit-1" class="nav-link active" data-scroll-target="#sec-sol-audit-1"><span class="header-section-number">47.1</span> Both inequalities</a></li>
+  <li><a href="#sec-sol-audit-2" id="toc-sec-sol-audit-2" class="nav-link" data-scroll-target="#sec-sol-audit-2"><span class="header-section-number">47.2</span> The ceiling of an audit</a></li>
+  <li><a href="#sec-sol-audit-3" id="toc-sec-sol-audit-3" class="nav-link" data-scroll-target="#sec-sol-audit-3"><span class="header-section-number">47.3</span> Where ε lives</a></li>
+  <li><a href="#sec-sol-audit-4" id="toc-sec-sol-audit-4" class="nav-link" data-scroll-target="#sec-sol-audit-4"><span class="header-section-number">47.4</span> What the sum of projections loses</a></li>
+  <li><a href="#sec-sol-audit-5" id="toc-sec-sol-audit-5" class="nav-link" data-scroll-target="#sec-sol-audit-5"><span class="header-section-number">47.5</span> How many canaries one run needs</a></li>
+  <li><a href="#sec-sol-audit-6" id="toc-sec-sol-audit-6" class="nav-link" data-scroll-target="#sec-sol-audit-6"><span class="header-section-number">47.6</span> Randomized response meets the bound</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/10-auditing.html"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/10-auditing.html"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></h1>
+<h1 class="title"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></h1>
 </div>
 
 
@@ -515,10 +534,10 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part05-dp-ml/10-auditing.html">the chapter on auditing private training</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part05-dp-ml/solutions_auditing.py</code> computes every number quoted here; run it with <code>uv run python code/part05-dp-ml/solutions_auditing.py</code>.</p>
 <p>The solutions use the chapter’s notation. An audit tests whether a training algorithm <span class="math inline">\(M\)</span> is differential privacy (DP) as claimed: it trains with a canary (<span class="math inline">\(D'\)</span>) and without (<span class="math inline">\(D\)</span>), and an attack says “canary in” when its score passes a threshold. The attack’s true positive rate (TPR) is the fraction of runs with the canary that it flags, and its false positive rate (FPR) the fraction of runs without the canary that it flags. Stochastic gradient descent (SGD) with clipping and Gaussian noise, DP-SGD, runs at sampling rate <span class="math inline">\(q\)</span>, noise multiplier <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(T\)</span> steps; the running example has <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(T = 10{,}000\)</span>, and the accountant claims <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. Bounds hold with probability <span class="math inline">\(1 - \beta = 95\%\)</span>. Gaussian differential privacy (GDP) with parameter <span class="math inline">\(\mu\)</span> is the trade-off curve of two unit-variance normals at distance <span class="math inline">\(\mu\)</span>.</p>
-<section id="sec-sol-audit-1" class="level2" data-number="45.1">
-<h2 data-number="45.1" class="anchored" data-anchor-id="sec-sol-audit-1"><span class="header-section-number">45.1</span> Both inequalities</h2>
+<section id="sec-sol-audit-1" class="level2" data-number="47.1">
+<h2 data-number="47.1" class="anchored" data-anchor-id="sec-sol-audit-1"><span class="header-section-number">47.1</span> Both inequalities</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 1.</strong> <strong>Both inequalities.</strong> For three attacks with exactly known rates, (FPR, TPR) <span class="math inline">\(= (0.05, 0.95)\)</span>, <span class="math inline">\((0.001, 0.05)\)</span> and <span class="math inline">\((0.5, 0.999)\)</span>, compute the two lower bounds on <span class="math inline">\(\varepsilon\)</span> that <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-region">Equation&nbsp;45.1</a> gives at <span class="math inline">\(\delta = 10^{-5}\)</span>, and say which one matters for each attack and why. <em>Check: 2.94 and 2.94; 3.91 and 0.05; 0.69 and 6.21.</em> <em>(Reading the privacy region)</em></p>
+<p><strong>Exercise 1.</strong> <strong>Both inequalities.</strong> For three attacks with exactly known rates, (FPR, TPR) <span class="math inline">\(= (0.05, 0.95)\)</span>, <span class="math inline">\((0.001, 0.05)\)</span> and <span class="math inline">\((0.5, 0.999)\)</span>, compute the two lower bounds on <span class="math inline">\(\varepsilon\)</span> that <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-region">Equation&nbsp;47.1</a> gives at <span class="math inline">\(\delta = 10^{-5}\)</span>, and say which one matters for each attack and why. <em>Check: 2.94 and 2.94; 3.91 and 0.05; 0.69 and 6.21.</em> <em>(Reading the privacy region)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -533,20 +552,20 @@ window.Quarto = {
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The two bounds.</strong> <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-region">Equation&nbsp;45.1</a> gives <span class="math inline">\(\varepsilon \ge \ln\frac{\mathrm{TPR} - \delta}{\mathrm{FPR}}\)</span> (the direct form, from “canary in” events) and <span class="math inline">\(\varepsilon \ge \ln\frac{1 - \mathrm{FPR} - \delta}{1 - \mathrm{TPR}}\)</span> (the mirror form, from “canary out” events).</li>
+<li><strong>The two bounds.</strong> <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-region">Equation&nbsp;47.1</a> gives <span class="math inline">\(\varepsilon \ge \ln\frac{\mathrm{TPR} - \delta}{\mathrm{FPR}}\)</span> (the direct form, from “canary in” events) and <span class="math inline">\(\varepsilon \ge \ln\frac{1 - \mathrm{FPR} - \delta}{1 - \mathrm{TPR}}\)</span> (the mirror form, from “canary out” events).</li>
 <li><strong>A symmetric attack.</strong> At <span class="math inline">\((0.05, 0.95)\)</span>, both are <span class="math inline">\(\ln(0.95/0.05) = \ln 19 = 2.94\)</span>, up to the <span class="math inline">\(\delta\)</span>: the attack errs equally often in both directions.</li>
 <li><strong>A low-FPR attack.</strong> At <span class="math inline">\((0.001, 0.05)\)</span>, the direct form is <span class="math inline">\(\ln(0.05/0.001) = \ln 50 = 3.91\)</span>, and the mirror form <span class="math inline">\(\ln(0.999/0.95) = 0.05\)</span>. The attack is confident when it says “in” and useless when it says “out”, so the direct form carries the information.</li>
 <li><strong>An attack that rarely misses.</strong> At <span class="math inline">\((0.5, 0.999)\)</span>, the direct form is <span class="math inline">\(\ln(0.999/0.5) = 0.69\)</span> and the mirror form <span class="math inline">\(\ln(0.5/0.001) = 6.21\)</span>. The attack almost never misses a present canary, so its “out” verdicts are confident: when it says “out”, the canary was absent with odds of about 500 to 1.</li>
 </ol>
-<p><em>An audit that only computes the direct form throws away attacks of the third kind. The certified version, <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-eps-lo">Equation&nbsp;45.4</a>, applies Clopper–Pearson bounds to both forms.</em></p>
+<p><em>An audit that only computes the direct form throws away attacks of the third kind. The certified version, <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-eps-lo">Equation&nbsp;47.4</a>, applies Clopper–Pearson bounds to both forms.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-audit-2" class="level2" data-number="45.2">
-<h2 data-number="45.2" class="anchored" data-anchor-id="sec-sol-audit-2"><span class="header-section-number">45.2</span> The ceiling of an audit</h2>
+<section id="sec-sol-audit-2" class="level2" data-number="47.2">
+<h2 data-number="47.2" class="anchored" data-anchor-id="sec-sol-audit-2"><span class="header-section-number">47.2</span> The ceiling of an audit</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>The ceiling of an audit.</strong> Show that a perfect attack with <span class="math inline">\(n\)</span> trials per hypothesis certifies about <span class="math inline">\(\ln(n/\ln(2/\beta))\)</span> (<a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-ceiling">Equation&nbsp;45.5</a>), compare the approximation with the exact value for <span class="math inline">\(n = 100\)</span>, 1,000, 10,000 and 100,000, and estimate the number of trials needed to certify the running example’s 6.71. <em>Check: 3.28 against 3.30, 5.60 against 5.60, 7.90 against 7.91, 10.21 against 10.21; 3,038 trials exactly, 3,035 by the approximation.</em> <em>(The rule of three)</em></p>
+<p><strong>Exercise 2.</strong> <strong>The ceiling of an audit.</strong> Show that a perfect attack with <span class="math inline">\(n\)</span> trials per hypothesis certifies about <span class="math inline">\(\ln(n/\ln(2/\beta))\)</span> (<a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-ceiling">Equation&nbsp;47.5</a>), compare the approximation with the exact value for <span class="math inline">\(n = 100\)</span>, 1,000, 10,000 and 100,000, and estimate the number of trials needed to certify the running example’s 6.71. <em>Check: 3.28 against 3.30, 5.60 against 5.60, 7.90 against 7.91, 10.21 against 10.21; 3,038 trials exactly, 3,035 by the approximation.</em> <em>(The rule of three)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -567,15 +586,15 @@ window.Quarto = {
 <li><strong>Numbers.</strong> The exact values are 3.28, 5.60, 7.90 and 10.21, against 3.30, 5.60, 7.91 and 10.21 from the approximation; the approximation is a little high at <span class="math inline">\(n = 100\)</span>, where <span class="math inline">\(e^{-x} \approx 1 - x\)</span> is cruder.</li>
 <li><strong>Inverting.</strong> Setting <span class="math inline">\(\ln(n/\ln 40) = 6.71\)</span> gives <span class="math inline">\(n = e^{6.71}\ln 40 = 3{,}035\)</span>; the exact search gives 3,038.</li>
 </ol>
-<p><em>Each unit of <span class="math inline">\(\varepsilon\)</span> multiplies the trials by <span class="math inline">\(e\)</span>. The ceiling is reached only by an attack that never errs; real audits need many more trials (<a href="../../book-full/part05-dp-ml/10-auditing.html#sec-audit-tight">Section&nbsp;45.5</a>).</em></p>
+<p><em>Each unit of <span class="math inline">\(\varepsilon\)</span> multiplies the trials by <span class="math inline">\(e\)</span>. The ceiling is reached only by an attack that never errs; real audits need many more trials (<a href="../../book-full/part05-dp-ml/10-auditing.html#sec-audit-tight">Section&nbsp;47.5</a>).</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-audit-3" class="level2" data-number="45.3">
-<h2 data-number="45.3" class="anchored" data-anchor-id="sec-sol-audit-3"><span class="header-section-number">45.3</span> Where ε lives</h2>
+<section id="sec-sol-audit-3" class="level2" data-number="47.3">
+<h2 data-number="47.3" class="anchored" data-anchor-id="sec-sol-audit-3"><span class="header-section-number">47.3</span> Where ε lives</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>Where ε lives.</strong> For a <span class="math inline">\(\mu\)</span>-GDP mechanism, derive the false positive rate at which the line <span class="math inline">\(\mathrm{TPR} = e^\varepsilon\mathrm{FPR} + \delta\)</span> touches the trade-off curve (<a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-touch">Equation&nbsp;45.8</a>). Evaluate it at <span class="math inline">\(\delta = 10^{-5}\)</span> for <span class="math inline">\(\mu = 1.3108\)</span> (the running example), 0.5 and 3, and compute how many trials without the canary are needed to see ten false positives there. <em>Check: <span class="math inline">\(\varepsilon = 6.01\)</span>, FPR <span class="math inline">\(8.1\times10^{-8}\)</span>, <span class="math inline">\(1.2\times10^{8}\)</span> trials; <span class="math inline">\(\varepsilon = 1.99\)</span>, <span class="math inline">\(1.1\times10^{-5}\)</span>, <span class="math inline">\(8.8\times10^{5}\)</span>; <span class="math inline">\(\varepsilon = 16.68\)</span>, <span class="math inline">\(8.4\times10^{-13}\)</span>, <span class="math inline">\(1.2\times10^{13}\)</span>.</em> <em>(Duality between (ε, δ) and trade-off curves)</em></p>
+<p><strong>Exercise 3.</strong> <strong>Where ε lives.</strong> For a <span class="math inline">\(\mu\)</span>-GDP mechanism, derive the false positive rate at which the line <span class="math inline">\(\mathrm{TPR} = e^\varepsilon\mathrm{FPR} + \delta\)</span> touches the trade-off curve (<a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-touch">Equation&nbsp;47.8</a>). Evaluate it at <span class="math inline">\(\delta = 10^{-5}\)</span> for <span class="math inline">\(\mu = 1.3108\)</span> (the running example), 0.5 and 3, and compute how many trials without the canary are needed to see ten false positives there. <em>Check: <span class="math inline">\(\varepsilon = 6.01\)</span>, FPR <span class="math inline">\(8.1\times10^{-8}\)</span>, <span class="math inline">\(1.2\times10^{8}\)</span> trials; <span class="math inline">\(\varepsilon = 1.99\)</span>, <span class="math inline">\(1.1\times10^{-5}\)</span>, <span class="math inline">\(8.8\times10^{5}\)</span>; <span class="math inline">\(\varepsilon = 16.68\)</span>, <span class="math inline">\(8.4\times10^{-13}\)</span>, <span class="math inline">\(1.2\times10^{13}\)</span>.</em> <em>(Duality between (ε, δ) and trade-off curves)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -590,7 +609,7 @@ window.Quarto = {
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The ratio to maximize.</strong> By <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-sup">Equation&nbsp;45.7</a>, <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta\)</span> is the largest <span class="math inline">\(\ln\frac{\mathrm{TPR} - \delta}{\mathrm{FPR}}\)</span> over thresholds. Geometrically, it is the steepest line through <span class="math inline">\((0, \delta)\)</span> that still meets the curve, so at the optimum the line touches the curve and has the curve’s slope there.</li>
+<li><strong>The ratio to maximize.</strong> By <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-sup">Equation&nbsp;47.7</a>, <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta\)</span> is the largest <span class="math inline">\(\ln\frac{\mathrm{TPR} - \delta}{\mathrm{FPR}}\)</span> over thresholds. Geometrically, it is the steepest line through <span class="math inline">\((0, \delta)\)</span> that still meets the curve, so at the optimum the line touches the curve and has the curve’s slope there.</li>
 <li><strong>The slope of the curve.</strong> For thresholds <span class="math inline">\(t\)</span> on an observation that is <span class="math inline">\(\mathcal N(0, 1)\)</span> without the canary and <span class="math inline">\(\mathcal N(\mu, 1)\)</span> with it, <span class="math inline">\(\mathrm{FPR} = 1 - \Phi(t)\)</span> and <span class="math inline">\(\mathrm{TPR} = 1 - \Phi(t - \mu)\)</span>. Moving <span class="math inline">\(t\)</span> changes the TPR by the density <span class="math inline">\(\phi(t - \mu)\)</span> and the FPR by <span class="math inline">\(\phi(t)\)</span> per unit, so the slope is <span class="math inline">\(\phi(t - \mu)/\phi(t) = e^{\mu t - \mu^2/2}\)</span>, the likelihood ratio at <span class="math inline">\(t\)</span>.</li>
 <li><strong>Set the slope to <span class="math inline">\(e^\varepsilon\)</span>.</strong> <span class="math inline">\(\mu t - \mu^2/2 = \varepsilon\)</span> gives <span class="math inline">\(t = \varepsilon/\mu + \mu/2\)</span>, so <span class="math inline">\(\mathrm{FPR}^* = \Phi(-\varepsilon/\mu - \mu/2)\)</span> and <span class="math inline">\(\mathrm{TPR}^* = \Phi(-\varepsilon/\mu + \mu/2)\)</span>.</li>
 <li><strong>The running example.</strong> <span class="math inline">\(\mu = 1.3108\)</span> gives <span class="math inline">\(\varepsilon = 6.01\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> through the Gaussian privacy profile, and then <span class="math inline">\(\mathrm{FPR}^* = 8.1\times10^{-8}\)</span>, <span class="math inline">\(\mathrm{TPR}^* = 4.3\times10^{-5}\)</span>. Ten false positives at that rate need <span class="math inline">\(10/(8.1\times10^{-8}) = 1.2\times10^{8}\)</span> trials.</li>
@@ -601,10 +620,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-audit-4" class="level2" data-number="45.4">
-<h2 data-number="45.4" class="anchored" data-anchor-id="sec-sol-audit-4"><span class="header-section-number">45.4</span> What the sum of projections loses</h2>
+<section id="sec-sol-audit-4" class="level2" data-number="47.4">
+<h2 data-number="47.4" class="anchored" data-anchor-id="sec-sol-audit-4"><span class="header-section-number">47.4</span> What the sum of projections loses</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>What the sum of projections loses.</strong> For a white-box Dirac canary, the likelihood-ratio statistic of <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-lr">Equation&nbsp;45.6</a> behaves like <span class="math inline">\(\mu\)</span>-GDP with <span class="math inline">\(\mu = q\sqrt{T(e^{1/\sigma^2} - 1)}\)</span> and the sum of projections like <span class="math inline">\(\mu_{\mathrm{sum}} = q\sqrt T/\sigma\)</span>. Compute their ratio for <span class="math inline">\(\sigma = 0.5\)</span>, 1, 2 and 4, and how many times more steps the sum would need to reach the likelihood ratio’s <span class="math inline">\(\mu\)</span>. Explain why the ratio tends to 1 for large <span class="math inline">\(\sigma\)</span>. <em>Check: 3.661, 1.311, 1.066, 1.016; step factors 13.40, 1.72, 1.14, 1.03.</em> <em>(Linearizing a likelihood ratio)</em></p>
+<p><strong>Exercise 4.</strong> <strong>What the sum of projections loses.</strong> For a white-box Dirac canary, the likelihood-ratio statistic of <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-lr">Equation&nbsp;47.6</a> behaves like <span class="math inline">\(\mu\)</span>-GDP with <span class="math inline">\(\mu = q\sqrt{T(e^{1/\sigma^2} - 1)}\)</span> and the sum of projections like <span class="math inline">\(\mu_{\mathrm{sum}} = q\sqrt T/\sigma\)</span>. Compute their ratio for <span class="math inline">\(\sigma = 0.5\)</span>, 1, 2 and 4, and how many times more steps the sum would need to reach the likelihood ratio’s <span class="math inline">\(\mu\)</span>. Explain why the ratio tends to 1 for large <span class="math inline">\(\sigma\)</span>. <em>Check: 3.661, 1.311, 1.066, 1.016; step factors 13.40, 1.72, 1.14, 1.03.</em> <em>(Linearizing a likelihood ratio)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -629,10 +648,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-audit-5" class="level2" data-number="45.5">
-<h2 data-number="45.5" class="anchored" data-anchor-id="sec-sol-audit-5"><span class="header-section-number">45.5</span> How many canaries one run needs</h2>
+<section id="sec-sol-audit-5" class="level2" data-number="47.5">
+<h2 data-number="47.5" class="anchored" data-anchor-id="sec-sol-audit-5"><span class="header-section-number">47.5</span> How many canaries one run needs</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 5.</strong> <strong>How many canaries one run needs.</strong> In a one-run audit where every one of <span class="math inline">\(m = r\)</span> guesses is correct, find the smallest <span class="math inline">\(m\)</span> that certifies the running example’s <span class="math inline">\(\varepsilon = 6.71\)</span>: first for pure DP with <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun">Equation&nbsp;45.10</a>, then with the <span class="math inline">\(\delta\)</span> correction of <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun-delta">Equation&nbsp;45.11</a> at <span class="math inline">\(\delta = 10^{-6}\)</span> and <span class="math inline">\(10^{-5}\)</span>. Give the bound for 2,000, 2,500 and 5,000 canaries at <span class="math inline">\(\delta = 10^{-5}\)</span>. <em>Check: 2,467; 2,483 and 2,648; 6.45, 6.66 and 7.28.</em> <em>(Binomial tails)</em></p>
+<p><strong>Exercise 5.</strong> <strong>How many canaries one run needs.</strong> In a one-run audit where every one of <span class="math inline">\(m = r\)</span> guesses is correct, find the smallest <span class="math inline">\(m\)</span> that certifies the running example’s <span class="math inline">\(\varepsilon = 6.71\)</span>: first for pure DP with <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun">Equation&nbsp;47.10</a>, then with the <span class="math inline">\(\delta\)</span> correction of <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun-delta">Equation&nbsp;47.11</a> at <span class="math inline">\(\delta = 10^{-6}\)</span> and <span class="math inline">\(10^{-5}\)</span>. Give the bound for 2,000, 2,500 and 5,000 canaries at <span class="math inline">\(\delta = 10^{-5}\)</span>. <em>Check: 2,467; 2,483 and 2,648; 6.45, 6.66 and 7.28.</em> <em>(Binomial tails)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
@@ -652,15 +671,15 @@ window.Quarto = {
 <li><strong>With <span class="math inline">\(\delta\)</span>.</strong> The correction term <span class="math inline">\(2m\delta\max_i\frac{f(v - i) - f(v)}{i}\)</span> grows with <span class="math inline">\(m\)</span>. At <span class="math inline">\(\delta = 10^{-6}\)</span> it barely matters, 2,483 canaries; at <span class="math inline">\(\delta = 10^{-5}\)</span> the requirement rises to 2,648.</li>
 <li><strong>The bounds.</strong> 2,000 perfect guesses certify 6.45, 2,500 certify 6.66 and 5,000 certify 7.28 at <span class="math inline">\(\delta = 10^{-5}\)</span>.</li>
 </ol>
-<p><em>Two and a half thousand canaries, every one guessed right, just to reach the claim. A real attack errs, and <a href="../../book-full/part05-dp-ml/10-auditing.html#tbl-audit-onerun">Table&nbsp;45.4</a> shows that 1,000 white-box Dirac canaries certify 2.22. In one run as in many, the bound grows like the logarithm of the number of trials.</em></p>
+<p><em>Two and a half thousand canaries, every one guessed right, just to reach the claim. A real attack errs, and <a href="../../book-full/part05-dp-ml/10-auditing.html#tbl-audit-onerun">Table&nbsp;47.4</a> shows that 1,000 white-box Dirac canaries certify 2.22. In one run as in many, the bound grows like the logarithm of the number of trials.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-audit-6" class="level2" data-number="45.6">
-<h2 data-number="45.6" class="anchored" data-anchor-id="sec-sol-audit-6"><span class="header-section-number">45.6</span> Randomized response meets the bound</h2>
+<section id="sec-sol-audit-6" class="level2" data-number="47.6">
+<h2 data-number="47.6" class="anchored" data-anchor-id="sec-sol-audit-6"><span class="header-section-number">47.6</span> Randomized response meets the bound</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 6.</strong> <strong>Randomized response meets the bound.</strong> Suppose each of 100 guesses is produced by <span class="math inline">\(\varepsilon\)</span>-randomized response on the true inclusion bit: it reports the true bit with probability <span class="math inline">\(e^\varepsilon/(1 + e^\varepsilon)\)</span> and the other one otherwise. At <span class="math inline">\(\varepsilon = \ln 3\)</span>, compute the expected number of correct guesses, check it by simulation, and compute the one-run p-value (<a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun">Equation&nbsp;45.10</a> with <span class="math inline">\(\delta = 0\)</span>) of 75 and of 85 correct guesses. What does this say about the tightness of <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun">Equation&nbsp;45.10</a>? <em>Check: 75; simulated mean 75.01; p-values 0.553 and 0.0111.</em> <em>(Tightness of a stochastic-dominance bound)</em></p>
+<p><strong>Exercise 6.</strong> <strong>Randomized response meets the bound.</strong> Suppose each of 100 guesses is produced by <span class="math inline">\(\varepsilon\)</span>-randomized response on the true inclusion bit: it reports the true bit with probability <span class="math inline">\(e^\varepsilon/(1 + e^\varepsilon)\)</span> and the other one otherwise. At <span class="math inline">\(\varepsilon = \ln 3\)</span>, compute the expected number of correct guesses, check it by simulation, and compute the one-run p-value (<a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun">Equation&nbsp;47.10</a> with <span class="math inline">\(\delta = 0\)</span>) of 75 and of 85 correct guesses. What does this say about the tightness of <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun">Equation&nbsp;47.10</a>? <em>Check: 75; simulated mean 75.01; p-values 0.553 and 0.0111.</em> <em>(Tightness of a stochastic-dominance bound)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
@@ -677,7 +696,7 @@ window.Quarto = {
 <ol type="1">
 <li><strong>Randomized response is <span class="math inline">\(\varepsilon\)</span>-DP.</strong> Its two output distributions differ by a factor of <span class="math inline">\(e^\varepsilon\)</span> on each output, by construction.</li>
 <li><strong>Its correct guesses.</strong> Each guess is right with probability <span class="math inline">\(p = 3/(1 + 3) = 0.75\)</span>, independently, so the count is <span class="math inline">\(\mathrm{Bin}(100, 0.75)\)</span>, with mean 75. Simulating 100,000 audits gives a mean of 75.01.</li>
-<li><strong>The p-values.</strong> <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun">Equation&nbsp;45.10</a> bounds <span class="math inline">\(\Pr[W \ge v]\)</span> by <span class="math inline">\(\Pr[\mathrm{Bin}(100, 0.75) \ge v]\)</span>: 0.553 for <span class="math inline">\(v = 75\)</span> and 0.0111 for <span class="math inline">\(v = 85\)</span>.</li>
+<li><strong>The p-values.</strong> <a href="../../book-full/part05-dp-ml/10-auditing.html#eq-audit-onerun">Equation&nbsp;47.10</a> bounds <span class="math inline">\(\Pr[W \ge v]\)</span> by <span class="math inline">\(\Pr[\mathrm{Bin}(100, 0.75) \ge v]\)</span>: 0.553 for <span class="math inline">\(v = 75\)</span> and 0.0111 for <span class="math inline">\(v = 85\)</span>.</li>
 <li><strong>Tightness.</strong> For randomized response, <span class="math inline">\(W\)</span> <em>is</em> the binomial, so the inequality holds with equality: no smaller bound is valid for every <span class="math inline">\(\varepsilon\)</span>-DP algorithm. Seeing 75 correct guesses is entirely consistent with <span class="math inline">\(\varepsilon = \ln 3\)</span> (p-value 0.553), and is what this mechanism produces on average; seeing 85 would reject <span class="math inline">\(\varepsilon = \ln 3\)</span> at the 5% level.</li>
 </ol>
 <p><em>The one-run bound is exact for randomized response and conservative for mechanisms whose trade-off curve is smooth, like the Gaussian. This is why one-run audits of DP-SGD fall further short of the accountant than many-run audits.</em></p>
@@ -1092,10 +1111,13 @@ window.Quarto = {
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/09-choosing-epsilon.html" class="pagination-link" aria-label="Exercises: Choosing ε">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
+      <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="pagination-link" aria-label="Exercises: Adaptive data analysis">
+        <span class="nav-page-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Exercises: Adaptive data analysis</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
   </div>
 </nav>
 </div> <!-- /content -->

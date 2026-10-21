@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>42&nbsp; User-level differential privacy – Privacy-Preserving Machine Learning</title>
+<title>44&nbsp; User-level differential privacy – Privacy-Preserving Machine Learning</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -348,26 +348,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -384,55 +396,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -449,61 +461,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -519,14 +537,98 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/01-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">How much noise to add</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/02-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Composing private releases</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/03-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/04-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">What ε means, and converting between definitions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/05-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Sums, limits and counting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/06-tails-tests-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Tail bounds, tests and divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/07-optimization-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Optimization and estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/08-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Random matrices and factorizations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/09-cryptography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/10-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/11-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">K</span>&nbsp; <span class="chapter-title">Composition of trade-off functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/12-amplification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">L</span>&nbsp; <span class="chapter-title">Subsampling, shuffling and iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/13-private-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">M</span>&nbsp; <span class="chapter-title">Private learning and tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/14-auditing-adaptivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">N</span>&nbsp; <span class="chapter-title">Auditing, reconstruction and adaptive analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../glossary.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+ <span class="menu-text"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../term-index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+ <span class="menu-text"><span class="chapter-number">P</span>&nbsp; <span class="chapter-title">Index</span></span></a>
   </div>
 </li>
       </ul>
@@ -541,82 +643,82 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">42.1</span> Why this matters</a>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">44.1</span> Why this matters</a>
   <ul class="collapse">
-  <li><a href="#the-one-idea-the-neighbouring-relation-is-the-privacy-unit" id="toc-the-one-idea-the-neighbouring-relation-is-the-privacy-unit" class="nav-link" data-scroll-target="#the-one-idea-the-neighbouring-relation-is-the-privacy-unit"><span class="header-section-number">42.1.1</span> The one idea: the neighbouring relation is the privacy unit</a></li>
+  <li><a href="#the-one-idea-the-neighbouring-relation-is-the-privacy-unit" id="toc-the-one-idea-the-neighbouring-relation-is-the-privacy-unit" class="nav-link" data-scroll-target="#the-one-idea-the-neighbouring-relation-is-the-privacy-unit"><span class="header-section-number">44.1.1</span> The one idea: the neighbouring relation is the privacy unit</a></li>
   </ul></li>
-  <li><a href="#toolkit-three-facts-every-derivation-uses" id="toc-toolkit-three-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-three-facts-every-derivation-uses"><span class="header-section-number">42.2</span> Toolkit: three facts every derivation uses</a>
+  <li><a href="#toolkit-three-facts-every-derivation-uses" id="toc-toolkit-three-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-three-facts-every-derivation-uses"><span class="header-section-number">44.2</span> Toolkit: three facts every derivation uses</a>
   <ul class="collapse">
-  <li><a href="#fact-1-group-privacy" id="toc-fact-1-group-privacy" class="nav-link" data-scroll-target="#fact-1-group-privacy"><span class="header-section-number">42.2.1</span> Fact 1 — Group privacy</a></li>
-  <li><a href="#fact-2-the-accountant-of-dp-sgd" id="toc-fact-2-the-accountant-of-dp-sgd" class="nav-link" data-scroll-target="#fact-2-the-accountant-of-dp-sgd"><span class="header-section-number">42.2.2</span> Fact 2 — The accountant of DP-SGD</a></li>
-  <li><a href="#fact-3-the-gaussian-moment-generating-function" id="toc-fact-3-the-gaussian-moment-generating-function" class="nav-link" data-scroll-target="#fact-3-the-gaussian-moment-generating-function"><span class="header-section-number">42.2.3</span> Fact 3 — The Gaussian moment generating function</a></li>
+  <li><a href="#fact-1-group-privacy" id="toc-fact-1-group-privacy" class="nav-link" data-scroll-target="#fact-1-group-privacy"><span class="header-section-number">44.2.1</span> Fact 1 — Group privacy</a></li>
+  <li><a href="#fact-2-the-accountant-of-dp-sgd" id="toc-fact-2-the-accountant-of-dp-sgd" class="nav-link" data-scroll-target="#fact-2-the-accountant-of-dp-sgd"><span class="header-section-number">44.2.2</span> Fact 2 — The accountant of DP-SGD</a></li>
+  <li><a href="#fact-3-the-gaussian-moment-generating-function" id="toc-fact-3-the-gaussian-moment-generating-function" class="nav-link" data-scroll-target="#fact-3-the-gaussian-moment-generating-function"><span class="header-section-number">44.2.3</span> Fact 3 — The Gaussian moment generating function</a></li>
   </ul></li>
-  <li><a href="#sec-ulvl-unit" id="toc-sec-ulvl-unit" class="nav-link" data-scroll-target="#sec-ulvl-unit"><span class="header-section-number">42.3</span> The privacy unit</a>
+  <li><a href="#sec-ulvl-unit" id="toc-sec-ulvl-unit" class="nav-link" data-scroll-target="#sec-ulvl-unit"><span class="header-section-number">44.3</span> The privacy unit</a>
   <ul class="collapse">
-  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">42.3.1</span> Context</a></li>
-  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">42.3.2</span> Statement</a></li>
-  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">42.3.3</span> Derivation</a></li>
-  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">42.3.4</span> Interpretation</a></li>
-  <li><a href="#example-the-running-examples-users" id="toc-example-the-running-examples-users" class="nav-link" data-scroll-target="#example-the-running-examples-users"><span class="header-section-number">42.3.5</span> Example: the running example’s users</a></li>
-  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">42.3.6</span> Check yourself</a></li>
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">44.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">44.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">44.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">44.3.4</span> Interpretation</a></li>
+  <li><a href="#example-the-running-examples-users" id="toc-example-the-running-examples-users" class="nav-link" data-scroll-target="#example-the-running-examples-users"><span class="header-section-number">44.3.5</span> Example: the running example’s users</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">44.3.6</span> Check yourself</a></li>
   </ul></li>
-  <li><a href="#sec-ulvl-group-sgd" id="toc-sec-ulvl-group-sgd" class="nav-link" data-scroll-target="#sec-ulvl-group-sgd"><span class="header-section-number">42.4</span> A user with k records in example-level DP-SGD</a>
+  <li><a href="#sec-ulvl-group-sgd" id="toc-sec-ulvl-group-sgd" class="nav-link" data-scroll-target="#sec-ulvl-group-sgd"><span class="header-section-number">44.4</span> A user with k records in example-level DP-SGD</a>
   <ul class="collapse">
-  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">42.4.1</span> Context</a></li>
-  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">42.4.2</span> Statement</a></li>
-  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">42.4.3</span> Derivation</a></li>
-  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">42.4.4</span> Interpretation</a></li>
-  <li><a href="#example-the-running-examples-guarantee-for-its-users" id="toc-example-the-running-examples-guarantee-for-its-users" class="nav-link" data-scroll-target="#example-the-running-examples-guarantee-for-its-users"><span class="header-section-number">42.4.5</span> Example: the running example’s guarantee for its users</a></li>
-  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">42.4.6</span> Check yourself</a></li>
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">44.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">44.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">44.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">44.4.4</span> Interpretation</a></li>
+  <li><a href="#example-the-running-examples-guarantee-for-its-users" id="toc-example-the-running-examples-guarantee-for-its-users" class="nav-link" data-scroll-target="#example-the-running-examples-guarantee-for-its-users"><span class="header-section-number">44.4.5</span> Example: the running example’s guarantee for its users</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">44.4.6</span> Check yourself</a></li>
   </ul></li>
-  <li><a href="#sec-ulvl-dpsgd" id="toc-sec-ulvl-dpsgd" class="nav-link" data-scroll-target="#sec-ulvl-dpsgd"><span class="header-section-number">42.5</span> User-level DP-SGD</a>
+  <li><a href="#sec-ulvl-dpsgd" id="toc-sec-ulvl-dpsgd" class="nav-link" data-scroll-target="#sec-ulvl-dpsgd"><span class="header-section-number">44.5</span> User-level DP-SGD</a>
   <ul class="collapse">
-  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">42.5.1</span> Context</a></li>
-  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">42.5.2</span> Statement</a></li>
-  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">42.5.3</span> Derivation</a></li>
-  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">42.5.4</span> Interpretation</a></li>
-  <li><a href="#example-the-noise-each-strategy-needs" id="toc-example-the-noise-each-strategy-needs" class="nav-link" data-scroll-target="#example-the-noise-each-strategy-needs"><span class="header-section-number">42.5.5</span> Example: the noise each strategy needs</a></li>
-  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">42.5.6</span> Check yourself</a></li>
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">44.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">44.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">44.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">44.5.4</span> Interpretation</a></li>
+  <li><a href="#example-the-noise-each-strategy-needs" id="toc-example-the-noise-each-strategy-needs" class="nav-link" data-scroll-target="#example-the-noise-each-strategy-needs"><span class="header-section-number">44.5.5</span> Example: the noise each strategy needs</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">44.5.6</span> Check yourself</a></li>
   </ul></li>
-  <li><a href="#sec-ulvl-bounding" id="toc-sec-ulvl-bounding" class="nav-link" data-scroll-target="#sec-ulvl-bounding"><span class="header-section-number">42.6</span> Contribution bounding</a>
+  <li><a href="#sec-ulvl-bounding" id="toc-sec-ulvl-bounding" class="nav-link" data-scroll-target="#sec-ulvl-bounding"><span class="header-section-number">44.6</span> Contribution bounding</a>
   <ul class="collapse">
-  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">42.6.1</span> Context</a></li>
-  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">42.6.2</span> Statement</a></li>
-  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">42.6.3</span> Derivation</a></li>
-  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">42.6.4</span> Interpretation</a></li>
-  <li><a href="#example-the-cap-on-the-running-example" id="toc-example-the-cap-on-the-running-example" class="nav-link" data-scroll-target="#example-the-cap-on-the-running-example"><span class="header-section-number">42.6.5</span> Example: the cap on the running example</a></li>
-  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">42.6.6</span> Check yourself</a></li>
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">44.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">44.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">44.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">44.6.4</span> Interpretation</a></li>
+  <li><a href="#example-the-cap-on-the-running-example" id="toc-example-the-cap-on-the-running-example" class="nav-link" data-scroll-target="#example-the-cap-on-the-running-example"><span class="header-section-number">44.6.5</span> Example: the cap on the running example</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">44.6.6</span> Check yourself</a></li>
   </ul></li>
-  <li><a href="#sec-ulvl-hetero" id="toc-sec-ulvl-hetero" class="nav-link" data-scroll-target="#sec-ulvl-hetero"><span class="header-section-number">42.7</span> Heterogeneous users</a>
+  <li><a href="#sec-ulvl-hetero" id="toc-sec-ulvl-hetero" class="nav-link" data-scroll-target="#sec-ulvl-hetero"><span class="header-section-number">44.7</span> Heterogeneous users</a>
   <ul class="collapse">
-  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">42.7.1</span> Context</a></li>
-  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">42.7.2</span> Statement</a></li>
-  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">42.7.3</span> Derivation</a></li>
-  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">42.7.4</span> Interpretation</a></li>
-  <li><a href="#example-heavy-users-in-the-running-example" id="toc-example-heavy-users-in-the-running-example" class="nav-link" data-scroll-target="#example-heavy-users-in-the-running-example"><span class="header-section-number">42.7.5</span> Example: heavy users in the running example</a></li>
-  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">42.7.6</span> Check yourself</a></li>
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">44.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">44.7.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">44.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">44.7.4</span> Interpretation</a></li>
+  <li><a href="#example-heavy-users-in-the-running-example" id="toc-example-heavy-users-in-the-running-example" class="nav-link" data-scroll-target="#example-heavy-users-in-the-running-example"><span class="header-section-number">44.7.5</span> Example: heavy users in the running example</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">44.7.6</span> Check yourself</a></li>
   </ul></li>
-  <li><a href="#sec-ulvl-run" id="toc-sec-ulvl-run" class="nav-link" data-scroll-target="#sec-ulvl-run"><span class="header-section-number">42.8</span> Comparing the strategies on the running example</a>
+  <li><a href="#sec-ulvl-run" id="toc-sec-ulvl-run" class="nav-link" data-scroll-target="#sec-ulvl-run"><span class="header-section-number">44.8</span> Comparing the strategies on the running example</a>
   <ul class="collapse">
-  <li><a href="#context-5" id="toc-context-5" class="nav-link" data-scroll-target="#context-5"><span class="header-section-number">42.8.1</span> Context</a></li>
-  <li><a href="#statement-5" id="toc-statement-5" class="nav-link" data-scroll-target="#statement-5"><span class="header-section-number">42.8.2</span> Statement</a></li>
-  <li><a href="#derivation-5" id="toc-derivation-5" class="nav-link" data-scroll-target="#derivation-5"><span class="header-section-number">42.8.3</span> Derivation</a></li>
-  <li><a href="#interpretation-5" id="toc-interpretation-5" class="nav-link" data-scroll-target="#interpretation-5"><span class="header-section-number">42.8.4</span> Interpretation</a></li>
-  <li><a href="#example-what-the-user-level-guarantee-costs" id="toc-example-what-the-user-level-guarantee-costs" class="nav-link" data-scroll-target="#example-what-the-user-level-guarantee-costs"><span class="header-section-number">42.8.5</span> Example: what the user-level guarantee costs</a></li>
-  <li><a href="#check-yourself-5" id="toc-check-yourself-5" class="nav-link" data-scroll-target="#check-yourself-5"><span class="header-section-number">42.8.6</span> Check yourself</a></li>
+  <li><a href="#context-5" id="toc-context-5" class="nav-link" data-scroll-target="#context-5"><span class="header-section-number">44.8.1</span> Context</a></li>
+  <li><a href="#statement-5" id="toc-statement-5" class="nav-link" data-scroll-target="#statement-5"><span class="header-section-number">44.8.2</span> Statement</a></li>
+  <li><a href="#derivation-5" id="toc-derivation-5" class="nav-link" data-scroll-target="#derivation-5"><span class="header-section-number">44.8.3</span> Derivation</a></li>
+  <li><a href="#interpretation-5" id="toc-interpretation-5" class="nav-link" data-scroll-target="#interpretation-5"><span class="header-section-number">44.8.4</span> Interpretation</a></li>
+  <li><a href="#example-what-the-user-level-guarantee-costs" id="toc-example-what-the-user-level-guarantee-costs" class="nav-link" data-scroll-target="#example-what-the-user-level-guarantee-costs"><span class="header-section-number">44.8.5</span> Example: what the user-level guarantee costs</a></li>
+  <li><a href="#check-yourself-5" id="toc-check-yourself-5" class="nav-link" data-scroll-target="#check-yourself-5"><span class="header-section-number">44.8.6</span> Check yourself</a></li>
   </ul></li>
-  <li><a href="#code-check-every-number-by-computation" id="toc-code-check-every-number-by-computation" class="nav-link" data-scroll-target="#code-check-every-number-by-computation"><span class="header-section-number">42.9</span> Code: check every number by computation</a></li>
-  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">42.10</span> References</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">42.11</span> Cheat sheet</a></li>
+  <li><a href="#code-check-every-number-by-computation" id="toc-code-check-every-number-by-computation" class="nav-link" data-scroll-target="#code-check-every-number-by-computation"><span class="header-section-number">44.9</span> Code: check every number by computation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">44.10</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">44.11</span> Cheat sheet</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></h1>
+<h1 class="title"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></h1>
 </div>
 
 
@@ -633,19 +735,19 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="42.1">
-<h2 data-number="42.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">42.1</span> Why this matters</h2>
+<section id="why-this-matters" class="level2" data-number="44.1">
+<h2 data-number="44.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">44.1</span> Why this matters</h2>
 <p>Every differential privacy (DP) guarantee in this part so far protects one record. Stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, clips each record’s gradient, adds noise scaled to that clip, and reports <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> for the part’s running example: an adversary who sees the trained model learns little about whether any single training example was used. But the people behind the data do not contribute one record each. A user of a messaging app contributes hundreds of messages, a patient dozens of visits, a photographer thousands of photos. Each of those records is protected by DP, and the person is not, because what the adversary learns about all of a person’s records together can be much larger than what they learn about one.</p>
 <p>This chapter asks two questions. What does a record-level <span class="math inline">\(\varepsilon\)</span> say about a person who contributed <span class="math inline">\(k\)</span> records? And how do you train a model with a guarantee for the person instead?</p>
-<section id="the-one-idea-the-neighbouring-relation-is-the-privacy-unit" class="level3" data-number="42.1.1">
-<h3 data-number="42.1.1" class="anchored" data-anchor-id="the-one-idea-the-neighbouring-relation-is-the-privacy-unit"><span class="header-section-number">42.1.1</span> The one idea: the neighbouring relation is the privacy unit</h3>
+<section id="the-one-idea-the-neighbouring-relation-is-the-privacy-unit" class="level3" data-number="44.1.1">
+<h3 data-number="44.1.1" class="anchored" data-anchor-id="the-one-idea-the-neighbouring-relation-is-the-privacy-unit"><span class="header-section-number">44.1.1</span> The one idea: the neighbouring relation is the privacy unit</h3>
 <p>A DP guarantee compares the outputs on two <strong>neighbouring</strong> datasets, and whatever differs between neighbours is what is protected. If neighbours differ in one record, records are protected; if they differ in all of one person’s records, people are. Nothing else in the definition changes. The work is to bound how much the <em>unit</em>, now a person, can move the computation, and to account for that bound.</p>
 <p>There are two ways to get a guarantee for a person. The first keeps the record as the unit and pays for the person afterwards, by group privacy or by an accountant that knows the person has <span class="math inline">\(k\)</span> records. It is cheap to implement and expensive in privacy, because the noise was calibrated to one record while the person moves the output by up to <span class="math inline">\(k\)</span>. The second makes the person the unit from the start: sample people instead of records, bound each person’s total contribution by clipping it, and run the usual accountant with people in place of records. On the running example the first route gives a useless model at any reasonable budget, and the second gives one within a few points of the non-private model.</p>
-<p><a href="#tbl-ulvl-overview" class="quarto-xref">Table&nbsp;<span>42.1</span></a> lists the results and where each is used.</p>
+<p><a href="#tbl-ulvl-overview" class="quarto-xref">Table&nbsp;<span>44.1</span></a> lists the results and where each is used.</p>
 <div id="tbl-ulvl-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;42.1: The results of this chapter and where each is used.
+Table&nbsp;44.1: The results of this chapter and where each is used.
 </figcaption>
 <div aria-describedby="tbl-ulvl-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -690,99 +792,99 @@ Table&nbsp;42.1: The results of this chapter and where each is used.
 </figure>
 </div>
 <p><strong>Notation.</strong> The training set has <span class="math inline">\(n\)</span> records belonging to <span class="math inline">\(U\)</span> users; user <span class="math inline">\(u\)</span> owns <span class="math inline">\(n_u\)</span> records. Two datasets are <strong>example-level neighbours</strong> if they differ by adding or removing one record, and <strong>user-level neighbours</strong> if they differ by adding or removing all the records of one user. <span class="math inline">\(k\)</span> is the number of records a user contributes, or the cap on it. In a batch drawn by Poisson sampling at rate <span class="math inline">\(q\)</span>, <span class="math inline">\(M\)</span> is the number of a given user’s records that are drawn. As in <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <span class="math inline">\(C\)</span> is the clipping norm, <span class="math inline">\(\sigma\)</span> the noise multiplier, <span class="math inline">\(T\)</span> the number of steps and <span class="math inline">\(B\)</span> the expected batch size, now counted in whichever unit is sampled.</p>
-<p><strong>The running example.</strong> The part’s network (one hidden layer of 64 tanh units, 3,329 weights) learns labels produced by a fixed teacher network from 10,000 training records of 50 features, and is tested on 20,000 more. This chapter assigns the 10,000 records to <span class="math inline">\(U = 1{,}000\)</span> users. Each user gets one record, and the other 9,000 are spread over users with probabilities proportional to log-normal weights, so user sizes are very uneven: the mean is 10 records, the median 4, and the largest user holds 348 (<a href="#fig-ulvl-population" class="quarto-xref">Figure&nbsp;<span>42.1</span></a>). A user’s records are a nearest-neighbour cluster around a random record, so they resemble each other the way one person’s messages do: the label balance <span class="math inline">\(|\bar y|\)</span> is 0.21 on average in the ten largest users, against 0.06 in the whole set. The population is fixed, like the dataset.</p>
+<p><strong>The running example.</strong> The part’s network (one hidden layer of 64 tanh units, 3,329 weights) learns labels produced by a fixed teacher network from 10,000 training records of 50 features, and is tested on 20,000 more. This chapter assigns the 10,000 records to <span class="math inline">\(U = 1{,}000\)</span> users. Each user gets one record, and the other 9,000 are spread over users with probabilities proportional to log-normal weights, so user sizes are very uneven: the mean is 10 records, the median 4, and the largest user holds 348 (<a href="#fig-ulvl-population" class="quarto-xref">Figure&nbsp;<span>44.1</span></a>). A user’s records are a nearest-neighbour cluster around a random record, so they resemble each other the way one person’s messages do: the label balance <span class="math inline">\(|\bar y|\)</span> is 0.21 on average in the ten largest users, against 0.06 in the whole set. The population is fixed, like the dataset.</p>
 <div id="fig-ulvl-population" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ulvl-population-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/ulvl_population.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ulvl-population-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;42.1: Left: the number of records per user in the running example’s population of 1,000 users, on log–log axes; 193 users have one record and the largest has 348. Right: the share of all records held by the largest users. The largest 10 users hold 17.9% of the records and the smallest half of the users 10.3%.
+Figure&nbsp;44.1: Left: the number of records per user in the running example’s population of 1,000 users, on log–log axes; 193 users have one record and the largest has 348. Right: the share of all records held by the largest users. The largest 10 users hold 17.9% of the records and the smallest half of the users 10.3%.
 </figcaption>
 </figure>
 </div>
-<p><strong>How to read this chapter.</strong> The toolkit restates three facts from earlier parts. <a href="#sec-ulvl-unit" class="quarto-xref"><span>Section 42.3</span></a> and <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 42.4</span></a> say what a record-level guarantee gives a person; the second has the chapter’s main derivation, the accountant for a user with <span class="math inline">\(k\)</span> records. <a href="#sec-ulvl-dpsgd" class="quarto-xref"><span>Section 42.5</span></a> and <a href="#sec-ulvl-bounding" class="quarto-xref"><span>Section 42.6</span></a> are the two ways to train with a user-level guarantee, <a href="#sec-ulvl-hetero" class="quarto-xref"><span>Section 42.7</span></a> asks what they do to heavy users, and <a href="#sec-ulvl-run" class="quarto-xref"><span>Section 42.8</span></a> compares everything on the running example.</p>
+<p><strong>How to read this chapter.</strong> The toolkit restates three facts from earlier parts. <a href="#sec-ulvl-unit" class="quarto-xref"><span>Section 44.3</span></a> and <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 44.4</span></a> say what a record-level guarantee gives a person; the second has the chapter’s main derivation, the accountant for a user with <span class="math inline">\(k\)</span> records. <a href="#sec-ulvl-dpsgd" class="quarto-xref"><span>Section 44.5</span></a> and <a href="#sec-ulvl-bounding" class="quarto-xref"><span>Section 44.6</span></a> are the two ways to train with a user-level guarantee, <a href="#sec-ulvl-hetero" class="quarto-xref"><span>Section 44.7</span></a> asks what they do to heavy users, and <a href="#sec-ulvl-run" class="quarto-xref"><span>Section 44.8</span></a> compares everything on the running example.</p>
 </section>
 </section>
-<section id="toolkit-three-facts-every-derivation-uses" class="level2" data-number="42.2">
-<h2 data-number="42.2" class="anchored" data-anchor-id="toolkit-three-facts-every-derivation-uses"><span class="header-section-number">42.2</span> Toolkit: three facts every derivation uses</h2>
-<section id="fact-1-group-privacy" class="level3" data-number="42.2.1">
-<h3 data-number="42.2.1" class="anchored" data-anchor-id="fact-1-group-privacy"><span class="header-section-number">42.2.1</span> Fact 1 — Group privacy</h3>
-<p>If a mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for neighbours that differ in one record, then for two datasets that differ in <span class="math inline">\(k\)</span> records it satisfies, for every event <span class="math inline">\(S\)</span>, <span id="eq-ulvl-group"><span class="math display">\[\Pr[M(D) \in S] \le e^{k\varepsilon}\Pr[M(D'') \in S] + \delta_k, \qquad \delta_k = \delta\sum_{j=0}^{k-1}e^{j\varepsilon} = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1}. \tag{42.1}\]</span></span> The reason is a chain: <span class="math inline">\(D\)</span> and <span class="math inline">\(D''\)</span> are joined by a path of <span class="math inline">\(k\)</span> steps, each between neighbouring datasets. Applying the one-record guarantee once per link multiplies the probability bound by <span class="math inline">\(e^\varepsilon\)</span> each time, and each link’s slack <span class="math inline">\(\delta\)</span> is then multiplied by the <span class="math inline">\(e^\varepsilon\)</span> of every later link, which is where the geometric sum comes from. The bound is attained by some mechanisms, so no better one holds for every <span class="math inline">\((\varepsilon, \delta)\)</span>-DP mechanism (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). For Rényi differential privacy (RDP) the chain is weaker still, because the Rényi divergence has no triangle inequality: an <span class="math inline">\((\alpha, \varepsilon)\)</span>-RDP mechanism is <span class="math inline">\((\alpha/2^c, 3^c\varepsilon)\)</span>-RDP for groups of <span class="math inline">\(2^c\)</span> records, when <span class="math inline">\(\alpha \ge 2^{c+1}\)</span> (Mironov 2017; <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>). Each doubling of the group halves the order and triples <span class="math inline">\(\varepsilon\)</span>.</p>
+<section id="toolkit-three-facts-every-derivation-uses" class="level2" data-number="44.2">
+<h2 data-number="44.2" class="anchored" data-anchor-id="toolkit-three-facts-every-derivation-uses"><span class="header-section-number">44.2</span> Toolkit: three facts every derivation uses</h2>
+<section id="fact-1-group-privacy" class="level3" data-number="44.2.1">
+<h3 data-number="44.2.1" class="anchored" data-anchor-id="fact-1-group-privacy"><span class="header-section-number">44.2.1</span> Fact 1 — Group privacy</h3>
+<p>If a mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for neighbours that differ in one record, then for two datasets that differ in <span class="math inline">\(k\)</span> records it satisfies, for every event <span class="math inline">\(S\)</span>, <span id="eq-ulvl-group"><span class="math display">\[\Pr[M(D) \in S] \le e^{k\varepsilon}\Pr[M(D'') \in S] + \delta_k, \qquad \delta_k = \delta\sum_{j=0}^{k-1}e^{j\varepsilon} = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1}. \tag{44.1}\]</span></span> The reason is a chain: <span class="math inline">\(D\)</span> and <span class="math inline">\(D''\)</span> are joined by a path of <span class="math inline">\(k\)</span> steps, each between neighbouring datasets. Applying the one-record guarantee once per link multiplies the probability bound by <span class="math inline">\(e^\varepsilon\)</span> each time, and each link’s slack <span class="math inline">\(\delta\)</span> is then multiplied by the <span class="math inline">\(e^\varepsilon\)</span> of every later link, which is where the geometric sum comes from. The bound is attained by some mechanisms, so no better one holds for every <span class="math inline">\((\varepsilon, \delta)\)</span>-DP mechanism (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). For Rényi differential privacy (RDP) the chain is weaker still, because the Rényi divergence has no triangle inequality: an <span class="math inline">\((\alpha, \varepsilon)\)</span>-RDP mechanism is <span class="math inline">\((\alpha/2^c, 3^c\varepsilon)\)</span>-RDP for groups of <span class="math inline">\(2^c\)</span> records, when <span class="math inline">\(\alpha \ge 2^{c+1}\)</span> (Mironov 2017; <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>). Each doubling of the group halves the order and triples <span class="math inline">\(\varepsilon\)</span>.</p>
 </section>
-<section id="fact-2-the-accountant-of-dp-sgd" class="level3" data-number="42.2.2">
-<h3 data-number="42.2.2" class="anchored" data-anchor-id="fact-2-the-accountant-of-dp-sgd"><span class="header-section-number">42.2.2</span> Fact 2 — The accountant of DP-SGD</h3>
-<p>One step of DP-SGD adds Gaussian noise of standard deviation <span class="math inline">\(\sigma C\)</span> to a sum of clipped per-example gradients computed on a Poisson batch: each record enters independently with probability <span class="math inline">\(q\)</span>. In units of <span class="math inline">\(C\)</span>, the worst case for one record is the pair <span class="math inline">\(P_0 = \mathcal N(0, \sigma^2)\)</span>, the output without the record, and the mixture <span class="math inline">\((1 - q)P_0 + q\mathcal N(1, \sigma^2)\)</span>, the output with it. Its RDP curve at order <span class="math inline">\(\alpha\)</span>, the Rényi divergence of order <span class="math inline">\(\alpha\)</span> between the two, is <span class="math inline">\(\varepsilon_{q,\sigma}(\alpha) = \frac{1}{\alpha - 1}\ln A_\alpha\)</span>, and for integer <span class="math inline">\(\alpha\)</span> <span id="eq-ulvl-binomial"><span class="math display">\[A_\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^j\exp\Big(\frac{j^2 - j}{2\sigma^2}\Big). \tag{42.2}\]</span></span> The sum comes from expanding <span class="math inline">\(\big((1 - q) + q\,r\big)^\alpha\)</span>, with <span class="math inline">\(r\)</span> the Gaussian likelihood ratio, by the binomial theorem and averaging each power <span class="math inline">\(r^j\)</span> under <span class="math inline">\(P_0\)</span> (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>). RDP curves add over the <span class="math inline">\(T\)</span> steps, even when each step depends on earlier outputs, and the total converts to <span class="math inline">\((\varepsilon, \delta)\)</span> at the best order: <span id="eq-ulvl-convert"><span class="math display">\[\varepsilon = \min_\alpha\Big[T\varepsilon_{q,\sigma}(\alpha) + \ln\frac{\alpha - 1}\alpha - \frac{\ln\delta + \ln\alpha}{\alpha - 1}\Big]. \tag{42.3}\]</span></span> The terms <span class="math inline">\(j = 0\)</span> and <span class="math inline">\(1\)</span> carry no privacy cost, since their exponential factor is 1. For small <span class="math inline">\(q\)</span> and moderate orders only the <span class="math inline">\(j = 2\)</span> term matters beyond them, so <span class="math inline">\(A_\alpha \approx 1 + \binom\alpha2q^2(e^{1/\sigma^2} - 1)\)</span> and <span class="math inline">\(\varepsilon_{q,\sigma}(\alpha) \approx \frac\alpha2q^2(e^{1/\sigma^2} - 1)\)</span>.</p>
+<section id="fact-2-the-accountant-of-dp-sgd" class="level3" data-number="44.2.2">
+<h3 data-number="44.2.2" class="anchored" data-anchor-id="fact-2-the-accountant-of-dp-sgd"><span class="header-section-number">44.2.2</span> Fact 2 — The accountant of DP-SGD</h3>
+<p>One step of DP-SGD adds Gaussian noise of standard deviation <span class="math inline">\(\sigma C\)</span> to a sum of clipped per-example gradients computed on a Poisson batch: each record enters independently with probability <span class="math inline">\(q\)</span>. In units of <span class="math inline">\(C\)</span>, the worst case for one record is the pair <span class="math inline">\(P_0 = \mathcal N(0, \sigma^2)\)</span>, the output without the record, and the mixture <span class="math inline">\((1 - q)P_0 + q\mathcal N(1, \sigma^2)\)</span>, the output with it. Its RDP curve at order <span class="math inline">\(\alpha\)</span>, the Rényi divergence of order <span class="math inline">\(\alpha\)</span> between the two, is <span class="math inline">\(\varepsilon_{q,\sigma}(\alpha) = \frac{1}{\alpha - 1}\ln A_\alpha\)</span>, and for integer <span class="math inline">\(\alpha\)</span> <span id="eq-ulvl-binomial"><span class="math display">\[A_\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^j\exp\Big(\frac{j^2 - j}{2\sigma^2}\Big). \tag{44.2}\]</span></span> The sum comes from expanding <span class="math inline">\(\big((1 - q) + q\,r\big)^\alpha\)</span>, with <span class="math inline">\(r\)</span> the Gaussian likelihood ratio, by the binomial theorem and averaging each power <span class="math inline">\(r^j\)</span> under <span class="math inline">\(P_0\)</span> (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>). RDP curves add over the <span class="math inline">\(T\)</span> steps, even when each step depends on earlier outputs, and the total converts to <span class="math inline">\((\varepsilon, \delta)\)</span> at the best order: <span id="eq-ulvl-convert"><span class="math display">\[\varepsilon = \min_\alpha\Big[T\varepsilon_{q,\sigma}(\alpha) + \ln\frac{\alpha - 1}\alpha - \frac{\ln\delta + \ln\alpha}{\alpha - 1}\Big]. \tag{44.3}\]</span></span> The terms <span class="math inline">\(j = 0\)</span> and <span class="math inline">\(1\)</span> carry no privacy cost, since their exponential factor is 1. For small <span class="math inline">\(q\)</span> and moderate orders only the <span class="math inline">\(j = 2\)</span> term matters beyond them, so <span class="math inline">\(A_\alpha \approx 1 + \binom\alpha2q^2(e^{1/\sigma^2} - 1)\)</span> and <span class="math inline">\(\varepsilon_{q,\sigma}(\alpha) \approx \frac\alpha2q^2(e^{1/\sigma^2} - 1)\)</span>.</p>
 </section>
-<section id="fact-3-the-gaussian-moment-generating-function" class="level3" data-number="42.2.3">
-<h3 data-number="42.2.3" class="anchored" data-anchor-id="fact-3-the-gaussian-moment-generating-function"><span class="header-section-number">42.2.3</span> Fact 3 — The Gaussian moment generating function</h3>
-<p>If <span class="math inline">\(Y \sim \mathcal N(0, \sigma^2)\)</span>, then <span class="math inline">\(\mathbb E[e^{sY}] = e^{s^2\sigma^2/2}\)</span> for every real <span class="math inline">\(s\)</span> (<a href="../part01-prerequisites/01-distributions.html">Distributions</a>). Every Rényi divergence between Gaussians with the same variance reduces to it, because their likelihood ratio is the exponential of a linear function of the output: for <span class="math inline">\(P_m = \mathcal N(m, \sigma^2)\)</span>, <span id="eq-ulvl-ratio"><span class="math display">\[\frac{P_m(y)}{P_0(y)} = \exp\Big(\frac{-(y - m)^2 + y^2}{2\sigma^2}\Big) = \exp\Big(\frac{2my - m^2}{2\sigma^2}\Big). \tag{42.4}\]</span></span></p>
+<section id="fact-3-the-gaussian-moment-generating-function" class="level3" data-number="44.2.3">
+<h3 data-number="44.2.3" class="anchored" data-anchor-id="fact-3-the-gaussian-moment-generating-function"><span class="header-section-number">44.2.3</span> Fact 3 — The Gaussian moment generating function</h3>
+<p>If <span class="math inline">\(Y \sim \mathcal N(0, \sigma^2)\)</span>, then <span class="math inline">\(\mathbb E[e^{sY}] = e^{s^2\sigma^2/2}\)</span> for every real <span class="math inline">\(s\)</span> (<a href="../part01-prerequisites/01-distributions.html">Distributions</a>). Every Rényi divergence between Gaussians with the same variance reduces to it, because their likelihood ratio is the exponential of a linear function of the output: for <span class="math inline">\(P_m = \mathcal N(m, \sigma^2)\)</span>, <span id="eq-ulvl-ratio"><span class="math display">\[\frac{P_m(y)}{P_0(y)} = \exp\Big(\frac{-(y - m)^2 + y^2}{2\sigma^2}\Big) = \exp\Big(\frac{2my - m^2}{2\sigma^2}\Big). \tag{44.4}\]</span></span></p>
 </section>
 </section>
-<section id="sec-ulvl-unit" class="level2" data-number="42.3">
-<h2 data-number="42.3" class="anchored" data-anchor-id="sec-ulvl-unit"><span class="header-section-number">42.3</span> The privacy unit</h2>
-<section id="context" class="level3" data-number="42.3.1">
-<h3 data-number="42.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">42.3.1</span> Context</h3>
+<section id="sec-ulvl-unit" class="level2" data-number="44.3">
+<h2 data-number="44.3" class="anchored" data-anchor-id="sec-ulvl-unit"><span class="header-section-number">44.3</span> The privacy unit</h2>
+<section id="context" class="level3" data-number="44.3.1">
+<h3 data-number="44.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">44.3.1</span> Context</h3>
 <p>A model trained with record-level DP-SGD at <span class="math inline">\(\varepsilon = 6.71\)</span> is released. One of the people in the training set contributed <span class="math inline">\(k\)</span> of its records. What, exactly, does the guarantee promise that person? The question has to be answered before a deployment can say “your data are protected”, because the promise is about whatever the neighbouring relation changes, and that relation was chosen by the engineer, not by the person.</p>
 </section>
-<section id="statement" class="level3" data-number="42.3.2">
-<h3 data-number="42.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">42.3.2</span> Statement</h3>
-<p>A mechanism is <strong>user-level</strong> <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if for every pair of datasets <span class="math inline">\(D\)</span>, <span class="math inline">\(D'\)</span> that differ by adding or removing all the records of one user, and every event <span class="math inline">\(S\)</span>, <span id="eq-auto-07userlevel-1"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta. \tag{42.5}\]</span></span> It is <strong>example-level</strong> DP if the same holds for datasets that differ in one record. A mechanism that is example-level <span class="math inline">\((\varepsilon, \delta)\)</span>-DP is user-level <span class="math inline">\((k\varepsilon, \delta_k)\)</span>-DP for users with at most <span class="math inline">\(k\)</span> records, with <span class="math inline">\(\delta_k\)</span> from <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>42.1</span></a>. Without more information about the mechanism, nothing better can be said.</p>
+<section id="statement" class="level3" data-number="44.3.2">
+<h3 data-number="44.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">44.3.2</span> Statement</h3>
+<p>A mechanism is <strong>user-level</strong> <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if for every pair of datasets <span class="math inline">\(D\)</span>, <span class="math inline">\(D'\)</span> that differ by adding or removing all the records of one user, and every event <span class="math inline">\(S\)</span>, <span id="eq-auto-07userlevel-1"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta. \tag{44.5}\]</span></span> It is <strong>example-level</strong> DP if the same holds for datasets that differ in one record. A mechanism that is example-level <span class="math inline">\((\varepsilon, \delta)\)</span>-DP is user-level <span class="math inline">\((k\varepsilon, \delta_k)\)</span>-DP for users with at most <span class="math inline">\(k\)</span> records, with <span class="math inline">\(\delta_k\)</span> from <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>44.1</span></a>. Without more information about the mechanism, nothing better can be said.</p>
 </section>
-<section id="derivation" class="level3" data-number="42.3.3">
-<h3 data-number="42.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">42.3.3</span> Derivation</h3>
+<section id="derivation" class="level3" data-number="44.3.3">
+<h3 data-number="44.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">44.3.3</span> Derivation</h3>
 <ol type="1">
 <li><strong>User-level neighbours are <span class="math inline">\(k\)</span> example-level steps apart.</strong> If <span class="math inline">\(D'\)</span> is <span class="math inline">\(D\)</span> plus the <span class="math inline">\(k\)</span> records of one user, add them one at a time. The datasets <span class="math inline">\(D, D \cup\{x_1\}, D\cup\{x_1, x_2\}, \dots, D'\)</span> form a chain in which each is an example-level neighbour of the next.</li>
-<li><strong>Apply group privacy.</strong> Fact 1 along this chain gives <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>42.1</span></a> with <span class="math inline">\(D'' = D'\)</span>, in both directions, since the chain can be walked either way.</li>
+<li><strong>Apply group privacy.</strong> Fact 1 along this chain gives <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>44.1</span></a> with <span class="math inline">\(D'' = D'\)</span>, in both directions, since the chain can be walked either way.</li>
 <li><strong>Nothing better holds in general.</strong> The bound is attained by a mechanism built for the purpose, which outputs an alarm with probabilities chosen so that every link’s inequality is an equality (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). A guarantee that is only known as “<span class="math inline">\((\varepsilon, \delta)\)</span>-DP” could come from that mechanism.</li>
 </ol>
 </section>
-<section id="interpretation" class="level3" data-number="42.3.4">
-<h3 data-number="42.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">42.3.4</span> Interpretation</h3>
+<section id="interpretation" class="level3" data-number="44.3.4">
+<h3 data-number="44.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">44.3.4</span> Interpretation</h3>
 <p><strong>The definition is the same; the unit is not.</strong> User-level DP is not a new privacy notion. It is DP with a coarser neighbouring relation, so every property proved for DP holds for it: post-processing, composition and the accountants of Part 4. The only thing that changes is the sensitivity: how far one unit can move the computation. Records, users, households, devices and organizations are all possible units, and the choice should follow the question “whose participation do I want to hide?” A deployment that says “DP” without naming the unit leaves that question open, and <a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a> lists the unit among the things a guarantee must report.</p>
-<p><strong>Group privacy is linear in <span class="math inline">\(\varepsilon\)</span> and exponential in <span class="math inline">\(\delta\)</span>.</strong> For pure DP a user with <span class="math inline">\(k\)</span> records gets <span class="math inline">\(k\varepsilon\)</span>, already weak: at <span class="math inline">\(\varepsilon = 1\)</span> per record, a user with 10 records gets <span class="math inline">\(\varepsilon = 10\)</span>, a likelihood ratio of <span class="math inline">\(e^{10} \approx 22{,}000\)</span>. With <span class="math inline">\(\delta &gt; 0\)</span> it is worse. In <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>42.1</span></a> each <span class="math inline">\(\delta\)</span> is multiplied by up to <span class="math inline">\(e^{(k-1)\varepsilon}\)</span>, so to keep the user’s <span class="math inline">\(\delta_k\)</span> at <span class="math inline">\(10^{-5}\)</span> the per-record <span class="math inline">\(\delta\)</span> must be tiny, and a smaller <span class="math inline">\(\delta\)</span> means a larger per-record <span class="math inline">\(\varepsilon\)</span>. For DP-SGD this trade can be made at any <span class="math inline">\(\delta\)</span>, because the accountant’s RDP curve converts to <span class="math inline">\((\varepsilon, \delta)\)</span> at every <span class="math inline">\(\delta\)</span>: choose the per-record <span class="math inline">\(\delta\)</span> so that <span class="math inline">\(\delta_k = 10^{-5}\)</span> exactly.</p>
+<p><strong>Group privacy is linear in <span class="math inline">\(\varepsilon\)</span> and exponential in <span class="math inline">\(\delta\)</span>.</strong> For pure DP a user with <span class="math inline">\(k\)</span> records gets <span class="math inline">\(k\varepsilon\)</span>, already weak: at <span class="math inline">\(\varepsilon = 1\)</span> per record, a user with 10 records gets <span class="math inline">\(\varepsilon = 10\)</span>, a likelihood ratio of <span class="math inline">\(e^{10} \approx 22{,}000\)</span>. With <span class="math inline">\(\delta &gt; 0\)</span> it is worse. In <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>44.1</span></a> each <span class="math inline">\(\delta\)</span> is multiplied by up to <span class="math inline">\(e^{(k-1)\varepsilon}\)</span>, so to keep the user’s <span class="math inline">\(\delta_k\)</span> at <span class="math inline">\(10^{-5}\)</span> the per-record <span class="math inline">\(\delta\)</span> must be tiny, and a smaller <span class="math inline">\(\delta\)</span> means a larger per-record <span class="math inline">\(\varepsilon\)</span>. For DP-SGD this trade can be made at any <span class="math inline">\(\delta\)</span>, because the accountant’s RDP curve converts to <span class="math inline">\((\varepsilon, \delta)\)</span> at every <span class="math inline">\(\delta\)</span>: choose the per-record <span class="math inline">\(\delta\)</span> so that <span class="math inline">\(\delta_k = 10^{-5}\)</span> exactly.</p>
 <p><strong>For DP-SGD it can fail altogether.</strong> The per-record <span class="math inline">\(\varepsilon\)</span> grows as the per-record <span class="math inline">\(\delta\)</span> shrinks, so <span class="math inline">\(\delta_k = \delta\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1}\)</span> is a race between a falling <span class="math inline">\(\delta\)</span> and a rising <span class="math inline">\(e^{(k-1)\varepsilon}\)</span>. For small <span class="math inline">\(k\)</span> the falling <span class="math inline">\(\delta\)</span> wins. For larger <span class="math inline">\(k\)</span> the rising <span class="math inline">\(\varepsilon\)</span> wins at every <span class="math inline">\(\delta\)</span>, and no choice brings <span class="math inline">\(\delta_k\)</span> down to <span class="math inline">\(10^{-5}\)</span>. Group privacy then gives no <span class="math inline">\((\varepsilon, 10^{-5})\)</span> guarantee at all (<a href="../../book-exercises/part05-dp-ml/07-user-level.html#sec-sol-ulvl-2">Exercise 2</a> traces the race).</p>
 </section>
-<section id="example-the-running-examples-users" class="level3" data-number="42.3.5">
-<h3 data-number="42.3.5" class="anchored" data-anchor-id="example-the-running-examples-users"><span class="header-section-number">42.3.5</span> Example: the running example’s users</h3>
+<section id="example-the-running-examples-users" class="level3" data-number="44.3.5">
+<h3 data-number="44.3.5" class="anchored" data-anchor-id="example-the-running-examples-users"><span class="header-section-number">44.3.5</span> Example: the running example’s users</h3>
 <p>The running example’s model is example-level <span class="math inline">\((6.71, 10^{-5})\)</span>-DP. Read naively as a user-level statement, a user with two records gets <span class="math inline">\(\varepsilon = 2 \times 6.71 = 13.42\)</span> with <span class="math inline">\(\delta_2 = 10^{-5}(1 + e^{6.71}) = 0.0082\)</span>: a probability of almost one in a hundred that the guarantee fails outright, which is no guarantee. Re-converting the accountant’s RDP curve at a smaller per-record <span class="math inline">\(\delta\)</span> does better. The per-record <span class="math inline">\(\delta\)</span> that makes <span class="math inline">\(\delta_2 = 10^{-5}\)</span> gives a per-record <span class="math inline">\(\varepsilon\)</span> of 9.30, so the user gets <span class="math inline">\((18.61, 10^{-5})\)</span>. For five records the same procedure gives a per-record <span class="math inline">\(\varepsilon\)</span> of 23.62 and a user-level <span class="math inline">\(\varepsilon\)</span> of 118.12. For ten records it gives nothing: no per-record <span class="math inline">\(\delta\)</span> makes <span class="math inline">\(\delta_{10}\)</span> as small as <span class="math inline">\(10^{-5}\)</span>. In the running example’s population, 244 of the 1,000 users have at least ten records (the median is 4), and 30 have at least 50.</p>
 </section>
-<section id="check-yourself" class="level3" data-number="42.3.6">
-<h3 data-number="42.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">42.3.6</span> Check yourself</h3>
+<section id="check-yourself" class="level3" data-number="44.3.6">
+<h3 data-number="44.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">44.3.6</span> Check yourself</h3>
 <ul>
 <li>A dataset has one row per hospital visit, and a mechanism is <span class="math inline">\(0.2\)</span>-DP (pure) at the visit level. What does a patient with 7 visits get? <em>(<span class="math inline">\(1.4\)</span>-DP, by group privacy with <span class="math inline">\(k = 7\)</span>; for pure DP the bound is just <span class="math inline">\(k\varepsilon\)</span>.)</em></li>
 <li>Why does a user-level guarantee still compose and survive post-processing? <em>(Because it is DP with a different neighbouring relation, and those proofs hold for any fixed relation: they never use what a neighbour is.)</em></li>
 </ul>
 </section>
 </section>
-<section id="sec-ulvl-group-sgd" class="level2" data-number="42.4">
-<h2 data-number="42.4" class="anchored" data-anchor-id="sec-ulvl-group-sgd"><span class="header-section-number">42.4</span> A user with k records in example-level DP-SGD</h2>
-<section id="context-1" class="level3" data-number="42.4.1">
-<h3 data-number="42.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">42.4.1</span> Context</h3>
+<section id="sec-ulvl-group-sgd" class="level2" data-number="44.4">
+<h2 data-number="44.4" class="anchored" data-anchor-id="sec-ulvl-group-sgd"><span class="header-section-number">44.4</span> A user with k records in example-level DP-SGD</h2>
+<section id="context-1" class="level3" data-number="44.4.1">
+<h3 data-number="44.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">44.4.1</span> Context</h3>
 <p>Group privacy treats DP-SGD as a black box. It is not one: we know exactly how a user with <span class="math inline">\(k\)</span> records enters each step. Each of the user’s records is drawn into the batch independently with probability <span class="math inline">\(q\)</span>, so in each step a random number of them, between 0 and <span class="math inline">\(k\)</span>, contributes to the noisy sum. An accountant that knows this can compute the user’s guarantee directly, as <a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a> did for one record. How large is that guarantee, and how does it grow with <span class="math inline">\(k\)</span>?</p>
 </section>
-<section id="statement-1" class="level3" data-number="42.4.2">
-<h3 data-number="42.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">42.4.2</span> Statement</h3>
-<p>Let <span class="math inline">\(M \sim \mathrm{Binomial}(k, q)\)</span> be the number of the user’s records in a Poisson batch, and <span class="math inline">\(b_m = \binom km q^m(1 - q)^{k - m}\)</span> its probabilities. In units of <span class="math inline">\(C\)</span>, one step of example-level DP-SGD compares <span id="eq-ulvl-mixture"><span class="math display">\[P_0 = \mathcal N(0, \sigma^2) \qquad\text{and}\qquad P_{(k)} = \sum_{m=0}^k b_m\,\mathcal N(m, \sigma^2), \tag{42.6}\]</span></span> the output without the user and with the user, whose drawn records all push the sum by the full <span class="math inline">\(C\)</span> in the same direction. Charles et al.&nbsp;(2024, Theorem 3) prove that this pair, composed over the <span class="math inline">\(T\)</span> steps, bounds the user’s privacy loss, and that the bound is attained by a loss for which the user’s gradients are aligned. The user’s RDP curve is therefore <span class="math inline">\(\varepsilon_{k}(\alpha) = \max\{D_\alpha(P_{(k)}\|P_0), D_\alpha(P_0\|P_{(k)})\}\)</span>. The first divergence is <span class="math inline">\(\frac{1}{\alpha - 1}\ln A_\alpha\)</span> with <span id="eq-ulvl-pair"><span class="math display">\[A_\alpha = \mathbb E\Big[\exp\Big(\frac{1}{\sigma^2}\sum_{1\le i&lt;j\le\alpha}M_iM_j\Big)\Big], \qquad M_1, \dots, M_\alpha \text{ independent copies of } M, \tag{42.7}\]</span></span> for integer <span class="math inline">\(\alpha\)</span>. For small <span class="math inline">\(kq\)</span> the curve is close to that of a single record sampled at rate <span class="math inline">\(kq\)</span>: <span id="eq-ulvl-rate"><span class="math display">\[\varepsilon_k(\alpha) \approx \frac\alpha2(kq)^2\big(e^{1/\sigma^2} - 1\big). \tag{42.8}\]</span></span> The user’s <span class="math inline">\((\varepsilon, \delta)\)</span> after <span class="math inline">\(T\)</span> steps is <a href="#eq-ulvl-convert" class="quarto-xref">Equation&nbsp;<span>42.3</span></a> applied to <span class="math inline">\(T\varepsilon_k(\alpha)\)</span>.</p>
+<section id="statement-1" class="level3" data-number="44.4.2">
+<h3 data-number="44.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">44.4.2</span> Statement</h3>
+<p>Let <span class="math inline">\(M \sim \mathrm{Binomial}(k, q)\)</span> be the number of the user’s records in a Poisson batch, and <span class="math inline">\(b_m = \binom km q^m(1 - q)^{k - m}\)</span> its probabilities. In units of <span class="math inline">\(C\)</span>, one step of example-level DP-SGD compares <span id="eq-ulvl-mixture"><span class="math display">\[P_0 = \mathcal N(0, \sigma^2) \qquad\text{and}\qquad P_{(k)} = \sum_{m=0}^k b_m\,\mathcal N(m, \sigma^2), \tag{44.6}\]</span></span> the output without the user and with the user, whose drawn records all push the sum by the full <span class="math inline">\(C\)</span> in the same direction. Charles et al.&nbsp;(2024, Theorem 3) prove that this pair, composed over the <span class="math inline">\(T\)</span> steps, bounds the user’s privacy loss, and that the bound is attained by a loss for which the user’s gradients are aligned. The user’s RDP curve is therefore <span class="math inline">\(\varepsilon_{k}(\alpha) = \max\{D_\alpha(P_{(k)}\|P_0), D_\alpha(P_0\|P_{(k)})\}\)</span>. The first divergence is <span class="math inline">\(\frac{1}{\alpha - 1}\ln A_\alpha\)</span> with <span id="eq-ulvl-pair"><span class="math display">\[A_\alpha = \mathbb E\Big[\exp\Big(\frac{1}{\sigma^2}\sum_{1\le i&lt;j\le\alpha}M_iM_j\Big)\Big], \qquad M_1, \dots, M_\alpha \text{ independent copies of } M, \tag{44.7}\]</span></span> for integer <span class="math inline">\(\alpha\)</span>. For small <span class="math inline">\(kq\)</span> the curve is close to that of a single record sampled at rate <span class="math inline">\(kq\)</span>: <span id="eq-ulvl-rate"><span class="math display">\[\varepsilon_k(\alpha) \approx \frac\alpha2(kq)^2\big(e^{1/\sigma^2} - 1\big). \tag{44.8}\]</span></span> The user’s <span class="math inline">\((\varepsilon, \delta)\)</span> after <span class="math inline">\(T\)</span> steps is <a href="#eq-ulvl-convert" class="quarto-xref">Equation&nbsp;<span>44.3</span></a> applied to <span class="math inline">\(T\varepsilon_k(\alpha)\)</span>.</p>
 </section>
-<section id="derivation-1" class="level3" data-number="42.4.3">
-<h3 data-number="42.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">42.4.3</span> Derivation</h3>
+<section id="derivation-1" class="level3" data-number="44.4.3">
+<h3 data-number="44.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">44.4.3</span> Derivation</h3>
 <p>The derivation follows the one for a single record: find the distribution of one step’s output with and without the user, write the Rényi divergence as an average of a power of the likelihood ratio, and evaluate the average. The new ingredient is that the power of a mixture over <span class="math inline">\(m\)</span> becomes a product of independent copies of <span class="math inline">\(M\)</span>, which makes the average computable by Fact 3.</p>
 <ol type="1">
 <li><strong>How many of the user’s records are drawn.</strong> Poisson sampling draws each record independently with probability <span class="math inline">\(q\)</span>, so the number of the user’s <span class="math inline">\(k\)</span> records in the batch is a sum of <span class="math inline">\(k\)</span> independent coins: <span class="math inline">\(M \sim \mathrm{Binomial}(k, q)\)</span>, independent of which other records are drawn.</li>
-<li><strong>What they do to the sum.</strong> Fix the other records’ contribution, which is the same with and without the user. Given <span class="math inline">\(M = m\)</span>, the user adds <span class="math inline">\(m\)</span> clipped gradients, each of length at most <span class="math inline">\(C\)</span>, so their sum has length at most <span class="math inline">\(mC\)</span>, with equality when they all point the same way. In units of <span class="math inline">\(C\)</span> and along that direction, the output is <span class="math inline">\(\mathcal N(m, \sigma^2)\)</span> with probability <span class="math inline">\(b_m\)</span>: the mixture of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>42.6</span></a>. That the aligned case is the worst over all configurations of the user’s gradients, and that the reduction to one dimension is valid, is the content of Charles et al.’s Theorem 3; the intuition is that gradients pointing in different directions add in squares rather than in length, and spread the user’s influence over several coordinates where it is harder to detect.</li>
-<li><strong>The divergence as an average.</strong> By the definition of the Rényi divergence, <span class="math inline">\(e^{(\alpha-1)D_\alpha(P_{(k)}\|P_0)} = \mathbb E_{y\sim P_0}\big[(P_{(k)}(y)/P_0(y))^\alpha\big]\)</span>. Dividing the mixture by <span class="math inline">\(P_0\)</span> term by term with <a href="#eq-ulvl-ratio" class="quarto-xref">Equation&nbsp;<span>42.4</span></a>, <span id="eq-auto-07userlevel-2"><span class="math display">\[\frac{P_{(k)}(y)}{P_0(y)} = \sum_m b_m\exp\Big(\frac{2my - m^2}{2\sigma^2}\Big) = \mathbb E_M\Big[\exp\Big(\frac{2My - M^2}{2\sigma^2}\Big)\Big], \tag{42.9}\]</span></span> an average over the number of drawn records.</li>
-<li><strong>The power of an average is an average over independent copies.</strong> For integer <span class="math inline">\(\alpha\)</span>, <span class="math inline">\((\mathbb E_M[f(M)])^\alpha = \mathbb E[f(M_1)f(M_2)\cdots f(M_\alpha)]\)</span> with <span class="math inline">\(M_1, \dots, M_\alpha\)</span> independent copies of <span class="math inline">\(M\)</span>: multiplying out <span class="math inline">\(\alpha\)</span> copies of the sum <span class="math inline">\(\sum_mb_mf(m)\)</span> gives one term for every choice <span class="math inline">\((m_1, \dots, m_\alpha)\)</span>, with weight <span class="math inline">\(b_{m_1}\cdots b_{m_\alpha}\)</span>, which is the joint distribution of independent copies. The product of exponentials is the exponential of the sum, so with <span class="math inline">\(S = M_1 + \dots + M_\alpha\)</span>, <span id="eq-auto-07userlevel-3"><span class="math display">\[\Big(\frac{P_{(k)}(y)}{P_0(y)}\Big)^\alpha = \mathbb E\Big[\exp\Big(\frac{2Sy - \sum_iM_i^2}{2\sigma^2}\Big)\Big]. \tag{42.10}\]</span></span></li>
-<li><strong>Average over <span class="math inline">\(y\)</span>.</strong> Exchange the two averages, which is allowed because everything is positive. For fixed copies, Fact 3 with <span class="math inline">\(s = S/\sigma^2\)</span> gives <span class="math inline">\(\mathbb E_{y\sim P_0}[e^{Sy/\sigma^2}] = e^{S^2/(2\sigma^2)}\)</span>, so <span id="eq-auto-07userlevel-4"><span class="math display">\[A_\alpha = \mathbb E\Big[\exp\Big(\frac{S^2 - \sum_iM_i^2}{2\sigma^2}\Big)\Big]. \tag{42.11}\]</span></span> Expanding the square, <span class="math inline">\(S^2 = \sum_iM_i^2 + 2\sum_{i&lt;j}M_iM_j\)</span>, and the squares cancel: this is <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>42.7</span></a>. Only products of <em>different</em> copies remain.</li>
-<li><strong>Check against one record.</strong> For <span class="math inline">\(k = 1\)</span>, each <span class="math inline">\(M_i\)</span> is a coin, 0 or 1. If <span class="math inline">\(J\)</span> of the <span class="math inline">\(\alpha\)</span> coins are 1, the sum <span class="math inline">\(\sum_{i&lt;j}M_iM_j\)</span> counts the pairs among them, <span class="math inline">\(\binom J2 = (J^2 - J)/2\)</span>, and <span class="math inline">\(J \sim \mathrm{Binomial}(\alpha, q)\)</span>. The average of <span class="math inline">\(e^{(J^2 - J)/(2\sigma^2)}\)</span> over <span class="math inline">\(J\)</span> is <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>42.2</span></a>.</li>
-<li><strong>Small <span class="math inline">\(kq\)</span>.</strong> When <span class="math inline">\(kq\)</span> is small, most copies are 0. The terms of <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>42.7</span></a> with at most one non-zero copy have <span class="math inline">\(\sum_{i&lt;j}M_iM_j = 0\)</span> and contribute their probability times 1. The first term that costs privacy has exactly two copies equal to 1, the most likely way for a product to be non-zero: there are <span class="math inline">\(\binom\alpha2\)</span> pairs of copies, each copy is 1 with probability about <span class="math inline">\(kq\)</span>, and the factor is <span class="math inline">\(e^{1/\sigma^2}\)</span>. So <span class="math inline">\(A_\alpha \approx 1 + \binom\alpha2(kq)^2(e^{1/\sigma^2} - 1)\)</span>, the same as <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>42.2</span></a>’s first three terms with <span class="math inline">\(q\)</span> replaced by <span class="math inline">\(kq\)</span>. Taking <span class="math inline">\(\ln(1 + x) \approx x\)</span> and dividing by <span class="math inline">\(\alpha - 1\)</span> gives <a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>42.8</span></a>.</li>
+<li><strong>What they do to the sum.</strong> Fix the other records’ contribution, which is the same with and without the user. Given <span class="math inline">\(M = m\)</span>, the user adds <span class="math inline">\(m\)</span> clipped gradients, each of length at most <span class="math inline">\(C\)</span>, so their sum has length at most <span class="math inline">\(mC\)</span>, with equality when they all point the same way. In units of <span class="math inline">\(C\)</span> and along that direction, the output is <span class="math inline">\(\mathcal N(m, \sigma^2)\)</span> with probability <span class="math inline">\(b_m\)</span>: the mixture of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>44.6</span></a>. That the aligned case is the worst over all configurations of the user’s gradients, and that the reduction to one dimension is valid, is the content of Charles et al.’s Theorem 3, which <a href="../appendix-derivations/13-private-learning.html#sec-apx-learn-user" class="quarto-xref"><span>Section M.4</span></a> in the appendices proves for <span class="math inline">\(D_\alpha(P_{(k)}\|P_0)\)</span> at integer orders; the intuition is that gradients pointing in different directions add in squares rather than in length, and spread the user’s influence over several coordinates where it is harder to detect.</li>
+<li><strong>The divergence as an average.</strong> By the definition of the Rényi divergence, <span class="math inline">\(e^{(\alpha-1)D_\alpha(P_{(k)}\|P_0)} = \mathbb E_{y\sim P_0}\big[(P_{(k)}(y)/P_0(y))^\alpha\big]\)</span>. Dividing the mixture by <span class="math inline">\(P_0\)</span> term by term with <a href="#eq-ulvl-ratio" class="quarto-xref">Equation&nbsp;<span>44.4</span></a>, <span id="eq-auto-07userlevel-2"><span class="math display">\[\frac{P_{(k)}(y)}{P_0(y)} = \sum_m b_m\exp\Big(\frac{2my - m^2}{2\sigma^2}\Big) = \mathbb E_M\Big[\exp\Big(\frac{2My - M^2}{2\sigma^2}\Big)\Big], \tag{44.9}\]</span></span> an average over the number of drawn records.</li>
+<li><strong>The power of an average is an average over independent copies.</strong> For integer <span class="math inline">\(\alpha\)</span>, <span class="math inline">\((\mathbb E_M[f(M)])^\alpha = \mathbb E[f(M_1)f(M_2)\cdots f(M_\alpha)]\)</span> with <span class="math inline">\(M_1, \dots, M_\alpha\)</span> independent copies of <span class="math inline">\(M\)</span>: multiplying out <span class="math inline">\(\alpha\)</span> copies of the sum <span class="math inline">\(\sum_mb_mf(m)\)</span> gives one term for every choice <span class="math inline">\((m_1, \dots, m_\alpha)\)</span>, with weight <span class="math inline">\(b_{m_1}\cdots b_{m_\alpha}\)</span>, which is the joint distribution of independent copies. The product of exponentials is the exponential of the sum, so with <span class="math inline">\(S = M_1 + \dots + M_\alpha\)</span>, <span id="eq-auto-07userlevel-3"><span class="math display">\[\Big(\frac{P_{(k)}(y)}{P_0(y)}\Big)^\alpha = \mathbb E\Big[\exp\Big(\frac{2Sy - \sum_iM_i^2}{2\sigma^2}\Big)\Big]. \tag{44.10}\]</span></span></li>
+<li><strong>Average over <span class="math inline">\(y\)</span>.</strong> Exchange the two averages, which is allowed because everything is positive. For fixed copies, Fact 3 with <span class="math inline">\(s = S/\sigma^2\)</span> gives <span class="math inline">\(\mathbb E_{y\sim P_0}[e^{Sy/\sigma^2}] = e^{S^2/(2\sigma^2)}\)</span>, so <span id="eq-auto-07userlevel-4"><span class="math display">\[A_\alpha = \mathbb E\Big[\exp\Big(\frac{S^2 - \sum_iM_i^2}{2\sigma^2}\Big)\Big]. \tag{44.11}\]</span></span> Expanding the square, <span class="math inline">\(S^2 = \sum_iM_i^2 + 2\sum_{i&lt;j}M_iM_j\)</span>, and the squares cancel: this is <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>44.7</span></a>. Only products of <em>different</em> copies remain.</li>
+<li><strong>Check against one record.</strong> For <span class="math inline">\(k = 1\)</span>, each <span class="math inline">\(M_i\)</span> is a coin, 0 or 1. If <span class="math inline">\(J\)</span> of the <span class="math inline">\(\alpha\)</span> coins are 1, the sum <span class="math inline">\(\sum_{i&lt;j}M_iM_j\)</span> counts the pairs among them, <span class="math inline">\(\binom J2 = (J^2 - J)/2\)</span>, and <span class="math inline">\(J \sim \mathrm{Binomial}(\alpha, q)\)</span>. The average of <span class="math inline">\(e^{(J^2 - J)/(2\sigma^2)}\)</span> over <span class="math inline">\(J\)</span> is <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>44.2</span></a>.</li>
+<li><strong>Small <span class="math inline">\(kq\)</span>.</strong> When <span class="math inline">\(kq\)</span> is small, most copies are 0. The terms of <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>44.7</span></a> with at most one non-zero copy have <span class="math inline">\(\sum_{i&lt;j}M_iM_j = 0\)</span> and contribute their probability times 1. The first term that costs privacy has exactly two copies equal to 1, the most likely way for a product to be non-zero: there are <span class="math inline">\(\binom\alpha2\)</span> pairs of copies, each copy is 1 with probability about <span class="math inline">\(kq\)</span>, and the factor is <span class="math inline">\(e^{1/\sigma^2}\)</span>. So <span class="math inline">\(A_\alpha \approx 1 + \binom\alpha2(kq)^2(e^{1/\sigma^2} - 1)\)</span>, the same as <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>44.2</span></a>’s first three terms with <span class="math inline">\(q\)</span> replaced by <span class="math inline">\(kq\)</span>. Taking <span class="math inline">\(\ln(1 + x) \approx x\)</span> and dividing by <span class="math inline">\(\alpha - 1\)</span> gives <a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>44.8</span></a>.</li>
 <li><strong>Other orders and the other direction.</strong> For non-integer <span class="math inline">\(\alpha\)</span>, and for <span class="math inline">\(D_\alpha(P_0\|P_{(k)})\)</span>, there is no finite expansion. Compute both as one-dimensional integrals of <span class="math inline">\(P_0(y)\)</span> times a power of the mixture ratio of step 3, on a grid of step <span class="math inline">\(\sigma/10\)</span> wide enough to contain the bump near <span class="math inline">\(y = \alpha k\)</span> that large orders create, with log-sum-exp to avoid overflow, exactly as for one record.</li>
 </ol>
 </section>
-<section id="interpretation-1" class="level3" data-number="42.4.4">
-<h3 data-number="42.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">42.4.4</span> Interpretation</h3>
-<p><strong>A user with <span class="math inline">\(k\)</span> records looks like one record sampled <span class="math inline">\(k\)</span> times as often.</strong> <a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>42.8</span></a> says that, in the regime where amplification works well, the only thing that matters is the probability that some record of the user is in the batch, about <span class="math inline">\(kq\)</span>. Halving the sampling rate exactly compensates doubling the user’s records. Since the per-step RDP grows like <span class="math inline">\((kq)^2\)</span>, and <span class="math inline">\(\varepsilon\)</span> after conversion grows roughly like the square root of the RDP slope, the user’s <span class="math inline">\(\varepsilon\)</span> grows roughly linearly in <span class="math inline">\(k\)</span> while <span class="math inline">\(kq\)</span> is small.</p>
-<p><strong>Beyond that regime it grows faster.</strong> Two things break the approximation. First, <span class="math inline">\(kq\)</span> is no longer small: for <span class="math inline">\(k = 50\)</span> and <span class="math inline">\(q = 0.01\)</span>, half of all steps include one of the user’s records, and subsampling, which helps only because the unit is usually absent, stops helping. Second, the higher terms of <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>42.7</span></a> grow like <span class="math inline">\(e^{M_iM_j/\sigma^2}\)</span>, and <span class="math inline">\(M_iM_j\)</span> can be as large as <span class="math inline">\(k^2\)</span>. A step that draws all <span class="math inline">\(k\)</span> records shifts the sum by <span class="math inline">\(kC\)</span>, a mechanism with noise multiplier <span class="math inline">\(\sigma/k\)</span>, whose privacy loss has a tail that no amount of rarity can hide at high orders. The accountant then uses orders close to 1, where the conversion is expensive.</p>
+<section id="interpretation-1" class="level3" data-number="44.4.4">
+<h3 data-number="44.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">44.4.4</span> Interpretation</h3>
+<p><strong>A user with <span class="math inline">\(k\)</span> records looks like one record sampled <span class="math inline">\(k\)</span> times as often.</strong> <a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>44.8</span></a> says that, in the regime where amplification works well, the only thing that matters is the probability that some record of the user is in the batch, about <span class="math inline">\(kq\)</span>. Halving the sampling rate exactly compensates doubling the user’s records. Since the per-step RDP grows like <span class="math inline">\((kq)^2\)</span>, and <span class="math inline">\(\varepsilon\)</span> after conversion grows roughly like the square root of the RDP slope, the user’s <span class="math inline">\(\varepsilon\)</span> grows roughly linearly in <span class="math inline">\(k\)</span> while <span class="math inline">\(kq\)</span> is small.</p>
+<p><strong>Beyond that regime it grows faster.</strong> Two things break the approximation. First, <span class="math inline">\(kq\)</span> is no longer small: for <span class="math inline">\(k = 50\)</span> and <span class="math inline">\(q = 0.01\)</span>, half of all steps include one of the user’s records, and subsampling, which helps only because the unit is usually absent, stops helping. Second, the higher terms of <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>44.7</span></a> grow like <span class="math inline">\(e^{M_iM_j/\sigma^2}\)</span>, and <span class="math inline">\(M_iM_j\)</span> can be as large as <span class="math inline">\(k^2\)</span>. A step that draws all <span class="math inline">\(k\)</span> records shifts the sum by <span class="math inline">\(kC\)</span>, a mechanism with noise multiplier <span class="math inline">\(\sigma/k\)</span>, whose privacy loss has a tail that no amount of rarity can hide at high orders. The accountant then uses orders close to 1, where the conversion is expensive.</p>
 <p><strong>Group privacy is the wrong tool for DP-SGD.</strong> It ignores both the structure of the mechanism and the fact that the RDP curve is known. The direct accountant gives a smaller <span class="math inline">\(\varepsilon\)</span> for every <span class="math inline">\(k\)</span> and a finite one for every <span class="math inline">\(k\)</span>.</p>
 <p><strong>The accountant is a worst case over gradients, not over users.</strong> It assumes the user’s drawn records push the sum in the same direction by the full <span class="math inline">\(C\)</span>. Real users’ gradients are partly aligned, which is precisely why their records are correlated, and the theorem says some loss attains the bound. An auditor should therefore treat it as the guarantee, not as a pessimistic estimate.</p>
 <div id="fig-ulvl-user-eps" class="quarto-float quarto-figure quarto-figure-center anchored">
@@ -791,18 +893,18 @@ Figure&nbsp;42.1: Left: the number of records per user in the running example’
 <img src="figures/ulvl_user_epsilon.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ulvl-user-eps-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;42.2: The user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example’s DP-SGD (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps; <span class="math inline">\(\varepsilon = 6.71\)</span> per record) for a user with <span class="math inline">\(k\)</span> records. The direct accountant of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>42.6</span></a> (black) is close to a single record sampled at rate <span class="math inline">\(kq\)</span> (blue, dotted) and grows faster than linearly (grey). Group privacy from the record-level guarantee (red, dashed) is larger, and gives no guarantee at all for <span class="math inline">\(k = 10\)</span> and above.
+Figure&nbsp;44.2: The user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example’s DP-SGD (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps; <span class="math inline">\(\varepsilon = 6.71\)</span> per record) for a user with <span class="math inline">\(k\)</span> records. The direct accountant of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>44.6</span></a> (black) is close to a single record sampled at rate <span class="math inline">\(kq\)</span> (blue, dotted) and grows faster than linearly (grey). Group privacy from the record-level guarantee (red, dashed) is larger, and gives no guarantee at all for <span class="math inline">\(k = 10\)</span> and above.
 </figcaption>
 </figure>
 </div>
 </section>
-<section id="example-the-running-examples-guarantee-for-its-users" class="level3" data-number="42.4.5">
-<h3 data-number="42.4.5" class="anchored" data-anchor-id="example-the-running-examples-guarantee-for-its-users"><span class="header-section-number">42.4.5</span> Example: the running example’s guarantee for its users</h3>
-<p><a href="#tbl-ulvl-k" class="quarto-xref">Table&nbsp;<span>42.2</span></a> applies the accountant to the running example’s DP-SGD run, <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, <span class="math inline">\(T = 10{,}000\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>.</p>
+<section id="example-the-running-examples-guarantee-for-its-users" class="level3" data-number="44.4.5">
+<h3 data-number="44.4.5" class="anchored" data-anchor-id="example-the-running-examples-guarantee-for-its-users"><span class="header-section-number">44.4.5</span> Example: the running example’s guarantee for its users</h3>
+<p><a href="#tbl-ulvl-k" class="quarto-xref">Table&nbsp;<span>44.2</span></a> applies the accountant to the running example’s DP-SGD run, <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, <span class="math inline">\(T = 10{,}000\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>.</p>
 <div id="tbl-ulvl-k" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;42.2: The user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example’s example-level DP-SGD, for a user with <span class="math inline">\(k\)</span> records. “None” means that group privacy gives no <span class="math inline">\((\varepsilon, 10^{-5})\)</span> guarantee.
+Table&nbsp;44.2: The user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example’s example-level DP-SGD, for a user with <span class="math inline">\(k\)</span> records. “None” means that group privacy gives no <span class="math inline">\((\varepsilon, 10^{-5})\)</span> guarantee.
 </figcaption>
 <div aria-describedby="tbl-ulvl-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -826,7 +928,7 @@ Table&nbsp;42.2: The user-level <span class="math inline">\(\varepsilon\)</span>
 </thead>
 <tbody>
 <tr class="odd">
-<td>User accountant, <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>42.6</span></a></td>
+<td>User accountant, <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>44.6</span></a></td>
 <td>6.72</td>
 <td>15.54</td>
 <td>52.36</td>
@@ -842,7 +944,7 @@ Table&nbsp;42.2: The user-level <span class="math inline">\(\varepsilon\)</span>
 <td>1.05</td>
 </tr>
 <tr class="odd">
-<td>Group privacy, <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>42.1</span></a></td>
+<td>Group privacy, <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>44.1</span></a></td>
 <td>6.71</td>
 <td>18.61</td>
 <td>118.12</td>
@@ -862,25 +964,25 @@ Table&nbsp;42.2: The user-level <span class="math inline">\(\varepsilon\)</span>
 </div>
 </figure>
 </div>
-<p>The first column checks the accountant: with one record it is the DP-SGD accountant, 6.72 against 6.71, the difference coming from the coarser grid of orders this chapter’s script uses (its best order is 4, against 4.1 on the finer grid). At <span class="math inline">\(\alpha = 4.1\)</span> the two curves agree to all printed digits, <span class="math inline">\(3.733633 \times 10^{-4}\)</span>. For <span class="math inline">\(k = 2\)</span> and 5 at <span class="math inline">\(\alpha = 2\)</span>, the numerical integral and the exact formula <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>42.7</span></a>, <span class="math inline">\(A_2 = \mathbb E[e^{M_1M_2/\sigma^2}]\)</span>, agree to seven digits (<span class="math inline">\(6.992273 \times 10^{-4}\)</span> and <span class="math inline">\(4.626224 \times 10^{-3}\)</span>), and the reverse direction is smaller (<span class="math inline">\(6.119238 \times 10^{-4}\)</span> and <span class="math inline">\(3.412123 \times 10^{-3}\)</span>).</p>
+<p>The first column checks the accountant: with one record it is the DP-SGD accountant, 6.72 against 6.71, the difference coming from the coarser grid of orders this chapter’s script uses (its best order is 4, against 4.1 on the finer grid). At <span class="math inline">\(\alpha = 4.1\)</span> the two curves agree to all printed digits, <span class="math inline">\(3.733633 \times 10^{-4}\)</span>. For <span class="math inline">\(k = 2\)</span> and 5 at <span class="math inline">\(\alpha = 2\)</span>, the numerical integral and the exact formula <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>44.7</span></a>, <span class="math inline">\(A_2 = \mathbb E[e^{M_1M_2/\sigma^2}]\)</span>, agree to seven digits (<span class="math inline">\(6.992273 \times 10^{-4}\)</span> and <span class="math inline">\(4.626224 \times 10^{-3}\)</span>), and the reverse direction is smaller (<span class="math inline">\(6.119238 \times 10^{-4}\)</span> and <span class="math inline">\(3.412123 \times 10^{-3}\)</span>).</p>
 <p>Already at two records, the person behind them is protected at <span class="math inline">\(\varepsilon = 15.54\)</span>, more than twice the record’s 6.71. At ten, <span class="math inline">\(\varepsilon = 146.20\)</span> means no protection at all. The rate-<span class="math inline">\(kq\)</span> approximation is within 1.5% at <span class="math inline">\(k = 2\)</span> (15.32 against 15.54) and 8% at <span class="math inline">\(k = 10\)</span> (134.50 against 146.20), so it is a quick estimate of the user’s exposure: rerun the record-level accountant with <span class="math inline">\(q\)</span> replaced by <span class="math inline">\(kq\)</span>. In every row it errs on the low side, because it drops the terms in which several of the user’s records are drawn together.</p>
 </section>
-<section id="check-yourself-1" class="level3" data-number="42.4.6">
-<h3 data-number="42.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">42.4.6</span> Check yourself</h3>
+<section id="check-yourself-1" class="level3" data-number="44.4.6">
+<h3 data-number="44.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">44.4.6</span> Check yourself</h3>
 <ul>
 <li>Your model was trained with example-level DP-SGD at <span class="math inline">\(q = 0.001\)</span>, and its heaviest user has 20 records. Which single-record accountant run gives a quick estimate of that user’s <span class="math inline">\(\varepsilon\)</span>, and in which direction is it off? <em>(The run with <span class="math inline">\(q = 0.02\)</span> and the same <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(T\)</span>. It underestimates slightly, because it ignores steps that draw several of the user’s records at once.)</em></li>
-<li>In <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>42.7</span></a>, why do only products of different copies appear? <em>(Because the <span class="math inline">\(\sum_iM_i^2\)</span> in the exponent of the likelihood ratio cancels the squares in <span class="math inline">\(S^2\)</span> after the Gaussian average. Each copy alone averages to a ratio whose expectation under <span class="math inline">\(P_0\)</span> is 1, as for one record.)</em></li>
+<li>In <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>44.7</span></a>, why do only products of different copies appear? <em>(Because the <span class="math inline">\(\sum_iM_i^2\)</span> in the exponent of the likelihood ratio cancels the squares in <span class="math inline">\(S^2\)</span> after the Gaussian average. Each copy alone averages to a ratio whose expectation under <span class="math inline">\(P_0\)</span> is 1, as for one record.)</em></li>
 </ul>
 </section>
 </section>
-<section id="sec-ulvl-dpsgd" class="level2" data-number="42.5">
-<h2 data-number="42.5" class="anchored" data-anchor-id="sec-ulvl-dpsgd"><span class="header-section-number">42.5</span> User-level DP-SGD</h2>
-<section id="context-2" class="level3" data-number="42.5.1">
-<h3 data-number="42.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">42.5.1</span> Context</h3>
+<section id="sec-ulvl-dpsgd" class="level2" data-number="44.5">
+<h2 data-number="44.5" class="anchored" data-anchor-id="sec-ulvl-dpsgd"><span class="header-section-number">44.5</span> User-level DP-SGD</h2>
+<section id="context-2" class="level3" data-number="44.5.1">
+<h3 data-number="44.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">44.5.1</span> Context</h3>
 <p>Accounting for users after the fact charges a heavy user for every one of their records. The alternative changes the algorithm, so that the unit DP-SGD samples, clips and accounts for is the user. The idea is due to McMahan, Ramage, Talwar &amp; Zhang (2018), who used it to train a language model with federated learning, where each user’s device computes an update on its own data and the server only sees the updates. What does the algorithm compute, and what does it guarantee?</p>
 </section>
-<section id="statement-2" class="level3" data-number="42.5.2">
-<h3 data-number="42.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">42.5.2</span> Statement</h3>
+<section id="statement-2" class="level3" data-number="44.5.2">
+<h3 data-number="44.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">44.5.2</span> Statement</h3>
 <p>Start from weights <span class="math inline">\(w_0\)</span> chosen independently of the data. For <span class="math inline">\(t = 0, \dots, T - 1\)</span>:</p>
 <ol type="1">
 <li><strong>Sample users.</strong> Put each user in the set <span class="math inline">\(S_t\)</span> independently with probability <span class="math inline">\(q\)</span>.</li>
@@ -889,34 +991,34 @@ Table&nbsp;42.2: The user-level <span class="math inline">\(\varepsilon\)</span>
 <li><strong>Noisy sum.</strong> <span class="math inline">\(G_t = \sum_{u\in S_t}\tilde g_u + \xi_t\)</span> with <span class="math inline">\(\xi_t \sim \mathcal N(0, \sigma^2C^2I)\)</span>.</li>
 <li><strong>Step.</strong> <span class="math inline">\(w_{t+1} = w_t - \eta\,G_t/(qU)\)</span>.</li>
 </ol>
-<p>Releasing <span class="math inline">\(w_1, \dots, w_T\)</span> is user-level <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span class="math inline">\(\varepsilon\)</span> given by <a href="#eq-ulvl-convert" class="quarto-xref">Equation&nbsp;<span>42.3</span></a> for the curve <span class="math inline">\(T\varepsilon_{q,\sigma}(\alpha)\)</span> of Fact 2: exactly the accountant of example-level DP-SGD, with users in place of records and <span class="math inline">\(q\)</span> the user sampling rate.</p>
-<p>A common variant replaces steps 2 and 3 by <strong>per-record clipping and a cap</strong>: keep at most <span class="math inline">\(k\)</span> records per user, clip each record’s gradient to <span class="math inline">\(C\)</span>, and sum them. One user then moves the sum by at most <span class="math inline">\(kC\)</span>, and the guarantee is that of noise multiplier <span class="math inline">\(\sigma/k\)</span>: <span id="eq-ulvl-together"><span class="math display">\[A_\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^j\exp\Big(\frac{k^2(j^2 - j)}{2\sigma^2}\Big), \tag{42.12}\]</span></span> <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>42.2</span></a> with <span class="math inline">\(\sigma\)</span> replaced by <span class="math inline">\(\sigma/k\)</span>.</p>
+<p>Releasing <span class="math inline">\(w_1, \dots, w_T\)</span> is user-level <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span class="math inline">\(\varepsilon\)</span> given by <a href="#eq-ulvl-convert" class="quarto-xref">Equation&nbsp;<span>44.3</span></a> for the curve <span class="math inline">\(T\varepsilon_{q,\sigma}(\alpha)\)</span> of Fact 2: exactly the accountant of example-level DP-SGD, with users in place of records and <span class="math inline">\(q\)</span> the user sampling rate.</p>
+<p>A common variant replaces steps 2 and 3 by <strong>per-record clipping and a cap</strong>: keep at most <span class="math inline">\(k\)</span> records per user, clip each record’s gradient to <span class="math inline">\(C\)</span>, and sum them. One user then moves the sum by at most <span class="math inline">\(kC\)</span>, and the guarantee is that of noise multiplier <span class="math inline">\(\sigma/k\)</span>: <span id="eq-ulvl-together"><span class="math display">\[A_\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^j\exp\Big(\frac{k^2(j^2 - j)}{2\sigma^2}\Big), \tag{44.12}\]</span></span> <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>44.2</span></a> with <span class="math inline">\(\sigma\)</span> replaced by <span class="math inline">\(\sigma/k\)</span>.</p>
 </section>
-<section id="derivation-2" class="level3" data-number="42.5.3">
-<h3 data-number="42.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">42.5.3</span> Derivation</h3>
+<section id="derivation-2" class="level3" data-number="44.5.3">
+<h3 data-number="44.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">44.5.3</span> Derivation</h3>
 <p>The proof of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> used four properties of the clipped sum. Each holds with users in place of records.</p>
 <ol type="1">
 <li><strong>One user moves the clipped sum by at most <span class="math inline">\(C\)</span>.</strong> Fix the weights <span class="math inline">\(w_t\)</span> and the other sampled users. Each <span class="math inline">\(\tilde g_v\)</span> is computed from user <span class="math inline">\(v\)</span>’s records alone, so adding user <span class="math inline">\(u\)</span> to the dataset leaves every other term unchanged and adds <span class="math inline">\(\tilde g_u\)</span>, of length at most <span class="math inline">\(C\)</span> by step 3. However many records <span class="math inline">\(u\)</span> has, they enter only through <span class="math inline">\(\tilde g_u\)</span>.</li>
 <li><strong>One step is a subsampled Gaussian mechanism over users.</strong> User <span class="math inline">\(u\)</span> enters <span class="math inline">\(S_t\)</span> with probability <span class="math inline">\(q\)</span>, independently of the other users. So the step’s output with <span class="math inline">\(u\)</span> is a mixture: with probability <span class="math inline">\(1 - q\)</span> the same as without <span class="math inline">\(u\)</span>, with probability <span class="math inline">\(q\)</span> shifted by <span class="math inline">\(\tilde g_u\)</span>. After rescaling by <span class="math inline">\(C\)</span> and rotating the shift onto one axis, the worst case is the pair of Fact 2, and the step’s RDP curve is <span class="math inline">\(\varepsilon_{q,\sigma}(\alpha)\)</span>.</li>
 <li><strong>Dividing by <span class="math inline">\(qU\)</span> is post-processing</strong>, since the number of users <span class="math inline">\(U\)</span> is treated as public, as <span class="math inline">\(n\)</span> is in example-level DP-SGD.</li>
-<li><strong>Compose and convert.</strong> RDP composition over the <span class="math inline">\(T\)</span> adaptive steps and <a href="#eq-ulvl-convert" class="quarto-xref">Equation&nbsp;<span>42.3</span></a> finish the proof, as before.</li>
-<li><strong>The capped-sum variant.</strong> With per-record clipping, user <span class="math inline">\(u\)</span>’s contribution is a sum of at most <span class="math inline">\(k\)</span> vectors of length at most <span class="math inline">\(C\)</span>, so its length is at most <span class="math inline">\(kC\)</span>, and the user is still sampled as a whole with probability <span class="math inline">\(q\)</span>. In units of <span class="math inline">\(C\)</span> the pair is <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> against <span class="math inline">\((1 - q)\mathcal N(0, \sigma^2) + q\mathcal N(k, \sigma^2)\)</span>. Dividing the output by <span class="math inline">\(k\)</span>, an invertible map that changes no divergence, gives the pair with shift 1 and noise <span class="math inline">\(\sigma/k\)</span>, whose curve is <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>42.2</span></a> with <span class="math inline">\(\sigma/k\)</span>: that is <a href="#eq-ulvl-together" class="quarto-xref">Equation&nbsp;<span>42.12</span></a>. The script checks it at <span class="math inline">\(k = 2\)</span>, <span class="math inline">\(\alpha = 3\)</span>: both give <span class="math inline">\(8.219438 \times 10^{-2}\)</span>.</li>
+<li><strong>Compose and convert.</strong> RDP composition over the <span class="math inline">\(T\)</span> adaptive steps and <a href="#eq-ulvl-convert" class="quarto-xref">Equation&nbsp;<span>44.3</span></a> finish the proof, as before.</li>
+<li><strong>The capped-sum variant.</strong> With per-record clipping, user <span class="math inline">\(u\)</span>’s contribution is a sum of at most <span class="math inline">\(k\)</span> vectors of length at most <span class="math inline">\(C\)</span>, so its length is at most <span class="math inline">\(kC\)</span>, and the user is still sampled as a whole with probability <span class="math inline">\(q\)</span>. In units of <span class="math inline">\(C\)</span> the pair is <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> against <span class="math inline">\((1 - q)\mathcal N(0, \sigma^2) + q\mathcal N(k, \sigma^2)\)</span>. Dividing the output by <span class="math inline">\(k\)</span>, an invertible map that changes no divergence, gives the pair with shift 1 and noise <span class="math inline">\(\sigma/k\)</span>, whose curve is <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>44.2</span></a> with <span class="math inline">\(\sigma/k\)</span>: that is <a href="#eq-ulvl-together" class="quarto-xref">Equation&nbsp;<span>44.12</span></a>. The script checks it at <span class="math inline">\(k = 2\)</span>, <span class="math inline">\(\alpha = 3\)</span>: both give <span class="math inline">\(8.219438 \times 10^{-2}\)</span>.</li>
 </ol>
 </section>
-<section id="interpretation-2" class="level3" data-number="42.5.4">
-<h3 data-number="42.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">42.5.4</span> Interpretation</h3>
+<section id="interpretation-2" class="level3" data-number="44.5.4">
+<h3 data-number="44.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">44.5.4</span> Interpretation</h3>
 <p><strong>The count that matters is the number of units.</strong> User-level DP-SGD has the privacy of example-level DP-SGD on a dataset of <span class="math inline">\(U\)</span> records. To keep the same expected batch of <span class="math inline">\(B\)</span> units, the sampling rate must be <span class="math inline">\(B/U\)</span>, larger than <span class="math inline">\(B/n\)</span> by the average number of records per user, and amplification is correspondingly weaker. On the running example, with 1,000 steps and an expected batch of 100 units, a record-level <span class="math inline">\(\varepsilon = 4\)</span> needs <span class="math inline">\(\sigma = 0.778\)</span> at <span class="math inline">\(q = 0.01\)</span>, and a user-level <span class="math inline">\(\varepsilon = 4\)</span> needs <span class="math inline">\(\sigma = 3.78\)</span> at <span class="math inline">\(q = 0.1\)</span>. The noise on the averaged update, <span class="math inline">\(\sigma C/B\)</span>, is 0.0189 against 0.00389, about five times larger. This is the honest price of protecting people: there are ten times fewer of them than records, and DP’s cost per unit is fixed.</p>
 <p><strong>Records inside a user are free.</strong> The guarantee does not depend on <span class="math inline">\(n_u\)</span>. A user’s records can be averaged, used for several local steps, or subsampled, all without changing <span class="math inline">\(\varepsilon\)</span>, as long as the result is one clipped vector computed from that user’s data alone. More records per user make each <span class="math inline">\(\bar g_u\)</span> a better estimate of the user’s gradient, so the signal improves while the noise stays fixed. Levy et al.&nbsp;(2021) show that, when each user’s records come from the same distribution, user-level private learning gains from having more records per user.</p>
-<p><strong>Average, or sum then clip?</strong> Averaging before clipping gives every user a vector of the same kind regardless of size, which keeps the clipping norm meaningful across users. Clipping each record and summing at most <span class="math inline">\(k\)</span> of them uses per-example gradient code that already exists, but pays a factor <span class="math inline">\(k\)</span> in noise multiplier (<a href="#eq-ulvl-together" class="quarto-xref">Equation&nbsp;<span>42.12</span></a>). Summing all of a user’s records and then clipping the sum is also valid (sensitivity <span class="math inline">\(C\)</span>), and gives heavy users more weight than averaging does, as <a href="#sec-ulvl-hetero" class="quarto-xref"><span>Section 42.7</span></a> shows.</p>
+<p><strong>Average, or sum then clip?</strong> Averaging before clipping gives every user a vector of the same kind regardless of size, which keeps the clipping norm meaningful across users. Clipping each record and summing at most <span class="math inline">\(k\)</span> of them uses per-example gradient code that already exists, but pays a factor <span class="math inline">\(k\)</span> in noise multiplier (<a href="#eq-ulvl-together" class="quarto-xref">Equation&nbsp;<span>44.12</span></a>). Summing all of a user’s records and then clipping the sum is also valid (sensitivity <span class="math inline">\(C\)</span>), and gives heavy users more weight than averaging does, as <a href="#sec-ulvl-hetero" class="quarto-xref"><span>Section 44.7</span></a> shows.</p>
 <p><strong>What the proof assumes.</strong> Step 1 needs every user’s contribution to be computed from that user alone, which rules out cross-user normalization and requires that one user’s records are not spread across several “users” in the data. If one person has several accounts, the unit is the account, and the person is again a group. Step 2 needs users to be Poisson-sampled; an implementation that iterates over users in a fixed shuffled order is a different mechanism, as for records.</p>
 </section>
-<section id="example-the-noise-each-strategy-needs" class="level3" data-number="42.5.5">
-<h3 data-number="42.5.5" class="anchored" data-anchor-id="example-the-noise-each-strategy-needs"><span class="header-section-number">42.5.5</span> Example: the noise each strategy needs</h3>
-<p><a href="#tbl-ulvl-sigma" class="quarto-xref">Table&nbsp;<span>42.3</span></a> fixes 1,000 steps with an expected batch of 100 sampled units and gives the noise multiplier for four user-level budgets. The column “record-level” is not a user-level guarantee; it shows the noise the same schedule would need to protect only records. Column (a) is example-level DP-SGD on all 10,000 records (<span class="math inline">\(q = 0.01\)</span>), accounted for the largest user with <span class="math inline">\(k = 348\)</span> by <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>42.6</span></a>; (b) is user-level DP-SGD (<span class="math inline">\(q = 0.1\)</span>); (c) keeps at most 2 records per user, 1,807 records in all, and runs example-level DP-SGD on them with <span class="math inline">\(q = 100/1{,}807 = 0.0553\)</span>, accounted for <span class="math inline">\(k = 2\)</span> (<a href="#sec-ulvl-bounding" class="quarto-xref"><span>Section 42.6</span></a>).</p>
+<section id="example-the-noise-each-strategy-needs" class="level3" data-number="44.5.5">
+<h3 data-number="44.5.5" class="anchored" data-anchor-id="example-the-noise-each-strategy-needs"><span class="header-section-number">44.5.5</span> Example: the noise each strategy needs</h3>
+<p><a href="#tbl-ulvl-sigma" class="quarto-xref">Table&nbsp;<span>44.3</span></a> fixes 1,000 steps with an expected batch of 100 sampled units and gives the noise multiplier for four user-level budgets. The column “record-level” is not a user-level guarantee; it shows the noise the same schedule would need to protect only records. Column (a) is example-level DP-SGD on all 10,000 records (<span class="math inline">\(q = 0.01\)</span>), accounted for the largest user with <span class="math inline">\(k = 348\)</span> by <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>44.6</span></a>; (b) is user-level DP-SGD (<span class="math inline">\(q = 0.1\)</span>); (c) keeps at most 2 records per user, 1,807 records in all, and runs example-level DP-SGD on them with <span class="math inline">\(q = 100/1{,}807 = 0.0553\)</span>, accounted for <span class="math inline">\(k = 2\)</span> (<a href="#sec-ulvl-bounding" class="quarto-xref"><span>Section 44.6</span></a>).</p>
 <div id="tbl-ulvl-sigma" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-sigma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;42.3: Noise multipliers for 1,000 steps with an expected batch of 100 units, at <span class="math inline">\(\delta = 10^{-5}\)</span>.
+Table&nbsp;44.3: Noise multipliers for 1,000 steps with an expected batch of 100 units, at <span class="math inline">\(\delta = 10^{-5}\)</span>.
 </figcaption>
 <div aria-describedby="tbl-ulvl-sigma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -972,50 +1074,50 @@ Table&nbsp;42.3: Noise multipliers for 1,000 steps with an expected batch of 100
 </div>
 <p>Column (a) is the cost of keeping the record as the unit when one user has 348 records: in each step this user has on average <span class="math inline">\(348 \times 0.01 = 3.48\)</span> records in the batch, so subsampling hardly hides them, and the noise must cover a shift of several clipping norms in nearly every step. At <span class="math inline">\(\varepsilon = 4\)</span> the noise on the averaged gradient has standard deviation <span class="math inline">\(128 \times 0.5/100 = 0.64\)</span> per coordinate, so length about <span class="math inline">\(0.64 \times \sqrt{3{,}329} = 36.9\)</span>, against a clipped average of length at most <span class="math inline">\(0.5\)</span>.</p>
 </section>
-<section id="check-yourself-2" class="level3" data-number="42.5.6">
-<h3 data-number="42.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">42.5.6</span> Check yourself</h3>
+<section id="check-yourself-2" class="level3" data-number="44.5.6">
+<h3 data-number="44.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">44.5.6</span> Check yourself</h3>
 <ul>
 <li>In user-level DP-SGD, a user with 300 records runs five local steps of SGD on them and sends the clipped change in weights. Does that change <span class="math inline">\(\varepsilon\)</span>? <em>(No.&nbsp;The user’s contribution is still one vector computed from their records alone, clipped to <span class="math inline">\(C\)</span>; the local computation is invisible to the accountant.)</em></li>
 <li>Why does user-level DP-SGD on 1,000 users need more noise than example-level DP-SGD on 10,000 records, at the same expected batch, steps and <span class="math inline">\(\varepsilon\)</span>? <em>(To keep the batch at 100 units it must sample at rate 0.1 instead of 0.01. Amplification by subsampling is weaker at a higher rate, so the same <span class="math inline">\(\varepsilon\)</span> needs a larger <span class="math inline">\(\sigma\)</span>.)</em></li>
 </ul>
 </section>
 </section>
-<section id="sec-ulvl-bounding" class="level2" data-number="42.6">
-<h2 data-number="42.6" class="anchored" data-anchor-id="sec-ulvl-bounding"><span class="header-section-number">42.6</span> Contribution bounding</h2>
-<section id="context-3" class="level3" data-number="42.6.1">
-<h3 data-number="42.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">42.6.1</span> Context</h3>
+<section id="sec-ulvl-bounding" class="level2" data-number="44.6">
+<h2 data-number="44.6" class="anchored" data-anchor-id="sec-ulvl-bounding"><span class="header-section-number">44.6</span> Contribution bounding</h2>
+<section id="context-3" class="level3" data-number="44.6.1">
+<h3 data-number="44.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">44.6.1</span> Context</h3>
 <p>User-level DP-SGD needs a data pipeline that groups records by user and computes one vector per user. Many training pipelines are built around records: shuffled files of examples, per-example gradient code, fixed-length batches. Can you keep that pipeline and still protect users? You can, if you limit how many records each user contributes. The question is what limit to choose, because the limit trades the noise the accountant requires against the data you throw away.</p>
 </section>
-<section id="statement-3" class="level3" data-number="42.6.2">
-<h3 data-number="42.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">42.6.2</span> Statement</h3>
-<p><strong>Contribution bounding</strong> keeps at most <span class="math inline">\(k\)</span> records of each user, chosen without looking at other users’ data, for example at random, and discards the rest. Run example-level DP-SGD on the <span class="math inline">\(n_k = \sum_u\min(n_u, k)\)</span> remaining records with sampling rate <span class="math inline">\(q\)</span>. The result is user-level <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span class="math inline">\(\varepsilon\)</span> given by the accountant of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>42.6</span></a> for a user with <span class="math inline">\(k\)</span> records. The trade-off:</p>
+<section id="statement-3" class="level3" data-number="44.6.2">
+<h3 data-number="44.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">44.6.2</span> Statement</h3>
+<p><strong>Contribution bounding</strong> keeps at most <span class="math inline">\(k\)</span> records of each user, chosen without looking at other users’ data, for example at random, and discards the rest. Run example-level DP-SGD on the <span class="math inline">\(n_k = \sum_u\min(n_u, k)\)</span> remaining records with sampling rate <span class="math inline">\(q\)</span>. The result is user-level <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span class="math inline">\(\varepsilon\)</span> given by the accountant of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>44.6</span></a> for a user with <span class="math inline">\(k\)</span> records. The trade-off:</p>
 <ul>
-<li>the <strong>noise</strong> grows with <span class="math inline">\(k\)</span>: in the small-<span class="math inline">\(kq\)</span> regime the user’s RDP is that of a record sampled at rate <span class="math inline">\(kq\)</span> (<a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>42.8</span></a>), so the noise multiplier must grow roughly in proportion to <span class="math inline">\(k\)</span> at a fixed <span class="math inline">\(q\)</span>;</li>
+<li>the <strong>noise</strong> grows with <span class="math inline">\(k\)</span>: in the small-<span class="math inline">\(kq\)</span> regime the user’s RDP is that of a record sampled at rate <span class="math inline">\(kq\)</span> (<a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>44.8</span></a>), so the noise multiplier must grow roughly in proportion to <span class="math inline">\(k\)</span> at a fixed <span class="math inline">\(q\)</span>;</li>
 <li>the <strong>bias</strong> shrinks with <span class="math inline">\(k\)</span>: the training set loses <span class="math inline">\(n - n_k\)</span> records, all of them from users with more than <span class="math inline">\(k\)</span> records, so the data are both smaller and reweighted toward light users.</li>
 </ul>
 </section>
-<section id="derivation-3" class="level3" data-number="42.6.3">
-<h3 data-number="42.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">42.6.3</span> Derivation</h3>
+<section id="derivation-3" class="level3" data-number="44.6.3">
+<h3 data-number="44.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">44.6.3</span> Derivation</h3>
 <ol type="1">
 <li><strong>Bounding is applied per user.</strong> Write the bounded dataset as <span class="math inline">\(\Pi(D) = \bigcup_u\pi(D_u)\)</span>, where <span class="math inline">\(D_u\)</span> is user <span class="math inline">\(u\)</span>’s records and <span class="math inline">\(\pi\)</span> keeps at most <span class="math inline">\(k\)</span> of them using randomness that is independent of everything else. Adding user <span class="math inline">\(u\)</span> to <span class="math inline">\(D\)</span> adds <span class="math inline">\(\pi(D_u)\)</span> to <span class="math inline">\(\Pi(D)\)</span> and changes nothing else, so user-level neighbours map to datasets that differ in at most <span class="math inline">\(k\)</span> records, all of one user.</li>
-<li><strong>Account for those records.</strong> Example-level DP-SGD on <span class="math inline">\(\Pi(D)\)</span> sees the user’s at most <span class="math inline">\(k\)</span> records, each drawn independently with probability <span class="math inline">\(q\)</span>. By <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 42.4</span></a>, the pair for one step is <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>42.6</span></a> with <span class="math inline">\(k\)</span>. A user with fewer records is covered too: they are a <span class="math inline">\(k\)</span>-record user some of whose clipped gradients happen to be 0, and the worst case of <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 42.4</span></a> is over all gradients of length at most <span class="math inline">\(C\)</span>, including 0. Composition and conversion are as before.</li>
-<li><strong>The noise grows with <span class="math inline">\(k\)</span>.</strong> At fixed <span class="math inline">\(q\)</span>, <a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>42.8</span></a> depends on <span class="math inline">\(k\)</span> and <span class="math inline">\(q\)</span> through <span class="math inline">\(kq\)</span> only. Keeping the user’s RDP fixed while <span class="math inline">\(k\)</span> doubles therefore requires either halving <span class="math inline">\(q\)</span>, which halves the batch, or raising <span class="math inline">\(\sigma\)</span>. In the regime where the per-step RDP is about <span class="math inline">\(\frac\alpha2(kq)^2/\sigma^2\)</span>, holding it fixed means <span class="math inline">\(\sigma \propto kq\)</span>.</li>
+<li><strong>Account for those records.</strong> Example-level DP-SGD on <span class="math inline">\(\Pi(D)\)</span> sees the user’s at most <span class="math inline">\(k\)</span> records, each drawn independently with probability <span class="math inline">\(q\)</span>. By <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 44.4</span></a>, the pair for one step is <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>44.6</span></a> with <span class="math inline">\(k\)</span>. A user with fewer records is covered too: they are a <span class="math inline">\(k\)</span>-record user some of whose clipped gradients happen to be 0, and the worst case of <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 44.4</span></a> is over all gradients of length at most <span class="math inline">\(C\)</span>, including 0. Composition and conversion are as before.</li>
+<li><strong>The noise grows with <span class="math inline">\(k\)</span>.</strong> At fixed <span class="math inline">\(q\)</span>, <a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>44.8</span></a> depends on <span class="math inline">\(k\)</span> and <span class="math inline">\(q\)</span> through <span class="math inline">\(kq\)</span> only. Keeping the user’s RDP fixed while <span class="math inline">\(k\)</span> doubles therefore requires either halving <span class="math inline">\(q\)</span>, which halves the batch, or raising <span class="math inline">\(\sigma\)</span>. In the regime where the per-step RDP is about <span class="math inline">\(\frac\alpha2(kq)^2/\sigma^2\)</span>, holding it fixed means <span class="math inline">\(\sigma \propto kq\)</span>.</li>
 <li><strong>The bias.</strong> Before bounding, the expected update of DP-SGD averages over all <span class="math inline">\(n\)</span> records; after it, over <span class="math inline">\(n_k\)</span> records in which each user has weight <span class="math inline">\(\min(n_u, k)/n_k\)</span> instead of <span class="math inline">\(n_u/n\)</span>. A user with <span class="math inline">\(n_u &gt; k\)</span> loses weight, and their records beyond <span class="math inline">\(k\)</span> are not used at all.</li>
 </ol>
 </section>
-<section id="interpretation-3" class="level3" data-number="42.6.4">
-<h3 data-number="42.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">42.6.4</span> Interpretation</h3>
-<p><strong>Choosing <span class="math inline">\(k\)</span> is a bias–variance trade-off.</strong> Amin, Kulesza, Muñoz Medina &amp; Vassilvitskii (2019) studied exactly this choice for private empirical risk minimization, and showed that the best cap depends on the distribution of user sizes: a cap above most users’ sizes buys little data at a large noise cost, and a cap below them throws away most of the data. Their framing is the same as that of choosing the clipping norm in <a href="../part03-dp-foundations/06-sensitivity.html">Beyond global sensitivity</a>: a smaller bound means less noise and more distortion of what is computed. Because the cap depends on the data, it should be chosen from public knowledge of the population or privately; choosing it by trying several caps and looking at test accuracy, as the example below does to show the trade-off, spends privacy that the accountant does not see (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</p>
+<section id="interpretation-3" class="level3" data-number="44.6.4">
+<h3 data-number="44.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">44.6.4</span> Interpretation</h3>
+<p><strong>Choosing <span class="math inline">\(k\)</span> is a bias–variance trade-off.</strong> Amin, Kulesza, Muñoz Medina &amp; Vassilvitskii (2019) studied exactly this choice for private empirical risk minimization, and showed that the best cap depends on the distribution of user sizes: a cap above most users’ sizes buys little data at a large noise cost, and a cap below them throws away most of the data. Their framing is the same as that of choosing the clipping norm in <a href="../part03-dp-foundations/07-sensitivity.html">Beyond global sensitivity</a>: a smaller bound means less noise and more distortion of what is computed. Because the cap depends on the data, it should be chosen from public knowledge of the population or privately; choosing it by trying several caps and looking at test accuracy, as the example below does to show the trade-off, spends privacy that the accountant does not see (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</p>
 <p><strong>Which records to keep matters.</strong> Random selection keeps the proof simple. Chua et al.&nbsp;(2024) compare selection rules for fine-tuning language models under contribution bounding and report that keeping each user’s longest records worked best on one of their datasets. Any rule that looks only at the user’s own records is allowed, by step 1.</p>
 <p><strong>Bounding plus user-level DP-SGD.</strong> The two techniques combine: cap each user at <span class="math inline">\(k\)</span> records to bound compute, then compute one clipped vector per user. With user sampling, the cap no longer costs noise, only data, and users can contribute their full records again by subsampling them inside each step.</p>
 </section>
-<section id="example-the-cap-on-the-running-example" class="level3" data-number="42.6.5">
-<h3 data-number="42.6.5" class="anchored" data-anchor-id="example-the-cap-on-the-running-example"><span class="header-section-number">42.6.5</span> Example: the cap on the running example</h3>
-<p><a href="#tbl-ulvl-cap" class="quarto-xref">Table&nbsp;<span>42.4</span></a> fixes the user-level budget at <span class="math inline">\(\varepsilon = 4\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span> and 1,000 steps with an expected batch of 100 records. For each cap, the sampling rate is <span class="math inline">\(q = 100/n_k\)</span>, so <span class="math inline">\(kq\)</span> is the probability scale at which a full user enters a batch.</p>
+<section id="example-the-cap-on-the-running-example" class="level3" data-number="44.6.5">
+<h3 data-number="44.6.5" class="anchored" data-anchor-id="example-the-cap-on-the-running-example"><span class="header-section-number">44.6.5</span> Example: the cap on the running example</h3>
+<p><a href="#tbl-ulvl-cap" class="quarto-xref">Table&nbsp;<span>44.4</span></a> fixes the user-level budget at <span class="math inline">\(\varepsilon = 4\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span> and 1,000 steps with an expected batch of 100 records. For each cap, the sampling rate is <span class="math inline">\(q = 100/n_k\)</span>, so <span class="math inline">\(kq\)</span> is the probability scale at which a full user enters a batch.</p>
 <div id="tbl-ulvl-cap" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-cap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;42.4: Contribution bounding at user-level <span class="math inline">\(\varepsilon = 4\)</span>: example-level DP-SGD on at most <span class="math inline">\(k\)</span> records per user, accounted for <span class="math inline">\(k\)</span> records, one run each.
+Table&nbsp;44.4: Contribution bounding at user-level <span class="math inline">\(\varepsilon = 4\)</span>: example-level DP-SGD on at most <span class="math inline">\(k\)</span> records per user, accounted for <span class="math inline">\(k\)</span> records, one run each.
 </figcaption>
 <div aria-describedby="tbl-ulvl-cap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1093,64 +1195,64 @@ Table&nbsp;42.4: Contribution bounding at user-level <span class="math inline">\
 </div>
 <p>Raising the cap from 1 to 50 multiplies the data by 8.4 and the noise multiplier by 5.8, and accuracy falls from 0.8917 to 0.6401. On this task the noise dominates: a 1,000-record dataset, one record per user, already contains most of what the network can learn privately at this budget, and every extra record per user costs more in noise than it adds in signal. The caps 1 and 2 are tied. The cap <span class="math inline">\(k = 1\)</span> row is user-level DP-SGD on one record per user in disguise: with one record per user, sampling records at rate 0.1 is sampling users at rate 0.1, and the accountant is the same, <span class="math inline">\(\sigma = 3.78\)</span>.</p>
 </section>
-<section id="check-yourself-3" class="level3" data-number="42.6.6">
-<h3 data-number="42.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">42.6.6</span> Check yourself</h3>
+<section id="check-yourself-3" class="level3" data-number="44.6.6">
+<h3 data-number="44.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">44.6.6</span> Check yourself</h3>
 <ul>
 <li>Why must the cap be applied with randomness independent of other users’ data? <em>(The derivation needs adding one user to change only that user’s kept records. If, say, the cap kept the <span class="math inline">\(k\)</span> records most similar to the rest of the dataset, adding a user could change which records other users keep, and neighbours would differ in more than <span class="math inline">\(k\)</span> records.)</em></li>
-<li>In <a href="#tbl-ulvl-cap" class="quarto-xref">Table&nbsp;<span>42.4</span></a>, <span class="math inline">\(kq\)</span> rises from 0.100 to 0.593 as the cap goes from 1 to 50. What does <a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>42.8</span></a> predict for the noise multiplier, and why is the actual one smaller? <em>(Proportionality to <span class="math inline">\(kq\)</span> predicts about <span class="math inline">\(3.78 \times 5.93 = 22.4\)</span>. The rule is only approximate: it holds where <span class="math inline">\(\sigma\)</span> is large and <span class="math inline">\(kq\)</span> small, and at <span class="math inline">\(kq = 0.593\)</span> neither the rate-<span class="math inline">\(kq\)</span> approximation nor the large-<span class="math inline">\(\sigma\)</span> law is accurate, so the accountant’s 21.8 differs from it.)</em></li>
+<li>In <a href="#tbl-ulvl-cap" class="quarto-xref">Table&nbsp;<span>44.4</span></a>, <span class="math inline">\(kq\)</span> rises from 0.100 to 0.593 as the cap goes from 1 to 50. What does <a href="#eq-ulvl-rate" class="quarto-xref">Equation&nbsp;<span>44.8</span></a> predict for the noise multiplier, and why is the actual one smaller? <em>(Proportionality to <span class="math inline">\(kq\)</span> predicts about <span class="math inline">\(3.78 \times 5.93 = 22.4\)</span>. The rule is only approximate: it holds where <span class="math inline">\(\sigma\)</span> is large and <span class="math inline">\(kq\)</span> small, and at <span class="math inline">\(kq = 0.593\)</span> neither the rate-<span class="math inline">\(kq\)</span> approximation nor the large-<span class="math inline">\(\sigma\)</span> law is accurate, so the accountant’s 21.8 differs from it.)</em></li>
 </ul>
 </section>
 </section>
-<section id="sec-ulvl-hetero" class="level2" data-number="42.7">
-<h2 data-number="42.7" class="anchored" data-anchor-id="sec-ulvl-hetero"><span class="header-section-number">42.7</span> Heterogeneous users</h2>
-<section id="context-4" class="level3" data-number="42.7.1">
-<h3 data-number="42.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">42.7.1</span> Context</h3>
-<p>User sizes are rarely equal. In the running example’s population, 30 users with at least 50 records each hold 30.6% of the records, while the smallest half of the users hold 10.3% (<a href="#fig-ulvl-population" class="quarto-xref">Figure&nbsp;<span>42.1</span></a>). Example-level training weights each user by their number of records; user-level training does not. What objective does user-level DP-SGD optimize, and what does that mean for heavy users?</p>
+<section id="sec-ulvl-hetero" class="level2" data-number="44.7">
+<h2 data-number="44.7" class="anchored" data-anchor-id="sec-ulvl-hetero"><span class="header-section-number">44.7</span> Heterogeneous users</h2>
+<section id="context-4" class="level3" data-number="44.7.1">
+<h3 data-number="44.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">44.7.1</span> Context</h3>
+<p>User sizes are rarely equal. In the running example’s population, 30 users with at least 50 records each hold 30.6% of the records, while the smallest half of the users hold 10.3% (<a href="#fig-ulvl-population" class="quarto-xref">Figure&nbsp;<span>44.1</span></a>). Example-level training weights each user by their number of records; user-level training does not. What objective does user-level DP-SGD optimize, and what does that mean for heavy users?</p>
 </section>
-<section id="statement-4" class="level3" data-number="42.7.2">
-<h3 data-number="42.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">42.7.2</span> Statement</h3>
-<p>Averaged over the user sampling and the noise, the update direction of user-level DP-SGD is <span id="eq-ulvl-expected"><span class="math display">\[\mathbb E\Big[\frac{G_t}{qU}\Big] = \frac1U\sum_{u=1}^U\min\Big(1, \frac{C}{\|\bar g_u\|}\Big)\bar g_u, \tag{42.13}\]</span></span> a sum in which each user has weight at most <span class="math inline">\(1/U\)</span> whatever their number of records. Example-level DP-SGD gives user <span class="math inline">\(u\)</span> weight <span class="math inline">\(n_u/n\)</span> in its expected update, <span class="math inline">\(\frac1n\sum_u\sum_{i\in u}\min(1, C/\|g_i\|)g_i\)</span>.</p>
+<section id="statement-4" class="level3" data-number="44.7.2">
+<h3 data-number="44.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">44.7.2</span> Statement</h3>
+<p>Averaged over the user sampling and the noise, the update direction of user-level DP-SGD is <span id="eq-ulvl-expected"><span class="math display">\[\mathbb E\Big[\frac{G_t}{qU}\Big] = \frac1U\sum_{u=1}^U\min\Big(1, \frac{C}{\|\bar g_u\|}\Big)\bar g_u, \tag{44.13}\]</span></span> a sum in which each user has weight at most <span class="math inline">\(1/U\)</span> whatever their number of records. Example-level DP-SGD gives user <span class="math inline">\(u\)</span> weight <span class="math inline">\(n_u/n\)</span> in its expected update, <span class="math inline">\(\frac1n\sum_u\sum_{i\in u}\min(1, C/\|g_i\|)g_i\)</span>.</p>
 </section>
-<section id="derivation-4" class="level3" data-number="42.7.3">
-<h3 data-number="42.7.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">42.7.3</span> Derivation</h3>
+<section id="derivation-4" class="level3" data-number="44.7.3">
+<h3 data-number="44.7.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">44.7.3</span> Derivation</h3>
 <ol type="1">
 <li><strong>Average over the sampling.</strong> User <span class="math inline">\(u\)</span> is in <span class="math inline">\(S_t\)</span> with probability <span class="math inline">\(q\)</span>, so <span class="math inline">\(\mathbb E\sum_{u\in S_t}\tilde g_u = q\sum_u\tilde g_u\)</span>. The noise has mean zero.</li>
-<li><strong>Divide by <span class="math inline">\(qU\)</span>.</strong> The <span class="math inline">\(q\)</span> cancels, leaving <span class="math inline">\(\frac1U\sum_u\tilde g_u\)</span>, which is <a href="#eq-ulvl-expected" class="quarto-xref">Equation&nbsp;<span>42.13</span></a> by the definition of <span class="math inline">\(\tilde g_u\)</span>.</li>
+<li><strong>Divide by <span class="math inline">\(qU\)</span>.</strong> The <span class="math inline">\(q\)</span> cancels, leaving <span class="math inline">\(\frac1U\sum_u\tilde g_u\)</span>, which is <a href="#eq-ulvl-expected" class="quarto-xref">Equation&nbsp;<span>44.13</span></a> by the definition of <span class="math inline">\(\tilde g_u\)</span>.</li>
 <li><strong>The weight of one user.</strong> <span class="math inline">\(\|\tilde g_u\| \le C\)</span> for every user, so each term has length at most <span class="math inline">\(C/U\)</span>, and the share of any group of users in the update is at most their share of the users.</li>
 <li><strong>Example-level.</strong> The same computation for DP-SGD over records (<a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>) gives each record weight <span class="math inline">\(1/n\)</span>, so user <span class="math inline">\(u\)</span>’s records together have weight <span class="math inline">\(n_u/n\)</span>.</li>
 </ol>
 </section>
-<section id="interpretation-4" class="level3" data-number="42.7.4">
-<h3 data-number="42.7.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">42.7.4</span> Interpretation</h3>
+<section id="interpretation-4" class="level3" data-number="44.7.4">
+<h3 data-number="44.7.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">44.7.4</span> Interpretation</h3>
 <p><strong>User-level training changes the objective, not only the noise.</strong> With averaged per-user gradients, the model minimizes (a clipped version of) the average over users of each user’s average loss, <span class="math inline">\(\frac1U\sum_u\frac1{n_u}\sum_{i\in u}\ell(w, z_i)\)</span>, rather than the average over records. Whether that is what you want depends on the application. For a keyboard model, weighting people equally keeps a few very active users from defining everyone’s suggestions. For a model meant to fit the overall distribution of records, it under-weights heavy users’ content, and the bias can matter when heavy users differ from light ones, for example by language, topic or device.</p>
 <p><strong>Clipping caps heavy users twice.</strong> A heavy user’s average gradient is a good estimate, typically short when the model already fits their data, and is rarely clipped. But if the user’s data are unusual, their gradient is long and is clipped to <span class="math inline">\(C\)</span>, so their influence is capped at that of any other user. This is the user-level analogue of what clipping does to records with large gradients (<a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a>).</p>
 <p><strong>Sum-then-clip sits in between.</strong> Summing a user’s gradients before clipping makes a heavy user’s vector up to <span class="math inline">\(n_u\)</span> times longer than one record’s, so heavy users are clipped first, and their influence rises with <span class="math inline">\(n_u\)</span> until it reaches <span class="math inline">\(C\)</span>. It interpolates between record weighting, for users whose sum stays below <span class="math inline">\(C\)</span>, and user weighting, for those above it (<a href="../../book-exercises/part05-dp-ml/07-user-level.html#sec-sol-ulvl-5">Exercise 5</a>).</p>
 </section>
-<section id="example-heavy-users-in-the-running-example" class="level3" data-number="42.7.5">
-<h3 data-number="42.7.5" class="anchored" data-anchor-id="example-heavy-users-in-the-running-example"><span class="header-section-number">42.7.5</span> Example: heavy users in the running example</h3>
+<section id="example-heavy-users-in-the-running-example" class="level3" data-number="44.7.5">
+<h3 data-number="44.7.5" class="anchored" data-anchor-id="example-heavy-users-in-the-running-example"><span class="header-section-number">44.7.5</span> Example: heavy users in the running example</h3>
 <p>The 30 users with at least 50 records hold 30.6% of the records, and so 30.6% of the weight in the expected example-level update. Under user-level DP-SGD their weight is at most <span class="math inline">\(30/1{,}000 = 3.0\%\)</span>. Does that hurt the model where heavy users’ data are? The script splits the test set by the owner of each test point’s nearest training record. Because a heavy user’s records were chosen as the nearest neighbours of one seed in 50 dimensions, they spread widely, and 68.3% of test points have a heavy user’s record as their nearest neighbour. At user-level <span class="math inline">\(\varepsilon = 4\)</span>, user-level DP-SGD reaches 0.9361 on those points and 0.9319 on the others; the non-private model, 0.9607 and 0.9622. On this task, down-weighting heavy users costs nothing measurable, because one teacher network labels every record, so the light users’ records teach the same function. On data where heavy users’ records follow their own patterns, the same reweighting would cost accuracy on those patterns.</p>
 </section>
-<section id="check-yourself-4" class="level3" data-number="42.7.6">
-<h3 data-number="42.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">42.7.6</span> Check yourself</h3>
+<section id="check-yourself-4" class="level3" data-number="44.7.6">
+<h3 data-number="44.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">44.7.6</span> Check yourself</h3>
 <ul>
 <li>A user-level model will be used to predict for each record equally, and you know that heavy users’ records differ from light users’. What can you change without changing <span class="math inline">\(\varepsilon\)</span>? <em>(How each user’s vector is computed: summing instead of averaging before clipping, or a larger <span class="math inline">\(C\)</span> relative to typical averaged gradients. Both are inside the per-user computation and leave the sensitivity at <span class="math inline">\(C\)</span>.)</em></li>
 <li>Why is each user’s share of the user-level update at most <span class="math inline">\(1/U\)</span> rather than exactly <span class="math inline">\(1/U\)</span>? <em>(Because a user’s clipped vector has length at most <span class="math inline">\(C\)</span>; users whose average gradient is shorter than <span class="math inline">\(C\)</span>, typically those the model already fits, contribute less.)</em></li>
 </ul>
 </section>
 </section>
-<section id="sec-ulvl-run" class="level2" data-number="42.8">
-<h2 data-number="42.8" class="anchored" data-anchor-id="sec-ulvl-run"><span class="header-section-number">42.8</span> Comparing the strategies on the running example</h2>
-<section id="context-5" class="level3" data-number="42.8.1">
-<h3 data-number="42.8.1" class="anchored" data-anchor-id="context-5"><span class="header-section-number">42.8.1</span> Context</h3>
+<section id="sec-ulvl-run" class="level2" data-number="44.8">
+<h2 data-number="44.8" class="anchored" data-anchor-id="sec-ulvl-run"><span class="header-section-number">44.8</span> Comparing the strategies on the running example</h2>
+<section id="context-5" class="level3" data-number="44.8.1">
+<h3 data-number="44.8.1" class="anchored" data-anchor-id="context-5"><span class="header-section-number">44.8.1</span> Context</h3>
 <p>Three ways to train the running example with a user-level guarantee are now on the table: (a) example-level DP-SGD on all records, with the user accountant for the heaviest user; (b) user-level DP-SGD; (c) contribution bounding to two records per user, then example-level DP-SGD. At the same user-level <span class="math inline">\((\varepsilon, \delta)\)</span>, which model is best?</p>
 </section>
-<section id="statement-5" class="level3" data-number="42.8.2">
-<h3 data-number="42.8.2" class="anchored" data-anchor-id="statement-5"><span class="header-section-number">42.8.2</span> Statement</h3>
-<p><a href="#tbl-ulvl-run" class="quarto-xref">Table&nbsp;<span>42.5</span></a> trains each strategy for 1,000 steps with an expected batch of 100 units, <span class="math inline">\(C = 0.5\)</span> and <span class="math inline">\(\eta = 0.5\)</span>, at the noise multipliers of <a href="#tbl-ulvl-sigma" class="quarto-xref">Table&nbsp;<span>42.3</span></a>, one run each.</p>
+<section id="statement-5" class="level3" data-number="44.8.2">
+<h3 data-number="44.8.2" class="anchored" data-anchor-id="statement-5"><span class="header-section-number">44.8.2</span> Statement</h3>
+<p><a href="#tbl-ulvl-run" class="quarto-xref">Table&nbsp;<span>44.5</span></a> trains each strategy for 1,000 steps with an expected batch of 100 units, <span class="math inline">\(C = 0.5\)</span> and <span class="math inline">\(\eta = 0.5\)</span>, at the noise multipliers of <a href="#tbl-ulvl-sigma" class="quarto-xref">Table&nbsp;<span>44.3</span></a>, one run each.</p>
 <div id="tbl-ulvl-run" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;42.5: Test accuracy at the same user-level budget, <span class="math inline">\(\delta = 10^{-5}\)</span>, one run each.
+Table&nbsp;44.5: Test accuracy at the same user-level budget, <span class="math inline">\(\delta = 10^{-5}\)</span>, one run each.
 </figcaption>
 <div aria-describedby="tbl-ulvl-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1205,49 +1307,49 @@ Table&nbsp;42.5: Test accuracy at the same user-level budget, <span class="math 
 </figure>
 </div>
 </section>
-<section id="derivation-5" class="level3" data-number="42.8.3">
-<h3 data-number="42.8.3" class="anchored" data-anchor-id="derivation-5"><span class="header-section-number">42.8.3</span> Derivation</h3>
-<p>Each strategy’s guarantee was derived above: (a) and (c) by the accountant of <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 42.4</span></a> with <span class="math inline">\(k = 348\)</span> and <span class="math inline">\(k = 2\)</span>, and (b) by <a href="#sec-ulvl-dpsgd" class="quarto-xref"><span>Section 42.5</span></a>. The cap <span class="math inline">\(k = 2\)</span> is the best cap at <span class="math inline">\(\varepsilon = 4\)</span> in <a href="#tbl-ulvl-cap" class="quarto-xref">Table&nbsp;<span>42.4</span></a>, tied with <span class="math inline">\(k = 1\)</span>; choosing it from test accuracy is a leak that a real deployment would have to pay for. Run-to-run variation is of the order of a point at these budgets: the cap <span class="math inline">\(k = 1\)</span> and user-level DP-SGD restricted to one random record per user are the same algorithm with the same <span class="math inline">\(\sigma\)</span>, and two runs of it gave 0.8917 and 0.9070.</p>
+<section id="derivation-5" class="level3" data-number="44.8.3">
+<h3 data-number="44.8.3" class="anchored" data-anchor-id="derivation-5"><span class="header-section-number">44.8.3</span> Derivation</h3>
+<p>Each strategy’s guarantee was derived above: (a) and (c) by the accountant of <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 44.4</span></a> with <span class="math inline">\(k = 348\)</span> and <span class="math inline">\(k = 2\)</span>, and (b) by <a href="#sec-ulvl-dpsgd" class="quarto-xref"><span>Section 44.5</span></a>. The cap <span class="math inline">\(k = 2\)</span> is the best cap at <span class="math inline">\(\varepsilon = 4\)</span> in <a href="#tbl-ulvl-cap" class="quarto-xref">Table&nbsp;<span>44.4</span></a>, tied with <span class="math inline">\(k = 1\)</span>; choosing it from test accuracy is a leak that a real deployment would have to pay for. Run-to-run variation is of the order of a point at these budgets: the cap <span class="math inline">\(k = 1\)</span> and user-level DP-SGD restricted to one random record per user are the same algorithm with the same <span class="math inline">\(\sigma\)</span>, and two runs of it gave 0.8917 and 0.9070.</p>
 </section>
-<section id="interpretation-5" class="level3" data-number="42.8.4">
-<h3 data-number="42.8.4" class="anchored" data-anchor-id="interpretation-5"><span class="header-section-number">42.8.4</span> Interpretation</h3>
-<p><strong>Keeping the record as the unit fails.</strong> Strategy (a) is at chance, between 0.53 and 0.57, at every budget up to <span class="math inline">\(\varepsilon = 8\)</span>. The heaviest user dictates the noise for everyone: <span class="math inline">\(\sigma\)</span> between 70.3 and 449 drowns every gradient. That is the practical meaning of <a href="#fig-ulvl-user-eps" class="quarto-xref">Figure&nbsp;<span>42.2</span></a>: an example-level pipeline on data with heavy users needs either an enormous <span class="math inline">\(\varepsilon\)</span> or a cap.</p>
-<p><strong>Changing the unit wins.</strong> User-level DP-SGD is the best strategy at every budget, 0.9347 at <span class="math inline">\(\varepsilon = 4\)</span> against 0.9612 for the non-private model. It needs a little less noise than the cap of 2 (<a href="#tbl-ulvl-sigma" class="quarto-xref">Table&nbsp;<span>42.3</span></a>) and, unlike the cap, it uses every record, through the per-user average. Its advantage is largest at small budgets: 9.8 points at <span class="math inline">\(\varepsilon = 1\)</span>, 1.1 points at <span class="math inline">\(\varepsilon = 8\)</span>. Its cost is compute: each step processes all the records of about 100 users, about 1,000 records, ten times what the example-level strategies process.</p>
+<section id="interpretation-5" class="level3" data-number="44.8.4">
+<h3 data-number="44.8.4" class="anchored" data-anchor-id="interpretation-5"><span class="header-section-number">44.8.4</span> Interpretation</h3>
+<p><strong>Keeping the record as the unit fails.</strong> Strategy (a) is at chance, between 0.53 and 0.57, at every budget up to <span class="math inline">\(\varepsilon = 8\)</span>. The heaviest user dictates the noise for everyone: <span class="math inline">\(\sigma\)</span> between 70.3 and 449 drowns every gradient. That is the practical meaning of <a href="#fig-ulvl-user-eps" class="quarto-xref">Figure&nbsp;<span>44.2</span></a>: an example-level pipeline on data with heavy users needs either an enormous <span class="math inline">\(\varepsilon\)</span> or a cap.</p>
+<p><strong>Changing the unit wins.</strong> User-level DP-SGD is the best strategy at every budget, 0.9347 at <span class="math inline">\(\varepsilon = 4\)</span> against 0.9612 for the non-private model. It needs a little less noise than the cap of 2 (<a href="#tbl-ulvl-sigma" class="quarto-xref">Table&nbsp;<span>44.3</span></a>) and, unlike the cap, it uses every record, through the per-user average. Its advantage is largest at small budgets: 9.8 points at <span class="math inline">\(\varepsilon = 1\)</span>, 1.1 points at <span class="math inline">\(\varepsilon = 8\)</span>. Its cost is compute: each step processes all the records of about 100 users, about 1,000 records, ten times what the example-level strategies process.</p>
 <p><strong>Bounding is the fallback.</strong> Strategy (c) keeps the example-level pipeline and loses 5 to 10 points against (b) below <span class="math inline">\(\varepsilon = 8\)</span>. It comes close at <span class="math inline">\(\varepsilon = 8\)</span>, where the noise is small enough that the discarded data, not the noise, limits accuracy.</p>
-<p>These findings agree with published comparisons on language models, which use different data, models and accountants. Chua et al.&nbsp;(2024) compare contribution bounding with group-privacy accounting (“Group Privacy”) against user-level DP-SGD with per-user averaging (“User-wise DP-SGD”) for fine-tuning, and report that user-wise DP-SGD generally does better, especially at small budgets. Charles et al.&nbsp;(2024), who call the two sampling schemes example-level and user-level sampling, report that user-level sampling usually does better when each user’s data are varied and when strong privacy is required, and that example-level sampling sometimes wins. Note that Chua et al.&nbsp;account for the cap with the generic group privacy of <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>42.1</span></a>; the direct accountant of <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 42.4</span></a> would give them less noise.</p>
+<p>These findings agree with published comparisons on language models, which use different data, models and accountants. Chua et al.&nbsp;(2024) compare contribution bounding with group-privacy accounting (“Group Privacy”) against user-level DP-SGD with per-user averaging (“User-wise DP-SGD”) for fine-tuning, and report that user-wise DP-SGD generally does better, especially at small budgets. Charles et al.&nbsp;(2024), who call the two sampling schemes example-level and user-level sampling, report that user-level sampling usually does better when each user’s data are varied and when strong privacy is required, and that example-level sampling sometimes wins. Note that Chua et al.&nbsp;account for the cap with the generic group privacy of <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>44.1</span></a>; the direct accountant of <a href="#sec-ulvl-group-sgd" class="quarto-xref"><span>Section 44.4</span></a> would give them less noise.</p>
 <div id="fig-ulvl-strategies" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-ulvl-strategies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <img src="figures/ulvl_strategies.svg" class="img-fluid figure-img">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ulvl-strategies-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;42.3: Test accuracy of the running example against the user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, for the three strategies (1,000 steps, expected batch 100, one run each; the runs differ from <a href="#tbl-ulvl-run" class="quarto-xref">Table&nbsp;<span>42.5</span></a> in their random seeds). User-level DP-SGD is best at every budget; example-level DP-SGD on all records, accounted for its heaviest user, stays near chance.
+Figure&nbsp;44.3: Test accuracy of the running example against the user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, for the three strategies (1,000 steps, expected batch 100, one run each; the runs differ from <a href="#tbl-ulvl-run" class="quarto-xref">Table&nbsp;<span>44.5</span></a> in their random seeds). User-level DP-SGD is best at every budget; example-level DP-SGD on all records, accounted for its heaviest user, stays near chance.
 </figcaption>
 </figure>
 </div>
 </section>
-<section id="example-what-the-user-level-guarantee-costs" class="level3" data-number="42.8.5">
-<h3 data-number="42.8.5" class="anchored" data-anchor-id="example-what-the-user-level-guarantee-costs"><span class="header-section-number">42.8.5</span> Example: what the user-level guarantee costs</h3>
-<p>At <span class="math inline">\(\varepsilon = 4\)</span> the running example loses 2.7 points to protect users (0.9347 against 0.9612). The record-level model of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> at the same <span class="math inline">\(\varepsilon\)</span>, trained for 10,000 steps, reached 0.9548, and this chapter’s 1,000-step schedule would need only <span class="math inline">\(\sigma = 0.778\)</span> for a record-level guarantee (<a href="#tbl-ulvl-sigma" class="quarto-xref">Table&nbsp;<span>42.3</span></a>). The difference is the price of the unit: 1,000 people instead of 10,000 records, and a guarantee that now covers the person with 348 records as well as the one with a single record.</p>
+<section id="example-what-the-user-level-guarantee-costs" class="level3" data-number="44.8.5">
+<h3 data-number="44.8.5" class="anchored" data-anchor-id="example-what-the-user-level-guarantee-costs"><span class="header-section-number">44.8.5</span> Example: what the user-level guarantee costs</h3>
+<p>At <span class="math inline">\(\varepsilon = 4\)</span> the running example loses 2.7 points to protect users (0.9347 against 0.9612). The record-level model of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> at the same <span class="math inline">\(\varepsilon\)</span>, trained for 10,000 steps, reached 0.9548, and this chapter’s 1,000-step schedule would need only <span class="math inline">\(\sigma = 0.778\)</span> for a record-level guarantee (<a href="#tbl-ulvl-sigma" class="quarto-xref">Table&nbsp;<span>44.3</span></a>). The difference is the price of the unit: 1,000 people instead of 10,000 records, and a guarantee that now covers the person with 348 records as well as the one with a single record.</p>
 </section>
-<section id="check-yourself-5" class="level3" data-number="42.8.6">
-<h3 data-number="42.8.6" class="anchored" data-anchor-id="check-yourself-5"><span class="header-section-number">42.8.6</span> Check yourself</h3>
+<section id="check-yourself-5" class="level3" data-number="44.8.6">
+<h3 data-number="44.8.6" class="anchored" data-anchor-id="check-yourself-5"><span class="header-section-number">44.8.6</span> Check yourself</h3>
 <ul>
 <li>Strategy (a) uses every record and the tightest available accountant. Why does it do worst? <em>(Because the guarantee must hold for the heaviest user, whose 348 records put about 3.5 of them into every batch; the noise has to hide a shift of several clipping norms in almost every step, which takes <span class="math inline">\(\sigma\)</span> in the hundreds.)</em></li>
 <li>Would strategy (a) look better if the heaviest user were removed from the data? <em>(Only a little: the accountant would be for the next-largest user, who has 258 records, so about 2.6 of them would still be in every batch. Removing a user because of their size is itself a data-dependent choice that must be made with public information or paid for, and it is a crude form of contribution bounding.)</em></li>
 </ul>
 </section>
 </section>
-<section id="code-check-every-number-by-computation" class="level2" data-number="42.9">
-<h2 data-number="42.9" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">42.9</span> Code: check every number by computation</h2>
-<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/user_level.py">code/user_level.py</a> builds the user population, implements the user accountant of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>42.6</span></a> by numerical integration and checks it against <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>42.7</span></a> and <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>42.2</span></a>, compares it with group privacy, and trains the three strategies with the part’s network. It imports the model, DP-SGD and the record-level accountant from <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a>. From the repository root:</p>
+<section id="code-check-every-number-by-computation" class="level2" data-number="44.9">
+<h2 data-number="44.9" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">44.9</span> Code: check every number by computation</h2>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/user_level.py">code/user_level.py</a> builds the user population, implements the user accountant of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>44.6</span></a> by numerical integration and checks it against <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>44.7</span></a> and <a href="#eq-ulvl-binomial" class="quarto-xref">Equation&nbsp;<span>44.2</span></a>, compares it with group privacy, and trains the three strategies with the part’s network. It imports the model, DP-SGD and the record-level accountant from <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/dp_sgd.py">code/dp_sgd.py</a>. From the repository root:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/user_level.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>It takes about a minute and a half, most of it spent in user-level DP-SGD, which processes about 1,000 records per step, and in finding the noise multiplier for the user with 348 records.</p>
-<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-ulvl-code" class="quarto-xref">Table&nbsp;<span>42.6</span></a>:</p>
+<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-ulvl-code" class="quarto-xref">Table&nbsp;<span>44.6</span></a>:</p>
 <div id="tbl-ulvl-code" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;42.6: The script’s output with the default seed.
+Table&nbsp;44.6: The script’s output with the default seed.
 </figcaption>
 <div aria-describedby="tbl-ulvl-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1268,7 +1370,7 @@ Table&nbsp;42.6: The script’s output with the default seed.
 </tr>
 <tr class="even">
 <td>Accountant checks</td>
-<td><span class="math inline">\(k = 1\)</span> matches the subsampled Gaussian; integral matches <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>42.7</span></a> to seven digits</td>
+<td><span class="math inline">\(k = 1\)</span> matches the subsampled Gaussian; integral matches <a href="#eq-ulvl-pair" class="quarto-xref">Equation&nbsp;<span>44.7</span></a> to seven digits</td>
 </tr>
 <tr class="odd">
 <td>Running example, user with <span class="math inline">\(k\)</span> records</td>
@@ -1298,11 +1400,11 @@ Table&nbsp;42.6: The script’s output with the default seed.
 <p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_user_level.py">tests/test_user_level.py</a> checks that the output still matches.</p>
 <p><strong>What to take from it.</strong> The record-level accountant answers the wrong question when people contribute many records, and asking it the right question, about a user with <span class="math inline">\(k\)</span> records, gives answers that grow faster than <span class="math inline">\(k\)</span>. The fix is in the algorithm, not the accountant: make the person the unit that is sampled and clipped. Implementation needs only a per-user aggregation before clipping; the accountant is unchanged.</p>
 </section>
-<section id="references" class="level2" data-number="42.10">
-<h2 data-number="42.10" class="anchored" data-anchor-id="references"><span class="header-section-number">42.10</span> References</h2>
+<section id="references" class="level2" data-number="44.10">
+<h2 data-number="44.10" class="anchored" data-anchor-id="references"><span class="header-section-number">44.10</span> References</h2>
 <ul>
 <li>McMahan, Ramage, Talwar &amp; Zhang, “Learning Differentially Private Recurrent Language Models” (ICLR 2018). User-level DP-SGD in federated learning: sample users, clip each user’s update, add Gaussian noise, account with users as the unit.</li>
-<li>Charles, Ganesh, McKenna, McMahan, Mitchell, Pillutla &amp; Rush, “Fine-Tuning Large Language Models with User-Level Differential Privacy” (arXiv 2407.07737, 2024). The tight accountant for example-level sampling (their Theorem 3, the mixture of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>42.6</span></a>), and an empirical comparison of example-level and user-level sampling for language models.</li>
+<li>Charles, Ganesh, McKenna, McMahan, Mitchell, Pillutla &amp; Rush, “Fine-Tuning Large Language Models with User-Level Differential Privacy” (arXiv 2407.07737, 2024). The tight accountant for example-level sampling (their Theorem 3, the mixture of <a href="#eq-ulvl-mixture" class="quarto-xref">Equation&nbsp;<span>44.6</span></a>), and an empirical comparison of example-level and user-level sampling for language models.</li>
 <li>Chua, Ghazi, Huang, Kamath, Kumar, Liu, Manurangsi, Sinha &amp; Zhang, “Mind the Privacy Unit! User-Level Differential Privacy for Language Model Fine-Tuning” (Conference on Language Modeling 2024; arXiv 2406.14322). Contribution bounding with group privacy against user-wise DP-SGD, with record-selection rules and the choice of the cap.</li>
 <li>Amin, Kulesza, Muñoz Medina &amp; Vassilvitskii, “Bounding User Contributions: A Bias-Variance Trade-off in Differential Privacy” (ICML 2019). The cap on records per user as a bias–variance trade-off, and how the best cap depends on the distribution of user sizes.</li>
 <li>Levy, Sun, Amin, Kale, Kulesza, Mohri &amp; Suresh, “Learning with User-Level Privacy” (NeurIPS 2021). Theory of user-level private learning when each user holds several samples.</li>
@@ -1310,13 +1412,13 @@ Table&nbsp;42.6: The script’s output with the default seed.
 <li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (Foundations and Trends in Theoretical Computer Science, 2014). Group privacy for pure and approximate DP.</li>
 </ul>
 </section>
-<section id="cheat-sheet" class="level2" data-number="42.11">
-<h2 data-number="42.11" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">42.11</span> Cheat sheet</h2>
-<p><span class="math inline">\(U\)</span> users, user <span class="math inline">\(u\)</span> with <span class="math inline">\(n_u\)</span> records, cap <span class="math inline">\(k\)</span>, sampling rate <span class="math inline">\(q\)</span>, noise multiplier <span class="math inline">\(\sigma\)</span>, clipping norm <span class="math inline">\(C\)</span>, <span class="math inline">\(T\)</span> steps. <a href="#tbl-ulvl-cheat" class="quarto-xref">Table&nbsp;<span>42.7</span></a> collects the results.</p>
+<section id="cheat-sheet" class="level2" data-number="44.11">
+<h2 data-number="44.11" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">44.11</span> Cheat sheet</h2>
+<p><span class="math inline">\(U\)</span> users, user <span class="math inline">\(u\)</span> with <span class="math inline">\(n_u\)</span> records, cap <span class="math inline">\(k\)</span>, sampling rate <span class="math inline">\(q\)</span>, noise multiplier <span class="math inline">\(\sigma\)</span>, clipping norm <span class="math inline">\(C\)</span>, <span class="math inline">\(T\)</span> steps. <a href="#tbl-ulvl-cheat" class="quarto-xref">Table&nbsp;<span>44.7</span></a> collects the results.</p>
 <div id="tbl-ulvl-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;42.7: Every result of the chapter.
+Table&nbsp;44.7: Every result of the chapter.
 </figcaption>
 <div aria-describedby="tbl-ulvl-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1801,12 +1903,12 @@ Table&nbsp;42.7: Every result of the chapter.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/06-public-data.html" class="pagination-link" aria-label="Public data and private fine-tuning">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/08-disparate-impact.html" class="pagination-link" aria-label="Disparate impact">
-        <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

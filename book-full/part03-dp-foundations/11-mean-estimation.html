@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>28&nbsp; Private mean estimation – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part04-privacy-accounting/00-introduction.html" rel="next">
+<link href="../part03-dp-foundations/10-lower-bounds.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/11-mean-estimation.html"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/01-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">How much noise to add</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/02-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Composing private releases</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/03-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/04-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">What ε means, and converting between definitions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/05-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Sums, limits and counting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/06-tails-tests-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Tail bounds, tests and divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/07-optimization-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Optimization and estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/08-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Random matrices and factorizations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/09-cryptography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/10-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/11-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">K</span>&nbsp; <span class="chapter-title">Composition of trade-off functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/12-amplification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">L</span>&nbsp; <span class="chapter-title">Subsampling, shuffling and iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/13-private-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">M</span>&nbsp; <span class="chapter-title">Private learning and tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/14-auditing-adaptivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">N</span>&nbsp; <span class="chapter-title">Auditing, reconstruction and adaptive analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">P</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">28.1</span> Why this matters</a></li>
+  <li><a href="#toolkit-five-facts-every-derivation-uses" id="toc-toolkit-five-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-five-facts-every-derivation-uses"><span class="header-section-number">28.2</span> Toolkit: five facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-the-error-splits-into-sampling-bias-and-noise" id="toc-fact-1-the-error-splits-into-sampling-bias-and-noise" class="nav-link" data-scroll-target="#fact-1-the-error-splits-into-sampling-bias-and-noise"><span class="header-section-number">28.2.1</span> Fact 1 — The error splits into sampling, bias and noise</a></li>
+  <li><a href="#fact-2-a-clipped-mean-with-laplace-noise" id="toc-fact-2-a-clipped-mean-with-laplace-noise" class="nav-link" data-scroll-target="#fact-2-a-clipped-mean-with-laplace-noise"><span class="header-section-number">28.2.2</span> Fact 2 — A clipped mean with Laplace noise</a></li>
+  <li><a href="#fact-3-normal-draws-stay-close-to-their-mean" id="toc-fact-3-normal-draws-stay-close-to-their-mean" class="nav-link" data-scroll-target="#fact-3-normal-draws-stay-close-to-their-mean"><span class="header-section-number">28.2.3</span> Fact 3 — Normal draws stay close to their mean</a></li>
+  <li><a href="#fact-4-the-exponential-mechanism-rarely-picks-a-bad-candidate" id="toc-fact-4-the-exponential-mechanism-rarely-picks-a-bad-candidate" class="nav-link" data-scroll-target="#fact-4-the-exponential-mechanism-rarely-picks-a-bad-candidate"><span class="header-section-number">28.2.4</span> Fact 4 — The exponential mechanism rarely picks a bad candidate</a></li>
+  <li><a href="#fact-5-budgets-add-even-when-a-step-uses-an-earlier-output" id="toc-fact-5-budgets-add-even-when-a-step-uses-an-earlier-output" class="nav-link" data-scroll-target="#fact-5-budgets-add-even-when-a-step-uses-an-earlier-output"><span class="header-section-number">28.2.5</span> Fact 5 — Budgets add, even when a step uses an earlier output</a></li>
+  </ul></li>
+  <li><a href="#sec-mean-bounded" id="toc-sec-mean-bounded" class="nav-link" data-scroll-target="#sec-mean-bounded"><span class="header-section-number">28.3</span> Bounded data: privacy adds a lower-order term</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">28.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">28.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">28.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">28.3.4</span> Interpretation</a></li>
+  <li><a href="#example-a-survey-proportion" id="toc-example-a-survey-proportion" class="nav-link" data-scroll-target="#example-a-survey-proportion"><span class="header-section-number">28.3.5</span> Example: a survey proportion</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">28.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-mean-naive" id="toc-sec-mean-naive" class="nav-link" data-scroll-target="#sec-mean-naive"><span class="header-section-number">28.4</span> Gaussian data with a known range: the naive estimator</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">28.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">28.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">28.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">28.4.4</span> Interpretation</a></li>
+  <li><a href="#example-three-ranges" id="toc-example-three-ranges" class="nav-link" data-scroll-target="#example-three-ranges"><span class="header-section-number">28.4.5</span> Example: three ranges</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">28.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-mean-coarse" id="toc-sec-mean-coarse" class="nav-link" data-scroll-target="#sec-mean-coarse"><span class="header-section-number">28.5</span> Coarse then fine</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">28.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">28.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">28.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">28.5.4</span> Interpretation</a></li>
+  <li><a href="#example-three-ranges-again" id="toc-example-three-ranges-again" class="nav-link" data-scroll-target="#example-three-ranges-again"><span class="header-section-number">28.5.5</span> Example: three ranges again</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">28.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-mean-multi" id="toc-sec-mean-multi" class="nav-link" data-scroll-target="#sec-mean-multi"><span class="header-section-number">28.6</span> Many dimensions: shrinking balls</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">28.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">28.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">28.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">28.6.4</span> Interpretation</a></li>
+  <li><a href="#example-a-thousand-dimensions" id="toc-example-a-thousand-dimensions" class="nav-link" data-scroll-target="#example-a-thousand-dimensions"><span class="header-section-number">28.6.5</span> Example: a thousand dimensions</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">28.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-mean-heavy" id="toc-sec-mean-heavy" class="nav-link" data-scroll-target="#sec-mean-heavy"><span class="header-section-number">28.7</span> Heavy tails: clip into the data</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">28.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">28.7.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">28.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">28.7.4</span> Interpretation</a></li>
+  <li><a href="#example-pareto-records" id="toc-example-pareto-records" class="nav-link" data-scroll-target="#example-pareto-records"><span class="header-section-number">28.7.5</span> Example: Pareto records</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">28.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-every-number-by-computation" id="toc-code-check-every-number-by-computation" class="nav-link" data-scroll-target="#code-check-every-number-by-computation"><span class="header-section-number">28.8</span> Code: check every number by computation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">28.9</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">28.10</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/11-mean-estimation.html"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="28.1">
+<h2 data-number="28.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">28.1</span> Why this matters</h2>
+<p>The mean is the statistic that private machine learning computes most often. Every step of private gradient descent clips per-example gradients, averages them and adds noise, and a survey that reports the share of people with some property releases a mean of 0/1 answers. Earlier chapters released the mean of the dataset in hand. An analyst usually wants something else: the mean of the <strong>population</strong> the data were drawn from. This chapter asks: <strong>how many records does a private estimate of a population mean need, and what does each thing you do not know about the data cost?</strong></p>
+<p>Two guarantees with different shapes meet here. Privacy must hold for <em>every</em> dataset, including ones that your assumptions say cannot happen, because a guarantee that fails when an assumption fails protects nobody. Accuracy, on the other hand, is a statement about data drawn from a distribution, such as “the records are normal with variance 1”. So an assumption about the data may make a mechanism more accurate, but it may never enter the privacy proof. Every mechanism below respects that split: it clips the data to a range, which makes it private whatever the data are, and the assumption only says how often the clipping changes nothing.</p>
+<p>The organizing idea of the chapter is this:</p>
+<blockquote class="blockquote">
+<p><strong>Spend a small part of the budget to learn where the data are, then clip there and spend the rest on the mean.</strong></p>
+</blockquote>
+<p>The noise of a clipped mean is proportional to the width of the clipping range. If you clip to a range set by your prior ignorance, the noise pays for that ignorance in full. If you first find the data privately, which costs a number of records that grows only like the logarithm of the range, the final step can clip to a narrow window and add little noise. The same idea, with more work, handles many dimensions and heavy tails.</p>
+<p><a href="#tbl-mean-uses" class="quarto-xref">Table&nbsp;<span>28.1</span></a> lists the results and where each is used.</p>
+<div id="tbl-mean-uses" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mean-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;28.1: The results of this chapter, what each gives you, and where it is used. Here <span class="math inline">\(\alpha\)</span> is the target error, <span class="math inline">\(\varepsilon\)</span> the privacy parameter, <span class="math inline">\(R\)</span> a bound on how far the mean can be from 0 and <span class="math inline">\(d\)</span> the dimension.
+</figcaption>
+<div aria-describedby="tbl-mean-uses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>What it gives you</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bounded data</td>
+<td>Privacy adds about <span class="math inline">\(1/(\alpha\varepsilon)\)</span> records to the <span class="math inline">\(1/\alpha^2\)</span> that sampling needs</td>
+<td>Proportions, surveys, clipped sums</td>
+</tr>
+<tr class="even">
+<td>The naive estimator</td>
+<td>Clipping to a known range costs records in proportion to the range</td>
+<td>The baseline everything below improves on</td>
+</tr>
+<tr class="odd">
+<td>Coarse then fine</td>
+<td>The range costs only about <span class="math inline">\(\ln R/\varepsilon\)</span> records</td>
+<td>Means with unknown location; choosing clip bounds privately</td>
+</tr>
+<tr class="even">
+<td>Shrinking balls</td>
+<td>In <span class="math inline">\(d\)</span> dimensions, about <span class="math inline">\(d/(\alpha\varepsilon)\)</span> records for privacy, plus <span class="math inline">\(\sqrt d\ln R/\varepsilon\)</span> for the range</td>
+<td>Private averages of vectors, such as gradients</td>
+</tr>
+<tr class="odd">
+<td>Heavy tails</td>
+<td>Clipping into the data, with a bias, costs about <span class="math inline">\(1/(\alpha^2\varepsilon)\)</span> records</td>
+<td>Incomes, session lengths, gradient norms</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Conventions.</strong> Datasets have a fixed size <span class="math inline">\(n\)</span>, and two datasets are <strong>neighbours</strong> when they differ in one replaced record, as in <a href="../part03-dp-foundations/07-sensitivity.html">Beyond global sensitivity</a>. The records, written <span class="math inline">\(X_1, \dots, X_n\)</span>, are drawn independently from a distribution whose mean <span class="math inline">\(\mu\)</span> is the target of the estimate. An estimate <span class="math inline">\(\hat\mu\)</span> is judged by its <strong>root-mean-square error</strong> (RMSE), the square root of the average of <span class="math inline">\((\hat\mu - \mu)^2\)</span> over the data and the mechanism’s noise.</p>
+<p>Recall what differential privacy (DP) asks of a randomized mechanism <span class="math inline">\(M\)</span>. Take any two neighbouring datasets <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> and any set <span class="math inline">\(S\)</span> of outputs. With a privacy parameter <span class="math inline">\(\varepsilon\)</span> and a small slack <span class="math inline">\(\delta\)</span>, the mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if <span id="eq-auto-11meanestimation-1"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta, \tag{28.1}\]</span></span> and it is <strong>pure</strong> <span class="math inline">\(\varepsilon\)</span>-DP when <span class="math inline">\(\delta = 0\)</span> (<a href="../part03-dp-foundations/01-definition.html">The definition of differential privacy</a>).</p>
+</section>
+<section id="toolkit-five-facts-every-derivation-uses" class="level2" data-number="28.2">
+<h2 data-number="28.2" class="anchored" data-anchor-id="toolkit-five-facts-every-derivation-uses"><span class="header-section-number">28.2</span> Toolkit: five facts every derivation uses</h2>
+<section id="fact-1-the-error-splits-into-sampling-bias-and-noise" class="level3" data-number="28.2.1">
+<h3 data-number="28.2.1" class="anchored" data-anchor-id="fact-1-the-error-splits-into-sampling-bias-and-noise"><span class="header-section-number">28.2.1</span> Fact 1 — The error splits into sampling, bias and noise</h3>
+<p>Every estimator in this chapter has the same form: clip each record with some function <span class="math inline">\(c\)</span>, average, and add independent noise <span class="math inline">\(\eta\)</span> with mean 0. Its error splits into three parts, each with its own cause. The average of the clipped records varies from sample to sample, clipping shifts its expected value away from <span class="math inline">\(\mu\)</span>, and the noise adds its own spread. The mean squared error is the sum of the three squares: <span id="eq-mean-split"><span class="math display">\[\mathbb E\big[(\hat\mu - \mu)^2\big] = \underbrace{\frac{\operatorname{Var}(c(X))}{n}}_{\text{sampling}} + \underbrace{\big(\mathbb E[c(X)] - \mu\big)^2}_{\text{bias}^2} + \underbrace{\operatorname{Var}(\eta)}_{\text{noise}}. \tag{28.2}\]</span></span> To see it, write <span class="math inline">\(\hat\mu - \mu\)</span> as the sum of three pieces: the average of <span class="math inline">\(c(X_i) - \mathbb E[c(X)]\)</span>, the constant <span class="math inline">\(\mathbb E[c(X)] - \mu\)</span>, and <span class="math inline">\(\eta\)</span>. The first and the last have mean 0 and are independent of each other, so when you square the sum and average, every cross term contains a mean-zero factor and vanishes. The average of <span class="math inline">\(n\)</span> independent terms has variance <span class="math inline">\(1/n\)</span> times that of one term, which gives the sampling part. This is the decomposition of the clipping section of <a href="../part03-dp-foundations/07-sensitivity.html#sec-sens-clip">Beyond global sensitivity</a>.</p>
+</section>
+<section id="fact-2-a-clipped-mean-with-laplace-noise" class="level3" data-number="28.2.2">
+<h3 data-number="28.2.2" class="anchored" data-anchor-id="fact-2-a-clipped-mean-with-laplace-noise"><span class="header-section-number">28.2.2</span> Fact 2 — A clipped mean with Laplace noise</h3>
+<p>If every clipped record lies in an interval of width <span class="math inline">\(w\)</span>, then replacing one record moves the sum by at most <span class="math inline">\(w\)</span> and the mean by at most <span class="math inline">\(w/n\)</span>. That is the sensitivity of the mean, so by the <a href="../part03-dp-foundations/03-laplace-gaussian.html">Laplace mechanism</a> adding noise <span class="math inline">\(\mathrm{Lap}(w/(n\varepsilon))\)</span> makes it <span class="math inline">\(\varepsilon\)</span>-DP. A Laplace variable with scale <span class="math inline">\(s\)</span> has variance <span class="math inline">\(2s^2\)</span>, so the noise term of <a href="#eq-mean-split" class="quarto-xref">Equation&nbsp;<span>28.2</span></a> is <span id="eq-mean-laplace-noise"><span class="math display">\[\operatorname{Var}(\eta) = \frac{2w^2}{n^2\varepsilon^2}. \tag{28.3}\]</span></span> The privacy holds for every dataset, because the clipping, not an assumption, keeps the records in the interval. An interval chosen from the data must be chosen privately, as Fact 5 allows.</p>
+</section>
+<section id="fact-3-normal-draws-stay-close-to-their-mean" class="level3" data-number="28.2.3">
+<h3 data-number="28.2.3" class="anchored" data-anchor-id="fact-3-normal-draws-stay-close-to-their-mean"><span class="header-section-number">28.2.3</span> Fact 3 — Normal draws stay close to their mean</h3>
+<p>A standard normal variable <span class="math inline">\(Z\)</span> exceeds a threshold <span class="math inline">\(t\)</span> in absolute value with probability at most <span class="math inline">\(2e^{-t^2/2}\)</span>. This is the Chernoff bound on each of its two tails. <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a> proves a bound half as large, but the factor 2 changes <span class="math inline">\(\tau\)</span> below only slightly, so the chapter keeps the simpler form. Now take <span class="math inline">\(n\)</span> draws from a normal distribution with mean <span class="math inline">\(\mu\)</span> and variance 1, and allow a failure probability <span class="math inline">\(\beta\)</span>. The union bound adds the <span class="math inline">\(n\)</span> tail probabilities, so all <span class="math inline">\(n\)</span> draws lie within a distance <span class="math inline">\(\tau\)</span> of <span class="math inline">\(\mu\)</span> with probability at least <span class="math inline">\(1 - \beta\)</span> once <span class="math inline">\(2ne^{-\tau^2/2} = \beta\)</span>, that is, for <span id="eq-mean-spread"><span class="math display">\[\tau = \sqrt{2\ln(2n/\beta)}. \tag{28.4}\]</span></span> For <span class="math inline">\(n = 1000\)</span> and <span class="math inline">\(\beta = 0.05\)</span>, <span class="math inline">\(\tau = 4.604\)</span>. The bound is loose: in 20,000 simulated datasets the largest distance exceeded <span class="math inline">\(\tau\)</span> in a fraction 0.0039 of them, not 0.05. In <span class="math inline">\(d\)</span> dimensions the analogue is about the length of the vector <span class="math inline">\(X - \mu\)</span>, which concentrates near <span class="math inline">\(\sqrt d\)</span> rather than near 0. The section on many dimensions uses it.</p>
+</section>
+<section id="fact-4-the-exponential-mechanism-rarely-picks-a-bad-candidate" class="level3" data-number="28.2.4">
+<h3 data-number="28.2.4" class="anchored" data-anchor-id="fact-4-the-exponential-mechanism-rarely-picks-a-bad-candidate"><span class="header-section-number">28.2.4</span> Fact 4 — The exponential mechanism rarely picks a bad candidate</h3>
+<p>The <a href="../part03-dp-foundations/05-selection.html">exponential mechanism</a> picks one of <span class="math inline">\(m\)</span> candidates with probability proportional to <span class="math inline">\(e^{\varepsilon u/2}\)</span>, where <span class="math inline">\(u\)</span> is a score that one record changes by at most 1. It is <span class="math inline">\(\varepsilon\)</span>-DP. Suppose the best score is <span class="math inline">\(u^*\)</span>. A candidate whose score is at most <span class="math inline">\(u^* - g\)</span> has a weight at most <span class="math inline">\(e^{\varepsilon(u^* - g)/2}\)</span>, while the total weight is at least that of the best candidate, <span class="math inline">\(e^{\varepsilon u^*/2}\)</span>. Adding over at most <span class="math inline">\(m\)</span> such candidates, <span id="eq-mean-em-utility"><span class="math display">\[\Pr[\text{the chosen score is at most } u^* - g] \le m\,e^{-\varepsilon g/2}. \tag{28.5}\]</span></span></p>
+</section>
+<section id="fact-5-budgets-add-even-when-a-step-uses-an-earlier-output" class="level3" data-number="28.2.5">
+<h3 data-number="28.2.5" class="anchored" data-anchor-id="fact-5-budgets-add-even-when-a-step-uses-an-earlier-output"><span class="header-section-number">28.2.5</span> Fact 5 — Budgets add, even when a step uses an earlier output</h3>
+<p>If one step is <span class="math inline">\((\varepsilon_1, \delta_1)\)</span>-DP and a second step, which may use the first step’s output, is <span class="math inline">\((\varepsilon_2, \delta_2)\)</span>-DP for each value of that output, then together they are <span class="math inline">\((\varepsilon_1 + \varepsilon_2, \delta_1 + \delta_2)\)</span>-DP. This is basic composition, adaptive case (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). It is what allows a first step to choose the clipping range of a second.</p>
+</section>
+</section>
+<section id="sec-mean-bounded" class="level2" data-number="28.3">
+<h2 data-number="28.3" class="anchored" data-anchor-id="sec-mean-bounded"><span class="header-section-number">28.3</span> Bounded data: privacy adds a lower-order term</h2>
+<section id="context" class="level3" data-number="28.3.1">
+<h3 data-number="28.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">28.3.1</span> Context</h3>
+<p>Start where nothing is unknown except the mean. The records lie in a known interval, such as yes/no answers coded 0 and 1. How many more records does a private estimate need than a non-private one?</p>
+</section>
+<section id="statement" class="level3" data-number="28.3.2">
+<h3 data-number="28.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">28.3.2</span> Statement</h3>
+<p>Let the records lie in an interval of width <span class="math inline">\(w\)</span> and have variance <span class="math inline">\(\sigma^2\)</span>. Release their average plus <span class="math inline">\(\mathrm{Lap}(w/(n\varepsilon))\)</span>. This is <span class="math inline">\(\varepsilon\)</span>-DP, and its RMSE is <span id="eq-mean-bounded"><span class="math display">\[\mathrm{RMSE} = \sqrt{\frac{\sigma^2}{n} + \frac{2w^2}{n^2\varepsilon^2}}. \tag{28.6}\]</span></span> The RMSE is at most <span class="math inline">\(\alpha\)</span> once <span id="eq-mean-bounded-n"><span class="math display">\[n \ge \frac{\sigma^2 + \sqrt{\sigma^4 + 8w^2\alpha^2/\varepsilon^2}}{2\alpha^2}, \qquad\text{which is at most}\qquad \frac{\sigma^2}{\alpha^2} + \frac{\sqrt2\,w}{\alpha\varepsilon}. \tag{28.7}\]</span></span></p>
+</section>
+<section id="derivation" class="level3" data-number="28.3.3">
+<h3 data-number="28.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">28.3.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Privacy.</strong> No clipping is needed, since the records already lie in the interval, so Fact 2 applies with width <span class="math inline">\(w\)</span>.</li>
+<li><strong>Error.</strong> In <a href="#eq-mean-split" class="quarto-xref">Equation&nbsp;<span>28.2</span></a> the bias is 0, the sampling term is <span class="math inline">\(\sigma^2/n\)</span>, and the noise term is <span class="math inline">\(2w^2/(n\varepsilon)^2\)</span> by <a href="#eq-mean-laplace-noise" class="quarto-xref">Equation&nbsp;<span>28.3</span></a>. Their sum is the square of <a href="#eq-mean-bounded" class="quarto-xref">Equation&nbsp;<span>28.6</span></a>.</li>
+<li><strong>Solve for <span class="math inline">\(n\)</span>.</strong> Setting the square of <a href="#eq-mean-bounded" class="quarto-xref">Equation&nbsp;<span>28.6</span></a> equal to <span class="math inline">\(\alpha^2\)</span> and multiplying by <span class="math inline">\(n^2\)</span> gives the quadratic <span class="math inline">\(\alpha^2n^2 - \sigma^2n - 2w^2/\varepsilon^2 = 0\)</span>. Its positive root is the first form of <a href="#eq-mean-bounded-n" class="quarto-xref">Equation&nbsp;<span>28.7</span></a>.</li>
+<li><strong>The simpler bound.</strong> The square root of a sum is at most the sum of the square roots, so <span class="math inline">\(\sqrt{\sigma^4 + 8w^2\alpha^2/\varepsilon^2} \le \sigma^2 + 2\sqrt2\,w\alpha/\varepsilon\)</span>. Inserting this and dividing by <span class="math inline">\(2\alpha^2\)</span> gives the second form.</li>
+</ol>
+</section>
+<section id="interpretation" class="level3" data-number="28.3.4">
+<h3 data-number="28.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">28.3.4</span> Interpretation</h3>
+<p>The second form of <a href="#eq-mean-bounded-n" class="quarto-xref">Equation&nbsp;<span>28.7</span></a> reads as two costs added together. Sampling needs about <span class="math inline">\(\sigma^2/\alpha^2\)</span> records whatever you do. Privacy adds about <span class="math inline">\(w/(\alpha\varepsilon)\)</span> more. The ratio of the privacy term to the sampling term is <span class="math inline">\(\sqrt2\,w\alpha/(\varepsilon\sigma^2)\)</span>, so for a small target error <span class="math inline">\(\alpha\)</span> privacy costs a lower-order number of records. That is the best case, and it is what the rest of the chapter tries to recover when the data are not bounded.</p>
+</section>
+<section id="example-a-survey-proportion" class="level3" data-number="28.3.5">
+<h3 data-number="28.3.5" class="anchored" data-anchor-id="example-a-survey-proportion"><span class="header-section-number">28.3.5</span> Example: a survey proportion</h3>
+<p>Take yes/no answers, so <span class="math inline">\(w = 1\)</span>, and the worst case for sampling, a population that is half yes, so <span class="math inline">\(\sigma = 0.5\)</span>. At <span class="math inline">\(\varepsilon = 1\)</span>, the private RMSE is 0.0520 for 100 people against 0.0500 without privacy, 0.0159 against 0.0158 for 1,000, and 0.0050 for both at 10,000. To reach <span class="math inline">\(\alpha = 0.05\)</span> you need 108 people instead of 100, and to reach <span class="math inline">\(\alpha = 0.01\)</span> you need 2,508 instead of 2,500. Privacy costs eight people at a sample size where sampling already needs 2,500.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="28.3.6">
+<h3 data-number="28.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">28.3.6</span> Check yourself</h3>
+<ul>
+<li>If you halve <span class="math inline">\(\varepsilon\)</span>, which term of <a href="#eq-mean-bounded-n" class="quarto-xref">Equation&nbsp;<span>28.7</span></a> changes, and by how much? <em>(Only the privacy term, which doubles. The sampling term does not involve <span class="math inline">\(\varepsilon\)</span>.)</em></li>
+<li>Why does the privacy term grow with the width <span class="math inline">\(w\)</span> but not with the variance <span class="math inline">\(\sigma^2\)</span>? <em>(The noise is set by the worst-case change one record can make, which is the width, whatever the data look like. The variance only describes typical data, which enter the sampling term.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-mean-naive" class="level2" data-number="28.4">
+<h2 data-number="28.4" class="anchored" data-anchor-id="sec-mean-naive"><span class="header-section-number">28.4</span> Gaussian data with a known range: the naive estimator</h2>
+<section id="context-1" class="level3" data-number="28.4.1">
+<h3 data-number="28.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">28.4.1</span> Context</h3>
+<p>Now let the records be unbounded, but drawn from a normal distribution with unknown mean <span class="math inline">\(\mu\)</span> and variance 1, and suppose all you know about the mean is that <span class="math inline">\(|\mu| \le R\)</span>. The bound <span class="math inline">\(R\)</span> measures your ignorance. A height in centimetres might have <span class="math inline">\(R\)</span> of a few hundred, while a feature of a model you have never looked at might need <span class="math inline">\(R = 10^6\)</span>. The obvious estimator clips to the range where the data could possibly be.</p>
+</section>
+<section id="statement-1" class="level3" data-number="28.4.2">
+<h3 data-number="28.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">28.4.2</span> Statement</h3>
+<p>With <span class="math inline">\(\tau\)</span> from <a href="#eq-mean-spread" class="quarto-xref">Equation&nbsp;<span>28.4</span></a>, clip every record to <span class="math inline">\([-R - \tau, R + \tau]\)</span>, average, and add <span class="math inline">\(\mathrm{Lap}\big(2(R + \tau)/(n\varepsilon)\big)\)</span>. This is <span class="math inline">\(\varepsilon\)</span>-DP. With probability at least <span class="math inline">\(1 - \beta\)</span> the clipping changes no record. On that event the estimate is the plain average plus noise, and ignoring the rare event where it fails, the error has no bias and <span id="eq-mean-naive"><span class="math display">\[\mathrm{RMSE} = \sqrt{\frac1n + \frac{8(R + \tau)^2}{n^2\varepsilon^2}}. \tag{28.8}\]</span></span> The noise grows linearly in <span class="math inline">\(R\)</span>, so reaching an error <span class="math inline">\(\alpha\)</span> takes about <span class="math inline">\(1/\alpha^2 + R/(\alpha\varepsilon)\)</span> records.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="28.4.3">
+<h3 data-number="28.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">28.4.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Privacy.</strong> The clipping interval has width <span class="math inline">\(w = 2(R + \tau)\)</span>, so Fact 2 gives <span class="math inline">\(\varepsilon\)</span>-DP for every dataset.</li>
+<li><strong>Clipping changes nothing, usually.</strong> By Fact 3, with probability at least <span class="math inline">\(1 - \beta\)</span> every record lies within <span class="math inline">\(\tau\)</span> of <span class="math inline">\(\mu\)</span>. Since <span class="math inline">\(|\mu| \le R\)</span>, every record then lies in <span class="math inline">\([-R - \tau, R + \tau]\)</span>, where clipping leaves it alone.</li>
+<li><strong>Error.</strong> On that event the clipped average is the plain average, so <a href="#eq-mean-split" class="quarto-xref">Equation&nbsp;<span>28.2</span></a> has no bias, a sampling term <span class="math inline">\(1/n\)</span>, and the noise term <a href="#eq-mean-laplace-noise" class="quarto-xref">Equation&nbsp;<span>28.3</span></a> with <span class="math inline">\(w = 2(R + \tau)\)</span>. Their sum is <a href="#eq-mean-naive" class="quarto-xref">Equation&nbsp;<span>28.8</span></a>. The script also computes the exact error, without conditioning on the event, from the mean and variance of a clipped normal variable, and the two agree to the digits quoted.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="28.4.4">
+<h3 data-number="28.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">28.4.4</span> Interpretation</h3>
+<p>The estimator pays for <span class="math inline">\(R\)</span> in full. Doubling your uncertainty about where the data are doubles the noise, even though the data themselves have not changed. The <a href="../part03-dp-foundations/10-lower-bounds.html">lower-bounds chapter</a> shows that this is not the price of privacy. Its packing argument gives a lower bound of only <span class="math inline">\(\ln(R/\alpha)/\varepsilon\)</span> records, so a cleverer mechanism should pay logarithmically, not linearly, for the range.</p>
+</section>
+<section id="example-three-ranges" class="level3" data-number="28.4.5">
+<h3 data-number="28.4.5" class="anchored" data-anchor-id="example-three-ranges"><span class="header-section-number">28.4.5</span> Example: three ranges</h3>
+<p>Take <span class="math inline">\(n = 1000\)</span> records at <span class="math inline">\(\varepsilon = 1\)</span>, with <span class="math inline">\(\beta = 0.05\)</span> so that <span class="math inline">\(\tau = 4.604\)</span>, and put the true mean at <span class="math inline">\(\mu = R/2\)</span>. For <span class="math inline">\(R = 10\)</span>, the noise standard deviation is 0.0413 and the RMSE is 0.0520, against 0.0316 without privacy. The error grows with the range, to 2.8416 for <span class="math inline">\(R = 10^3\)</span> and to 2828.44 for <span class="math inline">\(R = 10^6\)</span>. That last estimate is useless, although the 1,000 records pin the mean down to within about 0.03.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="28.4.6">
+<h3 data-number="28.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">28.4.6</span> Check yourself</h3>
+<ul>
+<li>Why widen the interval by <span class="math inline">\(\tau\)</span> instead of clipping to <span class="math inline">\([-R, R]\)</span>? <em>(A mean near <span class="math inline">\(R\)</span> has half its records above <span class="math inline">\(R\)</span>. Clipping them would bias the estimate toward 0. The margin <span class="math inline">\(\tau\)</span> keeps every record unclipped with probability <span class="math inline">\(1 - \beta\)</span>.)</em></li>
+<li>Does the privacy of the estimator depend on the data being normal? <em>(No.&nbsp;The clipping bounds the sensitivity for every dataset. Normality is used only to show that the clipping usually changes nothing.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-mean-coarse" class="level2" data-number="28.5">
+<h2 data-number="28.5" class="anchored" data-anchor-id="sec-mean-coarse"><span class="header-section-number">28.5</span> Coarse then fine</h2>
+<section id="context-2" class="level3" data-number="28.5.1">
+<h3 data-number="28.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">28.5.1</span> Context</h3>
+<p>The naive estimator wastes its noise on the empty parts of <span class="math inline">\([-R, R]\)</span>. Karwa &amp; Vadhan (2018) split the work in two. A <strong>coarse step</strong> spends a small part of the budget to find, privately, a short interval that holds the data. A <strong>fine step</strong> then clips to that interval and spends the rest of the budget on the mean. The coarse step is a selection problem among about <span class="math inline">\(R\)</span> candidate intervals, and selection costs only the logarithm of the number of candidates.</p>
+</section>
+<section id="statement-2" class="level3" data-number="28.5.2">
+<h3 data-number="28.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">28.5.2</span> Statement</h3>
+<p>Cut <span class="math inline">\([-R - b, R + b]\)</span> into <span class="math inline">\(m = \lceil 2(R + b)/b\rceil\)</span> bins of width <span class="math inline">\(b = 2\tau\)</span>, where <span class="math inline">\(\lceil\cdot\rceil\)</span> rounds up. Split the budget as <span class="math inline">\(\varepsilon = \varepsilon_1 + \varepsilon_2\)</span>.</p>
+<ol type="1">
+<li><strong>Coarse step.</strong> Choose a bin <span class="math inline">\(J\)</span> with the exponential mechanism at <span class="math inline">\(\varepsilon_1\)</span>, with the number of records in the bin as its score.</li>
+<li><strong>Fine step.</strong> Clip every record to the <strong>window</strong> made of bin <span class="math inline">\(J\)</span> and its two neighbours, an interval of width <span class="math inline">\(3b\)</span>. Average, and add <span class="math inline">\(\mathrm{Lap}(3b/(n\varepsilon_2))\)</span>.</li>
+</ol>
+<p>The mechanism is <span class="math inline">\(\varepsilon\)</span>-DP. With probability at least <span class="math inline">\(1 - \beta - m e^{-\varepsilon_1 n/4}\)</span>, no record is clipped. On that event the estimate is the plain average plus noise, and ignoring the rare event where it fails, <span id="eq-mean-coarse"><span class="math display">\[\mathrm{RMSE} = \sqrt{\frac1n + \frac{18b^2}{n^2\varepsilon_2^2}}, \tag{28.9}\]</span></span> which does not depend on <span class="math inline">\(R\)</span>. The coarse step fails with probability at most <span class="math inline">\(\beta\)</span> once <span id="eq-mean-coarse-n"><span class="math display">\[n \ge \frac{4\ln(m/\beta)}{\varepsilon_1}. \tag{28.10}\]</span></span> In total, an error <span class="math inline">\(\alpha\)</span> needs about <span class="math inline">\(1/\alpha^2 + 1/(\alpha\varepsilon) + \ln R/\varepsilon\)</span> records, up to factors of <span class="math inline">\(\sqrt{\ln n}\)</span> hidden in <span class="math inline">\(b\)</span>.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="28.5.3">
+<h3 data-number="28.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">28.5.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Privacy.</strong> Replacing one record takes it out of one bin and puts it into another, so every count changes by at most 1. The coarse step is then the exponential mechanism with a score of sensitivity 1, which is <span class="math inline">\(\varepsilon_1\)</span>-DP. For each value of <span class="math inline">\(J\)</span>, the fine step is a clipped mean over a window of width <span class="math inline">\(3b\)</span>, which is <span class="math inline">\(\varepsilon_2\)</span>-DP by Fact 2. By Fact 5 the two steps together are <span class="math inline">\(\varepsilon\)</span>-DP. The window depends on the data only through <span class="math inline">\(J\)</span>, which was chosen privately, so no leak of the kind seen in <a href="../part03-dp-foundations/07-sensitivity.html">Beyond global sensitivity</a> arises.</li>
+<li><strong>The data fill at most two bins.</strong> By Fact 3, with probability at least <span class="math inline">\(1 - \beta\)</span> every record lies within <span class="math inline">\(\tau = b/2\)</span> of <span class="math inline">\(\mu\)</span>. Then the records span an interval of length at most <span class="math inline">\(b\)</span>, which meets at most two neighbouring bins. So the fullest bin holds at least <span class="math inline">\(n/2\)</span> records, and every other bin except one is empty.</li>
+<li><strong>The coarse step picks a non-empty bin.</strong> An empty bin has score 0, at least <span class="math inline">\(n/2\)</span> below the best. Fact 4 with <span class="math inline">\(g = n/2\)</span> bounds the chance of picking one by <span class="math inline">\(m e^{-\varepsilon_1 n/4}\)</span>. Setting this equal to <span class="math inline">\(\beta\)</span> and solving for <span class="math inline">\(n\)</span> gives <a href="#eq-mean-coarse-n" class="quarto-xref">Equation&nbsp;<span>28.10</span></a>.</li>
+<li><strong>The window holds every record.</strong> A non-empty bin <span class="math inline">\(J\)</span> contains a record within <span class="math inline">\(b/2\)</span> of <span class="math inline">\(\mu\)</span>, so <span class="math inline">\(\mu\)</span> lies within <span class="math inline">\(b/2\)</span> of the bin. Every record lies within <span class="math inline">\(b/2\)</span> of <span class="math inline">\(\mu\)</span>, hence within <span class="math inline">\(b\)</span> of the bin, which is inside the window.</li>
+<li><strong>Error.</strong> On the events of steps 2 and 3, the fine step clips nothing, so <a href="#eq-mean-split" class="quarto-xref">Equation&nbsp;<span>28.2</span></a> has no bias, a sampling term <span class="math inline">\(1/n\)</span>, and the noise term <a href="#eq-mean-laplace-noise" class="quarto-xref">Equation&nbsp;<span>28.3</span></a> with <span class="math inline">\(w = 3b\)</span> and <span class="math inline">\(\varepsilon_2\)</span>. That is <a href="#eq-mean-coarse" class="quarto-xref">Equation&nbsp;<span>28.9</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-2" class="level3" data-number="28.5.4">
+<h3 data-number="28.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">28.5.4</span> Interpretation</h3>
+<p>The range <span class="math inline">\(R\)</span> now enters only through the number of bins <span class="math inline">\(m\)</span>, and only inside a logarithm in <a href="#eq-mean-coarse-n" class="quarto-xref">Equation&nbsp;<span>28.10</span></a>. The packing bound <a href="10-lower-bounds.html#eq-lower-mean-packing" class="quarto-xref">Equation&nbsp;<span>27.11</span></a> of <a href="../part03-dp-foundations/10-lower-bounds.html">the lower-bounds chapter</a> says a pure-DP mechanism must pay that logarithm, so the coarse step is optimal up to constants. The fine step pays for a window of width <span class="math inline">\(3b = 6\sqrt{2\ln(2n/\beta)}\)</span>, a few standard deviations, which is where the <span class="math inline">\(\ln n\)</span> factors come from.</p>
+<p>The split has a cost when you already know a lot. The fine step gets only <span class="math inline">\(\varepsilon_2\)</span> and clips to a window wider than the spread of the data, so for small <span class="math inline">\(R\)</span> the naive estimator wins. With <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span> and a quarter of the budget for the coarse step, the crossover is at <span class="math inline">\(R = 13.81\)</span> (<a href="#fig-mean-range" class="quarto-xref">Figure&nbsp;<span>28.2</span></a>). The quarter is a simple default rather than the best split, and <a href="../../book-exercises/part03-dp-foundations/11-mean-estimation.html#sec-sol-mean-2">Exercise 2</a> sizes the coarse budget from <a href="#eq-mean-coarse-n" class="quarto-xref">Equation&nbsp;<span>28.10</span></a> instead.</p>
+<p>Under approximate DP the range can go altogether. The <a href="../part03-dp-foundations/07-sensitivity.html#sec-sens-stable">stability-based release</a> reports the fullest bin exactly, with high probability, once it leads the others by about <span class="math inline">\(2\ln(1/\delta)/\varepsilon\)</span> records, whatever the number of bins. Its test is noisy, so a smaller lead gives a refusal rather than a wrong bin. Karwa &amp; Vadhan use a stability-based histogram of this kind, so their <span class="math inline">\((\varepsilon, \delta)\)</span>-DP coarse step needs a number of records of order <span class="math inline">\(\ln(1/\delta)/\varepsilon\)</span> and works even with no bound <span class="math inline">\(R\)</span> at all. (<a href="../appendix-derivations/10-mechanisms.html#sec-apx-mech-histogram" class="quarto-xref"><span>Section J.3</span></a> in the appendices proves the histogram’s guarantee for added or removed records. Under this chapter’s replaced records, two bins change, so the histogram is run at <span class="math inline">\(\varepsilon/2\)</span> and <span class="math inline">\(\delta/2\)</span>, which changes only the constant.) That matches the packing bound under approximate DP, <a href="10-lower-bounds.html#eq-lower-packing-approx" class="quarto-xref">Equation&nbsp;<span>27.10</span></a>.</p>
+<p>The same trick handles an unknown variance. Differences of pairs of records, <span class="math inline">\(X_2 - X_1\)</span> and so on, have mean 0 and a spread set by the variance alone. Put the sizes <span class="math inline">\(|X_2 - X_1|, |X_4 - X_3|, \dots\)</span> into bins whose edges double, from <span class="math inline">\([1, 2)\)</span> to <span class="math inline">\([2, 4)\)</span> and so on, scaled to the possible range of the standard deviation <span class="math inline">\(\sigma\)</span>. Most sizes fall within a factor of a few of <span class="math inline">\(\sigma\)</span>, so the fullest bins locate <span class="math inline">\(\sigma\)</span> within a constant factor. With <span class="math inline">\(\sigma\)</span> known to lie between <span class="math inline">\(\sigma_{\min}\)</span> and <span class="math inline">\(\sigma_{\max}\)</span> there are about <span class="math inline">\(\log_2(\sigma_{\max}/\sigma_{\min})\)</span> bins, and choosing a full one with the exponential mechanism costs, as in Fact 4, records of order the logarithm of that number divided by <span class="math inline">\(\varepsilon\)</span> (Karwa &amp; Vadhan 2018 give the details).</p>
+</section>
+<section id="example-three-ranges-again" class="level3" data-number="28.5.5">
+<h3 data-number="28.5.5" class="anchored" data-anchor-id="example-three-ranges-again"><span class="header-section-number">28.5.5</span> Example: three ranges again</h3>
+<p>Take <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\beta = 0.05\)</span> again, with <span class="math inline">\(\varepsilon_1 = 0.25\)</span> and <span class="math inline">\(\varepsilon_2 = 0.75\)</span>. The bins have width <span class="math inline">\(b = 9.207\)</span> and the window <span class="math inline">\(27.62\)</span>. <a href="#tbl-mean-coarse" class="quarto-xref">Table&nbsp;<span>28.2</span></a> compares the two estimators. The fine step’s noise has standard deviation 0.0521 and the RMSE is 0.0609 for every <span class="math inline">\(R\)</span>, while the naive estimator’s error grows with <span class="math inline">\(R\)</span>. The number of records the coarse step needs, by <a href="#eq-mean-coarse-n" class="quarto-xref">Equation&nbsp;<span>28.10</span></a>, grows from 74 to 245 as <span class="math inline">\(R\)</span> grows by a factor of <span class="math inline">\(10^5\)</span>. The bound on its failure probability is below <span class="math inline">\(10^{-21}\)</span> in all three cases, because 1,000 records is far more than it needs.</p>
+<div id="tbl-mean-coarse" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mean-coarse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;28.2: The naive and coarse-then-fine estimators of a normal mean, <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\beta = 0.05\)</span>, a quarter of the budget for the coarse step: the formulas <a href="#eq-mean-naive" class="quarto-xref">Equation&nbsp;<span>28.8</span></a> and <a href="#eq-mean-coarse" class="quarto-xref">Equation&nbsp;<span>28.9</span></a>, and simulations with 4,000 repetitions, whose own error is about 2%.
+</figcaption>
+<div aria-describedby="tbl-mean-coarse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Range <span class="math inline">\(R\)</span></th>
+<th>Bins <span class="math inline">\(m\)</span></th>
+<th>Coarse step needs <span class="math inline">\(n \ge\)</span></th>
+<th>Naive RMSE</th>
+<th>Coarse then fine: RMSE</th>
+<th>Simulated, naive</th>
+<th>Simulated, coarse then fine</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>5</td>
+<td>74</td>
+<td>0.0520</td>
+<td>0.0609</td>
+<td>0.0517</td>
+<td>0.0588</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(10^3\)</span></td>
+<td>220</td>
+<td>135</td>
+<td>2.8416</td>
+<td>0.0609</td>
+<td>2.7615</td>
+<td>0.0606</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(10^6\)</span></td>
+<td>217,223</td>
+<td>245</td>
+<td>2828.44</td>
+<td>0.0609</td>
+<td>2803.08</td>
+<td>0.0596</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="#fig-mean-coarse" class="quarto-xref">Figure&nbsp;<span>28.1</span></a> shows the coarse step on one dataset with <span class="math inline">\(R = 100\)</span> and <span class="math inline">\(\mu = 37\)</span>, which has 24 bins. On the script’s own draw of such a dataset, 876 and 124 records fall into the two non-empty bins. The exponential mechanism picks the fuller one with a probability that prints as 1 to twelve digits, and any given empty bin with probability about <span class="math inline">\(2.8\times10^{-48}\)</span>.</p>
+<div id="fig-mean-coarse" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mean-coarse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/mean_coarse.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mean-coarse-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.1: Top: the coarse histogram of 1,000 normal records with mean 37, in 24 bins of width 9.2 covering a range with <span class="math inline">\(R = 100\)</span> (a fresh draw). Bottom: the probability that the exponential mechanism with <span class="math inline">\(\varepsilon_1 = 0.25\)</span> picks each bin, on a log scale.
+</figcaption>
+</figure>
+</div>
+<div id="fig-mean-range" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mean-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/mean_range.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mean-range-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.2: Root-mean-square error of the naive estimator and of coarse then fine, against the bound <span class="math inline">\(R\)</span> on the mean, for <span class="math inline">\(n = 1000\)</span> normal records and <span class="math inline">\(\varepsilon = 1\)</span>. The dots are simulations of coarse then fine; the dotted line is the non-private error <span class="math inline">\(1/\sqrt n\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-2" class="level3" data-number="28.5.6">
+<h3 data-number="28.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">28.5.6</span> Check yourself</h3>
+<ul>
+<li>Why is the bin width <span class="math inline">\(2\tau\)</span> and not, say, <span class="math inline">\(\tau/10\)</span>? <em>(The proof needs the data to fill at most two bins, so that the fullest bin holds at least half the records. Narrower bins split the data over many bins, and the lead of the best bin over an empty one shrinks.)</em></li>
+<li>The window has width <span class="math inline">\(3b\)</span>. Why not clip to bin <span class="math inline">\(J\)</span> alone? <em>(The data can straddle two bins, and <span class="math inline">\(J\)</span> may be the less full one. Adding a neighbour on each side guarantees that every record is inside, by step 4.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-mean-multi" class="level2" data-number="28.6">
+<h2 data-number="28.6" class="anchored" data-anchor-id="sec-mean-multi"><span class="header-section-number">28.6</span> Many dimensions: shrinking balls</h2>
+<section id="context-3" class="level3" data-number="28.6.1">
+<h3 data-number="28.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">28.6.1</span> Context</h3>
+<p>Now each record is a vector in <span class="math inline">\(d\)</span> dimensions, drawn from a normal distribution with mean <span class="math inline">\(\mu\)</span> and identity covariance, and all you know is that the length of <span class="math inline">\(\mu\)</span>, <span class="math inline">\(\|\mu\|\)</span>, is at most <span class="math inline">\(R\)</span>. Error is measured by the length of <span class="math inline">\(\hat\mu - \mu\)</span>. A histogram over cells of a grid would need about <span class="math inline">\((R/b)^d\)</span> cells, and the logarithm of that is <span class="math inline">\(d\ln(R/b)\)</span>, a cost linear in <span class="math inline">\(d\)</span>. Biswas, Dong, Kamath &amp; Ullman (2020) shrink a ball instead. Keep a ball that contains <span class="math inline">\(\mu\)</span>, clip the data to a slightly larger ball, take a noisy mean, and use it to draw a smaller ball. A few rounds take the ball from radius <span class="math inline">\(R\)</span> down to the spread of the data.</p>
+</section>
+<section id="statement-3" class="level3" data-number="28.6.2">
+<h3 data-number="28.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">28.6.2</span> Statement</h3>
+<p>The noise is that of the <a href="../part03-dp-foundations/03-laplace-gaussian.html">Gaussian mechanism</a>, calibrated exactly. Write <span class="math inline">\(\Delta_2\)</span> for the <span class="math inline">\(\ell_2\)</span> sensitivity of a query, the most one record can move its answer in length. Gaussian noise with standard deviation <span class="math inline">\(\sigma\)</span> makes the query <span class="math inline">\((\varepsilon, \delta)\)</span>-DP when <span class="math inline">\(\Delta_2/\sigma\)</span> is at most a number <span class="math inline">\(\mu(\varepsilon, \delta)\)</span>, which that chapter computes from the exact privacy curve. (This <span class="math inline">\(\mu(\varepsilon, \delta)\)</span> is a ratio, not the mean.) Two lengths set the scale. The first bounds how far records lie from the mean, <span id="eq-auto-11meanestimation-2"><span class="math display">\[\tau_d = \sqrt d + \sqrt{2\ln(2n/\beta)}, \tag{28.11}\]</span></span> and the second, <span class="math inline">\(u\)</span>, is a margin for the <span class="math inline">\(T + 1\)</span> steps of the mechanism, <span class="math inline">\(T\)</span> rounds and a final step: <span id="eq-auto-11meanestimation-3"><span class="math display">\[u = \sqrt{2\ln(4(T + 1)/\beta)}. \tag{28.12}\]</span></span></p>
+<p>Start from the ball of radius <span class="math inline">\(r_0 = R\)</span> around 0. In round <span class="math inline">\(t = 0, \dots, T - 1\)</span>, with centre <span class="math inline">\(c_t\)</span> and radius <span class="math inline">\(r_t\)</span>:</p>
+<ol type="1">
+<li>Move every record that lies outside the ball of radius <span class="math inline">\(r_t + \tau_d\)</span> around <span class="math inline">\(c_t\)</span> onto its surface.</li>
+<li>Release the average plus Gaussian noise with standard deviation <span class="math inline">\(\sigma_t = 2(r_t + \tau_d)/(n\,\mu(\varepsilon_t, \delta_t))\)</span>, and call the result <span class="math inline">\(c_{t+1}\)</span>.</li>
+<li>Set the next radius to <span id="eq-mean-shrink"><span class="math display">\[r_{t+1} = \frac{\sqrt d + u}{\sqrt n} + \sigma_t\big(\sqrt d + u\big). \tag{28.13}\]</span></span></li>
+</ol>
+<p>A final step does the same once more with the rest of the budget and releases the noisy average. If the rounds share <span class="math inline">\(\varepsilon_t\)</span> and <span class="math inline">\(\delta_t\)</span> so that all the steps add up to <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span>, the mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. With probability at least <span class="math inline">\(1 - \beta\)</span>, every ball contains <span class="math inline">\(\mu\)</span> and no record is ever moved. On that event the final release is the plain average plus noise with standard deviation <span class="math inline">\(\sigma_T\)</span>, and ignoring the rare event where it fails, <span id="eq-mean-multi"><span class="math display">\[\mathrm{RMSE} = \sqrt{\frac dn + d\,\sigma_T^2}. \tag{28.14}\]</span></span> Reaching an error <span class="math inline">\(\alpha\)</span> takes about <span class="math inline">\(d/\alpha^2 + d\sqrt{\ln(1/\delta)}/(\alpha\varepsilon) + \sqrt d\ln R/\varepsilon\)</span> records, up to logarithmic factors.</p>
+</section>
+<section id="derivation-3" class="level3" data-number="28.6.3">
+<h3 data-number="28.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">28.6.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Records stay within <span class="math inline">\(\tau_d\)</span> of the mean.</strong> For a standard normal vector <span class="math inline">\(Z\)</span> in <span class="math inline">\(d\)</span> dimensions, the probability that its length exceeds <span class="math inline">\(\sqrt d + t\)</span> is at most <span class="math inline">\(e^{-t^2/2}\)</span>. This holds because the length is a function that moves by at most <span class="math inline">\(|a - b|\)</span> when <span class="math inline">\(Z\)</span> moves by a vector of length <span class="math inline">\(|a - b|\)</span>, and such functions of normal vectors concentrate around their average, which here is at most <span class="math inline">\(\sqrt d\)</span> (Boucheron, Lugosi &amp; Massart 2013, ch.&nbsp;5; <a href="../appendix-derivations/05-probability.html#sec-apx-prob-gauss-norm" class="quarto-xref"><span>Section E.4</span></a> in the appendices proves the same bound with the Chernoff method alone). A union bound over the <span class="math inline">\(n\)</span> records, each allowed <span class="math inline">\(\beta/(2n)\)</span>, gives <span class="math inline">\(\tau_d\)</span>.</li>
+<li><strong>Privacy of one step.</strong> After step 1 every record lies in a ball of radius <span class="math inline">\(r_t + \tau_d\)</span>, whose diameter is <span class="math inline">\(2(r_t + \tau_d)\)</span>. Replacing one record therefore moves the sum by a vector of length at most <span class="math inline">\(2(r_t + \tau_d)\)</span>, and the average by that divided by <span class="math inline">\(n\)</span>, which is the <span class="math inline">\(\ell_2\)</span> sensitivity. The noise <span class="math inline">\(\sigma_t\)</span> is calibrated to it, so the step is <span class="math inline">\((\varepsilon_t, \delta_t)\)</span>-DP for each value of the centre, which was chosen privately. Fact 5 adds up the steps.</li>
+<li><strong>The balls keep the mean.</strong> Suppose <span class="math inline">\(\mu\)</span> lies in the ball of round <span class="math inline">\(t\)</span> and the event of step 1 holds. Then every record lies within <span class="math inline">\(\tau_d\)</span> of <span class="math inline">\(\mu\)</span>, hence inside the clipping ball, and nothing moves. So <span class="math inline">\(c_{t+1} - \mu\)</span> is the sampling error <span class="math inline">\(\bar X - \mu\)</span> plus the noise. The sampling error is a normal vector with variance <span class="math inline">\(1/n\)</span> in each coordinate, so its length is at most <span class="math inline">\((\sqrt d + u)/\sqrt n\)</span>, and the noise’s length is at most <span class="math inline">\(\sigma_t(\sqrt d + u)\)</span>, each with probability at least <span class="math inline">\(1 - \beta/(4(T + 1))\)</span> by the bound of step 1. So <span class="math inline">\(\mu\)</span> lies in the next ball, of radius <a href="#eq-mean-shrink" class="quarto-xref">Equation&nbsp;<span>28.13</span></a>. A union bound over all the steps keeps the total failure probability below <span class="math inline">\(\beta\)</span>.</li>
+<li><strong>Final error.</strong> On that event, the final release is <span class="math inline">\(\bar X\)</span> plus independent noise. The expected squared length of <span class="math inline">\(\bar X - \mu\)</span> is <span class="math inline">\(d/n\)</span>, the sum of <span class="math inline">\(d\)</span> variances of <span class="math inline">\(1/n\)</span>, and that of the noise is <span class="math inline">\(d\sigma_T^2\)</span>. The cross term has mean 0, as in Fact 1, which gives <a href="#eq-mean-multi" class="quarto-xref">Equation&nbsp;<span>28.14</span></a>.</li>
+<li><strong>The rates.</strong> In a round, the radius drops from <span class="math inline">\(r_t\)</span> to about <span class="math inline">\(2(r_t + \tau_d)\sqrt d/(n\,\mu(\varepsilon_t, \delta_t))\)</span>. When <span class="math inline">\(n\)</span> is larger than a constant times <span class="math inline">\(\sqrt d/\mu(\varepsilon_t, \delta_t)\)</span>, which is of order <span class="math inline">\(\sqrt{d\ln(1/\delta)}/\varepsilon_t\)</span>, that is a reduction by a constant factor, and about <span class="math inline">\(\ln R\)</span> rounds bring it down to the order of <span class="math inline">\(\tau_d \approx \sqrt d\)</span>. In the final step the sensitivity is then about <span class="math inline">\(2\sqrt d/n\)</span>, so <span class="math inline">\(d\sigma_T^2\)</span> is about <span class="math inline">\(4d^2/(n\,\mu)^2\)</span>, and an error <span class="math inline">\(\alpha\)</span> needs <span class="math inline">\(n\)</span> of order <span class="math inline">\(d/(\alpha\,\mu)\)</span>, that is, <span class="math inline">\(d\sqrt{\ln(1/\delta)}/(\alpha\varepsilon)\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-3" class="level3" data-number="28.6.4">
+<h3 data-number="28.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">28.6.4</span> Interpretation</h3>
+<p>Without privacy the error is <span class="math inline">\(\sqrt{d/n}\)</span>. The privacy noise is about <span class="math inline">\(d/(n\varepsilon)\)</span> up to logarithmic factors, so it grows like <span class="math inline">\(d\)</span> instead of <span class="math inline">\(\sqrt d\)</span>, and it is larger than the sampling error <span class="math inline">\(\sqrt{d/n}\)</span> unless <span class="math inline">\(n\)</span> is above about <span class="math inline">\(d/\varepsilon^2\)</span>. That is not a weakness of the method. The <a href="../part03-dp-foundations/10-lower-bounds.html#sec-lower-fingerprinting">fingerprinting lower bound</a> says that releasing <span class="math inline">\(d\)</span> means with an error <span class="math inline">\(\alpha'\)</span> in each coordinate needs about <span class="math inline">\(\sqrt d/(\alpha'\varepsilon)\)</span> records. An <span class="math inline">\(\ell_2\)</span> error <span class="math inline">\(\alpha\)</span> spread over <span class="math inline">\(d\)</span> coordinates is an error of about <span class="math inline">\(\alpha/\sqrt d\)</span> in each, so substituting <span class="math inline">\(\alpha' = \alpha/\sqrt d\)</span> gives <span class="math inline">\(d/(\alpha\varepsilon)\)</span>. <a href="../../book-exercises/part03-dp-foundations/11-mean-estimation.html#sec-sol-mean-5">Exercise 5</a> does the substitution with the constants, and Kamath, Li, Singhal &amp; Ullman (2019) prove the matching lower bound directly for normal data.</p>
+<p>The range costs <span class="math inline">\(\sqrt d\ln R/\varepsilon\)</span>, which is less than the <span class="math inline">\(d\ln R/\varepsilon\)</span> of a grid histogram, because each round makes progress in all <span class="math inline">\(d\)</span> directions at once. The rounds compose here by Fact 5, which adds the budgets. The tighter accountants of Part 4 make several rounds cheaper, and the original method uses one of them.</p>
+<p>This is the shape of every private average of vectors, including the average of clipped gradients in private training. There the clipping radius is a fixed number rather than a shrinking ball, and choosing it is the clipping trade-off of <a href="../part03-dp-foundations/07-sensitivity.html#sec-sens-clip">Beyond global sensitivity</a> in many dimensions.</p>
+</section>
+<section id="example-a-thousand-dimensions" class="level3" data-number="28.6.5">
+<h3 data-number="28.6.5" class="anchored" data-anchor-id="example-a-thousand-dimensions"><span class="header-section-number">28.6.5</span> Example: a thousand dimensions</h3>
+<p>Take <span class="math inline">\(n = 100{,}000\)</span> records with <span class="math inline">\(\|\mu\| \le 1000\)</span>, at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, with <span class="math inline">\(\beta = 0.05\)</span> and a quarter of the budget for the rounds. Here <span class="math inline">\(\mu(1, 10^{-6}) = 0.2367\)</span>. <a href="#tbl-mean-multi" class="quarto-xref">Table&nbsp;<span>28.3</span></a> compares the naive estimator, which clips to the ball of radius <span class="math inline">\(R + \tau_d\)</span>, with shrinking balls. The script tries every number of rounds up to 29 and keeps the best, which is two for each <span class="math inline">\(d\)</span>. For <span class="math inline">\(d = 100\)</span> the radius falls from 1000 to 8.54 after one round and to 0.243 after the second. The ratio of the privacy noise to <span class="math inline">\(d/(n\varepsilon)\)</span> falls from 32.2 at <span class="math inline">\(d = 10\)</span> to 14.2 at <span class="math inline">\(d = 1000\)</span>, as the terms in <span class="math inline">\(\sqrt d\)</span> give way to the term in <span class="math inline">\(d\)</span>. A simulation at <span class="math inline">\(d = 100\)</span> with 40 datasets gives an RMSE of 0.0363 against the formula’s 0.0366, and every ball contained <span class="math inline">\(\mu\)</span> in all 40.</p>
+<div id="tbl-mean-multi" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mean-multi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;28.3: The mean of <span class="math inline">\(n = 100{,}000\)</span> normal vectors in <span class="math inline">\(d\)</span> dimensions with <span class="math inline">\(\|\mu\| \le 1000\)</span>, at <span class="math inline">\((1, 10^{-6})\)</span>-DP, by the naive estimator and by shrinking balls: the <span class="math inline">\(\ell_2\)</span> RMSE from <a href="#eq-mean-multi" class="quarto-xref">Equation&nbsp;<span>28.14</span></a>.
+</figcaption>
+<div aria-describedby="tbl-mean-multi-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(d\)</span></th>
+<th>Non-private <span class="math inline">\(\sqrt{d/n}\)</span></th>
+<th>Naive RMSE</th>
+<th>Rounds</th>
+<th>Radii</th>
+<th>Shrinking balls: RMSE</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>0.0100</td>
+<td>0.2697</td>
+<td>2</td>
+<td>1000, 4.12, 0.0725</td>
+<td>0.0105</td>
+</tr>
+<tr class="even">
+<td>100</td>
+<td>0.0316</td>
+<td>0.8586</td>
+<td>2</td>
+<td>1000, 8.54, 0.243</td>
+<td>0.0366</td>
+</tr>
+<tr class="odd">
+<td>1000</td>
+<td>0.1000</td>
+<td>2.7730</td>
+<td>2</td>
+<td>1000, 22.9, 1.43</td>
+<td>0.1736</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-mean-dimension" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mean-dimension-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/mean_dimension.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mean-dimension-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.3: The <span class="math inline">\(\ell_2\)</span> root-mean-square error of the mean of 100,000 normal vectors against the dimension <span class="math inline">\(d\)</span>, at <span class="math inline">\((1, 10^{-6})\)</span>-DP with <span class="math inline">\(\|\mu\| \le 1000\)</span>: clipping to the ball of radius <span class="math inline">\(R + \tau_d\)</span>, shrinking balls, and the non-private error <span class="math inline">\(\sqrt{d/n}\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-3" class="level3" data-number="28.6.6">
+<h3 data-number="28.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">28.6.6</span> Check yourself</h3>
+<ul>
+<li>Why is the noise in the final step set by <span class="math inline">\(\tau_d \approx \sqrt d\)</span> and not by the final radius, which can be much smaller? <em>(The records themselves are spread about <span class="math inline">\(\sqrt d\)</span> around <span class="math inline">\(\mu\)</span>, so the clipping ball must have radius at least <span class="math inline">\(\tau_d\)</span> to leave them alone. The sensitivity is the diameter of that ball divided by <span class="math inline">\(n\)</span>.)</em></li>
+<li>What would a shrinking round do if <span class="math inline">\(n\)</span> were smaller than about <span class="math inline">\(\sqrt d/\mu(\varepsilon_t, \delta_t)\)</span>? <em>(The new radius from <a href="#eq-mean-shrink" class="quarto-xref">Equation&nbsp;<span>28.13</span></a> would be larger than the old one, so the ball would not shrink. The method needs enough records per round, which is where the <span class="math inline">\(\sqrt d\ln R/\varepsilon\)</span> term comes from, and <a href="../../book-exercises/part03-dp-foundations/11-mean-estimation.html#sec-sol-mean-4">Exercise 4</a> computes it.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-mean-heavy" class="level2" data-number="28.7">
+<h2 data-number="28.7" class="anchored" data-anchor-id="sec-mean-heavy"><span class="header-section-number">28.7</span> Heavy tails: clip into the data</h2>
+<section id="context-4" class="level3" data-number="28.7.1">
+<h3 data-number="28.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">28.7.1</span> Context</h3>
+<p>Normal data rarely stray far, so every estimator so far could clip without touching a record. Many real quantities have heavy tails: incomes, session lengths, the norms of per-example gradients. Suppose all you know is that the variance is at most <span class="math inline">\(\sigma^2\)</span>. Chebyshev’s inequality then only says that a record is more than <span class="math inline">\(\sigma\sqrt{n/\beta}\)</span> from the mean with probability at most <span class="math inline">\(\beta/n\)</span>, so a clipping range wide enough to touch no record has half-width <span class="math inline">\(\sigma\sqrt{n/\beta}\)</span>, and its noise is enormous. The way out is to clip into the data on purpose and accept a bias.</p>
+</section>
+<section id="statement-4" class="level3" data-number="28.7.2">
+<h3 data-number="28.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">28.7.2</span> Statement</h3>
+<p>Suppose a coarse step has placed a centre <span class="math inline">\(c\)</span> near the mean; to keep the formulas clean, take <span class="math inline">\(c = \mu\)</span>. Clip every record to <span class="math inline">\([\mu - \tau, \mu + \tau]\)</span>, average, and add <span class="math inline">\(\mathrm{Lap}(2\tau/(n\varepsilon))\)</span>. This is <span class="math inline">\(\varepsilon\)</span>-DP for every <span class="math inline">\(\tau\)</span>, and for any distribution with variance at most <span class="math inline">\(\sigma^2\)</span>, <span id="eq-mean-heavy"><span class="math display">\[\mathrm{RMSE} \le \frac{\sigma}{\sqrt n} + \frac{\sigma^2}{\tau} + \frac{2\sqrt2\,\tau}{n\varepsilon}. \tag{28.15}\]</span></span> The right side is smallest at <span id="eq-mean-heavy-opt"><span class="math display">\[\tau_b = \sigma\sqrt{\frac{n\varepsilon}{2\sqrt2}}, \qquad\text{where it equals}\qquad \frac{\sigma}{\sqrt n} + 2\sigma\sqrt{\frac{2\sqrt2}{n\varepsilon}}. \tag{28.16}\]</span></span> So an error <span class="math inline">\(\alpha\)</span> needs about <span class="math inline">\(\sigma^2/\alpha^2 + 8\sqrt2\,\sigma^2/(\alpha^2\varepsilon)\)</span> records, of order <span class="math inline">\(1/(\alpha^2\varepsilon)\)</span>. Without clipping into the data, at <span class="math inline">\(\tau = \sigma\sqrt{n/\beta}\)</span>, it would need of order <span class="math inline">\(1/(\beta\alpha^2\varepsilon^2)\)</span>.</p>
+</section>
+<section id="derivation-4" class="level3" data-number="28.7.3">
+<h3 data-number="28.7.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">28.7.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Bias.</strong> Clipping moves a record <span class="math inline">\(X\)</span> toward <span class="math inline">\(\mu\)</span> by <span class="math inline">\((|X - \mu| - \tau)_+\)</span>, the amount by which its distance from <span class="math inline">\(\mu\)</span> exceeds <span class="math inline">\(\tau\)</span>, or 0. So the bias is at most the average of that amount. The amount is positive only where <span class="math inline">\(|X - \mu| &gt; \tau\)</span>, and there it is at most <span class="math inline">\(|X - \mu| \le (X - \mu)^2/\tau\)</span>, because dividing <span class="math inline">\(|X - \mu|\)</span> by <span class="math inline">\(\tau\)</span> gives a number above 1. Averaging, the bias is at most <span class="math inline">\(\mathbb E[(X - \mu)^2]/\tau \le \sigma^2/\tau\)</span>.</li>
+<li><strong>Sampling.</strong> A variance is half the average squared difference between two independent copies of a variable. Clipping to an interval never moves two values further apart, so the clipped record varies at most as much as the record itself, and its variance is at most <span class="math inline">\(\sigma^2\)</span>. The sampling term of <a href="#eq-mean-split" class="quarto-xref">Equation&nbsp;<span>28.2</span></a> is at most <span class="math inline">\(\sigma^2/n\)</span>.</li>
+<li><strong>Noise.</strong> The clipping interval has width <span class="math inline">\(2\tau\)</span>, so by <a href="#eq-mean-laplace-noise" class="quarto-xref">Equation&nbsp;<span>28.3</span></a> the noise standard deviation is <span class="math inline">\(\sqrt2\cdot2\tau/(n\varepsilon)\)</span>.</li>
+<li><strong>Add.</strong> By <a href="#eq-mean-split" class="quarto-xref">Equation&nbsp;<span>28.2</span></a>, the RMSE is the length of a vector with these three components, and a length is at most the sum of its components. That gives <a href="#eq-mean-heavy" class="quarto-xref">Equation&nbsp;<span>28.15</span></a>.</li>
+<li><strong>Minimize.</strong> The two terms that depend on <span class="math inline">\(\tau\)</span> are <span class="math inline">\(\sigma^2/\tau\)</span>, falling, and <span class="math inline">\(2\sqrt2\,\tau/(n\varepsilon)\)</span>, rising. The derivative of their sum, <span class="math inline">\(-\sigma^2/\tau^2 + 2\sqrt2/(n\varepsilon)\)</span>, is zero at <span class="math inline">\(\tau_b\)</span>, and there the two terms are equal, each <span class="math inline">\(\sigma\sqrt{2\sqrt2/(n\varepsilon)}\)</span>. That gives <a href="#eq-mean-heavy-opt" class="quarto-xref">Equation&nbsp;<span>28.16</span></a>. Requiring the second term of <a href="#eq-mean-heavy-opt" class="quarto-xref">Equation&nbsp;<span>28.16</span></a> to be at most <span class="math inline">\(\alpha\)</span> and squaring gives the <span class="math inline">\(8\sqrt2\,\sigma^2/(\alpha^2\varepsilon)\)</span> records.</li>
+</ol>
+</section>
+<section id="interpretation-4" class="level3" data-number="28.7.4">
+<h3 data-number="28.7.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">28.7.4</span> Interpretation</h3>
+<p>With heavy tails, privacy stops being a lower-order cost. For bounded data the privacy term in <a href="#eq-mean-bounded-n" class="quarto-xref">Equation&nbsp;<span>28.7</span></a> had a single <span class="math inline">\(1/\alpha\)</span>. Here it has <span class="math inline">\(1/\alpha^2\)</span>, the same power as sampling, divided by <span class="math inline">\(\varepsilon\)</span>. Kamath, Singhal &amp; Ullman (2020) show that this is unavoidable: no <span class="math inline">\(\varepsilon\)</span>-DP mechanism does better for every distribution with bounded variance. <a href="../appendix-derivations/10-mechanisms.html#sec-apx-mech-heavy" class="quarto-xref"><span>Section J.4</span></a> in the appendices derives this lower bound, and its <span class="math inline">\(k\)</span>-th moment version, from a two-point distribution and group privacy. They also show what more knowledge buys. If the <span class="math inline">\(k\)</span>-th moment <span class="math inline">\(\mathbb E|X - \mu|^k\)</span> is bounded for some <span class="math inline">\(k &gt; 2\)</span>, the cost falls to about <span class="math inline">\(1/(\varepsilon\,\alpha^{k/(k-1)})\)</span> records, and as <span class="math inline">\(k\)</span> grows it approaches the <span class="math inline">\(1/(\alpha\varepsilon)\)</span> of bounded data.</p>
+<p>The bound <a href="#eq-mean-heavy" class="quarto-xref">Equation&nbsp;<span>28.15</span></a> is a worst case, and it is tight up to a constant factor. A sharper version of step 1 gives <span class="math inline">\(\sigma^2/(4\tau)\)</span>, because <span class="math inline">\((|y| - \tau)_+ \le y^2/(4\tau)\)</span> for every <span class="math inline">\(y\)</span>, and a distribution that puts a little mass at distance <span class="math inline">\(2\tau\)</span> on one side of the mean attains that. So the worst case hides its variance in a few far-out records on one side. For an ordinary heavy-tailed distribution the bias falls faster than <span class="math inline">\(\sigma^2/\tau\)</span>, the best <span class="math inline">\(\tau\)</span> is smaller than <span class="math inline">\(\tau_b\)</span>, and the error is lower. But <span class="math inline">\(\tau_b\)</span> uses only <span class="math inline">\(n\)</span>, <span class="math inline">\(\varepsilon\)</span> and the variance bound, so it can be set without looking at the data. Setting <span class="math inline">\(\tau\)</span> from the data, such as to the observed maximum, would bring back the leak of <a href="../part03-dp-foundations/07-sensitivity.html#sec-sens-local">Beyond global sensitivity</a>.</p>
+</section>
+<section id="example-pareto-records" class="level3" data-number="28.7.5">
+<h3 data-number="28.7.5" class="anchored" data-anchor-id="example-pareto-records"><span class="header-section-number">28.7.5</span> Example: Pareto records</h3>
+<p>Take a Pareto distribution with shape 3, the law of <span class="math inline">\(x_m U^{-1/3}\)</span> for a uniform <span class="math inline">\(U\)</span> on <span class="math inline">\((0, 1)\)</span>, scaled so that its variance is 1. Its smallest value is <span class="math inline">\(x_m = 1.1547\)</span> and its mean is 1.7321, and its third moment is infinite. With <span class="math inline">\(n = 1000\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>, <a href="#tbl-mean-heavy" class="quarto-xref">Table&nbsp;<span>28.4</span></a> compares three choices of <span class="math inline">\(\tau\)</span>. Clipping wide enough to touch nothing costs an RMSE of 0.4012. The worst-case choice <span class="math inline">\(\tau_b = 18.80\)</span> gives 0.0607, and the best <span class="math inline">\(\tau\)</span> for this particular distribution, 5.36, gives 0.0329, close to the non-private 0.0316. The bound <a href="#eq-mean-heavy-opt" class="quarto-xref">Equation&nbsp;<span>28.16</span></a> promises 0.1380, which is loose for this distribution, as the interpretation predicted (<a href="../../book-exercises/part03-dp-foundations/11-mean-estimation.html#sec-sol-mean-3">Exercise 3</a> computes the exact bias). At <span class="math inline">\(n = 100{,}000\)</span> the pattern repeats, with RMSE 0.0401, 0.0062 and 0.0032 for the three choices.</p>
+<div id="tbl-mean-heavy" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mean-heavy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;28.4: Clipped private means of Pareto records with variance 1, <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>: the exact terms of <a href="#eq-mean-split" class="quarto-xref">Equation&nbsp;<span>28.2</span></a> for three clipping half-widths <span class="math inline">\(\tau\)</span> around the mean, and simulations with 4,000 repetitions.
+</figcaption>
+<div aria-describedby="tbl-mean-heavy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(\tau\)</span></th>
+<th>Bias</th>
+<th>Sampling sd</th>
+<th>Noise sd</th>
+<th>RMSE</th>
+<th>Simulated</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>141.42 (no record clipped)</td>
+<td>0.0000</td>
+<td>0.0313</td>
+<td>0.4000</td>
+<td>0.4012</td>
+<td>0.3997</td>
+</tr>
+<tr class="even">
+<td>18.80 (worst-case best, <span class="math inline">\(\tau_b\)</span>)</td>
+<td>−0.0018</td>
+<td>0.0293</td>
+<td>0.0532</td>
+<td>0.0607</td>
+<td>0.0591</td>
+</tr>
+<tr class="odd">
+<td>5.36 (best for this distribution)</td>
+<td>−0.0153</td>
+<td>0.0249</td>
+<td>0.0152</td>
+<td>0.0329</td>
+<td>0.0325</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="fig-mean-heavy" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-mean-heavy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/mean_heavy.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mean-heavy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;28.4: Error of the clipped private mean of Pareto records with variance 1, <span class="math inline">\(n = 1000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>, against the clipping half-width <span class="math inline">\(\tau\)</span>: the RMSE, the exact bias and its bound <span class="math inline">\(\sigma^2/\tau\)</span>, the noise and the sampling standard deviations, and simulated points. The dashed vertical line is <span class="math inline">\(\tau_b\)</span> and the dash-dotted one the width that clips no record.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-4" class="level3" data-number="28.7.6">
+<h3 data-number="28.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">28.7.6</span> Check yourself</h3>
+<ul>
+<li>Why does the bias of clipping at <span class="math inline">\(\tau\)</span> fall faster than <span class="math inline">\(\sigma^2/\tau\)</span> for the Pareto records? <em>(For this law the average excess beyond a point <span class="math inline">\(t\)</span>, <span class="math inline">\(\mathbb E[(X - t)_+]\)</span>, equals <span class="math inline">\(x_m^3/(2t^2)\)</span>, which falls like <span class="math inline">\(t^{-2}\)</span>. The bound is close to tight only when the variance sits in a few far points on one side of the mean.)</em></li>
+<li>If the variance bound <span class="math inline">\(\sigma^2\)</span> is four times too large, how does <span class="math inline">\(\tau_b\)</span> change, and is the release still private? <em>(It doubles, since <span class="math inline">\(\tau_b\)</span> is proportional to <span class="math inline">\(\sigma\)</span>. It stays private, because privacy holds for every <span class="math inline">\(\tau\)</span>. Only the accuracy suffers, from the extra noise.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-every-number-by-computation" class="level2" data-number="28.8">
+<h2 data-number="28.8" class="anchored" data-anchor-id="code-check-every-number-by-computation"><span class="header-section-number">28.8</span> Code: check every number by computation</h2>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part03-dp-foundations/mean_estimation.py">code/mean_estimation.py</a> computes every number in this chapter and draws its figures. Each estimator and each error formula is a small typed function. The exact errors use the mean and variance of a clipped normal or Pareto variable, and the simulations run the mechanisms on fresh data. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/mean_estimation.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="#tbl-mean-results" class="quarto-xref">Table&nbsp;<span>28.5</span></a> shows the output with seed 0.</p>
+<div id="tbl-mean-results" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mean-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;28.5: Results of the chapter’s script with seed 0.
+</figcaption>
+<div aria-describedby="tbl-mean-results-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Spread of 1,000 normal records, <span class="math inline">\(\beta = 0.05\)</span></td>
+<td><span class="math inline">\(\tau = 4.604\)</span>; exceeded in a fraction 0.0039 of 20,000 simulated datasets</td>
+</tr>
+<tr class="even">
+<td>Survey proportion, <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td>108 records for RMSE 0.05 (100 without privacy); 2,508 for 0.01 (2,500)</td>
+</tr>
+<tr class="odd">
+<td>Naive estimator, <span class="math inline">\(n = 1000\)</span></td>
+<td>RMSE 0.0520, 2.8416 and 2828.44 for <span class="math inline">\(R = 10\)</span>, <span class="math inline">\(10^3\)</span>, <span class="math inline">\(10^6\)</span></td>
+</tr>
+<tr class="even">
+<td>Coarse then fine, <span class="math inline">\(n = 1000\)</span></td>
+<td>RMSE 0.0609 for every <span class="math inline">\(R\)</span> (simulated 0.0588, 0.0606, 0.0596); coarse step needs 74, 135, 245 records; beats naive from <span class="math inline">\(R = 13.81\)</span></td>
+</tr>
+<tr class="odd">
+<td>Shrinking balls, <span class="math inline">\(n = 100{,}000\)</span>, <span class="math inline">\(R = 1000\)</span></td>
+<td>RMSE 0.0105, 0.0366, 0.1736 for <span class="math inline">\(d = 10\)</span>, 100, 1000, against 0.0100, 0.0316, 0.1000 without privacy; simulated 0.0363 at <span class="math inline">\(d = 100\)</span></td>
+</tr>
+<tr class="even">
+<td>Pareto records, <span class="math inline">\(n = 1000\)</span></td>
+<td>RMSE 0.4012 without clipping into the data, 0.0607 at <span class="math inline">\(\tau_b\)</span>, 0.0329 at the best <span class="math inline">\(\tau\)</span>; bound 0.1380</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_mean_estimation.py">tests/test_mean_estimation.py</a> checks that the output still matches this table.</p>
+<p><strong>What to take from it.</strong> For bounded data, privacy costs a handful of records on top of what sampling needs. The range is the expensive unknown for the naive estimator, whose error grows by a factor of <span class="math inline">\(10^5\)</span> across the three ranges, while coarse then fine stays at 0.0609 throughout and needs only 245 records for its coarse step even at <span class="math inline">\(R = 10^6\)</span>. In many dimensions the privacy noise grows like <span class="math inline">\(d\)</span>, against <span class="math inline">\(\sqrt d\)</span> for sampling, so at <span class="math inline">\(d = 1000\)</span> it is already the larger part of the error. Heavy tails change the rate itself, and clipping into the data on purpose is what keeps the error near the non-private one.</p>
+</section>
+<section id="references" class="level2" data-number="28.9">
+<h2 data-number="28.9" class="anchored" data-anchor-id="references"><span class="header-section-number">28.9</span> References</h2>
+<ul>
+<li>Karwa &amp; Vadhan, “Finite Sample Differentially Private Confidence Intervals” (ITCS 2018): coarse then fine for normal means and variances, under pure and approximate DP</li>
+<li>Biswas, Dong, Kamath &amp; Ullman, “CoinPress: Practical Private Mean and Covariance Estimation” (NeurIPS 2020): shrinking confidence balls for means and covariances, with code</li>
+<li>Kamath, Li, Singhal &amp; Ullman, “Privately Learning High-Dimensional Distributions” (COLT 2019): the <span class="math inline">\(d/(\alpha\varepsilon)\)</span> cost for normal means in <span class="math inline">\(d\)</span> dimensions, with a matching lower bound</li>
+<li>Kamath, Singhal &amp; Ullman, “Private Mean Estimation of Heavy-Tailed Distributions” (COLT 2020): the <span class="math inline">\(1/(\alpha^2\varepsilon)\)</span> rate for bounded variance and its generalization to <span class="math inline">\(k\)</span>-th moments, with lower bounds</li>
+<li>Kamath &amp; Ullman, “A Primer on Private Statistics” (arXiv 2020): the univariate and multivariate cases and the lower bounds, at textbook depth</li>
+<li>Kamath, <em>CS 860: Algorithms for Private Data Analysis</em> (University of Waterloo, lectures on private mean estimation): the ladder of rates from bounded to heavy-tailed data that organizes this chapter</li>
+<li>Bun &amp; Steinke, “Average-Case Averages: Private Algorithms for Smooth Sensitivity and Mean Estimation” (NeurIPS 2019): mean estimation by smooth sensitivity of a trimmed mean</li>
+<li>Boucheron, Lugosi &amp; Massart, <em>Concentration Inequalities</em> (Oxford, 2013), ch.&nbsp;5: concentration of the length of a normal vector</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="28.10">
+<h2 data-number="28.10" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">28.10</span> Cheat sheet</h2>
+<p><a href="#tbl-mean-cheat" class="quarto-xref">Table&nbsp;<span>28.6</span></a> collects the results. Records are independent, neighbours differ in one replaced record, and <span class="math inline">\(\tau = \sqrt{2\ln(2n/\beta)}\)</span>.</p>
+<div id="tbl-mean-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mean-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;28.6: Summary of the results in this chapter.
+</figcaption>
+<div aria-describedby="tbl-mean-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Mechanism</th>
+<th>Records for error <span class="math inline">\(\alpha\)</span> (up to log factors)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Bounded, width <span class="math inline">\(w\)</span>, variance <span class="math inline">\(\sigma^2\)</span></td>
+<td>Mean <span class="math inline">\(+ \mathrm{Lap}(w/(n\varepsilon))\)</span></td>
+<td><span class="math inline">\(\sigma^2/\alpha^2 + \sqrt2\,w/(\alpha\varepsilon)\)</span></td>
+</tr>
+<tr class="even">
+<td>Normal, <span class="math inline">\(\lvert\mu\rvert \le R\)</span>, naive</td>
+<td>Clip to <span class="math inline">\([-R - \tau, R + \tau]\)</span>, Laplace</td>
+<td><span class="math inline">\(1/\alpha^2 + R/(\alpha\varepsilon)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Normal, <span class="math inline">\(\lvert\mu\rvert \le R\)</span>, coarse then fine</td>
+<td>Exponential mechanism on bins of width <span class="math inline">\(2\tau\)</span>, then clip to 3 bins</td>
+<td><span class="math inline">\(1/\alpha^2 + 1/(\alpha\varepsilon) + \ln R/\varepsilon\)</span>; coarse step <span class="math inline">\(4\ln(m/\beta)/\varepsilon_1\)</span></td>
+</tr>
+<tr class="even">
+<td>Same, approximate DP</td>
+<td>Stability-based histogram for the coarse step</td>
+<td><span class="math inline">\(1/\alpha^2 + 1/(\alpha\varepsilon) + \ln(1/\delta)/\varepsilon\)</span>, no <span class="math inline">\(R\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(d\)</span> dimensions, <span class="math inline">\(\lVert\mu\rVert \le R\)</span></td>
+<td>Shrinking balls, Gaussian noise, radius <a href="#eq-mean-shrink" class="quarto-xref">Equation&nbsp;<span>28.13</span></a></td>
+<td><span class="math inline">\(d/\alpha^2 + d\sqrt{\ln(1/\delta)}/(\alpha\varepsilon) + \sqrt d\ln R/\varepsilon\)</span></td>
+</tr>
+<tr class="even">
+<td>Variance <span class="math inline">\(\le \sigma^2\)</span> only</td>
+<td>Clip to <span class="math inline">\(\mu \pm \tau_b\)</span>, <span class="math inline">\(\tau_b = \sigma\sqrt{n\varepsilon/(2\sqrt2)}\)</span></td>
+<td><span class="math inline">\(\sigma^2/\alpha^2 + 8\sqrt2\,\sigma^2/(\alpha^2\varepsilon)\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(k\)</span>-th moment bounded</td>
+<td>Clip into the data</td>
+<td><span class="math inline">\(1/\alpha^2 + 1/(\varepsilon\,\alpha^{k/(k-1)})\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>Privacy must hold for every dataset; let assumptions about the data affect only accuracy, through how often clipping changes nothing.</li>
+<li>Never clip to a range set by your ignorance. Spend a quarter of the budget or less finding the data first, which costs about <span class="math inline">\(\ln R/\varepsilon\)</span> records.</li>
+<li>In <span class="math inline">\(d\)</span> dimensions, budget about <span class="math inline">\(d\sqrt{\ln(1/\delta)}/(\alpha\varepsilon)\)</span> records for privacy on top of <span class="math inline">\(d/\alpha^2\)</span> for sampling.</li>
+<li>With heavy tails, clip into the data. Choose the width from <span class="math inline">\(n\)</span>, <span class="math inline">\(\varepsilon\)</span> and a variance bound, never from the data.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part03-dp-foundations/11-mean-estimation.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part03-dp-foundations/10-lower-bounds.html" class="pagination-link" aria-label="Lower bounds: what privacy costs">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part04-privacy-accounting/00-introduction.html" class="pagination-link" aria-label="Privacy accounting">
+        <span class="nav-page-text">Privacy accounting</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

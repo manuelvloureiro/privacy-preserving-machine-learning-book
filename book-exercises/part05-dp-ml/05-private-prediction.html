@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>40&nbsp; Exercises: Private prediction – Privacy-Preserving Machine Learning: Exercises</title>
+<title>42&nbsp; Exercises: Private prediction – Privacy-Preserving Machine Learning: Exercises</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -117,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/05-private-prediction.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/05-private-prediction.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -313,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -349,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -414,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Exercises: Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -483,22 +501,24 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-pate-1" id="toc-sec-sol-pate-1" class="nav-link active" data-scroll-target="#sec-sol-pate-1"><span class="header-section-number">40.1</span> The failure probability of a Laplace vote</a></li>
-  <li><a href="#sec-sol-pate-2" id="toc-sec-sol-pate-2" class="nav-link" data-scroll-target="#sec-sol-pate-2"><span class="header-section-number">40.2</span> The gap a reliable answer needs</a></li>
-  <li><a href="#sec-sol-pate-3" id="toc-sec-sol-pate-3" class="nav-link" data-scroll-target="#sec-sol-pate-3"><span class="header-section-number">40.3</span> Where Gaussian noise overtakes Laplace noise</a></li>
-  <li><a href="#sec-sol-pate-4" id="toc-sec-sol-pate-4" class="nav-link" data-scroll-target="#sec-sol-pate-4"><span class="header-section-number">40.4</span> Small failure probabilities are nearly free</a></li>
-  <li><a href="#sec-sol-pate-5" id="toc-sec-sol-pate-5" class="nav-link" data-scroll-target="#sec-sol-pate-5"><span class="header-section-number">40.5</span> The budget of Confident-GNMax</a></li>
-  <li><a href="#sec-sol-pate-6" id="toc-sec-sol-pate-6" class="nav-link" data-scroll-target="#sec-sol-pate-6"><span class="header-section-number">40.6</span> One teacher can move every query’s cost</a></li>
-  <li><a href="#sec-sol-pate-7" id="toc-sec-sol-pate-7" class="nav-link" data-scroll-target="#sec-sol-pate-7"><span class="header-section-number">40.7</span> Subsampling in private in-context learning</a></li>
+  <li><a href="#sec-sol-pate-1" id="toc-sec-sol-pate-1" class="nav-link active" data-scroll-target="#sec-sol-pate-1"><span class="header-section-number">42.1</span> The failure probability of a Laplace vote</a></li>
+  <li><a href="#sec-sol-pate-2" id="toc-sec-sol-pate-2" class="nav-link" data-scroll-target="#sec-sol-pate-2"><span class="header-section-number">42.2</span> The gap a reliable answer needs</a></li>
+  <li><a href="#sec-sol-pate-3" id="toc-sec-sol-pate-3" class="nav-link" data-scroll-target="#sec-sol-pate-3"><span class="header-section-number">42.3</span> Where Gaussian noise overtakes Laplace noise</a></li>
+  <li><a href="#sec-sol-pate-4" id="toc-sec-sol-pate-4" class="nav-link" data-scroll-target="#sec-sol-pate-4"><span class="header-section-number">42.4</span> Small failure probabilities are nearly free</a></li>
+  <li><a href="#sec-sol-pate-5" id="toc-sec-sol-pate-5" class="nav-link" data-scroll-target="#sec-sol-pate-5"><span class="header-section-number">42.5</span> The budget of Confident-GNMax</a></li>
+  <li><a href="#sec-sol-pate-6" id="toc-sec-sol-pate-6" class="nav-link" data-scroll-target="#sec-sol-pate-6"><span class="header-section-number">42.6</span> One teacher can move every query’s cost</a></li>
+  <li><a href="#sec-sol-pate-7" id="toc-sec-sol-pate-7" class="nav-link" data-scroll-target="#sec-sol-pate-7"><span class="header-section-number">42.7</span> Subsampling in private in-context learning</a></li>
+  <li><a href="#sec-sol-pate-8" id="toc-sec-sol-pate-8" class="nav-link" data-scroll-target="#sec-sol-pate-8"><span class="header-section-number">42.8</span> Distance to instability and the threshold</a></li>
+  <li><a href="#sec-sol-pate-9" id="toc-sec-sol-pate-9" class="nav-link" data-scroll-target="#sec-sol-pate-9"><span class="header-section-number">42.9</span> What stable aggregation needs</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/05-private-prediction.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/05-private-prediction.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></h1>
+<h1 class="title"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></h1>
 </div>
 
 
@@ -517,10 +537,10 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part05-dp-ml/05-private-prediction.html">the chapter on private prediction</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part05-dp-ml/solutions_private_prediction.py</code> computes every number quoted here; run it with <code>uv run python code/part05-dp-ml/solutions_private_prediction.py</code>.</p>
 <p>The solutions use the chapter’s notation. To give differential privacy (DP) to predictions, <span class="math inline">\(k\)</span> teachers are trained on disjoint shards of the private data and each query is answered by a noisy vote: LNMax adds <span class="math inline">\(\mathrm{Lap}(b)\)</span> noise to every vote count, GNMax adds <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span>, and only the label with the largest noisy count is released. The gap <span class="math inline">\(g\)</span> is the difference between the top two counts, <span class="math inline">\(Q\)</span> the number of answered queries, and <span class="math inline">\(\delta = 10^{-5}\)</span>. Costs are measured in Rényi differential privacy (RDP) of order <span class="math inline">\(\alpha\)</span>; one GNMax answer is <span class="math inline">\((\alpha, \alpha/\sigma^2)\)</span>-RDP. Private aggregation of teacher ensembles (PATE) trains a student on public inputs labelled this way.</p>
-<section id="sec-sol-pate-1" class="level2" data-number="40.1">
-<h2 data-number="40.1" class="anchored" data-anchor-id="sec-sol-pate-1"><span class="header-section-number">40.1</span> The failure probability of a Laplace vote</h2>
+<section id="sec-sol-pate-1" class="level2" data-number="42.1">
+<h2 data-number="42.1" class="anchored" data-anchor-id="sec-sol-pate-1"><span class="header-section-number">42.1</span> The failure probability of a Laplace vote</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 1.</strong> <strong>The failure probability of a Laplace vote.</strong> Show that if <span class="math inline">\(Z_1\)</span> and <span class="math inline">\(Z_2\)</span> are independent <span class="math inline">\(\mathrm{Lap}(b)\)</span>, then for <span class="math inline">\(t \ge 0\)</span>, <span class="math inline">\(\Pr[Z_1 - Z_2 &gt; t] = \frac14(2 + t/b)e^{-t/b}\)</span>. Use it to compute the probability that LNMax with <span class="math inline">\(b = 5\)</span> returns the runner-up on a two-label query with gap 10, and compare with GNMax at the same noise standard deviation, using <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-two-class">Equation&nbsp;40.5</a>. Repeat for a gap of 30. <em>Check: 0.1353 (simulated 0.1356) against 0.1587; at gap 30, <span class="math inline">\(4.96 \times 10^{-3}\)</span> against <span class="math inline">\(1.35 \times 10^{-3}\)</span>.</em> <em>(Convolution of densities)</em></p>
+<p><strong>Exercise 1.</strong> <strong>The failure probability of a Laplace vote.</strong> Show that if <span class="math inline">\(Z_1\)</span> and <span class="math inline">\(Z_2\)</span> are independent <span class="math inline">\(\mathrm{Lap}(b)\)</span>, then for <span class="math inline">\(t \ge 0\)</span>, <span class="math inline">\(\Pr[Z_1 - Z_2 &gt; t] = \frac14(2 + t/b)e^{-t/b}\)</span>. Use it to compute the probability that LNMax with <span class="math inline">\(b = 5\)</span> returns the runner-up on a two-label query with gap 10, and compare with GNMax at the same noise standard deviation, using <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-two-class">Equation&nbsp;42.5</a>. Repeat for a gap of 30. <em>Check: 0.1353 (simulated 0.1356) against 0.1587; at gap 30, <span class="math inline">\(4.96 \times 10^{-3}\)</span> against <span class="math inline">\(1.35 \times 10^{-3}\)</span>.</em> <em>(Convolution of densities)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -546,10 +566,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-pate-2" class="level2" data-number="40.2">
-<h2 data-number="40.2" class="anchored" data-anchor-id="sec-sol-pate-2"><span class="header-section-number">40.2</span> The gap a reliable answer needs</h2>
+<section id="sec-sol-pate-2" class="level2" data-number="42.2">
+<h2 data-number="42.2" class="anchored" data-anchor-id="sec-sol-pate-2"><span class="header-section-number">42.2</span> The gap a reliable answer needs</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>The gap a reliable answer needs.</strong> GNMax answers 1,000 queries at <span class="math inline">\(\varepsilon = 4\)</span>. Using <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-sigma">Equation&nbsp;40.4</a> and <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-two-class">Equation&nbsp;40.5</a>, find the gap at which a two-label answer returns the plurality with probability 0.9 and 0.99, and the fraction of 250 teachers that must agree for that gap. Compare with <a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-teachers">Table&nbsp;40.3</a>. <em>Check: <span class="math inline">\(\sigma = 51.8\)</span>; gaps 93.8 and 170.3; fractions 0.688 and 0.841.</em> <em>(Inverting a normal probability)</em></p>
+<p><strong>Exercise 2.</strong> <strong>The gap a reliable answer needs.</strong> GNMax answers 1,000 queries at <span class="math inline">\(\varepsilon = 4\)</span>. Using <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-sigma">Equation&nbsp;42.4</a> and <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-two-class">Equation&nbsp;42.5</a>, find the gap at which a two-label answer returns the plurality with probability 0.9 and 0.99, and the fraction of 250 teachers that must agree for that gap. Compare with <a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-teachers">Table&nbsp;42.3</a>. <em>Check: <span class="math inline">\(\sigma = 51.8\)</span>; gaps 93.8 and 170.3; fractions 0.688 and 0.841.</em> <em>(Inverting a normal probability)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -564,8 +584,8 @@ window.Quarto = {
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The noise.</strong> By <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-sigma">Equation&nbsp;40.4</a>, <span class="math inline">\(\sigma = \sqrt{1{,}000/0.3731} = 51.8\)</span>.</li>
-<li><strong>Invert <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-two-class">Equation&nbsp;40.5</a>.</strong> <span class="math inline">\(\Phi(g/(\sqrt2\sigma)) = p\)</span> gives <span class="math inline">\(g = \sqrt2\sigma\,\Phi^{-1}(p)\)</span>. With <span class="math inline">\(\Phi^{-1}(0.9) = 1.2816\)</span> and <span class="math inline">\(\Phi^{-1}(0.99) = 2.3263\)</span>: <span class="math inline">\(g = 93.8\)</span> and <span class="math inline">\(g = 170.3\)</span>.</li>
+<li><strong>The noise.</strong> By <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-sigma">Equation&nbsp;42.4</a>, <span class="math inline">\(\sigma = \sqrt{1{,}000/0.3731} = 51.8\)</span>.</li>
+<li><strong>Invert <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-two-class">Equation&nbsp;42.5</a>.</strong> <span class="math inline">\(\Phi(g/(\sqrt2\sigma)) = p\)</span> gives <span class="math inline">\(g = \sqrt2\sigma\,\Phi^{-1}(p)\)</span>. With <span class="math inline">\(\Phi^{-1}(0.9) = 1.2816\)</span> and <span class="math inline">\(\Phi^{-1}(0.99) = 2.3263\)</span>: <span class="math inline">\(g = 93.8\)</span> and <span class="math inline">\(g = 170.3\)</span>.</li>
 <li><strong>Agreement.</strong> If <span class="math inline">\(a\)</span> of the 250 teachers agree, the gap is <span class="math inline">\(250a - 250(1 - a) = 250(2a - 1)\)</span>, so <span class="math inline">\(a = (250 + g)/500\)</span>: 0.688 and 0.841.</li>
 <li><strong>Compare.</strong> With 250 teachers, the median gap on the running example is 0.408 of 250, about 102, so the median query is answered correctly with probability a little above 0.9; a substantial share of queries has much smaller gaps.</li>
 </ol>
@@ -574,8 +594,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-pate-3" class="level2" data-number="40.3">
-<h2 data-number="40.3" class="anchored" data-anchor-id="sec-sol-pate-3"><span class="header-section-number">40.3</span> Where Gaussian noise overtakes Laplace noise</h2>
+<section id="sec-sol-pate-3" class="level2" data-number="42.3">
+<h2 data-number="42.3" class="anchored" data-anchor-id="sec-sol-pate-3"><span class="header-section-number">42.3</span> Where Gaussian noise overtakes Laplace noise</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 3.</strong> <strong>Where Gaussian noise overtakes Laplace noise.</strong> For a budget of <span class="math inline">\(\varepsilon = 1\)</span> spread over <span class="math inline">\(Q\)</span> answers, compare the noise standard deviation LNMax needs (<span class="math inline">\(\sqrt2b\)</span>, each answer charged as a <span class="math inline">\((2/b)\)</span>-DP step through the randomized-response curve) with GNMax’s <span class="math inline">\(\sigma\)</span>. Find the smallest <span class="math inline">\(Q\)</span> at which Gaussian noise is smaller, and repeat for <span class="math inline">\(\varepsilon = 4\)</span>. Explain why Laplace wins for a single answer. <em>Check: from 5 answers at <span class="math inline">\(\varepsilon = 1\)</span>, from 6 at <span class="math inline">\(\varepsilon = 4\)</span>.</em> <em>(Composition of pure and Gaussian mechanisms)</em></p>
 </blockquote>
@@ -592,8 +612,8 @@ window.Quarto = {
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>One answer.</strong> A single LNMax answer is <span class="math inline">\((2/b)\)</span>-DP, so <span class="math inline">\(\varepsilon = 1\)</span> needs <span class="math inline">\(b\)</span> close to 2; the accountant, which goes through the randomized-response curve and <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-convert">Equation&nbsp;40.2</a>, gives <span class="math inline">\(b = 2.02\)</span>, a standard deviation of 2.85. A single GNMax answer needs <span class="math inline">\(\sigma = 5.72\)</span> (<a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-noise">Table&nbsp;40.2</a>). A Gaussian has no pure-DP guarantee: for one release, its <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> is set by how far into its tail the privacy loss must be controlled, which takes a lot of noise.</li>
-<li><strong>Many answers.</strong> The pure-DP curve of each Laplace answer is bounded by <span class="math inline">\(\varepsilon_0\)</span> and, at small orders, behaves like <span class="math inline">\(\alpha\varepsilon_0^2/2\)</span>; summed over <span class="math inline">\(Q\)</span> answers, the conversion trades between these. The Gaussian curve is the line <span class="math inline">\(\alpha/\sigma^2\)</span>, which composes exactly. As <span class="math inline">\(Q\)</span> grows, the Laplace cost per unit of noise variance is worse than the Gaussian’s, and the ratio of standard deviations tends to about 2 (<a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-noise">Table&nbsp;40.2</a>).</li>
+<li><strong>One answer.</strong> A single LNMax answer is <span class="math inline">\((2/b)\)</span>-DP, so <span class="math inline">\(\varepsilon = 1\)</span> needs <span class="math inline">\(b\)</span> close to 2; the accountant, which goes through the randomized-response curve and <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-convert">Equation&nbsp;42.2</a>, gives <span class="math inline">\(b = 2.02\)</span>, a standard deviation of 2.85. A single GNMax answer needs <span class="math inline">\(\sigma = 5.72\)</span> (<a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-noise">Table&nbsp;42.2</a>). A Gaussian has no pure-DP guarantee: for one release, its <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> is set by how far into its tail the privacy loss must be controlled, which takes a lot of noise.</li>
+<li><strong>Many answers.</strong> The pure-DP curve of each Laplace answer is bounded by <span class="math inline">\(\varepsilon_0\)</span> and, at small orders, behaves like <span class="math inline">\(\alpha\varepsilon_0^2/2\)</span>; summed over <span class="math inline">\(Q\)</span> answers, the conversion trades between these. The Gaussian curve is the line <span class="math inline">\(\alpha/\sigma^2\)</span>, which composes exactly. As <span class="math inline">\(Q\)</span> grows, the Laplace cost per unit of noise variance is worse than the Gaussian’s, and the ratio of standard deviations tends to about 2 (<a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-noise">Table&nbsp;42.2</a>).</li>
 <li><strong>The crossover.</strong> Scanning <span class="math inline">\(Q = 1, 2, \dots\)</span> with the accountant, Gaussian noise is smaller from <span class="math inline">\(Q = 5\)</span> at <span class="math inline">\(\varepsilon = 1\)</span> and from <span class="math inline">\(Q = 6\)</span> at <span class="math inline">\(\varepsilon = 4\)</span>.</li>
 </ol>
 <p><em>Use Laplace for a handful of answers and Gaussian beyond. The same pattern holds for any pure-DP versus Gaussian comparison: pure DP is cheap for few releases, Gaussian noise for many.</em></p>
@@ -601,10 +621,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-pate-4" class="level2" data-number="40.4">
-<h2 data-number="40.4" class="anchored" data-anchor-id="sec-sol-pate-4"><span class="header-section-number">40.4</span> Small failure probabilities are nearly free</h2>
+<section id="sec-sol-pate-4" class="level2" data-number="42.4">
+<h2 data-number="42.4" class="anchored" data-anchor-id="sec-sol-pate-4"><span class="header-section-number">42.4</span> Small failure probabilities are nearly free</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>Small failure probabilities are nearly free.</strong> Show that the right side of <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-dd-pure">Equation&nbsp;40.8</a> has derivative <span class="math inline">\(\big(e^{(\alpha - 1)\varepsilon_0} + (\alpha - 1)e^{\varepsilon_0} - \alpha\big)/(\alpha - 1)\)</span> at <span class="math inline">\(q = 0\)</span>, and is therefore about <span class="math inline">\(q\)</span> times this constant for small <span class="math inline">\(q\)</span>. Evaluate it for <span class="math inline">\(\varepsilon_0 = 0.1\)</span> at <span class="math inline">\(\alpha = 8\)</span> and <span class="math inline">\(\alpha = 32\)</span>, and compare <span class="math inline">\(0.001\)</span> times the slope with the bound at <span class="math inline">\(q = 0.001\)</span>. <em>Check: slopes 0.2500 and 0.7890; <span class="math inline">\(2.50 \times 10^{-4}\)</span> against <span class="math inline">\(2.50 \times 10^{-4}\)</span>, and <span class="math inline">\(7.89 \times 10^{-4}\)</span> against <span class="math inline">\(7.80 \times 10^{-4}\)</span>.</em> <em>(First-order expansion)</em></p>
+<p><strong>Exercise 4.</strong> <strong>Small failure probabilities are nearly free.</strong> Show that the right side of <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-dd-pure">Equation&nbsp;42.8</a> has derivative <span class="math inline">\(\big(e^{(\alpha - 1)\varepsilon_0} + (\alpha - 1)e^{\varepsilon_0} - \alpha\big)/(\alpha - 1)\)</span> at <span class="math inline">\(q = 0\)</span>, and is therefore about <span class="math inline">\(q\)</span> times this constant for small <span class="math inline">\(q\)</span>. Evaluate it for <span class="math inline">\(\varepsilon_0 = 0.1\)</span> at <span class="math inline">\(\alpha = 8\)</span> and <span class="math inline">\(\alpha = 32\)</span>, and compare <span class="math inline">\(0.001\)</span> times the slope with the bound at <span class="math inline">\(q = 0.001\)</span>. <em>Check: slopes 0.2500 and 0.7890; <span class="math inline">\(2.50 \times 10^{-4}\)</span> against <span class="math inline">\(2.50 \times 10^{-4}\)</span>, and <span class="math inline">\(7.89 \times 10^{-4}\)</span> against <span class="math inline">\(7.80 \times 10^{-4}\)</span>.</em> <em>(First-order expansion)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -629,10 +649,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-pate-5" class="level2" data-number="40.5">
-<h2 data-number="40.5" class="anchored" data-anchor-id="sec-sol-pate-5"><span class="header-section-number">40.5</span> The budget of Confident-GNMax</h2>
+<section id="sec-sol-pate-5" class="level2" data-number="42.5">
+<h2 data-number="42.5" class="anchored" data-anchor-id="sec-sol-pate-5"><span class="header-section-number">42.5</span> The budget of Confident-GNMax</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 5.</strong> <strong>The budget of Confident-GNMax.</strong> In <a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-confident">Table&nbsp;40.8</a>, 459 of 1,000 queries pass the check with <span class="math inline">\(\sigma_1 = 150\)</span> and are answered with <span class="math inline">\(\sigma_2 = 40\)</span>. Split the RDP slope of <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-confident">Equation&nbsp;40.10</a> into the check and the answers, convert the total to <span class="math inline">\(\varepsilon\)</span>, and compare with plain GNMax answering all 1,000 queries with <span class="math inline">\(\sigma = 40\)</span>. For which <span class="math inline">\(\sigma_1\)</span> would the check cost as much as the answers? <em>Check: slopes 0.0222 and 0.2869; <span class="math inline">\(\varepsilon = 3.59\)</span> against 5.38; <span class="math inline">\(\sigma_1 = 41.7\)</span>.</em> <em>(Accounting for a two-step mechanism)</em></p>
+<p><strong>Exercise 5.</strong> <strong>The budget of Confident-GNMax.</strong> In <a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-confident">Table&nbsp;42.8</a>, 459 of 1,000 queries pass the check with <span class="math inline">\(\sigma_1 = 150\)</span> and are answered with <span class="math inline">\(\sigma_2 = 40\)</span>. Split the RDP slope of <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-confident">Equation&nbsp;42.10</a> into the check and the answers, convert the total to <span class="math inline">\(\varepsilon\)</span>, and compare with plain GNMax answering all 1,000 queries with <span class="math inline">\(\sigma = 40\)</span>. For which <span class="math inline">\(\sigma_1\)</span> would the check cost as much as the answers? <em>Check: slopes 0.0222 and 0.2869; <span class="math inline">\(\varepsilon = 3.59\)</span> against 5.38; <span class="math inline">\(\sigma_1 = 41.7\)</span>.</em> <em>(Accounting for a two-step mechanism)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
@@ -649,7 +669,7 @@ window.Quarto = {
 <ol type="1">
 <li><strong>The check.</strong> Each of the 1,000 checks is a Gaussian mechanism on <span class="math inline">\(\max_in_i\)</span>, sensitivity 1, noise 150: slope <span class="math inline">\(1/(2 \times 150^2)\)</span>, and 1,000 of them <span class="math inline">\(1{,}000/45{,}000 = 0.0222\)</span>.</li>
 <li><strong>The answers.</strong> 459 GNMax answers with <span class="math inline">\(\sigma_2 = 40\)</span>: <span class="math inline">\(459/1{,}600 = 0.2869\)</span>.</li>
-<li><strong>Convert.</strong> The total line has slope 0.3091, which converts to <span class="math inline">\(\varepsilon = 3.59\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> by <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-convert">Equation&nbsp;40.2</a>.</li>
+<li><strong>Convert.</strong> The total line has slope 0.3091, which converts to <span class="math inline">\(\varepsilon = 3.59\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> by <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-convert">Equation&nbsp;42.2</a>.</li>
 <li><strong>Plain GNMax.</strong> 1,000 answers with <span class="math inline">\(\sigma = 40\)</span> have slope <span class="math inline">\(1{,}000/1{,}600 = 0.625\)</span> and <span class="math inline">\(\varepsilon = 5.38\)</span>.</li>
 <li><strong>Equal costs.</strong> <span class="math inline">\(1{,}000/(2\sigma_1^2) = 0.2869\)</span> gives <span class="math inline">\(\sigma_1 = \sqrt{1{,}000/0.5738} = 41.7\)</span>.</li>
 </ol>
@@ -658,10 +678,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-pate-6" class="level2" data-number="40.6">
-<h2 data-number="40.6" class="anchored" data-anchor-id="sec-sol-pate-6"><span class="header-section-number">40.6</span> One teacher can move every query’s cost</h2>
+<section id="sec-sol-pate-6" class="level2" data-number="42.6">
+<h2 data-number="42.6" class="anchored" data-anchor-id="sec-sol-pate-6"><span class="header-section-number">42.6</span> One teacher can move every query’s cost</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 6.</strong> <strong>One teacher can move every query’s cost.</strong> With <span class="math inline">\(\sigma = 40\)</span> at order 8, compute the data-dependent cost of <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-dd-gauss">Equation&nbsp;40.9</a> for a two-label query with gap <span class="math inline">\(g\)</span> and with gap <span class="math inline">\(g - 2\)</span>, the gap after one teacher switches sides, for <span class="math inline">\(g = 150\)</span>, 200 and 250. Why does this make the total data-dependent cost of <span class="math inline">\(Q\)</span> queries hard to release with noise calibrated to global sensitivity? <em>Check: ratios 1.096, 1.130 and 1.165; at <span class="math inline">\(g = 150\)</span>, 0.00123 against 0.00135.</em> <em>(Local sensitivity of a sum)</em></p>
+<p><strong>Exercise 6.</strong> <strong>One teacher can move every query’s cost.</strong> With <span class="math inline">\(\sigma = 40\)</span> at order 8, compute the data-dependent cost of <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-dd-gauss">Equation&nbsp;42.9</a> for a two-label query with gap <span class="math inline">\(g\)</span> and with gap <span class="math inline">\(g - 2\)</span>, the gap after one teacher switches sides, for <span class="math inline">\(g = 150\)</span>, 200 and 250. Why does this make the total data-dependent cost of <span class="math inline">\(Q\)</span> queries hard to release with noise calibrated to global sensitivity? <em>Check: ratios 1.096, 1.130 and 1.165; at <span class="math inline">\(g = 150\)</span>, 0.00123 against 0.00135.</em> <em>(Local sensitivity of a sum)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
@@ -676,20 +696,20 @@ window.Quarto = {
 <div id="callout-6" class="callout-6-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>One query.</strong> With <span class="math inline">\(\tilde q = \frac12\operatorname{erfc}(g/80)\)</span>, <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-dd-gauss">Equation&nbsp;40.9</a> gives 0.00123 at <span class="math inline">\(g = 150\)</span> and 0.00135 at <span class="math inline">\(g = 148\)</span>, a ratio of 1.096. At <span class="math inline">\(g = 200\)</span> the ratio is 1.130, and at <span class="math inline">\(g = 250\)</span>, 1.165: the relative change grows with the gap, because the cost falls faster than exponentially in the gap.</li>
+<li><strong>One query.</strong> With <span class="math inline">\(\tilde q = \frac12\operatorname{erfc}(g/80)\)</span>, <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-dd-gauss">Equation&nbsp;42.9</a> gives 0.00123 at <span class="math inline">\(g = 150\)</span> and 0.00135 at <span class="math inline">\(g = 148\)</span>, a ratio of 1.096. At <span class="math inline">\(g = 200\)</span> the ratio is 1.130, and at <span class="math inline">\(g = 250\)</span>, 1.165: the relative change grows with the gap, because the cost falls faster than exponentially in the gap.</li>
 <li><strong>All queries.</strong> One record changes one teacher, and that teacher may switch sides on every query, so every term of the sum can move at once. The local sensitivity of the total, how much it changes for this dataset’s neighbours, is a sum of <span class="math inline">\(Q\)</span> such changes, each small in absolute terms.</li>
 <li><strong>Global sensitivity.</strong> Over all datasets, the worst case includes histograms near a tie, where the answer is decided by one teacher and the cost jumps between nearly 0 and the full <span class="math inline">\(\alpha/\sigma^2\)</span>. The global sensitivity of the total is then close to the data-independent total itself, and noise of that size would make the released <span class="math inline">\(\varepsilon\)</span> useless.</li>
-<li><strong>The fix.</strong> Smooth sensitivity (<a href="../../book-full/part03-dp-foundations/06-sensitivity.html#sec-sens-smooth">Beyond global sensitivity</a>) scales the noise to how much the total can change near the actual dataset, discounted with distance, which on a dataset with strong consensus is small. This is what Papernot et al.&nbsp;(2018) do; in the chapter’s example, switching all of one teacher’s votes on 1,000 queries moves the data-dependent <span class="math inline">\(\varepsilon\)</span> only from 4.375 to 4.389.</li>
+<li><strong>The fix.</strong> Smooth sensitivity (<a href="../../book-full/part03-dp-foundations/07-sensitivity.html#sec-sens-smooth">Beyond global sensitivity</a>) scales the noise to how much the total can change near the actual dataset, discounted with distance, which on a dataset with strong consensus is small. This is what Papernot et al.&nbsp;(2018) do; in the chapter’s example, switching all of one teacher’s votes on 1,000 queries moves the data-dependent <span class="math inline">\(\varepsilon\)</span> only from 4.375 to 4.389.</li>
 </ol>
 <p><em>A data-dependent cost is a statistic of the private data like any other. It is cheap to release only because its local behaviour is tame, and that has to be proved and paid for, not assumed.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-pate-7" class="level2" data-number="40.7">
-<h2 data-number="40.7" class="anchored" data-anchor-id="sec-sol-pate-7"><span class="header-section-number">40.7</span> Subsampling in private in-context learning</h2>
+<section id="sec-sol-pate-7" class="level2" data-number="42.7">
+<h2 data-number="42.7" class="anchored" data-anchor-id="sec-sol-pate-7"><span class="header-section-number">42.7</span> Subsampling in private in-context learning</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 7.</strong> <strong>Subsampling in private in-context learning.</strong> In <a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-icl">Table&nbsp;40.9</a>, 1,000 queries at <span class="math inline">\(\varepsilon = 1\)</span> use <span class="math inline">\(\sigma = 7.39\)</span> with Poisson sampling rate 0.04. Compute <span class="math inline">\(\varepsilon\)</span> for the same <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(Q\)</span> without subsampling, and the <span class="math inline">\(\sigma\)</span> that 1,000 answers at <span class="math inline">\(\varepsilon = 1\)</span> need without subsampling. How many queries does each record take part in, on average? <em>Check: <span class="math inline">\(\varepsilon = 1.00\)</span> against 45.8; <span class="math inline">\(\sigma = 180.9\)</span>; 40 queries.</em> <em>(Amplification by subsampling)</em></p>
+<p><strong>Exercise 7.</strong> <strong>Subsampling in private in-context learning.</strong> In <a href="../../book-full/part05-dp-ml/05-private-prediction.html#tbl-pate-icl">Table&nbsp;42.10</a>, 1,000 queries at <span class="math inline">\(\varepsilon = 1\)</span> use <span class="math inline">\(\sigma = 7.39\)</span> with Poisson sampling rate 0.04. Compute <span class="math inline">\(\varepsilon\)</span> for the same <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(Q\)</span> without subsampling, and the <span class="math inline">\(\sigma\)</span> that 1,000 answers at <span class="math inline">\(\varepsilon = 1\)</span> need without subsampling. How many queries does each record take part in, on average? <em>Check: <span class="math inline">\(\varepsilon = 1.00\)</span> against 45.8; <span class="math inline">\(\sigma = 180.9\)</span>; 40 queries.</em> <em>(Amplification by subsampling)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
@@ -704,12 +724,68 @@ window.Quarto = {
 <div id="callout-7" class="callout-7-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>With subsampling.</strong> By <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-icl">Equation&nbsp;40.11</a> the curve is 1,000 times the subsampled-Gaussian curve with rate 0.04 and noise multiplier <span class="math inline">\(7.39/\sqrt2\)</span>, which converts to <span class="math inline">\(\varepsilon = 1.00\)</span>.</li>
+<li><strong>With subsampling.</strong> By <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-icl">Equation&nbsp;42.14</a> the curve is 1,000 times the subsampled-Gaussian curve with rate 0.04 and noise multiplier <span class="math inline">\(7.39/\sqrt2\)</span>, which converts to <span class="math inline">\(\varepsilon = 1.00\)</span>.</li>
 <li><strong>Without.</strong> Every record is in every query’s exemplars, each answer is <span class="math inline">\((\alpha, \alpha/7.39^2)\)</span>-RDP, and 1,000 of them convert to <span class="math inline">\(\varepsilon = 45.8\)</span>.</li>
-<li><strong>The noise without subsampling.</strong> By <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-sigma">Equation&nbsp;40.4</a>, <span class="math inline">\(\sigma = \sqrt{1{,}000/0.0306} = 180.9\)</span>, about 24 times more.</li>
+<li><strong>The noise without subsampling.</strong> By <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-sigma">Equation&nbsp;42.4</a>, <span class="math inline">\(\sigma = \sqrt{1{,}000/0.0306} = 180.9\)</span>, about 24 times more.</li>
 <li><strong>Participation.</strong> A record is drawn with probability 0.04 per query, so it takes part in <span class="math inline">\(1{,}000 \times 0.04 = 40\)</span> queries on average.</li>
 </ol>
 <p><em>Subsampling helps for two reasons: each record takes part in only 40 of the 1,000 answers, and when it does not, its absence is hidden among the random draws. But the noise must still be compared with the vote gaps of an ensemble of only 25 voters, which is why the stand-in’s accuracy falls anyway. With a large language model, whose votes agree far more, the same noise costs much less accuracy.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-pate-8" class="level2" data-number="42.8">
+<h2 data-number="42.8" class="anchored" data-anchor-id="sec-sol-pate-8"><span class="header-section-number">42.8</span> Distance to instability and the threshold</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 8.</strong> <strong>Distance to instability and the threshold.</strong> Compute the distance to instability of <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-dist">Equation&nbsp;42.11</a> for the two-label votes 0–0, 5–4, 6–4, 7–4, 55–45 and 135–115, and say for each why one more changed teacher would or would not be safe. Then find the threshold <span class="math inline">\(t\)</span> of <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-stable-threshold">Equation&nbsp;42.12</a> at <span class="math inline">\(\varepsilon_0 = 1\)</span> and <span class="math inline">\(\delta_{\text{bad}} = 5 \times 10^{-6}\)</span> for pools of 1,000 and 10,000 queries, and the smallest gap whose distance reaches it. Why does a tenfold larger pool raise <span class="math inline">\(t\)</span> by about <span class="math inline">\(4\ln 10\)</span>? <em>Check: distances 0, 0, 0, 1, 4, 9; <span class="math inline">\(t = 74.8\)</span> and 84.0; gaps 151 and 171; <span class="math inline">\(4\ln 10 = 9.2\)</span>.</em> <em>(Distances to a set; union bounds)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-8-contents" aria-controls="callout-8" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-8" class="callout-8-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The distances.</strong> The gaps are 0, 1, 2, 3, 10 and 20, so <span class="math inline">\(\lceil g/2\rceil - 1\)</span> gives 0, 0, 0, 1, 4 and 9 (0 for a tie). With 5–4, one teacher moving from the leader to the other label makes it 4–5, and the leader changes. With 6–4, one move makes it 5–5, a tie that the argmax may break either way, so the distance is still 0. With 7–4, one move gives 6–5 and the leader stays strictly on top, but a second move gives 5–6. In general each move costs the leader 2 votes of gap.</li>
+<li><strong>The thresholds.</strong> Bisection on <span class="math inline">\(P\cdot\Pr[\nu - \rho &gt; t] \le 5 \times 10^{-6}\)</span>, with <span class="math inline">\(\nu \sim \mathrm{Lap}(4)\)</span> and <span class="math inline">\(\rho \sim \mathrm{Lap}(2)\)</span>, gives <span class="math inline">\(t = 74.8\)</span> for <span class="math inline">\(P = 1{,}000\)</span> and <span class="math inline">\(t = 84.0\)</span> for <span class="math inline">\(P = 10{,}000\)</span>.</li>
+<li><strong>The gaps.</strong> The distance must be at least <span class="math inline">\(t\)</span>, so at least <span class="math inline">\(\lceil t\rceil\)</span>, which needs <span class="math inline">\(\lceil g/2\rceil \ge \lceil t\rceil + 1\)</span>, that is <span class="math inline">\(g \ge 2\lceil t\rceil + 1\)</span>: gaps of 151 and 171.</li>
+<li><strong>The pool size.</strong> For large <span class="math inline">\(t\)</span> the tail is dominated by its slower term, about <span class="math inline">\(\frac23e^{-t\varepsilon_0/4}\)</span>. Multiplying the pool by 10 requires the tail to fall by 10, so <span class="math inline">\(t\)</span> grows by <span class="math inline">\(4\ln 10/\varepsilon_0 = 9.2\)</span>, which matches <span class="math inline">\(84.0 - 74.8\)</span>.</li>
+</ol>
+<p><em>The threshold protects every query of the pool at once, so it grows with the logarithm of the pool, and it is measured in teachers. An ensemble whose typical gap is smaller than about <span class="math inline">\(2t\)</span> cannot use stable aggregation, however good its teachers are.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-pate-9" class="level2" data-number="42.9">
+<h2 data-number="42.9" class="anchored" data-anchor-id="sec-sol-pate-9"><span class="header-section-number">42.9</span> What stable aggregation needs</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 9.</strong> <strong>What stable aggregation needs.</strong> You want 1,000 exact labels from stable aggregation with a cutoff of <span class="math inline">\(c = 20\)</span> unstable answers, a pool of 10,000 queries and <span class="math inline">\(\delta_{\text{bad}} = \delta' = 5 \times 10^{-6}\)</span>. Compute the budget and the smallest passing gap at <span class="math inline">\(\varepsilon_0 = 0.5\)</span> and <span class="math inline">\(\varepsilon_0 = 1\)</span>. Suppose a share <span class="math inline">\(f\)</span> of the queries is unstable, in the sense that the test says so. How small must <span class="math inline">\(f\)</span> be for 20 unstable answers to leave 1,000 labelled queries on average? What does that say about the number of teachers? <em>Check: <span class="math inline">\(\varepsilon = 9.93\)</span> with gap 339, and 20.00 with gap 171; <span class="math inline">\(f \le 0.0196\)</span>.</em> <em>(Sparse vector; planning a budget)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-9-contents" aria-controls="callout-9" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-9" class="callout-9-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>Budgets.</strong> Twenty runs of <span class="math inline">\(\varepsilon_0\)</span>-DP AboveThreshold compose by <a href="../../book-full/part05-dp-ml/05-private-prediction.html#eq-pate-stable-eps">Equation&nbsp;42.13</a> to <span class="math inline">\(\varepsilon = 9.93\)</span> at <span class="math inline">\(\varepsilon_0 = 0.5\)</span> and 20.00 at <span class="math inline">\(\varepsilon_0 = 1\)</span>. At this scale the composition is almost linear, about <span class="math inline">\(20\varepsilon_0\)</span>.</li>
+<li><strong>Gaps.</strong> The thresholds are <span class="math inline">\(t = 168.1\)</span> and 84.0, so by Exercise 8 the plurality must lead by at least 339 and 171 votes.</li>
+<li><strong>The share of unstable queries.</strong> Before each unstable answer the procedure labels on average <span class="math inline">\((1 - f)/f\)</span> stable queries, so <span class="math inline">\(c\)</span> unstable answers leave about <span class="math inline">\(c(1 - f)/f\)</span> labels. Setting this to at least 1,000 gives <span class="math inline">\(f \le c/(c + 1{,}000) = 20/1{,}020 = 0.0196\)</span>.</li>
+<li><strong>Teachers.</strong> Fewer than 2% of the queries may fall short of a lead of 171 votes at <span class="math inline">\(\varepsilon = 20\)</span>, or of 339 votes at <span class="math inline">\(\varepsilon = 9.93\)</span>. Since the gap cannot exceed the number of teachers, that takes several hundred teachers, nearly unanimous on 98% of the queries. The running example’s 500 teachers clear a distance of 84 on only 0.3923 of the pool.</li>
+</ol>
+<p><em>Stable aggregation buys a budget fixed in advance and exact labels, and it pays with a demand on consensus that few tasks meet. Measure the share of queries that clear the threshold on public or held-out data before choosing it.</em></p>
 </div>
 </div>
 </div>
@@ -1121,12 +1197,12 @@ window.Quarto = {
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="pagination-link" aria-label="Exercises: DP-FTRL and matrix factorization">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/06-public-data.html" class="pagination-link" aria-label="Exercises: Public data and private fine-tuning">
-        <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

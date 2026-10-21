@@ -1,0 +1,1709 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Appendix J — Mechanisms and their limits – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../appendix-derivations/11-composition.html" rel="next">
+<link href="../appendix-derivations/09-cryptography.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix-derivations/01-calibration.html">Appendices</a></li><li class="breadcrumb-item"><a href="../appendix-derivations/10-mechanisms.html"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/01-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">How much noise to add</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/02-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Composing private releases</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/03-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/04-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">What ε means, and converting between definitions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/05-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Sums, limits and counting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/06-tails-tests-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Tail bounds, tests and divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/07-optimization-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Optimization and estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/08-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Random matrices and factorizations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/09-cryptography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/10-mechanisms.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/11-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">K</span>&nbsp; <span class="chapter-title">Composition of trade-off functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/12-amplification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">L</span>&nbsp; <span class="chapter-title">Subsampling, shuffling and iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/13-private-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">M</span>&nbsp; <span class="chapter-title">Private learning and tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/14-auditing-adaptivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">N</span>&nbsp; <span class="chapter-title">Auditing, reconstruction and adaptive analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">P</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-apx-mech-fourpoint" id="toc-sec-apx-mech-fourpoint" class="nav-link active" data-scroll-target="#sec-apx-mech-fourpoint"><span class="header-section-number">J.1</span> Every approximate-DP pair is post-processed four-point randomized response</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses" id="toc-what-the-chapter-uses" class="nav-link" data-scroll-target="#what-the-chapter-uses"><span class="header-section-number">J.1.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea" id="toc-the-idea" class="nav-link" data-scroll-target="#the-idea"><span class="header-section-number">J.1.2</span> The idea</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">J.1.3</span> Derivation</a></li>
+  <li><a href="#checking-it" id="toc-checking-it" class="nav-link" data-scroll-target="#checking-it"><span class="header-section-number">J.1.4</span> Checking it</a></li>
+  <li><a href="#what-it-does-not-cover" id="toc-what-it-does-not-cover" class="nav-link" data-scroll-target="#what-it-does-not-cover"><span class="header-section-number">J.1.5</span> What it does not cover</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-mech-zcdp" id="toc-sec-apx-mech-zcdp" class="nav-link" data-scroll-target="#sec-apx-mech-zcdp"><span class="header-section-number">J.2</span> Approximate DP implies approximate zCDP</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses-1" id="toc-what-the-chapter-uses-1" class="nav-link" data-scroll-target="#what-the-chapter-uses-1"><span class="header-section-number">J.2.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea-1" id="toc-the-idea-1" class="nav-link" data-scroll-target="#the-idea-1"><span class="header-section-number">J.2.2</span> The idea</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">J.2.3</span> Derivation</a></li>
+  <li><a href="#checking-it-1" id="toc-checking-it-1" class="nav-link" data-scroll-target="#checking-it-1"><span class="header-section-number">J.2.4</span> Checking it</a></li>
+  <li><a href="#what-it-does-not-cover-1" id="toc-what-it-does-not-cover-1" class="nav-link" data-scroll-target="#what-it-does-not-cover-1"><span class="header-section-number">J.2.5</span> What it does not cover</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-mech-histogram" id="toc-sec-apx-mech-histogram" class="nav-link" data-scroll-target="#sec-apx-mech-histogram"><span class="header-section-number">J.3</span> The stability-based histogram</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses-2" id="toc-what-the-chapter-uses-2" class="nav-link" data-scroll-target="#what-the-chapter-uses-2"><span class="header-section-number">J.3.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea-2" id="toc-the-idea-2" class="nav-link" data-scroll-target="#the-idea-2"><span class="header-section-number">J.3.2</span> The idea</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">J.3.3</span> Derivation</a></li>
+  <li><a href="#checking-it-2" id="toc-checking-it-2" class="nav-link" data-scroll-target="#checking-it-2"><span class="header-section-number">J.3.4</span> Checking it</a></li>
+  <li><a href="#what-it-does-not-cover-2" id="toc-what-it-does-not-cover-2" class="nav-link" data-scroll-target="#what-it-does-not-cover-2"><span class="header-section-number">J.3.5</span> What it does not cover</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-mech-heavy" id="toc-sec-apx-mech-heavy" class="nav-link" data-scroll-target="#sec-apx-mech-heavy"><span class="header-section-number">J.4</span> A lower bound for heavy-tailed means</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses-3" id="toc-what-the-chapter-uses-3" class="nav-link" data-scroll-target="#what-the-chapter-uses-3"><span class="header-section-number">J.4.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea-3" id="toc-the-idea-3" class="nav-link" data-scroll-target="#the-idea-3"><span class="header-section-number">J.4.2</span> The idea</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">J.4.3</span> Derivation</a></li>
+  <li><a href="#checking-it-3" id="toc-checking-it-3" class="nav-link" data-scroll-target="#checking-it-3"><span class="header-section-number">J.4.4</span> Checking it</a></li>
+  <li><a href="#what-it-does-not-cover-3" id="toc-what-it-does-not-cover-3" class="nav-link" data-scroll-target="#what-it-does-not-cover-3"><span class="header-section-number">J.4.5</span> What it does not cover</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-mech-svt" id="toc-sec-apx-mech-svt" class="nav-link" data-scroll-target="#sec-apx-mech-svt"><span class="header-section-number">J.5</span> Sparse vector with <span class="math inline">\(c\)</span> answers above</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses-4" id="toc-what-the-chapter-uses-4" class="nav-link" data-scroll-target="#what-the-chapter-uses-4"><span class="header-section-number">J.5.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea-4" id="toc-the-idea-4" class="nav-link" data-scroll-target="#the-idea-4"><span class="header-section-number">J.5.2</span> The idea</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">J.5.3</span> Derivation</a></li>
+  <li><a href="#checking-it-4" id="toc-checking-it-4" class="nav-link" data-scroll-target="#checking-it-4"><span class="header-section-number">J.5.4</span> Checking it</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-mech-gumbel" id="toc-sec-apx-mech-gumbel" class="nav-link" data-scroll-target="#sec-apx-mech-gumbel"><span class="header-section-number">J.6</span> Gumbel top-<span class="math inline">\(c\)</span> is the exponential mechanism without replacement</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses-5" id="toc-what-the-chapter-uses-5" class="nav-link" data-scroll-target="#what-the-chapter-uses-5"><span class="header-section-number">J.6.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea-5" id="toc-the-idea-5" class="nav-link" data-scroll-target="#the-idea-5"><span class="header-section-number">J.6.2</span> The idea</a></li>
+  <li><a href="#derivation-5" id="toc-derivation-5" class="nav-link" data-scroll-target="#derivation-5"><span class="header-section-number">J.6.3</span> Derivation</a></li>
+  <li><a href="#checking-it-5" id="toc-checking-it-5" class="nav-link" data-scroll-target="#checking-it-5"><span class="header-section-number">J.6.4</span> Checking it</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-mech-alarm" id="toc-sec-apx-mech-alarm" class="nav-link" data-scroll-target="#sec-apx-mech-alarm"><span class="header-section-number">J.7</span> The alarm mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, with one condition</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses-6" id="toc-what-the-chapter-uses-6" class="nav-link" data-scroll-target="#what-the-chapter-uses-6"><span class="header-section-number">J.7.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea-6" id="toc-the-idea-6" class="nav-link" data-scroll-target="#the-idea-6"><span class="header-section-number">J.7.2</span> The idea</a></li>
+  <li><a href="#derivation-6" id="toc-derivation-6" class="nav-link" data-scroll-target="#derivation-6"><span class="header-section-number">J.7.3</span> Derivation</a></li>
+  <li><a href="#checking-it-6" id="toc-checking-it-6" class="nav-link" data-scroll-target="#checking-it-6"><span class="header-section-number">J.7.4</span> Checking it</a></li>
+  <li><a href="#what-it-does-not-cover-4" id="toc-what-it-does-not-cover-4" class="nav-link" data-scroll-target="#what-it-does-not-cover-4"><span class="header-section-number">J.7.5</span> What it does not cover</a></li>
+  </ul></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">J.8</span> Code</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">J.9</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix-derivations/01-calibration.html">Appendices</a></li><li class="breadcrumb-item"><a href="../appendix-derivations/10-mechanisms.html"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Appendix J — Mechanisms and their limits</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This appendix proves seven results that the chapters on differential privacy (DP) state about specific mechanisms but do not derive in full. Three of them are about what the slack <span class="math inline">\(\delta\)</span> of approximate DP means. The first shows that every <span class="math inline">\((\varepsilon, \delta)\)</span>-DP pair of output distributions splits into an <span class="math inline">\(\varepsilon\)</span>-DP pair and a leftover of mass <span class="math inline">\(\delta\)</span>, and so is a post-processing of the worst <span class="math inline">\((\varepsilon, \delta)\)</span>-DP pair, called four-point randomized response. The second uses the same split to show that <span class="math inline">\((\varepsilon, \delta)\)</span>-DP implies an approximate form of zero-concentrated differential privacy (zCDP). The third, the stability-based histogram, shows what the slack buys: an error that does not grow with the number of bins. The other four results pin down single mechanisms. One is a lower bound for estimating means of heavy-tailed data. Two are privacy proofs for selection: the sparse vector technique with several answers above the threshold, and Gumbel top-<span class="math inline">\(c\)</span> selection. The last is a check that the “alarm” mechanism, which the group-privacy chapter uses to show its bound is tight, really is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</p>
+<p>The derivations share one habit. Each proof fixes a neighbouring pair, writes down the two output distributions, and then compares them directly: it splits them into parts, changes variables in the noise, or bounds them one outcome at a time. <a href="#tbl-apx-mech-map" class="quarto-xref">Table&nbsp;<span>J.1</span></a> maps each derivation to the chapter section that states or uses it.</p>
+<div id="tbl-apx-mech-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-mech-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;J.1: The derivations of this appendix and the chapter sections that rely on them.
+</figcaption>
+<div aria-describedby="tbl-apx-mech-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Derivation</th>
+<th>Where the chapter states or uses it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Every <span class="math inline">\((\varepsilon, \delta)\)</span> pair is post-processed four-point randomized response</td>
+<td><a href="../part03-dp-foundations/04-composition.html#sec-comp-optimal" class="quarto-xref"><span>Section 21.5</span></a> (<a href="../part03-dp-foundations/04-composition.html#tbl-comp-four-point" class="quarto-xref">Table&nbsp;<span>21.5</span></a>, <a href="../part03-dp-foundations/04-composition.html#eq-comp-kov" class="quarto-xref">Equation&nbsp;<span>21.11</span></a>), <a href="../part03-dp-foundations/04-composition.html#sec-comp-adaptive" class="quarto-xref"><span>Section 21.6</span></a></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\((\varepsilon, \delta)\)</span>-DP implies <span class="math inline">\(\delta\)</span>-approximate <span class="math inline">\((\varepsilon^2/2)\)</span>-zCDP</td>
+<td><a href="../part04-privacy-accounting/03-concentrated-dp.html#sec-cdp-approx" class="quarto-xref"><span>Section 31.7</span></a></td>
+</tr>
+<tr class="odd">
+<td>The stability-based histogram</td>
+<td><a href="../part03-dp-foundations/10-lower-bounds.html#sec-lower-packing" class="quarto-xref"><span>Section 27.3</span></a>, <a href="../part03-dp-foundations/11-mean-estimation.html#sec-mean-coarse" class="quarto-xref"><span>Section 28.5</span></a></td>
+</tr>
+<tr class="even">
+<td>A lower bound for heavy-tailed means</td>
+<td><a href="../part03-dp-foundations/11-mean-estimation.html#sec-mean-heavy" class="quarto-xref"><span>Section 28.7</span></a></td>
+</tr>
+<tr class="odd">
+<td>Sparse vector with <span class="math inline">\(c\)</span> answers above</td>
+<td><a href="../part03-dp-foundations/05-selection.html#sec-sel-svt" class="quarto-xref"><span>Section 22.8</span></a></td>
+</tr>
+<tr class="even">
+<td>Gumbel top-<span class="math inline">\(c\)</span> is the exponential mechanism without replacement</td>
+<td><a href="../part03-dp-foundations/05-selection.html#sec-sel-gumbel" class="quarto-xref"><span>Section 22.7</span></a></td>
+</tr>
+<tr class="odd">
+<td>The alarm mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP</td>
+<td><a href="../part03-dp-foundations/02-properties.html#sec-dpprop-group" class="quarto-xref"><span>Section 19.4</span></a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<section id="sec-apx-mech-fourpoint" class="level2" data-number="J.1">
+<h2 data-number="J.1" class="anchored" data-anchor-id="sec-apx-mech-fourpoint"><span class="header-section-number">J.1</span> Every approximate-DP pair is post-processed four-point randomized response</h2>
+<section id="what-the-chapter-uses" class="level3" data-number="J.1.1">
+<h3 data-number="J.1.1" class="anchored" data-anchor-id="what-the-chapter-uses"><span class="header-section-number">J.1.1</span> What the chapter uses</h3>
+<p>Take a mechanism that is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, fix two neighbouring datasets <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span>, and write <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> for the distributions of its output on them. For now the outputs are discrete, with probabilities <span class="math inline">\(p(y)\)</span> and <span class="math inline">\(q(y)\)</span> at an output <span class="math inline">\(y\)</span>; the last part of this section extends the argument to densities. Approximate DP says that the hockey-stick divergence is at most <span class="math inline">\(\delta\)</span> in both directions. That divergence is the mass of one distribution that sticks out above <span class="math inline">\(e^\varepsilon\)</span> times the other, as in <a href="../part03-dp-foundations/01-definition.html#eq-dpdef-hockey" class="quarto-xref">Equation&nbsp;<span>18.11</span></a>, so <span id="eq-auto-10mechanisms-1"><span class="math display">\[E_{e^\varepsilon}(P\|Q) = \sum_y\big(p(y) - e^\varepsilon q(y)\big)_+ \le \delta, \qquad E_{e^\varepsilon}(Q\|P) = \sum_y\big(q(y) - e^\varepsilon p(y)\big)_+ \le \delta. \tag{J.1}\]</span></span> Here the positive part <span class="math inline">\((x)_+\)</span> equals <span class="math inline">\(x\)</span> when <span class="math inline">\(x\)</span> is positive and 0 otherwise.</p>
+<p>The <strong>four-point pair</strong> <span class="math inline">\((P^\star, Q^\star)\)</span> of <a href="../part03-dp-foundations/04-composition.html#tbl-comp-four-point" class="quarto-xref">Table&nbsp;<span>21.5</span></a> is the worst such pair, in the sense that every test tells it apart as well as <span class="math inline">\((\varepsilon, \delta)\)</span>-DP allows. It has four outputs: “flag <span class="math inline">\(D\)</span>”, 0, 1 and “flag <span class="math inline">\(D'\)</span>”. With probability <span class="math inline">\(\delta\)</span> it announces the dataset, by “flag <span class="math inline">\(D\)</span>” on <span class="math inline">\(D\)</span> or “flag <span class="math inline">\(D'\)</span>” on <span class="math inline">\(D'\)</span>. Otherwise it runs randomized response at level <span class="math inline">\(\varepsilon\)</span>, which reports 0 with probability <span class="math inline">\(t = e^\varepsilon/(1 + e^\varepsilon)\)</span> on <span class="math inline">\(D\)</span> and <span class="math inline">\(1 - t\)</span> on <span class="math inline">\(D'\)</span>, and reports 1 otherwise. So <span class="math inline">\(P^\star\)</span> gives the four outputs the probabilities <span class="math inline">\(\delta\)</span>, <span class="math inline">\((1 - \delta)t\)</span>, <span class="math inline">\((1 - \delta)(1 - t)\)</span> and 0, and <span class="math inline">\(Q^\star\)</span> gives them 0, <span class="math inline">\((1 - \delta)(1 - t)\)</span>, <span class="math inline">\((1 - \delta)t\)</span> and <span class="math inline">\(\delta\)</span>. A <strong>channel</strong> <span class="math inline">\(K\)</span> is a table of probabilities <span class="math inline">\(K(y \mid z)\)</span> that turns an input <span class="math inline">\(z\)</span> into an output <span class="math inline">\(y\)</span>. The claim is that some channel produces the pair <span class="math inline">\((P, Q)\)</span> from the four-point pair: <span id="eq-apx-mech-channel"><span class="math display">\[p(y) = \sum_z P^\star(z)K(y \mid z), \qquad q(y) = \sum_z Q^\star(z)K(y \mid z) \qquad\text{for every output } y. \tag{J.2}\]</span></span> The composition chapter derives the channel for <span class="math inline">\(\delta = 0\)</span> (<a href="../part03-dp-foundations/04-composition.html#eq-comp-channel" class="quarto-xref">Equation&nbsp;<span>21.10</span></a>). For <span class="math inline">\(\delta &gt; 0\)</span> it explains why a channel must exist, through Blackwell’s theorem (a pair that is at least as hard to test as another at every level is a post-processing of it), and cites Kairouz, Oh &amp; Viswanath (2015) for its construction. Optimal composition <a href="../part03-dp-foundations/04-composition.html#eq-comp-kov" class="quarto-xref">Equation&nbsp;<span>21.11</span></a>, advanced composition with <span class="math inline">\(\delta &gt; 0\)</span>, and basic composition with <span class="math inline">\(\delta &gt; 0\)</span> in <a href="../part03-dp-foundations/04-composition.html#sec-comp-adaptive" class="quarto-xref"><span>Section 21.6</span></a> all rest on this channel.</p>
+</section>
+<section id="the-idea" class="level3" data-number="J.1.2">
+<h3 data-number="J.1.2" class="anchored" data-anchor-id="the-idea"><span class="header-section-number">J.1.2</span> The idea</h3>
+<p>Split each distribution into two parts. The two <strong>pure parts</strong>, one inside <span class="math inline">\(P\)</span> and one inside <span class="math inline">\(Q\)</span>, are chosen so that at every output each is at most <span class="math inline">\(e^\varepsilon\)</span> times the other. The <strong>leftover</strong> of each distribution is everything else, and the split is arranged so that it has mass exactly <span class="math inline">\(\delta\)</span>. The pure parts then form an <span class="math inline">\(\varepsilon\)</span>-DP pair, so the chapter’s <span class="math inline">\(\delta = 0\)</span> channel produces them from plain randomized response. The leftovers are what the flags are for: the channel turns “flag <span class="math inline">\(D\)</span>” into a draw from <span class="math inline">\(P\)</span>’s leftover, and “flag <span class="math inline">\(D'\)</span>” into a draw from <span class="math inline">\(Q\)</span>’s.</p>
+<p>The only care needed is in the masses. The four-point pair gives each side exactly <span class="math inline">\(1 - \delta\)</span> of plain randomized response, so the two pure parts must both have mass exactly <span class="math inline">\(1 - \delta\)</span>. The obvious pure parts, <span class="math inline">\(\min\{p, e^\varepsilon q\}\)</span> and <span class="math inline">\(\min\{q, e^\varepsilon p\}\)</span>, can have different masses. So the proof first moves the heavier one down to the lighter one’s mass, by mixing in a scaled copy of the other one so that the factor <span class="math inline">\(e^\varepsilon\)</span> survives, and then scales both down to <span class="math inline">\(1 - \delta\)</span>.</p>
+<p>A small case shows every step. Take three outputs with <span class="math inline">\(P = (0.6, 0.3, 0.1)\)</span>, <span class="math inline">\(Q = (0.2, 0.3, 0.5)\)</span> and <span class="math inline">\(e^\varepsilon = 2\)</span>. The mass of <span class="math inline">\(P\)</span> above <span class="math inline">\(2Q\)</span> is <span class="math inline">\(0.6 - 0.4 = 0.2\)</span>, and the mass of <span class="math inline">\(Q\)</span> above <span class="math inline">\(2P\)</span> is <span class="math inline">\(0.5 - 0.2 = 0.3\)</span>, so the pair is <span class="math inline">\((\ln 2, 0.3)\)</span>-DP, with <span class="math inline">\(\delta\)</span> the larger of the two. <a href="#tbl-apx-mech-small" class="quarto-xref">Table&nbsp;<span>J.2</span></a> follows the construction.</p>
+<div id="tbl-apx-mech-small" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-mech-small-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;J.2: The construction on three outputs with <span class="math inline">\(e^\varepsilon = 2\)</span> and <span class="math inline">\(\delta = 0.3\)</span>.
+</figcaption>
+<div aria-describedby="tbl-apx-mech-small-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Output 1</th>
+<th>Output 2</th>
+<th>Output 3</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(p\)</span></td>
+<td>0.6</td>
+<td>0.3</td>
+<td>0.1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(q\)</span></td>
+<td>0.2</td>
+<td>0.3</td>
+<td>0.5</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(m_P = \min\{p, 2q\}\)</span></td>
+<td>0.4</td>
+<td>0.3</td>
+<td>0.1</td>
+<td><span class="math inline">\(A = 0.8\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(m_Q = \min\{q, 2p\}\)</span></td>
+<td>0.2</td>
+<td>0.3</td>
+<td>0.2</td>
+<td><span class="math inline">\(B = 0.7\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\hat m_P\)</span>, the heavier part moved down to mass <span class="math inline">\(B\)</span></td>
+<td><span class="math inline">\(1/3\)</span></td>
+<td><span class="math inline">\(4/15\)</span></td>
+<td><span class="math inline">\(1/10\)</span></td>
+<td>0.7</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\hat m_Q = m_Q\)</span></td>
+<td>0.2</td>
+<td>0.3</td>
+<td>0.2</td>
+<td>0.7</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(R_D = (p - \hat m_P)/0.3\)</span></td>
+<td><span class="math inline">\(8/9\)</span></td>
+<td><span class="math inline">\(1/9\)</span></td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(R_{D'} = (q - \hat m_Q)/0.3\)</span></td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The rows <span class="math inline">\(m_P\)</span> and <span class="math inline">\(m_Q\)</span> are the first guesses for the pure parts, with masses <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>. The heavier one, <span class="math inline">\(m_P\)</span>, is moved down by step 4 of the derivation below: it is mixed with <span class="math inline">\(m_Q/e^\varepsilon = m_Q/2\)</span>, with weight <span class="math inline">\(\theta^* = \frac29\)</span> on <span class="math inline">\(m_Q/2\)</span>, chosen so that the mass falls to <span class="math inline">\(B\)</span>. So on output 1 the row <span class="math inline">\(\hat m_P\)</span> is <span class="math inline">\(\frac79 \times 0.4 + \frac29 \times 0.1 = \frac13\)</span>. The lighter mass <span class="math inline">\(B = 0.7\)</span> is already <span class="math inline">\(1 - \delta\)</span>, so no further scaling is needed, and both pure parts end with mass <span class="math inline">\(0.7\)</span>. They also stay within a factor 2 of each other on every output, because the ratios <span class="math inline">\(\hat m_P/\hat m_Q\)</span> are <span class="math inline">\(\frac53\)</span>, <span class="math inline">\(\frac89\)</span> and <span class="math inline">\(\frac12\)</span>. What is left over has mass <span class="math inline">\(0.3\)</span> on each side, so dividing it by <span class="math inline">\(\delta = 0.3\)</span> gives two distributions. The section’s checks below confirm that the channel built from these rows gives back <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> exactly.</p>
+</section>
+<section id="derivation" class="level3" data-number="J.1.3">
+<h3 data-number="J.1.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">J.1.3</span> Derivation</h3>
+<p>Assume <span class="math inline">\(0 &lt; \delta &lt; 1\)</span> and <span class="math inline">\(\varepsilon &gt; 0\)</span>. Write <span class="math inline">\(\gamma = e^\varepsilon\)</span> to keep the formulas short.</p>
+<ol type="1">
+<li><strong>Pure parts.</strong> Define, for every output <span class="math inline">\(y\)</span>, <span id="eq-auto-10mechanisms-2"><span class="math display">\[m_P(y) = \min\{p(y), \gamma q(y)\}, \qquad m_Q(y) = \min\{q(y), \gamma p(y)\}. \tag{J.3}\]</span></span> Each is non-negative and at most its own distribution, <span class="math inline">\(m_P \le p\)</span> and <span class="math inline">\(m_Q \le q\)</span>.</li>
+<li><strong>They are within a factor <span class="math inline">\(\gamma\)</span>.</strong> The claim is <span class="math inline">\(m_P \le \gamma m_Q\)</span> at every output. The minimum <span class="math inline">\(m_P\)</span> is at most <span class="math inline">\(\gamma q\)</span> by definition. To compare it with <span class="math inline">\(\gamma m_Q = \min\{\gamma q, \gamma \cdot \gamma p\}\)</span>, note that it is also at most <span class="math inline">\(p\)</span>, which is at most <span class="math inline">\(\gamma^2 p\)</span> because <span class="math inline">\(\gamma \ge 1\)</span>. So <span class="math inline">\(m_P\)</span> is at most both <span class="math inline">\(\gamma q\)</span> and <span class="math inline">\(\gamma \cdot \gamma p\)</span>, and hence at most <span class="math inline">\(\gamma\)</span> times the smaller one, which is <span class="math inline">\(\gamma m_Q\)</span>. Swapping the roles gives <span class="math inline">\(m_Q \le \gamma m_P\)</span>.</li>
+<li><strong>Their masses.</strong> At each output, <span class="math inline">\(p - \min\{p, \gamma q\} = (p - \gamma q)_+\)</span>: either the minimum is <span class="math inline">\(p\)</span> and both sides are 0, or the minimum is <span class="math inline">\(\gamma q &lt; p\)</span> and both sides are <span class="math inline">\(p - \gamma q\)</span>. Summing over outputs, the mass of <span class="math inline">\(m_P\)</span> is <span id="eq-auto-10mechanisms-3"><span class="math display">\[A = \sum_y m_P(y) = 1 - E_\gamma(P\|Q) \ge 1 - \delta, \tag{J.4}\]</span></span> and in the same way the mass of <span class="math inline">\(m_Q\)</span> is <span class="math inline">\(B = 1 - E_\gamma(Q\|P) \ge 1 - \delta\)</span>.</li>
+<li><strong>Move the heavier part down.</strong> Say <span class="math inline">\(A \ge B\)</span>; otherwise swap the names <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>. For a weight <span class="math inline">\(\theta\)</span> between 0 and 1, mix <span class="math inline">\(m_P\)</span> with the scaled-down <span class="math inline">\(\gamma^{-1}m_Q\)</span>: <span id="eq-auto-10mechanisms-4"><span class="math display">\[m_P^\theta = (1 - \theta)\,m_P + \theta\,\gamma^{-1}m_Q. \tag{J.5}\]</span></span> Three properties hold for every <span class="math inline">\(\theta\)</span>, because each holds for both pieces of the mix, and a mix of two numbers lies between them. First, the mix fits inside <span class="math inline">\(p\)</span>: <span class="math inline">\(m_P \le p\)</span> by step 1, and <span class="math inline">\(\gamma^{-1}m_Q \le \gamma^{-1}\gamma p = p\)</span> because <span class="math inline">\(m_Q \le \gamma p\)</span>. Second, it is at most <span class="math inline">\(\gamma m_Q\)</span>: <span class="math inline">\(m_P \le \gamma m_Q\)</span> by step 2, and <span class="math inline">\(\gamma^{-1}m_Q \le \gamma m_Q\)</span> because <span class="math inline">\(\gamma \ge 1\)</span>. Third, it is at least <span class="math inline">\(\gamma^{-1}m_Q\)</span>, which is the reverse bound <span class="math inline">\(m_Q \le \gamma m_P^\theta\)</span>. This holds because step 2 gives <span class="math inline">\(m_Q \le \gamma m_P\)</span>, that is <span class="math inline">\(m_P \ge \gamma^{-1}m_Q\)</span>, and the second piece equals <span class="math inline">\(\gamma^{-1}m_Q\)</span>. The mass of the mix is <span class="math inline">\((1 - \theta)A + \theta\gamma^{-1}B\)</span>. It falls in a straight line from <span class="math inline">\(A\)</span> at <span class="math inline">\(\theta = 0\)</span> to <span class="math inline">\(\gamma^{-1}B\)</span> at <span class="math inline">\(\theta = 1\)</span>, and <span class="math inline">\(\gamma^{-1}B \le B \le A\)</span>. So it passes through <span class="math inline">\(B\)</span>, at <span id="eq-auto-10mechanisms-5"><span class="math display">\[\theta^* = \frac{A - B}{A - \gamma^{-1}B} \tag{J.6}\]</span></span> (and <span class="math inline">\(\theta^* = 0\)</span> when <span class="math inline">\(A = B\)</span>). Now <span class="math inline">\(m_P^{\theta^*}\)</span> and <span class="math inline">\(m_Q\)</span> both have mass <span class="math inline">\(B\)</span>.</li>
+<li><strong>Scale both to mass <span class="math inline">\(1 - \delta\)</span>.</strong> Multiply both by <span class="math inline">\((1 - \delta)/B\)</span>, which is at most 1 by step 3: <span id="eq-auto-10mechanisms-6"><span class="math display">\[\hat m_P = \frac{1 - \delta}{B}\,m_P^{\theta^*}, \qquad \hat m_Q = \frac{1 - \delta}{B}\,m_Q. \tag{J.7}\]</span></span> Scaling both by the same factor keeps the ratio bounds of step 4 between <span class="math inline">\(m_P^{\theta^*}\)</span> and <span class="math inline">\(m_Q\)</span>, and scaling down keeps <span class="math inline">\(\hat m_P \le p\)</span> and <span class="math inline">\(\hat m_Q \le q\)</span>. Dividing by <span class="math inline">\(1 - \delta\)</span> then gives two distributions, <span id="eq-auto-10mechanisms-7"><span class="math display">\[\bar P = \frac{\hat m_P}{1 - \delta}, \qquad \bar Q = \frac{\hat m_Q}{1 - \delta}, \tag{J.8}\]</span></span> with <span class="math inline">\(\bar P(y) \le \gamma\bar Q(y)\)</span> and <span class="math inline">\(\bar Q(y) \le \gamma\bar P(y)\)</span> at every output. So <span class="math inline">\((\bar P, \bar Q)\)</span> is an <span class="math inline">\(\varepsilon\)</span>-DP pair.</li>
+<li><strong>The leftovers are distributions.</strong> Define the leftovers <span class="math inline">\(R_D = (p - \hat m_P)/\delta\)</span> and <span class="math inline">\(R_{D'} = (q - \hat m_Q)/\delta\)</span>. Each is non-negative because of step 5, and each sums to <span class="math inline">\((1 - (1 - \delta))/\delta = 1\)</span>, so each is a distribution. Rearranging the definitions gives the split <span id="eq-apx-mech-split"><span class="math display">\[P = (1 - \delta)\bar P + \delta R_D, \qquad Q = (1 - \delta)\bar Q + \delta R_{D'}. \tag{J.9}\]</span></span></li>
+<li><strong>The channel.</strong> The channel sends “flag <span class="math inline">\(D\)</span>” to <span class="math inline">\(R_D\)</span> and “flag <span class="math inline">\(D'\)</span>” to <span class="math inline">\(R_{D'}\)</span>. It sends the reports 0 and 1 to the two rows of the <span class="math inline">\(\delta = 0\)</span> channel <a href="../part03-dp-foundations/04-composition.html#eq-comp-channel" class="quarto-xref">Equation&nbsp;<span>21.10</span></a>, built for the pure pair <span class="math inline">\((\bar P, \bar Q)\)</span>: <span id="eq-auto-10mechanisms-8"><span class="math display">\[K(y \mid 0) = \frac{\gamma\bar P(y) - \bar Q(y)}{\gamma - 1}, \qquad K(y \mid 1) = \frac{\gamma\bar Q(y) - \bar P(y)}{\gamma - 1}. \tag{J.10}\]</span></span> The composition chapter shows that these rows are distributions when the pair is <span class="math inline">\(\varepsilon\)</span>-DP: each entry is non-negative because no output is more than <span class="math inline">\(\gamma\)</span> times likelier under one side, and each row sums to <span class="math inline">\((\gamma - 1)/(\gamma - 1) = 1\)</span>. It also shows that mixing the rows with weights <span class="math inline">\(t\)</span> and <span class="math inline">\(1 - t\)</span> gives <span class="math inline">\(\bar P\)</span>, and with weights <span class="math inline">\(1 - t\)</span> and <span class="math inline">\(t\)</span> gives <span class="math inline">\(\bar Q\)</span>.</li>
+<li><strong>Check <a href="#eq-apx-mech-channel" class="quarto-xref">Equation&nbsp;<span>J.2</span></a>.</strong> Feed <span class="math inline">\(P^\star\)</span> through <span class="math inline">\(K\)</span>, one input at a time. The input “flag <span class="math inline">\(D\)</span>” has probability <span class="math inline">\(\delta\)</span>, and the channel sends it to <span class="math inline">\(R_D\)</span>. The reports 0 and 1 have probabilities <span class="math inline">\((1 - \delta)t\)</span> and <span class="math inline">\((1 - \delta)(1 - t)\)</span>, so by step 7 their rows mix to <span class="math inline">\((1 - \delta)\bar P\)</span>. The input “flag <span class="math inline">\(D'\)</span>” has probability 0 under <span class="math inline">\(P^\star\)</span> and adds nothing. So the total is <span class="math inline">\(\delta R_D + (1 - \delta)\bar P\)</span>, which is <span class="math inline">\(P\)</span> by <a href="#eq-apx-mech-split" class="quarto-xref">Equation&nbsp;<span>J.9</span></a>. The same steps with <span class="math inline">\(Q^\star\)</span>, whose report 1 has probability <span class="math inline">\((1 - \delta)t\)</span>, give <span class="math inline">\((1 - \delta)\bar Q + \delta R_{D'} = Q\)</span>.</li>
+</ol>
+</section>
+<section id="checking-it" class="level3" data-number="J.1.4">
+<h3 data-number="J.1.4" class="anchored" data-anchor-id="checking-it"><span class="header-section-number">J.1.4</span> Checking it</h3>
+<p>The script runs the construction on three kinds of pairs: the small example, many random pairs, and a binned normal pair. On the small example of <a href="#tbl-apx-mech-small" class="quarto-xref">Table&nbsp;<span>J.2</span></a> it finds <span class="math inline">\(\theta^* = 0.2222\)</span> and the channel rows <span class="math inline">\(K(\cdot \mid 0) = (0.6667, 0.3333, 0)\)</span> and <span class="math inline">\(K(\cdot \mid 1) = (0.0952, 0.4762, 0.4286)\)</span>. Feeding <span class="math inline">\(P^\star\)</span> and <span class="math inline">\(Q^\star\)</span> through them returns <span class="math inline">\((0.6, 0.3, 0.1)\)</span> and <span class="math inline">\((0.2, 0.3, 0.5)\)</span>. It then draws 2,000 random pairs for each of three settings: 3 outputs at <span class="math inline">\(\varepsilon = 0.5\)</span>, 8 outputs at <span class="math inline">\(\varepsilon = 1\)</span> and 20 outputs at <span class="math inline">\(\varepsilon = 2\)</span>. A quarter of the pairs have an output that only one side can produce. Such an output has an infinite privacy loss, so all of its mass must go into the leftover. Each pair gets its own exact <span class="math inline">\(\delta\)</span>. Over all 6,000 pairs, <span class="math inline">\(P^\star K\)</span> and <span class="math inline">\(Q^\star K\)</span> differ from <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> by at most <span class="math inline">\(2.2\times10^{-16}\)</span>, and every ratio bound of step 5 holds to within rounding. The smallest channel entry is <span class="math inline">\(-1.4\times10^{-13}\)</span>, which is rounding too: the leftover rows divide a difference by <span class="math inline">\(\delta\)</span>, and <span class="math inline">\(\delta\)</span> is sometimes small.</p>
+<p><a href="#fig-apx-mech-fourpoint-split" class="quarto-xref">Figure&nbsp;<span>J.1</span></a> shows the split on a larger pair. <span class="math inline">\(P\)</span> is a normal distribution with mean 0 and standard deviation 1, <span class="math inline">\(Q\)</span> one with mean 1 and standard deviation 0.8, each reported in eight bins. At <span class="math inline">\(\varepsilon = 1\)</span> the two hockey-stick divergences are <span class="math inline">\(0.2259\)</span> and <span class="math inline">\(0.0844\)</span>, so <span class="math inline">\(\delta = 0.2259\)</span>. The red leftover of <span class="math inline">\(P\)</span> sits in the left bins, where <span class="math inline">\(p\)</span> exceeds <span class="math inline">\(e^\varepsilon q\)</span>, while the leftover of <span class="math inline">\(Q\)</span> sits on the right, where <span class="math inline">\(q\)</span> exceeds <span class="math inline">\(e^\varepsilon p\)</span>. In both panels the blue pure parts stay under the dashed line.</p>
+<div id="fig-apx-mech-fourpoint-split" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-fourpoint-split-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_fourpoint_split.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-fourpoint-split-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.1: The split of <a href="#eq-apx-mech-split" class="quarto-xref">Equation&nbsp;<span>J.9</span></a> for a pair of binned normal distributions at <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 0.2259\)</span>. Blue: the pure parts <span class="math inline">\((1 - \delta)\overline P\)</span> and <span class="math inline">\((1 - \delta)\overline Q\)</span>. Red: the leftovers <span class="math inline">\(\delta R_D\)</span> and <span class="math inline">\(\delta R_{D'}\)</span>. Dashed: <span class="math inline">\(e^\varepsilon\)</span> times the other side’s pure part, which each blue bar must stay under.
+</figcaption>
+</figure>
+</div>
+<p><a href="#fig-apx-mech-fourpoint-tradeoff" class="quarto-xref">Figure&nbsp;<span>J.2</span></a> shows the same pair as hypothesis tests. On the left are trade-off curves: for each false positive rate, the smallest false negative rate any test reaches. The pair’s curve lies above the boundary <span class="math inline">\(f_{\varepsilon,\delta}(\alpha) = \max\{0, 1 - \delta - e^\varepsilon\alpha, e^{-\varepsilon}(1 - \delta - \alpha)\}\)</span> of <a href="../part03-dp-foundations/01-definition.html#eq-dpdef-tradeoff" class="quarto-xref">Equation&nbsp;<span>18.14</span></a>, which is exactly the curve of the four-point pair. Its pure part lies above the higher boundary <span class="math inline">\(f_{\varepsilon,0}\)</span> of plain randomized response, because removing the leftover removes the outputs that tests can exploit. On the right is step 4. Here <span class="math inline">\(Q\)</span>’s first pure part is the heavier one, with mass <span class="math inline">\(B = 0.9156\)</span> against <span class="math inline">\(A = 0.7741\)</span>. So step 4 runs with the roles of <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> swapped: <span class="math inline">\(Q\)</span>’s part is mixed down, and it reaches <span class="math inline">\(A\)</span> at <span class="math inline">\(\theta^* = 0.2243\)</span>.</p>
+<div id="fig-apx-mech-fourpoint-tradeoff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-fourpoint-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_fourpoint_tradeoff.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-fourpoint-tradeoff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.2: Left: trade-off curves of the binned normal pair (orange) and of its pure part (blue dashed), against the boundaries <span class="math inline">\(f_{\varepsilon,\delta}\)</span> (black), attained by the four-point pair, and <span class="math inline">\(f_{\varepsilon,0}\)</span> (dotted), attained by randomized response. Right: the mass of the mixed heavier pure part against the mixing weight <span class="math inline">\(\theta\)</span>; it falls in a straight line and meets the lighter part’s mass at <span class="math inline">\(\theta^* = 0.224\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>The result is exact, not a bound, so there is no slack to measure. The construction is not unique, because other splits work too. But no split can use a <span class="math inline">\(\delta\)</span> below the pair’s own: every split needs a leftover of mass at least <span class="math inline">\(\max\{E_\gamma(P\|Q), E_\gamma(Q\|P)\}\)</span>, because a leftover smaller than the mass sticking out above <span class="math inline">\(\gamma\)</span> times the other side would leave some of that mass in the pure part.</p>
+</section>
+<section id="what-it-does-not-cover" class="level3" data-number="J.1.5">
+<h3 data-number="J.1.5" class="anchored" data-anchor-id="what-it-does-not-cover"><span class="header-section-number">J.1.5</span> What it does not cover</h3>
+<p>The proof needs <span class="math inline">\(\delta &gt; 0\)</span> to divide by in step 6, and the case <span class="math inline">\(\delta = 0\)</span> is the chapter’s own derivation. It also needs <span class="math inline">\(\varepsilon &gt; 0\)</span> to divide by <span class="math inline">\(\gamma - 1\)</span> in step 7. With <span class="math inline">\(\varepsilon = 0\)</span> the pure parts are equal, <span class="math inline">\(\bar P = \bar Q\)</span>, randomized response reports 0 with probability <span class="math inline">\(\frac12\)</span> on both sides, and both rows of the channel are simply <span class="math inline">\(\bar P\)</span>.</p>
+<p>Continuous outputs need one change. Replace the probabilities <span class="math inline">\(p(y)\)</span> and <span class="math inline">\(q(y)\)</span> by densities with respect to a common reference distribution, for example <span class="math inline">\((P + Q)/2\)</span>. Both have densities between 0 and 2 with respect to it, so every quantity above is finite. Every step above works output by output, so it goes through with sums replaced by integrals.</p>
+</section>
+</section>
+<section id="sec-apx-mech-zcdp" class="level2" data-number="J.2">
+<h2 data-number="J.2" class="anchored" data-anchor-id="sec-apx-mech-zcdp"><span class="header-section-number">J.2</span> Approximate DP implies approximate zCDP</h2>
+<section id="what-the-chapter-uses-1" class="level3" data-number="J.2.1">
+<h3 data-number="J.2.1" class="anchored" data-anchor-id="what-the-chapter-uses-1"><span class="header-section-number">J.2.1</span> What the chapter uses</h3>
+<p><strong>Zero-concentrated differential privacy</strong> describes a mechanism by a slope <span class="math inline">\(\rho\)</span>. It asks that the Rényi divergence <span class="math inline">\(D_\alpha\)</span> of every order <span class="math inline">\(\alpha &gt; 1\)</span>, between the outputs on neighbouring datasets, lie under the line <span class="math inline">\(\rho\alpha\)</span> through the origin (<a href="../part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-def" class="quarto-xref">Equation&nbsp;<span>31.2</span></a>). The approximate version allows this to fail on an event of probability at most <span class="math inline">\(\delta\)</span>. Precisely, a mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\(\delta\)</span>-approximately <span class="math inline">\(\rho\)</span>-zCDP</strong> if every pair of neighbours <span class="math inline">\(D \simeq D'\)</span> has an event <span class="math inline">\(E\)</span> for the run on <span class="math inline">\(D\)</span> and an event <span class="math inline">\(E'\)</span> for the run on <span class="math inline">\(D'\)</span> with the following two properties. (The events may depend on how the run produced its output, as the idea below explains, and <span class="math inline">\(M(D)|_E\)</span> is the output distribution conditioned on <span class="math inline">\(E\)</span>.) Each event has probability at least <span class="math inline">\(1 - \delta\)</span>, and for every order <span class="math inline">\(\alpha &gt; 1\)</span>, <span id="eq-auto-10mechanisms-9"><span class="math display">\[D_\alpha\big(M(D)|_E\,\big\|\,M(D')|_{E'}\big) \le \rho\alpha \qquad\text{and}\qquad D_\alpha\big(M(D')|_{E'}\,\big\|\,M(D)|_E\big) \le \rho\alpha. \tag{J.11}\]</span></span> The chapter states in <a href="../part04-privacy-accounting/03-concentrated-dp.html#sec-cdp-approx" class="quarto-xref"><span>Section 31.7</span></a> that an <span class="math inline">\((\varepsilon, \delta)\)</span>-DP mechanism is <span class="math inline">\(\delta\)</span>-approximately <span class="math inline">\((\varepsilon^2/2)\)</span>-zCDP (Bun &amp; Steinke 2016, Proposition 1.13). As the reason, it says only that any <span class="math inline">\((\varepsilon, \delta)\)</span>-DP pair decomposes so that “with probability <span class="math inline">\(1 - \delta\)</span> it behaves like an <span class="math inline">\(\varepsilon\)</span>-DP pair”. It also states that approximate zCDP composes, with failure probability <span class="math inline">\(\delta_1 + \delta_2 - \delta_1\delta_2\)</span> for two steps (their Lemma 8.2), and it uses both facts in an example pipeline that mixes stability-based steps with Gaussian steps.</p>
+</section>
+<section id="the-idea-1" class="level3" data-number="J.2.2">
+<h3 data-number="J.2.2" class="anchored" data-anchor-id="the-idea-1"><span class="header-section-number">J.2.2</span> The idea</h3>
+<p>The decomposition is <a href="#eq-apx-mech-split" class="quarto-xref">Equation&nbsp;<span>J.9</span></a> of the previous section. It says that you can produce <span class="math inline">\(M(D)\)</span> in two stages. First flip a coin that says “pure” with probability <span class="math inline">\(1 - \delta\)</span>. If it does, draw the output from the pure part <span class="math inline">\(\bar P\)</span>, and otherwise draw it from the leftover <span class="math inline">\(R_D\)</span>. The output then has exactly the distribution <span class="math inline">\(P = (1 - \delta)\bar P + \delta R_D\)</span>, so this two-stage run is the same mechanism. Do the same on <span class="math inline">\(D'\)</span> with <span class="math inline">\(\bar Q\)</span> and <span class="math inline">\(R_{D'}\)</span>. Now let <span class="math inline">\(E\)</span> and <span class="math inline">\(E'\)</span> be the events that the coins say “pure”. Conditioned on them, the outputs have distributions <span class="math inline">\(\bar P\)</span> and <span class="math inline">\(\bar Q\)</span>, an <span class="math inline">\(\varepsilon\)</span>-DP pair, and the chapter has already shown that every <span class="math inline">\(\varepsilon\)</span>-DP pair is <span class="math inline">\((\varepsilon^2/2)\)</span>-zCDP.</p>
+<p>Note that these events are about how the output was produced, not only about the output itself. That is enough for the chapter, because its conversion from approximate zCDP back to <span class="math inline">\((\varepsilon, \delta)\)</span>-DP uses <span class="math inline">\(E\)</span> only through its probability and through the conditional distribution.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="J.2.3">
+<h3 data-number="J.2.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">J.2.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Split the pair.</strong> Fix neighbours <span class="math inline">\(D \simeq D'\)</span>, with output distributions <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span>. Because the mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, both hockey-stick divergences are at most <span class="math inline">\(\delta\)</span>. For <span class="math inline">\(0 &lt; \delta &lt; 1\)</span> and <span class="math inline">\(\varepsilon &gt; 0\)</span>, the previous section then gives <a href="#eq-apx-mech-split" class="quarto-xref">Equation&nbsp;<span>J.9</span></a>, with <span class="math inline">\((\bar P, \bar Q)\)</span> an <span class="math inline">\(\varepsilon\)</span>-DP pair. If <span class="math inline">\(\delta = 0\)</span>, take <span class="math inline">\(\bar P = P\)</span> and <span class="math inline">\(\bar Q = Q\)</span>; if <span class="math inline">\(\varepsilon = 0\)</span>, the previous section’s last part covers it; and <span class="math inline">\(\delta = 1\)</span> makes the claim empty.</li>
+<li><strong>Realize the mechanism in two stages.</strong> Run <span class="math inline">\(M(D)\)</span> by drawing a coin <span class="math inline">\(C\)</span> that equals “pure” with probability <span class="math inline">\(1 - \delta\)</span>, then an output from <span class="math inline">\(\bar P\)</span> if <span class="math inline">\(C\)</span> is “pure” and from <span class="math inline">\(R_D\)</span> otherwise. The output has distribution <span class="math inline">\((1 - \delta)\bar P + \delta R_D = P\)</span>. Run <span class="math inline">\(M(D')\)</span> the same way with <span class="math inline">\(\bar Q\)</span> and <span class="math inline">\(R_{D'}\)</span>.</li>
+<li><strong>Pick the events.</strong> Let <span class="math inline">\(E\)</span> be “<span class="math inline">\(C\)</span> is pure” in the run on <span class="math inline">\(D\)</span>, and <span class="math inline">\(E'\)</span> the same in the run on <span class="math inline">\(D'\)</span>. Each has probability exactly <span class="math inline">\(1 - \delta\)</span>. Conditioned on <span class="math inline">\(E\)</span> the output is drawn from <span class="math inline">\(\bar P\)</span>, and conditioned on <span class="math inline">\(E'\)</span> from <span class="math inline">\(\bar Q\)</span>.</li>
+<li><strong>Apply the pure-DP bound.</strong> The pair <span class="math inline">\((\bar P, \bar Q)\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP, so by <a href="../part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-pure" class="quarto-xref">Equation&nbsp;<span>31.6</span></a> of <a href="../part04-privacy-accounting/03-concentrated-dp.html#sec-cdp-pure" class="quarto-xref"><span>Section 31.4</span></a>, <span id="eq-auto-10mechanisms-10"><span class="math display">\[D_\alpha(\bar P\|\bar Q) \le \frac{\alpha\varepsilon^2}{2} \qquad\text{and}\qquad D_\alpha(\bar Q\|\bar P) \le \frac{\alpha\varepsilon^2}{2} \qquad\text{for every } \alpha &gt; 1. \tag{J.12}\]</span></span> That chapter proves it with Hoeffding’s lemma. The privacy loss of an <span class="math inline">\(\varepsilon\)</span>-DP pair lies in <span class="math inline">\([-\varepsilon, \varepsilon]\)</span>, and a Rényi divergence is the logarithm of an exponential moment of the privacy loss. Hoeffding’s lemma bounds that moment by a normal one, and the result is the line <span class="math inline">\(\alpha\varepsilon^2/2\)</span>. Steps 3 and 4 together are the definition with <span class="math inline">\(\rho = \varepsilon^2/2\)</span>. The sharper <a href="../part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-pure-sharp" class="quarto-xref">Equation&nbsp;<span>31.7</span></a> gives <span class="math inline">\(\rho = \varepsilon\tanh(\varepsilon/2)\)</span> the same way.</li>
+</ol>
+<p><strong>Composition, in the case the chapter uses.</strong> The pipeline of <a href="../part04-privacy-accounting/03-concentrated-dp.html#sec-cdp-approx" class="quarto-xref"><span>Section 31.7</span></a> mixes steps that are <span class="math inline">\((\varepsilon_i, \delta_i)\)</span>-DP with steps that are <span class="math inline">\(\rho_i\)</span>-zCDP, each chosen after seeing the earlier outputs. For a zCDP step take <span class="math inline">\(\delta_i = 0\)</span> and the coin always “pure”. For an <span class="math inline">\((\varepsilon_i, \delta_i)\)</span>-DP step take <span class="math inline">\(\rho_i = \varepsilon_i^2/2\)</span> and the two-stage run of step 2, built for the mechanism that the earlier outputs (the history) selected.</p>
+<ol start="5" type="1">
+<li><strong>The coins ignore the history.</strong> Whatever the earlier outputs were, step <span class="math inline">\(i\)</span>’s coin says “pure” with probability exactly <span class="math inline">\(1 - \delta_i\)</span>. So the event “every coin says pure” has probability <span class="math inline">\(\prod_i(1 - \delta_i) = 1 - \delta_a\)</span>, which defines the failure probability <span class="math inline">\(\delta_a\)</span>.</li>
+<li><strong>Condition on all coins.</strong> The probability of a sequence of outputs together with “every coin says pure” is a product over steps of <span class="math inline">\((1 - \delta_i)\)</span> times the pure distribution of step <span class="math inline">\(i\)</span> given the history. Dividing by <span class="math inline">\(\prod_i(1 - \delta_i)\)</span> leaves the product of the pure distributions. So conditioned on all coins being pure, the run is an adaptive composition of the pure parts, on <span class="math inline">\(D\)</span> and on <span class="math inline">\(D'\)</span> alike.</li>
+<li><strong>Add the slopes.</strong> Each pure part is <span class="math inline">\(\rho_i\)</span>-zCDP for every history. Rényi divergences of an adaptive composition add, even when each step is chosen from the earlier outputs (Fact 2 of <a href="../part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>), so the conditioned run is <span class="math inline">\((\sum_i\rho_i)\)</span>-zCDP. The whole pipeline is therefore <span class="math inline">\(\delta_a\)</span>-approximately <span class="math inline">\((\sum_i\rho_i)\)</span>-zCDP, with <span class="math inline">\(\delta_a = 1 - \prod_i(1 - \delta_i)\)</span>. For two steps that is <span class="math inline">\(\delta_1 + \delta_2 - \delta_1\delta_2\)</span>.</li>
+</ol>
+</section>
+<section id="checking-it-1" class="level3" data-number="J.2.4">
+<h3 data-number="J.2.4" class="anchored" data-anchor-id="checking-it-1"><span class="header-section-number">J.2.4</span> Checking it</h3>
+<p>The script computes the Rényi divergences of the pure parts from the previous section on a grid of orders from 1.001 to 20.9, in both directions. For the three-output example, with <span class="math inline">\(\varepsilon = \ln 2\)</span> and <span class="math inline">\(\rho = \varepsilon^2/2 = 0.2402\)</span>, the largest value of <span class="math inline">\(D_\alpha/(\alpha\rho)\)</span> is <span class="math inline">\(0.4275\)</span>. For the binned normal pair, with <span class="math inline">\(\rho = 0.5\)</span>, it is <span class="math inline">\(0.4306\)</span>. Both are well under 1, the most the bound allows, and the slack has two sources. First, the Rényi divergence of an <span class="math inline">\(\varepsilon\)</span>-DP pair never exceeds <span class="math inline">\(\varepsilon\)</span>, so as <span class="math inline">\(\alpha\)</span> grows its curve flattens while the line <span class="math inline">\(\alpha\varepsilon^2/2\)</span> keeps rising. Second, these pure parts are milder than randomized response, the worst <span class="math inline">\(\varepsilon\)</span>-DP pair.</p>
+</section>
+<section id="what-it-does-not-cover-1" class="level3" data-number="J.2.5">
+<h3 data-number="J.2.5" class="anchored" data-anchor-id="what-it-does-not-cover-1"><span class="header-section-number">J.2.5</span> What it does not cover</h3>
+<p>The events here depend on the coin that chooses between the pure part and the leftover, not only on the output. If an event had to be a set of outputs, the argument would not apply as it stands, because the leftover and the pure part can share outputs. The chapter’s derivation in <a href="../part04-privacy-accounting/03-concentrated-dp.html#sec-cdp-approx" class="quarto-xref"><span>Section 31.7</span></a> uses the events only through their probabilities and conditional distributions, so it holds for these events.</p>
+<p>The composition argument above needs each good event to have probability exactly <span class="math inline">\(1 - \delta_i\)</span> given any history, which is what the two-stage run provides. Bun &amp; Steinke’s Lemma 8.2 covers general approximately-zCDP steps, whose good events only have probability at least <span class="math inline">\(1 - \delta_i\)</span> and may depend on the history. That general case stays cited. For the pipelines of the chapter, which mix <span class="math inline">\((\varepsilon, \delta)\)</span>-DP steps with zCDP steps, the special case is all that is used.</p>
+</section>
+</section>
+<section id="sec-apx-mech-histogram" class="level2" data-number="J.3">
+<h2 data-number="J.3" class="anchored" data-anchor-id="sec-apx-mech-histogram"><span class="header-section-number">J.3</span> The stability-based histogram</h2>
+<section id="what-the-chapter-uses-2" class="level3" data-number="J.3.1">
+<h3 data-number="J.3.1" class="anchored" data-anchor-id="what-the-chapter-uses-2"><span class="header-section-number">J.3.1</span> What the chapter uses</h3>
+<p>A histogram over a universe of <span class="math inline">\(N\)</span> bins releases a count for each bin. Under pure DP, the packing argument of <a href="../part03-dp-foundations/10-lower-bounds.html#sec-lower-packing" class="quarto-xref"><span>Section 27.3</span></a> shows that the <span class="math inline">\(\ell_\infty\)</span> error, the largest error over the bins, must grow like <span class="math inline">\(\ln N/\varepsilon\)</span> (<a href="../part03-dp-foundations/10-lower-bounds.html#eq-lower-histogram" class="quarto-xref">Equation&nbsp;<span>27.9</span></a>). Under approximate DP, the chapter says, “the stability-based histogram (Vadhan 2017) adds noise only to the bins that are non-empty … its error does not grow with <span class="math inline">\(N\)</span> at all”. It gives no proof. In <a href="../part03-dp-foundations/11-mean-estimation.html#sec-mean-coarse" class="quarto-xref"><span>Section 28.5</span></a>, the same mechanism locates the data roughly before a mean is estimated, without any bound on where the data might be.</p>
+<p>The <strong>stability-based histogram</strong> with parameters <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> works on a dataset of <span class="math inline">\(n\)</span> records. Each record falls in one bin, and <span class="math inline">\(c_x\)</span> is the number of records in bin <span class="math inline">\(x\)</span>. The mechanism compares noisy counts with a threshold, set to <span id="eq-apx-mech-threshold"><span class="math display">\[T = 1 + \frac{\ln\big(1/(2\delta)\big)}{\varepsilon}. \tag{J.13}\]</span></span> For every bin with <span class="math inline">\(c_x \ge 1\)</span>, it draws a fresh Laplace noise <span class="math inline">\(Z_x \sim \mathrm{Lap}(1/\varepsilon)\)</span>, and it releases the pair <span class="math inline">\((x, c_x + Z_x)\)</span> if the noisy count exceeds <span class="math inline">\(T\)</span>. It releases nothing else, and a bin that is not released is read as 0. The chapter needs two claims about it. The first is privacy: under add/remove neighbours, where <span class="math inline">\(D'\)</span> adds or removes one record, the mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. The second is accuracy. Suppose <span class="math inline">\(k\)</span> bins are non-empty, and allow a failure probability <span class="math inline">\(\beta\)</span>. Then with probability at least <span class="math inline">\(1 - \beta\)</span> every bin’s estimate is within <span id="eq-apx-mech-hist-error"><span class="math display">\[T + \frac{\ln(k/\beta)}{\varepsilon} = 1 + \frac{\ln\big(1/(2\delta)\big) + \ln(k/\beta)}{\varepsilon} \tag{J.14}\]</span></span> of its true count. Since <span class="math inline">\(k \le n\)</span>, this is of order <span class="math inline">\((\ln(1/\delta) + \ln(n/\beta))/\varepsilon\)</span>, with no <span class="math inline">\(N\)</span> in it.</p>
+</section>
+<section id="the-idea-2" class="level3" data-number="J.3.2">
+<h3 data-number="J.3.2" class="anchored" data-anchor-id="the-idea-2"><span class="header-section-number">J.3.2</span> The idea</h3>
+<p>Adding one record changes one bin, from count <span class="math inline">\(c\)</span> to <span class="math inline">\(c + 1\)</span>, and two cases can happen. If the bin already had records, both datasets put Laplace noise on it. That is the ordinary Laplace mechanism on a count, which is <span class="math inline">\(\varepsilon\)</span>-DP, and the threshold only decides what to print, so it changes nothing. If the bin was empty, the smaller dataset never even looks at it, so it cannot be released. The larger dataset releases it only if a count of 1 plus noise clears <span class="math inline">\(T\)</span>, and the threshold is set so that this happens with probability exactly <span class="math inline">\(\delta\)</span>. So apart from an event of probability <span class="math inline">\(\delta\)</span>, the two runs print the same thing. That is the argument of <a href="../part03-dp-foundations/01-definition.html#sec-dpdef-small-delta" class="quarto-xref"><span>Section 18.10</span></a> for the mechanism that releases each record with probability <span class="math inline">\(\delta\)</span>.</p>
+<p>Accuracy comes from the same threshold. A bin that is not released has a count below about <span class="math inline">\(T\)</span>, so reading it as 0 costs at most about <span class="math inline">\(T\)</span>. A released bin has the usual Laplace error. Only the <span class="math inline">\(k\)</span> non-empty bins have any noise at all, so the union bound runs over <span class="math inline">\(k\)</span> bins, not over <span class="math inline">\(N\)</span>.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="J.3.3">
+<h3 data-number="J.3.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">J.3.3</span> Derivation</h3>
+<p><strong>Privacy.</strong> Fix a dataset <span class="math inline">\(D\)</span> and add one record, in bin <span class="math inline">\(x\)</span>, to get <span class="math inline">\(D'\)</span>.</p>
+<ol type="1">
+<li><strong>Only bin <span class="math inline">\(x\)</span> differs.</strong> Every other bin has the same count in <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span>. Its noise is drawn the same way, independently of bin <span class="math inline">\(x\)</span>, so its part of the output has the same distribution on both sides.</li>
+<li><strong>Bin <span class="math inline">\(x\)</span> was non-empty.</strong> Then <span class="math inline">\(c_x(D) \ge 1\)</span>, and both runs add <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> to a count that changes by 1. That is the Laplace mechanism with sensitivity 1, which is <span class="math inline">\(\varepsilon\)</span>-DP. Comparing the noisy count with <span class="math inline">\(T\)</span> is a function of it, which is post-processing, so bin <span class="math inline">\(x\)</span>’s part of the output is <span class="math inline">\(\varepsilon\)</span>-DP.</li>
+<li><strong>Bin <span class="math inline">\(x\)</span> was empty.</strong> On <span class="math inline">\(D\)</span> nothing about bin <span class="math inline">\(x\)</span> is ever printed, while on <span class="math inline">\(D'\)</span> bin <span class="math inline">\(x\)</span> has count 1 and is printed exactly when <span class="math inline">\(1 + Z_x &gt; T\)</span>. A <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> variable exceeds a level <span class="math inline">\(s \ge 0\)</span> with probability <span class="math inline">\(\frac12e^{-\varepsilon s}\)</span>. Here the level is <span class="math inline">\(T - 1\)</span>, which is <span class="math inline">\(\ln(1/(2\delta))/\varepsilon\)</span> by <a href="#eq-apx-mech-threshold" class="quarto-xref">Equation&nbsp;<span>J.13</span></a>, so bin <span class="math inline">\(x\)</span> is printed with probability <span id="eq-auto-10mechanisms-11"><span class="math display">\[\Pr[Z_x &gt; T - 1] = \tfrac12e^{-\ln(1/(2\delta))} = \delta. \tag{J.15}\]</span></span></li>
+<li><strong>Couple the two runs in the empty case.</strong> Run the mechanism on <span class="math inline">\(D'\)</span> by first running it on <span class="math inline">\(D\)</span> with the same noise, then drawing <span class="math inline">\(Z_x\)</span> for the new bin. The two outputs differ only if bin <span class="math inline">\(x\)</span> is printed, which has probability <span class="math inline">\(\delta\)</span>. So for any set <span class="math inline">\(S\)</span> of outputs, <span class="math inline">\(\Pr[M(D') \in S] \le \Pr[M(D) \in S] + \delta\)</span>. In the other direction, the outputs agree whenever bin <span class="math inline">\(x\)</span> is not printed. That depends only on <span class="math inline">\(Z_x\)</span>, which is drawn independently of everything else, so the outputs agree with probability <span class="math inline">\(1 - \delta\)</span> whatever <span class="math inline">\(M(D)\)</span> printed, and <span class="math inline">\(\Pr[M(D') \in S] \ge (1 - \delta)\Pr[M(D) \in S] \ge \Pr[M(D) \in S] - \delta\)</span>. Both directions are <span class="math inline">\((0, \delta)\)</span>-DP.</li>
+<li><strong>Put the bins back together.</strong> Step 4 already compares whole outputs, but step 2 compares only bin <span class="math inline">\(x\)</span>’s part. To finish step 2, fix the output <span class="math inline">\(w\)</span> of all the other bins. For each <span class="math inline">\(w\)</span>, bin <span class="math inline">\(x\)</span>’s part satisfies the <span class="math inline">\(\varepsilon\)</span>-DP inequality. The other bins’ output <span class="math inline">\(w\)</span> has the same distribution on <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span>, so averaging the inequality over <span class="math inline">\(w\)</span> with these common weights keeps it. Either way the pair satisfies <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, in both orders.</li>
+</ol>
+<p><strong>Accuracy.</strong> Let the <span class="math inline">\(k\)</span> non-empty bins have noises <span class="math inline">\(Z_x\)</span>.</p>
+<ol start="6" type="1">
+<li><strong>Error of one bin.</strong> An empty bin is never printed and its estimate 0 is exact. A printed bin has error <span class="math inline">\(|Z_x|\)</span>. A non-empty bin that is not printed has <span class="math inline">\(c_x + Z_x \le T\)</span>, so its error, the count <span class="math inline">\(c_x\)</span> itself, is at most <span class="math inline">\(T - Z_x \le T + |Z_x|\)</span>. Either way the error is at most <span class="math inline">\(T + |Z_x|\)</span>.</li>
+<li><strong>All <span class="math inline">\(k\)</span> noises at once.</strong> A <span class="math inline">\(\mathrm{Lap}(1/\varepsilon)\)</span> variable exceeds <span class="math inline">\(s\)</span> in absolute value with probability <span class="math inline">\(e^{-\varepsilon s}\)</span>. The chance that at least one of <span class="math inline">\(k\)</span> events happens is at most the sum of their chances (the union bound), so <span id="eq-auto-10mechanisms-12"><span class="math display">\[\Pr\Big[\max_x|Z_x| &gt; s\Big] \le k e^{-\varepsilon s}. \tag{J.16}\]</span></span> The right side equals <span class="math inline">\(\beta\)</span> at <span class="math inline">\(s = \ln(k/\beta)/\varepsilon\)</span>. Together with step 6, this shows that the <span class="math inline">\(\ell_\infty\)</span> error is at most <a href="#eq-apx-mech-hist-error" class="quarto-xref">Equation&nbsp;<span>J.14</span></a> with probability at least <span class="math inline">\(1 - \beta\)</span>.</li>
+</ol>
+</section>
+<section id="checking-it-2" class="level3" data-number="J.3.4">
+<h3 data-number="J.3.4" class="anchored" data-anchor-id="checking-it-2"><span class="header-section-number">J.3.4</span> Checking it</h3>
+<p>Take <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, so <span class="math inline">\(T = 1 + \ln(5\times10^5) = 14.1224\)</span>. <a href="#fig-apx-mech-histogram-release" class="quarto-xref">Figure&nbsp;<span>J.3</span></a> shows the probability that a bin with true count <span class="math inline">\(c\)</span> is printed. Below <span class="math inline">\(T\)</span> it falls by a factor <span class="math inline">\(e^{\varepsilon}\)</span> for each record removed, and at <span class="math inline">\(c = 1\)</span> it is exactly <span class="math inline">\(10^{-6}\)</span>. That point is the whole <span class="math inline">\(\delta\)</span> the mechanism spends.</p>
+<div id="fig-apx-mech-histogram-release" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-histogram-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_histogram_release.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-histogram-release-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.3: The probability that the stability-based histogram prints a bin, against the bin’s true count, at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, on a linear scale (left) and a log scale (right). The dotted line is the threshold <span class="math inline">\(T = 14.12\)</span>. At count 1 the probability is exactly <span class="math inline">\(\delta\)</span>, which is all the privacy that empty bins cost.
+</figcaption>
+</figure>
+</div>
+<p>For accuracy, take <span class="math inline">\(k = 10\)</span> non-empty bins and <span class="math inline">\(\beta = 0.05\)</span>. The bound <a href="#eq-apx-mech-hist-error" class="quarto-xref">Equation&nbsp;<span>J.14</span></a> is <span class="math inline">\(14.1224 + \ln 200 = 19.4207\)</span>. The script also computes the exact 95% quantile of the error when all ten bins hold the same count, and takes the worst count. The worst is a count of 18. Each such bin is suppressed with probability <span class="math inline">\(\frac12e^{-(18 - T)} = 0.0104\)</span>, and then its whole count is the error. With ten bins, at least one is suppressed with probability about 0.1, which is more than 0.05, so the 95% quantile is exactly 18. A simulation of 200,000 runs at that count gives the same 18, so the bound is loose by about 1.4 records. The union bound costs little, and the slack has two small sources. A bin is suppressed only when its noise is negative, so only one of the two Laplace tails matters, which is worth <span class="math inline">\(\ln 2 = 0.69\)</span>. And counts are whole numbers, so the worst count cannot sit exactly where the bound puts it.</p>
+<p><a href="#fig-apx-mech-histogram-error" class="quarto-xref">Figure&nbsp;<span>J.4</span></a> compares the error with pure DP as the universe grows. The Laplace histogram must add noise to all <span class="math inline">\(N\)</span> bins. All <span class="math inline">\(N\)</span> noises stay below <span class="math inline">\(a\)</span> in size with probability <span class="math inline">\((1 - e^{-\varepsilon a})^N\)</span>, so setting this to 0.95 gives the exact 95% error, <span class="math inline">\(-\ln(1 - 0.95^{1/N})/\varepsilon\)</span>, which is <span class="math inline">\(16.79\)</span> at <span class="math inline">\(N = 10^6\)</span> and <span class="math inline">\(30.60\)</span> at <span class="math inline">\(N = 10^{12}\)</span>. The stability-based histogram stays at <span class="math inline">\(19.42\)</span> for every <span class="math inline">\(N\)</span>. It beats the Laplace histogram from <span class="math inline">\(N = 1.394\times10^7\)</span>. It even falls below the packing lower bound <a href="../part03-dp-foundations/10-lower-bounds.html#eq-lower-histogram" class="quarto-xref">Equation&nbsp;<span>27.9</span></a>, <span class="math inline">\(\frac12(\ln(0.95N)/\varepsilon - 1)\)</span>, which holds for every pure-DP mechanism, but only from <span class="math inline">\(N = 2.114\times10^{17}\)</span>, because <span class="math inline">\(\ln(1/\delta)\)</span> is a large constant.</p>
+<div id="fig-apx-mech-histogram-error" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-histogram-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_histogram_error.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-histogram-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.4: The <span class="math inline">\(\ell_\infty\)</span> error at the 95% level against the number of bins <span class="math inline">\(N\)</span>, at <span class="math inline">\(\varepsilon = 1\)</span>, for data in 10 non-empty bins. Orange: the Laplace histogram (exact), a pure-DP mechanism. Blue: the packing lower bound for every pure-DP mechanism, with the impossible region shaded. Green: the stability-based histogram with <span class="math inline">\(\delta = 10^{-6}\)</span>, its bound (solid) and its exact worst case (dashed), neither of which depends on <span class="math inline">\(N\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="what-it-does-not-cover-2" class="level3" data-number="J.3.5">
+<h3 data-number="J.3.5" class="anchored" data-anchor-id="what-it-does-not-cover-2"><span class="header-section-number">J.3.5</span> What it does not cover</h3>
+<p>The proof is for add/remove neighbours, which is the relation of the lower-bounds chapter. Under replace neighbours, as in <a href="../part03-dp-foundations/11-mean-estimation.html#sec-mean-coarse" class="quarto-xref"><span>Section 28.5</span></a>, one record leaves one bin and joins another. Each of the two bins behaves as in step 2 or step 4, independently, and basic composition gives <span class="math inline">\((2\varepsilon, 2\delta)\)</span>-DP. So run the mechanism with <span class="math inline">\(\varepsilon/2\)</span> and <span class="math inline">\(\delta/2\)</span>.</p>
+<p>The threshold <a href="#eq-apx-mech-threshold" class="quarto-xref">Equation&nbsp;<span>J.13</span></a> is the smallest that makes step 3 cost exactly <span class="math inline">\(\delta\)</span>. A larger threshold is also private, at the price of a larger error. The bound counts only bins that hold data. A universe with <span class="math inline">\(N\)</span> bins, or even infinitely many, never enters, because the mechanism never draws noise for an empty bin.</p>
+</section>
+</section>
+<section id="sec-apx-mech-heavy" class="level2" data-number="J.4">
+<h2 data-number="J.4" class="anchored" data-anchor-id="sec-apx-mech-heavy"><span class="header-section-number">J.4</span> A lower bound for heavy-tailed means</h2>
+<section id="what-the-chapter-uses-3" class="level3" data-number="J.4.1">
+<h3 data-number="J.4.1" class="anchored" data-anchor-id="what-the-chapter-uses-3"><span class="header-section-number">J.4.1</span> What the chapter uses</h3>
+<p><a href="../part03-dp-foundations/11-mean-estimation.html#sec-mean-heavy" class="quarto-xref"><span>Section 28.7</span></a> estimates the mean of data whose variance is at most <span class="math inline">\(\sigma^2\)</span>, from <span class="math inline">\(n\)</span> records, under replace neighbours. It clips each record to an interval narrower than the data’s spread, accepting a bias, and reaches an error <span class="math inline">\(\alpha\)</span> with about <span class="math inline">\(\sigma^2/\alpha^2 + 8\sqrt2\,\sigma^2/(\alpha^2\varepsilon)\)</span> records, by <a href="../part03-dp-foundations/11-mean-estimation.html#eq-mean-heavy-opt" class="quarto-xref">Equation&nbsp;<span>28.16</span></a>. It then says that “Kamath, Singhal &amp; Ullman (2020) show that this is unavoidable”, and that if the <span class="math inline">\(k\)</span>-th moment <span class="math inline">\(\mathbb E|X - \mu|^k\)</span> is bounded the cost falls to about <span class="math inline">\(1/(\varepsilon\alpha^{k/(k-1)})\)</span> records. It gives no proof.</p>
+<p>This section proves the claim for mechanisms that are pure <span class="math inline">\(\varepsilon\)</span>-DP. Fix a whole number <span class="math inline">\(k \ge 2\)</span> and a bound <span class="math inline">\(m_k\)</span> on the <span class="math inline">\(k\)</span>-th central moment, the average of <span class="math inline">\(|X - \mu|^k\)</span> for a record <span class="math inline">\(X\)</span> with mean <span class="math inline">\(\mu\)</span>. For the variance, <span class="math inline">\(k = 2\)</span> and <span class="math inline">\(m_2 = \sigma^2\)</span>. The data may come from any distribution that satisfies <span id="eq-auto-10mechanisms-13"><span class="math display">\[\mathbb E|X - \mu|^k \le m_k. \tag{J.17}\]</span></span> Suppose an <span class="math inline">\(\varepsilon\)</span>-DP mechanism <span class="math inline">\(M\)</span> takes <span class="math inline">\(n\)</span> records from such a distribution and returns an estimate within less than <span class="math inline">\(\alpha\)</span> of <span class="math inline">\(\mu\)</span> with probability at least <span class="math inline">\(1 - \beta\)</span>. The probability is over both the data and the mechanism’s noise, and the target error must satisfy <span class="math inline">\(\alpha \le m_k^{1/k}/2\)</span>. Then <span id="eq-apx-mech-heavy"><span class="math display">\[n \ge \frac{\ln\big((1 - \beta)/\beta\big)}{\ln\big(1 + p(e^\varepsilon - 1)\big)} \ge \frac{\ln\big((1 - \beta)/\beta\big)}{p(e^\varepsilon - 1)}, \qquad p = \frac{(2\alpha)^{k/(k-1)}}{m_k^{1/(k-1)}}. \tag{J.18}\]</span></span> For the variance, with <span class="math inline">\(k = 2\)</span>, the simpler bound reads <span id="eq-auto-10mechanisms-14"><span class="math display">\[n \ge \frac{\sigma^2\ln\big((1 - \beta)/\beta\big)}{4\alpha^2(e^\varepsilon - 1)}. \tag{J.19}\]</span></span> For small <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(e^\varepsilon - 1\)</span> is close to <span class="math inline">\(\varepsilon\)</span>, so this is of order <span class="math inline">\(\sigma^2/(\alpha^2\varepsilon)\)</span>, the rate of the chapter’s estimator. For general <span class="math inline">\(k\)</span>, with the moment bound <span class="math inline">\(m_k\)</span> held fixed, it is of order <span class="math inline">\(1/(\varepsilon\alpha^{k/(k-1)})\)</span>.</p>
+</section>
+<section id="the-idea-3" class="level3" data-number="J.4.2">
+<h3 data-number="J.4.2" class="anchored" data-anchor-id="the-idea-3"><span class="header-section-number">J.4.2</span> The idea</h3>
+<p>Build two distributions that a good estimator must tell apart but that DP says it cannot. The first, <span class="math inline">\(P_0\)</span>, puts all its mass at 0, so its mean is 0. The second, <span class="math inline">\(P_1\)</span>, is the same except that a small probability <span class="math inline">\(p\)</span> moves to a far point <span class="math inline">\(a\)</span>. Its mean is <span class="math inline">\(pa\)</span>, which we set to <span class="math inline">\(2\alpha\)</span>. An accurate estimator must answer below <span class="math inline">\(\alpha\)</span> on data from <span class="math inline">\(P_0\)</span> and above <span class="math inline">\(\alpha\)</span> on data from <span class="math inline">\(P_1\)</span>. The far point lets the mean move by <span class="math inline">\(2\alpha\)</span> while the moment stays within its bound, because the mass out there is tiny.</p>
+<p>Now look at the data. A sample from <span class="math inline">\(P_0\)</span> is all zeros. A sample from <span class="math inline">\(P_1\)</span> is all zeros except for about <span class="math inline">\(np\)</span> records equal to <span class="math inline">\(a\)</span>, so it is only about <span class="math inline">\(np\)</span> replacements away from the all-zeros sample. Group privacy says that <span class="math inline">\(\varepsilon\)</span>-DP outputs on datasets <span class="math inline">\(J\)</span> replacements apart differ by at most a factor <span class="math inline">\(e^{J\varepsilon}\)</span>. If <span class="math inline">\(np\)</span> is small, the two samples look too much alike for the estimator to answer differently, so <span class="math inline">\(n\)</span> must be at least about <span class="math inline">\(1/(p\varepsilon)\)</span>. The more spread the moment bound allows, the farther the point <span class="math inline">\(a\)</span> can be, the smaller <span class="math inline">\(p\)</span> becomes, and the larger <span class="math inline">\(n\)</span> must be.</p>
+<p><a href="#fig-apx-mech-heavy-two-point" class="quarto-xref">Figure&nbsp;<span>J.5</span></a> draws the two distributions for <span class="math inline">\(k = 2\)</span>, <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(\alpha = 0.15\)</span>.</p>
+<div id="fig-apx-mech-heavy-two-point" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-heavy-two-point-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_heavy_two_point.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-heavy-two-point-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.5: The two distributions of the lower bound for variance at most 1 and <span class="math inline">\(\alpha = 0.15\)</span>. <span class="math inline">\(P_0\)</span> (blue) puts all its mass at 0. <span class="math inline">\(P_1\)</span> (orange, its stem at 0 drawn slightly to the right) moves mass <span class="math inline">\(p = 0.09\)</span> to <span class="math inline">\(a = 3.33\)</span>, which shifts the mean to <span class="math inline">\(2\alpha = 0.3\)</span>. An estimator accurate to <span class="math inline">\(\alpha\)</span> must answer in the blue band on <span class="math inline">\(P_0\)</span> and in the orange band on <span class="math inline">\(P_1\)</span>, so the test “is the estimate at least <span class="math inline">\(\alpha\)</span>?” separates them.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="derivation-3" class="level3" data-number="J.4.3">
+<h3 data-number="J.4.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">J.4.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>The far point.</strong> Let <span class="math inline">\(P_1\)</span> put probability <span class="math inline">\(p\)</span> on a value <span class="math inline">\(a &gt; 0\)</span> and <span class="math inline">\(1 - p\)</span> on 0, with <span class="math inline">\(pa = 2\alpha\)</span> and <span class="math inline">\(pa^k = m_k\)</span>. (Step 2 shows that <span class="math inline">\(pa^k\)</span> bounds the central moment.) Dividing the second equation by the first gives <span class="math inline">\(a^{k-1} = m_k/(2\alpha)\)</span>, so <span id="eq-auto-10mechanisms-15"><span class="math display">\[a = \Big(\frac{m_k}{2\alpha}\Big)^{1/(k-1)}, \qquad p = \frac{2\alpha}{a} = \frac{(2\alpha)^{k/(k-1)}}{m_k^{1/(k-1)}}. \tag{J.20}\]</span></span> For <span class="math inline">\(p\)</span> to be a probability you need <span class="math inline">\(a \ge 2\alpha\)</span>, which is <span class="math inline">\(m_k \ge (2\alpha)^k\)</span>, the condition <span class="math inline">\(\alpha \le m_k^{1/k}/2\)</span>. For <span class="math inline">\(k = 2\)</span> this is <span class="math inline">\(a = \sigma^2/(2\alpha)\)</span> and <span class="math inline">\(p = 4\alpha^2/\sigma^2\)</span>.</li>
+<li><strong><span class="math inline">\(P_1\)</span> meets the moment bound.</strong> Its mean is <span class="math inline">\(\mu = pa\)</span>. The value 0 is at distance <span class="math inline">\(pa\)</span> from it and the value <span class="math inline">\(a\)</span> at distance <span class="math inline">\((1 - p)a\)</span>, so <span id="eq-auto-10mechanisms-16"><span class="math display">\[\mathbb E|X - \mu|^k = (1 - p)(pa)^k + p\big((1 - p)a\big)^k = p(1 - p)a^k\big(p^{k-1} + (1 - p)^{k-1}\big). \tag{J.21}\]</span></span> Both <span class="math inline">\(p\)</span> and <span class="math inline">\(1 - p\)</span> lie in <span class="math inline">\([0, 1]\)</span>, and raising such a number to the power <span class="math inline">\(k - 1 \ge 1\)</span> cannot increase it. So the last bracket is at most <span class="math inline">\(p + (1 - p) = 1\)</span>, and the moment is at most <span class="math inline">\(p(1 - p)a^k \le pa^k = m_k\)</span>. <span class="math inline">\(P_0\)</span> has moment 0.</li>
+<li><strong>The datasets.</strong> A sample of <span class="math inline">\(n\)</span> records from <span class="math inline">\(P_0\)</span> is the all-zeros dataset <span class="math inline">\(D_0\)</span>. A sample <span class="math inline">\(D_1\)</span> from <span class="math inline">\(P_1\)</span> has some number <span class="math inline">\(J\)</span> of records equal to <span class="math inline">\(a\)</span>, where <span class="math inline">\(J\)</span> follows a binomial distribution with <span class="math inline">\(n\)</span> trials and success probability <span class="math inline">\(p\)</span>. You get <span class="math inline">\(D_1\)</span> from <span class="math inline">\(D_0\)</span> by replacing <span class="math inline">\(J\)</span> records, so the two are at distance <span class="math inline">\(J\)</span>.</li>
+<li><strong>The test.</strong> Let <span class="math inline">\(S\)</span> be the event “the estimate is at least <span class="math inline">\(\alpha\)</span>”. On <span class="math inline">\(P_0\)</span> the mean is 0, and an estimate within less than <span class="math inline">\(\alpha\)</span> of it is below <span class="math inline">\(\alpha\)</span>. So accuracy on <span class="math inline">\(P_0\)</span> gives <span class="math inline">\(\Pr[M(D_0) \in S] \le \beta\)</span>. On <span class="math inline">\(P_1\)</span> the mean is <span class="math inline">\(2\alpha\)</span>, and an estimate within less than <span class="math inline">\(\alpha\)</span> of it is above <span class="math inline">\(\alpha\)</span>. So accuracy on <span class="math inline">\(P_1\)</span>, averaged over the random dataset <span class="math inline">\(D_1\)</span>, gives <span class="math inline">\(\mathbb E\Pr[M(D_1) \in S] \ge 1 - \beta\)</span>.</li>
+<li><strong>Group privacy.</strong> For pure DP, two datasets at distance <span class="math inline">\(J\)</span> satisfy <span class="math inline">\(\Pr[M(D_1) \in S] \le e^{J\varepsilon}\Pr[M(D_0) \in S]\)</span> (<a href="../part03-dp-foundations/02-properties.html#eq-dpprop-group" class="quarto-xref">Equation&nbsp;<span>19.6</span></a> with <span class="math inline">\(\delta = 0\)</span>). The reason is that the privacy loss adds up along the path of <span class="math inline">\(J\)</span> single replacements, at most <span class="math inline">\(\varepsilon\)</span> per step. With step 4, <span class="math inline">\(\Pr[M(D_1) \in S] \le e^{J\varepsilon}\beta\)</span> for every possible <span class="math inline">\(D_1\)</span>.</li>
+<li><strong>Average over the datasets.</strong> Combining steps 4 and 5 gives <span class="math inline">\(1 - \beta \le \beta\,\mathbb E[e^{\varepsilon J}]\)</span>. Each of the <span class="math inline">\(n\)</span> records independently contributes a factor <span class="math inline">\(e^\varepsilon\)</span> with probability <span class="math inline">\(p\)</span> and 1 otherwise, so the average of <span class="math inline">\(e^{\varepsilon J}\)</span> is <span class="math inline">\((1 - p + pe^\varepsilon)^n\)</span>. Hence <span id="eq-auto-10mechanisms-17"><span class="math display">\[1 - \beta \le \beta\big(1 + p(e^\varepsilon - 1)\big)^n. \tag{J.22}\]</span></span></li>
+<li><strong>Solve for <span class="math inline">\(n\)</span>.</strong> Take logarithms and divide by <span class="math inline">\(\ln(1 + p(e^\varepsilon - 1))\)</span> to get the first bound of <a href="#eq-apx-mech-heavy" class="quarto-xref">Equation&nbsp;<span>J.18</span></a>. Since <span class="math inline">\(\ln(1 + x) \le x\)</span>, the denominator is at most <span class="math inline">\(p(e^\varepsilon - 1)\)</span>, which gives the second, simpler bound.</li>
+</ol>
+</section>
+<section id="checking-it-3" class="level3" data-number="J.4.4">
+<h3 data-number="J.4.4" class="anchored" data-anchor-id="checking-it-3"><span class="header-section-number">J.4.4</span> Checking it</h3>
+<p>Take a variance bound <span class="math inline">\(\sigma^2 = 1\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>, and ask for error <span class="math inline">\(\alpha = 0.05\)</span> with failure probability <span class="math inline">\(\beta = 0.05\)</span>. Step 1 gives <span class="math inline">\(a = 10\)</span> and <span class="math inline">\(p = 0.01\)</span>, and the variance of <span class="math inline">\(P_1\)</span> is <span class="math inline">\(0.99\)</span>, within the bound. <a href="#eq-apx-mech-heavy" class="quarto-xref">Equation&nbsp;<span>J.18</span></a> then says that every <span class="math inline">\(\varepsilon\)</span>-DP estimator needs at least <span class="math inline">\(172.8\)</span> records, or <span class="math inline">\(171.4\)</span> by the simpler form. The chapter’s clipped mean reaches a root-mean-square error of <span class="math inline">\(0.05\)</span> with <span class="math inline">\(7{,}616\)</span> records, by <a href="../part03-dp-foundations/11-mean-estimation.html#eq-mean-heavy-opt" class="quarto-xref">Equation&nbsp;<span>28.16</span></a>. The two use different measures of error and the lower bound’s constants are loose, so the gap of a factor 44 says little. What matters is the rate. Lighter tails make the bound smaller. With a <span class="math inline">\(k\)</span>-th moment bound of 1 and the same <span class="math inline">\(\alpha\)</span>, it falls to <span class="math inline">\(55.6\)</span> records for <span class="math inline">\(k = 3\)</span> and to <span class="math inline">\(38.4\)</span> for <span class="math inline">\(k = 4\)</span>. For data in <span class="math inline">\([0, 1]\)</span> the far point can be at most 1, so the same argument with <span class="math inline">\(a = 1\)</span> and <span class="math inline">\(p = 2\alpha\)</span> gives <span class="math inline">\(18.6\)</span>. The script also checks step 2 on a grid of <span class="math inline">\(\alpha\)</span> for <span class="math inline">\(k = 2, 3, 4, 6\)</span>, and the largest <span class="math inline">\(k\)</span>-th central moment of <span class="math inline">\(P_1\)</span> never exceeds 1. It comes closest at the smallest <span class="math inline">\(\alpha\)</span>, where it prints as <span class="math inline">\(1.0000\)</span>.</p>
+<p><a href="#fig-apx-mech-heavy-rates" class="quarto-xref">Figure&nbsp;<span>J.6</span></a> plots these bounds against <span class="math inline">\(\alpha\)</span> on log–log axes. For <span class="math inline">\(k = 2\)</span> the lower bound and the chapter’s estimator both have slope <span class="math inline">\(-2\)</span>, so they differ by a constant factor at every <span class="math inline">\(\alpha\)</span>. A larger <span class="math inline">\(k\)</span> gives a smaller slope, <span class="math inline">\(-k/(k - 1)\)</span>, which approaches <span class="math inline">\(-1\)</span>, the slope of bounded data.</p>
+<div id="fig-apx-mech-heavy-rates" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-heavy-rates-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_heavy_rates.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-heavy-rates-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.6: Records needed for error <span class="math inline">\(\alpha\)</span> at <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\beta = 0.05\)</span>, on log–log axes, with <span class="math inline">\(k\)</span>-th central moment at most 1. Solid: the lower bound <a href="#eq-apx-mech-heavy" class="quarto-xref">Equation&nbsp;<span>J.18</span></a> for <span class="math inline">\(k = 2\)</span>, 3 and 4, and the same argument for data in <span class="math inline">\([0, 1]\)</span>. Dashed: the chapter’s clipped mean <a href="../part03-dp-foundations/11-mean-estimation.html#eq-mean-heavy-opt" class="quarto-xref">Equation&nbsp;<span>28.16</span></a> for <span class="math inline">\(k = 2\)</span>, which reaches root-mean-square error <span class="math inline">\(\alpha\)</span>. The <span class="math inline">\(k = 2\)</span> lines are parallel, so the chapter’s estimator has the optimal rate.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="what-it-does-not-cover-3" class="level3" data-number="J.4.5">
+<h3 data-number="J.4.5" class="anchored" data-anchor-id="what-it-does-not-cover-3"><span class="header-section-number">J.4.5</span> What it does not cover</h3>
+<p>The proof needs pure DP. Step 5 multiplies by <span class="math inline">\(e^{J\varepsilon}\)</span>, and under approximate DP group privacy adds a slack that grows like <span class="math inline">\(e^{J\varepsilon}\delta\)</span>, which ruins the averaging in step 6 once <span class="math inline">\(J\)</span> is large. Lower bounds under approximate DP need different tools and are not proved here, and Kamath, Singhal &amp; Ullman (2020) is the place to start. The bound is also only the privacy part of the cost. The sampling part, about <span class="math inline">\(\sigma^2/\alpha^2\)</span> records, comes from the usual non-private lower bounds.</p>
+</section>
+</section>
+<section id="sec-apx-mech-svt" class="level2" data-number="J.5">
+<h2 data-number="J.5" class="anchored" data-anchor-id="sec-apx-mech-svt"><span class="header-section-number">J.5</span> Sparse vector with <span class="math inline">\(c\)</span> answers above</h2>
+<section id="what-the-chapter-uses-4" class="level3" data-number="J.5.1">
+<h3 data-number="J.5.1" class="anchored" data-anchor-id="what-the-chapter-uses-4"><span class="header-section-number">J.5.1</span> What the chapter uses</h3>
+<p><a href="../part03-dp-foundations/05-selection.html#sec-sel-svt" class="quarto-xref"><span>Section 22.8</span></a> proves that AboveThreshold, which halts at the first query above a noisy threshold, is <span class="math inline">\((\varepsilon_1 + \varepsilon_2)\)</span>-DP, where <span class="math inline">\(\varepsilon_1\)</span> is the budget spent on the threshold’s noise and <span class="math inline">\(\varepsilon_2\)</span> the budget spent on the queries’ noise. To find <span class="math inline">\(c\)</span> queries above the threshold, it says, “Lyu, Su &amp; Li’s Algorithm 1 keeps one threshold noise and uses <span class="math inline">\(\nu_i \sim \mathrm{Lap}(2c\Delta/\varepsilon_2)\)</span>, so that the <span class="math inline">\(c\)</span> shifts together cost <span class="math inline">\(e^{\varepsilon_2}\)</span>”. It gives no proof. The algorithm takes a dataset <span class="math inline">\(D\)</span>, queries <span class="math inline">\(f_1, f_2, \dots\)</span> of sensitivity <span class="math inline">\(\Delta\)</span> that may be chosen adaptively, a threshold <span class="math inline">\(T\)</span> and budgets <span class="math inline">\(\varepsilon_1, \varepsilon_2 &gt; 0\)</span>.</p>
+<ol type="1">
+<li>Draw the threshold noise <span class="math inline">\(\rho \sim \mathrm{Lap}(\Delta/\varepsilon_1)\)</span> once. (In this section <span class="math inline">\(\rho\)</span> is this noise, not a zCDP slope.)</li>
+<li>For each query <span class="math inline">\(i\)</span>, draw fresh noise <span class="math inline">\(\nu_i \sim \mathrm{Lap}(2c\Delta/\varepsilon_2)\)</span>. If <span class="math inline">\(f_i(D) + \nu_i \ge T + \rho\)</span>, output <span class="math inline">\(\top\)</span>, and halt if this is the <span class="math inline">\(c\)</span>-th <span class="math inline">\(\top\)</span>. Otherwise output <span class="math inline">\(\bot\)</span>.</li>
+</ol>
+<p>The claim is that this is <span class="math inline">\((\varepsilon_1 + \varepsilon_2)\)</span>-DP for any number of queries. If the queries are monotone, meaning one record moves all of them the same way, noise <span class="math inline">\(\nu_i \sim \mathrm{Lap}(c\Delta/\varepsilon_2)\)</span> suffices.</p>
+</section>
+<section id="the-idea-4" class="level3" data-number="J.5.2">
+<h3 data-number="J.5.2" class="anchored" data-anchor-id="the-idea-4"><span class="header-section-number">J.5.2</span> The idea</h3>
+<p>The proof is the chapter’s AboveThreshold proof with <span class="math inline">\(c\)</span> answers <span class="math inline">\(\top\)</span> instead of one. Every <span class="math inline">\(\bot\)</span> answer says that its noisy query is below the noisy threshold. As in the chapter, all of them together are one condition: the largest noisy <span class="math inline">\(\bot\)</span> query is below the threshold. The proof compares the two datasets by a change of variables in the noise. If the threshold noise on <span class="math inline">\(D'\)</span> is shifted by the amount the largest <span class="math inline">\(\bot\)</span> query moved, at most <span class="math inline">\(\Delta\)</span>, that condition holds on <span class="math inline">\(D'\)</span> exactly when it held on <span class="math inline">\(D\)</span>. A Laplace density changes by at most a factor <span class="math inline">\(e^{\varepsilon_1}\)</span> under such a shift, however many <span class="math inline">\(\bot\)</span> answers there are. Each <span class="math inline">\(\top\)</span> answer needs its own noise shifted to stay above the shifted threshold, by at most <span class="math inline">\(2\Delta\)</span>: <span class="math inline">\(\Delta\)</span> for its own query’s move and <span class="math inline">\(\Delta\)</span> for the threshold’s. With noise scale <span class="math inline">\(2c\Delta/\varepsilon_2\)</span>, one such shift costs <span class="math inline">\(e^{\varepsilon_2/c}\)</span>. There are at most <span class="math inline">\(c\)</span> of them, because the run halts at the <span class="math inline">\(c\)</span>-th, so together they cost <span class="math inline">\(e^{\varepsilon_2}\)</span>.</p>
+</section>
+<section id="derivation-4" class="level3" data-number="J.5.3">
+<h3 data-number="J.5.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">J.5.3</span> Derivation</h3>
+<p>The proof reuses four facts of the selection chapter. Pure DP can be checked one output at a time (Fact 1). Noise drawn the same way on both datasets can be fixed and averaged over at the end (Fact 2). A Laplace density with scale <span class="math inline">\(b\)</span> changes by at most a factor <span class="math inline">\(e^{|s|/b}\)</span> when shifted by <span class="math inline">\(s\)</span> (Fact 3). And a maximum of numbers that each move by at most <span class="math inline">\(\Delta\)</span> moves by at most <span class="math inline">\(\Delta\)</span> (Fact 4). Fix neighbours <span class="math inline">\(D \simeq D'\)</span>.</p>
+<ol type="1">
+<li><strong>Fix an output and the <span class="math inline">\(\bot\)</span> noises.</strong> An output is a sequence of answers that ends either at the <span class="math inline">\(c\)</span>-th <span class="math inline">\(\top\)</span> or at the end of the stream. Let <span class="math inline">\(B\)</span> be the positions of its <span class="math inline">\(\bot\)</span> answers and <span class="math inline">\(A\)</span> those of its <span class="math inline">\(\top\)</span> answers, so <span class="math inline">\(A\)</span> has at most <span class="math inline">\(c\)</span> elements. Fix the noises <span class="math inline">\(\nu_i\)</span> for <span class="math inline">\(i \in B\)</span>. By Fact 2 it is enough to bound the conditional probability, because these noises do not depend on the data. The queries are fixed too, since each can depend only on earlier answers, which the output fixes.</li>
+<li><strong>Write the output as conditions on <span class="math inline">\(\rho\)</span> and the <span class="math inline">\(\top\)</span> noises.</strong> Let <span class="math inline">\(g(D) = \max_{i \in B}\big(f_i(D) + \nu_i\big)\)</span> be the largest noisy <span class="math inline">\(\bot\)</span> query. All <span class="math inline">\(\bot\)</span> answers happen exactly when <span class="math inline">\(g(D) &lt; T + \rho\)</span>. Each <span class="math inline">\(\top\)</span> answer <span class="math inline">\(i \in A\)</span> happens when <span class="math inline">\(f_i(D) + \nu_i \ge T + \rho\)</span>. Write <span class="math inline">\(p_\rho\)</span> and <span class="math inline">\(p_\nu\)</span> for the Laplace densities of the threshold noise and of a query noise. The probability of the output is the integral of these densities over the region where all the conditions hold: <span id="eq-auto-10mechanisms-18"><span class="math display">\[\int p_\rho(r)\,\mathbf 1\big[g(D) &lt; T + r\big]\prod_{i \in A}\Big(p_\nu(v_i)\,\mathbf 1\big[f_i(D) + v_i \ge T + r\big]\Big)\,dr\,\prod_{i \in A}dv_i. \tag{J.23}\]</span></span></li>
+<li><strong>Shift the noises.</strong> Substitute <span class="math inline">\(r = r' + g(D) - g(D')\)</span> and, for each <span class="math inline">\(i \in A\)</span>, <span class="math inline">\(v_i = v_i' + \big(g(D) - g(D')\big) - \big(f_i(D) - f_i(D')\big)\)</span>. The first condition becomes <span class="math inline">\(g(D') &lt; T + r'\)</span>, and each <span class="math inline">\(\top\)</span> condition becomes <span class="math inline">\(f_i(D') + v_i' \ge T + r'\)</span>. These are exactly the conditions for <span class="math inline">\(D'\)</span>. The substitution is a translation, so it does not change the volume element. Only the densities change: they are now evaluated at shifted points.</li>
+<li><strong>Size of the shifts.</strong> The <span class="math inline">\(\nu_i\)</span> for <span class="math inline">\(i \in B\)</span> are fixed, so <span class="math inline">\(g\)</span> is a maximum of numbers that each move by at most <span class="math inline">\(\Delta\)</span>, and <span class="math inline">\(|g(D) - g(D')| \le \Delta\)</span> by Fact 4. Each <span class="math inline">\(\top\)</span> shift is a difference of two terms of size at most <span class="math inline">\(\Delta\)</span>, so it is at most <span class="math inline">\(2\Delta\)</span>. If there are no <span class="math inline">\(\bot\)</span> answers, there is no <span class="math inline">\(g\)</span>: shift <span class="math inline">\(r\)</span> by 0 and each <span class="math inline">\(v_i\)</span> by <span class="math inline">\(-(f_i(D) - f_i(D'))\)</span>, at most <span class="math inline">\(\Delta\)</span>.</li>
+<li><strong>Pay for the shifts.</strong> By Fact 3, the threshold noise, with scale <span class="math inline">\(\Delta/\varepsilon_1\)</span> and shift at most <span class="math inline">\(\Delta\)</span>, costs a factor at most <span class="math inline">\(e^{\varepsilon_1}\)</span>. Each <span class="math inline">\(\top\)</span> noise, with scale <span class="math inline">\(2c\Delta/\varepsilon_2\)</span> and shift at most <span class="math inline">\(2\Delta\)</span>, costs at most <span class="math inline">\(e^{2\Delta\varepsilon_2/(2c\Delta)} = e^{\varepsilon_2/c}\)</span>. There are at most <span class="math inline">\(c\)</span> of them, so together they cost at most <span class="math inline">\(e^{\varepsilon_2}\)</span>. Pulling the factors out of the integral leaves the integral for <span class="math inline">\(D'\)</span>: <span id="eq-auto-10mechanisms-19"><span class="math display">\[\Pr[\text{output} \mid D, \nu_B] \le e^{\varepsilon_1 + \varepsilon_2}\,\Pr[\text{output} \mid D', \nu_B]. \tag{J.24}\]</span></span></li>
+<li><strong>Collect.</strong> Fact 2 removes the conditioning on <span class="math inline">\(\nu_B\)</span>, and Fact 1 turns the bound for every output into <span class="math inline">\((\varepsilon_1 + \varepsilon_2)\)</span>-DP.</li>
+</ol>
+<p><em>Monotone queries.</em> If all queries move the same way, by at most <span class="math inline">\(\Delta\)</span>, then <span class="math inline">\(g\)</span> moves the same way as each <span class="math inline">\(f_i\)</span>, also by at most <span class="math inline">\(\Delta\)</span> (Fact 4). The <span class="math inline">\(\top\)</span> shift in step 3 is the difference of two numbers of the same sign, each at most <span class="math inline">\(\Delta\)</span> in size, so it is at most <span class="math inline">\(\Delta\)</span>. With noise scale <span class="math inline">\(c\Delta/\varepsilon_2\)</span> each shift costs <span class="math inline">\(e^{\varepsilon_2/c}\)</span>, and the rest is unchanged.</p>
+</section>
+<section id="checking-it-4" class="level3" data-number="J.5.4">
+<h3 data-number="J.5.4" class="anchored" data-anchor-id="checking-it-4"><span class="header-section-number">J.5.4</span> Checking it</h3>
+<p>The script computes the exact privacy loss of one output on one neighbouring pair, by integrating over the threshold noise on a fine grid, as the selection chapter’s script does. The pair extends the counterexample of the selection chapter. On <span class="math inline">\(D\)</span> the first <span class="math inline">\(m\)</span> queries have value 0 and the last <span class="math inline">\(c\)</span> have value 1, while on <span class="math inline">\(D'\)</span> the first <span class="math inline">\(m\)</span> have value 1 and the last <span class="math inline">\(c\)</span> have value 0, with <span class="math inline">\(\Delta = 1\)</span>, <span class="math inline">\(T = 0\)</span> and <span class="math inline">\(\varepsilon_1 = \varepsilon_2 = 0.5\)</span>. The output is <span class="math inline">\(m\)</span> answers <span class="math inline">\(\bot\)</span> followed by <span class="math inline">\(c\)</span> answers <span class="math inline">\(\top\)</span>, which is complete because the run halts at the <span class="math inline">\(c\)</span>-th <span class="math inline">\(\top\)</span>. On this pair every shift in step 4 can approach its largest size.</p>
+<p><a href="#fig-apx-mech-svt-losses" class="quarto-xref">Figure&nbsp;<span>J.7</span></a> shows the loss against <span class="math inline">\(m\)</span>. For <span class="math inline">\(c = 1\)</span> it is <span class="math inline">\(0.3958\)</span> at <span class="math inline">\(m = 1\)</span> and <span class="math inline">\(0.9940\)</span> at <span class="math inline">\(m = 10\)</span>, which are the chapter’s AboveThreshold values. More answers above make the loss climb more slowly, so for <span class="math inline">\(c = 4\)</span> it is only <span class="math inline">\(0.2670\)</span> at <span class="math inline">\(m = 1\)</span> and <span class="math inline">\(0.7602\)</span> at <span class="math inline">\(m = 10\)</span>. But for every <span class="math inline">\(c\)</span> it reaches <span class="math inline">\(1.0000\)</span>, which is <span class="math inline">\(\varepsilon_1 + \varepsilon_2\)</span>, by <span class="math inline">\(m = 40\)</span>, and it never goes above, so the bound is tight. The dashed curve shows why the noise must grow with <span class="math inline">\(c\)</span>. With <span class="math inline">\(\nu_i \sim \mathrm{Lap}(2\Delta/\varepsilon_2)\)</span> and <span class="math inline">\(c = 4\)</span>, each <span class="math inline">\(\top\)</span> costs a full <span class="math inline">\(e^{\varepsilon_2}\)</span>, and the loss reaches <span class="math inline">\(2.5000 = \varepsilon_1 + 4\varepsilon_2\)</span>.</p>
+<div id="fig-apx-mech-svt-losses" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-svt-losses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_svt_losses.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-svt-losses-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.7: The exact privacy loss of the output “<span class="math inline">\(m\)</span> answers <span class="math inline">\(\bot\)</span>, then <span class="math inline">\(c\)</span> answers <span class="math inline">\(\top\)</span>” on a worst-case neighbouring pair, against <span class="math inline">\(m\)</span>, with <span class="math inline">\(\varepsilon_1 = \varepsilon_2 = 0.5\)</span>. With query noise <span class="math inline">\(\mathrm{Lap}(2c/\varepsilon_2)\)</span> the loss approaches <span class="math inline">\(\varepsilon_1 + \varepsilon_2 = 1\)</span> from below for <span class="math inline">\(c = 1\)</span>, 2 and 4. With noise <span class="math inline">\(\mathrm{Lap}(2/\varepsilon_2)\)</span> that does not grow with <span class="math inline">\(c\)</span> (dashed, <span class="math inline">\(c = 4\)</span>), it approaches <span class="math inline">\(\varepsilon_1 + 4\varepsilon_2 = 2.5\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-apx-mech-gumbel" class="level2" data-number="J.6">
+<h2 data-number="J.6" class="anchored" data-anchor-id="sec-apx-mech-gumbel"><span class="header-section-number">J.6</span> Gumbel top-<span class="math inline">\(c\)</span> is the exponential mechanism without replacement</h2>
+<section id="what-the-chapter-uses-5" class="level3" data-number="J.6.1">
+<h3 data-number="J.6.1" class="anchored" data-anchor-id="what-the-chapter-uses-5"><span class="header-section-number">J.6.1</span> What the chapter uses</h3>
+<p><a href="../part03-dp-foundations/05-selection.html#sec-sel-gumbel" class="quarto-xref"><span>Section 22.7</span></a> proves the Gumbel-max trick <a href="../part03-dp-foundations/05-selection.html#eq-sel-gumbel" class="quarto-xref">Equation&nbsp;<span>22.14</span></a>. Add independent Gumbel noise of scale <span class="math inline">\(\beta\)</span> to each score <span class="math inline">\(u_r\)</span> and take the largest. Then candidate <span class="math inline">\(i\)</span> wins with probability <span class="math inline">\(e^{u_i/\beta}/\sum_r e^{u_r/\beta}\)</span>, which is the exponential mechanism <a href="../part03-dp-foundations/05-selection.html#eq-sel-em" class="quarto-xref">Equation&nbsp;<span>22.3</span></a> when <span class="math inline">\(\beta = 2\Delta/\varepsilon\)</span>. (In this section <span class="math inline">\(\beta\)</span> is the noise scale, as in the chapter, not a failure probability.) The chapter then states without proof that “taking the <span class="math inline">\(c\)</span> largest of <span class="math inline">\(u_r + G_r\)</span> gives the same distribution as running the exponential mechanism <span class="math inline">\(c\)</span> times, removing each winner (Durfee &amp; Rogers 2019)”, so its privacy is <span class="math inline">\(c\varepsilon\)</span>.</p>
+<p>Write <span class="math inline">\(\lambda_r = e^{u_r/\beta}\)</span> for the weight of candidate <span class="math inline">\(r\)</span>. The claim is that for any distinct candidates <span class="math inline">\(i_1, \dots, i_c\)</span>, <span id="eq-apx-mech-pl"><span class="math display">\[\Pr\big[\text{the top } c \text{ of } u_r + G_r, \text{ in order, are } i_1, \dots, i_c\big] = \prod_{j=1}^c\frac{\lambda_{i_j}}{\sum_{r \notin \{i_1, \dots, i_{j-1}\}}\lambda_r}. \tag{J.25}\]</span></span> Each factor is the probability that the exponential mechanism, run on the candidates not yet chosen, picks <span class="math inline">\(i_j\)</span>.</p>
+</section>
+<section id="the-idea-5" class="level3" data-number="J.6.2">
+<h3 data-number="J.6.2" class="anchored" data-anchor-id="the-idea-5"><span class="header-section-number">J.6.2</span> The idea</h3>
+<p>Turn each noisy score into a waiting time, so that a higher score means an earlier arrival. The time <span class="math inline">\(E_r = e^{-(u_r + G_r)/\beta}\)</span> does this, because <span class="math inline">\(e^{-x}\)</span> falls as <span class="math inline">\(x\)</span> rises. For Gumbel noise these times turn out to be independent exponential variables, and candidate <span class="math inline">\(r\)</span>’s time has rate <span class="math inline">\(\lambda_r\)</span>: on average it arrives after <span class="math inline">\(1/\lambda_r\)</span>. The top <span class="math inline">\(c\)</span> noisy scores are then the first <span class="math inline">\(c\)</span> arrivals of a race.</p>
+<p>Exponential races have a simple rule. The chance that <span class="math inline">\(r\)</span> arrives first is its share of the total rate, <span class="math inline">\(\lambda_r/\sum_s\lambda_s\)</span>. And exponential waiting times have no memory: once one candidate has arrived, the others’ remaining waits are fresh exponential times with the same rates. So the race restarts among the rest, and the next arrival is again picked in proportion to the rates. For example, with rates 3, 2 and 1, the first candidate wins the first round with probability <span class="math inline">\(3/6\)</span>. The race then restarts between the other two, and the second candidate wins it with probability <span class="math inline">\(2/3\)</span>. The ordered pair (first, second) therefore has probability <span class="math inline">\(\frac36\cdot\frac23 = \frac13\)</span>.</p>
+</section>
+<section id="derivation-5" class="level3" data-number="J.6.3">
+<h3 data-number="J.6.3" class="anchored" data-anchor-id="derivation-5"><span class="header-section-number">J.6.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Arrival times are exponential.</strong> The Gumbel distribution with scale <span class="math inline">\(\beta\)</span> has cumulative distribution function <span class="math inline">\(\Pr[G \le g] = \exp(-e^{-g/\beta})\)</span>. For <span class="math inline">\(s &gt; 0\)</span>, <span class="math inline">\(E_r &gt; s\)</span> means <span class="math inline">\(u_r + G_r &lt; -\beta\ln s\)</span>, that is <span class="math inline">\(G_r &lt; -\beta\ln s - u_r\)</span>. So <span id="eq-auto-10mechanisms-20"><span class="math display">\[\Pr[E_r &gt; s] = \exp\big(-e^{\ln s + u_r/\beta}\big) = \exp(-s\lambda_r). \tag{J.26}\]</span></span> That is the survival function of an exponential variable with rate <span class="math inline">\(\lambda_r\)</span>. The <span class="math inline">\(E_r\)</span> are independent because the <span class="math inline">\(G_r\)</span> are.</li>
+<li><strong>Order reverses.</strong> The map <span class="math inline">\(x \mapsto e^{-x/\beta}\)</span> is decreasing, so the largest noisy score has the smallest arrival time. The top <span class="math inline">\(c\)</span> noisy scores, in decreasing order, are the first <span class="math inline">\(c\)</span> arrivals, in order.</li>
+<li><strong>The first arrival.</strong> Let <span class="math inline">\(\Lambda = \sum_r\lambda_r\)</span>. Candidate <span class="math inline">\(i\)</span> arrives first at a time near <span class="math inline">\(s\)</span> when <span class="math inline">\(E_i\)</span> is near <span class="math inline">\(s\)</span> and every other <span class="math inline">\(E_r\)</span> exceeds <span class="math inline">\(s\)</span>. Integrating over <span class="math inline">\(s\)</span>, <span id="eq-auto-10mechanisms-21"><span class="math display">\[\Pr[i \text{ first}] = \int_0^\infty\lambda_ie^{-\lambda_is}\prod_{r \ne i}e^{-\lambda_rs}\,ds = \int_0^\infty\lambda_ie^{-\Lambda s}\,ds = \frac{\lambda_i}{\Lambda}. \tag{J.27}\]</span></span></li>
+<li><strong>No memory.</strong> Given <span class="math inline">\(E_r &gt; s\)</span>, the extra wait <span class="math inline">\(E_r - s\)</span> exceeds <span class="math inline">\(x\)</span> with probability <span class="math inline">\(e^{-\lambda_r(s + x)}/e^{-\lambda_rs} = e^{-\lambda_rx}\)</span>. So it is again exponential with rate <span class="math inline">\(\lambda_r\)</span>, whatever <span class="math inline">\(s\)</span> is. The other candidates’ times are independent of <span class="math inline">\(E_i\)</span>, so given that <span class="math inline">\(i\)</span> arrives first at time <span class="math inline">\(s\)</span>, their extra waits are independent exponentials with their own rates, and their order does not depend on <span class="math inline">\(s\)</span>.</li>
+<li><strong>Restart the race.</strong> By step 4, the probability that <span class="math inline">\(i\)</span> arrives first and the rest arrive in a given order is the integral of step 3 times the probability of that order in a race among the others alone. That is <span class="math inline">\(\lambda_i/\Lambda\)</span> times a race with <span class="math inline">\(i\)</span> removed. Applying this <span class="math inline">\(c\)</span> times gives <a href="#eq-apx-mech-pl" class="quarto-xref">Equation&nbsp;<span>J.25</span></a>.</li>
+<li><strong>The same as <span class="math inline">\(c\)</span> exponential mechanisms.</strong> Round <span class="math inline">\(j\)</span> of the exponential mechanism without replacement picks <span class="math inline">\(i_j\)</span> with probability <span class="math inline">\(\lambda_{i_j}\)</span> over the sum of the remaining weights. That is the <span class="math inline">\(j\)</span>-th factor of <a href="#eq-apx-mech-pl" class="quarto-xref">Equation&nbsp;<span>J.25</span></a>, so the two procedures have the same distribution of ordered outputs.</li>
+<li><strong>Privacy.</strong> Each round is the exponential mechanism on a set of candidates fixed by the earlier outputs, with scores of sensitivity <span class="math inline">\(\Delta\)</span>, so each is <span class="math inline">\(\varepsilon\)</span>-DP. Basic composition, which holds even when each step depends on the earlier outputs (<a href="../part03-dp-foundations/02-properties.html#sec-dpprop-comp" class="quarto-xref"><span>Section 19.5</span></a>), makes the <span class="math inline">\(c\)</span> rounds <span class="math inline">\(c\varepsilon\)</span>-DP. Releasing the top <span class="math inline">\(c\)</span> as an unordered set is post-processing of the ordered list, so it is <span class="math inline">\(c\varepsilon\)</span>-DP too.</li>
+</ol>
+</section>
+<section id="checking-it-5" class="level3" data-number="J.6.4">
+<h3 data-number="J.6.4" class="anchored" data-anchor-id="checking-it-5"><span class="header-section-number">J.6.4</span> Checking it</h3>
+<p>Take six candidates with scores <span class="math inline">\((4, 3, 3, 1, 0, 0)\)</span> and scale <span class="math inline">\(\beta = 2\)</span>, the chapter’s five candidates with a sixth. <a href="#eq-apx-mech-pl" class="quarto-xref">Equation&nbsp;<span>J.25</span></a> gives probabilities for all 30 ordered pairs, and they sum to 1. For candidate 1 followed by candidate 2 it gives <span class="math inline">\(0.1313\)</span>, and in a million draws of Gumbel noise the top two came out in that order with frequency <span class="math inline">\(0.1313\)</span>. Over all 30 pairs the largest difference between frequency and formula is <span class="math inline">\(0.0003\)</span>, about the sampling error of a million draws. Step 1 is checked separately: the average arrival time of each candidate, times its rate, is 1 to within <span class="math inline">\(0.001\)</span>, as it must be for an exponential variable.</p>
+<p><a href="#fig-apx-mech-gumbel-top2" class="quarto-xref">Figure&nbsp;<span>J.8</span></a> shows the 30 pairs from a fresh run, and <a href="#fig-apx-mech-gumbel-race" class="quarto-xref">Figure&nbsp;<span>J.9</span></a> shows the race. Each curve is the probability that a candidate has not yet arrived by time <span class="math inline">\(s\)</span>. A higher score gives a steeper curve and an earlier typical arrival. One draw’s arrivals are marked with their rank, and the first two are the top two noisy scores.</p>
+<div id="fig-apx-mech-gumbel-top2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-gumbel-top2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_gumbel_top2.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-gumbel-top2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.8: Probabilities of the 30 ordered pairs (first, second) for six candidates with scores <span class="math inline">\((4, 3, 3, 1, 0, 0)\)</span> and Gumbel scale 2. Grey bars: two rounds of the exponential mechanism, <a href="#eq-apx-mech-pl" class="quarto-xref">Equation&nbsp;<span>J.25</span></a>. Red dots: frequencies of the top two noisy scores in 200,000 runs.
+</figcaption>
+</figure>
+</div>
+<div id="fig-apx-mech-gumbel-race" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-mech-gumbel-race-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_mech_gumbel_race.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-mech-gumbel-race-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;J.9: The exponential race for the same six candidates. Each curve is <span class="math inline">\(\Pr[E_r &gt; s] = e^{-s\lambda_r}\)</span> with rate <span class="math inline">\(\lambda_r = e^{u_r/2}\)</span>, on a log time axis; tied candidates share a curve (one dashed). The dots are one draw of the arrival times <span class="math inline">\(E_r = e^{-(u_r + G_r)/2}\)</span>, numbered in order of arrival.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="sec-apx-mech-alarm" class="level2" data-number="J.7">
+<h2 data-number="J.7" class="anchored" data-anchor-id="sec-apx-mech-alarm"><span class="header-section-number">J.7</span> The alarm mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, with one condition</h2>
+<section id="what-the-chapter-uses-6" class="level3" data-number="J.7.1">
+<h3 data-number="J.7.1" class="anchored" data-anchor-id="what-the-chapter-uses-6"><span class="header-section-number">J.7.1</span> What the chapter uses</h3>
+<p><a href="../part03-dp-foundations/02-properties.html#sec-dpprop-group" class="quarto-xref"><span>Section 19.4</span></a> shows that the group-privacy bound <a href="../part03-dp-foundations/02-properties.html#eq-dpprop-group" class="quarto-xref">Equation&nbsp;<span>19.6</span></a> is attained, using a mechanism whose input is a count, where neighbouring counts differ by 1. The mechanism has a parameter <span class="math inline">\(K\)</span>, the largest group it is built for, and on a count <span class="math inline">\(c \le K\)</span> it outputs “alarm” with probability <span id="eq-auto-10mechanisms-22"><span class="math display">\[a_c = \delta\sum_{j=0}^{K-c-1}e^{j\varepsilon} = \delta\,\frac{e^{(K-c)\varepsilon} - 1}{e^\varepsilon - 1}, \tag{J.28}\]</span></span> and “quiet” otherwise. Above <span class="math inline">\(K\)</span> it always outputs “quiet”, so <span class="math inline">\(a_c = 0\)</span> for <span class="math inline">\(c \ge K\)</span>. The chapter shows that the event “alarm” meets the definition with equality, and states the condition on <span class="math inline">\(K\)</span> under which the other events are also within <span class="math inline">\((\varepsilon, \delta)\)</span>. This section proves that condition.</p>
+<p>For <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(K \ge 1\)</span>, the alarm mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if and only if <span id="eq-apx-mech-alarm"><span class="math display">\[a_0 \le \frac{e^\varepsilon + \delta}{e^\varepsilon + 1}. \tag{J.29}\]</span></span> Since <span class="math inline">\(a_0\)</span> grows with <span class="math inline">\(K\)</span>, this caps <span class="math inline">\(K\)</span>.</p>
+</section>
+<section id="the-idea-6" class="level3" data-number="J.7.2">
+<h3 data-number="J.7.2" class="anchored" data-anchor-id="the-idea-6"><span class="header-section-number">J.7.2</span> The idea</h3>
+<p>There are only two outputs, so there are only two events to check, “alarm” and “quiet”, each in both orders of a pair of neighbouring counts. The alarm probabilities fall as the count rises, by the rule <span class="math inline">\(a_c = e^\varepsilon a_{c+1} + \delta\)</span>. Three of the four checks then hold for any <span class="math inline">\(K\)</span>. The fourth asks that “quiet” on the higher count is not too much likelier than on the lower one. If <span class="math inline">\(a_0\)</span> is close to 1, “quiet” is rare on count 0. Since <span class="math inline">\(a_1 = (a_0 - \delta)/e^\varepsilon\)</span> is smaller by about a factor <span class="math inline">\(e^\varepsilon\)</span>, “quiet” is much more common on count 1, and the ratio of the two “quiet” probabilities breaks the bound.</p>
+</section>
+<section id="derivation-6" class="level3" data-number="J.7.3">
+<h3 data-number="J.7.3" class="anchored" data-anchor-id="derivation-6"><span class="header-section-number">J.7.3</span> Derivation</h3>
+<p>Fix neighbouring counts <span class="math inline">\(c\)</span> and <span class="math inline">\(c + 1\)</span>. The alarm probability has fewer terms at <span class="math inline">\(c + 1\)</span>, so <span class="math inline">\(a_c \ge a_{c+1}\)</span>. For <span class="math inline">\(c \ge K\)</span> both are 0, the two output distributions are equal, and there is nothing to check. So take <span class="math inline">\(c \le K - 1\)</span>, where splitting off the first term of the sum gives <span id="eq-auto-10mechanisms-23"><span class="math display">\[a_c = e^\varepsilon a_{c+1} + \delta. \tag{J.30}\]</span></span> The empty event has probability 0 on both sides, and the event “alarm or quiet” has probability 1 on both sides, which is at most <span class="math inline">\(e^\varepsilon + \delta\)</span>. So both pass, and four checks remain.</p>
+<ol type="1">
+<li><strong>“Alarm”, count <span class="math inline">\(c\)</span> against <span class="math inline">\(c + 1\)</span>.</strong> The definition asks <span class="math inline">\(a_c \le e^\varepsilon a_{c+1} + \delta\)</span>. This holds with equality, by the rule above.</li>
+<li><strong>“Alarm”, count <span class="math inline">\(c + 1\)</span> against <span class="math inline">\(c\)</span>.</strong> It asks <span class="math inline">\(a_{c+1} \le e^\varepsilon a_c + \delta\)</span>, which holds because <span class="math inline">\(a_{c+1} \le a_c\)</span>.</li>
+<li><strong>“Quiet”, count <span class="math inline">\(c\)</span> against <span class="math inline">\(c + 1\)</span>.</strong> It asks <span class="math inline">\(1 - a_c \le e^\varepsilon(1 - a_{c+1}) + \delta\)</span>. This holds because <span class="math inline">\(1 - a_c \le 1 - a_{c+1}\)</span> and <span class="math inline">\(1 - a_{c+1} \ge 0\)</span>.</li>
+<li><strong>“Quiet”, count <span class="math inline">\(c + 1\)</span> against <span class="math inline">\(c\)</span>.</strong> It asks <span class="math inline">\(1 - a_{c+1} \le e^\varepsilon(1 - a_c) + \delta\)</span>. Substitute the rule for <span class="math inline">\(a_c\)</span>. The right side becomes <span class="math inline">\(e^\varepsilon - e^{2\varepsilon}a_{c+1} - (e^\varepsilon - 1)\delta\)</span>. Moving terms across, the check becomes <span class="math inline">\((e^{2\varepsilon} - 1)a_{c+1} \le (e^\varepsilon - 1)(1 - \delta)\)</span>. Since <span class="math inline">\(e^{2\varepsilon} - 1 = (e^\varepsilon - 1)(e^\varepsilon + 1)\)</span> and <span class="math inline">\(e^\varepsilon - 1 &gt; 0\)</span>, it is <span id="eq-auto-10mechanisms-24"><span class="math display">\[a_{c+1} \le \frac{1 - \delta}{e^\varepsilon + 1}. \tag{J.31}\]</span></span></li>
+<li><strong>The worst pair.</strong> The largest <span class="math inline">\(a_{c+1}\)</span> with <span class="math inline">\(c \le K - 1\)</span> is <span class="math inline">\(a_1\)</span>, so all checks pass exactly when <span class="math inline">\(a_1 \le (1 - \delta)/(e^\varepsilon + 1)\)</span>. By the rule, <span class="math inline">\(a_0 = e^\varepsilon a_1 + \delta\)</span>, and this condition is the same as <span class="math inline">\(a_0 \le \big(e^\varepsilon(1 - \delta) + \delta(e^\varepsilon + 1)\big)/(e^\varepsilon + 1)\)</span>. The numerator simplifies to <span class="math inline">\(e^\varepsilon + \delta\)</span>, which gives <a href="#eq-apx-mech-alarm" class="quarto-xref">Equation&nbsp;<span>J.29</span></a>. The right side of <a href="#eq-apx-mech-alarm" class="quarto-xref">Equation&nbsp;<span>J.29</span></a> is below 1, so the condition also makes <span class="math inline">\(a_0\)</span> a valid probability.</li>
+</ol>
+<p>At the cap the pair of counts 0 and 1 is exactly the four-point pair of <a href="#sec-apx-mech-fourpoint" class="quarto-xref"><span>Section J.1</span></a>, with “flag <span class="math inline">\(D\)</span>” merged into report 0 and “flag <span class="math inline">\(D'\)</span>” merged into report 1. Then <span class="math inline">\(a_0 = \delta + (1 - \delta)t\)</span> and <span class="math inline">\(a_1 = (1 - \delta)(1 - t)\)</span>, with <span class="math inline">\(t = e^\varepsilon/(1 + e^\varepsilon)\)</span>, as extreme as <span class="math inline">\((\varepsilon, \delta)\)</span>-DP allows.</p>
+</section>
+<section id="checking-it-6" class="level3" data-number="J.7.4">
+<h3 data-number="J.7.4" class="anchored" data-anchor-id="checking-it-6"><span class="header-section-number">J.7.4</span> Checking it</h3>
+<p>In the chapter’s example, <span class="math inline">\(\varepsilon = 0.5\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span> and <span class="math inline">\(K = 10\)</span>. The cap is <span class="math inline">\((e^{0.5} + 10^{-5})/(e^{0.5} + 1) = 0.6225\)</span>, and <span class="math inline">\(a_0 = 2.272\times10^{-3}\)</span>, far below it. So the chapter’s mechanism is <span class="math inline">\((0.5, 10^{-5})\)</span>-DP, and the script’s check over every event agrees: the largest amount by which any event exceeds the bound is <span class="math inline">\(2.5\times10^{-20}\)</span>, which is rounding on the event that holds with equality. The largest allowed size at these parameters is <span class="math inline">\(K = 21\)</span>, where <span class="math inline">\(a_0 = 0.5598\)</span>. At <span class="math inline">\(K = 22\)</span>, <span class="math inline">\(a_0 = 0.9229\)</span> is still a probability, but the event “quiet” on counts 1 against 0 exceeds the bound by <span class="math inline">\(0.3132\)</span>. So the condition is real, and it does not follow from <span class="math inline">\(a_0 \le 1\)</span>.</p>
+</section>
+<section id="what-it-does-not-cover-4" class="level3" data-number="J.7.5">
+<h3 data-number="J.7.5" class="anchored" data-anchor-id="what-it-does-not-cover-4"><span class="header-section-number">J.7.5</span> What it does not cover</h3>
+<p>The derivation divides by <span class="math inline">\(e^\varepsilon - 1\)</span> in step 4, so it needs <span class="math inline">\(\varepsilon &gt; 0\)</span>. At <span class="math inline">\(\varepsilon = 0\)</span> the rule reads <span class="math inline">\(a_c = a_{c+1} + \delta\)</span>, check 4 asks <span class="math inline">\(a_c - a_{c+1} \le \delta\)</span>, which holds with equality, and the only condition left is <span class="math inline">\(a_0 \le 1\)</span>.</p>
+</section>
+</section>
+<section id="code" class="level2" data-number="J.8">
+<h2 data-number="J.8" class="anchored" data-anchor-id="code"><span class="header-section-number">J.8</span> Code</h2>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/appendix-derivations/apx_mechanisms.py">apx_mechanisms.py</a> computes every number on this page and draws its figures. It builds the four-point channel and checks it on 6,000 random pairs. It computes the stability-based histogram’s error exactly and by simulation, and the sparse vector technique’s privacy loss by numerical integration. It also evaluates the heavy-tail lower bound, compares Gumbel top-two selection with the exponential mechanism, and checks every event of the alarm mechanism. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/appendix-derivations/apx_mechanisms.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><a href="#tbl-apx-mech-code" class="quarto-xref">Table&nbsp;<span>J.3</span></a> shows the output with seed 0.</p>
+<div id="tbl-apx-mech-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-mech-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;J.3: The script’s output with seed 0.
+</figcaption>
+<div aria-describedby="tbl-apx-mech-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Four-point channel, three-output example</td>
+<td><span class="math inline">\(\theta^* = 0.2222\)</span>; <span class="math inline">\(P^\star K = (0.6, 0.3, 0.1)\)</span> and <span class="math inline">\(Q^\star K = (0.2, 0.3, 0.5)\)</span> exactly</td>
+</tr>
+<tr class="even">
+<td>Four-point channel, binned normal pair at <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td><span class="math inline">\(\delta = 0.2259\)</span>; masses <span class="math inline">\(0.7741\)</span> and <span class="math inline">\(0.9156\)</span>; <span class="math inline">\(\theta^* = 0.2243\)</span></td>
+</tr>
+<tr class="odd">
+<td>Four-point channel, 6,000 random pairs</td>
+<td>reproduces <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> to <span class="math inline">\(2.2\times10^{-16}\)</span>; smallest channel entry <span class="math inline">\(-1.4\times10^{-13}\)</span> (rounding)</td>
+</tr>
+<tr class="even">
+<td>Pure parts as zCDP</td>
+<td>largest <span class="math inline">\(D_\alpha/(\alpha\varepsilon^2/2)\)</span> is 0.4275 and 0.4306</td>
+</tr>
+<tr class="odd">
+<td>Stability-based histogram, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-6}\)</span>, 10 bins</td>
+<td><span class="math inline">\(T = 14.1224\)</span>; error bound 19.4207; exact worst 18.0000, simulated 18.0000</td>
+</tr>
+<tr class="even">
+<td>Laplace histogram over <span class="math inline">\(N\)</span> bins</td>
+<td>16.7857 at <span class="math inline">\(N = 10^6\)</span>, 30.6012 at <span class="math inline">\(N = 10^{12}\)</span>; above the stability bound from <span class="math inline">\(N = 1.394\times10^7\)</span></td>
+</tr>
+<tr class="odd">
+<td>Heavy-tail lower bound, <span class="math inline">\(\alpha = 0.05\)</span></td>
+<td>172.8 records for <span class="math inline">\(k = 2\)</span>, 55.6 for <span class="math inline">\(k = 3\)</span>, 38.4 for <span class="math inline">\(k = 4\)</span>, 18.6 for bounded data; the clipped mean uses 7,616</td>
+</tr>
+<tr class="even">
+<td>Sparse vector, <span class="math inline">\(c = 1, 2, 4\)</span></td>
+<td>loss 0.9940, 0.9459, 0.7602 at <span class="math inline">\(m = 10\)</span>; 1.0000 at <span class="math inline">\(m = 40\)</span>; 2.5000 with noise that ignores <span class="math inline">\(c\)</span></td>
+</tr>
+<tr class="odd">
+<td>Gumbel top two, six candidates</td>
+<td>largest difference from <a href="#eq-apx-mech-pl" class="quarto-xref">Equation&nbsp;<span>J.25</span></a> 0.0003 over 30 pairs, from <span class="math inline">\(10^6\)</span> draws</td>
+</tr>
+<tr class="even">
+<td>Alarm mechanism, <span class="math inline">\(\varepsilon = 0.5\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span></td>
+<td>cap 0.6225; <span class="math inline">\(a_0 = 2.272\times10^{-3}\)</span> at <span class="math inline">\(K = 10\)</span>; largest <span class="math inline">\(K\)</span> is 21; at <span class="math inline">\(K = 22\)</span> an event fails by 0.3132</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_appendix_mechanisms.py">tests/test_appendix_mechanisms.py</a> checks that the output still matches this table.</p>
+<p><strong>What to take from it.</strong> The four-point construction is exact: it reproduces every pair to rounding, including pairs whose outputs only one side can produce. The stability-based histogram’s error is flat in <span class="math inline">\(N\)</span>, and its bound is within about 1.4 records of the exact worst case, so what approximate DP costs here is the constant <span class="math inline">\(\ln(1/\delta)/\varepsilon\)</span>, in place of a <span class="math inline">\(\ln N\)</span> that grows with the universe. The sparse vector proof is tight: on a worst-case pair the loss approaches <span class="math inline">\(\varepsilon_1 + \varepsilon_2\)</span> for every <span class="math inline">\(c\)</span>, and noise that ignores <span class="math inline">\(c\)</span> really does cost <span class="math inline">\(c\)</span> times more. And the alarm mechanism’s hidden condition matters at <span class="math inline">\(K = 22\)</span> but not at the chapter’s <span class="math inline">\(K = 10\)</span>.</p>
+</section>
+<section id="references" class="level2" data-number="J.9">
+<h2 data-number="J.9" class="anchored" data-anchor-id="references"><span class="header-section-number">J.9</span> References</h2>
+<ul>
+<li>Kairouz, Oh &amp; Viswanath, “The Composition Theorem for Differential Privacy” (ICML 2015; IEEE Transactions on Information Theory, 2017): the four-point pair, the channel for <span class="math inline">\(\delta &gt; 0\)</span>, and optimal composition.</li>
+<li>Blackwell, “Equivalent Comparisons of Experiments” (Annals of Mathematical Statistics, 1953): one experiment is a post-processing of another exactly when it is harder to test at every level.</li>
+<li>Bun &amp; Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (TCC 2016): approximate zCDP, Proposition 1.13 and the general composition Lemma 8.2.</li>
+<li>Vadhan, “The Complexity of Differential Privacy” (in <em>Tutorials on the Foundations of Cryptography</em>, 2017): the stability-based histogram and its accuracy, in the textbook form used here.</li>
+<li>Karwa &amp; Vadhan, “Finite Sample Differentially Private Confidence Intervals” (ITCS 2018): a stability-based histogram as the coarse step of mean estimation without a range bound.</li>
+<li>Kamath, Singhal &amp; Ullman, “Private Mean Estimation of Heavy-Tailed Distributions” (COLT 2020): upper and lower bounds for distributions with a bounded <span class="math inline">\(k\)</span>-th moment.</li>
+<li>Lyu, Su &amp; Li, “Understanding the Sparse Vector Technique for Differential Privacy” (VLDB 2017): Algorithm 1 with <span class="math inline">\(c\)</span> answers above, its proof, and the broken variants.</li>
+<li>Durfee &amp; Rogers, “Practical Differentially Private Top-<span class="math inline">\(k\)</span> Selection with Pay-what-you-get Composition” (NeurIPS 2019): Gumbel top-<span class="math inline">\(k\)</span> as repeated exponential mechanisms.</li>
+<li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014): AboveThreshold, the exponential mechanism and group privacy.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../appendix-derivations/09-cryptography.html" class="pagination-link" aria-label="Pseudorandom functions and learning with errors">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../appendix-derivations/11-composition.html" class="pagination-link" aria-label="Composition of trade-off functions">
+        <span class="nav-page-text"><span class="chapter-number">K</span>&nbsp; <span class="chapter-title">Composition of trade-off functions</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>37&nbsp; Exercises: DP-SGD – Privacy-Preserving Machine Learning: Exercises</title>
+<title>39&nbsp; Exercises: DP-SGD – Privacy-Preserving Machine Learning: Exercises</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -117,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/02-dp-sgd.html"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/02-dp-sgd.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -313,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -349,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -414,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Exercises: Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -483,21 +501,22 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-dpsgd-1" id="toc-sec-sol-dpsgd-1" class="nav-link active" data-scroll-target="#sec-sol-dpsgd-1"><span class="header-section-number">37.1</span> When does the signal beat the noise?</a></li>
-  <li><a href="#sec-sol-dpsgd-2" id="toc-sec-sol-dpsgd-2" class="nav-link" data-scroll-target="#sec-sol-dpsgd-2"><span class="header-section-number">37.2</span> Dividing by the realized batch size</a></li>
-  <li><a href="#sec-sol-dpsgd-3" id="toc-sec-sol-dpsgd-3" class="nav-link" data-scroll-target="#sec-sol-dpsgd-3"><span class="header-section-number">37.3</span> Adam does not see the clipping norm</a></li>
-  <li><a href="#sec-sol-dpsgd-4" id="toc-sec-sol-dpsgd-4" class="nav-link" data-scroll-target="#sec-sol-dpsgd-4"><span class="header-section-number">37.4</span> Where ghost clipping stops paying</a></li>
-  <li><a href="#sec-sol-dpsgd-5" id="toc-sec-sol-dpsgd-5" class="nav-link" data-scroll-target="#sec-sol-dpsgd-5"><span class="header-section-number">37.5</span> The small-q law for the noise multiplier</a></li>
-  <li><a href="#sec-sol-dpsgd-6" id="toc-sec-sol-dpsgd-6" class="nav-link" data-scroll-target="#sec-sol-dpsgd-6"><span class="header-section-number">37.6</span> How ε grows with the number of steps</a></li>
+  <li><a href="#sec-sol-dpsgd-1" id="toc-sec-sol-dpsgd-1" class="nav-link active" data-scroll-target="#sec-sol-dpsgd-1"><span class="header-section-number">39.1</span> When does the signal beat the noise?</a></li>
+  <li><a href="#sec-sol-dpsgd-2" id="toc-sec-sol-dpsgd-2" class="nav-link" data-scroll-target="#sec-sol-dpsgd-2"><span class="header-section-number">39.2</span> Dividing by the realized batch size</a></li>
+  <li><a href="#sec-sol-dpsgd-3" id="toc-sec-sol-dpsgd-3" class="nav-link" data-scroll-target="#sec-sol-dpsgd-3"><span class="header-section-number">39.3</span> Adam does not see the clipping norm</a></li>
+  <li><a href="#sec-sol-dpsgd-4" id="toc-sec-sol-dpsgd-4" class="nav-link" data-scroll-target="#sec-sol-dpsgd-4"><span class="header-section-number">39.4</span> Where ghost clipping stops paying</a></li>
+  <li><a href="#sec-sol-dpsgd-5" id="toc-sec-sol-dpsgd-5" class="nav-link" data-scroll-target="#sec-sol-dpsgd-5"><span class="header-section-number">39.5</span> The small-q law for the noise multiplier</a></li>
+  <li><a href="#sec-sol-dpsgd-6" id="toc-sec-sol-dpsgd-6" class="nav-link" data-scroll-target="#sec-sol-dpsgd-6"><span class="header-section-number">39.6</span> How ε grows with the number of steps</a></li>
+  <li><a href="#sec-sol-dpsgd-7" id="toc-sec-sol-dpsgd-7" class="nav-link" data-scroll-target="#sec-sol-dpsgd-7"><span class="header-section-number">39.7</span> What microbatches cost</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/02-dp-sgd.html"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/02-dp-sgd.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></h1>
+<h1 class="title"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></h1>
 </div>
 
 
@@ -516,10 +535,10 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part05-dp-ml/02-dp-sgd.html">the chapter on private stochastic gradient descent</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part05-dp-ml/solutions_dp_sgd.py</code> computes every number quoted here; run it with <code>uv run python code/part05-dp-ml/solutions_dp_sgd.py</code>.</p>
 <p>The solutions use the chapter’s notation. To give differential privacy (DP), stochastic gradient descent (SGD) is run with per-example clipping and Gaussian noise, as DP-SGD. <span class="math inline">\(C\)</span> is the clipping norm, <span class="math inline">\(\sigma\)</span> the noise multiplier, <span class="math inline">\(q\)</span> the Poisson sampling rate, <span class="math inline">\(B = qn\)</span> the expected batch size, <span class="math inline">\(T\)</span> the number of steps and <span class="math inline">\(p\)</span> the number of weights. The running example has <span class="math inline">\(n = 10{,}000\)</span>, <span class="math inline">\(p = 3{,}329\)</span>, <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(C = 0.5\)</span>, and its averaged clipped gradient has length about 0.026 during training. Rényi differential privacy (RDP) is the accountant’s currency.</p>
-<section id="sec-sol-dpsgd-1" class="level2" data-number="37.1">
-<h2 data-number="37.1" class="anchored" data-anchor-id="sec-sol-dpsgd-1"><span class="header-section-number">37.1</span> When does the signal beat the noise?</h2>
+<section id="sec-sol-dpsgd-1" class="level2" data-number="39.1">
+<h2 data-number="39.1" class="anchored" data-anchor-id="sec-sol-dpsgd-1"><span class="header-section-number">39.1</span> When does the signal beat the noise?</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 1.</strong> <strong>When does the signal beat the noise?</strong> In the running example the averaged clipped gradient has length about 0.026. Using the argument of <a href="../../book-full/part05-dp-ml/02-dp-sgd.html#sec-dpsgd-algorithm">Section&nbsp;37.3</a>, compute the length of the noise on the averaged gradient and the number of steps after which accumulated signal exceeds accumulated noise, at <span class="math inline">\(\varepsilon = 8\)</span>, 4 and 1 (<span class="math inline">\(\delta = 10^{-5}\)</span>, <span class="math inline">\(T = 10{,}000\)</span>). <em>Check: 104, 228 and 2,100 steps.</em> <em>(Drift against random walk)</em></p>
+<p><strong>Exercise 1.</strong> <strong>When does the signal beat the noise?</strong> In the running example the averaged clipped gradient has length about 0.026. Using the argument of <a href="../../book-full/part05-dp-ml/02-dp-sgd.html#sec-dpsgd-algorithm">Section&nbsp;39.3</a>, compute the length of the noise on the averaged gradient and the number of steps after which accumulated signal exceeds accumulated noise, at <span class="math inline">\(\varepsilon = 8\)</span>, 4 and 1 (<span class="math inline">\(\delta = 10^{-5}\)</span>, <span class="math inline">\(T = 10{,}000\)</span>). <em>Check: 104, 228 and 2,100 steps.</em> <em>(Drift against random walk)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -534,7 +553,7 @@ window.Quarto = {
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The noise multipliers.</strong> From the accountant, <span class="math inline">\(\sigma = 0.917\)</span>, 1.36 and 4.13 for the three budgets (<a href="../../book-full/part05-dp-ml/02-dp-sgd.html#tbl-dpsgd-sigma">Table&nbsp;37.2</a>).</li>
+<li><strong>The noise multipliers.</strong> From the accountant, <span class="math inline">\(\sigma = 0.917\)</span>, 1.36 and 4.13 for the three budgets (<a href="../../book-full/part05-dp-ml/02-dp-sgd.html#tbl-dpsgd-sigma">Table&nbsp;39.2</a>).</li>
 <li><strong>Noise length.</strong> The noise on the averaged gradient has standard deviation <span class="math inline">\(\sigma C/B\)</span> per coordinate and length about <span class="math inline">\(\sigma C\sqrt p/B\)</span>: <span class="math inline">\(0.917 \times 0.5 \times \sqrt{3{,}329}/100 = 0.265\)</span>, then 0.392 and 1.191.</li>
 <li><strong>Accumulation.</strong> Over <span class="math inline">\(k\)</span> steps a signal of roughly constant direction adds up to length <span class="math inline">\(0.026k\)</span>, and independent noise to about <span class="math inline">\(\sqrt k\)</span> times its per-step length. They are equal when <span class="math inline">\(\sqrt k = \text{noise}/0.026\)</span>, so <span class="math inline">\(k = (\text{noise}/0.026)^2\)</span>.</li>
 <li><strong>Numbers.</strong> <span class="math inline">\((0.265/0.026)^2 = 104\)</span>, <span class="math inline">\((0.392/0.026)^2 = 228\)</span> and <span class="math inline">\((1.191/0.026)^2 = 2{,}100\)</span>.</li>
@@ -544,8 +563,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-dpsgd-2" class="level2" data-number="37.2">
-<h2 data-number="37.2" class="anchored" data-anchor-id="sec-sol-dpsgd-2"><span class="header-section-number">37.2</span> Dividing by the realized batch size</h2>
+<section id="sec-sol-dpsgd-2" class="level2" data-number="39.2">
+<h2 data-number="39.2" class="anchored" data-anchor-id="sec-sol-dpsgd-2"><span class="header-section-number">39.2</span> Dividing by the realized batch size</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>Dividing by the realized batch size.</strong> Under Poisson sampling the batch size <span class="math inline">\(|S|\)</span> is random, with mean <span class="math inline">\(B = qn\)</span>. For <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(q = 0.01\)</span>, compute its relative standard deviation, the probability that the batch is empty, and (by a normal approximation) the probability that it is less than half its mean. Repeat for <span class="math inline">\(n = 1{,}000\)</span>. Why does dividing by <span class="math inline">\(|S|\)</span> break the proof even when these probabilities are tiny? <em>Check: relative standard deviation 0.0995 and 0.3146.</em> <em>(Binomial batch sizes)</em></p>
 </blockquote>
@@ -568,15 +587,15 @@ window.Quarto = {
 <li><strong>Less than half.</strong> The normal approximation gives <span class="math inline">\(\Phi(-\frac{B/2}{\sqrt{nq(1-q)}})\)</span>: <span class="math inline">\(2.5 \times 10^{-7}\)</span> for <span class="math inline">\(B = 100\)</span>, and 0.056 for <span class="math inline">\(B = 10\)</span>.</li>
 <li><strong>Why it breaks the proof anyway.</strong> The derivation needs the update to be a function of the noisy sum <span class="math inline">\(G_t\)</span> alone. Dividing by <span class="math inline">\(|S_t|\)</span> uses a second data-dependent quantity, which changes by one when the target record is drawn. The accountant has not paid for releasing it, and the sensitivity of <span class="math inline">\(G_t/|S_t|\)</span> is no longer <span class="math inline">\(C\)</span> divided by a constant. A proof does not hold “with high probability” unless it was written that way.</li>
 </ol>
-<p><em>Small batch sizes vary a lot, and a correct implementation divides by the public <span class="math inline">\(B\)</span>; the update is then unbiased (<a href="../../book-full/part05-dp-ml/02-dp-sgd.html#eq-dpsgd-expected">Equation&nbsp;37.3</a>), at the price of a step length that varies a little with <span class="math inline">\(|S_t|\)</span>.</em></p>
+<p><em>Small batch sizes vary a lot, and a correct implementation divides by the public <span class="math inline">\(B\)</span>; the update is then unbiased (<a href="../../book-full/part05-dp-ml/02-dp-sgd.html#eq-dpsgd-expected">Equation&nbsp;39.3</a>), at the price of a step length that varies a little with <span class="math inline">\(|S_t|\)</span>.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-dpsgd-3" class="level2" data-number="37.3">
-<h2 data-number="37.3" class="anchored" data-anchor-id="sec-sol-dpsgd-3"><span class="header-section-number">37.3</span> Adam does not see the clipping norm</h2>
+<section id="sec-sol-dpsgd-3" class="level2" data-number="39.3">
+<h2 data-number="39.3" class="anchored" data-anchor-id="sec-sol-dpsgd-3"><span class="header-section-number">39.3</span> Adam does not see the clipping norm</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>Adam does not see the clipping norm.</strong> Suppose every per-example gradient is clipped, so each noisy sum is <span class="math inline">\(C\)</span> times a quantity that does not depend on <span class="math inline">\(C\)</span> (<a href="../../book-full/part05-dp-ml/02-dp-sgd.html#eq-dpsgd-normalized">Equation&nbsp;37.4</a>). Show that Adam’s update is then independent of <span class="math inline">\(C\)</span> up to its small constant <span class="math inline">\(\epsilon_{\text{Adam}}\)</span> in the denominator, so with Adam the clipping norm does not even need to be matched by the step size. Check numerically with 20 random gradients, <span class="math inline">\(C = 0.01\)</span> and <span class="math inline">\(C = 10\)</span>. <em>Check: the updates agree to a relative difference of <span class="math inline">\(7.3 \times 10^{-5}\)</span>.</em> <em>(Scale invariance of adaptive optimizers)</em></p>
+<p><strong>Exercise 3.</strong> <strong>Adam does not see the clipping norm.</strong> Suppose every per-example gradient is clipped, so each noisy sum is <span class="math inline">\(C\)</span> times a quantity that does not depend on <span class="math inline">\(C\)</span> (<a href="../../book-full/part05-dp-ml/02-dp-sgd.html#eq-dpsgd-normalized">Equation&nbsp;39.4</a>). Show that Adam’s update is then independent of <span class="math inline">\(C\)</span> up to its small constant <span class="math inline">\(\epsilon_{\text{Adam}}\)</span> in the denominator, so with Adam the clipping norm does not even need to be matched by the step size. Check numerically with 20 random gradients, <span class="math inline">\(C = 0.01\)</span> and <span class="math inline">\(C = 10\)</span>. <em>Check: the updates agree to a relative difference of <span class="math inline">\(7.3 \times 10^{-5}\)</span>.</em> <em>(Scale invariance of adaptive optimizers)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -601,8 +620,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-dpsgd-4" class="level2" data-number="37.4">
-<h2 data-number="37.4" class="anchored" data-anchor-id="sec-sol-dpsgd-4"><span class="header-section-number">37.4</span> Where ghost clipping stops paying</h2>
+<section id="sec-sol-dpsgd-4" class="level2" data-number="39.4">
+<h2 data-number="39.4" class="anchored" data-anchor-id="sec-sol-dpsgd-4"><span class="header-section-number">39.4</span> Where ghost clipping stops paying</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>Where ghost clipping stops paying.</strong> For a dense layer from <span class="math inline">\(p_{\text{in}}\)</span> to <span class="math inline">\(p_{\text{out}}\)</span> applied to sequences of <span class="math inline">\(T\)</span> tokens, ghost norms store <span class="math inline">\(2BT^2\)</span> numbers and explicit per-example gradients <span class="math inline">\(Bp_{\text{in}}p_{\text{out}}\)</span>. Find the sequence length above which explicit gradients are cheaper, for <span class="math inline">\(768 \to 768\)</span>, <span class="math inline">\(768 \to 3{,}072\)</span> and <span class="math inline">\(4{,}096 \to 4{,}096\)</span>. <em>Check: 543, 1,086 and 2,896 tokens.</em> <em>(Comparing costs)</em></p>
 </blockquote>
@@ -628,8 +647,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-dpsgd-5" class="level2" data-number="37.5">
-<h2 data-number="37.5" class="anchored" data-anchor-id="sec-sol-dpsgd-5"><span class="header-section-number">37.5</span> The small-q law for the noise multiplier</h2>
+<section id="sec-sol-dpsgd-5" class="level2" data-number="39.5">
+<h2 data-number="39.5" class="anchored" data-anchor-id="sec-sol-dpsgd-5"><span class="header-section-number">39.5</span> The small-q law for the noise multiplier</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>The small-q law for the noise multiplier.</strong> Approximate the composed RDP curve of DP-SGD by a line, <span class="math inline">\(\rho\alpha\)</span>, and convert it with <span class="math inline">\(\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}\)</span> (the zero-concentrated DP conversion of <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>). Find <span class="math inline">\(\rho\)</span> for <span class="math inline">\(\varepsilon = 4\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>. Then compute <span class="math inline">\(\sigma\)</span> for <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(T = 10{,}000\)</span> in two ways, from <span class="math inline">\(Tq^2/(2\sigma^2) = \rho\)</span> and from <span class="math inline">\(Tq^2(e^{1/\sigma^2} - 1)/2 = \rho\)</span>, and compare with the accountant. Repeat for <span class="math inline">\(q = 0.001\)</span>, <span class="math inline">\(T = 100{,}000\)</span>. <em>Check: <span class="math inline">\(\rho = 0.2977\)</span>; <span class="math inline">\(\sigma = 1.296\)</span> and 1.463 against the accountant’s 1.36; at <span class="math inline">\(q = 0.001\)</span>, 0.410 and 0.718 against 0.704.</em> <em>(Approximating an accountant)</em></p>
 </blockquote>
@@ -657,8 +676,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-dpsgd-6" class="level2" data-number="37.6">
-<h2 data-number="37.6" class="anchored" data-anchor-id="sec-sol-dpsgd-6"><span class="header-section-number">37.6</span> How ε grows with the number of steps</h2>
+<section id="sec-sol-dpsgd-6" class="level2" data-number="39.6">
+<h2 data-number="39.6" class="anchored" data-anchor-id="sec-sol-dpsgd-6"><span class="header-section-number">39.6</span> How ε grows with the number of steps</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>How ε grows with the number of steps.</strong> With <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>, compute <span class="math inline">\(\varepsilon\)</span> after 100, 1,000, 10,000 and 100,000 steps, and the number of steps at which <span class="math inline">\(\varepsilon\)</span> first reaches 1, 2 and 4. Explain the shape. <em>Check: 1.21, 2.10, 6.71 and 27.23; 5, 882 and 3,859 steps.</em> <em>(Composition in RDP)</em></p>
 </blockquote>
@@ -677,11 +696,38 @@ window.Quarto = {
 <ol type="1">
 <li><strong>The values.</strong> The accountant gives <span class="math inline">\(\varepsilon = 1.21\)</span>, 2.10, 6.71 and 27.23.</li>
 <li><strong>The thresholds.</strong> Bisection over <span class="math inline">\(T\)</span> gives 5 steps for <span class="math inline">\(\varepsilon = 1\)</span>, 882 for 2 and 3,859 for 4.</li>
-<li><strong>Why the first steps cost so much.</strong> The conversion of <a href="../../book-full/part05-dp-ml/02-dp-sgd.html#eq-dpsgd-convert">Equation&nbsp;37.2</a> adds <span class="math inline">\(\ln(1/\delta)/(\alpha - 1)\)</span> and related terms at any order, about 1 for the orders that are best for short runs. Even a few steps report <span class="math inline">\(\varepsilon \approx 1\)</span>, because the conversion, not the composition, dominates. The first step alone has <span class="math inline">\(\varepsilon = 0.96\)</span> by this accountant.</li>
+<li><strong>Why the first steps cost so much.</strong> The conversion of <a href="../../book-full/part05-dp-ml/02-dp-sgd.html#eq-dpsgd-convert">Equation&nbsp;39.2</a> adds <span class="math inline">\(\ln(1/\delta)/(\alpha - 1)\)</span> and related terms at any order, about 1 for the orders that are best for short runs. Even a few steps report <span class="math inline">\(\varepsilon \approx 1\)</span>, because the conversion, not the composition, dominates. The first step alone has <span class="math inline">\(\varepsilon = 0.96\)</span> by this accountant.</li>
 <li><strong>The middle.</strong> From 1,000 to 10,000 steps, <span class="math inline">\(\varepsilon\)</span> grows by a factor of 3.2, close to <span class="math inline">\(\sqrt{10}\)</span>, as in the quadratic regime: the composed RDP is <span class="math inline">\(T\)</span> times a curve linear in <span class="math inline">\(\alpha\)</span>, and the conversion of a linear curve grows like the square root of its slope for small slopes.</li>
 <li><strong>The end.</strong> From 10,000 to 100,000 steps the factor is 4.1, more than <span class="math inline">\(\sqrt{10}\)</span>: the best order falls toward 1, where the curve is no longer linear and the conversion grows faster.</li>
 </ol>
 <p><em>Privacy cost is not proportional to training time. It is front-loaded by the conversion, grows like <span class="math inline">\(\sqrt T\)</span> over the useful range, and faster for very long runs.</em></p>
+</div>
+</div>
+</div>
+</section>
+<section id="sec-sol-dpsgd-7" class="level2" data-number="39.7">
+<h2 data-number="39.7" class="anchored" data-anchor-id="sec-sol-dpsgd-7"><span class="header-section-number">39.7</span> What microbatches cost</h2>
+<blockquote class="blockquote">
+<p><strong>Exercise 7.</strong> <strong>What microbatches cost.</strong> Microbatched DP-SGD (<a href="../../book-full/part05-dp-ml/02-dp-sgd.html#eq-dpsgd-microbatch">Equation&nbsp;39.8</a>) clips the mean gradient of groups of <span class="math inline">\(m\)</span> records fixed in advance, and adds noise <span class="math inline">\(2\sigma C\)</span> to keep the accountant’s <span class="math inline">\(\varepsilon\)</span>. For the running example (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(B = 100\)</span>, <span class="math inline">\(C = 0.5\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps, <span class="math inline">\(\varepsilon = 6.71\)</span>), find by what factor microbatches of <span class="math inline">\(m = 2\)</span> and <span class="math inline">\(m = 4\)</span> multiply the noise on the averaged update. Per-example DP-SGD with that much more noise would have what <span class="math inline">\(\varepsilon\)</span>? Explain the factor 2 in the sensitivity with a two-record example. <em>Check: factors 4 and 8; per-example DP-SGD with <span class="math inline">\(\sigma = 4\)</span> and 8 has <span class="math inline">\(\varepsilon = 1.035\)</span> and 0.481.</em> <em>(Sensitivity of clipped means)</em></p>
+</blockquote>
+<div class="callout callout-style-default callout-tip callout-titled" title="Solution">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Solution
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<ol type="1">
+<li><strong>The factor.</strong> The noise per coordinate is <span class="math inline">\(2\sigma C/(B/m) = 2m\,\sigma C/B\)</span>, against <span class="math inline">\(\sigma C/B\)</span> for per-example clipping, a factor <span class="math inline">\(2m\)</span>: 4 for <span class="math inline">\(m = 2\)</span> and 8 for <span class="math inline">\(m = 4\)</span>.</li>
+<li><strong>The same noise, spent per example.</strong> Per-example DP-SGD with noise multiplier 4 or 8 has exactly as much noise on its averaged update as these microbatched runs. The accountant gives it <span class="math inline">\(\varepsilon = 1.035\)</span> and 0.481. So microbatches of 4 buy the accuracy of a run at <span class="math inline">\(\varepsilon \approx 0.5\)</span> while paying <span class="math inline">\(\varepsilon = 6.71\)</span>.</li>
+<li><strong>The factor 2.</strong> Take a microbatch with one other record whose gradient is <span class="math inline">\(Cu\)</span> for a unit vector <span class="math inline">\(u\)</span>, and add a record whose gradient is <span class="math inline">\(-3Cu\)</span>. The mean changes from <span class="math inline">\(Cu\)</span> to <span class="math inline">\(-Cu\)</span>, both of length <span class="math inline">\(C\)</span> after clipping, so the clipped mean moves by <span class="math inline">\(2C\)</span>. Under per-example clipping the added record contributes its own clipped term, <span class="math inline">\(-Cu\)</span>, and the sum moves by only <span class="math inline">\(C\)</span>.</li>
+</ol>
+<p><em>Microbatches make clipping cheaper by making it coarser, and the privacy accounting charges for that twice: fewer clipped terms carry the signal, and each moves by up to <span class="math inline">\(2C\)</span>. Vectorized per-example gradients give the speed without the charge.</em></p>
 </div>
 </div>
 </div>
@@ -1093,12 +1139,12 @@ window.Quarto = {
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/01-dp-erm.html" class="pagination-link" aria-label="Exercises: Private empirical risk minimization">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="pagination-link" aria-label="Exercises: Hyperparameter tuning and private selection">
-        <span class="nav-page-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

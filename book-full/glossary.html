@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Appendix A — Glossary – Privacy-Preserving Machine Learning</title>
+<title>Appendix O — Glossary – Privacy-Preserving Machine Learning</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -37,7 +37,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./term-index.html" rel="next">
-<link href="./part05-dp-ml/10-auditing.html" rel="prev">
+<link href="./appendix-derivations/14-auditing-adaptivity.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -88,7 +88,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./glossary.html">Appendices</a></li><li class="breadcrumb-item"><a href="./glossary.html"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix-derivations/01-calibration.html">Appendices</a></li><li class="breadcrumb-item"><a href="./glossary.html"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -284,26 +284,38 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  <a href="./part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="./part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  <a href="./part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  <a href="./part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -320,55 +332,55 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -385,61 +397,67 @@ ul.task-list li input[type="checkbox"] {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -455,14 +473,98 @@ ul.task-list li input[type="checkbox"] {
       <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/01-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">How much noise to add</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/02-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Composing private releases</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/03-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/04-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">What ε means, and converting between definitions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/05-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Sums, limits and counting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/06-tails-tests-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Tail bounds, tests and divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/07-optimization-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Optimization and estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/08-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Random matrices and factorizations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/09-cryptography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/10-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/11-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">K</span>&nbsp; <span class="chapter-title">Composition of trade-off functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/12-amplification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">L</span>&nbsp; <span class="chapter-title">Subsampling, shuffling and iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/13-private-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">M</span>&nbsp; <span class="chapter-title">Private learning and tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./appendix-derivations/14-auditing-adaptivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">N</span>&nbsp; <span class="chapter-title">Auditing, reconstruction and adaptive analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./glossary.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+ <span class="menu-text"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./term-index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+ <span class="menu-text"><span class="chapter-number">P</span>&nbsp; <span class="chapter-title">Index</span></span></a>
   </div>
 </li>
       </ul>
@@ -478,9 +580,9 @@ ul.task-list li input[type="checkbox"] {
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./glossary.html">Appendices</a></li><li class="breadcrumb-item"><a href="./glossary.html"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./appendix-derivations/01-calibration.html">Appendices</a></li><li class="breadcrumb-item"><a href="./glossary.html"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span id="sec-glossary" class="quarto-section-identifier">Appendix A — Glossary</span></h1>
+<h1 class="title"><span id="sec-glossary" class="quarto-section-identifier">Appendix O — Glossary</span></h1>
 </div>
 
 
@@ -514,7 +616,7 @@ Area under the curve. Used in <a href="./part01-prerequisites/04-hypothesis-test
 </dd>
 <dt><strong>CDF</strong></dt>
 <dd>
-Cumulative distribution function. Used in <a href="./part01-prerequisites/01-distributions.html">Probability distributions</a>, <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part02-attacks/01-threat-models.html">Threat models and privacy games</a>, <a href="./part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>, <a href="./part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>, <a href="./part03-dp-foundations/05-selection.html">Selection: exponential mechanism, report-noisy-max, sparse vector</a>, <a href="./part03-dp-foundations/07-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>.
+Cumulative distribution function. Used in <a href="./part01-prerequisites/01-distributions.html">Probability distributions</a>, <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part02-attacks/01-threat-models.html">Threat models and privacy games</a>, <a href="./part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>, <a href="./part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>, <a href="./part03-dp-foundations/05-selection.html">Selection: exponential mechanism, report-noisy-max, sparse vector</a>, <a href="./part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>, <a href="./appendix-derivations/05-probability.html">Sums, limits and counting</a>.
 </dd>
 <dt><strong>CDP</strong></dt>
 <dd>
@@ -522,7 +624,7 @@ Concentrated differential privacy. Used in <a href="./part04-privacy-accounting/
 </dd>
 <dt><strong>CLT</strong></dt>
 <dd>
-Central limit theorem. Used in <a href="./part01-prerequisites/01-distributions.html">Probability distributions</a>, <a href="./part01-prerequisites/02-concentration.html">Concentration inequalities</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>.
+Central limit theorem. Used in <a href="./part01-prerequisites/01-distributions.html">Probability distributions</a>, <a href="./part01-prerequisites/02-concentration.html">Concentration inequalities</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>, <a href="./appendix-derivations/05-probability.html">Sums, limits and counting</a>, <a href="./appendix-derivations/11-composition.html">Composition of trade-off functions</a>.
 </dd>
 <dt><strong>CPA</strong></dt>
 <dd>
@@ -534,11 +636,11 @@ Deep Leakage from Gradients. Used in <a href="./part02-attacks/06-gradient-inver
 </dd>
 <dt><strong>DNA</strong></dt>
 <dd>
-Deoxyribonucleic acid. Used in <a href="./part03-dp-foundations/09-lower-bounds.html">Lower bounds: what privacy costs</a>.
+Deoxyribonucleic acid. Used in <a href="./part02-attacks/09-reconstruction.html">Reconstruction attacks</a>, <a href="./part03-dp-foundations/10-lower-bounds.html">Lower bounds: what privacy costs</a>.
 </dd>
 <dt><strong>DP</strong></dt>
 <dd>
-Differential privacy. Used in <a href="./part03-dp-foundations/00-introduction.html">Differential privacy foundations</a>, <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>, <a href="./part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>, <a href="./part03-dp-foundations/04-composition.html">Advanced and optimal composition</a>, <a href="./part03-dp-foundations/05-selection.html">Selection: exponential mechanism, report-noisy-max, sparse vector</a>, <a href="./part03-dp-foundations/06-sensitivity.html">Beyond global sensitivity</a>, <a href="./part03-dp-foundations/07-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>, <a href="./part03-dp-foundations/08-trust-models.html">Local, shuffle and distributed trust models</a>, <a href="./part03-dp-foundations/09-lower-bounds.html">Lower bounds: what privacy costs</a>, <a href="./part04-privacy-accounting/00-introduction.html">Privacy accounting</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition: filters, odometers and individual accounting</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <a href="./part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning and private selection</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a>, <a href="./part05-dp-ml/07-user-level.html">User-level differential privacy</a>, <a href="./part05-dp-ml/08-disparate-impact.html">Disparate impact</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>.
+Differential privacy. Used in <a href="./part03-dp-foundations/00-introduction.html">Differential privacy foundations</a>, <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>, <a href="./part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>, <a href="./part03-dp-foundations/04-composition.html">Advanced and optimal composition</a>, <a href="./part03-dp-foundations/05-selection.html">Selection: exponential mechanism, report-noisy-max, sparse vector</a>, <a href="./part03-dp-foundations/06-query-release.html">Query release and private multiplicative weights</a>, <a href="./part03-dp-foundations/07-sensitivity.html">Beyond global sensitivity</a>, <a href="./part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>, <a href="./part03-dp-foundations/09-trust-models.html">Local, shuffle and distributed trust models</a>, <a href="./part03-dp-foundations/10-lower-bounds.html">Lower bounds: what privacy costs</a>, <a href="./part03-dp-foundations/11-mean-estimation.html">Private mean estimation</a>, <a href="./part04-privacy-accounting/00-introduction.html">Privacy accounting</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition: filters, odometers and individual accounting</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <a href="./part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning and private selection</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a>, <a href="./part05-dp-ml/07-user-level.html">User-level differential privacy</a>, <a href="./part05-dp-ml/08-disparate-impact.html">Disparate impact</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>, <a href="./part05-dp-ml/11-adaptive-data-analysis.html">Adaptive data analysis</a>, <a href="./appendix-derivations/01-calibration.html">How much noise to add</a>, <a href="./appendix-derivations/02-composition.html">Composing private releases</a>, <a href="./appendix-derivations/03-dp-sgd.html">Accounting for DP-SGD</a>, <a href="./appendix-derivations/04-conversions.html">What ε means, and converting between definitions</a>, <a href="./appendix-derivations/08-matrices.html">Random matrices and factorizations</a>, <a href="./appendix-derivations/10-mechanisms.html">Mechanisms and their limits</a>, <a href="./appendix-derivations/11-composition.html">Composition of trade-off functions</a>, <a href="./appendix-derivations/12-amplification.html">Subsampling, shuffling and iteration</a>, <a href="./appendix-derivations/13-private-learning.html">Private learning and tuning</a>, <a href="./appendix-derivations/14-auditing-adaptivity.html">Auditing, reconstruction and adaptive analysis</a>.
 </dd>
 <dt><strong>DPI</strong></dt>
 <dd>
@@ -550,7 +652,7 @@ Earth mover’s distance. Used in <a href="./part02-attacks/08-syntactic-anonymi
 </dd>
 <dt><strong>ERM</strong></dt>
 <dd>
-Empirical risk minimization. Used in <a href="./part01-prerequisites/06-optimization.html">Optimization</a>, <a href="./part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, <a href="./part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a>.
+Empirical risk minimization. Used in <a href="./part01-prerequisites/06-optimization.html">Optimization</a>, <a href="./part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, <a href="./part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a>, <a href="./appendix-derivations/13-private-learning.html">Private learning and tuning</a>.
 </dd>
 <dt><strong>FFT</strong></dt>
 <dd>
@@ -562,15 +664,15 @@ Federated learning. Used in <a href="./part02-attacks/06-gradient-inversion.html
 </dd>
 <dt><strong>FNR</strong></dt>
 <dd>
-False negative rate. Used in <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>.
+False negative rate. Used in <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>, <a href="./appendix-derivations/04-conversions.html">What ε means, and converting between definitions</a>.
 </dd>
 <dt><strong>FPR</strong></dt>
 <dd>
-False positive rate. Used in <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part02-attacks/00-introduction.html">Threat models and attacks</a>, <a href="./part02-attacks/01-threat-models.html">Threat models and privacy games</a>, <a href="./part02-attacks/02-membership-inference.html">Membership inference</a>, <a href="./part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a>, <a href="./part02-attacks/04-property-inference.html">Property inference</a>, <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part03-dp-foundations/09-lower-bounds.html">Lower bounds: what privacy costs</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>.
+False positive rate. Used in <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part02-attacks/00-introduction.html">Threat models and attacks</a>, <a href="./part02-attacks/01-threat-models.html">Threat models and privacy games</a>, <a href="./part02-attacks/02-membership-inference.html">Membership inference</a>, <a href="./part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a>, <a href="./part02-attacks/04-property-inference.html">Property inference</a>, <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part03-dp-foundations/10-lower-bounds.html">Lower bounds: what privacy costs</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>, <a href="./appendix-derivations/04-conversions.html">What ε means, and converting between definitions</a>.
 </dd>
 <dt><strong>FTRL</strong></dt>
 <dd>
-Follow the regularized leader. Used in <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>.
+Follow the regularized leader. Used in <a href="./part03-dp-foundations/06-query-release.html">Query release and private multiplicative weights</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./appendix-derivations/08-matrices.html">Random matrices and factorizations</a>.
 </dd>
 <dt><strong>GAN</strong></dt>
 <dd>
@@ -578,11 +680,11 @@ Generative adversarial network. Used in <a href="./part01-prerequisites/03-diver
 </dd>
 <dt><strong>GD</strong></dt>
 <dd>
-Gradient descent. Used in <a href="./part01-prerequisites/06-optimization.html">Optimization</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>.
+Gradient descent. Used in <a href="./part01-prerequisites/06-optimization.html">Optimization</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./appendix-derivations/07-optimization-estimation.html">Optimization and estimation</a>.
 </dd>
 <dt><strong>GDP</strong></dt>
 <dd>
-Gaussian differential privacy. Used in <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>.
+Gaussian differential privacy. Used in <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>, <a href="./appendix-derivations/04-conversions.html">What ε means, and converting between definitions</a>, <a href="./appendix-derivations/08-matrices.html">Random matrices and factorizations</a>, <a href="./appendix-derivations/11-composition.html">Composition of trade-off functions</a>.
 </dd>
 <dt><strong>GPU</strong></dt>
 <dd>
@@ -600,9 +702,13 @@ Hash-based message authentication code. Used in <a href="./part01-prerequisites/
 <dd>
 Indistinguishability, as in IND-CPA. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>.
 </dd>
+<dt><strong>IP</strong></dt>
+<dd>
+Internet Protocol, as in IP address. Used in <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>.
+</dd>
 <dt><strong>KL</strong></dt>
 <dd>
-Kullback–Leibler. Used in <a href="./part01-prerequisites/00-introduction.html">Prerequisites</a>, <a href="./part01-prerequisites/03-divergences.html">Divergences</a>, <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part01-prerequisites/05-information-theory.html">Information theory</a>, <a href="./part03-dp-foundations/04-composition.html">Advanced and optimal composition</a>, <a href="./part03-dp-foundations/08-trust-models.html">Local, shuffle and distributed trust models</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>.
+Kullback–Leibler. Used in <a href="./part01-prerequisites/00-introduction.html">Prerequisites</a>, <a href="./part01-prerequisites/03-divergences.html">Divergences</a>, <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part01-prerequisites/05-information-theory.html">Information theory</a>, <a href="./part03-dp-foundations/04-composition.html">Advanced and optimal composition</a>, <a href="./part03-dp-foundations/09-trust-models.html">Local, shuffle and distributed trust models</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./appendix-derivations/05-probability.html">Sums, limits and counting</a>, <a href="./appendix-derivations/06-tails-tests-divergences.html">Tail bounds, tests and divergences</a>.
 </dd>
 <dt><strong>LLM</strong></dt>
 <dd>
@@ -618,7 +724,7 @@ Likelihood ratio. Used in <a href="./part01-prerequisites/04-hypothesis-testing.
 </dd>
 <dt><strong>LWE</strong></dt>
 <dd>
-Learning with errors. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>.
+Learning with errors. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, <a href="./appendix-derivations/09-cryptography.html">Pseudorandom functions and learning with errors</a>.
 </dd>
 <dt><strong>MAP</strong></dt>
 <dd>
@@ -626,7 +732,7 @@ Maximum a posteriori. Used in <a href="./part01-prerequisites/05-information-the
 </dd>
 <dt><strong>MGF</strong></dt>
 <dd>
-Moment generating function. Used in <a href="./part01-prerequisites/01-distributions.html">Probability distributions</a>, <a href="./part01-prerequisites/02-concentration.html">Concentration inequalities</a>, <a href="./part01-prerequisites/03-divergences.html">Divergences</a>, <a href="./part03-dp-foundations/08-trust-models.html">Local, shuffle and distributed trust models</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>.
+Moment generating function. Used in <a href="./part01-prerequisites/01-distributions.html">Probability distributions</a>, <a href="./part01-prerequisites/02-concentration.html">Concentration inequalities</a>, <a href="./part01-prerequisites/03-divergences.html">Divergences</a>, <a href="./part03-dp-foundations/09-trust-models.html">Local, shuffle and distributed trust models</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./appendix-derivations/03-dp-sgd.html">Accounting for DP-SGD</a>, <a href="./appendix-derivations/04-conversions.html">What ε means, and converting between definitions</a>, <a href="./appendix-derivations/05-probability.html">Sums, limits and counting</a>, <a href="./appendix-derivations/06-tails-tests-divergences.html">Tail bounds, tests and divergences</a>, <a href="./appendix-derivations/13-private-learning.html">Private learning and tuning</a>.
 </dd>
 <dt><strong>MIA</strong></dt>
 <dd>
@@ -634,27 +740,43 @@ Membership inference attack. Used in <a href="./part05-dp-ml/05-private-predicti
 </dd>
 <dt><strong>ML</strong></dt>
 <dd>
-Machine learning. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, <a href="./part02-attacks/02-membership-inference.html">Membership inference</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <a href="./part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning and private selection</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>.
+Machine learning. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, <a href="./part02-attacks/02-membership-inference.html">Membership inference</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <a href="./part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning and private selection</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./appendix-derivations/03-dp-sgd.html">Accounting for DP-SGD</a>.
+</dd>
+<dt><strong>MWEM</strong></dt>
+<dd>
+Multiplicative weights exponential mechanism. Used in <a href="./part03-dp-foundations/06-query-release.html">Query release and private multiplicative weights</a>.
 </dd>
 <dt><strong>NN</strong></dt>
 <dd>
-Nearest neighbour. Used in <a href="./part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>.
+Nearest neighbour. Used in <a href="./part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>, <a href="./appendix-derivations/07-optimization-estimation.html">Optimization and estimation</a>.
+</dd>
+<dt><strong>NYC</strong></dt>
+<dd>
+New York City. Used in <a href="./part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a>.
+</dd>
+<dt><strong>PAC</strong></dt>
+<dd>
+Probably approximately correct. Used in <a href="./part03-dp-foundations/05-selection.html">Selection: exponential mechanism, report-noisy-max, sparse vector</a>.
 </dd>
 <dt><strong>PATE</strong></dt>
 <dd>
-Private aggregation of teacher ensembles. Used in <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>.
+Private aggregation of teacher ensembles. Used in <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./appendix-derivations/13-private-learning.html">Private learning and tuning</a>.
+</dd>
+<dt><strong>PCP</strong></dt>
+<dd>
+Probabilistically checkable proof. Used in <a href="./part03-dp-foundations/06-query-release.html">Query release and private multiplicative weights</a>.
 </dd>
 <dt><strong>PIN</strong></dt>
 <dd>
-Personal identification number. Used in <a href="./part01-prerequisites/05-information-theory.html">Information theory</a>.
+Personal identification number. Used in <a href="./part01-prerequisites/05-information-theory.html">Information theory</a>, <a href="./appendix-derivations/06-tails-tests-divergences.html">Tail bounds, tests and divergences</a>.
 </dd>
 <dt><strong>PLD</strong></dt>
 <dd>
-Privacy loss distribution. Used in <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>.
+Privacy loss distribution. Used in <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./appendix-derivations/02-composition.html">Composing private releases</a>, <a href="./appendix-derivations/03-dp-sgd.html">Accounting for DP-SGD</a>, <a href="./appendix-derivations/11-composition.html">Composition of trade-off functions</a>, <a href="./appendix-derivations/13-private-learning.html">Private learning and tuning</a>.
 </dd>
 <dt><strong>PMF</strong></dt>
 <dd>
-Probability mass function. Used in <a href="./part01-prerequisites/01-distributions.html">Probability distributions</a>, <a href="./part03-dp-foundations/07-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>.
+Probability mass function. Used in <a href="./part01-prerequisites/01-distributions.html">Probability distributions</a>, <a href="./part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>.
 </dd>
 <dt><strong>PPT</strong></dt>
 <dd>
@@ -662,11 +784,11 @@ Probabilistic polynomial time. Used in <a href="./part01-prerequisites/08-crypto
 </dd>
 <dt><strong>PRF</strong></dt>
 <dd>
-Pseudorandom function. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>.
+Pseudorandom function. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, <a href="./appendix-derivations/09-cryptography.html">Pseudorandom functions and learning with errors</a>.
 </dd>
 <dt><strong>PRG</strong></dt>
 <dd>
-Pseudorandom generator. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>.
+Pseudorandom generator. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, <a href="./appendix-derivations/09-cryptography.html">Pseudorandom functions and learning with errors</a>.
 </dd>
 <dt><strong>PRP</strong></dt>
 <dd>
@@ -678,7 +800,11 @@ Privacy loss random variable. Used in <a href="./part04-privacy-accounting/02-rd
 </dd>
 <dt><strong>RDP</strong></dt>
 <dd>
-Rényi differential privacy. Used in <a href="./part04-privacy-accounting/00-introduction.html">Privacy accounting</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition: filters, odometers and individual accounting</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <a href="./part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning and private selection</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./part05-dp-ml/07-user-level.html">User-level differential privacy</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>.
+Rényi differential privacy. Used in <a href="./part04-privacy-accounting/00-introduction.html">Privacy accounting</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition: filters, odometers and individual accounting</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <a href="./part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning and private selection</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./part05-dp-ml/07-user-level.html">User-level differential privacy</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>, <a href="./appendix-derivations/02-composition.html">Composing private releases</a>, <a href="./appendix-derivations/03-dp-sgd.html">Accounting for DP-SGD</a>, <a href="./appendix-derivations/04-conversions.html">What ε means, and converting between definitions</a>, <a href="./appendix-derivations/06-tails-tests-divergences.html">Tail bounds, tests and divergences</a>, <a href="./appendix-derivations/12-amplification.html">Subsampling, shuffling and iteration</a>, <a href="./appendix-derivations/13-private-learning.html">Private learning and tuning</a>, <a href="./appendix-derivations/14-auditing-adaptivity.html">Auditing, reconstruction and adaptive analysis</a>.
+</dd>
+<dt><strong>RMSE</strong></dt>
+<dd>
+Root-mean-square error. Used in <a href="./part03-dp-foundations/11-mean-estimation.html">Private mean estimation</a>, <a href="./appendix-derivations/08-matrices.html">Random matrices and factorizations</a>.
 </dd>
 <dt><strong>ROC</strong></dt>
 <dd>
@@ -686,15 +812,23 @@ Receiver operating characteristic. Used in <a href="./part01-prerequisites/04-hy
 </dd>
 <dt><strong>SGD</strong></dt>
 <dd>
-Stochastic gradient descent. Used in <a href="./part01-prerequisites/06-optimization.html">Optimization</a>, <a href="./part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>, <a href="./part02-attacks/06-gradient-inversion.html">Gradient inversion</a>, <a href="./part04-privacy-accounting/00-introduction.html">Privacy accounting</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition: filters, odometers and individual accounting</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <a href="./part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning and private selection</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a>, <a href="./part05-dp-ml/07-user-level.html">User-level differential privacy</a>, <a href="./part05-dp-ml/08-disparate-impact.html">Disparate impact</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>.
+Stochastic gradient descent. Used in <a href="./part01-prerequisites/06-optimization.html">Optimization</a>, <a href="./part01-prerequisites/07-stability-generalization.html">Algorithmic stability and generalization</a>, <a href="./part02-attacks/06-gradient-inversion.html">Gradient inversion</a>, <a href="./part04-privacy-accounting/00-introduction.html">Privacy accounting</a>, <a href="./part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a>, <a href="./part04-privacy-accounting/02-rdp-conversions.html">From Rényi DP to (ε, δ) and to tests</a>, <a href="./part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>, <a href="./part04-privacy-accounting/06-numerical-accounting.html">Numerical accounting with privacy loss distributions</a>, <a href="./part04-privacy-accounting/07-shuffling-iteration.html">Amplification by shuffling and by iteration</a>, <a href="./part04-privacy-accounting/08-adaptive-composition.html">Adaptive composition: filters, odometers and individual accounting</a>, <a href="./part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>, <a href="./part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a>, <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, <a href="./part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <a href="./part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning and private selection</a>, <a href="./part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL and matrix factorization</a>, <a href="./part05-dp-ml/05-private-prediction.html">Private prediction: PATE and in-context learning</a>, <a href="./part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a>, <a href="./part05-dp-ml/07-user-level.html">User-level differential privacy</a>, <a href="./part05-dp-ml/08-disparate-impact.html">Disparate impact</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>, <a href="./appendix-derivations/02-composition.html">Composing private releases</a>, <a href="./appendix-derivations/03-dp-sgd.html">Accounting for DP-SGD</a>, <a href="./appendix-derivations/04-conversions.html">What ε means, and converting between definitions</a>, <a href="./appendix-derivations/07-optimization-estimation.html">Optimization and estimation</a>, <a href="./appendix-derivations/08-matrices.html">Random matrices and factorizations</a>, <a href="./appendix-derivations/11-composition.html">Composition of trade-off functions</a>, <a href="./appendix-derivations/12-amplification.html">Subsampling, shuffling and iteration</a>, <a href="./appendix-derivations/13-private-learning.html">Private learning and tuning</a>.
+</dd>
+<dt><strong>SQL</strong></dt>
+<dd>
+Structured Query Language. Used in <a href="./part02-attacks/09-reconstruction.html">Reconstruction attacks</a>.
+</dd>
+<dt><strong>SVM</strong></dt>
+<dd>
+Support vector machine. Used in <a href="./part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>.
 </dd>
 <dt><strong>TPR</strong></dt>
 <dd>
-True positive rate. Used in <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part02-attacks/00-introduction.html">Threat models and attacks</a>, <a href="./part02-attacks/01-threat-models.html">Threat models and privacy games</a>, <a href="./part02-attacks/02-membership-inference.html">Membership inference</a>, <a href="./part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a>, <a href="./part02-attacks/04-property-inference.html">Property inference</a>, <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part03-dp-foundations/09-lower-bounds.html">Lower bounds: what privacy costs</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>.
+True positive rate. Used in <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part02-attacks/00-introduction.html">Threat models and attacks</a>, <a href="./part02-attacks/01-threat-models.html">Threat models and privacy games</a>, <a href="./part02-attacks/02-membership-inference.html">Membership inference</a>, <a href="./part02-attacks/03-attribute-inference.html">Attribute inference and model inversion</a>, <a href="./part02-attacks/04-property-inference.html">Property inference</a>, <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part03-dp-foundations/10-lower-bounds.html">Lower bounds: what privacy costs</a>, <a href="./part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>, <a href="./part05-dp-ml/10-auditing.html">Auditing private training</a>, <a href="./appendix-derivations/04-conversions.html">What ε means, and converting between definitions</a>.
 </dd>
 <dt><strong>TV</strong></dt>
 <dd>
-Total variation. Used in <a href="./part01-prerequisites/03-divergences.html">Divergences</a>, <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, <a href="./part02-attacks/01-threat-models.html">Threat models and privacy games</a>, <a href="./part02-attacks/04-property-inference.html">Property inference</a>, <a href="./part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>, <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>, <a href="./part03-dp-foundations/07-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>, <a href="./part03-dp-foundations/08-trust-models.html">Local, shuffle and distributed trust models</a>, <a href="./part03-dp-foundations/09-lower-bounds.html">Lower bounds: what privacy costs</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>.
+Total variation. Used in <a href="./part01-prerequisites/03-divergences.html">Divergences</a>, <a href="./part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>, <a href="./part01-prerequisites/08-crypto-basics.html">Cryptography basics</a>, <a href="./part02-attacks/01-threat-models.html">Threat models and privacy games</a>, <a href="./part02-attacks/04-property-inference.html">Property inference</a>, <a href="./part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>, <a href="./part03-dp-foundations/01-definition.html">The definition of differential privacy</a>, <a href="./part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>, <a href="./part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>, <a href="./part03-dp-foundations/09-trust-models.html">Local, shuffle and distributed trust models</a>, <a href="./part03-dp-foundations/10-lower-bounds.html">Lower bounds: what privacy costs</a>, <a href="./part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>, <a href="./appendix-derivations/05-probability.html">Sums, limits and counting</a>.
 </dd>
 <dt><strong>XOR</strong></dt>
 <dd>
@@ -702,7 +836,7 @@ Exclusive or. Used in <a href="./part01-prerequisites/08-crypto-basics.html">Cry
 </dd>
 <dt><strong>ZIP</strong></dt>
 <dd>
-Zone Improvement Plan code, the US postal code. Used in <a href="./part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a>, <a href="./part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>, <a href="./part03-dp-foundations/09-lower-bounds.html">Lower bounds: what privacy costs</a>.
+Zone Improvement Plan code, the US postal code. Used in <a href="./part02-attacks/07-linkage-reidentification.html">Linkage and re-identification</a>, <a href="./part02-attacks/08-syntactic-anonymity.html">Syntactic anonymity and how it breaks</a>, <a href="./part03-dp-foundations/10-lower-bounds.html">Lower bounds: what privacy costs</a>.
 </dd>
 </dl>
 
@@ -1111,13 +1245,13 @@ Zone Improvement Plan code, the US postal code. Used in <a href="./part02-attack
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./part05-dp-ml/10-auditing.html" class="pagination-link" aria-label="Auditing private training">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span>
+      <a href="./appendix-derivations/14-auditing-adaptivity.html" class="pagination-link" aria-label="Auditing, reconstruction and adaptive analysis">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">N</span>&nbsp; <span class="chapter-title">Auditing, reconstruction and adaptive analysis</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./term-index.html" class="pagination-link" aria-label="Index">
-        <span class="nav-page-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">P</span>&nbsp; <span class="chapter-title">Index</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

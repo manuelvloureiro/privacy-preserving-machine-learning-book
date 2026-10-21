@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>38&nbsp; Exercises: Hyperparameter tuning and private selection – Privacy-Preserving Machine Learning: Exercises</title>
+<title>40&nbsp; Exercises: Hyperparameter tuning and private selection – Privacy-Preserving Machine Learning: Exercises</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -117,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -313,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -349,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -414,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Exercises: Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -483,21 +501,21 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-hpt-1" id="toc-sec-sol-hpt-1" class="nav-link active" data-scroll-target="#sec-sol-hpt-1"><span class="header-section-number">38.1</span> Composition is nearly tight at large orders</a></li>
-  <li><a href="#sec-sol-hpt-2" id="toc-sec-sol-hpt-2" class="nav-link" data-scroll-target="#sec-sol-hpt-2"><span class="header-section-number">38.2</span> Geometric stopping on randomized response</a></li>
-  <li><a href="#sec-sol-hpt-3" id="toc-sec-sol-hpt-3" class="nav-link" data-scroll-target="#sec-sol-hpt-3"><span class="header-section-number">38.3</span> The expected quantile of the best run</a></li>
-  <li><a href="#sec-sol-hpt-4" id="toc-sec-sol-hpt-4" class="nav-link" data-scroll-target="#sec-sol-hpt-4"><span class="header-section-number">38.4</span> The Poisson theorem for a pure-DP run</a></li>
-  <li><a href="#sec-sol-hpt-5" id="toc-sec-sol-hpt-5" class="nav-link" data-scroll-target="#sec-sol-hpt-5"><span class="header-section-number">38.5</span> Calibrating the noise of a search</a></li>
-  <li><a href="#sec-sol-hpt-6" id="toc-sec-sol-hpt-6" class="nav-link" data-scroll-target="#sec-sol-hpt-6"><span class="header-section-number">38.6</span> How large a validation set?</a></li>
+  <li><a href="#sec-sol-hpt-1" id="toc-sec-sol-hpt-1" class="nav-link active" data-scroll-target="#sec-sol-hpt-1"><span class="header-section-number">40.1</span> Composition is nearly tight at large orders</a></li>
+  <li><a href="#sec-sol-hpt-2" id="toc-sec-sol-hpt-2" class="nav-link" data-scroll-target="#sec-sol-hpt-2"><span class="header-section-number">40.2</span> Geometric stopping on randomized response</a></li>
+  <li><a href="#sec-sol-hpt-3" id="toc-sec-sol-hpt-3" class="nav-link" data-scroll-target="#sec-sol-hpt-3"><span class="header-section-number">40.3</span> The expected quantile of the best run</a></li>
+  <li><a href="#sec-sol-hpt-4" id="toc-sec-sol-hpt-4" class="nav-link" data-scroll-target="#sec-sol-hpt-4"><span class="header-section-number">40.4</span> The Poisson theorem for a pure-DP run</a></li>
+  <li><a href="#sec-sol-hpt-5" id="toc-sec-sol-hpt-5" class="nav-link" data-scroll-target="#sec-sol-hpt-5"><span class="header-section-number">40.5</span> Calibrating the noise of a search</a></li>
+  <li><a href="#sec-sol-hpt-6" id="toc-sec-sol-hpt-6" class="nav-link" data-scroll-target="#sec-sol-hpt-6"><span class="header-section-number">40.6</span> How large a validation set?</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/01-dp-erm.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></h1>
+<h1 class="title"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></h1>
 </div>
 
 
@@ -516,10 +534,10 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html">the chapter on hyperparameter tuning and private selection</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part05-dp-ml/solutions_hyperparameter_tuning.py</code> computes every number quoted here; run it with <code>uv run python code/part05-dp-ml/solutions_hyperparameter_tuning.py</code>.</p>
 <p>The solutions use the chapter’s notation. A run <span class="math inline">\(Q\)</span> is a private training algorithm, satisfying differential privacy (DP), that outputs a model and a score; the best-of-<span class="math inline">\(K\)</span> algorithm <span class="math inline">\(A\)</span> runs it <span class="math inline">\(K\)</span> times and releases the best output, and <span class="math inline">\(f(x) = \mathbb E[x^K]\)</span> is the generating function of <span class="math inline">\(K\)</span>. Guarantees are Rényi differential privacy (RDP) curves <span class="math inline">\(\varepsilon(\lambda)\)</span>, with <span class="math inline">\(D_\lambda\)</span> the Rényi divergence of order <span class="math inline">\(\lambda\)</span>. Randomized response with parameter <span class="math inline">\(\varepsilon\)</span> is the run with two outcomes, “good” and “bad”, where a run is bad with probability <span class="math inline">\(s = e^\varepsilon/(1 + e^\varepsilon)\)</span> on <span class="math inline">\(D\)</span> and <span class="math inline">\(1 - s\)</span> on its neighbour <span class="math inline">\(D'\)</span>. The running example trains with stochastic gradient descent (SGD) with clipping and noise, DP-SGD, at sampling rate <span class="math inline">\(q = 0.01\)</span>.</p>
-<section id="sec-sol-hpt-1" class="level2" data-number="38.1">
-<h2 data-number="38.1" class="anchored" data-anchor-id="sec-sol-hpt-1"><span class="header-section-number">38.1</span> Composition is nearly tight at large orders</h2>
+<section id="sec-sol-hpt-1" class="level2" data-number="40.1">
+<h2 data-number="40.1" class="anchored" data-anchor-id="sec-sol-hpt-1"><span class="header-section-number">40.1</span> Composition is nearly tight at large orders</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 1.</strong> <strong>Composition is nearly tight at large orders.</strong> For randomized response with <span class="math inline">\(\varepsilon = 0.5\)</span> and the best of <span class="math inline">\(k = 5\)</span> runs, compute the exact Rényi divergence <span class="math inline">\(D_\lambda(A(D)\|A(D'))\)</span> at orders 2, 10 and 100, and compare it with the lower bound <span class="math inline">\(k\varepsilon - k\ln(1 + e^{-\varepsilon})/(\lambda - 1)\)</span> of <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#sec-hpt-leak">Section&nbsp;38.3</a> and with composition, <span class="math inline">\(k\)</span> times one run’s divergence. <em>Check: at order 2 the three numbers are 0.6763, 0.1296 and 1.1367; at order 10, 2.2366, 2.2366 and 2.2367.</em> <em>(Rényi divergence of discrete distributions)</em></p>
+<p><strong>Exercise 1.</strong> <strong>Composition is nearly tight at large orders.</strong> For randomized response with <span class="math inline">\(\varepsilon = 0.5\)</span> and the best of <span class="math inline">\(k = 5\)</span> runs, compute the exact Rényi divergence <span class="math inline">\(D_\lambda(A(D)\|A(D'))\)</span> at orders 2, 10 and 100, and compare it with the lower bound <span class="math inline">\(k\varepsilon - k\ln(1 + e^{-\varepsilon})/(\lambda - 1)\)</span> of <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#sec-hpt-leak">Section&nbsp;40.3</a> and with composition, <span class="math inline">\(k\)</span> times one run’s divergence. <em>Check: at order 2 the three numbers are 0.6763, 0.1296 and 1.1367; at order 10, 2.2366, 2.2366 and 2.2367.</em> <em>(Rényi divergence of discrete distributions)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
@@ -537,7 +555,7 @@ window.Quarto = {
 <li><strong>The two distributions.</strong> The best of 5 is bad only if all five runs are bad. On <span class="math inline">\(D\)</span> that has probability <span class="math inline">\(s^5\)</span> with <span class="math inline">\(s = e^{0.5}/(1 + e^{0.5}) = 0.6225\)</span>, on <span class="math inline">\(D'\)</span> probability <span class="math inline">\((1 - s)^5\)</span>; the good outcome takes the rest.</li>
 <li><strong>The divergence.</strong> <span class="math inline">\(D_\lambda = \frac{1}{\lambda - 1}\ln\big[(s^5)^\lambda((1 - s)^5)^{1 - \lambda} + (1 - s^5)^\lambda(1 - (1 - s)^5)^{1 - \lambda}\big]\)</span>. At order 2 this is 0.6763, at order 10 it is 2.2366 and at order 100 it is 2.4761.</li>
 <li><strong>The lower bound.</strong> It keeps only the bad term of the sum: <span class="math inline">\(5 \times 0.5 - 5\ln(1 + e^{-0.5})/(\lambda - 1)\)</span>, which is 0.1296 at order 2, 2.2366 at order 10 and 2.4761 at order 100.</li>
-<li><strong>Composition.</strong> Five times one run’s divergence (<a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-compose">Equation&nbsp;38.6</a>): 1.1367 at order 2, 2.2367 at order 10 and 2.4761 at order 100.</li>
+<li><strong>Composition.</strong> Five times one run’s divergence (<a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-compose">Equation&nbsp;40.6</a>): 1.1367 at order 2, 2.2367 at order 10 and 2.4761 at order 100.</li>
 <li><strong>Reading it.</strong> At low orders the good outcome contributes most of the sum, so the lower bound is loose and composition overstates the exact value by 68%. At high orders the bad outcome, with its likelihood ratio <span class="math inline">\(e^{5\varepsilon}\)</span>, dominates the sum, and all three agree.</li>
 </ol>
 <p><em>The best of a fixed number of runs is as expensive as all the runs exactly where conversions to <span class="math inline">\((\varepsilon, \delta)\)</span> at small <span class="math inline">\(\delta\)</span> look: at the large orders that weight rare events.</em></p>
@@ -545,8 +563,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-hpt-2" class="level2" data-number="38.2">
-<h2 data-number="38.2" class="anchored" data-anchor-id="sec-sol-hpt-2"><span class="header-section-number">38.2</span> Geometric stopping on randomized response</h2>
+<section id="sec-sol-hpt-2" class="level2" data-number="40.2">
+<h2 data-number="40.2" class="anchored" data-anchor-id="sec-sol-hpt-2"><span class="header-section-number">40.2</span> Geometric stopping on randomized response</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 2.</strong> <strong>Geometric stopping on randomized response.</strong> Run randomized response with <span class="math inline">\(\varepsilon = 0.5\)</span> a geometric number of times, stopping after each run with probability <span class="math inline">\(\gamma\)</span>, and release the best outcome. Using Fact 3 of the chapter, show that the log ratio of the probabilities of “bad” is <span class="math inline">\(\varepsilon + \ln\frac{\gamma + (1 - \gamma)s}{\gamma + (1 - \gamma)(1 - s)}\)</span>, find its limits as <span class="math inline">\(\gamma \to 1\)</span> and <span class="math inline">\(\gamma \to 0\)</span>, and evaluate it for <span class="math inline">\(\gamma = 0.5\)</span>, 0.1, 0.01 and 0.001. <em>Check: 0.6636, 0.9063, 0.9897 and 0.9990, approaching <span class="math inline">\(2\varepsilon = 1\)</span>.</em> <em>(Generating functions)</em></p>
 </blockquote>
@@ -563,18 +581,18 @@ window.Quarto = {
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The probability of “bad”.</strong> The best is bad only if every run is bad, so by <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-pgf">Equation&nbsp;38.4</a> <span class="math inline">\(P[A = \text{bad}] = f(P[\text{run is bad}])\)</span> with the geometric generating function <span class="math inline">\(f(x) = \gamma x/(1 - (1 - \gamma)x)\)</span>.</li>
-<li><strong>The ratio.</strong> On <span class="math inline">\(D\)</span> the argument is <span class="math inline">\(s\)</span>, on <span class="math inline">\(D'\)</span> it is <span class="math inline">\(1 - s\)</span>: <span id="eq-auto-03hyperparametertuning-1"><span class="math display">\[\frac{f(s)}{f(1 - s)} = \frac{s}{1 - s}\cdot\frac{1 - (1 - \gamma)(1 - s)}{1 - (1 - \gamma)s} = e^\varepsilon\cdot\frac{\gamma + (1 - \gamma)s}{\gamma + (1 - \gamma)(1 - s)}, \tag{38.1}\]</span></span> using <span class="math inline">\(s/(1 - s) = e^\varepsilon\)</span> and <span class="math inline">\(1 - (1 - \gamma)x = \gamma + (1 - \gamma)(1 - x)\)</span>.</li>
+<li><strong>The probability of “bad”.</strong> The best is bad only if every run is bad, so by <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-pgf">Equation&nbsp;40.4</a> <span class="math inline">\(P[A = \text{bad}] = f(P[\text{run is bad}])\)</span> with the geometric generating function <span class="math inline">\(f(x) = \gamma x/(1 - (1 - \gamma)x)\)</span>.</li>
+<li><strong>The ratio.</strong> On <span class="math inline">\(D\)</span> the argument is <span class="math inline">\(s\)</span>, on <span class="math inline">\(D'\)</span> it is <span class="math inline">\(1 - s\)</span>: <span id="eq-auto-03hyperparametertuning-1"><span class="math display">\[\frac{f(s)}{f(1 - s)} = \frac{s}{1 - s}\cdot\frac{1 - (1 - \gamma)(1 - s)}{1 - (1 - \gamma)s} = e^\varepsilon\cdot\frac{\gamma + (1 - \gamma)s}{\gamma + (1 - \gamma)(1 - s)}, \tag{40.1}\]</span></span> using <span class="math inline">\(s/(1 - s) = e^\varepsilon\)</span> and <span class="math inline">\(1 - (1 - \gamma)x = \gamma + (1 - \gamma)(1 - x)\)</span>.</li>
 <li><strong>Limits.</strong> As <span class="math inline">\(\gamma \to 1\)</span> the second factor tends to 1, and the log ratio to <span class="math inline">\(\varepsilon\)</span>: one run. As <span class="math inline">\(\gamma \to 0\)</span> it tends to <span class="math inline">\(s/(1 - s) = e^\varepsilon\)</span>, and the log ratio to <span class="math inline">\(2\varepsilon\)</span>.</li>
 <li><strong>Numbers.</strong> With <span class="math inline">\(\varepsilon = 0.5\)</span>: 0.6636, 0.9063, 0.9897 and 0.9990. The good outcome has a smaller log ratio, so these are the exact <span class="math inline">\(\varepsilon\)</span> of the release, as the script confirms.</li>
 </ol>
-<p><em>Two outcomes give only <span class="math inline">\(2\varepsilon\)</span>, as the chapter said: the good outcome has nothing better than it, so one of the three factors of <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-lt">Equation&nbsp;38.7</a> cannot move. The third factor of Liu and Talwar’s <span class="math inline">\(3\varepsilon\)</span> needs an outcome with something above and something below it.</em></p>
+<p><em>Two outcomes give only <span class="math inline">\(2\varepsilon\)</span>, as the chapter said: the good outcome has nothing better than it, so one of the three factors of <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-lt">Equation&nbsp;40.7</a> cannot move. The third factor of Liu and Talwar’s <span class="math inline">\(3\varepsilon\)</span> needs an outcome with something above and something below it.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-hpt-3" class="level2" data-number="38.3">
-<h2 data-number="38.3" class="anchored" data-anchor-id="sec-sol-hpt-3"><span class="header-section-number">38.3</span> The expected quantile of the best run</h2>
+<section id="sec-sol-hpt-3" class="level2" data-number="40.3">
+<h2 data-number="40.3" class="anchored" data-anchor-id="sec-sol-hpt-3"><span class="header-section-number">40.3</span> The expected quantile of the best run</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 3.</strong> <strong>The expected quantile of the best run.</strong> If one run’s score has a continuous distribution, its quantile <span class="math inline">\(U\)</span> (the fraction of runs it beats) is uniform on <span class="math inline">\([0, 1]\)</span>, and the best of <span class="math inline">\(K\)</span> runs has quantile <span class="math inline">\(\max(U_1, \dots, U_K)\)</span>. Show that its expectation is <span class="math inline">\(\mathbb E[K/(K + 1)] = 1 - \int_0^1f(x)\,dx\)</span>, and evaluate it for four distributions with mean 8: fixed <span class="math inline">\(K = 8\)</span>, Poisson, geometric and logarithmic. <em>Check: 0.8889, 0.8750, 0.8034 and 0.7360.</em> <em>(Order statistics and generating functions)</em></p>
 </blockquote>
@@ -602,10 +620,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-hpt-4" class="level2" data-number="38.4">
-<h2 data-number="38.4" class="anchored" data-anchor-id="sec-sol-hpt-4"><span class="header-section-number">38.4</span> The Poisson theorem for a pure-DP run</h2>
+<section id="sec-sol-hpt-4" class="level2" data-number="40.4">
+<h2 data-number="40.4" class="anchored" data-anchor-id="sec-sol-hpt-4"><span class="header-section-number">40.4</span> The Poisson theorem for a pure-DP run</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 4.</strong> <strong>The Poisson theorem for a pure-DP run.</strong> An <span class="math inline">\(\varepsilon\)</span>-DP run is <span class="math inline">\((\hat\varepsilon, 0)\)</span>-DP with <span class="math inline">\(\hat\varepsilon = \varepsilon\)</span>. Find the largest order <span class="math inline">\(\lambda^*\)</span> at which <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-poisson">Equation&nbsp;38.11</a> applies with <span class="math inline">\(\hat\delta = 0\)</span>, and show that the bound there is <span class="math inline">\(\varepsilon(\lambda^*) + (e^\varepsilon - 1)\ln\mu\)</span>. Evaluate it for randomized response with <span class="math inline">\(\varepsilon = 0.1\)</span> and <span class="math inline">\(\mu = 100\)</span>, and compare it with the exact divergence and with composition of 100 runs at the same order. <em>Check: <span class="math inline">\(\lambda^* = 10.5083\)</span>; bound 0.5299, exact 0.0729, composition 4.5556.</em> <em>(Applying a theorem’s side condition)</em></p>
+<p><strong>Exercise 4.</strong> <strong>The Poisson theorem for a pure-DP run.</strong> An <span class="math inline">\(\varepsilon\)</span>-DP run is <span class="math inline">\((\hat\varepsilon, 0)\)</span>-DP with <span class="math inline">\(\hat\varepsilon = \varepsilon\)</span>. Find the largest order <span class="math inline">\(\lambda^*\)</span> at which <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-poisson">Equation&nbsp;40.11</a> applies with <span class="math inline">\(\hat\delta = 0\)</span>, and show that the bound there is <span class="math inline">\(\varepsilon(\lambda^*) + (e^\varepsilon - 1)\ln\mu\)</span>. Evaluate it for randomized response with <span class="math inline">\(\varepsilon = 0.1\)</span> and <span class="math inline">\(\mu = 100\)</span>, and compare it with the exact divergence and with composition of 100 runs at the same order. <em>Check: <span class="math inline">\(\lambda^* = 10.5083\)</span>; bound 0.5299, exact 0.0729, composition 4.5556.</em> <em>(Applying a theorem’s side condition)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
@@ -620,18 +638,18 @@ window.Quarto = {
 <div id="callout-4" class="callout-4-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The side condition.</strong> <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-poisson">Equation&nbsp;38.11</a> needs <span class="math inline">\(e^{\hat\varepsilon} \le 1 + \frac{1}{\lambda - 1}\)</span>. With <span class="math inline">\(\hat\varepsilon = \varepsilon\)</span> this is <span class="math inline">\(\lambda - 1 \le \frac{1}{e^\varepsilon - 1}\)</span>, so <span class="math inline">\(\lambda^* = 1 + \frac{1}{e^\varepsilon - 1}\)</span>; for <span class="math inline">\(\varepsilon = 0.1\)</span>, <span class="math inline">\(\lambda^* = 10.5083\)</span>.</li>
+<li><strong>The side condition.</strong> <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-poisson">Equation&nbsp;40.11</a> needs <span class="math inline">\(e^{\hat\varepsilon} \le 1 + \frac{1}{\lambda - 1}\)</span>. With <span class="math inline">\(\hat\varepsilon = \varepsilon\)</span> this is <span class="math inline">\(\lambda - 1 \le \frac{1}{e^\varepsilon - 1}\)</span>, so <span class="math inline">\(\lambda^* = 1 + \frac{1}{e^\varepsilon - 1}\)</span>; for <span class="math inline">\(\varepsilon = 0.1\)</span>, <span class="math inline">\(\lambda^* = 10.5083\)</span>.</li>
 <li><strong>The bound.</strong> With <span class="math inline">\(\hat\delta = 0\)</span>, <span class="math inline">\(\varepsilon_A(\lambda^*) \le \varepsilon(\lambda^*) + \frac{\ln\mu}{\lambda^* - 1} = \varepsilon(\lambda^*) + (e^\varepsilon - 1)\ln\mu\)</span>.</li>
 <li><strong>Numbers.</strong> Randomized response with <span class="math inline">\(\varepsilon = 0.1\)</span> has <span class="math inline">\(\varepsilon(10.5083) = 0.0456\)</span>, and <span class="math inline">\((e^{0.1} - 1)\ln 100 = 0.1052 \times 4.6052 = 0.4843\)</span>, so the bound is 0.5299.</li>
-<li><strong>Compare.</strong> The exact divergence of the best of a Poisson number of runs, from <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-pgf">Equation&nbsp;38.4</a>, is 0.0729 at this order; composition of 100 runs gives <span class="math inline">\(100 \times 0.0456 = 4.5556\)</span>. The bound is about nine times below composition and seven times above the exact value.</li>
+<li><strong>Compare.</strong> The exact divergence of the best of a Poisson number of runs, from <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-pgf">Equation&nbsp;40.4</a>, is 0.0729 at this order; composition of 100 runs gives <span class="math inline">\(100 \times 0.0456 = 4.5556\)</span>. The bound is about nine times below composition and seven times above the exact value.</li>
 </ol>
-<p><em>For very private runs the Poisson bound is excellent, because the condition <span class="math inline">\(e^{\hat\varepsilon} \le 1 + 1/(\lambda - 1)\)</span> allows large orders. For a DP-SGD run with <span class="math inline">\(\varepsilon\)</span> of several units, the same condition forces either small orders or a <span class="math inline">\(\hat\delta\)</span> at a small <span class="math inline">\(\hat\varepsilon\)</span>, which is why the Poisson bound grows almost linearly in <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#tbl-hpt-overhead">Table&nbsp;38.5</a>.</em></p>
+<p><em>For very private runs the Poisson bound is excellent, because the condition <span class="math inline">\(e^{\hat\varepsilon} \le 1 + 1/(\lambda - 1)\)</span> allows large orders. For a DP-SGD run with <span class="math inline">\(\varepsilon\)</span> of several units, the same condition forces either small orders or a <span class="math inline">\(\hat\delta\)</span> at a small <span class="math inline">\(\hat\varepsilon\)</span>, which is why the Poisson bound grows almost linearly in <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#tbl-hpt-overhead">Table&nbsp;40.5</a>.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-hpt-5" class="level2" data-number="38.5">
-<h2 data-number="38.5" class="anchored" data-anchor-id="sec-sol-hpt-5"><span class="header-section-number">38.5</span> Calibrating the noise of a search</h2>
+<section id="sec-sol-hpt-5" class="level2" data-number="40.5">
+<h2 data-number="40.5" class="anchored" data-anchor-id="sec-sol-hpt-5"><span class="header-section-number">40.5</span> Calibrating the noise of a search</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>Calibrating the noise of a search.</strong> You want to tune the running example’s DP-SGD runs of 10,000 steps with <span class="math inline">\(q = 0.01\)</span> over about 10 configurations, and the whole search must satisfy <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, the budget of one run at <span class="math inline">\(\sigma = 1\)</span>. Find the noise multiplier each run needs under composition of 10 runs, and with a Poisson, geometric or logarithmic number of runs with mean 10. <em>Check: 2.45, 1.65, 1.47 and 1.31.</em> <em>(Inverting an accountant)</em></p>
 </blockquote>
@@ -648,9 +666,9 @@ window.Quarto = {
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The total as a function of <span class="math inline">\(\sigma\)</span>.</strong> For each <span class="math inline">\(\sigma\)</span> the accountant gives one run’s RDP curve, <span class="math inline">\(10{,}000\,\varepsilon_{q,\sigma}(\lambda)\)</span>. Composition multiplies it by 10 (<a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-compose">Equation&nbsp;38.6</a>); the random-<span class="math inline">\(K\)</span> bounds transform it by <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-poisson">Equation&nbsp;38.11</a> or <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-tnb">Equation&nbsp;38.12</a>, with the best second order <span class="math inline">\(\hat\lambda\)</span>; <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-convert">Equation&nbsp;38.2</a> converts the result.</li>
+<li><strong>The total as a function of <span class="math inline">\(\sigma\)</span>.</strong> For each <span class="math inline">\(\sigma\)</span> the accountant gives one run’s RDP curve, <span class="math inline">\(10{,}000\,\varepsilon_{q,\sigma}(\lambda)\)</span>. Composition multiplies it by 10 (<a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-compose">Equation&nbsp;40.6</a>); the random-<span class="math inline">\(K\)</span> bounds transform it by <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-poisson">Equation&nbsp;40.11</a> or <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-tnb">Equation&nbsp;40.12</a>, with the best second order <span class="math inline">\(\hat\lambda\)</span>; <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#eq-hpt-convert">Equation&nbsp;40.2</a> converts the result.</li>
 <li><strong>Monotonicity.</strong> More noise lowers the curve at every order, and each of the transformations is increasing in the curve, so the total <span class="math inline">\(\varepsilon\)</span> falls as <span class="math inline">\(\sigma\)</span> grows. Bisection over <span class="math inline">\(\sigma\)</span> (to three significant digits, rounding up) finds the smallest <span class="math inline">\(\sigma\)</span> within budget.</li>
-<li><strong>Numbers.</strong> Composition needs <span class="math inline">\(\sigma = 2.45\)</span> (as in <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#tbl-hpt-compose">Table&nbsp;38.2</a>); Poisson 1.65; geometric 1.47; logarithmic 1.31.</li>
+<li><strong>Numbers.</strong> Composition needs <span class="math inline">\(\sigma = 2.45\)</span> (as in <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html#tbl-hpt-compose">Table&nbsp;40.2</a>); Poisson 1.65; geometric 1.47; logarithmic 1.31.</li>
 <li><strong>Reading it.</strong> With the logarithmic distribution each run is only 31% noisier than the untuned run, against 145% more noise for composition. Whether that buys accuracy depends on how often the skewed distribution stops early (Exercise 3).</li>
 </ol>
 <p><em>Search and noise are one budget. Fix the search procedure first, then solve for the noise multiplier that keeps the whole procedure within the target.</em></p>
@@ -658,8 +676,8 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-hpt-6" class="level2" data-number="38.6">
-<h2 data-number="38.6" class="anchored" data-anchor-id="sec-sol-hpt-6"><span class="header-section-number">38.6</span> How large a validation set?</h2>
+<section id="sec-sol-hpt-6" class="level2" data-number="40.6">
+<h2 data-number="40.6" class="anchored" data-anchor-id="sec-sol-hpt-6"><span class="header-section-number">40.6</span> How large a validation set?</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>How large a validation set?</strong> You select among <span class="math inline">\(k\)</span> fixed candidates with the exponential mechanism at <span class="math inline">\(\varepsilon = 0.5\)</span>, scoring by correct predictions on <span class="math inline">\(m\)</span> private validation records. Using the tail bound <span class="math inline">\(P[\text{gap} \ge \frac{2\Delta}{\varepsilon}(\ln k + t)] \le e^{-t}\)</span> of <a href="../../book-full/part03-dp-foundations/05-selection.html">Selection</a>, find the smallest <span class="math inline">\(m\)</span> that keeps the accuracy gap below 0.5 percentage points with probability at least 0.95, for <span class="math inline">\(k = 8\)</span> and <span class="math inline">\(k = 1{,}000\)</span>. <em>Check: 4,061 and 7,923 records.</em> <em>(Utility of the exponential mechanism)</em></p>
 </blockquote>
@@ -1093,12 +1111,12 @@ window.Quarto = {
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/02-dp-sgd.html" class="pagination-link" aria-label="Exercises: DP-SGD">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="pagination-link" aria-label="Exercises: DP-FTRL and matrix factorization">
-        <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

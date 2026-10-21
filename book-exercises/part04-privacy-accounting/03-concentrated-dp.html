@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>29&nbsp; Exercises: Concentrated differential privacy – Privacy-Preserving Machine Learning: Exercises</title>
+<title>31&nbsp; Exercises: Concentrated differential privacy – Privacy-Preserving Machine Learning: Exercises</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -117,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -313,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -349,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -414,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Exercises: Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -483,21 +501,21 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-cdp-1" id="toc-sec-sol-cdp-1" class="nav-link active" data-scroll-target="#sec-sol-cdp-1"><span class="header-section-number">29.1</span> Laplace in a zCDP budget</a></li>
-  <li><a href="#sec-sol-cdp-2" id="toc-sec-sol-cdp-2" class="nav-link" data-scroll-target="#sec-sol-cdp-2"><span class="header-section-number">29.2</span> Calibrating σ for many steps</a></li>
-  <li><a href="#sec-sol-cdp-3" id="toc-sec-sol-cdp-3" class="nav-link" data-scroll-target="#sec-sol-cdp-3"><span class="header-section-number">29.3</span> Hölder for two steps</a></li>
-  <li><a href="#sec-sol-cdp-4" id="toc-sec-sol-cdp-4" class="nav-link" data-scroll-target="#sec-sol-cdp-4"><span class="header-section-number">29.4</span> A mixed pipeline</a></li>
-  <li><a href="#sec-sol-cdp-5" id="toc-sec-sol-cdp-5" class="nav-link" data-scroll-target="#sec-sol-cdp-5"><span class="header-section-number">29.5</span> The subsampled Gaussian at order 2</a></li>
-  <li><a href="#sec-sol-cdp-6" id="toc-sec-sol-cdp-6" class="nav-link" data-scroll-target="#sec-sol-cdp-6"><span class="header-section-number">29.6</span> The tCDP conversion</a></li>
+  <li><a href="#sec-sol-cdp-1" id="toc-sec-sol-cdp-1" class="nav-link active" data-scroll-target="#sec-sol-cdp-1"><span class="header-section-number">31.1</span> Laplace in a zCDP budget</a></li>
+  <li><a href="#sec-sol-cdp-2" id="toc-sec-sol-cdp-2" class="nav-link" data-scroll-target="#sec-sol-cdp-2"><span class="header-section-number">31.2</span> Calibrating σ for many steps</a></li>
+  <li><a href="#sec-sol-cdp-3" id="toc-sec-sol-cdp-3" class="nav-link" data-scroll-target="#sec-sol-cdp-3"><span class="header-section-number">31.3</span> Hölder for two steps</a></li>
+  <li><a href="#sec-sol-cdp-4" id="toc-sec-sol-cdp-4" class="nav-link" data-scroll-target="#sec-sol-cdp-4"><span class="header-section-number">31.4</span> A mixed pipeline</a></li>
+  <li><a href="#sec-sol-cdp-5" id="toc-sec-sol-cdp-5" class="nav-link" data-scroll-target="#sec-sol-cdp-5"><span class="header-section-number">31.5</span> The subsampled Gaussian at order 2</a></li>
+  <li><a href="#sec-sol-cdp-6" id="toc-sec-sol-cdp-6" class="nav-link" data-scroll-target="#sec-sol-cdp-6"><span class="header-section-number">31.6</span> The tCDP conversion</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></h1>
+<h1 class="title"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></h1>
 </div>
 
 
@@ -516,8 +534,8 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">Concentrated differential privacy</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part04-privacy-accounting/solutions_concentrated_dp.py</code> computes every number quoted here; run it with <code>uv run python code/part04-privacy-accounting/solutions_concentrated_dp.py</code>.</p>
 <p>The solutions use the chapter’s notation. A mechanism is <span class="math inline">\(\rho\)</span>-zero-concentrated differentially private (<span class="math inline">\(\rho\)</span>-zCDP) when its Rényi differential privacy (RDP) curve satisfies <span class="math inline">\(\varepsilon(\alpha) \le \rho\alpha\)</span> for all <span class="math inline">\(\alpha &gt; 1\)</span>; <span class="math inline">\((\varepsilon, \delta)\)</span>-differential privacy (DP) is the guarantee you report; <span class="math inline">\(\ell = \ln(1/\delta)\)</span>, and <span class="math inline">\(\delta = 10^{-5}\)</span> throughout, so <span class="math inline">\(\ell = 11.5129\)</span>. Divergences are Kullback–Leibler (KL) or Rényi.</p>
-<section id="sec-sol-cdp-1" class="level2" data-number="29.1">
-<h2 data-number="29.1" class="anchored" data-anchor-id="sec-sol-cdp-1"><span class="header-section-number">29.1</span> Laplace in a zCDP budget</h2>
+<section id="sec-sol-cdp-1" class="level2" data-number="31.1">
+<h2 data-number="31.1" class="anchored" data-anchor-id="sec-sol-cdp-1"><span class="header-section-number">31.1</span> Laplace in a zCDP budget</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>Laplace in a zCDP budget.</strong> The Laplace mechanism with scale <span class="math inline">\(b\)</span> on a sensitivity-1 query is <span class="math inline">\(\varepsilon\)</span>-DP with <span class="math inline">\(\varepsilon = 1/b\)</span>. Using its exact RDP curve (<a href="../../book-full/part01-prerequisites/03-divergences.html#eq-laplace-renyi">Equation&nbsp;3.19</a> with <span class="math inline">\(t = \varepsilon\)</span>), find numerically the smallest <span class="math inline">\(\rho\)</span> for <span class="math inline">\(\varepsilon = 1\)</span>, and compare it with <span class="math inline">\(\varepsilon^2/2\)</span> and with randomized response at the same <span class="math inline">\(\varepsilon\)</span>. <em>Check: the smallest <span class="math inline">\(\rho\)</span> is the KL divergence <span class="math inline">\(t + e^{-t} - 1 = 0.3679\)</span>, reached as <span class="math inline">\(\alpha \to 1\)</span>.</em> <em>(Pure DP to zCDP, tightness)</em></p>
 </blockquote>
@@ -534,13 +552,13 @@ window.Quarto = {
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The curve.</strong> The outputs on neighbours are <span class="math inline">\(\mathrm{Lap}(0, b)\)</span> and <span class="math inline">\(\mathrm{Lap}(1, b)\)</span>, a shift of <span class="math inline">\(t = 1/b = \varepsilon\)</span> scale units. By <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-laplace-renyi">Equation&nbsp;3.19</a>, <span id="eq-auto-03concentrateddp-1"><span class="math display">\[\varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln\left(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)t} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha t}\right). \tag{29.1}\]</span></span> The script evaluates it in log space, so large orders do not overflow.</li>
-<li><strong>The smallest <span class="math inline">\(\rho\)</span> is the largest ratio.</strong> <span class="math inline">\(\varepsilon(\alpha) \le \rho\alpha\)</span> for all <span class="math inline">\(\alpha\)</span> exactly when <span class="math inline">\(\rho \ge \sup_{\alpha &gt; 1}\varepsilon(\alpha)/\alpha\)</span>. <a href="#tbl-sol-cdp-laplace" class="quarto-xref">Table&nbsp;<span>29.1</span></a> evaluates the ratio at <span class="math inline">\(t = 1\)</span>.</li>
+<li><strong>The curve.</strong> The outputs on neighbours are <span class="math inline">\(\mathrm{Lap}(0, b)\)</span> and <span class="math inline">\(\mathrm{Lap}(1, b)\)</span>, a shift of <span class="math inline">\(t = 1/b = \varepsilon\)</span> scale units. By <a href="../../book-full/part01-prerequisites/03-divergences.html#eq-laplace-renyi">Equation&nbsp;3.19</a>, <span id="eq-auto-03concentrateddp-1"><span class="math display">\[\varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln\left(\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)t} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha t}\right). \tag{31.1}\]</span></span> The script evaluates it in log space, so large orders do not overflow.</li>
+<li><strong>The smallest <span class="math inline">\(\rho\)</span> is the largest ratio.</strong> <span class="math inline">\(\varepsilon(\alpha) \le \rho\alpha\)</span> for all <span class="math inline">\(\alpha\)</span> exactly when <span class="math inline">\(\rho \ge \sup_{\alpha &gt; 1}\varepsilon(\alpha)/\alpha\)</span>. <a href="#tbl-sol-cdp-laplace" class="quarto-xref">Table&nbsp;<span>31.1</span></a> evaluates the ratio at <span class="math inline">\(t = 1\)</span>.</li>
 </ol>
 <div id="tbl-sol-cdp-laplace" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-cdp-laplace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;29.1: The RDP curve of the Laplace mechanism with <span class="math inline">\(t = \varepsilon = 1\)</span> and its slope from the origin.
+Table&nbsp;31.1: The RDP curve of the Laplace mechanism with <span class="math inline">\(t = \varepsilon = 1\)</span> and its slope from the origin.
 </figcaption>
 <div aria-describedby="tbl-sol-cdp-laplace-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -581,15 +599,15 @@ Table&nbsp;29.1: The RDP curve of the Laplace mechanism with <span class="math i
 <li><strong>The ratio is largest as <span class="math inline">\(\alpha \to 1\)</span>.</strong> There <span class="math inline">\(\varepsilon(\alpha) \to D_{\mathrm{KL}} = t + e^{-t} - 1\)</span> (the KL divergence of the Laplace pair, from <a href="../../book-full/part01-prerequisites/03-divergences.html">Divergences</a>), and <span class="math inline">\(\alpha \to 1\)</span>. On the fine grid of orders the maximum of <span class="math inline">\(\varepsilon(\alpha)/\alpha\)</span> is <span class="math inline">\(0.3679\)</span>, equal to the KL divergence <span class="math inline">\(0.3679\)</span>.</li>
 <li><strong>Compare.</strong> The general bound is <span class="math inline">\(\varepsilon^2/2 = 0.5000\)</span>; randomized response at <span class="math inline">\(\varepsilon = 1\)</span> needs <span class="math inline">\(\varepsilon\tanh(\varepsilon/2) = 0.4621\)</span>; the Laplace mechanism only <span class="math inline">\(0.3679\)</span>.</li>
 </ol>
-<p><em>The general <span class="math inline">\(\varepsilon^2/2\)</span> is a convenient upper bound, not the cost of any mechanism at fixed <span class="math inline">\(\varepsilon\)</span>. Every <span class="math inline">\(\varepsilon\)</span>-DP mechanism is a post-processing of randomized response (<a href="../../book-full/part03-dp-foundations/04-composition.html">Composition</a>), so none needs more than randomized response’s <span class="math inline">\(\varepsilon\tanh(\varepsilon/2) = 0.4621\)</span> at <span class="math inline">\(\varepsilon = 1\)</span> (<a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-pure-sharp">Equation&nbsp;29.7</a>). The Laplace mechanism, whose privacy loss reaches <span class="math inline">\(\pm\varepsilon\)</span> only in its tails, needs <span class="math inline">\(0.3679\)</span>. Charging it <span class="math inline">\(\varepsilon^2/2\)</span> is safe but overcharges by a factor <span class="math inline">\(0.5000/0.3679 = 1.36\)</span>; the sharp <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span> still overcharges by <span class="math inline">\(0.4621/0.3679 = 1.26\)</span>.</em></p>
+<p><em>The general <span class="math inline">\(\varepsilon^2/2\)</span> is a convenient upper bound, not the cost of any mechanism at fixed <span class="math inline">\(\varepsilon\)</span>. Every <span class="math inline">\(\varepsilon\)</span>-DP mechanism is a post-processing of randomized response (<a href="../../book-full/part03-dp-foundations/04-composition.html">Composition</a>), so none needs more than randomized response’s <span class="math inline">\(\varepsilon\tanh(\varepsilon/2) = 0.4621\)</span> at <span class="math inline">\(\varepsilon = 1\)</span> (<a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-pure-sharp">Equation&nbsp;31.7</a>). The Laplace mechanism, whose privacy loss reaches <span class="math inline">\(\pm\varepsilon\)</span> only in its tails, needs <span class="math inline">\(0.3679\)</span>. Charging it <span class="math inline">\(\varepsilon^2/2\)</span> is safe but overcharges by a factor <span class="math inline">\(0.5000/0.3679 = 1.36\)</span>; the sharp <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span> still overcharges by <span class="math inline">\(0.4621/0.3679 = 1.26\)</span>.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-cdp-2" class="level2" data-number="29.2">
-<h2 data-number="29.2" class="anchored" data-anchor-id="sec-sol-cdp-2"><span class="header-section-number">29.2</span> Calibrating σ for many steps</h2>
+<section id="sec-sol-cdp-2" class="level2" data-number="31.2">
+<h2 data-number="31.2" class="anchored" data-anchor-id="sec-sol-cdp-2"><span class="header-section-number">31.2</span> Calibrating σ for many steps</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>Calibrating <span class="math inline">\(\sigma\)</span> for many steps.</strong> Derive <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-inverse">Equation&nbsp;29.12</a>. Then find the noise multiplier that makes <span class="math inline">\(k = 100\)</span> Gaussian steps <span class="math inline">\((1, 10^{-5})\)</span>-DP by the simple conversion, and the <span class="math inline">\(\varepsilon\)</span> that the improved conversion and the exact Gaussian profile give for that <span class="math inline">\(\sigma\)</span>. <em>Check: <span class="math inline">\(\sigma = 49.01\)</span>.</em> <em>(Optimizing over α, inverting a conversion)</em></p>
+<p><strong>Exercise 2.</strong> <strong>Calibrating <span class="math inline">\(\sigma\)</span> for many steps.</strong> Derive <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-inverse">Equation&nbsp;31.12</a>. Then find the noise multiplier that makes <span class="math inline">\(k = 100\)</span> Gaussian steps <span class="math inline">\((1, 10^{-5})\)</span>-DP by the simple conversion, and the <span class="math inline">\(\varepsilon\)</span> that the improved conversion and the exact Gaussian profile give for that <span class="math inline">\(\sigma\)</span>. <em>Check: <span class="math inline">\(\sigma = 49.01\)</span>.</em> <em>(Optimizing over α, inverting a conversion)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -604,7 +622,7 @@ Table&nbsp;29.1: The RDP curve of the Laplace mechanism with <span class="math i
 <div id="callout-2" class="callout-2-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Inversion.</strong> The simple conversion <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-simple">Equation&nbsp;29.10</a> is <span class="math inline">\(\varepsilon = \rho + 2\sqrt{\rho\ell}\)</span>, increasing in <span class="math inline">\(\rho\)</span>. Put <span class="math inline">\(x = \sqrt\rho \ge 0\)</span>: <span class="math inline">\(x^2 + 2\sqrt\ell\,x = \varepsilon\)</span>. Add <span class="math inline">\(\ell\)</span> to both sides: <span class="math inline">\((x + \sqrt\ell)^2 = \varepsilon + \ell\)</span>. So <span class="math inline">\(x = \sqrt{\varepsilon + \ell} - \sqrt\ell\)</span> (the other root is negative), and every <span class="math inline">\(\rho \le x^2\)</span> meets the target. That is <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-inverse">Equation&nbsp;29.12</a>.</li>
+<li><strong>Inversion.</strong> The simple conversion <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-simple">Equation&nbsp;31.10</a> is <span class="math inline">\(\varepsilon = \rho + 2\sqrt{\rho\ell}\)</span>, increasing in <span class="math inline">\(\rho\)</span>. Put <span class="math inline">\(x = \sqrt\rho \ge 0\)</span>: <span class="math inline">\(x^2 + 2\sqrt\ell\,x = \varepsilon\)</span>. Add <span class="math inline">\(\ell\)</span> to both sides: <span class="math inline">\((x + \sqrt\ell)^2 = \varepsilon + \ell\)</span>. So <span class="math inline">\(x = \sqrt{\varepsilon + \ell} - \sqrt\ell\)</span> (the other root is negative), and every <span class="math inline">\(\rho \le x^2\)</span> meets the target. That is <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-inverse">Equation&nbsp;31.12</a>.</li>
 <li><strong>The total budget.</strong> With <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\ell = 11.5129\)</span>, <span class="math inline">\(\rho = 0.02082\)</span>.</li>
 <li><strong>Split it over the steps.</strong> Composition adds <span class="math inline">\(\rho\)</span>, so each of the 100 steps may spend <span class="math inline">\(\rho/100 = 2.0820 \times 10^{-4}\)</span>. A Gaussian step with noise multiplier <span class="math inline">\(\sigma\)</span> spends <span class="math inline">\(1/(2\sigma^2)\)</span>, so <span class="math inline">\(\sigma = 1/\sqrt{2\rho/100} = \sqrt{100}/\sqrt{2\rho} = 49.01\)</span>.</li>
 <li><strong>Check the other conversions.</strong> 100 steps at <span class="math inline">\(\sigma = 49.01\)</span> give back <span class="math inline">\(\rho = 0.02082\)</span> and <span class="math inline">\(\varepsilon = 1.0000\)</span> by the simple formula. The improved conversion gives <span class="math inline">\(0.8118\)</span>. The composition of 100 Gaussian steps is itself a Gaussian pair with <span class="math inline">\(\mu = \sqrt{2\rho}\)</span>, whose exact <span class="math inline">\(\varepsilon\)</span> is <span class="math inline">\(0.7416\)</span>.</li>
@@ -614,10 +632,10 @@ Table&nbsp;29.1: The RDP curve of the Laplace mechanism with <span class="math i
 </div>
 </div>
 </section>
-<section id="sec-sol-cdp-3" class="level2" data-number="29.3">
-<h2 data-number="29.3" class="anchored" data-anchor-id="sec-sol-cdp-3"><span class="header-section-number">29.3</span> Hölder for two steps</h2>
+<section id="sec-sol-cdp-3" class="level2" data-number="31.3">
+<h2 data-number="31.3" class="anchored" data-anchor-id="sec-sol-cdp-3"><span class="header-section-number">31.3</span> Hölder for two steps</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>Hölder for two steps.</strong> Write out <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-triangle">Equation&nbsp;29.15</a> for <span class="math inline">\(m = 2\)</span> and <span class="math inline">\(\alpha = 2\)</span>, and check it on <span class="math inline">\(P = \mathrm{Bern}(0.2)\)</span>, <span class="math inline">\(Q = \mathrm{Bern}(0.8)\)</span> with <span class="math inline">\(R = \mathrm{Bern}(0.4)\)</span> and with <span class="math inline">\(R = \mathrm{Bern}(0.5)\)</span>. When does it hold with equality? <em>Check: the left side is <span class="math inline">\(1.1787\)</span>; the right side is <span class="math inline">\(1.1872\)</span> for <span class="math inline">\(R = \mathrm{Bern}(0.4)\)</span> and <span class="math inline">\(1.1787\)</span> for <span class="math inline">\(R = \mathrm{Bern}(0.5)\)</span>.</em> <em>(Hölder’s inequality, group privacy)</em></p>
+<p><strong>Exercise 3.</strong> <strong>Hölder for two steps.</strong> Write out <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-triangle">Equation&nbsp;31.15</a> for <span class="math inline">\(m = 2\)</span> and <span class="math inline">\(\alpha = 2\)</span>, and check it on <span class="math inline">\(P = \mathrm{Bern}(0.2)\)</span>, <span class="math inline">\(Q = \mathrm{Bern}(0.8)\)</span> with <span class="math inline">\(R = \mathrm{Bern}(0.4)\)</span> and with <span class="math inline">\(R = \mathrm{Bern}(0.5)\)</span>. When does it hold with equality? <em>Check: the left side is <span class="math inline">\(1.1787\)</span>; the right side is <span class="math inline">\(1.1872\)</span> for <span class="math inline">\(R = \mathrm{Bern}(0.4)\)</span> and <span class="math inline">\(1.1787\)</span> for <span class="math inline">\(R = \mathrm{Bern}(0.5)\)</span>.</em> <em>(Hölder’s inequality, group privacy)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -632,13 +650,13 @@ Table&nbsp;29.1: The RDP curve of the Laplace mechanism with <span class="math i
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The orders.</strong> With group size <span class="math inline">\(m = 2\)</span> and <span class="math inline">\(\alpha = 2\)</span>: the first order is <span class="math inline">\(\frac{m\alpha - 1}{m - 1} = 3\)</span>, the coefficient <span class="math inline">\(\frac{m\alpha}{m\alpha - 1} = \frac43\)</span>, and the second order <span class="math inline">\(m\alpha = 4\)</span>: <span id="eq-auto-03concentrateddp-2"><span class="math display">\[D_2(P\|Q) \le \tfrac43D_3(P\|R) + D_4(R\|Q). \tag{29.2}\]</span></span> The Hölder exponents are <span class="math inline">\(u = \frac{m\alpha - 1}{\alpha(m - 1)} = \frac32\)</span> and <span class="math inline">\(v = \frac{m\alpha - 1}{\alpha - 1} = 3\)</span>, and indeed <span class="math inline">\(\frac23 + \frac13 = 1\)</span>.</li>
-<li><strong>Evaluate.</strong> Each divergence is a two-term sum, <span class="math inline">\(D_\alpha(P\|Q) = \frac{1}{\alpha-1}\ln\sum_y P(y)^\alpha Q(y)^{1-\alpha}\)</span>. <a href="#tbl-sol-cdp-holder" class="quarto-xref">Table&nbsp;<span>29.2</span></a> lists the values.</li>
+<li><strong>The orders.</strong> With group size <span class="math inline">\(m = 2\)</span> and <span class="math inline">\(\alpha = 2\)</span>: the first order is <span class="math inline">\(\frac{m\alpha - 1}{m - 1} = 3\)</span>, the coefficient <span class="math inline">\(\frac{m\alpha}{m\alpha - 1} = \frac43\)</span>, and the second order <span class="math inline">\(m\alpha = 4\)</span>: <span id="eq-auto-03concentrateddp-2"><span class="math display">\[D_2(P\|Q) \le \tfrac43D_3(P\|R) + D_4(R\|Q). \tag{31.2}\]</span></span> The Hölder exponents are <span class="math inline">\(u = \frac{m\alpha - 1}{\alpha(m - 1)} = \frac32\)</span> and <span class="math inline">\(v = \frac{m\alpha - 1}{\alpha - 1} = 3\)</span>, and indeed <span class="math inline">\(\frac23 + \frac13 = 1\)</span>.</li>
+<li><strong>Evaluate.</strong> Each divergence is a two-term sum, <span class="math inline">\(D_\alpha(P\|Q) = \frac{1}{\alpha-1}\ln\sum_y P(y)^\alpha Q(y)^{1-\alpha}\)</span>. <a href="#tbl-sol-cdp-holder" class="quarto-xref">Table&nbsp;<span>31.2</span></a> lists the values.</li>
 </ol>
 <div id="tbl-sol-cdp-holder" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-cdp-holder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;29.2: The triangle-like inequality for <span class="math inline">\(m = 2\)</span>, <span class="math inline">\(\alpha = 2\)</span>, <span class="math inline">\(P = \mathrm{Bern}(0.2)\)</span>, <span class="math inline">\(Q = \mathrm{Bern}(0.8)\)</span>.
+Table&nbsp;31.2: The triangle-like inequality for <span class="math inline">\(m = 2\)</span>, <span class="math inline">\(\alpha = 2\)</span>, <span class="math inline">\(P = \mathrm{Bern}(0.2)\)</span>, <span class="math inline">\(Q = \mathrm{Bern}(0.8)\)</span>.
 </figcaption>
 <div aria-describedby="tbl-sol-cdp-holder-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -687,8 +705,8 @@ Table&nbsp;29.2: The triangle-like inequality for <span class="math inline">\(m 
 </div>
 </div>
 </section>
-<section id="sec-sol-cdp-4" class="level2" data-number="29.4">
-<h2 data-number="29.4" class="anchored" data-anchor-id="sec-sol-cdp-4"><span class="header-section-number">29.4</span> A mixed pipeline</h2>
+<section id="sec-sol-cdp-4" class="level2" data-number="31.4">
+<h2 data-number="31.4" class="anchored" data-anchor-id="sec-sol-cdp-4"><span class="header-section-number">31.4</span> A mixed pipeline</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>A mixed pipeline.</strong> A pipeline runs 20 propose-test-release steps, each <span class="math inline">\((0.25, 10^{-8})\)</span>-DP, and 50 Gaussian steps with <span class="math inline">\(\sigma = 5\)</span>. Find its <span class="math inline">\(\rho\)</span>, its <span class="math inline">\(\delta_a\)</span>, and <span class="math inline">\(\varepsilon\)</span> at total <span class="math inline">\(\delta = 10^{-5}\)</span> with the improved conversion. <em>Check: <span class="math inline">\(\rho = 1.625\)</span>.</em> <em>(Approximate zCDP)</em></p>
 </blockquote>
@@ -716,10 +734,10 @@ Table&nbsp;29.2: The triangle-like inequality for <span class="math inline">\(m 
 </div>
 </div>
 </section>
-<section id="sec-sol-cdp-5" class="level2" data-number="29.5">
-<h2 data-number="29.5" class="anchored" data-anchor-id="sec-sol-cdp-5"><span class="header-section-number">29.5</span> The subsampled Gaussian at order 2</h2>
+<section id="sec-sol-cdp-5" class="level2" data-number="31.5">
+<h2 data-number="31.5" class="anchored" data-anchor-id="sec-sol-cdp-5"><span class="header-section-number">31.5</span> The subsampled Gaussian at order 2</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 5.</strong> <strong>The subsampled Gaussian at order 2.</strong> From <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-sg">Equation&nbsp;29.18</a>, show <span class="math inline">\(\varepsilon(2) = \ln\big(1 + q^2(e^{1/\sigma^2} - 1)\big)\)</span>, and evaluate it for <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>. Then show that the lower bound <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-sg-lower">Equation&nbsp;29.21</a> is positive exactly when <span class="math inline">\(\alpha &gt; 1 + 2\sigma^2\ln(1/q)\)</span>. <em>Check: <span class="math inline">\(\varepsilon(2) = 1.7181 \times 10^{-4}\)</span>.</em> <em>(Binomial expansion)</em></p>
+<p><strong>Exercise 5.</strong> <strong>The subsampled Gaussian at order 2.</strong> From <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-sg">Equation&nbsp;31.18</a>, show <span class="math inline">\(\varepsilon(2) = \ln\big(1 + q^2(e^{1/\sigma^2} - 1)\big)\)</span>, and evaluate it for <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>. Then show that the lower bound <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-sg-lower">Equation&nbsp;31.21</a> is positive exactly when <span class="math inline">\(\alpha &gt; 1 + 2\sigma^2\ln(1/q)\)</span>. <em>Check: <span class="math inline">\(\varepsilon(2) = 1.7181 \times 10^{-4}\)</span>.</em> <em>(Binomial expansion)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
@@ -734,21 +752,21 @@ Table&nbsp;29.2: The triangle-like inequality for <span class="math inline">\(m 
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>The three terms of <span class="math inline">\(A_2\)</span>.</strong> In <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-sg">Equation&nbsp;29.18</a> with <span class="math inline">\(\alpha = 2\)</span>, <span class="math inline">\(j = 0\)</span> gives <span class="math inline">\((1 - q)^2\)</span>, <span class="math inline">\(j = 1\)</span> gives <span class="math inline">\(2q(1 - q)e^0\)</span>, and <span class="math inline">\(j = 2\)</span> gives <span class="math inline">\(q^2e^{(4 - 2)/(2\sigma^2)} = q^2e^{1/\sigma^2}\)</span>.</li>
+<li><strong>The three terms of <span class="math inline">\(A_2\)</span>.</strong> In <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-sg">Equation&nbsp;31.18</a> with <span class="math inline">\(\alpha = 2\)</span>, <span class="math inline">\(j = 0\)</span> gives <span class="math inline">\((1 - q)^2\)</span>, <span class="math inline">\(j = 1\)</span> gives <span class="math inline">\(2q(1 - q)e^0\)</span>, and <span class="math inline">\(j = 2\)</span> gives <span class="math inline">\(q^2e^{(4 - 2)/(2\sigma^2)} = q^2e^{1/\sigma^2}\)</span>.</li>
 <li><strong>Add.</strong> <span class="math inline">\((1 - q)^2 + 2q(1 - q) = (1 - q)(1 + q) = 1 - q^2\)</span>, so <span class="math inline">\(A_2 = 1 - q^2 + q^2e^{1/\sigma^2} = 1 + q^2(e^{1/\sigma^2} - 1)\)</span>.</li>
 <li><strong>Divide</strong> <span class="math inline">\(\ln A_2\)</span> by <span class="math inline">\(\alpha - 1 = 1\)</span>. For <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>: the closed form and the binomial sum both give <span class="math inline">\(1.7181 \times 10^{-4}\)</span>. Without subsampling, <span class="math inline">\(\varepsilon(2) = 1\)</span>, so subsampling at 1% buys a factor of about 5,800 at this order: <span class="math inline">\(1/q^2 = 10^4\)</span>, divided by <span class="math inline">\(e^{1/\sigma^2} - 1 = e - 1 = 1.72\)</span>.</li>
 <li><strong>Where the lower bound turns positive.</strong> <span class="math inline">\(\rho_0\alpha + \frac{\alpha\ln q}{\alpha - 1} &gt; 0\)</span> with <span class="math inline">\(\rho_0 = 1/(2\sigma^2)\)</span> and <span class="math inline">\(\alpha &gt; 1\)</span> means <span class="math inline">\(\frac{\alpha - 1}{2\sigma^2} &gt; \ln(1/q)\)</span>, that is <span class="math inline">\(\alpha &gt; 1 + 2\sigma^2\ln(1/q)\)</span>.</li>
 <li><strong>Check.</strong> For <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, the threshold is <span class="math inline">\(10.21\)</span>. The bound is <span class="math inline">\(-0.1169\)</span> at <span class="math inline">\(\alpha = 10\)</span> and <span class="math inline">\(0.4343\)</span> at <span class="math inline">\(\alpha = 11\)</span>.</li>
 </ol>
-<p><em>The threshold <span class="math inline">\(1 + 2\sigma^2\ln(1/q)\)</span> is where the curve bends in <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#fig-cdp-subsampled">Figure&nbsp;29.4</a>: below it the rare event “the record is in every sample” is too rare to matter, above it that event dominates.</em></p>
+<p><em>The threshold <span class="math inline">\(1 + 2\sigma^2\ln(1/q)\)</span> is where the curve bends in <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#fig-cdp-subsampled">Figure&nbsp;31.4</a>: below it the rare event “the record is in every sample” is too rare to matter, above it that event dominates.</em></p>
 </div>
 </div>
 </div>
 </section>
-<section id="sec-sol-cdp-6" class="level2" data-number="29.6">
-<h2 data-number="29.6" class="anchored" data-anchor-id="sec-sol-cdp-6"><span class="header-section-number">29.6</span> The tCDP conversion</h2>
+<section id="sec-sol-cdp-6" class="level2" data-number="31.6">
+<h2 data-number="31.6" class="anchored" data-anchor-id="sec-sol-cdp-6"><span class="header-section-number">31.6</span> The tCDP conversion</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 6.</strong> <strong>The tCDP conversion.</strong> Derive <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-tcdp-conv">Equation&nbsp;29.20</a> and apply it to <span class="math inline">\(10{,}000\)</span> steps of the running example with <span class="math inline">\(\omega = 4\)</span> and <span class="math inline">\(\omega = 8\)</span>, saying which branch applies. <em>Check: <span class="math inline">\(7.469\)</span> and <span class="math inline">\(8.289\)</span>.</em> <em>(Constrained optimization over α)</em></p>
+<p><strong>Exercise 6.</strong> <strong>The tCDP conversion.</strong> Derive <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#eq-cdp-tcdp-conv">Equation&nbsp;31.20</a> and apply it to <span class="math inline">\(10{,}000\)</span> steps of the running example with <span class="math inline">\(\omega = 4\)</span> and <span class="math inline">\(\omega = 8\)</span>, saying which branch applies. <em>Check: <span class="math inline">\(7.469\)</span> and <span class="math inline">\(8.289\)</span>.</em> <em>(Constrained optimization over α)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-6-contents" aria-controls="callout-6" aria-expanded="false" aria-label="Toggle callout">
@@ -767,7 +785,7 @@ Table&nbsp;29.2: The triangle-like inequality for <span class="math inline">\(m 
 <li><strong>The unconstrained minimum.</strong> <span class="math inline">\(g\)</span> is convex with minimizer <span class="math inline">\(\alpha^* = 1 + \sqrt{\ell/\rho}\)</span> and minimum <span class="math inline">\(\rho + 2\sqrt{\rho\ell}\)</span> (the chapter’s conversion section).</li>
 <li><strong>First branch.</strong> If <span class="math inline">\(\alpha^* \le \omega\)</span>, which is <span class="math inline">\(\ell \le (\omega - 1)^2\rho\)</span>, the minimizer is admissible.</li>
 <li><strong>Second branch.</strong> Otherwise <span class="math inline">\(g' &lt; 0\)</span> on all of <span class="math inline">\((1, \omega]\)</span> (a convex function decreases before its minimizer), so the best admissible order is <span class="math inline">\(\omega\)</span>: <span class="math inline">\(\varepsilon = \rho\omega + \ell/(\omega - 1)\)</span>.</li>
-<li><strong><span class="math inline">\(\omega = 4\)</span>.</strong> Per step <span class="math inline">\(\rho = 9.0789 \times 10^{-5}\)</span> (chapter, <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#tbl-cdp-tcdp">Table&nbsp;29.7</a>), so <span class="math inline">\(10{,}000\)</span> steps give <span class="math inline">\(\rho = 0.9079\)</span>. Then <span class="math inline">\((\omega - 1)^2\rho = 8.171 &lt; \ell = 11.5129\)</span>: second branch, <span class="math inline">\(\varepsilon = 7.469\)</span>. The unconstrained minimizer <span class="math inline">\(\alpha^* = 4.561\)</span> lies beyond <span class="math inline">\(\omega\)</span>.</li>
+<li><strong><span class="math inline">\(\omega = 4\)</span>.</strong> Per step <span class="math inline">\(\rho = 9.0789 \times 10^{-5}\)</span> (chapter, <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html#tbl-cdp-tcdp">Table&nbsp;31.7</a>), so <span class="math inline">\(10{,}000\)</span> steps give <span class="math inline">\(\rho = 0.9079\)</span>. Then <span class="math inline">\((\omega - 1)^2\rho = 8.171 &lt; \ell = 11.5129\)</span>: second branch, <span class="math inline">\(\varepsilon = 7.469\)</span>. The unconstrained minimizer <span class="math inline">\(\alpha^* = 4.561\)</span> lies beyond <span class="math inline">\(\omega\)</span>.</li>
 <li><strong><span class="math inline">\(\omega = 8\)</span>.</strong> <span class="math inline">\(\rho = 1.1171\)</span> and <span class="math inline">\((\omega - 1)^2\rho = 54.736 \ge \ell\)</span>: first branch, with <span class="math inline">\(\alpha^* = 4.210 \le 8\)</span>, and <span class="math inline">\(\varepsilon = 8.289\)</span>.</li>
 </ol>
 <p><em>A larger <span class="math inline">\(\omega\)</span> makes more orders available but forces a larger slope, because the line has to clear the curve on more orders. Here the slope wins, and the smaller truncation point gives the better <span class="math inline">\(\varepsilon\)</span>.</em></p>
@@ -1182,12 +1200,12 @@ Table&nbsp;29.2: The triangle-like inequality for <span class="math inline">\(m 
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="pagination-link" aria-label="Exercises: From Rényi DP to (ε, δ) and to tests">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="pagination-link" aria-label="Exercises: f-DP and Gaussian differential privacy">
-        <span class="nav-page-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

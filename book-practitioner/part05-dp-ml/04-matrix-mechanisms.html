@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>39&nbsp; DP-FTRL and matrix factorization – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>41&nbsp; DP-FTRL and matrix factorization – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/04-matrix-mechanisms.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/04-matrix-mechanisms.html"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -348,26 +348,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -384,55 +396,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -449,61 +461,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -541,25 +559,23 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">39.1</span> Why this matters</a></li>
-  <li><a href="#sec-mfac-prefix" id="toc-sec-mfac-prefix" class="nav-link" data-scroll-target="#sec-mfac-prefix"><span class="header-section-number">39.2</span> Training is a stream of prefix sums</a></li>
-  <li><a href="#sec-mfac-mechanism" id="toc-sec-mfac-mechanism" class="nav-link" data-scroll-target="#sec-mfac-mechanism"><span class="header-section-number">39.3</span> The matrix mechanism</a></li>
-  <li><a href="#sec-mfac-tree" id="toc-sec-mfac-tree" class="nav-link" data-scroll-target="#sec-mfac-tree"><span class="header-section-number">39.4</span> Tree aggregation and DP-FTRL</a></li>
-  <li><a href="#sec-mfac-sqrt" id="toc-sec-mfac-sqrt" class="nav-link" data-scroll-target="#sec-mfac-sqrt"><span class="header-section-number">39.5</span> The square-root factorization</a></li>
-  <li><a href="#sec-mfac-epochs" id="toc-sec-mfac-epochs" class="nav-link" data-scroll-target="#sec-mfac-epochs"><span class="header-section-number">39.6</span> Several participations</a></li>
-  <li><a href="#sec-mfac-run" id="toc-sec-mfac-run" class="nav-link" data-scroll-target="#sec-mfac-run"><span class="header-section-number">39.7</span> The running example: matrix mechanisms against DP-SGD</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">39.8</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">39.9</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">39.10</span> Further reading</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">41.1</span> Why this matters</a></li>
+  <li><a href="#sec-mfac-mechanism" id="toc-sec-mfac-mechanism" class="nav-link" data-scroll-target="#sec-mfac-mechanism"><span class="header-section-number">41.2</span> The matrix mechanism</a></li>
+  <li><a href="#sec-mfac-sqrt" id="toc-sec-mfac-sqrt" class="nav-link" data-scroll-target="#sec-mfac-sqrt"><span class="header-section-number">41.3</span> Choosing a factorization</a></li>
+  <li><a href="#sec-mfac-epochs" id="toc-sec-mfac-epochs" class="nav-link" data-scroll-target="#sec-mfac-epochs"><span class="header-section-number">41.4</span> Several passes: banding and the data order</a></li>
+  <li><a href="#sec-mfac-run" id="toc-sec-mfac-run" class="nav-link" data-scroll-target="#sec-mfac-run"><span class="header-section-number">41.5</span> Which method when</a></li>
+  <li><a href="#sec-mfac-code" id="toc-sec-mfac-code" class="nav-link" data-scroll-target="#sec-mfac-code"><span class="header-section-number">41.6</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">41.7</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">41.8</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/04-matrix-mechanisms.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/04-matrix-mechanisms.html"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></h1>
+<h1 class="title"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></h1>
 </div>
 
 
@@ -576,181 +592,50 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="39.1">
-<h2 data-number="39.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">39.1</span> Why this matters</h2>
-<p>Stochastic gradient descent (SGD) with differential privacy (DP), the <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> of this part, gets much of its privacy from <strong>Poisson sampling</strong>: each record enters a batch only with probability <span class="math inline">\(q\)</span>, and the accountant credits the run for the attacker’s uncertainty about whether the record was used at all (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>). Many pipelines cannot honestly claim it: data loaders shuffle and cut fixed batches, streams arrive in order, and a federated server cannot choose which phones check in. The Poisson accountant can then understate <span class="math inline">\(\varepsilon\)</span> considerably, and giving up amplification is expensive: on this part’s running example, for <span class="math inline">\(\varepsilon = 2\)</span> over five passes through the data, the noise multiplier has to grow from 0.928 to 4.458, and test accuracy falls from 0.9460 to 0.8941.</p>
-<p>How do you train privately without random batches, and can correlated noise beat independent noise? It can, by a lot. The first algorithm to show it ran the follow the regularized leader (FTRL) optimizer on noisy gradient sums released through a binary tree, and is called DP-FTRL. Its modern form, the <strong>matrix factorization mechanism</strong>, contains the tree as a special case, and on the running example it closes nearly all of the gap to amplified DP-SGD without any sampling.</p>
-<p>The one idea: <strong>training releases running sums of gradients, so put the noise where the running sums need it.</strong> Noise added at one step may partly cancel the noise added before it; the price is that each record’s gradient then has to be hidden in several noisy quantities at once.</p>
+<section id="why-this-matters" class="level2" data-number="41.1">
+<h2 data-number="41.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">41.1</span> Why this matters</h2>
+<p>Stochastic gradient descent (SGD) with differential privacy (DP), the <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> of this part, owes much of its accuracy to <strong>Poisson sampling</strong>. Many pipelines cannot honestly claim that sampling, because they cut fixed batches, read data in arrival order or take whichever phones check in. Using the Poisson accountant anyway can understate the privacy loss <span class="math inline">\(\varepsilon\)</span> considerably (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes">Amplification by subsampling</a>).</p>
+<p>Giving up amplification honestly is expensive. On this part’s running example, five passes at <span class="math inline">\(\varepsilon = 2\)</span> on a fixed order need a noise multiplier of 4.458 instead of 0.928, and test accuracy falls from 0.9460 to 0.8941. This chapter wins that loss back by correlating the noise across steps. The first such method used the follow the regularized leader (FTRL) optimizer and is called DP-FTRL. Its modern form, the <strong>matrix factorization mechanism</strong>, closes nearly all of the gap.</p>
 </section>
-<section id="sec-mfac-prefix" class="level2" data-number="39.2">
-<h2 data-number="39.2" class="anchored" data-anchor-id="sec-mfac-prefix"><span class="header-section-number">39.2</span> Training is a stream of prefix sums</h2>
-<p>Plain gradient descent, without momentum, adds up its steps. If <span class="math inline">\(x_t\)</span> is the sum of the clipped gradients of the batch at step <span class="math inline">\(t\)</span>, each of length at most the clipping norm <span class="math inline">\(C\)</span>, and <span class="math inline">\(\hat x_t\)</span> is its noisy version, then after <span class="math inline">\(t\)</span> steps with step size <span class="math inline">\(\eta\)</span> and batch size <span class="math inline">\(B\)</span> <span id="eq-auto-04matrixmechanisms-1"><span class="math display">\[w_{t+1} = w_0 - \frac\eta B\hat S_t, \qquad \hat S_t = \hat x_1 + \dots + \hat x_t. \tag{39.1}\]</span></span> Every model along the way is a fixed function of the noisy <strong>prefix sums</strong> <span class="math inline">\(\hat S_t\)</span>, so releasing those privately makes every model private, and the noise in a model is the noise in its prefix sum. FTRL with a quadratic regularizer produces the same weights. All <span class="math inline">\(T\)</span> prefix sums must be released, not just the last, because training is adaptive: the gradient at step <span class="math inline">\(t\)</span> is computed at <span class="math inline">\(w_t\)</span>, which depends on the earlier sums.</p>
-<p>Two mechanisms suggest themselves. <strong>Independent noise on each step</strong>, which is DP-SGD without amplification, hides a record’s single gradient with noise of the size of one gradient, but the noise in <span class="math inline">\(\hat S_t\)</span> is a sum of <span class="math inline">\(t\)</span> independent terms, a random walk whose standard deviation grows like <span class="math inline">\(\sqrt t\)</span>. <strong>Independent noise on each prefix sum</strong> keeps every error the same size, but a record at step 1 appears in all <span class="math inline">\(T\)</span> sums, so the noise must be <span class="math inline">\(\sqrt T\)</span> times larger to hide it, and every sum is as bad as the worst sum of the first mechanism. Neither uses the structure of the problem.</p>
-<p>Take one epoch of the running example, <span class="math inline">\(T = 100\)</span> steps, at <span class="math inline">\(\varepsilon = 2\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>. Independent noise needs a noise scale of 1.994 per step, in units of <span class="math inline">\(C\)</span>, so the final prefix sum carries noise of standard deviation 19.94. DP-SGD with Poisson sampling at <span class="math inline">\(q = 0.01\)</span> and the same <span class="math inline">\(\varepsilon\)</span> needs only <span class="math inline">\(\sigma = 0.827\)</span>, and its final prefix sum carries 8.27: amplification buys a factor of 2.4. The rest of the chapter shows that correlated noise can beat even that without sampling.</p>
+<section id="sec-mfac-mechanism" class="level2" data-number="41.2">
+<h2 data-number="41.2" class="anchored" data-anchor-id="sec-mfac-mechanism"><span class="header-section-number">41.2</span> The matrix mechanism</h2>
+<p>Plain gradient descent subtracts each step’s noisy sum of clipped gradients, scaled by the step size <span class="math inline">\(\eta\)</span> over the batch size <span class="math inline">\(B\)</span>, from the starting weights <span class="math inline">\(w_0\)</span>: <span id="eq-mfac-weights"><span class="math display">\[w_{t+1} = w_0 - \frac\eta B\hat S_t, \qquad \hat S_t = \hat x_1 + \dots + \hat x_t, \tag{41.1}\]</span></span> where <span class="math inline">\(\hat x_t\)</span> is the noisy gradient sum of step <span class="math inline">\(t\)</span>. A training run is therefore a release of <strong>prefix sums</strong>, and momentum or a learning-rate schedule only changes the fixed weights with which they are combined. Every model is computed from them, so it is post-processing and inherits their privacy (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>).</p>
+<p>Stack the true gradient sums as the rows of a matrix <span class="math inline">\(x\)</span>. The prefix sums are then <span class="math inline">\(Ax\)</span>, where <span class="math inline">\(A\)</span> has ones on and below the diagonal. The <strong>matrix mechanism</strong> splits <span class="math inline">\(A\)</span> into an encoder <span class="math inline">\(R\)</span> and a decoder <span class="math inline">\(L\)</span> with <span class="math inline">\(A = LR\)</span>. It adds Gaussian noise <span class="math inline">\(z\)</span> to the encoded gradients and decodes the result: <span id="eq-mfac-mechanism"><span class="math display">\[\hat S = L(Rx + z) = Ax + Lz. \tag{41.2}\]</span></span> Each entry of the noise <span class="math inline">\(z\)</span> has standard deviation <span class="math inline">\(sC\)</span>, where <span class="math inline">\(C\)</span> is the clipping norm and the <strong>noise scale</strong> <span class="math inline">\(s\)</span> plays the role of DP-SGD’s noise multiplier.</p>
+<p>Privacy depends only on the columns of the encoder. A record used at one step shifts <span class="math inline">\(Rx\)</span> by that step’s column of <span class="math inline">\(R\)</span> times its clipped gradient. So the encoder’s sensitivity, in units of <span class="math inline">\(C\)</span>, is the length of its longest column <span class="math inline">\(r_j\)</span>. The mechanism is then a Gaussian mechanism whose ratio of sensitivity to noise is <span id="eq-mfac-privacy"><span class="math display">\[\mu = \frac{\operatorname{sens}(R)}{s}, \qquad \operatorname{sens}(R) = \max_j\|r_j\|. \tag{41.3}\]</span></span> To calibrate, look up the largest ratio that meets your target <span class="math inline">\((\varepsilon, \delta)\)</span>, written <span class="math inline">\(\mu(\varepsilon, \delta)\)</span>, with the exact Gaussian calibration of <a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian DP</a>. Then set <span class="math inline">\(s = \operatorname{sens}(R)/\mu(\varepsilon, \delta)\)</span>. This chapter uses <span class="math inline">\(\delta = 10^{-5}\)</span> throughout, and at <span class="math inline">\(\varepsilon = 2\)</span> the ratio is 0.502.</p>
+<p>Accuracy depends on the rows of the decoder. Write <span class="math inline">\(\ell_t\)</span> for the row that produces the <span class="math inline">\(t\)</span>-th prefix sum. Each coordinate of its error has standard deviation <span class="math inline">\(sC\|\ell_t\|\)</span>, which is <span class="math inline">\(C/\mu\)</span> times the <strong>error per unit of privacy</strong> <span id="eq-mfac-error"><span class="math display">\[e_t = \operatorname{sens}(R)\,\|\ell_t\|. \tag{41.4}\]</span></span></p>
+<p>Two conditions make all this valid during training. First, both factors must be lower-triangular, so that each step’s release uses only gradients that already exist. Second, a record’s slot in the data order must be fixed in advance, independently of the data. The sensitivity above also assumes neighbours that add or remove a record. If they replace a record instead, its gradient can change by <span class="math inline">\(2C\)</span>, and every sensitivity in this chapter doubles.</p>
+<p>In code, the mechanism is noisy SGD that adds the correlated noise <span class="math inline">\(R^{-1}z\)</span> to the gradient sums. You keep a buffer of past noise draws and never form a large matrix.</p>
 </section>
-<section id="sec-mfac-mechanism" class="level2" data-number="39.3">
-<h2 data-number="39.3" class="anchored" data-anchor-id="sec-mfac-mechanism"><span class="header-section-number">39.3</span> The matrix mechanism</h2>
-<p>Releasing all prefix sums is a linear map, <span class="math inline">\(S = Ax\)</span>, where <span class="math inline">\(A\)</span> is the <span class="math inline">\(T \times T\)</span> lower-triangular matrix of ones and <span class="math inline">\(x\)</span> stacks the <span class="math inline">\(x_t\)</span> as rows. The <strong>matrix mechanism</strong> splits <span class="math inline">\(A\)</span> into two factors, <span class="math inline">\(A = LR\)</span>, adds Gaussian noise <span class="math inline">\(z\)</span> in the middle, and releases <span id="eq-auto-04matrixmechanisms-2"><span class="math display">\[\hat S = L(Rx + z) = Ax + Lz, \tag{39.2}\]</span></span> where <span class="math inline">\(z\)</span> has independent entries with standard deviation <span class="math inline">\(sC\)</span>, and <span class="math inline">\(s\)</span> is the <strong>noise scale</strong>, the analogue of DP-SGD’s noise multiplier. The <strong>encoder</strong> <span class="math inline">\(R\)</span> decides what gets noised; the <strong>decoder</strong> <span class="math inline">\(L\)</span> recovers the prefix sums from it.</p>
-<p>Privacy lives in the columns of <span class="math inline">\(R\)</span>. A record that takes part in step <span class="math inline">\(\tau\)</span> changes row <span class="math inline">\(\tau\)</span> of <span class="math inline">\(x\)</span> by a gradient <span class="math inline">\(g\)</span> of length at most <span class="math inline">\(C\)</span>, which moves <span class="math inline">\(Rx\)</span> by column <span class="math inline">\(\tau\)</span> of <span class="math inline">\(R\)</span> times <span class="math inline">\(g\)</span>. Recall that the privacy of a Gaussian mechanism depends only on one ratio, the sensitivity divided by the noise standard deviation, called <span class="math inline">\(\mu\)</span> (<a href="../part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>). So the mechanism has <span id="eq-auto-04matrixmechanisms-3"><span class="math display">\[\mu = \frac{\operatorname{sens}(R)}{s}, \qquad \operatorname{sens}(R) = \max_j\|r_j\|, \tag{39.3}\]</span></span> the length of the longest column <span class="math inline">\(r_j\)</span>. To meet an <span class="math inline">\((\varepsilon, \delta)\)</span> target, find the largest admissible ratio <span class="math inline">\(\mu(\varepsilon, \delta)\)</span> from the exact Gaussian calibration, for example <span class="math inline">\(\mu(2, 10^{-5}) = 0.502\)</span> and <span class="math inline">\(\mu(8, 10^{-5}) = 1.666\)</span>, and set <span class="math inline">\(s = \operatorname{sens}(R)/\mu\)</span>.</p>
-<p>Error lives in the rows of <span class="math inline">\(L\)</span>. The error in <span class="math inline">\(\hat S_t\)</span> is row <span class="math inline">\(t\)</span> of <span class="math inline">\(L\)</span>, written <span class="math inline">\(\ell_t\)</span>, times the noise, a weighted sum of independent normals, so its standard deviation in each coordinate is <span class="math inline">\(sC\|\ell_t\|\)</span>. At a fixed privacy level that is <span class="math inline">\((C/\mu)\,e_t\)</span>, with <span id="eq-auto-04matrixmechanisms-4"><span class="math display">\[e_t = \operatorname{sens}(R)\,\|\ell_t\| \tag{39.4}\]</span></span> the <strong>error per unit of privacy</strong>. Multiplying <span class="math inline">\(R\)</span> by 2 and dividing <span class="math inline">\(L\)</span> by 2 changes nothing, so only the product matters, and the best factorization balances short columns against short rows. Independent noise on each step is <span class="math inline">\(R = I\)</span>, <span class="math inline">\(L = A\)</span>: columns of length 1, rows of length <span class="math inline">\(\sqrt t\)</span>. Noise on each prefix sum is <span class="math inline">\(R = A\)</span>, <span class="math inline">\(L = I\)</span>, the opposite extreme.</p>
-<p>Does this survive adaptive training, where later gradients depend on earlier outputs? Yes, if both factors are lower-triangular (Denisov et al.&nbsp;2022, Theorem 2.1). Then row <span class="math inline">\(j\)</span> of <span class="math inline">\(Rx + z\)</span> depends only on steps up to <span class="math inline">\(j\)</span> and can be released at step <span class="math inline">\(j\)</span>. Before the record’s step the outputs have the same distribution on both datasets, and from then on the record shifts the remaining rows by column <span class="math inline">\(\tau\)</span> times <span class="math inline">\(g\)</span>, so the accounting is the same as for inputs fixed in advance. A factor with entries above the diagonal would need noise or data from future steps.</p>
-<p>When <span class="math inline">\(R\)</span> is square and invertible, the mechanism is noisy SGD with correlated noise: it adds <span class="math inline">\(\zeta = R^{-1}z\)</span> to the gradients, each step’s noise a fixed combination of the noise drawn so far. Neighbours here leave the record’s slot in the public data order empty; if they replace the record instead, every sensitivity doubles.</p>
-<p>How good can a factorization be? No factorization can push the root-mean-square of <span class="math inline">\(e_t\)</span> over a run below the trace norm of <span class="math inline">\(A\)</span> (the sum of its singular values) divided by <span class="math inline">\(T\)</span>: 2.18 at <span class="math inline">\(T = 100\)</span> and 3.63 at <span class="math inline">\(T = 10{,}000\)</span>. <a href="#tbl-mfac-single" class="quarto-xref">Table&nbsp;<span>39.1</span></a> shows how far each mechanism is from that bound; the next two sections explain the rows.</p>
-<div id="tbl-mfac-single" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mfac-single-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;39.1: Error of each released prefix sum per unit of privacy (<span class="math inline">\(\mu = 1\)</span>, <span class="math inline">\(C = 1\)</span>), for one participation per record. The optimal factorization is normalized to columns of length 1 and was computed for <span class="math inline">\(T \le 256\)</span> only.
-</figcaption>
-<div aria-describedby="tbl-mfac-single-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Mechanism</th>
-<th><span class="math inline">\(T = 100\)</span>: sens<span class="math inline">\((R)\)</span></th>
-<th>root-mean-square <span class="math inline">\(e_t\)</span></th>
-<th>max <span class="math inline">\(e_t\)</span></th>
-<th><span class="math inline">\(T = 10{,}000\)</span>: sens<span class="math inline">\((R)\)</span></th>
-<th>root-mean-square <span class="math inline">\(e_t\)</span></th>
-<th>max <span class="math inline">\(e_t\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Independent noise (<span class="math inline">\(R = I\)</span>)</td>
-<td>1</td>
-<td>7.11</td>
-<td>10.00</td>
-<td>1</td>
-<td>70.71</td>
-<td>100.00</td>
-</tr>
-<tr class="even">
-<td>Noise on prefix sums (<span class="math inline">\(R = A\)</span>)</td>
-<td>10</td>
-<td>10.00</td>
-<td>10.00</td>
-<td>100</td>
-<td>100.00</td>
-<td>100.00</td>
-</tr>
-<tr class="odd">
-<td>Binary tree</td>
-<td>2.828</td>
-<td>5.05</td>
-<td>6.93</td>
-<td>3.873</td>
-<td>9.84</td>
-<td>13.96</td>
-</tr>
-<tr class="even">
-<td>Square root</td>
-<td>1.591</td>
-<td>2.37</td>
-<td>2.53</td>
-<td>2.000</td>
-<td>3.84</td>
-<td>4.00</td>
-</tr>
-<tr class="odd">
-<td>Optimal (Frobenius)</td>
-<td>1</td>
-<td>2.24</td>
-<td>2.45</td>
-<td>—</td>
-<td>—</td>
-<td>—</td>
-</tr>
-<tr class="even">
-<td>Lower bound</td>
-<td>—</td>
-<td>2.18</td>
-<td>—</td>
-<td>—</td>
-<td>3.63</td>
-<td>—</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p>From <span class="math inline">\(T = 100\)</span> to <span class="math inline">\(T = 10{,}000\)</span>, a hundredfold longer run, the independent-noise error grows tenfold, the tree’s by a factor of 2 and the square root’s by a factor of 1.6.</p>
+<section id="sec-mfac-sqrt" class="level2" data-number="41.3">
+<h2 data-number="41.3" class="anchored" data-anchor-id="sec-mfac-sqrt"><span class="header-section-number">41.3</span> Choosing a factorization</h2>
+<p>For a single pass, each factorization trades the encoder’s column length against the decoder’s row length. The numbers below are for one epoch of <span class="math inline">\(T = 100\)</span> steps.</p>
+<p><strong>Independent noise</strong>, the identity encoder, is DP-SGD without amplification. Its prefix-sum noise is a random walk, with a final error per unit of privacy of 10.</p>
+<p>The <strong>binary tree</strong>, the encoder of the original DP-FTRL (Kairouz et al.&nbsp;2021), adds noise to the sum over every node of a binary tree over the steps. Its error grows like <span class="math inline">\(\log T\)</span>, with a largest error of 6.93 over one epoch.</p>
+<p>The <strong>square-root factorization</strong> uses the same lower-triangular matrix for both factors, a square root of <span class="math inline">\(A\)</span>. You can compute it with <code>scipy.linalg.sqrtm</code> on the prefix-sum matrix, or from the closed-form coefficients in the snippet below, which are constant along each diagonal. Over one epoch its sensitivity is 1.591, and its final error is 2.53, a quarter of independent noise’s.</p>
+<p>Optimized factorizations exist in research code (Denisov et al.&nbsp;2022), but they cost time cubic in <span class="math inline">\(T\)</span> and gain little, so the free square root is the default.</p>
 </section>
-<section id="sec-mfac-tree" class="level2" data-number="39.4">
-<h2 data-number="39.4" class="anchored" data-anchor-id="sec-mfac-tree"><span class="header-section-number">39.4</span> Tree aggregation and DP-FTRL</h2>
-<p>The first mechanism with error far below <span class="math inline">\(\sqrt T\)</span> was the <strong>binary tree</strong>, from the theory of private running counts (Dwork, Naor, Pitassi &amp; Rothblum 2010; Chan, Shi &amp; Song 2010). Build a tree over the steps: each leaf is one step, each node above covers a block of <span class="math inline">\(2, 4, 8, \dots\)</span> consecutive steps. Release every node’s gradient sum with independent noise. Any prefix <span class="math inline">\(1, \dots, t\)</span> is the union of one node for each 1 in the binary expansion of <span class="math inline">\(t\)</span>: <span class="math inline">\(7 = 4 + 2 + 1\)</span> uses the nodes covering steps 1 to 4, 5 and 6, and 7. So a prefix sum collects at most <span class="math inline">\(\log_2 t + 1\)</span> noise terms instead of <span class="math inline">\(t\)</span>. The price is that each step sits in one node per level, so its column in <span class="math inline">\(R\)</span> has length <span class="math inline">\(\sqrt{L_T}\)</span>, with <span class="math inline">\(L_T = \lceil\log_2 T\rceil + 1\)</span> levels, and the noise must be that much larger.</p>
-<p>That trade is a large win for long runs: at <span class="math inline">\(T = 10{,}000\)</span> the root-mean-square error is 9.84 against 70.71 for independent noise. But the error jumps around: the prefix <span class="math inline">\(127 = 1111111_2\)</span> uses seven nodes and <span class="math inline">\(128\)</span> uses one (<a href="#fig-mfac-errors" class="quarto-xref">Figure&nbsp;<span>39.2</span></a>, left). And the encoder is wasteful: few prefixes use the top nodes, yet every step pays for being in them.</p>
-<p>Kairouz et al.&nbsp;(2021) ran FTRL on prefix sums released by the tree, with momentum and periodic restarts, and called it DP-FTRL. They report that it compares favourably with amplified DP-SGD in their experiments while allowing much more flexible data access, and Xu et al.&nbsp;(2023) used it to train production keyboard language models in federated learning.</p>
-</section>
-<section id="sec-mfac-sqrt" class="level2" data-number="39.5">
-<h2 data-number="39.5" class="anchored" data-anchor-id="sec-mfac-sqrt"><span class="header-section-number">39.5</span> The square-root factorization</h2>
-<p>A natural symmetric choice is <span class="math inline">\(L = R\)</span>, a lower-triangular matrix whose square is <span class="math inline">\(A\)</span>. It exists and has a closed form, because lower-triangular matrices that are constant along each diagonal multiply like power series in a variable <span class="math inline">\(x\)</span>, coefficient by coefficient. <span class="math inline">\(A\)</span>, all ones, is the series <span class="math inline">\(1 + x + x^2 + \dots = 1/(1 - x)\)</span>, so its square root is the series <span class="math inline">\((1 - x)^{-1/2}\)</span>, whose coefficients are <span id="eq-auto-04matrixmechanisms-5"><span class="math display">\[r_k = \binom{2k}k4^{-k}: \qquad r = 1, \tfrac12, \tfrac38, \tfrac5{16}, \tfrac{35}{128}, \dots, \tag{39.5}\]</span></span> computed by <span class="math inline">\(r_0 = 1\)</span>, <span class="math inline">\(r_k = r_{k-1}(2k - 1)/(2k)\)</span>. The first column of <span class="math inline">\(R\)</span> is the longest and the last row of <span class="math inline">\(L = R\)</span> the longest, both with squared length <span class="math inline">\(\sum_{k&lt;T}r_k^2\)</span>, so that sum is both <span class="math inline">\(\operatorname{sens}(R)^2\)</span> and the largest error per unit of privacy. It grows like <span class="math inline">\(\ln(T)/\pi\)</span>: logarithmic, like the tree’s error, but much smaller than the tree’s at both horizons of <a href="#tbl-mfac-single" class="quarto-xref">Table&nbsp;<span>39.1</span></a>, and far below <span class="math inline">\(\sqrt T\)</span>. At <span class="math inline">\(T = 100\)</span>, <span class="math inline">\(\sum r_k^2 = 2.531\)</span>, so <span class="math inline">\(\operatorname{sens}(R) = 1.591\)</span> and the final prefix sum’s error is 2.53, a quarter of independent noise’s 10.</p>
-<p>Seen as noisy SGD, the noise added to step <span class="math inline">\(t\)</span>’s gradient comes from <span class="math inline">\(R^{-1}\)</span>, the series <span class="math inline">\((1 - x)^{1/2} = 1 - \frac12x - \frac18x^2 - \frac1{16}x^3 - \dots\)</span>: <span id="eq-auto-04matrixmechanisms-6"><span class="math display">\[\zeta_t = z_t - \tfrac12z_{t-1} - \tfrac18z_{t-2} - \tfrac1{16}z_{t-3} - \dots, \tag{39.6}\]</span></span> fresh noise minus a decaying share of the noise already injected. Each step’s noise is slightly larger than independent noise, with standard deviation tending to <span class="math inline">\(\sqrt{4/\pi} = 1.128\)</span> times the noise scale, but the negative coefficients pull the accumulated noise back towards zero, so the running sums no longer drift like a random walk (<a href="#fig-mfac-noise-paths" class="quarto-xref">Figure&nbsp;<span>39.1</span></a>).</p>
-<div id="fig-mfac-noise-paths" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-mfac-noise-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/mfac_noise_paths.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mfac-noise-paths-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;39.1: Left: one coordinate of the noise added to each of the first 60 steps’ gradients, independent (identity factorization) and square-root correlated, both calibrated to <span class="math inline">\(\mu = 1\)</span> for one participation. Right: the noise in the prefix sums over 1,000 steps, for independent noise, the binary tree and the square root, with bands of two standard deviations. Independent noise drifts like a random walk; the square root’s stays within a narrow band.
-</figcaption>
-</figure>
-</div>
-<p>The square root is close to optimal: its root-mean-square error, 2.37 at <span class="math inline">\(T = 100\)</span> and 3.84 at <span class="math inline">\(T = 10{,}000\)</span>, is within 9% and 6% of the lower bound. The best factorization, computed by a fixed-point iteration (Denisov et al.&nbsp;2022), reaches 2.24 at <span class="math inline">\(T = 100\)</span>, but each iteration costs cubic time in <span class="math inline">\(T\)</span>, so the square root, free and nearly as good, is the usual default for long runs (<a href="#fig-mfac-errors" class="quarto-xref">Figure&nbsp;<span>39.2</span></a>). The two even look alike (<a href="#fig-mfac-matrices" class="quarto-xref">Figure&nbsp;<span>39.3</span></a>).</p>
-<div id="fig-mfac-errors" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-mfac-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/mfac_errors.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mfac-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;39.2: Left: standard deviation of the error of each released prefix sum <span class="math inline">\(S_t\)</span> for <span class="math inline">\(T = 256\)</span>, one participation, at <span class="math inline">\(\mu = 1\)</span> and <span class="math inline">\(C = 1\)</span>, for five factorizations. Right: the root-mean-square error over a run against its length <span class="math inline">\(T\)</span>, with the trace-norm lower bound dotted; the optimal factorization is computed up to <span class="math inline">\(T = 256\)</span>.
-</figcaption>
-</figure>
-</div>
-<div id="fig-mfac-matrices" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-mfac-matrices-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/mfac_matrices.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mfac-matrices-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;39.3: The encoder <span class="math inline">\(R\)</span> (top) and decoder <span class="math inline">\(L\)</span> (bottom) of three factorizations of the <span class="math inline">\(16 \times 16\)</span> prefix-sum matrix. The tree’s encoder has one row per node (31 rows), and its decoder picks the nodes of each prefix. The square root uses the same matrix for both; the optimal factorization’s encoder has columns of length exactly 1.
-</figcaption>
-</figure>
-</div>
-</section>
-<section id="sec-mfac-epochs" class="level2" data-number="39.6">
-<h2 data-number="39.6" class="anchored" data-anchor-id="sec-mfac-epochs"><span class="header-section-number">39.6</span> Several participations</h2>
-<p>Training for <span class="math inline">\(E\)</span> epochs puts a record’s gradient into <span class="math inline">\(E\)</span> steps, each through a different column of <span class="math inline">\(R\)</span>, and the shifts add before the norm is taken. When all inner products between columns are nonnegative (as for any <span class="math inline">\(R\)</span> with nonnegative entries: the identity, the tree, the square root), the worst case is the same gradient every time, and the sensitivity is the length of the <em>sum</em> of the record’s columns, maximized over the possible participation patterns.</p>
-<p>For independent noise the columns are orthogonal, so <span class="math inline">\(E\)</span> participations cost <span class="math inline">\(\sqrt E\)</span>, the usual composition of Gaussian mechanisms. For the square root, columns of nearby steps overlap and point in similar directions, so a record that appears again lands on top of its earlier contribution and the sensitivity grows faster than <span class="math inline">\(\sqrt E\)</span>. The tree is worse still: a node covering many steps holds several participations of the same record, and their contributions add inside it.</p>
-<p><strong>Banding</strong> fixes this. Keep only the first <span class="math inline">\(b\)</span> diagonals of the square-root encoder, and make sure any two participations of a record are at least <span class="math inline">\(b\)</span> steps apart (<strong><span class="math inline">\(b\)</span>-min-separation</strong>). Then the columns of different participations do not overlap at all, the cross terms vanish, and the sensitivity is back to at most <span class="math inline">\(\sqrt E\)</span> times the longest column. The banded decoder, <span class="math inline">\(L = AR^{-1}\)</span>, is less accurate than the square root’s for a single participation, because the band no longer spreads the noise across the whole run, but with many participations the sensitivity saving dominates. <a href="#tbl-mfac-epochs" class="quarto-xref">Table&nbsp;<span>39.2</span></a> uses the running example’s order: 100 steps per epoch, each record exactly 100 steps apart, band <span class="math inline">\(b = 100\)</span>.</p>
+<section id="sec-mfac-epochs" class="level2" data-number="41.4">
+<h2 data-number="41.4" class="anchored" data-anchor-id="sec-mfac-epochs"><span class="header-section-number">41.4</span> Several passes: banding and the data order</h2>
+<p>Over <span class="math inline">\(k\)</span> passes a record enters the encoder through <span class="math inline">\(k\)</span> columns. When no two columns have a negative inner product, as for the identity, the tree and the square root, the worst case is a record that contributes the same full-length gradient each time. The sensitivity is the length of the sum of its columns, maximized over the participation patterns that the data order allows: <span id="eq-mfac-multi"><span class="math display">\[\operatorname{sens}(R) = \max_{\text{patterns}}\Big\|\sum_{i=1}^kr_{\tau_i}\Big\|, \tag{41.5}\]</span></span> where <span class="math inline">\(\tau_1, \dots, \tau_k\)</span> are the steps of one pattern.</p>
+<p>Repeated participation costs correlated noise more, because the square root’s columns for nearby steps overlap, so its sensitivity grows faster than <span class="math inline">\(\sqrt k\)</span>. <strong>Banding</strong> fixes this by keeping only the first <span class="math inline">\(b\)</span> diagonals of the square root. Suppose every two participations of a record are at least <span class="math inline">\(b\)</span> steps apart, a condition called <strong><span class="math inline">\(b\)</span>-min-separation</strong>. Then the columns no longer overlap, and the sensitivity is at most <span class="math inline">\(\sqrt k\)</span> times the longest column, as for independent noise. Its decoder rows are longer, so banding pays only when participations repeat.</p>
+<p>The running example reuses one public random permutation every epoch, so each record takes part exactly 100 steps apart, which is the band used below.</p>
 <div id="tbl-mfac-epochs" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mfac-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;39.2: Sensitivity (in units of <span class="math inline">\(C\)</span>) and error of the final prefix sum per unit of privacy, for <span class="math inline">\(E\)</span> participations 100 steps apart, <span class="math inline">\(T = 100E\)</span>.
+Table&nbsp;41.1: Sensitivity (in units of <span class="math inline">\(C\)</span>) and error of the final prefix sum per unit of privacy, for <span class="math inline">\(E\)</span> participations 100 steps apart, <span class="math inline">\(T = 100E\)</span>.
 </figcaption>
 <div aria-describedby="tbl-mfac-epochs-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Epochs <span class="math inline">\(E\)</span></th>
 <th>Independent: sens / final <span class="math inline">\(e_T\)</span></th>
-<th>Tree</th>
 <th>Square root</th>
 <th>Banded square root</th>
 </tr>
@@ -759,35 +644,18 @@ Table&nbsp;39.2: Sensitivity (in units of <span class="math inline">\(C\)</span>
 <tr class="odd">
 <td>1</td>
 <td>1.000 / 10.00</td>
-<td>2.828 / 4.90</td>
 <td>1.591 / 2.53</td>
 <td>1.591 / 2.53</td>
-</tr>
-<tr class="even">
-<td>2</td>
-<td>1.414 / 20.00</td>
-<td>4.690 / 8.12</td>
-<td>2.531 / 4.20</td>
-<td>2.250 / 4.16</td>
-</tr>
-<tr class="odd">
-<td>5</td>
-<td>2.236 / 50.00</td>
-<td>8.944 / 21.91</td>
-<td>5.080 / 8.86</td>
-<td>3.558 / 8.56</td>
 </tr>
 <tr class="even">
 <td>10</td>
 <td>3.162 / 100.00</td>
-<td>16.186 / 39.65</td>
 <td>9.154 / 16.54</td>
 <td>5.031 / 15.69</td>
 </tr>
 <tr class="odd">
 <td>20</td>
 <td>4.472 / 200.00</td>
-<td>30.430 / 74.54</td>
 <td>17.191 / 32.09</td>
 <td>7.115 / 29.85</td>
 </tr>
@@ -796,103 +664,15 @@ Table&nbsp;39.2: Sensitivity (in units of <span class="math inline">\(C\)</span>
 </div>
 </figure>
 </div>
-<p>At 20 epochs the banded sensitivity is <span class="math inline">\(\sqrt{20} \times 1.591 = 7.115\)</span>, while the full square root’s is 17.191, more than twice as large. The final errors are closer, 29.85 against 32.09, because the banded decoder is less accurate; both are between a sixth and a seventh of independent noise’s 200.</p>
-<p>So the data order is part of the mechanism. A fixed permutation, drawn independently of the data and repeated every epoch, guarantees a separation of exactly <span class="math inline">\(n/B\)</span> steps; reshuffling every epoch can put a record at the end of one epoch and the start of the next, one step apart, which breaks the banded bound. The order must be fixed in the analysis, but need not be random. Banded factorizations can also use amplification by sampling when it is available (Choquette-Choo et al.&nbsp;2023).</p>
+<p>At 20 epochs, the banded sensitivity is exactly <span class="math inline">\(\sqrt{20}\)</span> times its one-epoch value, while the full square root’s is more than twice as large. So the data order is part of the mechanism, and a permutation kept for every epoch guarantees a separation of exactly one epoch. Reshuffling every epoch can put a record at the end of one epoch and the start of the next, one step apart, and that breaks the banded bound.</p>
 </section>
-<section id="sec-mfac-run" class="level2" data-number="39.7">
-<h2 data-number="39.7" class="anchored" data-anchor-id="sec-mfac-run"><span class="header-section-number">39.7</span> The running example: matrix mechanisms against DP-SGD</h2>
-<p>Does less noise in the prefix sums mean better models? Train the running example (the network of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, <span class="math inline">\(n = 10{,}000\)</span> records, batch 100, <span class="math inline">\(C = 0.5\)</span>) in a fixed order with each mechanism, and compare with DP-SGD with Poisson sampling at <span class="math inline">\(q = 0.01\)</span> and the Rényi differential privacy (RDP) accountant, at the same <span class="math inline">\(\varepsilon\)</span> (<a href="#tbl-mfac-noise" class="quarto-xref">Table&nbsp;<span>39.3</span></a>, <a href="#tbl-mfac-run" class="quarto-xref">Table&nbsp;<span>39.4</span></a>).</p>
-<div id="tbl-mfac-noise" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mfac-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;39.3: Noise needed by each method at equal <span class="math inline">\(\varepsilon\)</span> (<span class="math inline">\(\delta = 10^{-5}\)</span>, 100 steps per epoch) and the resulting noise in the final prefix sum, all in units of <span class="math inline">\(C\)</span>. DP-SGD uses Poisson sampling with <span class="math inline">\(q = 0.01\)</span> and the RDP accountant; the others use a fixed order and exact Gaussian accounting.
-</figcaption>
-<div aria-describedby="tbl-mfac-noise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-<col style="width: 14%">
-</colgroup>
-<thead>
-<tr class="header">
-<th><span class="math inline">\(\varepsilon\)</span>, epochs</th>
-<th>DP-SGD <span class="math inline">\(\sigma\)</span></th>
-<th>Independent <span class="math inline">\(s\)</span></th>
-<th>Tree <span class="math inline">\(s\)</span></th>
-<th>Square root <span class="math inline">\(s\)</span></th>
-<th>Banded <span class="math inline">\(s\)</span></th>
-<th>Final prefix noise: DP-SGD / independent / tree / square root / banded</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>2, 1</td>
-<td>0.827</td>
-<td>1.994</td>
-<td>5.639</td>
-<td>3.172</td>
-<td>3.172</td>
-<td>8.27 / 19.94 / 9.77 / 5.05 / 5.05</td>
-</tr>
-<tr class="even">
-<td>2, 5</td>
-<td>0.928</td>
-<td>4.458</td>
-<td>17.833</td>
-<td>10.129</td>
-<td>7.093</td>
-<td>20.75 / 99.69 / 43.68 / 17.67 / 17.06</td>
-</tr>
-<tr class="odd">
-<td>2, 10</td>
-<td>1.03</td>
-<td>6.305</td>
-<td>32.273</td>
-<td>18.251</td>
-<td>10.031</td>
-<td>32.57 / 199.38 / 79.05 / 32.98 / 31.28</td>
-</tr>
-<tr class="even">
-<td>8, 1</td>
-<td>0.501</td>
-<td>0.600</td>
-<td>1.698</td>
-<td>0.955</td>
-<td>0.955</td>
-<td>5.01 / 6.00 / 2.94 / 1.52 / 1.52</td>
-</tr>
-<tr class="odd">
-<td>8, 5</td>
-<td>0.573</td>
-<td>1.342</td>
-<td>5.369</td>
-<td>3.049</td>
-<td>2.135</td>
-<td>12.81 / 30.01 / 13.15 / 5.32 / 5.14</td>
-</tr>
-<tr class="even">
-<td>8, 10</td>
-<td>0.616</td>
-<td>1.898</td>
-<td>9.716</td>
-<td>5.495</td>
-<td>3.020</td>
-<td>19.48 / 60.02 / 23.80 / 9.93 / 9.42</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
+<section id="sec-mfac-run" class="level2" data-number="41.5">
+<h2 data-number="41.5" class="anchored" data-anchor-id="sec-mfac-run"><span class="header-section-number">41.5</span> Which method when</h2>
+<p><a href="#tbl-mfac-run" class="quarto-xref">Table&nbsp;<span>41.2</span></a> trains the network of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> with each method at equal <span class="math inline">\(\varepsilon\)</span>, with DP-SGD on Poisson sampling and the Rényi differential privacy accountant.</p>
 <div id="tbl-mfac-run" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mfac-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;39.4: Test accuracy (mean ± standard deviation over three runs) at equal <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>, batch 100, clipping norm 0.5, best of step sizes 0.5 and 2. Without noise, fixed-order training with clipping reaches 0.9420, 0.9580 and 0.9606 after 1, 5 and 10 epochs.
+Table&nbsp;41.2: Test accuracy (mean of three runs) at equal <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>.
 </figcaption>
 <div aria-describedby="tbl-mfac-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -917,149 +697,80 @@ Table&nbsp;39.4: Test accuracy (mean ± standard deviation over three runs) at e
 <tbody>
 <tr class="odd">
 <td>2, 1</td>
-<td>0.9343 ± 0.0044</td>
-<td>0.9066 ± 0.0031</td>
-<td>0.9134 ± 0.0038</td>
-<td>0.9361 ± 0.0046</td>
-<td>0.9358 ± 0.0019</td>
+<td>0.9343</td>
+<td>0.9066</td>
+<td>0.9134</td>
+<td>0.9361</td>
+<td>0.9358</td>
 </tr>
 <tr class="even">
-<td>2, 5</td>
-<td>0.9460 ± 0.0021</td>
-<td>0.8941 ± 0.0071</td>
-<td>0.9183 ± 0.0084</td>
-<td>0.9430 ± 0.0011</td>
-<td>0.9456 ± 0.0019</td>
-</tr>
-<tr class="odd">
 <td>2, 10</td>
-<td>0.9493 ± 0.0012</td>
-<td>0.8641 ± 0.0130</td>
-<td>0.9096 ± 0.0074</td>
-<td>0.9398 ± 0.0029</td>
-<td>0.9491 ± 0.0024</td>
-</tr>
-<tr class="even">
-<td>8, 1</td>
-<td>0.9371 ± 0.0016</td>
-<td>0.9395 ± 0.0018</td>
-<td>0.9412 ± 0.0006</td>
-<td>0.9461 ± 0.0022</td>
-<td>0.9434 ± 0.0017</td>
+<td>0.9493</td>
+<td>0.8641</td>
+<td>0.9096</td>
+<td>0.9398</td>
+<td>0.9491</td>
 </tr>
 <tr class="odd">
-<td>8, 5</td>
-<td>0.9524 ± 0.0026</td>
-<td>0.9420 ± 0.0029</td>
-<td>0.9461 ± 0.0012</td>
-<td>0.9497 ± 0.0025</td>
-<td>0.9542 ± 0.0014</td>
+<td>8, 1</td>
+<td>0.9371</td>
+<td>0.9395</td>
+<td>0.9412</td>
+<td>0.9461</td>
+<td>0.9434</td>
 </tr>
 <tr class="even">
 <td>8, 10</td>
-<td>0.9520 ± 0.0006</td>
-<td>0.9410 ± 0.0032</td>
-<td>0.9484 ± 0.0004</td>
-<td>0.9530 ± 0.0015</td>
-<td>0.9549 ± 0.0024</td>
+<td>0.9520</td>
+<td>0.9410</td>
+<td>0.9484</td>
+<td>0.9530</td>
+<td>0.9549</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>Without amplification, correlated noise is essential. At <span class="math inline">\(\varepsilon = 2\)</span>, independent noise loses 2.8 points to DP-SGD after one epoch and 8.5 points after ten, and gets worse with more epochs, because its per-step noise grows like <span class="math inline">\(\sqrt E\)</span> and then accumulates like a random walk. The tree recovers between a quarter and a half of the gap. The square root and the banded square root recover nearly all of it: at ten epochs the banded encoder reaches 0.9491, within 0.0002 of DP-SGD.</p>
-<p>For short runs and large <span class="math inline">\(\varepsilon\)</span>, matrix mechanisms can beat amplified DP-SGD outright, because amplification gains little there. At <span class="math inline">\(\varepsilon = 8\)</span> and one epoch, DP-SGD needs <span class="math inline">\(\sigma = 0.501\)</span> and independent noise without sampling 0.600, barely more, while the square root’s final prefix sum carries 1.52 against DP-SGD’s 5.01, and it reaches 0.9461 against 0.9371. DP-SGD keeps its lead at small <span class="math inline">\(\varepsilon\)</span> over many epochs, where amplification is strongest: at <span class="math inline">\(\varepsilon = 2\)</span> its per-step noise grows only from 0.827 to 1.03 between one and ten epochs, while every fixed-order mechanism pays for ten participations. There the full square root falls behind, 0.9398 against 0.9493, because its overlapping columns make repeated participation expensive, and only banding keeps up. Across the table, the method with the least final-prefix noise is the most accurate, or within the run-to-run spread of the most accurate, in every row: that number is a good guide when choosing.</p>
-<div id="fig-mfac-accuracy" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-mfac-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="figures/mfac_accuracy.svg" class="img-fluid figure-img">
-</div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-mfac-accuracy-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;39.4: Test accuracy of the running example after 5 epochs (500 steps of batch 100) at step size 1, against <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, one run per point. DP-SGD uses Poisson sampling; the other four use a fixed data order and differ only in how their noise is correlated.
-</figcaption>
-</figure>
-</div>
-<p>Three caveats. The RDP accountant overstates DP-SGD’s <span class="math inline">\(\varepsilon\)</span> somewhat compared with a numerical accountant (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>), so a tighter one would lower its noise somewhat. The step size was picked per method by test accuracy, a leak that <a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a> charges for; here it only compares methods at their best. And the runs are short, at most 1,000 steps; the noise gaps of <a href="#tbl-mfac-epochs" class="quarto-xref">Table&nbsp;<span>39.2</span></a> keep widening with epochs, so longer runs should separate the methods more, not less. <a href="#fig-mfac-accuracy" class="quarto-xref">Figure&nbsp;<span>39.4</span></a> shows the same pattern across budgets at five epochs.</p>
-<p>This is what makes matrix mechanisms the tool for federated learning. The server cannot sample devices independently with a known rate, so the Poisson accountant does not apply, but it can enforce that a device contributes at most once every <span class="math inline">\(b\)</span> rounds. With that min-separation, a banded mechanism has a provable guarantee, and on the running example’s scale it is as accurate as DP-SGD with sampling would be. That is why production federated training of language models uses DP-FTRL (Xu et al.&nbsp;2023); the privacy unit there is a user, not an example, which <a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a> treats.</p>
+<p>Three patterns guide the choice. Independent noise without amplification is a poor option, trailing DP-SGD by 8.5 points at <span class="math inline">\(\varepsilon = 2\)</span> and ten epochs, while the banded square root comes within 0.02 points. At large <span class="math inline">\(\varepsilon\)</span> and few epochs, amplification gains little, so correlated noise can even beat DP-SGD. At small <span class="math inline">\(\varepsilon\)</span> over many epochs, DP-SGD keeps its lead, and only banding keeps up.</p>
+<p>You can choose before training anything, by computing each candidate’s noise in the final prefix sum, <span class="math inline">\(sC\)</span> times the length of the decoder’s last row. On the running example, the method with the least of it was the most accurate, or nearly so, in every configuration.</p>
+<p>Federated learning is the main use, because the server cannot sample devices at a known rate. If a device contributes at most once every <span class="math inline">\(b\)</span> rounds, a banded mechanism with band at most <span class="math inline">\(b\)</span> gives a provable guarantee, and Google trained its Gboard keyboard language models this way with DP-FTRL (Xu et al.&nbsp;2023).</p>
+<p>You rarely write the mechanism yourself. Google’s JAX Privacy library implements matrix-factorization noise for JAX training, including banded factorizations. TensorFlow Federated provides tree-aggregation noise for federated training through <code>tff.aggregators.DifferentiallyPrivateFactory.tree_aggregation</code>. Opacus assumes Poisson sampling, so it is the wrong tool here. Whatever the library, check that its sensitivity uses the participation pattern and the neighbouring relation you actually have.</p>
 </section>
-<section id="code" class="level2" data-number="39.8">
-<h2 data-number="39.8" class="anchored" data-anchor-id="code"><span class="header-section-number">39.8</span> Code</h2>
-<p>A correlated-noise mechanism is a few lines on top of noisy SGD; what takes care is the sensitivity, which depends on the data order and must be computed for the order you actually use. This snippet computes the square root’s coefficients, its single-participation errors, the multi-epoch sensitivities of <a href="#tbl-mfac-epochs" class="quarto-xref">Table&nbsp;<span>39.2</span></a> and the resulting noise scale:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> ceil, erfc, exp, log2, sqrt</span>
+<section id="sec-mfac-code" class="level2" data-number="41.6">
+<h2 data-number="41.6" class="anchored" data-anchor-id="sec-mfac-code"><span class="header-section-number">41.6</span> Code</h2>
+<p>To check a library’s configuration, the snippet computes a banded square root’s sensitivity for your separation and number of epochs.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> sqrt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sqrt_coeffs(t: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">float</span>]:</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""r_k = C(2k, k)/4^k: the first column of the lower-triangular square root of A."""</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> [<span class="fl">1.0</span>]</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, t):</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        r.append(r[<span class="op">-</span><span class="dv">1</span>] <span class="op">*</span> (<span class="dv">2</span> <span class="op">*</span> k <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> k))</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> r</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    r <span class="op">=</span> [<span class="fl">1.0</span>]</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> k <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, t):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        r.append(r[<span class="op">-</span><span class="dv">1</span>] <span class="op">*</span> (<span class="dv">2</span> <span class="op">*</span> k <span class="op">-</span> <span class="dv">1</span>) <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> k))</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> r</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> toeplitz_sensitivity(c: <span class="bu">list</span>[<span class="bu">float</span>], t: <span class="bu">int</span>, sep: <span class="bu">int</span>, epochs: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Length of the sum of the encoder columns a record touches, worst slot (entries of c &gt;= 0)."""</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> offset <span class="kw">in</span> <span class="bu">range</span>(sep):</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        steps <span class="op">=</span> <span class="bu">range</span>(offset, t, sep)[:epochs]</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        col <span class="op">=</span> [<span class="bu">sum</span>(c[i <span class="op">-</span> p] <span class="cf">for</span> p <span class="kw">in</span> steps <span class="cf">if</span> <span class="dv">0</span> <span class="op">&lt;=</span> i <span class="op">-</span> p <span class="op">&lt;</span> <span class="bu">len</span>(c)) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(t)]</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        best <span class="op">=</span> <span class="bu">max</span>(best, sqrt(<span class="bu">sum</span>(v <span class="op">*</span> v <span class="cf">for</span> v <span class="kw">in</span> col)))</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> tree_sensitivity(t: <span class="bu">int</span>, sep: <span class="bu">int</span>, epochs: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""A record's contributions to one tree node add up before the norm is taken."""</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> offset <span class="kw">in</span> <span class="bu">range</span>(sep):</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        steps <span class="op">=</span> <span class="bu">range</span>(offset, t, sep)[:epochs]</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        total <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> level <span class="kw">in</span> <span class="bu">range</span>(ceil(log2(t)) <span class="op">+</span> <span class="dv">1</span>):</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>            counts: <span class="bu">dict</span>[<span class="bu">int</span>, <span class="bu">int</span>] <span class="op">=</span> {}</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> p <span class="kw">in</span> steps:</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                counts[p <span class="op">&gt;&gt;</span> level] <span class="op">=</span> counts.get(p <span class="op">&gt;&gt;</span> level, <span class="dv">0</span>) <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>            total <span class="op">+=</span> <span class="bu">sum</span>(n <span class="op">*</span> n <span class="cf">for</span> n <span class="kw">in</span> counts.values())</span>
-<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>        best <span class="op">=</span> <span class="bu">max</span>(best, sqrt(total))</span>
-<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best</span>
-<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> phi(x: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="fl">0.5</span> <span class="op">*</span> erfc(<span class="op">-</span>x <span class="op">/</span> sqrt(<span class="dv">2</span>))</span>
-<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> gaussian_mu(eps: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Largest sensitivity-to-noise ratio for which a Gaussian mechanism is (eps, delta)-DP."""</span></span>
-<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> <span class="fl">1e-9</span>, <span class="fl">100.0</span></span>
-<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">200</span>):</span>
-<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>        mu <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
-<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> phi(mu <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> eps <span class="op">/</span> mu) <span class="op">-</span> exp(eps) <span class="op">*</span> phi(<span class="op">-</span>mu <span class="op">/</span> <span class="dv">2</span> <span class="op">-</span> eps <span class="op">/</span> mu) <span class="op">&gt;</span> delta:</span>
-<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>            hi <span class="op">=</span> mu</span>
-<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
-<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>            lo <span class="op">=</span> mu</span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lo</span>
-<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> <span class="dv">100</span></span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>r <span class="op">=</span> sqrt_coeffs(T)</span>
-<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>sens <span class="op">=</span> sqrt(<span class="bu">sum</span>(v <span class="op">*</span> v <span class="cf">for</span> v <span class="kw">in</span> r))  <span class="co"># the first column is the longest</span></span>
-<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> [sqrt(<span class="bu">sum</span>(v <span class="op">*</span> v <span class="cf">for</span> v <span class="kw">in</span> r[:t])) <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, T <span class="op">+</span> <span class="dv">1</span>)]  <span class="co"># row t of L = R</span></span>
-<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>sens<span class="sc">:.3f}</span><span class="ss"> </span><span class="sc">{</span>sens <span class="op">*</span> rows[<span class="op">-</span><span class="dv">1</span>]<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 1.591 2.53</span></span>
-<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>sens <span class="op">*</span> sqrt(<span class="bu">sum</span>(x <span class="op">*</span> x <span class="cf">for</span> x <span class="kw">in</span> rows) <span class="op">/</span> T)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 2.37</span></span>
-<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>sqrt(<span class="bu">sum</span>(<span class="bu">range</span>(<span class="dv">1</span>, T <span class="op">+</span> <span class="dv">1</span>)) <span class="op">/</span> T)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 7.11</span></span>
-<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>E <span class="op">=</span> <span class="dv">20</span>  <span class="co"># epochs of 100 steps, each record exactly 100 steps apart</span></span>
-<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>toeplitz_sensitivity(sqrt_coeffs(T <span class="op">*</span> E), T <span class="op">*</span> E, T, E)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 17.191</span></span>
-<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>toeplitz_sensitivity(r, T <span class="op">*</span> E, T, E)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 7.115</span></span>
-<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>tree_sensitivity(T <span class="op">*</span> E, T, E)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 30.430</span></span>
-<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>toeplitz_sensitivity(r, T <span class="op">*</span> <span class="dv">10</span>, T, <span class="dv">10</span>) <span class="op">/</span> gaussian_mu(<span class="fl">2.0</span>, <span class="fl">1e-5</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 10.031</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The banded encoder is the square root cut to its first 100 coefficients, which is why it reuses <code>r</code>; the last line is its noise scale for <span class="math inline">\(\varepsilon = 2\)</span> over ten epochs, as in <a href="#tbl-mfac-noise" class="quarto-xref">Table&nbsp;<span>39.3</span></a>. The full edition’s script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/matrix_mechanisms.py">matrix_mechanisms.py</a>, builds every factorization, including the optimal one, and trains the running example with each:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/matrix_mechanisms.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> toeplitz_sensitivity(c: <span class="bu">list</span>[<span class="bu">float</span>], t: <span class="bu">int</span>, sep: <span class="bu">int</span>, epochs: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="fl">0.0</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> offset <span class="kw">in</span> <span class="bu">range</span>(sep):</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        steps <span class="op">=</span> <span class="bu">range</span>(offset, t, sep)[:epochs]</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        col <span class="op">=</span> [<span class="bu">sum</span>(c[i <span class="op">-</span> p] <span class="cf">for</span> p <span class="kw">in</span> steps <span class="cf">if</span> <span class="dv">0</span> <span class="op">&lt;=</span> i <span class="op">-</span> p <span class="op">&lt;</span> <span class="bu">len</span>(c)) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(t)]</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>        best <span class="op">=</span> <span class="bu">max</span>(best, sqrt(<span class="bu">sum</span>(v <span class="op">*</span> v <span class="cf">for</span> v <span class="kw">in</span> col)))</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>T <span class="op">=</span> <span class="dv">100</span>  <span class="co"># steps per epoch</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>band <span class="op">=</span> sqrt_coeffs(T)  <span class="co"># the banded encoder keeps the first T coefficients</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>toeplitz_sensitivity(band, T <span class="op">*</span> <span class="dv">20</span>, T, <span class="dv">20</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 7.115</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>toeplitz_sensitivity(band, T <span class="op">*</span> <span class="dv">10</span>, T, <span class="dv">10</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 5.031</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Divide the sensitivity by <span class="math inline">\(\mu(\varepsilon, \delta)\)</span> to get the noise scale.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="39.9">
-<h2 data-number="39.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">39.9</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="41.7">
+<h2 data-number="41.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">41.7</span> Cheat sheet</h2>
 <div id="tbl-mfac-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-mfac-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;39.5: The results of this chapter.
+Table&nbsp;41.3: Which mechanism for which pipeline.
 </figcaption>
 <div aria-describedby="tbl-mfac-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1070,56 +781,26 @@ Table&nbsp;39.5: The results of this chapter.
 </colgroup>
 <thead>
 <tr class="header">
-<th>Result</th>
-<th>Formula</th>
-<th>Conditions</th>
+<th>Situation</th>
+<th>Use</th>
+<th>What to expect</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>Training releases prefix sums</td>
-<td><span class="math inline">\(w_{t+1} = w_0 - \frac\eta B\hat S_t\)</span></td>
-<td>Gradient descent or FTRL, no momentum</td>
+<td>You can implement Poisson sampling</td>
+<td>DP-SGD with its accountant</td>
+<td>Strongest at small <span class="math inline">\(\varepsilon\)</span> and many epochs</td>
 </tr>
 <tr class="even">
-<td>Matrix mechanism</td>
-<td><span class="math inline">\(\hat S = L(Rx + z) = Ax + Lz\)</span>, <span class="math inline">\(A = LR\)</span></td>
-<td><span class="math inline">\(L\)</span>, <span class="math inline">\(R\)</span> lower-triangular for adaptive training</td>
+<td>Fixed order, one pass</td>
+<td>Square-root factorization</td>
+<td>Close to the optimized factorization, with nothing to optimize</td>
 </tr>
 <tr class="odd">
-<td>Privacy</td>
-<td><span class="math inline">\(\mu = \max_j\|r_j\|/s\)</span>; set <span class="math inline">\(s = \operatorname{sens}(R)/\mu(\varepsilon, \delta)\)</span></td>
-<td>One participation</td>
-</tr>
-<tr class="even">
-<td>Error</td>
-<td><span class="math inline">\(\operatorname{sd}(\hat S_t - S_t) = sC\|\ell_t\|\)</span></td>
-<td>Per coordinate</td>
-</tr>
-<tr class="odd">
-<td>Independent noise</td>
-<td>Sensitivity 1, error <span class="math inline">\(\sqrt t\)</span></td>
-<td>DP-SGD without amplification</td>
-</tr>
-<tr class="even">
-<td>Binary tree</td>
-<td>Sensitivity <span class="math inline">\(\sqrt{\lceil\log_2T\rceil + 1}\)</span>, error grows like <span class="math inline">\(\log T\)</span></td>
-<td>DP-FTRL</td>
-</tr>
-<tr class="odd">
-<td>Square root</td>
-<td><span class="math inline">\(r_k = \binom{2k}k4^{-k}\)</span>; sens<span class="math inline">\(^2\)</span> = max error <span class="math inline">\(= \sum_{k&lt;T}r_k^2\)</span>, grows like <span class="math inline">\(\ln(T)/\pi\)</span></td>
-<td>Root-mean-square error within 9% of the bound at <span class="math inline">\(T = 100\)</span></td>
-</tr>
-<tr class="even">
-<td>Several participations</td>
-<td>Sensitivity = length of the sum of the participating columns</td>
-<td>Nonnegative inner products between columns</td>
-</tr>
-<tr class="odd">
-<td>Banded encoder</td>
-<td>At most <span class="math inline">\(\sqrt E\)</span> times the longest column</td>
-<td>Band <span class="math inline">\(\le\)</span> separation of participations</td>
+<td>Fixed order, several passes</td>
+<td>Banded square root, band at most the separation</td>
+<td>Sensitivity at most <span class="math inline">\(\sqrt k\)</span> times one column</td>
 </tr>
 </tbody>
 </table>
@@ -1128,21 +809,20 @@ Table&nbsp;39.5: The results of this chapter.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>If you cannot implement Poisson sampling, do not account as if you did. Fix the data order in advance and use a matrix mechanism.</li>
-<li>One pass: the square-root factorization. Several passes: a fixed order with evenly separated participations and a banded encoder whose band is at most the separation.</li>
-<li>Compute the sensitivity for the participation pattern you actually have; reshuffling every epoch changes it.</li>
-<li>Compare methods by the noise in the final prefix sum at equal <span class="math inline">\(\varepsilon\)</span>.</li>
+<li>If you cannot implement Poisson sampling, do not account as if you did.</li>
+<li>Fix the data order before training, independently of the data, and keep the same permutation every epoch.</li>
+<li>Compare methods by the noise in the final prefix sum at equal <span class="math inline">\(\varepsilon\)</span> and the same number of epochs.</li>
+<li>Never claim amplification on top of a matrix mechanism unless its analysis allows it, as the banded analysis of Choquette-Choo et al.&nbsp;(2023) does.</li>
+<li>Never reuse the single-participation sensitivity after reshuffling every epoch.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="39.10">
-<h2 data-number="39.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">39.10</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="41.8">
+<h2 data-number="41.8" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">41.8</span> Further reading</h2>
 <ul>
-<li>Kairouz, McMahan, Song, Thakkar, Thakurta &amp; Xu, “Practical and Private (Deep) Learning without Sampling or Shuffling” (ICML 2021): DP-FTRL with tree aggregation, and its comparison with amplified DP-SGD.</li>
-<li>Denisov, McMahan, Rush, Smith &amp; Thakurta, “Improved Differential Privacy for SGD via Optimal Private Linear Operators on Adaptive Streams” (NeurIPS 2022): the matrix mechanism for adaptive streams, and the optimal factorization.</li>
-<li>Choquette-Choo, Ganesh, McKenna, McMahan, Rush, Thakurta &amp; Xu, “(Amplified) Banded Matrix Factorizations: A Unified Approach to Private Training” (NeurIPS 2023): banded encoders, min-separation, and amplification for matrix mechanisms.</li>
-<li>Xu, Zhang, Andrew, Choquette-Choo, Kairouz, McMahan, Rosenstock &amp; Zhang, “Federated Learning of Gboard Language Models with Differential Privacy” (ACL 2023, industry track): DP-FTRL in a production federated system.</li>
+<li>Denisov, McMahan, Rush, Smith &amp; Thakurta, “Improved Differential Privacy for SGD via Optimal Private Linear Operators on Adaptive Streams” (NeurIPS 2022): the mechanism for training.</li>
+<li>Choquette-Choo, Ganesh, McKenna, McMahan, Rush, Thakurta &amp; Xu, “(Amplified) Banded Matrix Factorizations: A Unified Approach to Private Training” (NeurIPS 2023): banding and min-separation.</li>
 </ul>
-<p><strong>Derivations.</strong> Every result in this chapter is derived step by step in <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html">the full edition’s chapter</a>.</p>
+<p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part05-dp-ml/04-matrix-mechanisms.html">the full edition’s chapter</a>.</p>
 
 
 </section>
@@ -1551,12 +1231,12 @@ Table&nbsp;39.5: The results of this chapter.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="pagination-link" aria-label="Hyperparameter tuning and private selection">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/05-private-prediction.html" class="pagination-link" aria-label="Private prediction: PATE and in-context learning">
-        <span class="nav-page-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

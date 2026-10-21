@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>23&nbsp; Query release and private multiplicative weights – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part03-dp-foundations/07-sensitivity.html" rel="next">
+<link href="../part03-dp-foundations/05-selection.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/06-query-release.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/01-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">How much noise to add</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/02-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Composing private releases</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/03-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/04-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">What ε means, and converting between definitions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/05-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Sums, limits and counting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/06-tails-tests-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Tail bounds, tests and divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/07-optimization-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Optimization and estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/08-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Random matrices and factorizations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/09-cryptography.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/10-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/11-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">K</span>&nbsp; <span class="chapter-title">Composition of trade-off functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/12-amplification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">L</span>&nbsp; <span class="chapter-title">Subsampling, shuffling and iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/13-private-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">M</span>&nbsp; <span class="chapter-title">Private learning and tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/14-auditing-adaptivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">N</span>&nbsp; <span class="chapter-title">Auditing, reconstruction and adaptive analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">P</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">23.1</span> Why this matters</a>
+  <ul class="collapse">
+  <li><a href="#the-one-idea-learn-the-data-from-its-mistakes" id="toc-the-one-idea-learn-the-data-from-its-mistakes" class="nav-link" data-scroll-target="#the-one-idea-learn-the-data-from-its-mistakes"><span class="header-section-number">23.1.1</span> The one idea: learn the data from its mistakes</a></li>
+  </ul></li>
+  <li><a href="#toolkit-three-facts-every-derivation-uses" id="toc-toolkit-three-facts-every-derivation-uses" class="nav-link" data-scroll-target="#toolkit-three-facts-every-derivation-uses"><span class="header-section-number">23.2</span> Toolkit: three facts every derivation uses</a>
+  <ul class="collapse">
+  <li><a href="#fact-1-a-linear-query-is-an-inner-product-with-the-histogram" id="toc-fact-1-a-linear-query-is-an-inner-product-with-the-histogram" class="nav-link" data-scroll-target="#fact-1-a-linear-query-is-an-inner-product-with-the-histogram"><span class="header-section-number">23.2.1</span> Fact 1 — A linear query is an inner product with the histogram</a></li>
+  <li><a href="#fact-2-two-bounds-on-the-logarithm" id="toc-fact-2-two-bounds-on-the-logarithm" class="nav-link" data-scroll-target="#fact-2-two-bounds-on-the-logarithm"><span class="header-section-number">23.2.2</span> Fact 2 — Two bounds on the logarithm</a></li>
+  <li><a href="#fact-3-the-privacy-tools-restated" id="toc-fact-3-the-privacy-tools-restated" class="nav-link" data-scroll-target="#fact-3-the-privacy-tools-restated"><span class="header-section-number">23.2.3</span> Fact 3 — The privacy tools, restated</a></li>
+  </ul></li>
+  <li><a href="#sec-qr-baseline" id="toc-sec-qr-baseline" class="nav-link" data-scroll-target="#sec-qr-baseline"><span class="header-section-number">23.3</span> Answering every query: the baseline</a>
+  <ul class="collapse">
+  <li><a href="#context" id="toc-context" class="nav-link" data-scroll-target="#context"><span class="header-section-number">23.3.1</span> Context</a></li>
+  <li><a href="#statement" id="toc-statement" class="nav-link" data-scroll-target="#statement"><span class="header-section-number">23.3.2</span> Statement</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">23.3.3</span> Derivation</a></li>
+  <li><a href="#interpretation" id="toc-interpretation" class="nav-link" data-scroll-target="#interpretation"><span class="header-section-number">23.3.4</span> Interpretation</a></li>
+  <li><a href="#example-the-running-example" id="toc-example-the-running-example" class="nav-link" data-scroll-target="#example-the-running-example"><span class="header-section-number">23.3.5</span> Example: the running example</a></li>
+  <li><a href="#check-yourself" id="toc-check-yourself" class="nav-link" data-scroll-target="#check-yourself"><span class="header-section-number">23.3.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-qr-mw" id="toc-sec-qr-mw" class="nav-link" data-scroll-target="#sec-qr-mw"><span class="header-section-number">23.4</span> Multiplicative weights and its regret bound</a>
+  <ul class="collapse">
+  <li><a href="#context-1" id="toc-context-1" class="nav-link" data-scroll-target="#context-1"><span class="header-section-number">23.4.1</span> Context</a></li>
+  <li><a href="#statement-1" id="toc-statement-1" class="nav-link" data-scroll-target="#statement-1"><span class="header-section-number">23.4.2</span> Statement</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">23.4.3</span> Derivation</a></li>
+  <li><a href="#interpretation-1" id="toc-interpretation-1" class="nav-link" data-scroll-target="#interpretation-1"><span class="header-section-number">23.4.4</span> Interpretation</a></li>
+  <li><a href="#example-two-experts-by-hand" id="toc-example-two-experts-by-hand" class="nav-link" data-scroll-target="#example-two-experts-by-hand"><span class="header-section-number">23.4.5</span> Example: two experts by hand</a></li>
+  <li><a href="#check-yourself-1" id="toc-check-yourself-1" class="nav-link" data-scroll-target="#check-yourself-1"><span class="header-section-number">23.4.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-qr-mistakes" id="toc-sec-qr-mistakes" class="nav-link" data-scroll-target="#sec-qr-mistakes"><span class="header-section-number">23.5</span> From regret to a mistake bound: learning a histogram</a>
+  <ul class="collapse">
+  <li><a href="#context-2" id="toc-context-2" class="nav-link" data-scroll-target="#context-2"><span class="header-section-number">23.5.1</span> Context</a></li>
+  <li><a href="#statement-2" id="toc-statement-2" class="nav-link" data-scroll-target="#statement-2"><span class="header-section-number">23.5.2</span> Statement</a></li>
+  <li><a href="#derivation-2" id="toc-derivation-2" class="nav-link" data-scroll-target="#derivation-2"><span class="header-section-number">23.5.3</span> Derivation</a></li>
+  <li><a href="#interpretation-2" id="toc-interpretation-2" class="nav-link" data-scroll-target="#interpretation-2"><span class="header-section-number">23.5.4</span> Interpretation</a></li>
+  <li><a href="#example-the-running-example-1" id="toc-example-the-running-example-1" class="nav-link" data-scroll-target="#example-the-running-example-1"><span class="header-section-number">23.5.5</span> Example: the running example</a></li>
+  <li><a href="#check-yourself-2" id="toc-check-yourself-2" class="nav-link" data-scroll-target="#check-yourself-2"><span class="header-section-number">23.5.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-qr-pmw" id="toc-sec-qr-pmw" class="nav-link" data-scroll-target="#sec-qr-pmw"><span class="header-section-number">23.6</span> Private multiplicative weights</a>
+  <ul class="collapse">
+  <li><a href="#context-3" id="toc-context-3" class="nav-link" data-scroll-target="#context-3"><span class="header-section-number">23.6.1</span> Context</a></li>
+  <li><a href="#statement-3" id="toc-statement-3" class="nav-link" data-scroll-target="#statement-3"><span class="header-section-number">23.6.2</span> Statement</a></li>
+  <li><a href="#derivation-3" id="toc-derivation-3" class="nav-link" data-scroll-target="#derivation-3"><span class="header-section-number">23.6.3</span> Derivation</a></li>
+  <li><a href="#interpretation-3" id="toc-interpretation-3" class="nav-link" data-scroll-target="#interpretation-3"><span class="header-section-number">23.6.4</span> Interpretation</a></li>
+  <li><a href="#example-the-running-example-and-the-scale-of-the-bound" id="toc-example-the-running-example-and-the-scale-of-the-bound" class="nav-link" data-scroll-target="#example-the-running-example-and-the-scale-of-the-bound"><span class="header-section-number">23.6.5</span> Example: the running example, and the scale of the bound</a></li>
+  <li><a href="#check-yourself-3" id="toc-check-yourself-3" class="nav-link" data-scroll-target="#check-yourself-3"><span class="header-section-number">23.6.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-qr-online" id="toc-sec-qr-online" class="nav-link" data-scroll-target="#sec-qr-online"><span class="header-section-number">23.7</span> Online private multiplicative weights</a>
+  <ul class="collapse">
+  <li><a href="#context-4" id="toc-context-4" class="nav-link" data-scroll-target="#context-4"><span class="header-section-number">23.7.1</span> Context</a></li>
+  <li><a href="#statement-4" id="toc-statement-4" class="nav-link" data-scroll-target="#statement-4"><span class="header-section-number">23.7.2</span> Statement</a></li>
+  <li><a href="#derivation-4" id="toc-derivation-4" class="nav-link" data-scroll-target="#derivation-4"><span class="header-section-number">23.7.3</span> Derivation</a></li>
+  <li><a href="#interpretation-4" id="toc-interpretation-4" class="nav-link" data-scroll-target="#interpretation-4"><span class="header-section-number">23.7.4</span> Interpretation</a></li>
+  <li><a href="#example-a-large-query-server" id="toc-example-a-large-query-server" class="nav-link" data-scroll-target="#example-a-large-query-server"><span class="header-section-number">23.7.5</span> Example: a large query server</a></li>
+  <li><a href="#check-yourself-4" id="toc-check-yourself-4" class="nav-link" data-scroll-target="#check-yourself-4"><span class="header-section-number">23.7.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#sec-qr-smalldb" id="toc-sec-qr-smalldb" class="nav-link" data-scroll-target="#sec-qr-smalldb"><span class="header-section-number">23.8</span> SmallDB: the exponential mechanism over small datasets</a>
+  <ul class="collapse">
+  <li><a href="#context-5" id="toc-context-5" class="nav-link" data-scroll-target="#context-5"><span class="header-section-number">23.8.1</span> Context</a></li>
+  <li><a href="#statement-5" id="toc-statement-5" class="nav-link" data-scroll-target="#statement-5"><span class="header-section-number">23.8.2</span> Statement</a></li>
+  <li><a href="#derivation-5" id="toc-derivation-5" class="nav-link" data-scroll-target="#derivation-5"><span class="header-section-number">23.8.3</span> Derivation</a></li>
+  <li><a href="#interpretation-5" id="toc-interpretation-5" class="nav-link" data-scroll-target="#interpretation-5"><span class="header-section-number">23.8.4</span> Interpretation</a></li>
+  <li><a href="#example-the-running-example-2" id="toc-example-the-running-example-2" class="nav-link" data-scroll-target="#example-the-running-example-2"><span class="header-section-number">23.8.5</span> Example: the running example</a></li>
+  <li><a href="#check-yourself-5" id="toc-check-yourself-5" class="nav-link" data-scroll-target="#check-yourself-5"><span class="header-section-number">23.8.6</span> Check yourself</a></li>
+  </ul></li>
+  <li><a href="#code-check-every-algorithm-by-computation-and-simulation" id="toc-code-check-every-algorithm-by-computation-and-simulation" class="nav-link" data-scroll-target="#code-check-every-algorithm-by-computation-and-simulation"><span class="header-section-number">23.9</span> Code: check every algorithm by computation and simulation</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">23.10</span> References</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">23.11</span> Cheat sheet</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-dp-foundations/00-introduction.html">Differential privacy foundations</a></li><li class="breadcrumb-item"><a href="../part03-dp-foundations/06-query-release.html"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="23.1">
+<h2 data-number="23.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">23.1</span> Why this matters</h2>
+<p>Many private releases are not one statistic but a large batch of simple ones. A statistics office publishes every cross-tabulation of a census file, and a dashboard shows hundreds of counts. Before it trains a model, a team computes how often every combination of a few features occurs. Each of these numbers is a <strong>linear query</strong>: the average, over the records, of a function that gives each record a value between 0 and 1. Counts and frequencies are the usual case, where the function is 1 for the records that match and 0 for the rest. The tools so far answer such a batch by adding noise to every answer, and the noise has to grow with the number of queries. Under pure differential privacy (DP), the Laplace mechanism’s noise grows in proportion to the number of queries. Under approximate DP, the Gaussian mechanism’s noise grows like its square root (<a href="../part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>). With millions of queries, either is useless.</p>
+<p>The growth is not only an artefact of these mechanisms. The <a href="../part02-attacks/09-reconstruction.html">reconstruction attack</a> of Dinur and Nissim shows that answers that are all very accurate, to many more queries than there are records, give the data away. But that attack needs every answer to be within about <span class="math inline">\(1/\sqrt n\)</span> of the truth, where <span class="math inline">\(n\)</span> is the number of records. Between “too accurate to be private” and “too noisy to be useful” there is a wide gap, and this chapter fills it. It shows how to answer an arbitrary set of linear queries with an error that grows only with the <em>logarithm</em> of the number of queries and the logarithm of the number of possible records. As a bonus, the answer is a <strong>synthetic dataset</strong>: a histogram over all possible records that can be published and that answers every query in the set. It also answers queries outside the set, although the guarantee covers only the queries in it.</p>
+<section id="the-one-idea-learn-the-data-from-its-mistakes" class="level3" data-number="23.1.1">
+<h3 data-number="23.1.1" class="anchored" data-anchor-id="the-one-idea-learn-the-data-from-its-mistakes"><span class="header-section-number">23.1.1</span> The one idea: learn the data from its mistakes</h3>
+<p>Keep a public guess of the data, a histogram over all possible records that starts out uniform. Find a query that the guess gets badly wrong, measure that one query privately, and nudge the guess toward the measured answer. Each nudge is a step of the <strong>multiplicative weights</strong> method, which comes from online learning. Its guarantee bounds its <strong>regret</strong>, how much worse it does than the best fixed choice in hindsight. That bound says that only about <span class="math inline">\(\ln N/\alpha^2\)</span> nudges are ever needed before the guess is within a target error <span class="math inline">\(\alpha\)</span> on every query, where <span class="math inline">\(N\)</span> is the number of possible records. The number of queries does not appear. So the privacy budget is split over the corrections instead of over every query. The privacy tools come from the previous chapters. In each round the exponential mechanism of <a href="../part03-dp-foundations/05-selection.html">Selection</a> finds a badly answered query, and the Laplace mechanism measures it. <a href="../part03-dp-foundations/04-composition.html">Advanced composition</a> adds up the cost of the rounds. When the queries arrive one at a time, the sparse vector technique of <a href="../part03-dp-foundations/05-selection.html">Selection</a> replaces the exponential mechanism.</p>
+<p><a href="#tbl-qr-overview" class="quarto-xref">Table&nbsp;<span>23.1</span></a> lists the results of the chapter and where each is used.</p>
+<div id="tbl-qr-overview" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-qr-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.1: The results of this chapter and where each is used.
+</figcaption>
+<div aria-describedby="tbl-qr-overview-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Where it is used</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Noise on every answer: error grows like <span class="math inline">\(\lvert Q\rvert\)</span> or <span class="math inline">\(\sqrt{\lvert Q\rvert}\)</span></td>
+<td>The baseline; small or structured sets of queries</td>
+</tr>
+<tr class="even">
+<td>Multiplicative weights and its regret bound</td>
+<td>The engine of everything below; online learning, and the <a href="../part05-dp-ml/04-matrix-mechanisms.html">matrix-factorization training</a> of Part 5</td>
+</tr>
+<tr class="odd">
+<td>Regret to mistakes: at most <span class="math inline">\(4\ln N/\alpha^2\)</span> corrections</td>
+<td>Why the number of rounds does not depend on the number of queries</td>
+</tr>
+<tr class="even">
+<td>Offline private multiplicative weights</td>
+<td>Synthetic data for a fixed set of queries, such as all marginals of a table</td>
+</tr>
+<tr class="odd">
+<td>Online private multiplicative weights</td>
+<td>Interactive query servers; queries that depend on earlier answers</td>
+</tr>
+<tr class="even">
+<td>SmallDB</td>
+<td>What the exponential mechanism can do without regard to running time; the limits of efficient release</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>How to read this chapter.</strong> The baseline section sets the target. The next two sections are about learning, with no privacy at all: multiplicative weights, and how its regret bound turns into a bound on the number of corrections. Read them before the private algorithm, which is those two sections with two lines replaced. The online version and SmallDB are variations and can be read in either order.</p>
+<p><strong>What you need.</strong> The exponential mechanism, its utility bound and the sparse vector technique are in <a href="../part03-dp-foundations/05-selection.html">Selection</a>. Advanced composition is in <a href="../part03-dp-foundations/04-composition.html">Advanced and optimal composition</a>, and the Laplace and Gaussian mechanisms are in <a href="../part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a>. Hoeffding’s inequality and the union bound are in <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>. Each is restated where it is used.</p>
+<p><strong>Notation.</strong> The <strong>universe</strong> <span class="math inline">\(X\)</span> is the set of all possible records, and <span class="math inline">\(N = |X|\)</span> is its size. A dataset <span class="math inline">\(D\)</span> holds <span class="math inline">\(n\)</span> records, <span class="math inline">\(x_1, \dots, x_n\)</span>. Its <strong>histogram</strong> <span class="math inline">\(p\)</span> records how often each value occurs. For each element <span class="math inline">\(x\)</span> of the universe, <span class="math inline">\(p(x)\)</span> is the fraction of the records that equal <span class="math inline">\(x\)</span>.</p>
+<p>A linear query is a function <span class="math inline">\(q\)</span> from the universe to <span class="math inline">\([0, 1]\)</span>. Its answer on <span class="math inline">\(D\)</span> is the average of its values over the records, <span class="math inline">\(q(D) = \frac1n\sum_iq(x_i)\)</span>. The set of queries to answer is <span class="math inline">\(Q\)</span>, and <span class="math inline">\(|Q|\)</span> is its size. Neighbouring datasets differ by replacing one record, and <span class="math inline">\(n\)</span> is public, so one answer moves by at most <span class="math inline">\(1/n\)</span>.</p>
+<p>The <strong>error</strong> of a guessed histogram <span class="math inline">\(\hat p\)</span> on a query is the distance between its answer and the true one. The target is an error of at most <span class="math inline">\(\alpha\)</span> on every query, except with a small failure probability <span class="math inline">\(\beta\)</span>. Logarithms are natural.</p>
+<p><strong>The running example.</strong> A table has <span class="math inline">\(n = 10{,}000\)</span> records with eight yes/no attributes, so the universe has <span class="math inline">\(N = 2^8 = 256\)</span> elements. The records come from a mixture of three groups with different attribute rates. The queries are every cell of every marginal table: for every set of attributes and every combination of their values, the fraction of records with those values. Each nonempty set of attributes gives a table, so there are <span class="math inline">\(2^8 - 1 = 255\)</span> tables. A cell fixes each attribute to 0, to 1, or leaves it out, which gives <span class="math inline">\(3^8\)</span> choices, minus the one that leaves every attribute out, so there are <span class="math inline">\(3^8 - 1 = 6560\)</span> cells. The uniform histogram, which uses no data at all, has a largest error of 0.232 over these queries.</p>
+</section>
+</section>
+<section id="toolkit-three-facts-every-derivation-uses" class="level2" data-number="23.2">
+<h2 data-number="23.2" class="anchored" data-anchor-id="toolkit-three-facts-every-derivation-uses"><span class="header-section-number">23.2</span> Toolkit: three facts every derivation uses</h2>
+<section id="fact-1-a-linear-query-is-an-inner-product-with-the-histogram" class="level3" data-number="23.2.1">
+<h3 data-number="23.2.1" class="anchored" data-anchor-id="fact-1-a-linear-query-is-an-inner-product-with-the-histogram"><span class="header-section-number">23.2.1</span> Fact 1 — A linear query is an inner product with the histogram</h3>
+<p>The answer to a linear query depends on the records only through how many of them take each value. So group the records by value: each element <span class="math inline">\(x\)</span> of the universe contributes <span class="math inline">\(q(x)\)</span> once for every record equal to it, which is <span class="math inline">\(np(x)\)</span> times. Dividing by <span class="math inline">\(n\)</span>, <span id="eq-qr-inner"><span class="math display">\[q(D) = \frac1n\sum_{i=1}^nq(x_i) = \sum_{x \in X}q(x)\,p(x) = \langle q, p\rangle. \tag{23.1}\]</span></span> Here <span class="math inline">\(\langle q, p\rangle\)</span> is the inner product of two vectors indexed by the universe.</p>
+<p>A concrete case: two yes/no attributes, so the universe is <span class="math inline">\(\{00, 01, 10, 11\}\)</span>, and four records <span class="math inline">\(01, 11, 11, 10\)</span>. <a href="#tbl-qr-inner" class="quarto-xref">Table&nbsp;<span>23.2</span></a> lists the histogram and the query “the first attribute is 1”.</p>
+<div id="tbl-qr-inner" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-qr-inner-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.2: A four-record dataset as a histogram, and one query.
+</figcaption>
+<div aria-describedby="tbl-qr-inner-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Element <span class="math inline">\(x\)</span></th>
+<th>00</th>
+<th>01</th>
+<th>10</th>
+<th>11</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Records equal to <span class="math inline">\(x\)</span></td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(p(x)\)</span></td>
+<td>0</td>
+<td>1/4</td>
+<td>1/4</td>
+<td>1/2</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(q(x)\)</span>: first attribute is 1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The inner product is <span class="math inline">\(0 + 0 + \frac14 + \frac12 = \frac34\)</span>, and indeed three of the four records have a first attribute of 1.</p>
+<p>Two consequences matter. Any distribution <span class="math inline">\(\hat p\)</span> over the universe, not only a real dataset, gives an answer <span class="math inline">\(\langle q, \hat p\rangle\)</span> to every query, so a histogram is a synthetic dataset. And the error of <span class="math inline">\(\hat p\)</span> on <span class="math inline">\(q\)</span> is <span class="math inline">\(|\langle q, \hat p - p\rangle|\)</span>, which is linear in the difference of the two histograms.</p>
+</section>
+<section id="fact-2-two-bounds-on-the-logarithm" class="level3" data-number="23.2.2">
+<h3 data-number="23.2.2" class="anchored" data-anchor-id="fact-2-two-bounds-on-the-logarithm"><span class="header-section-number">23.2.2</span> Fact 2 — Two bounds on the logarithm</h3>
+<p>The analysis of multiplicative weights tracks the logarithm of a product of factors <span class="math inline">\(1 - x\)</span>, and it needs two bounds on <span class="math inline">\(\ln(1 - x)\)</span>, one from above and one from below. From above, the logarithm is concave, so it lies below its tangent at 0: <span class="math inline">\(\ln(1 - x) \le -x\)</span> for every <span class="math inline">\(x &lt; 1\)</span>. From below, near 0 it falls short of the tangent by at most <span class="math inline">\(x^2\)</span>: <span id="eq-qr-log-lower"><span class="math display">\[\ln(1 - x) \ge -x - x^2 \qquad \text{for } |x| \le \tfrac12. \tag{23.2}\]</span></span></p>
+<p>To see the lower bound, let <span class="math inline">\(g(x) = \ln(1 - x) + x + x^2\)</span>, so that <span class="math inline">\(g(0) = 0\)</span>. Its derivative is <span class="math inline">\(g'(x) = -\frac1{1 - x} + 1 + 2x = \frac{x(1 - 2x)}{1 - x}\)</span>. On <span class="math inline">\([0, \frac12]\)</span> the derivative is at least 0, so <span class="math inline">\(g\)</span> rises from 0 and stays non-negative. On <span class="math inline">\([-\frac12, 0]\)</span> it is at most 0, so <span class="math inline">\(g\)</span> falls toward <span class="math inline">\(g(0) = 0\)</span> and is non-negative there too. The two ends of the range show how much room is left. At <span class="math inline">\(x = \frac12\)</span>, <span class="math inline">\(\ln\frac12 = -0.6931\)</span> lies above <span class="math inline">\(-x - x^2 = -0.75\)</span>. At <span class="math inline">\(x = -\frac12\)</span>, <span class="math inline">\(\ln\frac32 = 0.4055\)</span> lies above <span class="math inline">\(-x - x^2 = 0.25\)</span>. Outside <span class="math inline">\([-\frac12, \frac12]\)</span> the bound can fail, and at <span class="math inline">\(x = 0.9\)</span> it does, because <span class="math inline">\(\ln 0.1 = -2.30\)</span> lies below <span class="math inline">\(-x - x^2 = -1.71\)</span>. That is why the step size will be kept small.</p>
+</section>
+<section id="fact-3-the-privacy-tools-restated" class="level3" data-number="23.2.3">
+<h3 data-number="23.2.3" class="anchored" data-anchor-id="fact-3-the-privacy-tools-restated"><span class="header-section-number">23.2.3</span> Fact 3 — The privacy tools, restated</h3>
+<p>Three tools from earlier chapters do the private work. Each comes with a tail bound that the accuracy proofs combine by a union bound, which says that the probability that at least one of several events happens is at most the sum of their probabilities.</p>
+<ul>
+<li>The <strong>Laplace mechanism</strong> takes an answer of sensitivity <span class="math inline">\(\Delta\)</span>, the most that one record can move it. To be <span class="math inline">\(\varepsilon_0\)</span>-DP for a per-step budget <span class="math inline">\(\varepsilon_0\)</span>, it adds noise <span class="math inline">\(\mathrm{Lap}(b)\)</span> of scale <span class="math inline">\(b = \Delta/\varepsilon_0\)</span>. Its noise exceeds <span class="math inline">\(b\ln(1/\beta')\)</span> in absolute value with probability exactly <span class="math inline">\(\beta'\)</span>.</li>
+<li>The <strong>exponential mechanism</strong> picks one of <span class="math inline">\(k\)</span> candidates, each with a score <span class="math inline">\(u\)</span> of sensitivity <span class="math inline">\(\Delta\)</span>, with probability proportional to <span class="math inline">\(e^{\varepsilon_0u/(2\Delta)}\)</span>, and is <span class="math inline">\(\varepsilon_0\)</span>-DP. Its utility bound (<a href="../part03-dp-foundations/05-selection.html#sec-sel-utility">Selection</a>) says that, except with probability <span class="math inline">\(\beta'\)</span>, the chosen candidate’s score is within <span class="math inline">\(\frac{2\Delta}{\varepsilon_0}\big(\ln k + \ln(1/\beta')\big)\)</span> of the best.</li>
+<li><strong>Advanced composition</strong> (<a href="../part03-dp-foundations/04-composition.html#sec-comp-advanced">Advanced and optimal composition</a>) says that <span class="math inline">\(k\)</span> steps that are each <span class="math inline">\(\varepsilon_0\)</span>-DP, chosen adaptively, are <span class="math inline">\((\varepsilon', \delta)\)</span>-DP with <span class="math inline">\(\varepsilon' = \varepsilon_0\sqrt{2k\ln(1/\delta)} + k\varepsilon_0\tanh(\varepsilon_0/2)\)</span>.</li>
+</ul>
+<p>The derivations need a closed-form per-step budget. If each of <span class="math inline">\(k\)</span> steps gets <span id="eq-qr-step-eps"><span class="math display">\[\varepsilon_0 = \frac{\varepsilon}{2\sqrt{2k\ln(1/\delta)}}, \tag{23.3}\]</span></span> then the whole is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP whenever <span class="math inline">\(\varepsilon \le 8\ln(1/\delta)\)</span>. The condition is mild: at <span class="math inline">\(\delta = 10^{-6}\)</span> it allows any <span class="math inline">\(\varepsilon\)</span> up to 110. To see the claim, substitute <span class="math inline">\(\varepsilon_0\)</span> into <span class="math inline">\(\varepsilon'\)</span>. The first term is exactly <span class="math inline">\(\varepsilon/2\)</span>. The second term, <span class="math inline">\(k\varepsilon_0\tanh(\varepsilon_0/2)\)</span>, is at most <span class="math inline">\(k\varepsilon_0^2/2\)</span>, because <span class="math inline">\(\tanh\)</span> never exceeds its argument. Substituting <span class="math inline">\(\varepsilon_0\)</span> turns <span class="math inline">\(k\varepsilon_0^2/2\)</span> into <span class="math inline">\(\varepsilon^2/(16\ln(1/\delta))\)</span>, and the condition <span class="math inline">\(\varepsilon \le 8\ln(1/\delta)\)</span> makes this at most <span class="math inline">\(\varepsilon/2\)</span>. When <span class="math inline">\(\varepsilon_0\)</span> is small the second term is far below <span class="math inline">\(\varepsilon/2\)</span>, so the closed form leaves up to half the budget unspent. The chapter’s script also solves for the largest <span class="math inline">\(\varepsilon_0\)</span> exactly, and the Example of <a href="#sec-qr-pmw" class="quarto-xref"><span>Section 23.6</span></a> compares the two.</p>
+</section>
+</section>
+<section id="sec-qr-baseline" class="level2" data-number="23.3">
+<h2 data-number="23.3" class="anchored" data-anchor-id="sec-qr-baseline"><span class="header-section-number">23.3</span> Answering every query: the baseline</h2>
+<section id="context" class="level3" data-number="23.3.1">
+<h3 data-number="23.3.1" class="anchored" data-anchor-id="context"><span class="header-section-number">23.3.1</span> Context</h3>
+<p>The direct way to release the answers to a set of queries is to add noise to each. Before improving on it, it helps to know exactly what it costs and why the cost grows with the number of queries.</p>
+</section>
+<section id="statement" class="level3" data-number="23.3.2">
+<h3 data-number="23.3.2" class="anchored" data-anchor-id="statement"><span class="header-section-number">23.3.2</span> Statement</h3>
+<p>Write <span class="math inline">\(f(D)\)</span> for the vector of the <span class="math inline">\(|Q|\)</span> answers. Replacing one record moves each answer by at most <span class="math inline">\(1/n\)</span>. The <span class="math inline">\(\ell_1\)</span> norm of the change, the sum of the absolute changes, is therefore at most <span class="math inline">\(|Q|/n\)</span>. The <span class="math inline">\(\ell_2\)</span> norm, the square root of the sum of their squares, is at most <span class="math inline">\(\sqrt{|Q|}/n\)</span>, because the squares add up to at most <span class="math inline">\(|Q|/n^2\)</span>. The Laplace mechanism on the vector is <span class="math inline">\(\varepsilon\)</span>-DP, and with probability at least <span class="math inline">\(1 - \beta\)</span> its largest error is below <span class="math inline">\(\alpha\)</span> once <span id="eq-qr-laplace-n"><span class="math display">\[n \ge \frac{|Q|\ln(|Q|/\beta)}{\alpha\varepsilon}. \tag{23.4}\]</span></span> The Gaussian mechanism is calibrated through a number <span class="math inline">\(\mu = \mu(\varepsilon, \delta)\)</span>, the largest ratio of sensitivity to noise standard deviation that the exact calibration of <a href="../part03-dp-foundations/03-laplace-gaussian.html">The Laplace and Gaussian mechanisms</a> allows. Dividing the <span class="math inline">\(\ell_2\)</span> sensitivity by <span class="math inline">\(\mu\)</span> gives the noise it needs, a standard deviation <span class="math inline">\(\sigma = \sqrt{|Q|}/(n\mu)\)</span> on every answer, and then it is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. Its largest error is below <span class="math inline">\(\alpha\)</span> with probability at least <span class="math inline">\(1 - \beta\)</span> once <span id="eq-qr-gauss-n"><span class="math display">\[n \ge \frac{\sqrt{|Q|}\,z}{\mu\alpha}, \tag{23.5}\]</span></span> where <span class="math inline">\(z\)</span> is the number that a standard normal variable exceeds with probability <span class="math inline">\(\beta/(2|Q|)\)</span>.</p>
+<p>A query set with structure can do better. For all the cells of a marginal table, replacing one record lowers one cell by <span class="math inline">\(1/n\)</span> and raises another by <span class="math inline">\(1/n\)</span>, so each table contributes only <span class="math inline">\(2/n\)</span> to the <span class="math inline">\(\ell_1\)</span> sensitivity, whatever its number of cells.</p>
+</section>
+<section id="derivation" class="level3" data-number="23.3.3">
+<h3 data-number="23.3.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">23.3.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Laplace.</strong> Each answer gets noise of scale <span class="math inline">\(b = |Q|/(n\varepsilon)\)</span>. One noise exceeds <span class="math inline">\(b\ln(|Q|/\beta)\)</span> in absolute value with probability <span class="math inline">\(\beta/|Q|\)</span>, and by the union bound some noise does with probability at most <span class="math inline">\(\beta\)</span>. Setting <span class="math inline">\(b\ln(|Q|/\beta) = \alpha\)</span> and solving for <span class="math inline">\(n\)</span> gives <a href="#eq-qr-laplace-n" class="quarto-xref">Equation&nbsp;<span>23.4</span></a>.</li>
+<li><strong>Gaussian.</strong> A normal variable exceeds <span class="math inline">\(z\)</span> standard deviations in absolute value with probability <span class="math inline">\(2\Phi(-z)\)</span>, where <span class="math inline">\(\Phi\)</span> is the standard normal cumulative distribution function. By the union bound, some answer’s noise exceeds <span class="math inline">\(\sigma z\)</span> with probability at most <span class="math inline">\(2|Q|\Phi(-z) = \beta\)</span>, which is how <span class="math inline">\(z\)</span> was chosen. Setting <span class="math inline">\(\sigma z = \alpha\)</span> and solving for <span class="math inline">\(n\)</span> gives <a href="#eq-qr-gauss-n" class="quarto-xref">Equation&nbsp;<span>23.5</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation" class="level3" data-number="23.3.4">
+<h3 data-number="23.3.4" class="anchored" data-anchor-id="interpretation"><span class="header-section-number">23.3.4</span> Interpretation</h3>
+<p>The records needed grow like <span class="math inline">\(|Q|\)</span> under pure DP and like <span class="math inline">\(\sqrt{|Q|}\)</span>, times a slowly growing <span class="math inline">\(z\)</span>, under approximate DP. Put differently, at a fixed <span class="math inline">\(n\)</span> the error per answer grows at the same rates. For a few hundred queries on a large dataset that is fine, and nothing in this chapter beats it there. But a table with 30 yes/no attributes has <span class="math inline">\(3^{30} - 1 \approx 2\times10^{14}\)</span> marginal cells, and no dataset is large enough to answer them all with independent noise. The algorithms below pay instead for the logarithm of <span class="math inline">\(|Q|\)</span> and the logarithm of <span class="math inline">\(N\)</span>.</p>
+</section>
+<section id="example-the-running-example" class="level3" data-number="23.3.5">
+<h3 data-number="23.3.5" class="anchored" data-anchor-id="example-the-running-example"><span class="header-section-number">23.3.5</span> Example: the running example</h3>
+<p>With <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(\varepsilon = 1\)</span>, the 255 marginal tables give an <span class="math inline">\(\ell_1\)</span> sensitivity of <span class="math inline">\(2 \times 255/n = 0.0510\)</span>, so the Laplace mechanism adds noise of scale 0.0510 to each of the 6,560 cells. Its largest error, averaged over 20 runs, is 0.497, worse than the 0.232 of the uniform histogram, which uses no data. The Gaussian mechanism at <span class="math inline">\(\delta = 10^{-6}\)</span> has <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\sqrt{2 \times 255}/n = 0.00226\)</span>. With <span class="math inline">\(\mu = 0.2367\)</span> its noise has standard deviation 0.0095, and its average largest error is 0.037. Both use the structure of the marginals. Treated as 6,560 unrelated queries, the <span class="math inline">\(\ell_1\)</span> sensitivity would be <span class="math inline">\(|Q|/n = 0.656\)</span>, about 13 times larger.</p>
+</section>
+<section id="check-yourself" class="level3" data-number="23.3.6">
+<h3 data-number="23.3.6" class="anchored" data-anchor-id="check-yourself"><span class="header-section-number">23.3.6</span> Check yourself</h3>
+<ul>
+<li>Why does the <span class="math inline">\(\ell_2\)</span> sensitivity grow like <span class="math inline">\(\sqrt{|Q|}\)</span> while the <span class="math inline">\(\ell_1\)</span> sensitivity grows like <span class="math inline">\(|Q|\)</span>? <em>(Each of the <span class="math inline">\(|Q|\)</span> answers moves by up to <span class="math inline">\(1/n\)</span>. The <span class="math inline">\(\ell_1\)</span> norm adds the <span class="math inline">\(|Q|\)</span> moves, while the <span class="math inline">\(\ell_2\)</span> norm adds their squares, <span class="math inline">\(|Q|/n^2\)</span>, and takes a square root.)</em></li>
+<li>A colleague answers 6,560 marginal cells with Laplace noise of scale <span class="math inline">\(1/(n\varepsilon)\)</span> each, “because each cell has sensitivity <span class="math inline">\(1/n\)</span>”. What is the actual guarantee? <em>(Composing 6,560 steps of <span class="math inline">\(\varepsilon\)</span>-DP gives <span class="math inline">\(6560\varepsilon\)</span> by basic composition, or <span class="math inline">\(510\varepsilon\)</span> if you use the structure of the 255 tables, each with <span class="math inline">\(\ell_1\)</span> sensitivity <span class="math inline">\(2/n\)</span>. Each cell’s noise must instead be scaled to the sensitivity of the whole vector.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-qr-mw" class="level2" data-number="23.4">
+<h2 data-number="23.4" class="anchored" data-anchor-id="sec-qr-mw"><span class="header-section-number">23.4</span> Multiplicative weights and its regret bound</h2>
+<section id="context-1" class="level3" data-number="23.4.1">
+<h3 data-number="23.4.1" class="anchored" data-anchor-id="context-1"><span class="header-section-number">23.4.1</span> Context</h3>
+<p>Forget privacy for two sections. The method behind this chapter comes from a prediction game. Each day, <span class="math inline">\(N\)</span> <strong>experts</strong> make predictions, and you must decide whom to follow before you see the outcome. In the easiest version one expert is always right, and you do not know which. Then a simple rule works: follow the majority of the experts who have never been wrong, and drop every expert who errs. Whenever you are wrong, at least half of the remaining experts were wrong too, so at least half are dropped. The perfect expert is never dropped, so you can be wrong at most <span class="math inline">\(\log_2N\)</span> times. This is the <strong>halving algorithm</strong>. In 20 simulated runs with 1,024 random experts and one perfect one, over 200 days, it never made more than 6 mistakes, against the bound <span class="math inline">\(\log_2 1024 = 10\)</span>.</p>
+<p>Real experts are never perfect, and dropping an expert for one mistake is too harsh. <strong>Multiplicative weights</strong> keeps every expert but multiplies its weight by a factor below 1 each time it does badly. The question is how much worse this can be than the best expert in hindsight, a quantity called <strong>regret</strong>.</p>
+</section>
+<section id="statement-1" class="level3" data-number="23.4.2">
+<h3 data-number="23.4.2" class="anchored" data-anchor-id="statement-1"><span class="header-section-number">23.4.2</span> Statement</h3>
+<p>The game has <span class="math inline">\(T\)</span> rounds. In round <span class="math inline">\(t\)</span> the learner chooses a probability distribution <span class="math inline">\(p_t\)</span> over the <span class="math inline">\(N\)</span> experts. Then a <strong>loss vector</strong> <span class="math inline">\(\ell_t\)</span> is revealed, which gives each expert a loss between <span class="math inline">\(-1\)</span> and 1, and the learner pays the average loss under its distribution, <span class="math inline">\(\langle\ell_t, p_t\rangle\)</span>. The losses may be chosen by an adversary who knows the learner’s rule.</p>
+<p><strong>Multiplicative weights</strong> keeps a positive weight <span class="math inline">\(w_t(x)\)</span> on each expert <span class="math inline">\(x\)</span>, and every expert starts with weight 1. A step size <span class="math inline">\(\gamma\)</span>, at most <span class="math inline">\(\frac12\)</span>, sets how strongly one round’s loss changes a weight. In round <span class="math inline">\(t\)</span> the learner divides each weight by the total weight <span class="math inline">\(W_t = \sum_xw_t(x)\)</span> and plays the resulting distribution <span class="math inline">\(p_t(x) = w_t(x)/W_t\)</span>. After the losses are revealed, it updates each weight by <span id="eq-qr-mw"><span class="math display">\[w_{t+1}(x) = w_t(x)\big(1 - \gamma\ell_t(x)\big). \tag{23.6}\]</span></span> An expert with a positive loss loses weight, and one with a negative loss gains it.</p>
+<p>Compare the learner with any distribution <span class="math inline">\(\pi\)</span> over the experts, fixed in hindsight. Its <strong>regret</strong> against <span class="math inline">\(\pi\)</span> is the learner’s total loss minus the total loss of <span class="math inline">\(\pi\)</span>, and it satisfies <span id="eq-qr-regret"><span class="math display">\[\sum_{t=1}^T\langle\ell_t, p_t\rangle - \sum_{t=1}^T\langle\ell_t, \pi\rangle \le \gamma T + \frac{\ln N}{\gamma}. \tag{23.7}\]</span></span> A larger step size raises the first term and lowers the second, so the best step size makes them equal. That step size, and the regret it gives, are <span id="eq-auto-06queryrelease-1"><span class="math display">\[\gamma = \sqrt{\frac{\ln N}{T}}, \qquad \text{regret} \le 2\sqrt{T\ln N}. \tag{23.8}\]</span></span> Because <span class="math inline">\(\gamma\)</span> may be at most <span class="math inline">\(\frac12\)</span>, this choice needs <span class="math inline">\(T \ge 4\ln N\)</span>.</p>
+</section>
+<section id="derivation-1" class="level3" data-number="23.4.3">
+<h3 data-number="23.4.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">23.4.3</span> Derivation</h3>
+<p>The proof follows the total weight <span class="math inline">\(W_t\)</span>. It bounds <span class="math inline">\(\ln W_{T+1}\)</span> from above by the learner’s total loss and from below by any one expert’s total loss, and then compares the two bounds.</p>
+<ol type="1">
+<li><strong>The total weight shrinks with the learner’s loss.</strong> Summing <a href="#eq-qr-mw" class="quarto-xref">Equation&nbsp;<span>23.6</span></a> over the experts, <span class="math inline">\(W_{t+1} = \sum_xw_t(x) - \gamma\sum_xw_t(x)\ell_t(x)\)</span>. Dividing by <span class="math inline">\(W_t\)</span> turns the weights into <span class="math inline">\(p_t\)</span>, so <span class="math inline">\(W_{t+1} = W_t\big(1 - \gamma\langle\ell_t, p_t\rangle\big)\)</span>.</li>
+<li><strong>Upper bound.</strong> Start from <span class="math inline">\(W_1 = N\)</span> and take logarithms of the product of the factors in step 1. Each factor’s <span class="math inline">\(\gamma\langle\ell_t, p_t\rangle\)</span> is at most <span class="math inline">\(\frac12\)</span>, so the upper bound of Fact 2 applies: <span id="eq-auto-06queryrelease-2"><span class="math display">\[\ln W_{T+1} = \ln N + \sum_t\ln\big(1 - \gamma\langle\ell_t, p_t\rangle\big) \le \ln N - \gamma\sum_t\langle\ell_t, p_t\rangle. \tag{23.9}\]</span></span></li>
+<li><strong>Lower bound from one expert.</strong> The total weight is at least the weight of any single expert <span class="math inline">\(x\)</span>, and that weight is the product of its own factors. Each <span class="math inline">\(\gamma\ell_t(x)\)</span> lies in <span class="math inline">\([-\frac12, \frac12]\)</span>, so the lower bound of Fact 2 applies, and <span class="math inline">\(\ell_t(x)^2 \le 1\)</span>: <span id="eq-auto-06queryrelease-3"><span class="math display">\[\ln W_{T+1} \ge \ln w_{T+1}(x) = \sum_t\ln\big(1 - \gamma\ell_t(x)\big) \ge -\gamma\sum_t\ell_t(x) - \gamma^2T. \tag{23.10}\]</span></span></li>
+<li><strong>Compare.</strong> Putting steps 2 and 3 together and rearranging, <span class="math inline">\(\gamma\sum_t\langle\ell_t, p_t\rangle \le \ln N + \gamma\sum_t\ell_t(x) + \gamma^2T\)</span>. Dividing by <span class="math inline">\(\gamma\)</span> gives <a href="#eq-qr-regret" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> for the comparison with the single expert <span class="math inline">\(x\)</span>.</li>
+<li><strong>Any distribution.</strong> The inequality of step 4 holds for every expert <span class="math inline">\(x\)</span>, and its left side does not depend on <span class="math inline">\(x\)</span>. Multiply it by <span class="math inline">\(\pi(x)\)</span> and add over the experts. Since the <span class="math inline">\(\pi(x)\)</span> sum to 1, the left side and the constant terms are unchanged, and <span class="math inline">\(\sum_x\pi(x)\ell_t(x) = \langle\ell_t, \pi\rangle\)</span>. This is <a href="#eq-qr-regret" class="quarto-xref">Equation&nbsp;<span>23.7</span></a>.</li>
+<li><strong>Choose the step size.</strong> The bound <span class="math inline">\(\gamma T + \ln N/\gamma\)</span> is smallest where the two terms are equal, at <span class="math inline">\(\gamma = \sqrt{\ln N/T}\)</span>, and there it equals <span class="math inline">\(2\sqrt{T\ln N}\)</span>. Fact 2 needs <span class="math inline">\(\gamma \le \frac12\)</span>, that is <span class="math inline">\(T \ge 4\ln N\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-1" class="level3" data-number="23.4.4">
+<h3 data-number="23.4.4" class="anchored" data-anchor-id="interpretation-1"><span class="header-section-number">23.4.4</span> Interpretation</h3>
+<p>The regret grows like <span class="math inline">\(\sqrt T\)</span>, so the average regret per round, <span class="math inline">\(2\sqrt{\ln N/T}\)</span>, goes to zero. Over many rounds the learner does as well as the best fixed distribution, against any sequence of losses, without knowing in advance which distribution that is. The number of experts enters only through <span class="math inline">\(\ln N\)</span>, which is what makes the method useful with exponentially many experts. The weights also look familiar. Each factor <span class="math inline">\(1 - \gamma\ell\)</span> is close to <span class="math inline">\(e^{-\gamma\ell}\)</span> when <span class="math inline">\(\gamma\)</span> is small, so after <span class="math inline">\(t\)</span> rounds each weight is close to <span class="math inline">\(e^{-\gamma\sum_s\ell_s(x)}\)</span>, and the distribution is a softmax of minus the cumulative losses. That is the shape of the exponential mechanism, with cumulative loss in place of score. The version that uses the factor <span class="math inline">\(e^{-\gamma\ell}\)</span> exactly is called Hedge. Online learning also views Hedge as follow the regularized leader (FTRL). In each round that rule plays the distribution that minimizes the total loss so far plus a penalty, and for Hedge the penalty is the negative entropy of the distribution. <a href="../part05-dp-ml/04-matrix-mechanisms.html">DP-FTRL</a> uses the same view with a squared-norm penalty to train models privately.</p>
+<p>The bound guards against the worst sequence of losses, chosen by an adversary. The sequences met in practice are rarely that hostile, as the example of the next section shows.</p>
+</section>
+<section id="example-two-experts-by-hand" class="level3" data-number="23.4.5">
+<h3 data-number="23.4.5" class="anchored" data-anchor-id="example-two-experts-by-hand"><span class="header-section-number">23.4.5</span> Example: two experts by hand</h3>
+<p>Take <span class="math inline">\(N = 2\)</span> experts and <span class="math inline">\(\gamma = \frac12\)</span> over <span class="math inline">\(T = 3\)</span> rounds, with losses <span class="math inline">\(\ell_1 = (1, 0)\)</span>, <span class="math inline">\(\ell_2 = (0, 1)\)</span> and <span class="math inline">\(\ell_3 = (1, 0)\)</span>. <a href="#tbl-qr-mw-hand" class="quarto-xref">Table&nbsp;<span>23.3</span></a> follows the weights.</p>
+<div id="tbl-qr-mw-hand" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-qr-mw-hand-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.3: Multiplicative weights on two experts with step size 1/2.
+</figcaption>
+<div aria-describedby="tbl-qr-mw-hand-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Round <span class="math inline">\(t\)</span></th>
+<th>Weights <span class="math inline">\(w_t\)</span></th>
+<th>Distribution <span class="math inline">\(p_t\)</span></th>
+<th>Loss <span class="math inline">\(\ell_t\)</span></th>
+<th>Learner pays <span class="math inline">\(\langle\ell_t, p_t\rangle\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><span class="math inline">\((1, 1)\)</span></td>
+<td><span class="math inline">\((1/2, 1/2)\)</span></td>
+<td><span class="math inline">\((1, 0)\)</span></td>
+<td><span class="math inline">\(1/2\)</span></td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><span class="math inline">\((1/2, 1)\)</span></td>
+<td><span class="math inline">\((1/3, 2/3)\)</span></td>
+<td><span class="math inline">\((0, 1)\)</span></td>
+<td><span class="math inline">\(2/3\)</span></td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><span class="math inline">\((1/2, 1/2)\)</span></td>
+<td><span class="math inline">\((1/2, 1/2)\)</span></td>
+<td><span class="math inline">\((1, 0)\)</span></td>
+<td><span class="math inline">\(1/2\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The learner pays <span class="math inline">\(\frac12 + \frac23 + \frac12 = \frac53\)</span> in total. Expert 2 lost only 1, so the regret against it is <span class="math inline">\(\frac23\)</span>. The bound <a href="#eq-qr-regret" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> is <span class="math inline">\(\frac12 \times 3 + \ln 2/\frac12 = 1.5 + 1.386 = 2.886\)</span>.</p>
+</section>
+<section id="check-yourself-1" class="level3" data-number="23.4.6">
+<h3 data-number="23.4.6" class="anchored" data-anchor-id="check-yourself-1"><span class="header-section-number">23.4.6</span> Check yourself</h3>
+<ul>
+<li>Why may the losses be chosen by an adversary who knows the learner’s rule? <em>(Steps 1–5 hold for every sequence of losses in <span class="math inline">\([-1, 1]\)</span>. Nothing in them assumes the losses are random or independent of the weights.)</em></li>
+<li>What goes wrong in step 3 if a loss can be 3? <em>(Then <span class="math inline">\(\gamma\ell\)</span> can exceed <span class="math inline">\(\frac12\)</span>, and the lower bound of Fact 2 fails; with <span class="math inline">\(\gamma\ell \ge 1\)</span> a weight can even become zero or negative. Losses must be rescaled into <span class="math inline">\([-1, 1]\)</span> first.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-qr-mistakes" class="level2" data-number="23.5">
+<h2 data-number="23.5" class="anchored" data-anchor-id="sec-qr-mistakes"><span class="header-section-number">23.5</span> From regret to a mistake bound: learning a histogram</h2>
+<section id="context-2" class="level3" data-number="23.5.1">
+<h3 data-number="23.5.1" class="anchored" data-anchor-id="context-2"><span class="header-section-number">23.5.1</span> Context</h3>
+<p>Now turn the game into an algorithm for releasing answers, still without privacy. Let the experts be the elements of the universe, so that the learner’s distribution <span class="math inline">\(p_t\)</span> is a guessed histogram. Compare it with the true histogram <span class="math inline">\(p\)</span>, which is one particular distribution <span class="math inline">\(\pi\)</span> over the experts. Then choose the losses so that each round’s regret against <span class="math inline">\(p\)</span> is the error of the guess on one query. A regret bound becomes a bound on how many large errors the guess can make.</p>
+</section>
+<section id="statement-2" class="level3" data-number="23.5.2">
+<h3 data-number="23.5.2" class="anchored" data-anchor-id="statement-2"><span class="header-section-number">23.5.2</span> Statement</h3>
+<p>Run multiplicative weights over the universe, starting from the uniform histogram. In each round, look for a query <span class="math inline">\(q_t \in Q\)</span> on which the current guess has error more than <span class="math inline">\(\alpha\)</span>. If there is none, stop: the guess is within <span class="math inline">\(\alpha\)</span> on every query. Otherwise let <span class="math inline">\(s_t\)</span> be <span class="math inline">\(+1\)</span> if the guess’s answer is too high and <span class="math inline">\(-1\)</span> if it is too low, and use the loss <span class="math inline">\(\ell_t = s_tq_t\)</span>. With step size <span class="math inline">\(\gamma = \alpha/2\)</span>, the number <span class="math inline">\(U\)</span> of rounds before the algorithm stops satisfies <span id="eq-qr-mistakes"><span class="math display">\[U \le \frac{4\ln N}{\alpha^2}. \tag{23.11}\]</span></span> The bound does not depend on <span class="math inline">\(|Q|\)</span>.</p>
+</section>
+<section id="derivation-2" class="level3" data-number="23.5.3">
+<h3 data-number="23.5.3" class="anchored" data-anchor-id="derivation-2"><span class="header-section-number">23.5.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Each round’s regret is the error.</strong> By Fact 1, <span class="math inline">\(\langle\ell_t, p_t - p\rangle = s_t\big(\langle q_t, p_t\rangle - \langle q_t, p\rangle\big)\)</span>. The sign <span class="math inline">\(s_t\)</span> was chosen to make this the absolute value, so it equals the error of <span class="math inline">\(p_t\)</span> on <span class="math inline">\(q_t\)</span>, which is more than <span class="math inline">\(\alpha\)</span>.</li>
+<li><strong>Total regret is large.</strong> Adding over the <span class="math inline">\(U\)</span> rounds, the regret against <span class="math inline">\(p\)</span> is more than <span class="math inline">\(\alpha U\)</span>.</li>
+<li><strong>Total regret is small.</strong> The losses <span class="math inline">\(s_tq_t\)</span> lie in <span class="math inline">\([-1, 1]\)</span>, and <span class="math inline">\(\gamma = \alpha/2 \le \frac12\)</span>, so <a href="#eq-qr-regret" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> with <span class="math inline">\(\pi = p\)</span>, the true histogram, bounds the same regret by <span class="math inline">\(\gamma U + \ln N/\gamma = \alpha U/2 + 2\ln N/\alpha\)</span>.</li>
+<li><strong>Combine.</strong> The regret is more than <span class="math inline">\(\alpha U\)</span> by step 2 and at most <span class="math inline">\(\alpha U/2 + 2\ln N/\alpha\)</span> by step 3, so <span id="eq-auto-06queryrelease-4"><span class="math display">\[\alpha U &lt; \frac{\alpha U}{2} + \frac{2\ln N}{\alpha}. \tag{23.12}\]</span></span> Subtracting <span class="math inline">\(\alpha U/2\)</span> from both sides and dividing by <span class="math inline">\(\alpha/2\)</span> gives <span class="math inline">\(U &lt; 4\ln N/\alpha^2\)</span>, which is <a href="#eq-qr-mistakes" class="quarto-xref">Equation&nbsp;<span>23.11</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-2" class="level3" data-number="23.5.4">
+<h3 data-number="23.5.4" class="anchored" data-anchor-id="interpretation-2"><span class="header-section-number">23.5.4</span> Interpretation</h3>
+<p>The update moves the guess toward the truth on the query it got wrong. If the guess’s answer is too high, the loss is <span class="math inline">\(+q_t\)</span>, and the weights of the records that the query counts shrink, which lowers the answer. Why should a few such corrections fix every query at once? The regret bound gives the reason. Roughly, each correction moves the guess closer to the true histogram, as measured by the relative entropy between the two, and that distance starts at no more than <span class="math inline">\(\ln N\)</span>. The number of queries never enters, because the algorithm never looks at the queries it gets right.</p>
+<p>The algorithm plays the adversary of the prediction game against itself. Easy queries would teach the guess nothing, so it always picks one that is badly wrong. That choice, and the sign, are the only two places where it touches the data. Both depend on the data only through answers to queries, each of sensitivity <span class="math inline">\(1/n\)</span>, which is what makes the algorithm easy to privatize.</p>
+<p>The bound is very loose. It assumes that each correction only just clears <span class="math inline">\(\alpha\)</span> and that the regret is as large as <a href="#eq-qr-regret" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> allows. In practice the first corrections fix errors several times larger than <span class="math inline">\(\alpha\)</span>, and they fix many queries at once.</p>
+<div id="fig-qr-mw" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-qr-mw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/qr_mw.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-qr-mw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.1: Non-private multiplicative weights on the running example with <span class="math inline">\(\alpha = 0.05\)</span> and step size <span class="math inline">\(\gamma = \alpha/2\)</span>. Left: the largest error over all 6,560 queries before each update, until it falls below <span class="math inline">\(\alpha\)</span>. Right: the regret against the true histogram, which must exceed <span class="math inline">\(\alpha\)</span> times the number of updates, and its bound <span class="math inline">\(\gamma t + \ln N/\gamma\)</span>.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-running-example-1" class="level3" data-number="23.5.5">
+<h3 data-number="23.5.5" class="anchored" data-anchor-id="example-the-running-example-1"><span class="header-section-number">23.5.5</span> Example: the running example</h3>
+<p>With <span class="math inline">\(\alpha = 0.05\)</span> the bound <a href="#eq-qr-mistakes" class="quarto-xref">Equation&nbsp;<span>23.11</span></a> allows <span class="math inline">\(4\ln 256/0.05^2 = 8872\)</span> corrections. The algorithm needs 148 (<a href="#fig-qr-mw" class="quarto-xref">Figure&nbsp;<span>23.1</span></a>). The first three queries it corrects have errors 0.232, 0.228 and 0.226, more than four times <span class="math inline">\(\alpha\)</span>. After 148 rounds the regret is 16.70, against a bound of 225.5.</p>
+</section>
+<section id="check-yourself-2" class="level3" data-number="23.5.6">
+<h3 data-number="23.5.6" class="anchored" data-anchor-id="check-yourself-2"><span class="header-section-number">23.5.6</span> Check yourself</h3>
+<ul>
+<li>If the universe doubles from 256 to 512 elements, how does the bound on corrections change? <em>(It grows from <span class="math inline">\(4\ln 256/\alpha^2\)</span> to <span class="math inline">\(4\ln 512/\alpha^2\)</span>, by the factor <span class="math inline">\(\ln 512/\ln 256 = 9/8\)</span>. A doubling of the universe adds only <span class="math inline">\(4\ln 2/\alpha^2\)</span> corrections.)</em></li>
+<li>Why does the derivation compare with the true histogram <span class="math inline">\(p\)</span> rather than with the best single expert? <em>(The regret bound holds for every distribution <span class="math inline">\(\pi\)</span> over the experts, and <span class="math inline">\(p\)</span> is a distribution over the universe. Its loss <span class="math inline">\(\langle\ell_t, p\rangle\)</span> is exactly the true answer times <span class="math inline">\(s_t\)</span>, which is what turns regret into error.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-qr-pmw" class="level2" data-number="23.6">
+<h2 data-number="23.6" class="anchored" data-anchor-id="sec-qr-pmw"><span class="header-section-number">23.6</span> Private multiplicative weights</h2>
+<section id="context-3" class="level3" data-number="23.6.1">
+<h3 data-number="23.6.1" class="anchored" data-anchor-id="context-3"><span class="header-section-number">23.6.1</span> Context</h3>
+<p>The algorithm of the previous section touches the data in two places: it finds a query with a large error, and it finds the sign of that error. Make both private and nothing else changes. The exponential mechanism picks a query whose error is close to the largest, and the Laplace mechanism measures the chosen query’s answer, which gives the sign. The private selection can miss and the measurement can be off, so the algorithm cannot tell for sure when to stop. Instead it runs a fixed number of rounds <span class="math inline">\(T\)</span>, chosen in advance, and releases the average of its guesses, which is what the analysis can bound (step 5 of the derivation). This is the structure of the <strong>multiplicative weights exponential mechanism (MWEM)</strong> of Hardt, Ligett &amp; McSherry (2012), the practical form of the private multiplicative weights mechanism of Hardt &amp; Rothblum (2010).</p>
+</section>
+<section id="statement-3" class="level3" data-number="23.6.2">
+<h3 data-number="23.6.2" class="anchored" data-anchor-id="statement-3"><span class="header-section-number">23.6.2</span> Statement</h3>
+<p><strong>Private multiplicative weights (offline).</strong> Input: the dataset <span class="math inline">\(D\)</span>, the queries <span class="math inline">\(Q\)</span>, a number of rounds <span class="math inline">\(T \ge 4\ln N\)</span> and a per-step budget <span class="math inline">\(\varepsilon_0\)</span>. Start from the uniform histogram <span class="math inline">\(p_1\)</span> and set <span class="math inline">\(\gamma = \sqrt{\ln N/T}\)</span>. For <span class="math inline">\(t = 1, \dots, T\)</span>:</p>
+<ol type="1">
+<li><strong>Select.</strong> Run the exponential mechanism over <span class="math inline">\(Q\)</span> with budget <span class="math inline">\(\varepsilon_0\)</span> and score <span class="math inline">\(|\langle q, p_t\rangle - q(D)|\)</span>, the error of the current guess, which has sensitivity <span class="math inline">\(1/n\)</span>. Call the chosen query <span class="math inline">\(q_t\)</span>.</li>
+<li><strong>Measure.</strong> Release <span class="math inline">\(m_t = q_t(D) + \mathrm{Lap}\big(1/(n\varepsilon_0)\big)\)</span>.</li>
+<li><strong>Update.</strong> Let <span class="math inline">\(s_t = +1\)</span> if <span class="math inline">\(\langle q_t, p_t\rangle &gt; m_t\)</span> and <span class="math inline">\(-1\)</span> otherwise, and apply <a href="#eq-qr-mw" class="quarto-xref">Equation&nbsp;<span>23.6</span></a> with the loss <span class="math inline">\(s_tq_t\)</span> to get <span class="math inline">\(p_{t+1}\)</span>.</li>
+</ol>
+<p>Output the average histogram <span class="math inline">\(\bar p = \frac1T\sum_{t=1}^Tp_t\)</span>.</p>
+<p><strong>Privacy.</strong> The algorithm is <span class="math inline">\(2T\varepsilon_0\)</span>-DP by basic composition. So <span class="math inline">\(\varepsilon_0 = \varepsilon/(2T)\)</span> gives <span class="math inline">\(\varepsilon\)</span>-DP, and <span class="math inline">\(\varepsilon_0\)</span> from <a href="#eq-qr-step-eps" class="quarto-xref">Equation&nbsp;<span>23.3</span></a> with <span class="math inline">\(k = 2T\)</span> steps gives <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</p>
+<p><strong>Accuracy.</strong> With probability at least <span class="math inline">\(1 - \beta\)</span>, the largest error of the average histogram over the queries in <span class="math inline">\(Q\)</span> is at most <span id="eq-qr-pmw"><span class="math display">\[\max_{q \in Q}\big|\langle q, \bar p\rangle - q(D)\big| \le 2\sqrt{\frac{\ln N}{T}} + \frac{2}{n\varepsilon_0}\Big(\ln|Q| + 2\ln\frac{2T}\beta\Big). \tag{23.13}\]</span></span> The first term falls with more rounds. The second grows with them, because each round gets less budget. Choosing <span class="math inline">\(T\)</span> to balance them gives two sample sizes, both written with <span class="math inline">\(L = \ln|Q| + 2\ln(2T/\beta)\)</span>, which depends on <span class="math inline">\(T\)</span> only through a logarithm. With <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, error <span class="math inline">\(\alpha\)</span> is guaranteed once <span id="eq-qr-pmw-n"><span class="math display">\[n \ge \frac{64\sqrt{\ln N\,\ln(1/\delta)}\,L}{\alpha^2\varepsilon}. \tag{23.14}\]</span></span> With <span class="math inline">\(\varepsilon\)</span>-DP it is guaranteed once <span id="eq-auto-06queryrelease-5"><span class="math display">\[n \ge \frac{108\,L\ln N}{\alpha^3\varepsilon}. \tag{23.15}\]</span></span></p>
+</section>
+<section id="derivation-3" class="level3" data-number="23.6.3">
+<h3 data-number="23.6.3" class="anchored" data-anchor-id="derivation-3"><span class="header-section-number">23.6.3</span> Derivation</h3>
+<p>The proof runs the regret argument of the previous section on the event where the two private steps work as intended in every round.</p>
+<ol type="1">
+<li><strong>Privacy.</strong> In round <span class="math inline">\(t\)</span>, the guess <span class="math inline">\(p_t\)</span> depends only on earlier outputs, so given the history it is a fixed histogram. Then the score <span class="math inline">\(|\langle q, p_t\rangle - q(D)|\)</span> moves by at most <span class="math inline">\(1/n\)</span> between neighbours, and the selection is <span class="math inline">\(\varepsilon_0\)</span>-DP. The measurement is a Laplace mechanism on an answer of sensitivity <span class="math inline">\(1/n\)</span>, so it is <span class="math inline">\(\varepsilon_0\)</span>-DP too. The update and the average use only released outputs, so they are post-processing. The <span class="math inline">\(2T\)</span> steps are chosen adaptively, which the composition theorems allow (<a href="../part03-dp-foundations/04-composition.html#sec-comp-adaptive">Advanced and optimal composition</a>).</li>
+<li><strong>The good event.</strong> Write <span class="math inline">\(\mathrm{err}_t(q) = |\langle q, p_t\rangle - q(D)|\)</span> for the error of round <span class="math inline">\(t\)</span>’s guess on query <span class="math inline">\(q\)</span>. Give each of the <span class="math inline">\(2T\)</span> private steps the failure probability <span class="math inline">\(\beta' = \beta/(2T)\)</span> of Fact 3. The exponential mechanism’s utility bound, with <span class="math inline">\(|Q|\)</span> candidates and sensitivity <span class="math inline">\(1/n\)</span>, then says that the selection picks a query whose error is within <span id="eq-auto-06queryrelease-6"><span class="math display">\[c_E = \frac{2}{n\varepsilon_0}\Big(\ln|Q| + \ln\frac{2T}\beta\Big) \tag{23.16}\]</span></span> of the largest, except with probability <span class="math inline">\(\beta/(2T)\)</span>. The Laplace tail says that the measurement’s noise is below <span id="eq-auto-06queryrelease-7"><span class="math display">\[c_L = \frac{1}{n\varepsilon_0}\ln\frac{2T}\beta, \tag{23.17}\]</span></span> also except with probability <span class="math inline">\(\beta/(2T)\)</span>. A union bound over the <span class="math inline">\(2T\)</span> steps makes all of this hold at once except with probability <span class="math inline">\(\beta\)</span>.</li>
+<li><strong>Each round’s loss is nearly the largest error.</strong> If the sign <span class="math inline">\(s_t\)</span> is right, then <span class="math inline">\(\langle s_tq_t, p_t - p\rangle = \mathrm{err}_t(q_t)\)</span>, as in the previous section. If it is wrong, the measured and true answers lie on different sides of the guess’s answer, so the true error is at most the noise, <span class="math inline">\(\mathrm{err}_t(q_t) \le c_L\)</span>. Then the loss is <span class="math inline">\(-\mathrm{err}_t(q_t)\)</span>. Because <span class="math inline">\(\mathrm{err}_t(q_t) \le c_L\)</span>, the loss falls short of <span class="math inline">\(\mathrm{err}_t(q_t)\)</span> by at most <span class="math inline">\(2c_L\)</span>, so it is still at least <span class="math inline">\(\mathrm{err}_t(q_t) - 2c_L\)</span>. Either way, by step 2, <span id="eq-auto-06queryrelease-8"><span class="math display">\[\langle s_tq_t, p_t - p\rangle \ge \mathrm{err}_t(q_t) - 2c_L \ge \max_q\mathrm{err}_t(q) - c_E - 2c_L. \tag{23.18}\]</span></span></li>
+<li><strong>Sum and use the regret bound.</strong> Adding over the <span class="math inline">\(T\)</span> rounds, the regret against the true histogram is at least <span class="math inline">\(\sum_t\max_q\mathrm{err}_t(q) - T(c_E + 2c_L)\)</span>. By <a href="#eq-qr-regret" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> with <span class="math inline">\(\gamma = \sqrt{\ln N/T}\)</span> it is at most <span class="math inline">\(2\sqrt{T\ln N}\)</span>. Dividing by <span class="math inline">\(T\)</span>, <span id="eq-auto-06queryrelease-9"><span class="math display">\[\frac1T\sum_{t=1}^T\max_q\mathrm{err}_t(q) \le 2\sqrt{\frac{\ln N}{T}} + c_E + 2c_L. \tag{23.19}\]</span></span></li>
+<li><strong>The average histogram.</strong> For any query <span class="math inline">\(q\)</span>, by Fact 1, <span class="math inline">\(\langle q, \bar p\rangle - q(D) = \frac1T\sum_t\langle q, p_t - p\rangle\)</span>. Its absolute value is at most <span class="math inline">\(\frac1T\sum_t\mathrm{err}_t(q)\)</span>, which is at most the left side of step 4. Finally <span class="math inline">\(c_E + 2c_L = \frac{2}{n\varepsilon_0}\big(\ln|Q| + 2\ln\frac{2T}\beta\big)\)</span>, which gives <a href="#eq-qr-pmw" class="quarto-xref">Equation&nbsp;<span>23.13</span></a>.</li>
+<li><strong>Sample size, approximate DP.</strong> Take the per-step budget of <a href="#eq-qr-step-eps" class="quarto-xref">Equation&nbsp;<span>23.3</span></a> with <span class="math inline">\(k = 2T\)</span> steps, <span class="math inline">\(\varepsilon_0 = \varepsilon/(4\sqrt{T\ln(1/\delta)})\)</span>. With it, the bound <a href="#eq-qr-pmw" class="quarto-xref">Equation&nbsp;<span>23.13</span></a> has the shape <span class="math inline">\(A/\sqrt T + B\sqrt T\)</span>. The first term comes from the regret, with <span class="math inline">\(A = 2\sqrt{\ln N}\)</span>, and the second from the noise, with <span class="math inline">\(B = 8\sqrt{\ln(1/\delta)}\,L/(n\varepsilon)\)</span>. A sum of this shape is smallest where its two terms are equal, at <span class="math inline">\(T = A/B\)</span>, and there it equals <span id="eq-auto-06queryrelease-10"><span class="math display">\[2\sqrt{AB} = 8\big(\ln N\ln(1/\delta)\big)^{1/4}\sqrt{\frac{L}{n\varepsilon}}. \tag{23.20}\]</span></span> Setting this to <span class="math inline">\(\alpha\)</span> and solving for <span class="math inline">\(n\)</span> gives <a href="#eq-qr-pmw-n" class="quarto-xref">Equation&nbsp;<span>23.14</span></a>. The term <span class="math inline">\(L\)</span> depends on <span class="math inline">\(T\)</span> too, but only through a logarithm, so the chapter’s script finds the best <span class="math inline">\(T\)</span> by searching over it.</li>
+<li><strong>Sample size, pure DP.</strong> With <span class="math inline">\(\varepsilon_0 = \varepsilon/(2T)\)</span>, the second term of <a href="#eq-qr-pmw" class="quarto-xref">Equation&nbsp;<span>23.13</span></a> grows linearly, as <span class="math inline">\(CT\)</span> with <span class="math inline">\(C = 4L/(n\varepsilon)\)</span>, while the first is still <span class="math inline">\(A/\sqrt T\)</span>. Their sum is smallest where its derivative <span class="math inline">\(-A/(2T^{3/2}) + C\)</span> is zero, at <span class="math inline">\(T = (A/(2C))^{2/3}\)</span>. At that <span class="math inline">\(T\)</span> the second term is half the first, so the sum is <span class="math inline">\(3CT\)</span>, which works out to <span class="math inline">\(3(4L\ln N/(n\varepsilon))^{1/3}\)</span>. Setting this to <span class="math inline">\(\alpha\)</span> and solving gives the pure-DP sample size.</li>
+</ol>
+</section>
+<section id="interpretation-3" class="level3" data-number="23.6.4">
+<h3 data-number="23.6.4" class="anchored" data-anchor-id="interpretation-3"><span class="header-section-number">23.6.4</span> Interpretation</h3>
+<p><strong>Logarithms where the baseline had powers.</strong> The number of queries enters <a href="#eq-qr-pmw-n" class="quarto-xref">Equation&nbsp;<span>23.14</span></a> only through <span class="math inline">\(L\)</span>, which grows like <span class="math inline">\(\ln|Q|\)</span>, and the universe only through <span class="math inline">\(\sqrt{\ln N}\)</span>, where the baseline paid <span class="math inline">\(|Q|\)</span> or <span class="math inline">\(\sqrt{|Q|}\)</span>. The price is in the accuracy. At a fixed <span class="math inline">\(n\)</span> the error of private multiplicative weights falls like <span class="math inline">\(n^{-1/2}\)</span> under approximate DP and like <span class="math inline">\(n^{-1/3}\)</span> under pure DP, while the error of independent noise falls like <span class="math inline">\(1/n\)</span> for a fixed set of queries. So private multiplicative weights wins only when the queries are many compared with the records. Its guaranteed error never goes below about <span class="math inline">\(1/\sqrt n\)</span>, and that is no accident: below that scale, the reconstruction attack would recover the data from answers to many queries.</p>
+<p><strong>How close to the best possible.</strong> The <span class="math inline">\(\ln N\)</span> cannot be avoided under pure DP: the packing argument of <a href="../part03-dp-foundations/10-lower-bounds.html#sec-lower-sample">Lower bounds</a>, a later chapter of this part, shows that releasing a histogram over <span class="math inline">\(N\)</span> cells to error <span class="math inline">\(\alpha\)</span> needs about <span class="math inline">\(\ln N/(2\alpha\varepsilon)\)</span> records. Under approximate DP, Bun, Ullman &amp; Vadhan (2014) used the fingerprinting argument of the same chapter to show that, for some families of queries, no algorithm needs substantially fewer records than private multiplicative weights.</p>
+<p><strong>The running time is proportional to <span class="math inline">\(N\)</span>.</strong> Each round updates a weight for every element of the universe. With 8 attributes that is 256 weights, but with 50 it is <span class="math inline">\(2^{50}\)</span>, which is out of reach. Some cost of this kind is unavoidable in general. Ullman &amp; Vadhan (2011) showed that, under standard cryptographic assumptions, no efficient algorithm can produce private synthetic data that is accurate for every two-way marginal. Their proof uses probabilistically checkable proof (PCP) techniques from complexity theory. Practical synthetic-data methods keep the select–measure–update loop but replace the full histogram with a compact model, and the Laplace measurement with Gaussian measurements of whole marginal tables (McKenna, Mullins, Sheldon &amp; Miklau 2022).</p>
+<p><strong>The constants are poor.</strong> On the running example the bound <a href="#eq-qr-pmw" class="quarto-xref">Equation&nbsp;<span>23.13</span></a> is above 1, which says nothing about errors that cannot exceed 1. The real error is much smaller, as the example shows. The bound assumes that the selection misses by its worst amount and that every correction only just clears the error it fixes.</p>
+<div id="fig-qr-error-vs-n" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-qr-error-vs-n-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/qr_error_vs_n.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-qr-error-vs-n-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.2: Largest error over the 6,560 marginal queries of the running example, as the number of records grows, averaged over 10 runs: Laplace and Gaussian noise on every answer, using the marginals’ structure, and private multiplicative weights with pure DP and the number of rounds that minimizes its bound. The dotted line is the uniform histogram, which uses no data.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-the-running-example-and-the-scale-of-the-bound" class="level3" data-number="23.6.5">
+<h3 data-number="23.6.5" class="anchored" data-anchor-id="example-the-running-example-and-the-scale-of-the-bound"><span class="header-section-number">23.6.5</span> Example: the running example, and the scale of the bound</h3>
+<p>With <span class="math inline">\(n = 10{,}000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span> and pure DP, the number of rounds that minimizes <a href="#eq-qr-pmw" class="quarto-xref">Equation&nbsp;<span>23.13</span></a> is <span class="math inline">\(T = 38\)</span>, so each step gets <span class="math inline">\(\varepsilon_0 = 1/76 = 0.0132\)</span>. <a href="#tbl-qr-pmw" class="quarto-xref">Table&nbsp;<span>23.4</span></a> compares three choices of <span class="math inline">\(T\)</span>, averaged over 20 runs.</p>
+<div id="tbl-qr-pmw" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-qr-pmw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.4: Private multiplicative weights on the running example, <span class="math inline">\(n = 10{,}000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>.
+</figcaption>
+<div aria-describedby="tbl-qr-pmw-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Rounds <span class="math inline">\(T\)</span></th>
+<th>Budget per step <span class="math inline">\(\varepsilon_0\)</span></th>
+<th>Largest error</th>
+<th>Bound <a href="#eq-qr-pmw" class="quarto-xref">Equation&nbsp;<span>23.13</span></a></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>0.0500</td>
+<td>0.098</td>
+<td>1.572</td>
+</tr>
+<tr class="even">
+<td>38</td>
+<td>0.0132</td>
+<td>0.078</td>
+<td>1.120</td>
+</tr>
+<tr class="odd">
+<td>100</td>
+<td>0.0050</td>
+<td>0.123</td>
+<td>1.486</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The bound picks a good <span class="math inline">\(T\)</span>, although its values are useless as numbers. With 38 rounds the largest error is 0.078, against 0.497 for Laplace noise on every cell and 0.037 for Gaussian noise. So on this example the Gaussian mechanism wins. <a href="#fig-qr-error-vs-n" class="quarto-xref">Figure&nbsp;<span>23.2</span></a> shows the trend over <span class="math inline">\(n\)</span>. Private multiplicative weights beats Laplace noise throughout, but it beats Gaussian noise only below a few thousand records: 6,560 queries are not many enough.</p>
+<p>With <span class="math inline">\(\delta &gt; 0\)</span>, advanced composition gives each step more budget once <span class="math inline">\(T\)</span> is large. At <span class="math inline">\(T = 100\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, pure DP gives each step <span class="math inline">\(\varepsilon_0 = 0.00500\)</span>. The closed form <a href="#eq-qr-step-eps" class="quarto-xref">Equation&nbsp;<span>23.3</span></a> gives 0.00673, although in total it spends only <span class="math inline">\(0.505\varepsilon\)</span> of the budget. The largest <span class="math inline">\(\varepsilon_0\)</span> that advanced composition allows is 0.01322. At <span class="math inline">\(T = 1000\)</span> the same three budgets, in the same order, are 0.00050, 0.00213 and 0.00418.</p>
+<p>The guarantees separate only at a much larger scale. <a href="#tbl-qr-records" class="quarto-xref">Table&nbsp;<span>23.5</span></a> gives the records each method needs for error 0.05 on every query, with probability 0.95. The setting is <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-6}\)</span>, a universe of <span class="math inline">\(N = 2^{20}\)</span> records, and queries with no structure. The Laplace and SmallDB columns are pure DP, and the Gaussian and private multiplicative weights columns are <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. For private multiplicative weights the table solves <a href="#eq-qr-pmw" class="quarto-xref">Equation&nbsp;<span>23.13</span></a> for <span class="math inline">\(n\)</span>, after a search for the <span class="math inline">\(T\)</span> that makes <span class="math inline">\(n\)</span> smallest. At <span class="math inline">\(10^6\)</span> queries the search finds <span class="math inline">\(T = 81{,}552\)</span> and <span class="math inline">\(L = 43.81\)</span>, and it needs <span class="math inline">\(1.56\times10^7\)</span> records. The closed form <a href="#eq-qr-pmw-n" class="quarto-xref">Equation&nbsp;<span>23.14</span></a> gives almost the same, <span class="math inline">\(1.55\times10^7\)</span>.</p>
+<div id="tbl-qr-records" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-qr-records-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.5: Records needed for error 0.05 on every query with probability 0.95, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-6}\)</span>, <span class="math inline">\(N = 2^{20}\)</span>.
+</figcaption>
+<div aria-describedby="tbl-qr-records-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Queries <span class="math inline">\(\lvert Q\rvert\)</span></th>
+<th>Laplace</th>
+<th>Gaussian</th>
+<th>Private multiplicative weights (bound)</th>
+<th>SmallDB (bound)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(10^3\)</span></td>
+<td><span class="math inline">\(1.98\times10^5\)</span></td>
+<td><span class="math inline">\(1.08\times10^4\)</span></td>
+<td><span class="math inline">\(1.31\times10^7\)</span></td>
+<td><span class="math inline">\(6.74\times10^6\)</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(10^6\)</span></td>
+<td><span class="math inline">\(3.36\times10^8\)</span></td>
+<td><span class="math inline">\(4.61\times10^5\)</span></td>
+<td><span class="math inline">\(1.56\times10^7\)</span></td>
+<td><span class="math inline">\(1.29\times10^7\)</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(10^9\)</span></td>
+<td><span class="math inline">\(4.74\times10^{11}\)</span></td>
+<td><span class="math inline">\(1.76\times10^7\)</span></td>
+<td><span class="math inline">\(1.81\times10^7\)</span></td>
+<td><span class="math inline">\(1.90\times10^7\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The bounds for private multiplicative weights hardly move as the number of queries grows a millionfold, while the Laplace column grows a millionfold and the Gaussian column a thousandfold. The private multiplicative weights and Gaussian columns cross near <span class="math inline">\(10^9\)</span> queries (<a href="#fig-qr-sample-complexity" class="quarto-xref">Figure&nbsp;<span>23.3</span></a>).</p>
+<div id="fig-qr-sample-complexity" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-qr-sample-complexity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/qr_sample_complexity.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-qr-sample-complexity-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;23.3: Records needed for error 0.05 on every query, with probability 0.95, at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span> over a universe of <span class="math inline">\(2^{20}\)</span> records, as the number of queries grows: Laplace and Gaussian noise on every answer, and the bounds of private multiplicative weights and SmallDB. Log–log axes.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="check-yourself-3" class="level3" data-number="23.6.6">
+<h3 data-number="23.6.6" class="anchored" data-anchor-id="check-yourself-3"><span class="header-section-number">23.6.6</span> Check yourself</h3>
+<ul>
+<li>Why does the algorithm release the average of its guesses rather than the last one? <em>(The regret bound controls the sum over rounds of the largest errors, so it controls the average guess, through step 5. It says nothing about any single round, and the last guess can be worse than the average.)</em></li>
+<li>Why can step 2 not reuse the selection’s work, the exact error the exponential mechanism used as the chosen query’s score? <em>(The exponential mechanism releases only the index of the query. Its scores are exact, never noised and never released, so using one would use the data without paying for it. The measurement must be a fresh Laplace answer, with its own budget.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-qr-online" class="level2" data-number="23.7">
+<h2 data-number="23.7" class="anchored" data-anchor-id="sec-qr-online"><span class="header-section-number">23.7</span> Online private multiplicative weights</h2>
+<section id="context-4" class="level3" data-number="23.7.1">
+<h3 data-number="23.7.1" class="anchored" data-anchor-id="context-4"><span class="header-section-number">23.7.1</span> Context</h3>
+<p>The offline algorithm needs the whole set of queries in advance, because the exponential mechanism chooses among them. An interactive query server instead receives queries one at a time, and an analyst may choose each query after seeing the answers to the earlier ones. The sparse vector technique of <a href="../part03-dp-foundations/05-selection.html#sec-sel-svt">Selection</a> is made for this. Recall its basic form, AboveThreshold. It compares each incoming query’s noisy value with one noisy threshold and answers <span class="math inline">\(\bot\)</span> (“below”) or <span class="math inline">\(\top\)</span> (“above”). It halts at the first <span class="math inline">\(\top\)</span>, and the <span class="math inline">\(\bot\)</span> answers before it cost nothing. Its comparisons can be wrong only for queries close to the threshold. With probability <span class="math inline">\(1 - \beta\)</span>, every query it calls <span class="math inline">\(\bot\)</span> lies below the threshold plus a <strong>margin</strong>, and every query it calls <span class="math inline">\(\top\)</span> lies above the threshold minus that margin. For <span class="math inline">\(k\)</span> queries of sensitivity <span class="math inline">\(\Delta\)</span> at budget <span class="math inline">\(\varepsilon\)</span> the margin is <span class="math inline">\(8\Delta(\ln k + \ln(2/\beta))/\varepsilon\)</span> (<a href="05-selection.html#eq-sel-svt-alpha" class="quarto-xref">Equation&nbsp;<span>22.18</span></a>). The variant Sparse restarts it after each <span class="math inline">\(\top\)</span>, up to a fixed number of <span class="math inline">\(\top\)</span> answers.</p>
+<p>Here the query asks whether the current guess’s error is above a threshold. Queries the guess already answers well are answered from the guess, for free. Only the queries that it gets wrong cost privacy, and the mistake bound says there are few of them. This is the original form of private multiplicative weights, due to Hardt &amp; Rothblum (2010).</p>
+</section>
+<section id="statement-4" class="level3" data-number="23.7.2">
+<h3 data-number="23.7.2" class="anchored" data-anchor-id="statement-4"><span class="header-section-number">23.7.2</span> Statement</h3>
+<p><strong>Online private multiplicative weights.</strong> Input: the dataset, a target error <span class="math inline">\(\alpha\)</span>, privacy parameters <span class="math inline">\((\varepsilon, \delta)\)</span>, and a stream of at most <span class="math inline">\(k\)</span> queries, with <span class="math inline">\(k\)</span> fixed in advance. Set the budget of updates to <span class="math inline">\(c = \lceil16\ln N/\alpha^2\rceil\)</span>, the step size to <span class="math inline">\(\gamma = \alpha/4\)</span>, and the guess <span class="math inline">\(\hat p\)</span> to the uniform histogram. Give each of the at most <span class="math inline">\(c\)</span> runs of AboveThreshold inside Sparse, and each of the at most <span class="math inline">\(c\)</span> measurements, the budget <span class="math inline">\(\varepsilon_0\)</span> of <a href="#eq-qr-step-eps" class="quarto-xref">Equation&nbsp;<span>23.3</span></a> with <span class="math inline">\(2c\)</span> steps. For each incoming query <span class="math inline">\(f_i\)</span>, the score is the current guess’s error on it, <span class="math inline">\(g_i = |\langle f_i, \hat p\rangle - f_i(D)|\)</span>, which has sensitivity <span class="math inline">\(1/n\)</span>. Run Sparse on these scores with threshold <span class="math inline">\(3\alpha/4\)</span>, allowing up to <span class="math inline">\(c\)</span> answers <span class="math inline">\(\top\)</span>, and act on its answer:</p>
+<ul>
+<li>If Sparse answers <span class="math inline">\(\bot\)</span>, answer <span class="math inline">\(\langle f_i, \hat p\rangle\)</span> from the guess.</li>
+<li>If it answers <span class="math inline">\(\top\)</span>, measure <span class="math inline">\(m_i = f_i(D) + \mathrm{Lap}(1/(n\varepsilon_0))\)</span>, answer <span class="math inline">\(m_i\)</span>, and update <span class="math inline">\(\hat p\)</span> by <a href="#eq-qr-mw" class="quarto-xref">Equation&nbsp;<span>23.6</span></a> with the loss <span class="math inline">\(s_if_i\)</span>, where <span class="math inline">\(s_i\)</span> is the sign of <span class="math inline">\(\langle f_i, \hat p\rangle - m_i\)</span>.</li>
+<li>After the <span class="math inline">\(c\)</span>-th <span class="math inline">\(\top\)</span>, halt.</li>
+</ul>
+<p>With these budgets the algorithm is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</p>
+<p>Accuracy needs enough records to keep the noise small. Suppose that, with probability at least <span class="math inline">\(1 - \beta\)</span>, every AboveThreshold run has margin at most <span class="math inline">\(\alpha/4\)</span> and every measurement has noise at most <span class="math inline">\(\alpha/4\)</span>. On that event every answer is within <span class="math inline">\(\alpha\)</span> of the truth. The algorithm also never uses up its <span class="math inline">\(c\)</span> answers <span class="math inline">\(\top\)</span>, so it answers the whole stream. By <a href="05-selection.html#eq-sel-svt-alpha" class="quarto-xref">Equation&nbsp;<span>22.18</span></a> with failure probability <span class="math inline">\(\beta/(2c)\)</span> per run, and the Laplace tail of Fact 3, this needs <span id="eq-qr-online-n"><span class="math display">\[n \ge \frac{32\big(\ln k + \ln(4c/\beta)\big)}{\alpha\varepsilon_0}, \qquad \varepsilon_0 = \frac{\varepsilon}{2\sqrt{4c\ln(1/\delta)}}. \tag{23.21}\]</span></span> Because <span class="math inline">\(\sqrt c\)</span> is about <span class="math inline">\(4\sqrt{\ln N}/\alpha\)</span>, the per-step budget <span class="math inline">\(\varepsilon_0\)</span> shrinks like <span class="math inline">\(\alpha\varepsilon/\sqrt{\ln N\ln(1/\delta)}\)</span>, up to constants. The records needed therefore grow like <span class="math inline">\(\sqrt{\ln N\ln(1/\delta)}/(\alpha^2\varepsilon)\)</span> times a logarithm, as in the offline algorithm, but the logarithm is now of the stream length <span class="math inline">\(k\)</span> instead of <span class="math inline">\(|Q|\)</span>.</p>
+</section>
+<section id="derivation-4" class="level3" data-number="23.7.3">
+<h3 data-number="23.7.3" class="anchored" data-anchor-id="derivation-4"><span class="header-section-number">23.7.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>Sensitivity.</strong> Between two updates the guess <span class="math inline">\(\hat p\)</span> is fixed, because it changes only after a measurement, which is a released output. Given the history, each score <span class="math inline">\(g_i\)</span> is the distance between a fixed number and an answer of sensitivity <span class="math inline">\(1/n\)</span>, so it has sensitivity <span class="math inline">\(1/n\)</span>.</li>
+<li><strong>Privacy.</strong> The runs of AboveThreshold and the measurements alternate: a run ends with its <span class="math inline">\(\top\)</span>, then that query is measured, then the next run starts with the updated guess. So the algorithm is a sequence of at most <span class="math inline">\(2c\)</span> steps, each <span class="math inline">\(\varepsilon_0\)</span>-DP and each chosen as a function of the earlier outputs. By advanced composition and <a href="#eq-qr-step-eps" class="quarto-xref">Equation&nbsp;<span>23.3</span></a> it is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</li>
+<li><strong>Answers.</strong> On the good event, a <span class="math inline">\(\bot\)</span> means <span class="math inline">\(g_i &lt; 3\alpha/4 + \alpha/4 = \alpha\)</span>, so the guess’s answer is within <span class="math inline">\(\alpha\)</span>. A <span class="math inline">\(\top\)</span> is answered by the measurement, within <span class="math inline">\(\alpha/4\)</span>.</li>
+<li><strong>Updates are real corrections.</strong> A <span class="math inline">\(\top\)</span> means <span class="math inline">\(g_i \ge 3\alpha/4 - \alpha/4 = \alpha/2\)</span>. The measurement’s noise is at most <span class="math inline">\(\alpha/4\)</span>, less than the error, so the measured answer lies on the same side of the guess’s answer as the true one, and the sign <span class="math inline">\(s_i\)</span> is right. As in the previous section, the update’s regret against the true histogram is <span class="math inline">\(g_i \ge \alpha/2\)</span>.</li>
+<li><strong>Few updates.</strong> After <span class="math inline">\(U\)</span> updates the regret is at least <span class="math inline">\(\alpha U/2\)</span>, and by <a href="#eq-qr-regret" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> with <span class="math inline">\(\gamma = \alpha/4\)</span> it is at most <span class="math inline">\(\alpha U/4 + 4\ln N/\alpha\)</span>. So <span class="math inline">\(\alpha U/4 \le 4\ln N/\alpha\)</span>, which is <span class="math inline">\(U \le 16\ln N/\alpha^2 \le c\)</span>. The budget of <span class="math inline">\(c\)</span> answers <span class="math inline">\(\top\)</span> is never exhausted.</li>
+<li><strong>Records.</strong> Half of the failure probability <span class="math inline">\(\beta\)</span> goes to the <span class="math inline">\(c\)</span> runs of AboveThreshold, <span class="math inline">\(\beta/(2c)\)</span> each, and half to the <span class="math inline">\(c\)</span> measurements. With budget <span class="math inline">\(\varepsilon_0\)</span>, sensitivity <span class="math inline">\(1/n\)</span> and failure probability <span class="math inline">\(\beta/(2c)\)</span>, the margin of one run is <span class="math inline">\(8(\ln k + \ln(4c/\beta))/(n\varepsilon_0)\)</span>, and asking for at most <span class="math inline">\(\alpha/4\)</span> gives <a href="#eq-qr-online-n" class="quarto-xref">Equation&nbsp;<span>23.21</span></a>. A measurement’s noise exceeds <span class="math inline">\(\ln(2c/\beta)/(n\varepsilon_0)\)</span> with probability <span class="math inline">\(\beta/(2c)\)</span>. That level is smaller than the margin of a run, so the condition that keeps the margin below <span class="math inline">\(\alpha/4\)</span> keeps it below <span class="math inline">\(\alpha/4\)</span> too. The union bound over the <span class="math inline">\(c\)</span> runs and the <span class="math inline">\(c\)</span> measurements gives total failure probability <span class="math inline">\(\beta\)</span>.</li>
+</ol>
+</section>
+<section id="interpretation-4" class="level3" data-number="23.7.4">
+<h3 data-number="23.7.4" class="anchored" data-anchor-id="interpretation-4"><span class="header-section-number">23.7.4</span> Interpretation</h3>
+<p>The online algorithm pays for the same corrections as the offline one, but it finds them differently. The exponential mechanism searches a known list for the worst query, while the sparse vector technique waits for a bad query to arrive. The threshold must leave room between “answered well” and “corrected”: a <span class="math inline">\(\bot\)</span> only promises an error below <span class="math inline">\(\alpha\)</span>, while a <span class="math inline">\(\top\)</span> promises one above <span class="math inline">\(\alpha/2\)</span>. The gap between the two is what lets every update make progress.</p>
+<p>Two features matter in practice. The analyst may choose each query after seeing the earlier answers, and the guarantee still holds, because every step in the derivation conditions on the history. This is the setting of <a href="../part05-dp-ml/11-adaptive-data-analysis.html">Adaptive data analysis</a>, where the same machinery protects against overfitting to a reused holdout set. And the budget <span class="math inline">\(c\)</span> is set by the worst case, so it is far larger than the number of corrections a real stream needs. The offline algorithm needed 148 corrections on the running example, against an online budget of 35,490.</p>
+</section>
+<section id="example-a-large-query-server" class="level3" data-number="23.7.5">
+<h3 data-number="23.7.5" class="anchored" data-anchor-id="example-a-large-query-server"><span class="header-section-number">23.7.5</span> Example: a large query server</h3>
+<p>For a universe of <span class="math inline">\(N = 2^{20}\)</span> records and <span class="math inline">\(\alpha = 0.05\)</span>, the budget of corrections is <span class="math inline">\(c = 88{,}723\)</span>. To answer a stream of <span class="math inline">\(k = 10^6\)</span> queries at <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, with probability 0.95, <a href="#eq-qr-online-n" class="quarto-xref">Equation&nbsp;<span>23.21</span></a> asks for <span class="math inline">\(8.39\times10^7\)</span> records. That is about five times the offline bound for <span class="math inline">\(10^6\)</span> queries in <a href="#tbl-qr-records" class="quarto-xref">Table&nbsp;<span>23.5</span></a>. The difference is the price of the worst-case budget <span class="math inline">\(c\)</span> and of the wider margin that the threshold needs.</p>
+</section>
+<section id="check-yourself-4" class="level3" data-number="23.7.6">
+<h3 data-number="23.7.6" class="anchored" data-anchor-id="check-yourself-4"><span class="header-section-number">23.7.6</span> Check yourself</h3>
+<ul>
+<li>Why is the threshold <span class="math inline">\(3\alpha/4\)</span> and not <span class="math inline">\(\alpha\)</span>? <em>(A <span class="math inline">\(\top\)</span> must certify an error of at least <span class="math inline">\(\alpha/2\)</span>, so that the update makes progress, while a <span class="math inline">\(\bot\)</span> must certify an error below <span class="math inline">\(\alpha\)</span>. With margin <span class="math inline">\(\alpha/4\)</span>, the threshold <span class="math inline">\(3\alpha/4\)</span> gives both. At threshold <span class="math inline">\(\alpha\)</span>, a <span class="math inline">\(\bot\)</span> would only certify an error below <span class="math inline">\(5\alpha/4\)</span>.)</em></li>
+<li>Could the algorithm answer a <span class="math inline">\(\top\)</span> query with <span class="math inline">\(\langle f_i, \hat p\rangle\)</span> and skip the measurement? <em>(No.&nbsp;On a <span class="math inline">\(\top\)</span> the guess is known to be off by at least <span class="math inline">\(\alpha/2\)</span>, so its answer could miss the target. The measurement is also what gives the sign for the update.)</em></li>
+</ul>
+</section>
+</section>
+<section id="sec-qr-smalldb" class="level2" data-number="23.8">
+<h2 data-number="23.8" class="anchored" data-anchor-id="sec-qr-smalldb"><span class="header-section-number">23.8</span> SmallDB: the exponential mechanism over small datasets</h2>
+<section id="context-5" class="level3" data-number="23.8.1">
+<h3 data-number="23.8.1" class="anchored" data-anchor-id="context-5"><span class="header-section-number">23.8.1</span> Context</h3>
+<p>Before private multiplicative weights, Blum, Ligett &amp; Roth (2008) were the first to answer many linear queries with error that grows only with <span class="math inline">\(\ln|Q|\)</span>. Their algorithm, <strong>SmallDB</strong>, makes a single choice with the exponential mechanism. The candidates are not queries but whole small datasets. It is the exponential mechanism used as a learner, exactly like the classifier selection of <a href="../part03-dp-foundations/05-selection.html#sec-sel-apps">Selection</a>, with datasets in place of classifiers.</p>
+</section>
+<section id="statement-5" class="level3" data-number="23.8.2">
+<h3 data-number="23.8.2" class="anchored" data-anchor-id="statement-5"><span class="header-section-number">23.8.2</span> Statement</h3>
+<p><strong>SmallDB</strong> runs the exponential mechanism over small datasets: every dataset <span class="math inline">\(S\)</span> of <span class="math inline">\(m = \lceil2\ln(2|Q|)/\alpha^2\rceil\)</span> records drawn from the universe. The score of a candidate <span class="math inline">\(S\)</span> is minus its largest error on the queries, <span class="math inline">\(-\max_{q \in Q}|q(S) - q(D)|\)</span>, so the candidates with small errors are the likely ones. This score has sensitivity <span class="math inline">\(1/n\)</span>, so SmallDB is <span class="math inline">\(\varepsilon\)</span>-DP. The chosen dataset has error at most <span class="math inline">\(\alpha\)</span> on every query, with probability at least <span class="math inline">\(1 - \beta\)</span>, once <span id="eq-qr-smalldb"><span class="math display">\[n \ge \frac{4\big(m\ln N + \ln(1/\beta)\big)}{\alpha\varepsilon} \approx \frac{8\ln(2|Q|)\ln N}{\alpha^3\varepsilon}. \tag{23.22}\]</span></span></p>
+</section>
+<section id="derivation-5" class="level3" data-number="23.8.3">
+<h3 data-number="23.8.3" class="anchored" data-anchor-id="derivation-5"><span class="header-section-number">23.8.3</span> Derivation</h3>
+<ol type="1">
+<li><strong>A small dataset exists.</strong> Draw <span class="math inline">\(m\)</span> records independently from the true histogram <span class="math inline">\(p\)</span> and call the result <span class="math inline">\(S\)</span>. For one query, <span class="math inline">\(q(S)\)</span> is an average of <span class="math inline">\(m\)</span> independent values in <span class="math inline">\([0, 1]\)</span> with mean <span class="math inline">\(q(D)\)</span>, so by Hoeffding’s inequality it is more than <span class="math inline">\(\alpha/2\)</span> away with probability at most <span class="math inline">\(2e^{-2m(\alpha/2)^2} = 2e^{-m\alpha^2/2}\)</span>. By the union bound, some query is that far off with probability at most <span class="math inline">\(2|Q|e^{-m\alpha^2/2}\)</span>. With <span class="math inline">\(m &gt; 2\ln(2|Q|)/\alpha^2\)</span> this is below 1. So with positive probability no query is off by more than <span class="math inline">\(\alpha/2\)</span>, and therefore some dataset of <span class="math inline">\(m\)</span> records has error at most <span class="math inline">\(\alpha/2\)</span> on every query. The best score is at least <span class="math inline">\(-\alpha/2\)</span>.</li>
+<li><strong>Count the candidates.</strong> A dataset of <span class="math inline">\(m\)</span> records is a list of <span class="math inline">\(m\)</span> elements of the universe, so there are at most <span class="math inline">\(N^m\)</span> candidates, and <span class="math inline">\(\ln N^m = m\ln N\)</span>.</li>
+<li><strong>The selection is nearly the best.</strong> By the utility bound of the exponential mechanism with <span class="math inline">\(\Delta = 1/n\)</span> and failure probability <span class="math inline">\(\beta\)</span>, the chosen dataset’s score is within <span class="math inline">\(\frac{2}{n\varepsilon}\big(m\ln N + \ln(1/\beta)\big)\)</span> of the best. Its error is therefore at most <span class="math inline">\(\alpha/2\)</span> plus that amount.</li>
+<li><strong>Records.</strong> Asking that the second amount be at most <span class="math inline">\(\alpha/2\)</span> gives <a href="#eq-qr-smalldb" class="quarto-xref">Equation&nbsp;<span>23.22</span></a>.</li>
+</ol>
+</section>
+<section id="interpretation-5" class="level3" data-number="23.8.4">
+<h3 data-number="23.8.4" class="anchored" data-anchor-id="interpretation-5"><span class="header-section-number">23.8.4</span> Interpretation</h3>
+<p>SmallDB has the same logarithm of <span class="math inline">\(|Q|\)</span> as private multiplicative weights, and with pure DP it has the same <span class="math inline">\(\alpha^{-3}\)</span>. It is simpler to analyze, because it makes one choice instead of <span class="math inline">\(T\)</span>. But it is hopeless to run: the exponential mechanism must weigh <span class="math inline">\(N^m\)</span> candidates. Its role is to show what the exponential mechanism can achieve when running time is ignored. The private learner of <a href="../part03-dp-foundations/05-selection.html#sec-sel-apps">Selection</a> picks, from a finite class, a classifier with few training mistakes. SmallDB picks, from the finite class of small datasets, one with small errors on the queries, and the same utility bound controls both.</p>
+</section>
+<section id="example-the-running-example-2" class="level3" data-number="23.8.5">
+<h3 data-number="23.8.5" class="anchored" data-anchor-id="example-the-running-example-2"><span class="header-section-number">23.8.5</span> Example: the running example</h3>
+<p>For the 6,560 marginal queries at <span class="math inline">\(\alpha = 0.1\)</span>, a dataset of <span class="math inline">\(m = 1897\)</span> records suffices, and there are <span class="math inline">\(256^{1897} \approx 10^{4568}\)</span> candidates. <a href="#eq-qr-smalldb" class="quarto-xref">Equation&nbsp;<span>23.22</span></a> asks for <span class="math inline">\(4.21\times10^5\)</span> records at <span class="math inline">\(\varepsilon = 1\)</span>. For a universe of <span class="math inline">\(2^{20}\)</span> and <span class="math inline">\(\alpha = 0.05\)</span>, the last column of <a href="#tbl-qr-records" class="quarto-xref">Table&nbsp;<span>23.5</span></a> shows that SmallDB’s bound is close to that of private multiplicative weights.</p>
+</section>
+<section id="check-yourself-5" class="level3" data-number="23.8.6">
+<h3 data-number="23.8.6" class="anchored" data-anchor-id="check-yourself-5"><span class="header-section-number">23.8.6</span> Check yourself</h3>
+<ul>
+<li>Why does the existence argument in step 1 need no algorithm? <em>(It shows that a random sample of <span class="math inline">\(m\)</span> records has the property with positive probability, so some dataset has it. The exponential mechanism then finds a nearly as good one by trying all of them.)</em></li>
+<li>Where does the <span class="math inline">\(\alpha^{-3}\)</span> come from? <em>(From <span class="math inline">\(m\)</span>, which grows like <span class="math inline">\(1/\alpha^2\)</span>, times the <span class="math inline">\(1/(\alpha\varepsilon)\)</span> of the exponential mechanism’s error.)</em></li>
+</ul>
+</section>
+</section>
+<section id="code-check-every-algorithm-by-computation-and-simulation" class="level2" data-number="23.9">
+<h2 data-number="23.9" class="anchored" data-anchor-id="code-check-every-algorithm-by-computation-and-simulation"><span class="header-section-number">23.9</span> Code: check every algorithm by computation and simulation</h2>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part03-dp-foundations/query_release.py">code/query_release.py</a> computes every number in this chapter and draws every figure. It builds the running example’s table, runs the baselines, the halving algorithm, non-private multiplicative weights and private multiplicative weights, and evaluates every bound. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part03-dp-foundations/query_release.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Output</strong> (seed 0), summarized in <a href="#tbl-qr-code" class="quarto-xref">Table&nbsp;<span>23.6</span></a>:</p>
+<div id="tbl-qr-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-qr-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.6: The script’s output with the default seed.
+</figcaption>
+<div aria-describedby="tbl-qr-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Experiment</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Running example</td>
+<td><span class="math inline">\(N = 256\)</span>, <span class="math inline">\(\lvert Q\rvert = 6560\)</span> cells in 255 tables; uniform histogram error 0.232</td>
+</tr>
+<tr class="even">
+<td>Baselines, <span class="math inline">\(n = 10{,}000\)</span></td>
+<td>Laplace scale 0.0510, largest error 0.497; Gaussian <span class="math inline">\(\mu = 0.2367\)</span>, standard deviation 0.0095, largest error 0.037</td>
+</tr>
+<tr class="odd">
+<td>Halving, 1,024 experts</td>
+<td>At most 6 mistakes in 20 runs; bound 10</td>
+</tr>
+<tr class="even">
+<td>Non-private multiplicative weights, <span class="math inline">\(\alpha = 0.05\)</span></td>
+<td>148 corrections against the bound 8,872; regret 16.70 against 225.5</td>
+</tr>
+<tr class="odd">
+<td>Private multiplicative weights, <span class="math inline">\(\varepsilon = 1\)</span></td>
+<td><a href="#tbl-qr-pmw" class="quarto-xref">Table&nbsp;<span>23.4</span></a>; best <span class="math inline">\(T = 38\)</span></td>
+</tr>
+<tr class="even">
+<td>Budget per step at <span class="math inline">\(\delta = 10^{-6}\)</span></td>
+<td><span class="math inline">\(T = 100\)</span>: 0.00500, 0.00673, 0.01322; <span class="math inline">\(T = 1000\)</span>: 0.00050, 0.00213, 0.00418</td>
+</tr>
+<tr class="odd">
+<td>Records needed</td>
+<td><a href="#tbl-qr-records" class="quarto-xref">Table&nbsp;<span>23.5</span></a>; closed form <span class="math inline">\(1.55\times10^7\)</span> at <span class="math inline">\(10^6\)</span> queries</td>
+</tr>
+<tr class="even">
+<td>SmallDB, <span class="math inline">\(\alpha = 0.1\)</span></td>
+<td><span class="math inline">\(m = 1897\)</span>; <span class="math inline">\(10^{4568}\)</span> candidates; <span class="math inline">\(4.21\times10^5\)</span> records</td>
+</tr>
+<tr class="odd">
+<td>Online private multiplicative weights, <span class="math inline">\(\alpha = 0.05\)</span></td>
+<td><span class="math inline">\(c = 88{,}723\)</span> for <span class="math inline">\(N = 2^{20}\)</span>, <span class="math inline">\(8.39\times10^7\)</span> records for <span class="math inline">\(k = 10^6\)</span>; <span class="math inline">\(c = 35{,}490\)</span> for <span class="math inline">\(N = 256\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/tests/test_query_release.py">tests/test_query_release.py</a> checks that the output still matches.</p>
+<p>Three things stand out. First, the algorithms work much better than their bounds say. Multiplicative weights needs 148 corrections where the bound allows 8,872, and private multiplicative weights reaches an error of 0.078 where its bound exceeds 1. Second, the bounds still pick sensible parameters, such as the number of rounds, because they get the shape of the trade-off right even when the constants are poor. Third, the advantage of private multiplicative weights is asymptotic: on a few thousand structured queries, Gaussian noise on every answer is better. The method pays off when the queries are far more numerous than the records, which is the setting of synthetic data and of open-ended query servers.</p>
+</section>
+<section id="references" class="level2" data-number="23.10">
+<h2 data-number="23.10" class="anchored" data-anchor-id="references"><span class="header-section-number">23.10</span> References</h2>
+<ul>
+<li>Hardt &amp; Rothblum, “A Multiplicative Weights Mechanism for Privacy-Preserving Data Analysis” (FOCS 2010). Private multiplicative weights in its online form, with the sparse vector technique, and the <span class="math inline">\(\sqrt{\ln N}\ln|Q|/\alpha^2\)</span> sample complexity.</li>
+<li>Hardt, Ligett &amp; McSherry, “A Simple and Practical Algorithm for Differentially Private Data Release” (NeurIPS 2012). MWEM, the offline form with the exponential mechanism and an averaged output, and its experiments on real tables.</li>
+<li>Blum, Ligett &amp; Roth, “A Learning Theory Approach to Non-Interactive Database Privacy” (STOC 2008; Journal of the ACM 2013). SmallDB, the first release with error logarithmic in the number of queries.</li>
+<li>Arora, Hazan &amp; Kale, “The Multiplicative Weights Update Method: a Meta-Algorithm and Applications” (Theory of Computing, 2012). The regret bound of <a href="#eq-qr-regret" class="quarto-xref">Equation&nbsp;<span>23.7</span></a> and the many uses of the method.</li>
+<li>Littlestone &amp; Warmuth, “The Weighted Majority Algorithm” (Information and Computation, 1994). The halving and weighted majority algorithms.</li>
+<li>Dwork &amp; Roth, <em>The Algorithmic Foundations of Differential Privacy</em> (2014), Chapter 4. SmallDB and online private multiplicative weights, with full proofs.</li>
+<li>Gupta, Roth &amp; Ullman, “Iterative Constructions and Private Data Release” (TCC 2012). The general select–measure–update framework behind both algorithms.</li>
+<li>Bun, Ullman &amp; Vadhan, “Fingerprinting Codes and the Price of Approximate Differential Privacy” (STOC 2014). Lower bounds showing that private multiplicative weights is close to optimal for some query families.</li>
+<li>Ullman &amp; Vadhan, “PCPs and the Hardness of Generating Private Synthetic Data” (TCC 2011). Why efficient private synthetic data for all two-way marginals is impossible in general.</li>
+<li>McKenna, Mullins, Sheldon &amp; Miklau, “AIM: An Adaptive and Iterative Mechanism for Differentially Private Synthetic Data” (VLDB 2022). The select–measure–update loop with graphical models and Gaussian measurements, as used in practice.</li>
+</ul>
+</section>
+<section id="cheat-sheet" class="level2" data-number="23.11">
+<h2 data-number="23.11" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">23.11</span> Cheat sheet</h2>
+<p>A dataset is a histogram <span class="math inline">\(p\)</span> over a universe of <span class="math inline">\(N\)</span> records, and a linear query <span class="math inline">\(q : X \to [0, 1]\)</span> has answer <span class="math inline">\(\langle q, p\rangle\)</span> of sensitivity <span class="math inline">\(1/n\)</span>. <a href="#tbl-qr-cheat" class="quarto-xref">Table&nbsp;<span>23.7</span></a> collects the results for error <span class="math inline">\(\alpha\)</span> on every query in <span class="math inline">\(Q\)</span>, with probability <span class="math inline">\(1 - \beta\)</span>.</p>
+<div id="tbl-qr-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-qr-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;23.7: The query-release results of this chapter.
+</figcaption>
+<div aria-describedby="tbl-qr-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Method</th>
+<th>Privacy</th>
+<th>Records needed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Laplace on every answer</td>
+<td><span class="math inline">\(\varepsilon\)</span></td>
+<td><span class="math inline">\(\lvert Q\rvert\ln(\lvert Q\rvert/\beta)/(\alpha\varepsilon)\)</span></td>
+</tr>
+<tr class="even">
+<td>Gaussian on every answer</td>
+<td><span class="math inline">\((\varepsilon, \delta)\)</span></td>
+<td><span class="math inline">\(\sqrt{\lvert Q\rvert}\,z/(\mu\alpha)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Multiplicative weights (no privacy)</td>
+<td>—</td>
+<td>At most <span class="math inline">\(4\ln N/\alpha^2\)</span> corrections; regret <span class="math inline">\(\le \gamma T + \ln N/\gamma\)</span></td>
+</tr>
+<tr class="even">
+<td>Offline private multiplicative weights</td>
+<td><span class="math inline">\(\varepsilon\)</span> or <span class="math inline">\((\varepsilon, \delta)\)</span></td>
+<td>Error <span class="math inline">\(2\sqrt{\ln N/T} + \frac{2}{n\varepsilon_0}(\ln\lvert Q\rvert + 2\ln\frac{2T}\beta)\)</span>; <span class="math inline">\(n \approx 64\sqrt{\ln N\ln(1/\delta)}\,L/(\alpha^2\varepsilon)\)</span></td>
+</tr>
+<tr class="odd">
+<td>Online private multiplicative weights</td>
+<td><span class="math inline">\((\varepsilon, \delta)\)</span></td>
+<td><span class="math inline">\(c = 16\ln N/\alpha^2\)</span> corrections; <span class="math inline">\(n \ge 32(\ln k + \ln(4c/\beta))/(\alpha\varepsilon_0)\)</span></td>
+</tr>
+<tr class="even">
+<td>SmallDB</td>
+<td><span class="math inline">\(\varepsilon\)</span></td>
+<td><span class="math inline">\(4(m\ln N + \ln(1/\beta))/(\alpha\varepsilon)\)</span>, <span class="math inline">\(m = 2\ln(2\lvert Q\rvert)/\alpha^2\)</span>; time <span class="math inline">\(N^m\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p><strong>Rules of thumb</strong></p>
+<ul>
+<li>For hundreds or thousands of queries, add Gaussian noise to every answer, scaled to the structure of the query set.</li>
+<li>Reach for private multiplicative weights when the queries far outnumber the records, or when you want a synthetic dataset that answers queries you have not thought of yet.</li>
+<li>Spend the budget on corrections, not on queries, because the number of rounds depends on <span class="math inline">\(\ln N/\alpha^2\)</span>, never on <span class="math inline">\(|Q|\)</span>.</li>
+<li>Release the average of the guesses, measure with fresh noise, and choose <span class="math inline">\(T\)</span> by the bound, not by looking at the data.</li>
+<li>The running time is proportional to the universe, so beyond a few dozen attributes, replace the histogram with a compact model.</li>
+</ul>
+<p><strong>Practice.</strong> Exercises for this chapter, each with a worked solution, are in <a href="../../book-exercises/part03-dp-foundations/06-query-release.html">the exercise book</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part03-dp-foundations/05-selection.html" class="pagination-link" aria-label="Selection: exponential mechanism, report-noisy-max, sparse vector">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part03-dp-foundations/07-sensitivity.html" class="pagination-link" aria-label="Beyond global sensitivity">
+        <span class="nav-page-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

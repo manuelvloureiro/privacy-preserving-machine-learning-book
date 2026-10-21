@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Appendix I — Pseudorandom functions and learning with errors – Privacy-Preserving Machine Learning</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../appendix-derivations/10-mechanisms.html" rel="next">
+<link href="../appendix-derivations/08-matrices.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix-derivations/01-calibration.html">Appendices</a></li><li class="breadcrumb-item"><a href="../appendix-derivations/09-cryptography.html"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/01-calibration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">How much noise to add</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/02-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Composing private releases</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/03-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">C</span>&nbsp; <span class="chapter-title">Accounting for DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/04-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">D</span>&nbsp; <span class="chapter-title">What ε means, and converting between definitions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/05-probability.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">E</span>&nbsp; <span class="chapter-title">Sums, limits and counting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/06-tails-tests-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">F</span>&nbsp; <span class="chapter-title">Tail bounds, tests and divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/07-optimization-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">G</span>&nbsp; <span class="chapter-title">Optimization and estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/08-matrices.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Random matrices and factorizations</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/09-cryptography.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/10-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/11-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">K</span>&nbsp; <span class="chapter-title">Composition of trade-off functions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/12-amplification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">L</span>&nbsp; <span class="chapter-title">Subsampling, shuffling and iteration</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/13-private-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">M</span>&nbsp; <span class="chapter-title">Private learning and tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../appendix-derivations/14-auditing-adaptivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">N</span>&nbsp; <span class="chapter-title">Auditing, reconstruction and adaptive analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">O</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">P</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-apx-crypto-ggm" id="toc-sec-apx-crypto-ggm" class="nav-link active" data-scroll-target="#sec-apx-crypto-ggm"><span class="header-section-number">I.1</span> The GGM tree is a pseudorandom function</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses" id="toc-what-the-chapter-uses" class="nav-link" data-scroll-target="#what-the-chapter-uses"><span class="header-section-number">I.1.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea" id="toc-the-idea" class="nav-link" data-scroll-target="#the-idea"><span class="header-section-number">I.1.2</span> The idea</a></li>
+  <li><a href="#derivation" id="toc-derivation" class="nav-link" data-scroll-target="#derivation"><span class="header-section-number">I.1.3</span> Derivation</a></li>
+  <li><a href="#checking-it" id="toc-checking-it" class="nav-link" data-scroll-target="#checking-it"><span class="header-section-number">I.1.4</span> Checking it</a></li>
+  <li><a href="#what-it-does-not-cover" id="toc-what-it-does-not-cover" class="nav-link" data-scroll-target="#what-it-does-not-cover"><span class="header-section-number">I.1.5</span> What it does not cover</a></li>
+  </ul></li>
+  <li><a href="#sec-apx-crypto-lwe" id="toc-sec-apx-crypto-lwe" class="nav-link" data-scroll-target="#sec-apx-crypto-lwe"><span class="header-section-number">I.2</span> Search LWE reduces to decision LWE</a>
+  <ul class="collapse">
+  <li><a href="#what-the-chapter-uses-1" id="toc-what-the-chapter-uses-1" class="nav-link" data-scroll-target="#what-the-chapter-uses-1"><span class="header-section-number">I.2.1</span> What the chapter uses</a></li>
+  <li><a href="#the-idea-1" id="toc-the-idea-1" class="nav-link" data-scroll-target="#the-idea-1"><span class="header-section-number">I.2.2</span> The idea</a></li>
+  <li><a href="#derivation-1" id="toc-derivation-1" class="nav-link" data-scroll-target="#derivation-1"><span class="header-section-number">I.2.3</span> Derivation</a></li>
+  <li><a href="#checking-it-1" id="toc-checking-it-1" class="nav-link" data-scroll-target="#checking-it-1"><span class="header-section-number">I.2.4</span> Checking it</a></li>
+  <li><a href="#what-it-does-not-cover-1" id="toc-what-it-does-not-cover-1" class="nav-link" data-scroll-target="#what-it-does-not-cover-1"><span class="header-section-number">I.2.5</span> What it does not cover</a></li>
+  </ul></li>
+  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">I.3</span> Code</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">I.4</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../appendix-derivations/01-calibration.html">Appendices</a></li><li class="breadcrumb-item"><a href="../appendix-derivations/09-cryptography.html"><span class="chapter-number">I</span>&nbsp; <span class="chapter-title">Pseudorandom functions and learning with errors</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Appendix I — Pseudorandom functions and learning with errors</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>This appendix proves two results that <a href="../part01-prerequisites/08-crypto-basics.html">Cryptography basics</a> states without a full proof. The first is that the GGM tree, named after Goldreich, Goldwasser and Micali, is a pseudorandom function (PRF) whenever the pseudorandom generator (PRG) it is built from is secure. The second is about learning with errors (LWE), a problem in which a secret vector is hidden behind noisy linear equations. When the arithmetic is done modulo a prime, an algorithm that can only <em>recognize</em> such equations can be turned into one that <em>finds</em> the secret. Both proofs are reductions: each turns an algorithm that solves one problem into an algorithm that solves another. Both also rest on the same move. The new algorithm takes the input it must judge, called its challenge, and uses it to build exactly the situation the old algorithm expects to see. So the heart of each proof is a check that two distributions are identical. <a href="#tbl-apx-crypto-map" class="quarto-xref">Table&nbsp;<span>I.1</span></a> lists where each result comes from.</p>
+<div id="tbl-apx-crypto-map" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-crypto-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;I.1: The two derivations in this appendix and the chapter section that states each one.
+</figcaption>
+<div aria-describedby="tbl-apx-crypto-map-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Derivation</th>
+<th>Where the chapter states it</th>
+<th>What the chapter gives</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#sec-apx-crypto-ggm" class="quarto-xref"><span>Section I.1</span></a>: the GGM tree is a PRF, with advantage at most <span class="math inline">\(nq\)</span> times the PRG’s</td>
+<td><a href="../part01-prerequisites/08-crypto-basics.html#sec-crypto-ggm" class="quarto-xref"><span>Section 8.6.4</span></a></td>
+<td>A proof sketch, citing Goldreich for the full proof</td>
+</tr>
+<tr class="even">
+<td><a href="#sec-apx-crypto-lwe" class="quarto-xref"><span>Section I.2</span></a>: search LWE reduces to decision LWE for prime <span class="math inline">\(p\)</span> polynomial in <span class="math inline">\(d\)</span></td>
+<td><a href="../part01-prerequisites/08-crypto-basics.html#sec-crypto-lwe" class="quarto-xref"><span>Section 8.9</span></a>, Definition</td>
+<td>One sentence describing Regev’s idea</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>The notation is the chapter’s. The security parameter <span class="math inline">\(\lambda\)</span> is the length of keys and seeds in bits, and <span class="math inline">\(U_k\)</span> stands for the uniform distribution on strings of <span class="math inline">\(k\)</span> bits. An <strong>adversary</strong> is an algorithm that tries to break a scheme, usually by asking it questions called queries, and <span class="math inline">\(q\)</span> is the number of queries it makes. The modulus in learning with errors is <span class="math inline">\(p\)</span>.</p>
+<p>A <strong>distinguisher</strong> receives input from one of two distributions, its two “worlds”, and outputs a bit. Its <strong>advantage</strong> is the absolute difference between how often it outputs 1 in the two worlds. A procedure is <strong>efficient</strong> if its running time grows at most polynomially in <span class="math inline">\(\lambda\)</span>, and a quantity is <strong>negligible</strong> if it shrinks faster than one over any polynomial in <span class="math inline">\(\lambda\)</span>.</p>
+<section id="sec-apx-crypto-ggm" class="level2" data-number="I.1">
+<h2 data-number="I.1" class="anchored" data-anchor-id="sec-apx-crypto-ggm"><span class="header-section-number">I.1</span> The GGM tree is a pseudorandom function</h2>
+<section id="what-the-chapter-uses" class="level3" data-number="I.1.1">
+<h3 data-number="I.1.1" class="anchored" data-anchor-id="what-the-chapter-uses"><span class="header-section-number">I.1.1</span> What the chapter uses</h3>
+<p>A pseudorandom generator stretches a short random seed into a longer string that efficient algorithms cannot tell from random. Here the generator doubles the length: <span class="math inline">\(G: \{0,1\}^\lambda \to \{0,1\}^{2\lambda}\)</span>. Write its output as a left half <span class="math inline">\(G_0(s)\)</span> followed by a right half <span class="math inline">\(G_1(s)\)</span>, each as long as the seed, so that <span class="math inline">\(G(s) = (G_0(s), G_1(s))\)</span>. A PRG distinguisher <span class="math inline">\(D\)</span> receives one <span class="math inline">\(2\lambda\)</span>-bit string and outputs a bit, and its advantage is <span id="eq-auto-09cryptography-1"><span class="math display">\[\mathrm{Adv}_{\mathrm{PRG}}(D) = \big|\Pr[D(G(U_\lambda)) = 1] - \Pr[D(U_{2\lambda}) = 1]\big|. \tag{I.1}\]</span></span></p>
+<p>The GGM tree turns <span class="math inline">\(G\)</span> into a keyed function on <span class="math inline">\(n\)</span>-bit inputs. Picture a binary tree of depth <span class="math inline">\(n\)</span> in which every node carries a <span class="math inline">\(\lambda\)</span>-bit <strong>label</strong>. The root’s label is the key <span class="math inline">\(k\)</span>. A node’s left child gets the left half <span class="math inline">\(G_0\)</span> of <span class="math inline">\(G\)</span> applied to the node’s label, and its right child gets the right half <span class="math inline">\(G_1\)</span>. An input <span class="math inline">\(x = x_1 x_2 \cdots x_n\)</span> is then read as directions from the root to a leaf. At level <span class="math inline">\(i\)</span>, the bit <span class="math inline">\(x_i\)</span> says go left if it is 0 and right if it is 1, and the output is the label of the leaf you reach, <span id="eq-auto-09cryptography-2"><span class="math display">\[F_k(x) = G_{x_n}\big(\cdots G_{x_2}\big(G_{x_1}(k)\big)\cdots\big). \tag{I.2}\]</span></span> A node is named by the bits that lead to it, so node <span class="math inline">\(01\)</span> is the right child of the left child of the root, and its <strong>depth</strong> is the length of its name.</p>
+<p>In the PRF game, a fair coin decides what sits inside a box. It is either <span class="math inline">\(F_k\)</span> with a uniform key, or a truly random function <span class="math inline">\(f\)</span> from <span class="math inline">\(n\)</span>-bit inputs to <span class="math inline">\(\lambda\)</span>-bit outputs, which gives each input an independent uniform output. An adversary <span class="math inline">\(A\)</span> sends up to <span class="math inline">\(q\)</span> queries, each chosen after seeing the answers to the earlier ones, and then outputs a bit. The box that answers the queries is called an oracle, and <span class="math inline">\(A^O\)</span> means <span class="math inline">\(A\)</span> run with oracle <span class="math inline">\(O\)</span>. The adversary’s advantage is <span id="eq-auto-09cryptography-3"><span class="math display">\[\mathrm{Adv}_{\mathrm{PRF}}(A) = \big|\Pr[A^{F_k} = 1] - \Pr[A^{f} = 1]\big|, \tag{I.3}\]</span></span> where the probabilities are also over the adversary’s own random choices.</p>
+<p>The result says that any such adversary can be turned into a PRG distinguisher whose advantage is smaller by exactly the factor <span class="math inline">\(nq\)</span>, and which is about as fast. Precisely, take any adversary <span class="math inline">\(A\)</span> that makes at most <span class="math inline">\(q\)</span> queries. Then there is a PRG distinguisher <span class="math inline">\(B\)</span> that runs <span class="math inline">\(A\)</span> once and, apart from that, evaluates <span class="math inline">\(G\)</span> fewer than <span class="math inline">\(nq\)</span> times, such that <span id="eq-apx-crypto-ggm"><span class="math display">\[\mathrm{Adv}_{\mathrm{PRF}}(A) = nq\cdot\mathrm{Adv}_{\mathrm{PRG}}(B). \tag{I.4}\]</span></span> The running time matters because PRG security only limits fast distinguishers. So if no distinguisher with <span class="math inline">\(B\)</span>’s running time has PRG advantage above some <span class="math inline">\(\varepsilon\)</span>, then no <span class="math inline">\(q\)</span>-query adversary has PRF advantage above <span class="math inline">\(nq\,\varepsilon\)</span>, which is the chapter’s <span class="math inline">\(\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}\)</span>. The chapter gives a proof sketch and cites Goldreich, <em>Foundations of Cryptography</em>, Vol. 1, §3.6, for the full proof.</p>
+</section>
+<section id="the-idea" class="level3" data-number="I.1.2">
+<h3 data-number="I.1.2" class="anchored" data-anchor-id="the-idea"><span class="header-section-number">I.1.2</span> The idea</h3>
+<p>The proof walks from the real function to a random one in <span class="math inline">\(n\)</span> steps, one level of the tree at a time. Each intermediate world is called a <strong>hybrid</strong>, because it is part real and part random. The <span class="math inline">\(j\)</span>-th hybrid, <span class="math inline">\(H_j\)</span>, gives every node at depth <span class="math inline">\(j\)</span> a fresh uniform label and computes everything below it with <span class="math inline">\(G\)</span> as usual. The first hybrid, <span class="math inline">\(H_0\)</span>, is the real <span class="math inline">\(F_k\)</span>, because the only node at depth 0 is the root and its uniform label is the key. The last, <span class="math inline">\(H_n\)</span>, is a random function, because every leaf gets its own uniform label. Going from <span class="math inline">\(H_{j-1}\)</span> to <span class="math inline">\(H_j\)</span> changes a single thing. In <span class="math inline">\(H_{j-1}\)</span>, the two children of a node at depth <span class="math inline">\(j - 1\)</span> carry the two halves of <span class="math inline">\(G\)</span> applied to a uniform label, while in <span class="math inline">\(H_j\)</span> they carry two uniform labels. Telling these apart is the PRG’s game of output against uniform string, played once for every node at depth <span class="math inline">\(j - 1\)</span> that the adversary’s queries pass through. <a href="#fig-apx-crypto-ggm-hybrids" class="quarto-xref">Figure&nbsp;<span>I.1</span></a> shows the four hybrids for <span class="math inline">\(n = 3\)</span> and three queries.</p>
+<div id="fig-apx-crypto-ggm-hybrids" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-crypto-ggm-hybrids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_crypto_ggm_hybrids.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-crypto-ggm-hybrids-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;I.1: The GGM tree of depth 3 in the hybrids <span class="math inline">\(H_0\)</span> to <span class="math inline">\(H_3\)</span>, for the queries 000, 001 and 100. Orange nodes get independent uniform labels, blue nodes are computed with <span class="math inline">\(G\)</span> from their parent, and grey nodes lie on a query path but are never used. A red <span class="math inline">\(y_c\)</span> marks the node at depth <span class="math inline">\(j - 1\)</span> to which the reduction <span class="math inline">\(B_j\)</span> assigns its <span class="math inline">\(c\)</span>-th challenge string.
+</figcaption>
+</figure>
+</div>
+<p>The subtle part is that the adversary chooses its queries as it goes. A reduction <span class="math inline">\(B_j\)</span> that wants to use the adversary to break the PRG receives <span class="math inline">\(q\)</span> challenge strings, which are either all outputs of <span class="math inline">\(G\)</span> on independent uniform seeds or all uniform. But it cannot know in advance which nodes at depth <span class="math inline">\(j - 1\)</span> the queries will pass through. So it hands out its challenge strings like cloakroom tickets. The first time a query passes through a new node at depth <span class="math inline">\(j - 1\)</span>, that node gets the next unused string and keeps it for the rest of the game. <a href="#tbl-apx-crypto-tickets" class="quarto-xref">Table&nbsp;<span>I.2</span></a> follows <span class="math inline">\(B_2\)</span> through the three queries of <a href="#fig-apx-crypto-ggm-hybrids" class="quarto-xref">Figure&nbsp;<span>I.1</span></a>.</p>
+<div id="tbl-apx-crypto-tickets" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-crypto-tickets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;I.2: How <span class="math inline">\(B_2\)</span> assigns its challenge strings <span class="math inline">\(y_1, y_2, y_3\)</span> to the nodes at depth 1 as the queries arrive. The third string is never needed.
+</figcaption>
+<div aria-describedby="tbl-apx-crypto-tickets-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Query</th>
+<th>Node at depth 1</th>
+<th>First visit?</th>
+<th>String used</th>
+<th>Node at depth 2</th>
+<th>Its label</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>000</td>
+<td>0</td>
+<td>yes</td>
+<td><span class="math inline">\(y_1\)</span></td>
+<td>00</td>
+<td>left half of <span class="math inline">\(y_1\)</span></td>
+</tr>
+<tr class="even">
+<td>001</td>
+<td>0</td>
+<td>no</td>
+<td><span class="math inline">\(y_1\)</span></td>
+<td>00</td>
+<td>left half of <span class="math inline">\(y_1\)</span></td>
+</tr>
+<tr class="odd">
+<td>100</td>
+<td>1</td>
+<td>yes</td>
+<td><span class="math inline">\(y_2\)</span></td>
+<td>10</td>
+<td>left half of <span class="math inline">\(y_2\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>If each <span class="math inline">\(y_c\)</span> is <span class="math inline">\(G\)</span> applied to its own uniform seed, then the labels at depth 2 are halves of <span class="math inline">\(G\)</span> applied to independent uniform labels at depth 1, which is <span class="math inline">\(H_1\)</span>. If each <span class="math inline">\(y_c\)</span> is uniform, the labels at depth 2 are uniform, which is <span class="math inline">\(H_2\)</span>. The one thing left to check is that handing out values on first use gives the adversary the same distribution of answers as drawing them all in advance. It does, because a value nobody has looked at yet is still a fresh draw, and step 4 below proves this carefully.</p>
+</section>
+<section id="derivation" class="level3" data-number="I.1.3">
+<h3 data-number="I.1.3" class="anchored" data-anchor-id="derivation"><span class="header-section-number">I.1.3</span> Derivation</h3>
+<p>The proof has four parts. Steps 1 to 3 set up the hybrids and show that two neighbouring hybrids differ only in the distribution of one table. Steps 4 and 5 build the reduction <span class="math inline">\(B_j\)</span>, which judges <span class="math inline">\(q\)</span> strings at once, and show that it recreates either neighbour exactly. Steps 6 and 7 turn it into a distinguisher that judges a single string, and add up the levels. Step 8 restates the result for efficient adversaries.</p>
+<ol type="1">
+<li><p><strong>Define the hybrids.</strong> For <span class="math inline">\(j = 0, 1, \dots, n\)</span>, hybrid <span class="math inline">\(H_j\)</span> gives every node at depth <span class="math inline">\(j\)</span> an independent uniform <span class="math inline">\(\lambda\)</span>-bit label <span class="math inline">\(L(x_1\cdots x_j)\)</span>, all drawn before the game starts. It answers the query <span class="math inline">\(x\)</span> by walking down from the depth-<span class="math inline">\(j\)</span> node on its path: <span id="eq-auto-09cryptography-4"><span class="math display">\[H_j(x) = G_{x_n}\big(\cdots G_{x_{j+1}}\big(L(x_1\cdots x_j)\big)\cdots\big). \tag{I.5}\]</span></span> With <span class="math inline">\(j = 0\)</span> the only label is the root’s, which is a uniform key, so <span class="math inline">\(H_0\)</span> is <span class="math inline">\(F_k\)</span>. With <span class="math inline">\(j = n\)</span> the answer is the leaf’s own label, independent and uniform for each input, so <span class="math inline">\(H_n\)</span> is a random function. The table of <span class="math inline">\(2^j\)</span> labels can be huge, but that does not matter. The hybrids are thought experiments, and only the reduction has to be efficient.</p></li>
+<li><p><strong>Split the advantage into levels.</strong> Write <span class="math inline">\(h_j = \Pr[A^{H_j} = 1]\)</span> for how often the adversary says 1 in hybrid <span class="math inline">\(H_j\)</span>. In the sum <span class="math inline">\(\sum_{j=1}^n (h_{j-1} - h_j)\)</span>, each intermediate <span class="math inline">\(h_j\)</span> appears once with a plus sign and once with a minus sign, so the sum telescopes: <span id="eq-apx-crypto-telescope"><span class="math display">\[h_0 - h_n = \sum_{j=1}^n (h_{j-1} - h_j). \tag{I.6}\]</span></span> The chapter calls this telescoping Fact 3, where it is used with absolute values. The left side is <span class="math inline">\(\Pr[A^{F_k} = 1] - \Pr[A^f = 1]\)</span>, whose absolute value is <span class="math inline">\(\mathrm{Adv}_{\mathrm{PRF}}(A)\)</span>.</p></li>
+<li><p><strong>Write two neighbouring hybrids as one table.</strong> Fix <span class="math inline">\(j \ge 1\)</span> and look at a node <span class="math inline">\(w\)</span> at depth <span class="math inline">\(j - 1\)</span>. In <span class="math inline">\(H_{j-1}\)</span>, its two children <span class="math inline">\(w0\)</span> and <span class="math inline">\(w1\)</span> get the two halves of <span class="math inline">\(G(L(w))\)</span>, so together they carry the string <span class="math inline">\(G(L(w))\)</span>. Different nodes <span class="math inline">\(w\)</span> have independent uniform labels, so these strings are independent, each distributed as <span class="math inline">\(G(U_\lambda)\)</span>. In <span class="math inline">\(H_j\)</span>, the children carry two independent uniform labels, so together they carry a string distributed as <span class="math inline">\(U_{2\lambda}\)</span>, again independently for each <span class="math inline">\(w\)</span>. Below depth <span class="math inline">\(j\)</span> both hybrids compute with <span class="math inline">\(G\)</span> in the same way. So the two hybrids are one and the same world, except for the distribution <span class="math inline">\(\mathcal D\)</span> that the children’s strings come from. In that world, a table <span class="math inline">\(T\)</span> gives each node <span class="math inline">\(w\)</span> at depth <span class="math inline">\(j - 1\)</span> its own independent draw <span class="math inline">\(T(w)\)</span> from <span class="math inline">\(\mathcal D\)</span>. The query <span class="math inline">\(x\)</span> is answered by taking the half of <span class="math inline">\(T(x_1\cdots x_{j-1})\)</span> that bit <span class="math inline">\(x_j\)</span> selects and walking down with <span class="math inline">\(G\)</span>: <span id="eq-auto-09cryptography-5"><span class="math display">\[W_j^{\mathcal D}(x) = G_{x_n}\big(\cdots G_{x_{j+1}}\big(\text{half } x_j \text{ of } T(x_1\cdots x_{j-1})\big)\cdots\big). \tag{I.7}\]</span></span> With <span class="math inline">\(\mathcal D = G(U_\lambda)\)</span> this world is <span class="math inline">\(H_{j-1}\)</span>, and with <span class="math inline">\(\mathcal D = U_{2\lambda}\)</span> it is <span class="math inline">\(H_j\)</span>. For <span class="math inline">\(j = 1\)</span> the only node at depth 0 is the root, so the table has a single entry.</p></li>
+<li><p><strong>Lazy sampling gives the same view.</strong> There are two ways to fill the table <span class="math inline">\(T\)</span>. In the <em>advance</em> version, every entry is drawn before the game starts. In the <em>lazy</em> version, each entry is drawn from <span class="math inline">\(\mathcal D\)</span> the first time a query needs it, and reused afterwards. The adversary’s <strong>view</strong> is everything it sees: its own random choices (its coins) and all the answers it receives. The claim is that the view has the same distribution in both versions. Think of dice rolled earlier and hidden under cups: lifting a cup now shows a number that is exactly as random as rolling the die now, provided nobody peeked.</p>
+<p>The proof goes one query at a time. Call the <strong>history</strong> after <span class="math inline">\(i\)</span> queries the adversary’s coins together with the table entries used so far. Every answer, and therefore every next query, is a function of the history. If the next query needs an entry that was already used, both versions answer with that same entry, which is part of the history. If it needs a new entry, then in the advance version that entry was drawn independently of the other entries and of the adversary’s coins, so given the history it is still distributed as <span class="math inline">\(\mathcal D\)</span>. In the lazy version it is a fresh draw from <span class="math inline">\(\mathcal D\)</span>, so the same holds. So in both versions, the history after <span class="math inline">\(i + 1\)</span> queries is the history after <span class="math inline">\(i\)</span> queries plus one entry with the same conditional distribution. The probability of a whole history is the product of these conditional probabilities, one per query (the chain rule), so the histories have the same distribution after every query. The same then holds for anything computed from them, including the adversary’s output.</p></li>
+<li><p><strong>Build <span class="math inline">\(B_j\)</span>, which judges <span class="math inline">\(q\)</span> strings at once.</strong> The reduction <span class="math inline">\(B_j\)</span> receives <span class="math inline">\(q\)</span> strings <span class="math inline">\(y_1, \dots, y_q\)</span> of <span class="math inline">\(2\lambda\)</span> bits each. They are drawn independently from one distribution <span class="math inline">\(\mathcal D\)</span>, which is either <span class="math inline">\(G(U_\lambda)\)</span> or <span class="math inline">\(U_{2\lambda}\)</span>. It runs <span class="math inline">\(A\)</span> and keeps a ticket table, which starts empty. When a query <span class="math inline">\(x\)</span> arrives, <span class="math inline">\(B_j\)</span> looks at the node <span class="math inline">\(w = x_1\cdots x_{j-1}\)</span> at depth <span class="math inline">\(j - 1\)</span> on its path, and if <span class="math inline">\(w\)</span> has no ticket yet, gives it the next unused index <span class="math inline">\(c\)</span>. It then answers with the half of <span class="math inline">\(y_c\)</span> that <span class="math inline">\(x_j\)</span> selects, walked down with <span class="math inline">\(G\)</span> exactly as in step 3. At the end, <span class="math inline">\(B_j\)</span> outputs whatever <span class="math inline">\(A\)</span> outputs. Each query passes through one node at depth <span class="math inline">\(j - 1\)</span>, so at most <span class="math inline">\(q\)</span> nodes ever need a ticket and the strings never run out.</p>
+<p>Now compare this with step 4. The string <span class="math inline">\(y_c\)</span> is first read when the <span class="math inline">\(c\)</span>-th new node appears. Until then, everything <span class="math inline">\(B_j\)</span> has done depends only on <span class="math inline">\(y_1, \dots, y_{c-1}\)</span> and on <span class="math inline">\(A\)</span>’s coins, and <span class="math inline">\(y_c\)</span> is independent of all of them. So <span class="math inline">\(B_j\)</span> fills the table of step 3 lazily, in the sense of step 4, and <span class="math inline">\(A\)</span>’s view inside <span class="math inline">\(B_j\)</span> is exactly its view in <span class="math inline">\(W_j^{\mathcal D}\)</span>. With step 3, this gives <span id="eq-auto-09cryptography-6"><span class="math display">\[\Pr\big[B_j(G(U_\lambda)^q) = 1\big] = h_{j-1}, \qquad \Pr\big[B_j(U_{2\lambda}^q) = 1\big] = h_j, \tag{I.8}\]</span></span> where <span class="math inline">\(G(U_\lambda)^q\)</span> means <span class="math inline">\(q\)</span> independent outputs of <span class="math inline">\(G\)</span> on uniform seeds, and <span class="math inline">\(U_{2\lambda}^q\)</span> means <span class="math inline">\(q\)</span> independent uniform strings.</p></li>
+<li><p><strong>Go from <span class="math inline">\(q\)</span> strings to one.</strong> The chapter’s hybrid lemma for many samples does this, and here is its argument for this case. Write <span class="math inline">\(g_i\)</span> for the probability that <span class="math inline">\(B_j\)</span> outputs 1 on a list of <span class="math inline">\(q\)</span> independent strings whose first <span class="math inline">\(i\)</span> are uniform and whose other <span class="math inline">\(q - i\)</span> are outputs of <span class="math inline">\(G\)</span>. The two ends are the cases of step 5: <span class="math inline">\(g_0 = h_{j-1}\)</span> (all from <span class="math inline">\(G\)</span>) and <span class="math inline">\(g_q = h_j\)</span> (all uniform). The mixed lists in between match no hybrid, and they do not need to. The one-string distinguisher <span class="math inline">\(B'_j\)</span> takes a challenge string <span class="math inline">\(z\)</span> and picks a position <span class="math inline">\(i\)</span> uniformly from 1 to <span class="math inline">\(q\)</span>. It puts uniform strings before position <span class="math inline">\(i\)</span>, puts <span class="math inline">\(z\)</span> at position <span class="math inline">\(i\)</span>, and after it puts outputs of <span class="math inline">\(G\)</span> on seeds it draws itself, which is possible because <span class="math inline">\(G\)</span> is public. Then it outputs <span class="math inline">\(B_j\)</span>’s answer on the whole list. If <span class="math inline">\(z\)</span> comes from <span class="math inline">\(G\)</span>, the list starts with <span class="math inline">\(i - 1\)</span> uniform strings, so <span class="math inline">\(B'_j\)</span> says 1 with probability <span class="math inline">\(g_{i-1}\)</span>; if <span class="math inline">\(z\)</span> is uniform, the probability is <span class="math inline">\(g_i\)</span>. Averaging over <span class="math inline">\(i\)</span> gives <span class="math inline">\(\frac1q\sum_{i=1}^q (g_{i-1} - g_i)\)</span>, which telescopes as in step 2 to <span class="math inline">\(\frac1q(g_0 - g_q)\)</span>: <span id="eq-auto-09cryptography-7"><span class="math display">\[\Pr[B'_j(G(U_\lambda)) = 1] - \Pr[B'_j(U_{2\lambda}) = 1] = \frac1q\,(h_{j-1} - h_j). \tag{I.9}\]</span></span></p></li>
+<li><p><strong>Pick the level at random and add up.</strong> The final distinguisher <span class="math inline">\(B\)</span> picks <span class="math inline">\(j\)</span> uniformly from <span class="math inline">\(\{1, \dots, n\}\)</span> and runs <span class="math inline">\(B'_j\)</span>. Averaging step 6 over <span class="math inline">\(j\)</span> and using <a href="#eq-apx-crypto-telescope" class="quarto-xref">Equation&nbsp;<span>I.6</span></a>, <span id="eq-auto-09cryptography-8"><span class="math display">\[\Pr[B(G(U_\lambda)) = 1] - \Pr[B(U_{2\lambda}) = 1] = \frac1n\sum_{j=1}^n \frac1q\,(h_{j-1} - h_j) = \frac{h_0 - h_n}{nq}. \tag{I.10}\]</span></span> Taking absolute values gives <a href="#eq-apx-crypto-ggm" class="quarto-xref">Equation&nbsp;<span>I.4</span></a>. As for the cost, <span class="math inline">\(B\)</span> runs <span class="math inline">\(A\)</span> once. It computes at most <span class="math inline">\(q - 1\)</span> outputs of <span class="math inline">\(G\)</span> for the list, and at most <span class="math inline">\(n - 1\)</span> evaluations of <span class="math inline">\(G\)</span> per query to walk down the tree. That is at most <span class="math inline">\((q - 1) + q(n - 1) = nq - 1\)</span> evaluations, fewer than <span class="math inline">\(nq\)</span>.</p></li>
+<li><p><strong>Conclude for efficient adversaries.</strong> Suppose <span class="math inline">\(n\)</span> and <span class="math inline">\(q\)</span> grow at most polynomially in <span class="math inline">\(\lambda\)</span>. Then an efficient <span class="math inline">\(A\)</span> gives an efficient <span class="math inline">\(B\)</span>. If <span class="math inline">\(A\)</span>’s advantage were not negligible, it would be at least <span class="math inline">\(\lambda^{-c}\)</span> for some exponent <span class="math inline">\(c\)</span> and infinitely many <span class="math inline">\(\lambda\)</span>. Dividing by the polynomial <span class="math inline">\(nq\)</span> keeps it above one over a polynomial, so <span class="math inline">\(B\)</span>’s advantage <span class="math inline">\(\mathrm{Adv}_{\mathrm{PRF}}(A)/(nq)\)</span> would not be negligible either, and <span class="math inline">\(G\)</span> would not be a PRG. So if <span class="math inline">\(G\)</span> is a PRG, the GGM tree is a PRF.</p></li>
+</ol>
+<p>Adaptivity matters only in step 5. A reduction that fixed in advance which nodes get challenge strings would have to cover all <span class="math inline">\(2^{j-1}\)</span> nodes at depth <span class="math inline">\(j - 1\)</span>. That can be exponentially many strings, and the loss factor would grow with it, from <span class="math inline">\(q\)</span> to <span class="math inline">\(2^{j-1}\)</span>. The ticket rule lets the adversary’s own queries decide where the <span class="math inline">\(q\)</span> strings go, and step 4 is why that changes nothing in what the adversary sees.</p>
+</section>
+<section id="checking-it" class="level3" data-number="I.1.4">
+<h3 data-number="I.1.4" class="anchored" data-anchor-id="checking-it"><span class="header-section-number">I.1.4</span> Checking it</h3>
+<p>The script runs the whole reduction on a toy with <span class="math inline">\(\lambda = 8\)</span>, <span class="math inline">\(n = 3\)</span> and <span class="math inline">\(q = 3\)</span>. Its PRG is broken on purpose, so that every advantage is large enough to measure: <span class="math inline">\(G(s) = (s, f(s))\)</span> for a fixed random permutation <span class="math inline">\(f\)</span> of the 8-bit strings. So the left half is the seed itself, and the right half is a public function of it. In the real <span class="math inline">\(F_k\)</span>, every left step keeps the label and every right step applies <span class="math inline">\(f\)</span>. So <span class="math inline">\(F_k(000) = k\)</span>, <span class="math inline">\(F_k(001) = f(k)\)</span> and <span class="math inline">\(F_k(100) = f(k)\)</span>, while <span class="math inline">\(F_k(110) = f(f(k))\)</span> because it takes two right steps.</p>
+<p>The adversary uses these relations, and it chooses its third query adaptively so that the check also covers the subtle part of step 5. It asks 000 and then 001, and for its third query it asks 100 if the first answer starts with a 0 bit, and 110 otherwise. Check 1 asks whether the second answer is <span class="math inline">\(f\)</span> of the first. Check 2 asks whether the third answer is <span class="math inline">\(f\)</span> of the first, after 100, or <span class="math inline">\(f\)</span> applied twice to the first, after 110. The adversary flips a coin to choose one check, and outputs 1, meaning “random function”, if that check fails. A uniform label passes a fixed equality only with probability <span class="math inline">\(2^{-8}\)</span>, so a check on labels that are independent fails with probability <span class="math inline">\(1 - 2^{-8}\)</span>. Both checks pass in <span class="math inline">\(H_0\)</span>, so <span class="math inline">\(h_0 = 0\)</span>. In <span class="math inline">\(H_1\)</span> and <span class="math inline">\(H_2\)</span>, the first two leaves still hang below one node and are computed from it with <span class="math inline">\(G\)</span>, so check 1 passes. But check 2 compares labels from different branches of the tree, which are independent, so it fails with probability <span class="math inline">\(1 - 2^{-8}\)</span>. That gives <span class="math inline">\(h_1 = h_2 = \frac12(1 - 2^{-8}) = 0.4980\)</span>. In <span class="math inline">\(H_3\)</span> both checks fail, so <span class="math inline">\(h_3 = 1 - 2^{-8} = 0.9961\)</span>. <a href="#tbl-apx-crypto-ggm-check" class="quarto-xref">Table&nbsp;<span>I.3</span></a> compares these with simulation.</p>
+<div id="tbl-apx-crypto-ggm-check" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-crypto-ggm-check-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;I.3: How often the adversary says “random” in each hybrid, and in each reduction <span class="math inline">\(B_j\)</span> fed outputs of the toy <span class="math inline">\(G\)</span> or uniform strings (seed 0, 200,000 runs per entry).
+</figcaption>
+<div aria-describedby="tbl-apx-crypto-ggm-check-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><span class="math inline">\(j\)</span></th>
+<th>Exact <span class="math inline">\(h_j\)</span></th>
+<th>Simulated <span class="math inline">\(h_j\)</span></th>
+<th><span class="math inline">\(B_j\)</span> on 3 outputs of <span class="math inline">\(G\)</span> (should be <span class="math inline">\(h_{j-1}\)</span>)</th>
+<th><span class="math inline">\(B_j\)</span> on 3 uniform strings (should be <span class="math inline">\(h_j\)</span>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>0.0000</td>
+<td>0.0000</td>
+<td></td>
+<td></td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>0.4980</td>
+<td>0.4994</td>
+<td>0.0000</td>
+<td>0.5005</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>0.4980</td>
+<td>0.4985</td>
+<td>0.4979</td>
+<td>0.4993</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>0.9961</td>
+<td>0.9962</td>
+<td>0.4983</td>
+<td>0.9964</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Each <span class="math inline">\(B_j\)</span> lands on the hybrid that step 5 predicts, to within simulation noise of about 0.001, even though the adversary’s third query depends on what it has seen. <a href="#fig-apx-crypto-ggm-check" class="quarto-xref">Figure&nbsp;<span>I.2</span></a> draws the same comparison. The single-sample distinguisher <span class="math inline">\(B\)</span> of step 7 says 1 with probability 0.5535 on outputs of <span class="math inline">\(G\)</span> and 0.6641 on uniform strings. Its advantage is therefore 0.1105, against the predicted <span class="math inline">\(0.9961/9 = 0.1107\)</span>. Multiplying back by <span class="math inline">\(nq = 9\)</span> gives 0.995, which matches the adversary’s PRF advantage <span class="math inline">\(h_3 - h_0 = 0.9961\)</span> as <a href="#eq-apx-crypto-ggm" class="quarto-xref">Equation&nbsp;<span>I.4</span></a> says it should.</p>
+<div id="fig-apx-crypto-ggm-check" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-crypto-ggm-check-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_crypto_ggm_check.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-crypto-ggm-check-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;I.2: How often the toy adversary says “random” in the hybrids <span class="math inline">\(H_0\)</span> to <span class="math inline">\(H_3\)</span>, exactly and by simulation, and in each reduction <span class="math inline">\(B_j\)</span>. Red triangles are <span class="math inline">\(B_j\)</span> fed outputs of <span class="math inline">\(G\)</span>, placed at <span class="math inline">\(H_{j-1}\)</span>; orange squares are <span class="math inline">\(B_j\)</span> fed uniform strings, placed at <span class="math inline">\(H_j\)</span>. Every marker sits on the curve.
+</figcaption>
+</figure>
+</div>
+<p>Since <a href="#eq-apx-crypto-ggm" class="quarto-xref">Equation&nbsp;<span>I.4</span></a> is an equality, the factor <span class="math inline">\(nq\)</span> between the two advantages is lost inside <span class="math inline">\(B\)</span> itself, in the averaging over levels and positions. The toy shows why. The adversary’s rate jumps by 0.498 at levels 1 and 3 and does not move at level 2, but <span class="math inline">\(B\)</span> spreads its effort evenly over all levels and all <span class="math inline">\(q\)</span> positions, most of which carry no signal. So the factor <span class="math inline">\(nq\)</span> comes from how the proof is organized, just like the factor for <span class="math inline">\(m\)</span> samples in the chapter’s hybrid lemma.</p>
+</section>
+<section id="what-it-does-not-cover" class="level3" data-number="I.1.5">
+<h3 data-number="I.1.5" class="anchored" data-anchor-id="what-it-does-not-cover"><span class="header-section-number">I.1.5</span> What it does not cover</h3>
+<p>The proof needs every input to have the same length <span class="math inline">\(n\)</span>. With inputs of different lengths the GGM tree is not a PRF, because <span class="math inline">\(F_k(0)\)</span> is the label of the node that <span class="math inline">\(F_k(00)\)</span> hangs from. An adversary then checks whether <span class="math inline">\(F_k(00) = G_0(F_k(0))\)</span>, which always holds for the real function and almost never for a random one. The proof also assumes that <span class="math inline">\(G\)</span> is deterministic, because a node’s label must give the same children every time a query passes through it. It assumes as well that <span class="math inline">\(G\)</span> doubles its input exactly; a generator that stretches by only one bit can be applied repeatedly to its own output to reach double length. Finally, <a href="#eq-apx-crypto-ggm" class="quarto-xref">Equation&nbsp;<span>I.4</span></a> compares advantages. To turn it into a concrete guarantee, such as “no attacker running for <span class="math inline">\(2^{128}\)</span> steps succeeds”, you need a concrete bound on the advantage of PRG distinguishers with <span class="math inline">\(B\)</span>’s running time.</p>
+</section>
+</section>
+<section id="sec-apx-crypto-lwe" class="level2" data-number="I.2">
+<h2 data-number="I.2" class="anchored" data-anchor-id="sec-apx-crypto-lwe"><span class="header-section-number">I.2</span> Search LWE reduces to decision LWE</h2>
+<section id="what-the-chapter-uses-1" class="level3" data-number="I.2.1">
+<h3 data-number="I.2.1" class="anchored" data-anchor-id="what-the-chapter-uses-1"><span class="header-section-number">I.2.1</span> What the chapter uses</h3>
+<p>Learning with errors hides a secret vector behind linear equations with small errors. Fix a dimension <span class="math inline">\(d\)</span>, a modulus <span class="math inline">\(p\)</span> and an error distribution <span class="math inline">\(\chi\)</span> on integers that are small compared with <span class="math inline">\(p\)</span>. Write <span class="math inline">\(\mathbb Z_p\)</span> for the integers <span class="math inline">\(0, \dots, p - 1\)</span> with arithmetic mod <span class="math inline">\(p\)</span>, and <span class="math inline">\(\mathbb Z_p^d\)</span> for vectors of <span class="math inline">\(d\)</span> such numbers. The secret <span class="math inline">\(s\)</span> is a vector in <span class="math inline">\(\mathbb Z_p^d\)</span>. An <strong>LWE sample</strong> is a pair made of a uniform random vector <span class="math inline">\(a\)</span> in <span class="math inline">\(\mathbb Z_p^d\)</span> and a number <span class="math inline">\(b\)</span>. To make <span class="math inline">\(b\)</span>, draw an error <span class="math inline">\(e\)</span> from <span class="math inline">\(\chi\)</span> and set <span id="eq-auto-09cryptography-9"><span class="math display">\[b = \langle a, s\rangle + e \bmod p, \qquad \langle a, s\rangle = \sum_{j=1}^d a_j s_j. \tag{I.11}\]</span></span> Every sample has its own fresh <span class="math inline">\(a\)</span> and <span class="math inline">\(e\)</span>, independent of the other samples, and the secret is the same in all of them.</p>
+<p><strong>Search LWE</strong> asks for <span class="math inline">\(s\)</span>, given as many samples as the algorithm needs. <strong>Decision LWE</strong> asks whether <span class="math inline">\(m\)</span> given pairs are LWE samples or uniform pairs in <span class="math inline">\(\mathbb Z_p^d \times \mathbb Z_p\)</span>. The chapter shows that search is at least as hard as decision. For the converse it says only this: Regev, who introduced LWE, proves it for a prime <span class="math inline">\(p\)</span> that is at most polynomial in <span class="math inline">\(d\)</span>, by guessing the coordinates of <span class="math inline">\(s\)</span> one at a time and testing each guess with the decision algorithm.</p>
+<p>Here is that converse in a form this appendix proves. Assume that <span class="math inline">\(p\)</span> is prime. Assume also that a decision algorithm <span class="math inline">\(D\)</span>, given <span class="math inline">\(m\)</span> pairs, has advantage at least <span class="math inline">\(\varepsilon\)</span> for every secret, where the probabilities are over the pairs and over <span class="math inline">\(D\)</span>’s own random choices: <span id="eq-auto-09cryptography-10"><span class="math display">\[\big|\Pr[D(m \text{ LWE samples with secret } s) = 1] - \Pr[D(m \text{ uniform pairs}) = 1]\big| \ge \varepsilon \quad\text{for every } s \in \mathbb Z_p^d. \tag{I.12}\]</span></span> Then, for any failure probability <span class="math inline">\(\beta\)</span>, there is a search algorithm that finds all of <span class="math inline">\(s\)</span> with probability at least <span class="math inline">\(1 - \beta\)</span>. It calls <span class="math inline">\(D\)</span> at most <span class="math inline">\((dp + 1)N\)</span> times and uses <span class="math inline">\(dpNm\)</span> LWE samples, where the number of repetitions per test is <span id="eq-apx-crypto-repetitions"><span class="math display">\[N = \left\lceil \frac{8}{\varepsilon^2}\ln\frac{2(dp + 1)}{\beta} \right\rceil. \tag{I.13}\]</span></span> The advantage <span class="math inline">\(\varepsilon\)</span> is <strong>noticeable</strong> if it is at least one over some polynomial in <span class="math inline">\(d\)</span>. In that case, and when <span class="math inline">\(p\)</span>, <span class="math inline">\(m\)</span> and <span class="math inline">\(D\)</span>’s running time are also polynomial in <span class="math inline">\(d\)</span>, the search runs in polynomial time. The value of <span class="math inline">\(N\)</span> comes from step 6 of the derivation.</p>
+</section>
+<section id="the-idea-1" class="level3" data-number="I.2.2">
+<h3 data-number="I.2.2" class="anchored" data-anchor-id="the-idea-1"><span class="header-section-number">I.2.2</span> The idea</h3>
+<p>The test for one guess works like this. Take an LWE sample and a guess <span class="math inline">\(g\)</span> for the first coordinate <span class="math inline">\(s_1\)</span>. Pick a random number <span class="math inline">\(r\)</span>, add it to the first coordinate of <span class="math inline">\(a\)</span>, and add <span class="math inline">\(r g\)</span> to <span class="math inline">\(b\)</span>. If the guess is right, the change to <span class="math inline">\(b\)</span> is exactly the change to <span class="math inline">\(\langle a, s\rangle\)</span>. So the new pair is again an LWE sample with the same secret and the same small error. If the guess is wrong, the error picks up the extra term <span class="math inline">\(r(g - s_1)\)</span>. When <span class="math inline">\(p\)</span> is prime, that term is a random multiple of a nonzero number, so it is uniform. It drowns the error, and together with the shifted first coordinate it makes the whole pair uniform. Feeding the new pairs to <span class="math inline">\(D\)</span> therefore asks <span class="math inline">\(D\)</span> “LWE or uniform?”, and the true answer is “LWE” exactly when the guess is right. Repeating the test many times measures how often <span class="math inline">\(D\)</span> says 1, and comparing that rate with <span class="math inline">\(D\)</span>’s rate on uniform pairs, which the search draws itself, tells the right guess from the wrong ones. Trying all <span class="math inline">\(p\)</span> guesses for each of the <span class="math inline">\(d\)</span> coordinates recovers <span class="math inline">\(s\)</span>.</p>
+<p><a href="#tbl-apx-crypto-small" class="quarto-xref">Table&nbsp;<span>I.4</span></a> makes the wrong-guess case concrete with <span class="math inline">\(p = 5\)</span>, <span class="math inline">\(s_1 = 3\)</span> and error <span class="math inline">\(e = 1\)</span>. After the change, the new <span class="math inline">\(b\)</span> minus the inner product of the new <span class="math inline">\(a\)</span> with <span class="math inline">\(s\)</span> is <span class="math inline">\(e + r(g - s_1) \bmod 5\)</span>. With the right guess <span class="math inline">\(g = 3\)</span> it stays at <span class="math inline">\(e = 1\)</span> for every <span class="math inline">\(r\)</span>. With the wrong guess <span class="math inline">\(g = 1\)</span> it becomes <span class="math inline">\(1 - 2r \bmod 5\)</span>, which takes each of the five values exactly once as <span class="math inline">\(r\)</span> runs through <span class="math inline">\(0, \dots, 4\)</span>. Since <span class="math inline">\(r\)</span> is uniform, the result is uniform.</p>
+<div id="tbl-apx-crypto-small" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-crypto-small-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;I.4: The value <span class="math inline">\(b - \langle a, s\rangle\)</span> after re-randomizing with guess <span class="math inline">\(g\)</span>, for <span class="math inline">\(p = 5\)</span>, <span class="math inline">\(s_1 = 3\)</span>, <span class="math inline">\(e = 1\)</span> and each value of <span class="math inline">\(r\)</span>. The wrong guess hits every element of <span class="math inline">\(\mathbb Z_5\)</span> once.
+</figcaption>
+<div aria-describedby="tbl-apx-crypto-small-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th><span class="math inline">\(r\)</span></th>
+<th>0</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Right guess <span class="math inline">\(g = 3\)</span>: <span class="math inline">\(1 + 0 \cdot r\)</span></td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td>Wrong guess <span class="math inline">\(g = 1\)</span>: <span class="math inline">\(1 - 2r \bmod 5\)</span></td>
+<td>1</td>
+<td>4</td>
+<td>2</td>
+<td>0</td>
+<td>3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="derivation-1" class="level3" data-number="I.2.3">
+<h3 data-number="I.2.3" class="anchored" data-anchor-id="derivation-1"><span class="header-section-number">I.2.3</span> Derivation</h3>
+<p>Fix a coordinate <span class="math inline">\(\ell\)</span> and a guess <span class="math inline">\(g \in \mathbb Z_p\)</span>. Steps 1 to 4 show what one re-randomized sample looks like, and steps 5 to 8 turn this into a search with a failure probability you choose.</p>
+<ol type="1">
+<li><p><strong>Re-randomize.</strong> Take an LWE sample <span class="math inline">\((a, b)\)</span> with <span class="math inline">\(b = \langle a, s\rangle + e\)</span>. Draw a fresh <span class="math inline">\(r\)</span> uniform in <span class="math inline">\(\mathbb Z_p\)</span>, independent of everything else. Let <span class="math inline">\(a'\)</span> be <span class="math inline">\(a\)</span> with <span class="math inline">\(r\)</span> added to its <span class="math inline">\(\ell\)</span>-th coordinate, and let <span class="math inline">\(b' = b + rg \bmod p\)</span>. Adding <span class="math inline">\(r\)</span> to <span class="math inline">\(a_\ell\)</span> adds <span class="math inline">\(r s_\ell\)</span> to the inner product, so <span class="math inline">\(\langle a', s\rangle = \langle a, s\rangle + r s_\ell\)</span>. Subtracting this from <span class="math inline">\(b'\)</span> leaves the <strong>residual</strong> <span id="eq-apx-crypto-residual"><span class="math display">\[b' - \langle a', s\rangle = e + r(g - s_\ell) \bmod p. \tag{I.14}\]</span></span></p></li>
+<li><p><strong>The new vector is still uniform.</strong> For each fixed <span class="math inline">\(r\)</span>, adding <span class="math inline">\(r\)</span> to one coordinate is a bijection of <span class="math inline">\(\mathbb Z_p^d\)</span>. By the chapter’s Fact 4, a bijection maps the uniform distribution to itself. Since <span class="math inline">\(a\)</span> is uniform and independent of <span class="math inline">\(r\)</span> and <span class="math inline">\(e\)</span>, the vector <span class="math inline">\(a'\)</span> is uniform and independent of <span class="math inline">\(e\)</span>.</p></li>
+<li><p><strong>A right guess gives an LWE sample.</strong> If <span class="math inline">\(g = s_\ell\)</span>, the residual <a href="#eq-apx-crypto-residual" class="quarto-xref">Equation&nbsp;<span>I.14</span></a> is just <span class="math inline">\(e\)</span>, so <span class="math inline">\(b' = \langle a', s\rangle + e\)</span>. With step 2, <span class="math inline">\(a'\)</span> is uniform and <span class="math inline">\(e\)</span> is an independent draw from <span class="math inline">\(\chi\)</span>, so <span class="math inline">\((a', b')\)</span> is an LWE sample with the same secret <span class="math inline">\(s\)</span>.</p></li>
+<li><p><strong>A wrong guess gives a uniform pair.</strong> Now let <span class="math inline">\(c = g - s_\ell \ne 0\)</span>. This is where <span class="math inline">\(p\)</span> must be prime. Every nonzero number mod a prime has an inverse; for example, <span class="math inline">\(2 \cdot 3 = 6 \equiv 1 \pmod 5\)</span>. Fix the error <span class="math inline">\(e\)</span> and write <span class="math inline">\(v = e + rc\)</span> for the residual. The map that sends <span class="math inline">\((a, r)\)</span> to <span class="math inline">\((a', v)\)</span> can be undone. From the residual you recover <span class="math inline">\(r = (v - e)c^{-1}\)</span>, and then you recover <span class="math inline">\(a\)</span> by subtracting <span class="math inline">\(r\)</span> from coordinate <span class="math inline">\(\ell\)</span> of <span class="math inline">\(a'\)</span>. So this map is a bijection of <span class="math inline">\(\mathbb Z_p^d \times \mathbb Z_p\)</span>. The pair <span class="math inline">\((a, r)\)</span> is uniform there and independent of <span class="math inline">\(e\)</span>, so by Fact 4 the pair <span class="math inline">\((a', v)\)</span> is uniform, whatever <span class="math inline">\(e\)</span> is. Finally, <span class="math inline">\(b' = \langle a', s\rangle + v\)</span>. The map from <span class="math inline">\((a', v)\)</span> to <span class="math inline">\((a', b')\)</span> is another bijection, undone by subtracting <span class="math inline">\(\langle a', s\rangle\)</span> from <span class="math inline">\(b'\)</span>. So by Fact 4 once more, <span class="math inline">\((a', b')\)</span> is uniform on <span class="math inline">\(\mathbb Z_p^d \times \mathbb Z_p\)</span>.</p></li>
+<li><p><strong>The test feeds <span class="math inline">\(D\)</span> exactly one of its two worlds.</strong> Each re-randomized pair uses its own fresh sample and its own <span class="math inline">\(r\)</span>, so <span class="math inline">\(m\)</span> of them are independent. By steps 3 and 4, they are <span class="math inline">\(m\)</span> LWE samples with secret <span class="math inline">\(s\)</span> when the guess is right, and <span class="math inline">\(m\)</span> uniform pairs when it is wrong. Write <span class="math inline">\(\alpha_{\mathrm{LWE}}\)</span> and <span class="math inline">\(\alpha_{\mathrm U}\)</span> for the probabilities that <span class="math inline">\(D\)</span> outputs 1 in these two cases. Then a run of the test outputs 1 with probability <span class="math inline">\(\alpha_{\mathrm{LWE}}\)</span> for the right guess and <span class="math inline">\(\alpha_{\mathrm U}\)</span> for every wrong one, and <span class="math inline">\(|\alpha_{\mathrm{LWE}} - \alpha_{\mathrm U}| \ge \varepsilon\)</span> by assumption.</p></li>
+<li><p><strong>Estimate the rates.</strong> The search does not know <span class="math inline">\(\alpha_{\mathrm{LWE}}\)</span> or <span class="math inline">\(\alpha_{\mathrm U}\)</span>, so it estimates them by repetition. For the baseline, it draws <span class="math inline">\(m\)</span> uniform pairs itself, runs <span class="math inline">\(D\)</span> on them, and repeats <span class="math inline">\(N\)</span> times. The fraction of 1s is its estimate <span class="math inline">\(\hat\alpha_{\mathrm U}\)</span>. For each coordinate <span class="math inline">\(\ell\)</span> and guess <span class="math inline">\(g\)</span>, it repeats the test <span class="math inline">\(N\)</span> times with fresh samples and fresh <span class="math inline">\(r\)</span>, and the fraction of 1s is <span class="math inline">\(\hat\alpha_{\ell,g}\)</span>. Each estimate is an average of <span class="math inline">\(N\)</span> independent 0/1 values, so it concentrates around its mean. Hoeffding’s inequality, from <a href="../part01-prerequisites/02-concentration.html">Concentration inequalities</a>, says that such an average lands at least <span class="math inline">\(\tau\)</span> away from its mean with probability at most <span class="math inline">\(2e^{-2N\tau^2}\)</span>. Step 7 needs every estimate within <span class="math inline">\(\varepsilon/4\)</span>, so take <span class="math inline">\(\tau = \varepsilon/4\)</span>, which gives <span class="math inline">\(2e^{-N\varepsilon^2/8}\)</span>. There are <span class="math inline">\(dp + 1\)</span> estimates in all. The union bound says that the chance that at least one of several events happens is at most the sum of their chances. So some estimate is off by <span class="math inline">\(\varepsilon/4\)</span> or more with probability at most <span id="eq-auto-09cryptography-11"><span class="math display">\[2(dp + 1)\,e^{-N\varepsilon^2/8} \le \beta, \tag{I.15}\]</span></span> Taking logarithms, this holds when <span class="math inline">\(N\varepsilon^2/8 \ge \ln(2(dp + 1)/\beta)\)</span>, which is <a href="#eq-apx-crypto-repetitions" class="quarto-xref">Equation&nbsp;<span>I.13</span></a>.</p></li>
+<li><p><strong>Decide each guess.</strong> The search keeps the guess <span class="math inline">\(g\)</span> for coordinate <span class="math inline">\(\ell\)</span> when <span class="math inline">\(|\hat\alpha_{\ell,g} - \hat\alpha_{\mathrm U}| &gt; \varepsilon/2\)</span>. Suppose every estimate is within <span class="math inline">\(\varepsilon/4\)</span> of its mean, which happens with probability at least <span class="math inline">\(1 - \beta\)</span>. For the right guess, the true gap is at least <span class="math inline">\(\varepsilon\)</span> and the two estimation errors together are less than <span class="math inline">\(\varepsilon/2\)</span>, so the measured gap is more than <span class="math inline">\(\varepsilon/2\)</span> and the guess is kept. For a wrong guess the true gap is 0, so the measured gap is less than <span class="math inline">\(\varepsilon/2\)</span> and the guess is dropped. So exactly one guess survives for each coordinate, and it is <span class="math inline">\(s_\ell\)</span>.</p></li>
+<li><p><strong>Count the cost.</strong> The search calls <span class="math inline">\(D\)</span> <span class="math inline">\(N\)</span> times for the baseline and <span class="math inline">\(N\)</span> times for each of the <span class="math inline">\(dp\)</span> pairs of coordinate and guess, which is <span class="math inline">\((dp + 1)N\)</span> calls. Each test call uses <span class="math inline">\(m\)</span> fresh LWE samples, so the search uses <span class="math inline">\(dpNm\)</span> samples. By <a href="#eq-apx-crypto-repetitions" class="quarto-xref">Equation&nbsp;<span>I.13</span></a>, <span class="math inline">\(N\)</span> grows like <span class="math inline">\(1/\varepsilon^2\)</span> and only like the logarithm of <span class="math inline">\(dp/\beta\)</span>. So the cost is polynomial in <span class="math inline">\(d\)</span> when <span class="math inline">\(p\)</span>, <span class="math inline">\(m\)</span> and <span class="math inline">\(1/\varepsilon\)</span> are. Even a failure probability as small as <span class="math inline">\(\beta = 2^{-d}\)</span> is affordable, because then <span class="math inline">\(\ln(1/\beta) = d\ln 2\)</span> is only linear in <span class="math inline">\(d\)</span>.</p></li>
+</ol>
+<p>Each assumption has its place. Primality is used in step 4, a polynomial <span class="math inline">\(p\)</span> in step 8 (the search tries every element of <span class="math inline">\(\mathbb Z_p\)</span>), a noticeable <span class="math inline">\(\varepsilon\)</span> in step 8 as well, and “for every secret” in step 5. The coordinates are tested independently of one another, which is the “one at a time” of the chapter.</p>
+</section>
+<section id="checking-it-1" class="level3" data-number="I.2.4">
+<h3 data-number="I.2.4" class="anchored" data-anchor-id="checking-it-1"><span class="header-section-number">I.2.4</span> Checking it</h3>
+<p>The script first checks steps 3 and 4 directly, with <span class="math inline">\(d = 4\)</span>, <span class="math inline">\(p = 97\)</span> and errors drawn from a normal distribution with standard deviation 3, rounded to the nearest integer. It re-randomizes 20,000 samples with the right guess for <span class="math inline">\(s_1\)</span> and with a guess that is off by 1. <a href="#fig-apx-crypto-lwe-residuals" class="quarto-xref">Figure&nbsp;<span>I.3</span></a> shows the residuals. With the right guess they form the narrow bump of the error, and 0.760 of them lie within 3 of zero, against the exact 0.757 for the rounded normal. With the wrong guess they are flat, and 0.071 of them lie within 3 of zero. A uniform residual lands on each of the 7 values from <span class="math inline">\(-3\)</span> to 3 with probability <span class="math inline">\(1/97\)</span>, so the exact share is <span class="math inline">\(7/97 = 0.072\)</span>.</p>
+<p>The third panel shows why the modulus must be prime. With <span class="math inline">\(p = 96\)</span> and a guess off by 48, the term <span class="math inline">\(48r \bmod 96\)</span> is only ever 0 or 48, because <span class="math inline">\(48r\)</span> is a multiple of 96 when <span class="math inline">\(r\)</span> is even. So the residual is the error, or the error shifted by half the modulus, and it forms two bumps instead of a flat line. A decision algorithm that looks for small residuals would accept this wrong guess about half as often as the right one, and the test of step 7 could keep it.</p>
+<div id="fig-apx-crypto-lwe-residuals" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-crypto-lwe-residuals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_crypto_lwe_residuals.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-crypto-lwe-residuals-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;I.3: Histograms of the residual <span class="math inline">\(b' - \langle a', s\rangle\)</span> after re-randomizing 20,000 LWE samples (<span class="math inline">\(d = 4\)</span>, rounded normal errors with standard deviation 3). Left: prime <span class="math inline">\(p = 97\)</span> and the right guess, which keeps the error’s bump. Middle: <span class="math inline">\(p = 97\)</span> and a guess off by 1, which is uniform. Right: composite <span class="math inline">\(p = 96\)</span> and a guess off by 48, which leaves two bumps.
+</figcaption>
+</figure>
+</div>
+<p>It then runs the whole search. A real decision algorithm for these parameters would be hard to write, so the script uses a stand-in. The stand-in sees one pair per call (<span class="math inline">\(m = 1\)</span>) and is built with the secret, but the search treats it as a black box and never reads <span class="math inline">\(s\)</span>. On 90% of calls it ignores its input and answers with a fair coin flip. On the other 10% it says 1 when the residual is within 3 of zero, which happens with probability 0.7567 for an LWE sample and <span class="math inline">\(7/97\)</span> for a uniform pair. Its advantage is therefore <span class="math inline">\(\varepsilon = 0.1 \times (0.7567 - 7/97) = 0.0684\)</span>. With <span class="math inline">\(\beta = 0.01\)</span>, <a href="#eq-apx-crypto-repetitions" class="quarto-xref">Equation&nbsp;<span>I.13</span></a> asks for <span class="math inline">\(N = 19{,}230\)</span> repetitions per test, which makes 7,480,470 calls to the stand-in in total.</p>
+<p>The search recovers the secret <span class="math inline">\((6, 27, 27, 28)\)</span> exactly. The smallest gap for a right guess is 0.0708, and the largest gap for a wrong one is 0.0166, both measured against the threshold <span class="math inline">\(\varepsilon/2 = 0.0342\)</span>. <a href="#fig-apx-crypto-lwe-search" class="quarto-xref">Figure&nbsp;<span>I.4</span></a> shows a second run with another secret. Run on ten more random secrets, the search recovers every one of them.</p>
+<div id="fig-apx-crypto-lwe-search" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-apx-crypto-lwe-search-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/apx_crypto_lwe_search.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-apx-crypto-lwe-search-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;I.4: Acceptance rate of the stand-in decision algorithm on re-randomized samples, for every guess <span class="math inline">\(g\)</span> of each of the four coordinates of a secret in <span class="math inline">\(\mathbb Z_{97}^4\)</span>. Grey dots are wrong guesses, the red dot is the right one, the black line is the rate on uniform pairs and the shaded band is <span class="math inline">\(\pm\varepsilon/2\)</span> around it.
+</figcaption>
+</figure>
+</div>
+<p>The bound behind <a href="#eq-apx-crypto-repetitions" class="quarto-xref">Equation&nbsp;<span>I.13</span></a> is conservative. It asks every estimate to be within <span class="math inline">\(\varepsilon/4\)</span> with probability <span class="math inline">\(1 - \beta\)</span> at once, but in practice the largest gap for a wrong guess, 0.0166, is only about half the threshold. The right guess clears the threshold with room to spare too. A search that stops testing once a guess is found, or that adds repetitions only for guesses near the threshold, would need fewer calls.</p>
+</section>
+<section id="what-it-does-not-cover-1" class="level3" data-number="I.2.5">
+<h3 data-number="I.2.5" class="anchored" data-anchor-id="what-it-does-not-cover-1"><span class="header-section-number">I.2.5</span> What it does not cover</h3>
+<p>The proof assumes that <span class="math inline">\(D\)</span> works for every secret. Some decision algorithms work only on average over a random secret. The first step in handling them is to make the secret random: pick a uniform vector <span class="math inline">\(u\)</span> and replace each <span class="math inline">\(b\)</span> by <span class="math inline">\(b + \langle a, u\rangle\)</span>, which gives samples with the random secret <span class="math inline">\(s + u\)</span>. But for a given <span class="math inline">\(u\)</span> the algorithm may still fail, so the search must try several <span class="math inline">\(u\)</span> and check which ones work. Regev (2009) carries this out, and those details stay cited. The proof also assumes that a lower bound <span class="math inline">\(\varepsilon\)</span> on <span class="math inline">\(D\)</span>’s advantage is known. Without one, the search can try <span class="math inline">\(\varepsilon = 1/2, 1/4, 1/8, \dots\)</span> in turn, which multiplies the cost by a logarithmic factor.</p>
+<p>For moduli that are not prime, or are too large to try every guess, other reductions exist. Peikert (2009) handles moduli that are products of distinct small primes, and Micciancio &amp; Mol (2011) give reductions that use no more samples than the decision algorithm, for a wide class of moduli. Brakerski, Langlois, Peikert, Regev &amp; Stehlé (2013) show that decision LWE is hard for any modulus by relating moduli to one another rather than by guessing. These stay cited, because each needs lattice and number theory well beyond this appendix.</p>
+</section>
+</section>
+<section id="code" class="level2" data-number="I.3">
+<h2 data-number="I.3" class="anchored" data-anchor-id="code"><span class="header-section-number">I.3</span> Code</h2>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/appendix-derivations/apx_cryptography.py">apx_cryptography.py</a> computes every number on this page and draws its figures. For the GGM tree it builds the toy PRG, runs the adaptive adversary in each hybrid, runs each reduction <span class="math inline">\(B_j\)</span> on outputs of <span class="math inline">\(G\)</span> and on uniform strings, and measures the single-sample distinguisher of step 7. For LWE it prints <a href="#tbl-apx-crypto-small" class="quarto-xref">Table&nbsp;<span>I.4</span></a>, re-randomizes samples with right and wrong guesses, and runs the full search with the stand-in decision algorithm. From the repository root:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/appendix-derivations/apx_cryptography.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="tbl-apx-crypto-code" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-apx-crypto-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;I.5: The numbers the script prints (seed 0; 200,000 runs per GGM entry, 20,000 samples for the residuals).
+</figcaption>
+<div aria-describedby="tbl-apx-crypto-code-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Quantity</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>GGM: exact <span class="math inline">\(h_0, h_1, h_2, h_3\)</span></td>
+<td>0.0000, 0.4980, 0.4980, 0.9961</td>
+</tr>
+<tr class="even">
+<td>GGM: single-sample <span class="math inline">\(B\)</span>, rate on <span class="math inline">\(G(U_\lambda)\)</span> and on <span class="math inline">\(U_{2\lambda}\)</span></td>
+<td>0.5535, 0.6641</td>
+</tr>
+<tr class="odd">
+<td>GGM: advantage of <span class="math inline">\(B\)</span>, measured and predicted <span class="math inline">\(\mathrm{Adv}_{\mathrm{PRF}}(A)/(nq)\)</span></td>
+<td>0.1105, 0.1107</td>
+</tr>
+<tr class="even">
+<td>LWE: residual within 3 of zero, right guess (exact)</td>
+<td>0.760 (0.757)</td>
+</tr>
+<tr class="odd">
+<td>LWE: residual within 3 of zero, wrong guess (exact)</td>
+<td>0.071 (0.072)</td>
+</tr>
+<tr class="even">
+<td>LWE search: <span class="math inline">\(\varepsilon\)</span>, repetitions <span class="math inline">\(N\)</span>, calls to the stand-in</td>
+<td>0.0684, 19,230, 7,480,470</td>
+</tr>
+<tr class="odd">
+<td>LWE search: smallest right gap, largest wrong gap, threshold <span class="math inline">\(\varepsilon/2\)</span></td>
+<td>0.0708, 0.0166, 0.0342</td>
+</tr>
+<tr class="even">
+<td>LWE search: random secrets recovered exactly</td>
+<td>10 of 10</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Two things are worth taking from these numbers. In the GGM check, the reductions recreate the hybrids exactly even against an adaptive adversary, so the factor <span class="math inline">\(nq\)</span> is lost only in the averaging of steps 6 and 7. In the LWE check, re-randomizing turns a right guess into LWE samples and a wrong one into exactly uniform pairs, and the only real cost is the number of repetitions needed to see a weak decision algorithm’s small advantage.</p>
+</section>
+<section id="references" class="level2" data-number="I.4">
+<h2 data-number="I.4" class="anchored" data-anchor-id="references"><span class="header-section-number">I.4</span> References</h2>
+<ul>
+<li>Goldreich, Goldwasser &amp; Micali, “How to Construct Random Functions”, <em>Journal of the ACM</em>, 1986. The GGM construction and its original proof.</li>
+<li>Goldreich, <em>Foundations of Cryptography</em>, Vol. 1: <em>Basic Tools</em>, 2001, §3.6. The careful textbook proof of the GGM theorem, with the hybrids over the levels of the tree.</li>
+<li>Katz &amp; Lindell, <em>Introduction to Modern Cryptography</em>, 3rd ed., 2020. A readable proof of the GGM theorem, in its chapter on theoretical constructions of symmetric-key primitives.</li>
+<li>Bellare &amp; Rogaway, “The Security of Triple Encryption and a Framework for Code-Based Game-Playing Proofs”, <em>EUROCRYPT</em>, 2006. Game-playing proofs, including lazy sampling of random tables.</li>
+<li>Regev, “On Lattices, Learning with Errors, Random Linear Codes, and Cryptography”, <em>Journal of the ACM</em>, 2009 (conference version 2005). Defines LWE, and its search-to-decision lemma is the reduction proved here, including the step for decision algorithms that work only on average.</li>
+<li>Peikert, “Public-Key Cryptosystems from the Worst-Case Shortest Vector Problem”, <em>STOC</em>, 2009. Search-to-decision for moduli that are products of small primes.</li>
+<li>Micciancio &amp; Mol, “Pseudorandom Knapsacks and the Sample Complexity of LWE Search-to-Decision Reductions”, <em>CRYPTO</em>, 2011. Search-to-decision reductions that preserve the number of samples, for a wide class of moduli.</li>
+<li>Brakerski, Langlois, Peikert, Regev &amp; Stehlé, “Classical Hardness of Learning with Errors”, <em>STOC</em>, 2013. Hardness of decision LWE for any modulus.</li>
+<li>Hoeffding, “Probability Inequalities for Sums of Bounded Random Variables”, <em>Journal of the American Statistical Association</em>, 1963. The concentration bound behind the number of repetitions.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../appendix-derivations/08-matrices.html" class="pagination-link" aria-label="Random matrices and factorizations">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">H</span>&nbsp; <span class="chapter-title">Random matrices and factorizations</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../appendix-derivations/10-mechanisms.html" class="pagination-link" aria-label="Mechanisms and their limits">
+        <span class="nav-page-text"><span class="chapter-number">J</span>&nbsp; <span class="chapter-title">Mechanisms and their limits</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

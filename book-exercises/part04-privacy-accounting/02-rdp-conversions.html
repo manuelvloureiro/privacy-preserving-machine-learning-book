@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>28&nbsp; Exercises: From Rényi DP to (ε, δ) and to tests – Privacy-Preserving Machine Learning: Exercises</title>
+<title>30&nbsp; Exercises: From Rényi DP to (ε, δ) and to tests – Privacy-Preserving Machine Learning: Exercises</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -117,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/02-rdp-conversions.html"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/02-rdp-conversions.html"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -313,26 +313,38 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/06-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Exercises: Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/07-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Exercises: Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/08-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Exercises: Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part03-dp-foundations/09-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Exercises: Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: Private mean estimation</span></span></a>
   </div>
 </li>
       </ul>
@@ -349,55 +361,55 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by subsampling</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Numerical accounting with privacy loss distributions</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: Choosing an accountant</span></span></a>
   </div>
 </li>
       </ul>
@@ -414,61 +426,67 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: DP-FTRL and matrix factorization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: Private prediction</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Public data and private fine-tuning</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Disparate impact</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Exercises: Choosing ε</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Exercises: Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Exercises: Adaptive data analysis</span></span></a>
   </div>
 </li>
       </ul>
@@ -483,21 +501,21 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-sol-conv-1" id="toc-sec-sol-conv-1" class="nav-link active" data-scroll-target="#sec-sol-conv-1"><span class="header-section-number">28.1</span> The optimal constant, in general</a></li>
-  <li><a href="#sec-sol-conv-2" id="toc-sec-sol-conv-2" class="nav-link" data-scroll-target="#sec-sol-conv-2"><span class="header-section-number">28.2</span> Best orders for a linear curve</a></li>
-  <li><a href="#sec-sol-conv-3" id="toc-sec-sol-conv-3" class="nav-link" data-scroll-target="#sec-sol-conv-3"><span class="header-section-number">28.3</span> One order’s boundary at small <span class="math inline">\(a\)</span></a></li>
-  <li><a href="#sec-sol-conv-4" id="toc-sec-sol-conv-4" class="nav-link" data-scroll-target="#sec-sol-conv-4"><span class="header-section-number">28.4</span> Composing Laplace mechanisms in RDP</a></li>
-  <li><a href="#sec-sol-conv-5" id="toc-sec-sol-conv-5" class="nav-link" data-scroll-target="#sec-sol-conv-5"><span class="header-section-number">28.5</span> How fine must the grid be?</a></li>
-  <li><a href="#sec-sol-conv-6" id="toc-sec-sol-conv-6" class="nav-link" data-scroll-target="#sec-sol-conv-6"><span class="header-section-number">28.6</span> When is the improved conversion optimal for one order?</a></li>
+  <li><a href="#sec-sol-conv-1" id="toc-sec-sol-conv-1" class="nav-link active" data-scroll-target="#sec-sol-conv-1"><span class="header-section-number">30.1</span> The optimal constant, in general</a></li>
+  <li><a href="#sec-sol-conv-2" id="toc-sec-sol-conv-2" class="nav-link" data-scroll-target="#sec-sol-conv-2"><span class="header-section-number">30.2</span> Best orders for a linear curve</a></li>
+  <li><a href="#sec-sol-conv-3" id="toc-sec-sol-conv-3" class="nav-link" data-scroll-target="#sec-sol-conv-3"><span class="header-section-number">30.3</span> One order’s boundary at small <span class="math inline">\(a\)</span></a></li>
+  <li><a href="#sec-sol-conv-4" id="toc-sec-sol-conv-4" class="nav-link" data-scroll-target="#sec-sol-conv-4"><span class="header-section-number">30.4</span> Composing Laplace mechanisms in RDP</a></li>
+  <li><a href="#sec-sol-conv-5" id="toc-sec-sol-conv-5" class="nav-link" data-scroll-target="#sec-sol-conv-5"><span class="header-section-number">30.5</span> How fine must the grid be?</a></li>
+  <li><a href="#sec-sol-conv-6" id="toc-sec-sol-conv-6" class="nav-link" data-scroll-target="#sec-sol-conv-6"><span class="header-section-number">30.6</span> When is the improved conversion optimal for one order?</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/02-rdp-conversions.html"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/01-renyi-dp.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/02-rdp-conversions.html"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></h1>
+<h1 class="title"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Exercises: From Rényi DP to (ε, δ) and to tests</span></h1>
 </div>
 
 
@@ -516,8 +534,8 @@ window.Quarto = {
 
 <p>Exercises for <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html">the chapter on converting Rényi differential privacy</a>, each with a worked solution. Try each exercise before opening its solution. The script <code>code/part04-privacy-accounting/solutions_rdp_conversions.py</code> computes every number quoted here; run it with <code>uv run python code/part04-privacy-accounting/solutions_rdp_conversions.py</code>.</p>
 <p>The solutions use the chapter’s notation. Rényi differential privacy (RDP) is converted to <span class="math inline">\((\varepsilon, \delta)\)</span>-differential privacy (DP). <span class="math inline">\(P = M(D)\)</span> and <span class="math inline">\(Q = M(D')\)</span>, <span class="math inline">\(L = \ln(p/q)\)</span> is the privacy loss, and under <span class="math inline">\(P\)</span> it is the privacy loss random variable (PRV). <span class="math inline">\(\alpha\)</span> is always the Rényi order, <span class="math inline">\(\varepsilon(\alpha)\)</span> the RDP curve, and <span class="math inline">\(\delta = 10^{-5}\)</span> unless stated otherwise.</p>
-<section id="sec-sol-conv-1" class="level2" data-number="28.1">
-<h2 data-number="28.1" class="anchored" data-anchor-id="sec-sol-conv-1"><span class="header-section-number">28.1</span> The optimal constant, in general</h2>
+<section id="sec-sol-conv-1" class="level2" data-number="30.1">
+<h2 data-number="30.1" class="anchored" data-anchor-id="sec-sol-conv-1"><span class="header-section-number">30.1</span> The optimal constant, in general</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 1.</strong> <strong>The optimal constant, in general.</strong> Show that <span class="math inline">\(\sup_z (1 - e^{\varepsilon - z})_+ e^{-(\alpha - 1)z}\)</span> is attained at <span class="math inline">\(z^* = \varepsilon - \ln(1 - 1/\alpha)\)</span>, and that the ratio of the improved to Mironov’s <span class="math inline">\(\delta\)</span> is <span class="math inline">\(\frac1\alpha(1 - \frac1\alpha)^{\alpha - 1}\)</span>, with <span class="math inline">\(\alpha\)</span> times this ratio tending to <span class="math inline">\(1/e\)</span>. <em>Check: at <span class="math inline">\(\alpha = 2\)</span>, <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(c^* = 9.196986\times10^{-2}\)</span>; <span class="math inline">\(\alpha\)</span> times the ratio is 0.5000, 0.3874, 0.3697, 0.3681 at <span class="math inline">\(\alpha = 2, 10, 100, 1000\)</span>.</em> <em>(Calculus, majorizing an integrand)</em></p>
 </blockquote>
@@ -546,10 +564,10 @@ window.Quarto = {
 </div>
 </div>
 </section>
-<section id="sec-sol-conv-2" class="level2" data-number="28.2">
-<h2 data-number="28.2" class="anchored" data-anchor-id="sec-sol-conv-2"><span class="header-section-number">28.2</span> Best orders for a linear curve</h2>
+<section id="sec-sol-conv-2" class="level2" data-number="30.2">
+<h2 data-number="30.2" class="anchored" data-anchor-id="sec-sol-conv-2"><span class="header-section-number">30.2</span> Best orders for a linear curve</h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 2.</strong> <strong>Best orders for a linear curve.</strong> For <span class="math inline">\(\varepsilon(\alpha) = \rho\alpha\)</span>, derive Mironov’s best order and value and <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-alpha-star">Equation&nbsp;28.13</a>, and evaluate both at <span class="math inline">\(\rho = 0.5\)</span> and <span class="math inline">\(\rho = 0.005\)</span> for <span class="math inline">\(\delta = 10^{-5}\)</span> and <span class="math inline">\(10^{-10}\)</span>. <em>Check: at <span class="math inline">\(\rho = 0.5\)</span>, <span class="math inline">\(\delta = 10^{-10}\)</span>, Mironov 7.286 at order 7.786 and improved 6.839 at order 7.483.</em> <em>(Optimization over α)</em></p>
+<p><strong>Exercise 2.</strong> <strong>Best orders for a linear curve.</strong> For <span class="math inline">\(\varepsilon(\alpha) = \rho\alpha\)</span>, derive Mironov’s best order and value and <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-alpha-star">Equation&nbsp;30.13</a>, and evaluate both at <span class="math inline">\(\rho = 0.5\)</span> and <span class="math inline">\(\rho = 0.005\)</span> for <span class="math inline">\(\delta = 10^{-5}\)</span> and <span class="math inline">\(10^{-10}\)</span>. <em>Check: at <span class="math inline">\(\rho = 0.5\)</span>, <span class="math inline">\(\delta = 10^{-10}\)</span>, Mironov 7.286 at order 7.786 and improved 6.839 at order 7.483.</em> <em>(Optimization over α)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
@@ -565,14 +583,14 @@ window.Quarto = {
 <div class="callout-body-container callout-body">
 <ol type="1">
 <li><strong>Mironov.</strong> <span class="math inline">\(g(\alpha) = \rho\alpha + \frac{\ln(1/\delta)}{\alpha - 1}\)</span> has <span class="math inline">\(g'(\alpha) = \rho - \frac{\ln(1/\delta)}{(\alpha - 1)^2}\)</span> and <span class="math inline">\(g'' &gt; 0\)</span>. The zero is <span class="math inline">\(\alpha^* = 1 + \sqrt{\ln(1/\delta)/\rho}\)</span>. At it, <span class="math inline">\(\rho\alpha^* = \rho + \sqrt{\rho\ln(1/\delta)}\)</span> and <span class="math inline">\(\frac{\ln(1/\delta)}{\alpha^* - 1} = \sqrt{\rho\ln(1/\delta)}\)</span>, so <span class="math inline">\(\varepsilon^* = \rho + 2\sqrt{\rho\ln(1/\delta)}\)</span>.</li>
-<li><strong>Improved.</strong> <span class="math inline">\(h(\alpha) = \rho\alpha + \ln(1 - 1/\alpha) + \frac{\ln(1/\delta) - \ln\alpha}{\alpha - 1}\)</span>. The derivative of the middle term is <span class="math inline">\(\frac{1}{\alpha(\alpha - 1)}\)</span>; the derivative of the last is <span class="math inline">\(-\frac{1}{\alpha(\alpha - 1)} - \frac{\ln(1/\delta) - \ln\alpha}{(\alpha - 1)^2}\)</span>. They cancel in part, leaving <span class="math inline">\(h'(\alpha) = \rho - \frac{\ln(1/(\alpha\delta))}{(\alpha - 1)^2}\)</span>, whose zero is <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-alpha-star">Equation&nbsp;28.13</a>.</li>
+<li><strong>Improved.</strong> <span class="math inline">\(h(\alpha) = \rho\alpha + \ln(1 - 1/\alpha) + \frac{\ln(1/\delta) - \ln\alpha}{\alpha - 1}\)</span>. The derivative of the middle term is <span class="math inline">\(\frac{1}{\alpha(\alpha - 1)}\)</span>; the derivative of the last is <span class="math inline">\(-\frac{1}{\alpha(\alpha - 1)} - \frac{\ln(1/\delta) - \ln\alpha}{(\alpha - 1)^2}\)</span>. They cancel in part, leaving <span class="math inline">\(h'(\alpha) = \rho - \frac{\ln(1/(\alpha\delta))}{(\alpha - 1)^2}\)</span>, whose zero is <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-alpha-star">Equation&nbsp;30.13</a>.</li>
 <li><strong>Solve it.</strong> Rewrite as <span class="math inline">\(\alpha = 1 + \sqrt{\ln(1/(\alpha\delta))/\rho}\)</span> and iterate from Mironov’s <span class="math inline">\(\alpha^*\)</span>. The right side changes slowly with <span class="math inline">\(\alpha\)</span> (through <span class="math inline">\(\ln\alpha\)</span>), so the iteration converges; the script’s residual <span class="math inline">\(\rho(\alpha - 1)^2 - \ln(1/(\alpha\delta))\)</span> is at most <span class="math inline">\(8.9\times10^{-16}\)</span>.</li>
-<li><strong>Values.</strong> <a href="#tbl-sol-conv-orders" class="quarto-xref">Table&nbsp;<span>28.1</span></a>. At <span class="math inline">\(\rho = 0.5\)</span> and <span class="math inline">\(\delta = 10^{-10}\)</span>, Mironov gives 7.286 at order 7.786 and the improved conversion 6.839 at order 7.483. Evaluating <span class="math inline">\(g\)</span> directly at Mironov’s <span class="math inline">\(\alpha^*\)</span> reproduces each <span class="math inline">\(\varepsilon^*\)</span>.</li>
+<li><strong>Values.</strong> <a href="#tbl-sol-conv-orders" class="quarto-xref">Table&nbsp;<span>30.1</span></a>. At <span class="math inline">\(\rho = 0.5\)</span> and <span class="math inline">\(\delta = 10^{-10}\)</span>, Mironov gives 7.286 at order 7.786 and the improved conversion 6.839 at order 7.483. Evaluating <span class="math inline">\(g\)</span> directly at Mironov’s <span class="math inline">\(\alpha^*\)</span> reproduces each <span class="math inline">\(\varepsilon^*\)</span>.</li>
 </ol>
 <div id="tbl-sol-conv-orders" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-conv-orders-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;28.1: Best continuous orders for a linear RDP curve.
+Table&nbsp;30.1: Best continuous orders for a linear RDP curve.
 </figcaption>
 <div aria-describedby="tbl-sol-conv-orders-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -637,10 +655,10 @@ Table&nbsp;28.1: Best continuous orders for a linear RDP curve.
 </div>
 </div>
 </section>
-<section id="sec-sol-conv-3" class="level2" data-number="28.3">
-<h2 data-number="28.3" class="anchored" data-anchor-id="sec-sol-conv-3"><span class="header-section-number">28.3</span> One order’s boundary at small <span class="math inline">\(a\)</span></h2>
+<section id="sec-sol-conv-3" class="level2" data-number="30.3">
+<h2 data-number="30.3" class="anchored" data-anchor-id="sec-sol-conv-3"><span class="header-section-number">30.3</span> One order’s boundary at small <span class="math inline">\(a\)</span></h2>
 <blockquote class="blockquote">
-<p><strong>Exercise 3.</strong> <strong>One order’s boundary at small <span class="math inline">\(a\)</span>.</strong> For a single order <span class="math inline">\(\alpha\)</span>, show from the second inequality of <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-region">Equation&nbsp;28.11</a> that every test has power <span class="math inline">\(1 - b \le e^{(\alpha - 1)\varepsilon(\alpha)/\alpha}a^{(\alpha - 1)/\alpha}\)</span>, and that keeping the second term at its value 1 for <span class="math inline">\(b = 1\)</span> gives the approximation <span class="math inline">\(1 - b \approx (e^{(\alpha - 1)\varepsilon(\alpha)} - 1)^{1/\alpha}a^{(\alpha - 1)/\alpha}\)</span>. For the Gaussian at <span class="math inline">\(\mu = 1\)</span>, compare both with the exact single-order boundary at <span class="math inline">\(a = 10^{-6}\)</span> for orders 2 and 8, and say when the slope picture of <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#fig-conv-tradeoff">Figure&nbsp;28.2</a> is accurate. <em>Check: at order 2, <span class="math inline">\(1.6487\times10^{-3}\)</span>, <span class="math inline">\(1.3108\times10^{-3}\)</span> and exact <span class="math inline">\(1.3118\times10^{-3}\)</span>; at order 8 all three are <span class="math inline">\(1.8622\times10^{-4}\)</span>.</em> <em>(Test region, asymptotics)</em></p>
+<p><strong>Exercise 3.</strong> <strong>One order’s boundary at small <span class="math inline">\(a\)</span>.</strong> For a single order <span class="math inline">\(\alpha\)</span>, show from the second inequality of <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-region">Equation&nbsp;30.11</a> that every test has power <span class="math inline">\(1 - b \le e^{(\alpha - 1)\varepsilon(\alpha)/\alpha}a^{(\alpha - 1)/\alpha}\)</span>, and that keeping the second term at its value 1 for <span class="math inline">\(b = 1\)</span> gives the approximation <span class="math inline">\(1 - b \approx (e^{(\alpha - 1)\varepsilon(\alpha)} - 1)^{1/\alpha}a^{(\alpha - 1)/\alpha}\)</span>. For the Gaussian at <span class="math inline">\(\mu = 1\)</span>, compare both with the exact single-order boundary at <span class="math inline">\(a = 10^{-6}\)</span> for orders 2 and 8, and say when the slope picture of <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#fig-conv-tradeoff">Figure&nbsp;30.2</a> is accurate. <em>Check: at order 2, <span class="math inline">\(1.6487\times10^{-3}\)</span>, <span class="math inline">\(1.3108\times10^{-3}\)</span> and exact <span class="math inline">\(1.3118\times10^{-3}\)</span>; at order 8 all three are <span class="math inline">\(1.8622\times10^{-4}\)</span>.</em> <em>(Test region, asymptotics)</em></p>
 </blockquote>
 <div class="callout callout-style-default callout-tip callout-titled" title="Solution">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
@@ -655,15 +673,15 @@ Table&nbsp;28.1: Best continuous orders for a linear RDP curve.
 <div id="callout-3" class="callout-3-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>A bound that always holds.</strong> The second inequality of <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-region">Equation&nbsp;28.11</a> is <span class="math inline">\((1 - b)^\alpha a^{1 - \alpha} + b^\alpha(1 - a)^{1 - \alpha} \le e^{(\alpha - 1)\varepsilon(\alpha)}\)</span>. The second term is non-negative, so <span class="math inline">\((1 - b)^\alpha \le e^{(\alpha - 1)\varepsilon(\alpha)}a^{\alpha - 1}\)</span>. Taking the <span class="math inline">\(\alpha\)</span>-th root gives <span class="math inline">\(1 - b \le e^{(\alpha - 1)\varepsilon(\alpha)/\alpha}a^{(\alpha - 1)/\alpha}\)</span> for every <span class="math inline">\(a\)</span>: on log axes a line of slope <span class="math inline">\((\alpha - 1)/\alpha\)</span>.</li>
+<li><strong>A bound that always holds.</strong> The second inequality of <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-region">Equation&nbsp;30.11</a> is <span class="math inline">\((1 - b)^\alpha a^{1 - \alpha} + b^\alpha(1 - a)^{1 - \alpha} \le e^{(\alpha - 1)\varepsilon(\alpha)}\)</span>. The second term is non-negative, so <span class="math inline">\((1 - b)^\alpha \le e^{(\alpha - 1)\varepsilon(\alpha)}a^{\alpha - 1}\)</span>. Taking the <span class="math inline">\(\alpha\)</span>-th root gives <span class="math inline">\(1 - b \le e^{(\alpha - 1)\varepsilon(\alpha)/\alpha}a^{(\alpha - 1)/\alpha}\)</span> for every <span class="math inline">\(a\)</span>: on log axes a line of slope <span class="math inline">\((\alpha - 1)/\alpha\)</span>.</li>
 <li><strong>The approximation.</strong> At small <span class="math inline">\(a\)</span> the allowed power is small, so <span class="math inline">\(b\)</span> is near 1 and the second term <span class="math inline">\(b^\alpha(1 - a)^{1 - \alpha}\)</span> is near 1. Moving it to the right side as 1 gives <span class="math inline">\((1 - b)^\alpha a^{1 - \alpha} \lesssim e^{(\alpha - 1)\varepsilon(\alpha)} - 1\)</span>, which is the approximation. It is not a bound: <span class="math inline">\(b^\alpha \approx 1 - \alpha(1 - b)\)</span> is a little below 1, so the exact boundary allows slightly more power.</li>
 <li><strong>The ratio of the two.</strong> The approximation divided by the bound is <span class="math inline">\((1 - e^{-(\alpha - 1)\varepsilon(\alpha)})^{1/\alpha}\)</span>, the same at every <span class="math inline">\(a\)</span>. With <span class="math inline">\(\varepsilon(\alpha) = \alpha/2\)</span> it is 0.7951 at order 2, where <span class="math inline">\((\alpha - 1)\varepsilon(\alpha) = 1\)</span>, and 1.0000 at order 8, where <span class="math inline">\((\alpha - 1)\varepsilon(\alpha) = 28\)</span> and <span class="math inline">\(e^{-28}\)</span> is negligible.</li>
-<li><strong>Against the exact boundary.</strong> <a href="#tbl-sol-conv-slope" class="quarto-xref">Table&nbsp;<span>28.2</span></a> compares both with the exact single-order boundary, computed by bisection with both inequalities of <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-region">Equation&nbsp;28.11</a>. At order 2 and <span class="math inline">\(a = 10^{-6}\)</span> the bound gives <span class="math inline">\(1.6487\times10^{-3}\)</span>, the approximation <span class="math inline">\(1.3108\times10^{-3}\)</span> and the exact boundary <span class="math inline">\(1.3118\times10^{-3}\)</span>. At order 8 all three are <span class="math inline">\(1.8622\times10^{-4}\)</span>.</li>
+<li><strong>Against the exact boundary.</strong> <a href="#tbl-sol-conv-slope" class="quarto-xref">Table&nbsp;<span>30.2</span></a> compares both with the exact single-order boundary, computed by bisection with both inequalities of <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-region">Equation&nbsp;30.11</a>. At order 2 and <span class="math inline">\(a = 10^{-6}\)</span> the bound gives <span class="math inline">\(1.6487\times10^{-3}\)</span>, the approximation <span class="math inline">\(1.3108\times10^{-3}\)</span> and the exact boundary <span class="math inline">\(1.3118\times10^{-3}\)</span>. At order 8 all three are <span class="math inline">\(1.8622\times10^{-4}\)</span>.</li>
 </ol>
 <div id="tbl-sol-conv-slope" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-conv-slope-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;28.2: Largest power allowed by one order of the Gaussian’s RDP curve at <span class="math inline">\(\mu = 1\)</span>: exact, the bound of step 1 and the approximation of step 2.
+Table&nbsp;30.2: Largest power allowed by one order of the Gaussian’s RDP curve at <span class="math inline">\(\mu = 1\)</span>: exact, the bound of step 1 and the approximation of step 2.
 </figcaption>
 <div aria-describedby="tbl-sol-conv-slope-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -737,8 +755,8 @@ Table&nbsp;28.2: Largest power allowed by one order of the Gaussian’s RDP curv
 </div>
 </div>
 </section>
-<section id="sec-sol-conv-4" class="level2" data-number="28.4">
-<h2 data-number="28.4" class="anchored" data-anchor-id="sec-sol-conv-4"><span class="header-section-number">28.4</span> Composing Laplace mechanisms in RDP</h2>
+<section id="sec-sol-conv-4" class="level2" data-number="30.4">
+<h2 data-number="30.4" class="anchored" data-anchor-id="sec-sol-conv-4"><span class="header-section-number">30.4</span> Composing Laplace mechanisms in RDP</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 4.</strong> <strong>Composing Laplace mechanisms in RDP.</strong> Extend Exercise 2 of <a href="../../book-full/part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a> with the improved conversion. One hundred Laplace mechanisms each with <span class="math inline">\(\varepsilon_0 = 0.1\)</span>: compare basic composition, advanced composition in its textbook form (<a href="../../book-full/part03-dp-foundations/04-composition.html">composition</a>), and the improved conversion of the summed curve, 100 times the Laplace RDP curve <span class="math inline">\(\varepsilon(\alpha) = \frac{1}{\alpha - 1}\ln\big[\frac{\alpha}{2\alpha - 1}e^{(\alpha - 1)\varepsilon_0} + \frac{\alpha - 1}{2\alpha - 1}e^{-\alpha\varepsilon_0}\big]\)</span> (Mironov 2017). <em>Check: 10.000, 5.850 and 4.533 at <span class="math inline">\(\delta = 10^{-5}\)</span>.</em> <em>(Composition in RDP, conversion)</em></p>
 </blockquote>
@@ -766,8 +784,8 @@ Table&nbsp;28.2: Largest power allowed by one order of the Gaussian’s RDP curv
 </div>
 </div>
 </section>
-<section id="sec-sol-conv-5" class="level2" data-number="28.5">
-<h2 data-number="28.5" class="anchored" data-anchor-id="sec-sol-conv-5"><span class="header-section-number">28.5</span> How fine must the grid be?</h2>
+<section id="sec-sol-conv-5" class="level2" data-number="30.5">
+<h2 data-number="30.5" class="anchored" data-anchor-id="sec-sol-conv-5"><span class="header-section-number">30.5</span> How fine must the grid be?</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 5.</strong> <strong>How fine must the grid be?</strong> For <span class="math inline">\(\varepsilon(\alpha) = \rho\alpha\)</span>, compute the relative excess of the grid’s improved <span class="math inline">\(\varepsilon\)</span> over the continuous optimum at <span class="math inline">\(\rho = 5000\)</span>, <span class="math inline">\(0.005\)</span>, <span class="math inline">\(5\times10^{-5}\)</span> and <span class="math inline">\(5.556\times10^{-6}\)</span>. <em>Check: 2.48%, 0.01%, 4.76% and 22.86%.</em> <em>(Choosing the order)</em></p>
 </blockquote>
@@ -784,14 +802,14 @@ Table&nbsp;28.2: Largest power allowed by one order of the Gaussian’s RDP curv
 <div id="callout-5" class="callout-5-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
 <ol type="1">
-<li><strong>Continuous optimum.</strong> Solve <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-alpha-star">Equation&nbsp;28.13</a> by the iteration of Exercise 2.</li>
-<li><strong>Grid optimum.</strong> Evaluate <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-improved">Equation&nbsp;28.7</a> at every order of the grid and take the smallest.</li>
-<li><strong>Compare.</strong> <a href="#tbl-sol-conv-grid" class="quarto-xref">Table&nbsp;<span>28.3</span></a> lists the four cases, written as a Gaussian with <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(k\)</span>.</li>
+<li><strong>Continuous optimum.</strong> Solve <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-alpha-star">Equation&nbsp;30.13</a> by the iteration of Exercise 2.</li>
+<li><strong>Grid optimum.</strong> Evaluate <a href="../../book-full/part04-privacy-accounting/02-rdp-conversions.html#eq-conv-improved">Equation&nbsp;30.7</a> at every order of the grid and take the smallest.</li>
+<li><strong>Compare.</strong> <a href="#tbl-sol-conv-grid" class="quarto-xref">Table&nbsp;<span>30.3</span></a> lists the four cases, written as a Gaussian with <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(k\)</span>.</li>
 </ol>
 <div id="tbl-sol-conv-grid" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-conv-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;28.3: The grid’s improved ε against the continuous optimum.
+Table&nbsp;30.3: The grid’s improved ε against the continuous optimum.
 </figcaption>
 <div aria-describedby="tbl-sol-conv-grid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -871,8 +889,8 @@ Table&nbsp;28.3: The grid’s improved ε against the continuous optimum.
 </div>
 </div>
 </section>
-<section id="sec-sol-conv-6" class="level2" data-number="28.6">
-<h2 data-number="28.6" class="anchored" data-anchor-id="sec-sol-conv-6"><span class="header-section-number">28.6</span> When is the improved conversion optimal for one order?</h2>
+<section id="sec-sol-conv-6" class="level2" data-number="30.6">
+<h2 data-number="30.6" class="anchored" data-anchor-id="sec-sol-conv-6"><span class="header-section-number">30.6</span> When is the improved conversion optimal for one order?</h2>
 <blockquote class="blockquote">
 <p><strong>Exercise 6.</strong> <strong>When is the improved conversion optimal for one order?</strong> Show that for any pair, the improved bound exceeds the true <span class="math inline">\(\delta\)</span> by at least <span class="math inline">\(c^*\,\mathbb E_P[e^{(\alpha - 1)L}\mathbf 1[L \le \varepsilon]]\)</span>, and use the worst two-outcome pair to explain why the improved conversion is optimal at large orders and not at small ones. <em>Check: at <span class="math inline">\(\mu = 1\)</span>, improved and optimal are 11.1266 and 10.6680 at order 2, and 5.2141 and 5.2141 at order 8.</em> <em>(Optimal conversion, data processing)</em></p>
 </blockquote>
@@ -893,12 +911,12 @@ Table&nbsp;28.3: The grid’s improved ε against the continuous optimum.
 <li><strong>Split by <span class="math inline">\(L\)</span>.</strong> Where <span class="math inline">\(L &gt; \varepsilon\)</span> the integrand is <span class="math inline">\(\ge 0\)</span>, because <span class="math inline">\(c^*e^{(\alpha - 1)z}\)</span> lies above <span class="math inline">\((1 - e^{\varepsilon - z})_+\)</span> everywhere. Where <span class="math inline">\(L \le \varepsilon\)</span> the second term is 0. Dropping the first part leaves the claimed lower bound <span class="math inline">\(c^*\,\mathbb E_P[e^{(\alpha - 1)L}\mathbf 1[L \le \varepsilon]]\)</span>.</li>
 <li><strong>The worst pair cannot avoid it.</strong> The optimal conversion for one order is attained by a two-outcome pair (the chapter’s test region). One outcome carries the large loss, near <span class="math inline">\(z^*\)</span>; the other must carry almost all the mass, at a loss near 0, because <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> both sum to 1. That outcome contributes about <span class="math inline">\(c^* \times 1\)</span> to the gap. So the improved <span class="math inline">\(\delta\)</span> exceeds the optimal <span class="math inline">\(\delta\)</span> by about <span class="math inline">\(c^*\)</span>.</li>
 <li><strong>Compare <span class="math inline">\(c^*\)</span> with δ.</strong> At the improved <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(c^*/\delta\)</span> is 0.687 at order 1.5, 0.368 at order 2, 0.002 at order 4 and essentially 0 at order 8 (<span class="math inline">\(c^* = 6.914\times10^{-18}\)</span>). Since <span class="math inline">\(c^* \propto e^{-(\alpha - 1)\varepsilon}/(\alpha - 1)\)</span>, it is negligible against <span class="math inline">\(\delta\)</span> once <span class="math inline">\((\alpha - 1)\varepsilon\)</span> clearly exceeds <span class="math inline">\(\ln(1/\delta)\)</span>.</li>
-<li><strong>In ε.</strong> <a href="#tbl-sol-conv-single" class="quarto-xref">Table&nbsp;<span>28.4</span></a> gives the two conversions for the Gaussian’s single values <span class="math inline">\(\varepsilon(\alpha) = \alpha/2\)</span>. The optimal one uses the forward constraint <span class="math inline">\(D_\alpha(P\|Q) \le \varepsilon(\alpha)\)</span> alone, as the improved conversion does. At order 2 the improved conversion gives 11.1266 against the optimal 10.6680; at order 8 both give 5.2141.</li>
+<li><strong>In ε.</strong> <a href="#tbl-sol-conv-single" class="quarto-xref">Table&nbsp;<span>30.4</span></a> gives the two conversions for the Gaussian’s single values <span class="math inline">\(\varepsilon(\alpha) = \alpha/2\)</span>. The optimal one uses the forward constraint <span class="math inline">\(D_\alpha(P\|Q) \le \varepsilon(\alpha)\)</span> alone, as the improved conversion does. At order 2 the improved conversion gives 11.1266 against the optimal 10.6680; at order 8 both give 5.2141.</li>
 </ol>
 <div id="tbl-sol-conv-single" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sol-conv-single-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;28.4: The improved conversion against the optimal conversion from one order, Gaussian at μ = 1.
+Table&nbsp;30.4: The improved conversion against the optimal conversion from one order, Gaussian at μ = 1.
 </figcaption>
 <div aria-describedby="tbl-sol-conv-single-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -1352,12 +1370,12 @@ Table&nbsp;28.4: The improved conversion against the optimal conversion from one
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part04-privacy-accounting/01-renyi-dp.html" class="pagination-link" aria-label="Exercises: Rényi differential privacy">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Rényi differential privacy</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="pagination-link" aria-label="Exercises: Concentrated differential privacy">
-        <span class="nav-page-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Exercises: Concentrated differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
