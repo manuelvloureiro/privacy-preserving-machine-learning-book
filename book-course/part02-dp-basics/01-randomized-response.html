@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; Randomized Response and the Definition – A Course in Differential Privacy</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-dp-basics/02-laplace-mechanism.html" rel="next">
+<link href="../part02-dp-basics/00-introduction.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-dp-basics/00-introduction.html">The Basics of Differential Privacy</a></li><li class="breadcrumb-item"><a href="../part02-dp-basics/01-randomized-response.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">A Course in Differential Privacy</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-privacy-failures/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy Failures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/01-attempts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Attempts at Data Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/02-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Reconstruction Attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-dp-basics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Basics of Differential Privacy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/01-randomized-response.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/02-laplace-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/03-approximate-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/04-advanced-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/05-exponential-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Exponential Mechanism</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-query-release/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query Release and Its Limits</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/01-multiplicative-weights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Private Multiplicative Weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/02-sparse-vector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sparse Vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/03-beyond-global-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/04-packing-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Packing Lower Bounds</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-learning-statistics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Private Learning and Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/01-privacy-violations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What Differential Privacy Protects</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/02-private-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/03-private-deep-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/04-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Private Mean Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/05-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Adaptive Data Analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-deployments/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deployments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/01-local-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Local Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/02-shuffle-and-central-deployments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-rr-mechanism" id="toc-sec-rr-mechanism" class="nav-link active" data-scroll-target="#sec-rr-mechanism"><span class="header-section-number">3.1</span> Randomized response</a></li>
+  <li><a href="#sec-rr-definition" id="toc-sec-rr-definition" class="nav-link" data-scroll-target="#sec-rr-definition"><span class="header-section-number">3.2</span> Differential privacy</a>
+  <ul class="collapse">
+  <li><a href="#sec-rr-testing" id="toc-sec-rr-testing" class="nav-link" data-scroll-target="#sec-rr-testing"><span class="header-section-number">3.2.1</span> Hypothesis testing</a></li>
+  <li><a href="#sec-rr-meaning" id="toc-sec-rr-meaning" class="nav-link" data-scroll-target="#sec-rr-meaning"><span class="header-section-number">3.2.2</span> What the definition promises</a></li>
+  </ul></li>
+  <li><a href="#sec-rr-privacy" id="toc-sec-rr-privacy" class="nav-link" data-scroll-target="#sec-rr-privacy"><span class="header-section-number">3.3</span> Randomized response revisited</a></li>
+  <li><a href="#sec-rr-summary" id="toc-sec-rr-summary" class="nav-link" data-scroll-target="#sec-rr-summary"><span class="header-section-number">3.4</span> Summary</a></li>
+  <li><a href="#sec-rr-notes" id="toc-sec-rr-notes" class="nav-link" data-scroll-target="#sec-rr-notes"><span class="header-section-number">3.5</span> Notes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-dp-basics/00-introduction.html">The Basics of Differential Privacy</a></li><li class="breadcrumb-item"><a href="../part02-dp-basics/01-randomized-response.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>A group of people each hold one sensitive bit, and an analyst wants the fraction of ones without learning anyone’s bit. This chapter solves that problem with a biased coin, the oldest private algorithm, and then turns the idea behind it, plausible deniability, into a definition. The definition is differential privacy (DP), and the rest of the book is built on it.</p>
+<section id="sec-rr-mechanism" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="sec-rr-mechanism"><span class="header-section-number">3.1</span> Randomized response</h2>
+<p>Write <span class="math inline">\(n\)</span> for the number of people. Person number <span class="math inline">\(i\)</span> holds a bit <span class="math inline">\(X_i \in \{0,1\}\)</span>, for instance whether they cheated on an exam, and the analyst wants the fraction of ones,</p>
+<p><span id="eq-auto-01randomizedresponse-1"><span class="math display">\[
+p = \frac{1}{n}\sum_{i=1}^n X_i .
+\tag{3.1}\]</span></span></p>
+<p>Each person sends the analyst one message <span class="math inline">\(Y_i\)</span>, which may depend on <span class="math inline">\(X_i\)</span> and on coins that only person <span class="math inline">\(i\)</span> sees. Two extreme protocols frame the problem. If <span class="math inline">\(Y_i = X_i\)</span> with probability <span class="math inline">\(1\)</span>, the analyst computes <span class="math inline">\(p\)</span> exactly but sees every bit, so there is no privacy. If <span class="math inline">\(Y_i = X_i\)</span> with probability <span class="math inline">\(1/2\)</span> and <span class="math inline">\(1 - X_i\)</span> otherwise, then <span class="math inline">\(Y_i\)</span> is a fair coin independent of <span class="math inline">\(X_i\)</span>. The analyst learns nothing about anyone, and nothing about <span class="math inline">\(p\)</span> either, since the average of the reports is distributed as <span class="math inline">\(\frac1n\mathrm{Bin}(n, \frac12)\)</span> whatever the data. Randomized response interpolates between the two.</p>
+<div id="def-rr-mechanism" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 3.1 (Randomized response)</strong></span> For a bias <span class="math inline">\(\gamma \in [0, 1/2]\)</span>, person <span class="math inline">\(i\)</span> reports</p>
+<p><span id="eq-auto-01randomizedresponse-2"><span class="math display">\[
+Y_i = \begin{cases} X_i &amp; \text{with probability } \tfrac12 + \gamma, \\ 1 - X_i &amp; \text{with probability } \tfrac12 - \gamma, \end{cases}
+\tag{3.2}\]</span></span></p>
+<p>with fresh, independent coins for each person.</p>
+</div>
+<p>The value <span class="math inline">\(\gamma = 1/2\)</span> is the honest protocol and <span class="math inline">\(\gamma = 0\)</span> is the fair coin. In between, say at <span class="math inline">\(\gamma = 1/4\)</span>, a person who reports <span class="math inline">\(Y_i = 1\)</span> can claim that their bit was <span class="math inline">\(0\)</span> and the coin flipped it, which happens with probability <span class="math inline">\(1/4\)</span>. That plausible deniability is the privacy, and it grows as <span class="math inline">\(\gamma\)</span> shrinks.</p>
+<p>The reports are biased towards the truth, so their average is not <span class="math inline">\(p\)</span>. The bias is known, though, and the analyst can undo it. The average of one report is</p>
+<p><span id="eq-auto-01randomizedresponse-3"><span class="math display">\[
+\mathbb E[Y_i] = \left(\tfrac12+\gamma\right)X_i + \left(\tfrac12-\gamma\right)(1-X_i) = 2\gamma X_i + \tfrac12 - \gamma ,
+\tag{3.3}\]</span></span></p>
+<p>which is linear in <span class="math inline">\(X_i\)</span>. Solving for <span class="math inline">\(X_i\)</span> gives an unbiased estimate of each bit, and averaging those estimates gives the estimator of <span class="math inline">\(p\)</span>.</p>
+<div id="def-rr-estimator" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 3.2 (Debiased estimator)</strong></span> For <span class="math inline">\(\gamma &gt; 0\)</span>, the analyst outputs</p>
+<p><span id="eq-rr-estimator"><span class="math display">\[
+\tilde p = \frac1n \sum_{i=1}^n \frac{Y_i - \tfrac12 + \gamma}{2\gamma}.
+\tag{3.4}\]</span></span></p>
+</div>
+<div id="thm-rr-variance" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 3.1</strong></span> For every <span class="math inline">\(\gamma \in (0, 1/2]\)</span> and every input <span class="math inline">\(X \in \{0,1\}^n\)</span>, the estimator is unbiased, <span class="math inline">\(\mathbb E[\tilde p] = p\)</span>, and its variance is</p>
+<p><span id="eq-auto-01randomizedresponse-4"><span class="math display">\[
+\operatorname{Var}[\tilde p] = \frac{1 - 4\gamma^2}{16\gamma^2 n} \le \frac{1}{16\gamma^2 n}.
+\tag{3.5}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Each term <span class="math inline">\(Z_i = (Y_i - \tfrac12 + \gamma)/(2\gamma)\)</span> has mean <span class="math inline">\(X_i\)</span>, by the formula for <span class="math inline">\(\mathbb E[Y_i]\)</span> above. Averaging over <span class="math inline">\(i\)</span> and using linearity of expectation gives <span class="math inline">\(\mathbb E[\tilde p] = p\)</span>.</li>
+<li>The constants <span class="math inline">\(\tfrac12 - \gamma\)</span> and <span class="math inline">\(2\gamma\)</span> do not change the variance except through the scaling, so <span class="math inline">\(\operatorname{Var}[Z_i] = \operatorname{Var}[Y_i]/(4\gamma^2)\)</span>.</li>
+<li>The report <span class="math inline">\(Y_i\)</span> is a Bernoulli variable that equals <span class="math inline">\(1\)</span> with probability <span class="math inline">\(\tfrac12 + \gamma\)</span> or <span class="math inline">\(\tfrac12 - \gamma\)</span>, depending on <span class="math inline">\(X_i\)</span>. In both cases its variance is <span class="math inline">\((\tfrac12+\gamma)(\tfrac12-\gamma) = \tfrac14 - \gamma^2\)</span>.</li>
+<li>The reports are independent because each person uses their own coins. So the variance of the sum is the sum of the variances, and</li>
+</ol>
+<p><span id="eq-auto-01randomizedresponse-5"><span class="math display">\[
+\operatorname{Var}[\tilde p] = \frac{1}{n^2}\sum_{i=1}^n \frac{\operatorname{Var}[Y_i]}{4\gamma^2} = \frac{\tfrac14 - \gamma^2}{4\gamma^2 n} = \frac{1-4\gamma^2}{16\gamma^2 n}.
+\tag{3.6}\]</span></span></p>
+</div>
+<p>Chebyshev’s inequality turns the variance into an error bar: with probability at least <span class="math inline">\(3/4\)</span>, the error is at most two standard deviations, <span class="math inline">\(|\tilde p - p| \le 1/(2\gamma\sqrt n)\)</span>. For a failure probability <span class="math inline">\(\beta\)</span> that is small, Hoeffding’s inequality does better, because each <span class="math inline">\(Z_i\)</span> takes only two values.</p>
+<div id="thm-rr-accuracy" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 3.2</strong></span> For every <span class="math inline">\(\gamma \in (0,1/2]\)</span> and <span class="math inline">\(\beta \in (0,1)\)</span>, with probability at least <span class="math inline">\(1-\beta\)</span> over the coins,</p>
+<p><span id="eq-rr-accuracy"><span class="math display">\[
+|\tilde p - p| \le \frac{1}{2\gamma}\sqrt{\frac{\ln(2/\beta)}{2n}} .
+\tag{3.7}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>The term <span class="math inline">\(Z_i\)</span> takes the values <span class="math inline">\((\tfrac12+\gamma)/(2\gamma)\)</span> and <span class="math inline">\(-(\tfrac12-\gamma)/(2\gamma)\)</span>, so it lies in an interval of length <span class="math inline">\(1/(2\gamma)\)</span>.</li>
+<li>The <span class="math inline">\(Z_i\)</span> are independent with mean <span class="math inline">\(X_i\)</span>. Hoeffding’s inequality for the average of <span class="math inline">\(n\)</span> independent variables, each in an interval of length <span class="math inline">\(\ell\)</span>, gives</li>
+</ol>
+<p><span id="eq-auto-01randomizedresponse-6"><span class="math display">\[
+\Pr\left[\,|\tilde p - p| \ge t\,\right] \le 2\exp\!\left(-\frac{2nt^2}{\ell^2}\right) = 2\exp\!\left(-8\gamma^2 n t^2\right).
+\tag{3.8}\]</span></span></p>
+<ol start="3" type="1">
+<li>Setting the right-hand side equal to <span class="math inline">\(\beta\)</span> and solving for <span class="math inline">\(t\)</span> gives <a href="#eq-rr-accuracy" class="quarto-xref">Equation&nbsp;<span>3.7</span></a>.</li>
+</ol>
+</div>
+<p>So the error is of order <span class="math inline">\(1/(\gamma\sqrt n)\)</span>, and it goes to <span class="math inline">\(0\)</span> as <span class="math inline">\(n\)</span> grows. Read the other way, an error of at most <span class="math inline">\(\alpha\)</span> with probability <span class="math inline">\(1-\beta\)</span> needs</p>
+<p><span id="eq-auto-01randomizedresponse-7"><span class="math display">\[
+n \ge \frac{\ln(2/\beta)}{8\gamma^2\alpha^2}
+\tag{3.9}\]</span></span></p>
+<p>people. A smaller <span class="math inline">\(\gamma\)</span> hides each bit better and needs more people for the same accuracy. To say how much better a smaller <span class="math inline">\(\gamma\)</span> hides a bit, we need a definition.</p>
+</section>
+<section id="sec-rr-definition" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="sec-rr-definition"><span class="header-section-number">3.2</span> Differential privacy</h2>
+<p>In privacy, the first step is to fix the setting. Here it is the <strong>central model</strong>. Each of <span class="math inline">\(n\)</span> people sends their data point to a <strong>trusted curator</strong>, whom they trust with it and trust no one else. The curator runs an algorithm <span class="math inline">\(M\)</span> on the dataset <span class="math inline">\(X = (X_1, \dots, X_n) \in \mathcal X^n\)</span> and publishes the output. Everything the curator publishes crosses a trust barrier, and anyone on the far side may be an adversary. The guarantee is a property of the algorithm, which in this field is called a <strong>mechanism</strong>. It says that no single person’s data has a large effect on the distribution of the output.</p>
+<div id="def-rr-neighbours" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 3.3 (Neighbouring datasets)</strong></span> Two datasets <span class="math inline">\(X, X' \in \mathcal X^n\)</span> are <strong>neighbours</strong>, written <span class="math inline">\(X \sim X'\)</span>, if they differ in exactly one entry.</p>
+</div>
+<div id="def-rr-dp" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 3.4 (Differential privacy)</strong></span> Let <span class="math inline">\(\varepsilon \ge 0\)</span>. A randomized algorithm <span class="math inline">\(M \colon \mathcal X^n \to \mathcal Y\)</span> is <strong><span class="math inline">\(\varepsilon\)</span>-differentially private</strong> (<span class="math inline">\(\varepsilon\)</span>-DP) if for all neighbours <span class="math inline">\(X \sim X'\)</span> and all events <span class="math inline">\(T \subseteq \mathcal Y\)</span>,</p>
+<p><span id="eq-rr-dp"><span class="math display">\[
+\Pr[M(X) \in T] \le e^{\varepsilon}\, \Pr[M(X') \in T] .
+\tag{3.10}\]</span></span></p>
+<p>The probability is over the coins of <span class="math inline">\(M\)</span> only. The datasets are fixed.</p>
+</div>
+<p>This is sometimes called <strong>pure</strong> differential privacy, to set it apart from a relaxation in a later chapter. Several features of it matter later.</p>
+<ul>
+<li><strong>It is quantitative.</strong> At <span class="math inline">\(\varepsilon = 0\)</span> the output distribution is the same on every dataset, which is perfect privacy and allows no accuracy. Any algorithm that is not randomized is <span class="math inline">\(\infty\)</span>-DP, which is no guarantee at all. Values of <span class="math inline">\(\varepsilon\)</span> between about <span class="math inline">\(0.1\)</span> and <span class="math inline">\(5\)</span> are typical, smaller is more private, and a claim far outside that range deserves suspicion. Because the bound is <span class="math inline">\(e^\varepsilon\)</span>, privacy weakens quickly once <span class="math inline">\(\varepsilon\)</span> is above <span class="math inline">\(1\)</span>.</li>
+<li><strong>It is worst case.</strong> It must hold for every pair of neighbours, however unlikely the data. No distribution over datasets is assumed.</li>
+<li><strong>It is symmetric.</strong> Swapping <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> in <a href="#eq-rr-dp" class="quarto-xref">Equation&nbsp;<span>3.10</span></a> gives the lower bound <span class="math inline">\(\Pr[M(X)\in T] \ge e^{-\varepsilon}\Pr[M(X')\in T]\)</span>.</li>
+<li><strong>It bounds a ratio, not a difference.</strong> For small <span class="math inline">\(\varepsilon\)</span> the factor <span class="math inline">\(e^\varepsilon\)</span> is close to <span class="math inline">\(1 + \varepsilon\)</span>. The exponential form is chosen because factors multiply when guarantees are chained, <span class="math inline">\(e^{\varepsilon_1}e^{\varepsilon_2} = e^{\varepsilon_1+\varepsilon_2}\)</span>, which the next chapter uses for group privacy. An additive notion of closeness, such as a small total variation distance, sounds natural but gives no meaningful guarantee.</li>
+</ul>
+<p>This notion of neighbours replaces one entry, and is called <strong>bounded</strong> differential privacy. <strong>Unbounded</strong> differential privacy instead adds or removes one entry. A replacement is a removal followed by an addition, so an algorithm that is <span class="math inline">\(\varepsilon\)</span>-DP under unbounded neighbours is <span class="math inline">\(2\varepsilon\)</span>-DP under bounded ones, by the chaining argument of the next chapter’s group privacy. The converse can fail, because under unbounded neighbours the size <span class="math inline">\(n\)</span> of the dataset is itself private, so an algorithm may not use it as a public number. The book uses replacement, because it is more convenient mathematically. In practice, two algorithms can be compared only under the same notion.</p>
+<p>For discrete outputs it suffices to check single outcomes, because the probability of an event is a sum of the probabilities of its outcomes.</p>
+<div id="lem-rr-pointwise" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 3.1</strong></span> Let <span class="math inline">\(\mathcal Y\)</span> be countable. If <span class="math inline">\(\Pr[M(X) = y] \le e^{\varepsilon}\Pr[M(X') = y]\)</span> for all neighbours <span class="math inline">\(X \sim X'\)</span> and all outputs <span class="math inline">\(y \in \mathcal Y\)</span>, then <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>For an event <span class="math inline">\(T\)</span>, sum the pointwise inequality over the outputs <span class="math inline">\(y \in T\)</span>:</p>
+<p><span id="eq-auto-01randomizedresponse-8"><span class="math display">\[
+\Pr[M(X)\in T] = \sum_{y \in T}\Pr[M(X) = y] \le e^{\varepsilon}\sum_{y\in T}\Pr[M(X') = y] = e^{\varepsilon}\Pr[M(X')\in T].
+\tag{3.11}\]</span></span></p>
+</div>
+<p>A first consequence of the definition is that privacy forces randomness.</p>
+<div id="prp-rr-randomized" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 3.1</strong></span> For <span class="math inline">\(\varepsilon &lt; \infty\)</span>, a deterministic <span class="math inline">\(\varepsilon\)</span>-DP algorithm is constant.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Let <span class="math inline">\(M\)</span> be deterministic and <span class="math inline">\(X \sim X'\)</span>. Take the event <span class="math inline">\(T = \{M(X)\}\)</span>. The definition gives <span class="math inline">\(1 = \Pr[M(X) \in T] \le e^\varepsilon \Pr[M(X') \in T]\)</span>, so <span class="math inline">\(\Pr[M(X') = M(X)] &gt; 0\)</span>. Since <span class="math inline">\(M(X')\)</span> is a single value, <span class="math inline">\(M(X') = M(X)\)</span>.</li>
+<li>Any two datasets in <span class="math inline">\(\mathcal X^n\)</span> are joined by a path of at most <span class="math inline">\(n\)</span> neighbours, changing one entry at a time. By step 1, <span class="math inline">\(M\)</span> takes the same value at every step of the path, so it is constant.</li>
+</ol>
+</div>
+<section id="sec-rr-testing" class="level3" data-number="3.2.1">
+<h3 data-number="3.2.1" class="anchored" data-anchor-id="sec-rr-testing"><span class="header-section-number">3.2.1</span> Hypothesis testing</h3>
+<p>The definition has an operational reading, from the adversary’s side. An adversary knows that the dataset is one of two neighbours, <span class="math inline">\(X\)</span> or <span class="math inline">\(X'\)</span>, and sees the output of <span class="math inline">\(M\)</span>. It must decide between the <strong>null hypothesis</strong> and the <strong>alternative</strong>,</p>
+<p><span id="eq-auto-01randomizedresponse-9"><span class="math display">\[
+H_0\colon \text{the dataset is } X, \qquad H_1\colon \text{the dataset is } X' .
+\tag{3.12}\]</span></span></p>
+<p>A test is a function <span class="math inline">\(\phi\colon \mathcal Y \to [0,1]\)</span>, the probability of answering <span class="math inline">\(H_1\)</span> given the output, so randomized tests are allowed. The test’s <strong>false positive rate</strong> <span class="math inline">\(p\)</span> is the chance of answering <span class="math inline">\(H_1\)</span> when <span class="math inline">\(H_0\)</span> holds, and its <strong>false negative rate</strong> <span class="math inline">\(q\)</span> is the chance of answering <span class="math inline">\(H_0\)</span> when <span class="math inline">\(H_1\)</span> holds:</p>
+<p><span id="eq-auto-01randomizedresponse-10"><span class="math display">\[
+p = \mathbb E[\phi(M(X))], \qquad q = 1 - \mathbb E[\phi(M(X'))].
+\tag{3.13}\]</span></span></p>
+<div id="thm-rr-testing" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 3.3</strong></span> A mechanism <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP if and only if, for every pair of neighbours and every test, the two error rates satisfy</p>
+<p><span id="eq-rr-testing"><span class="math display">\[
+p + e^{\varepsilon}q \ge 1 \qquad\text{and}\qquad e^{\varepsilon}p + q \ge 1 .
+\tag{3.14}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>DP extends from events to tests.</em> Let <span class="math inline">\(M\)</span> be <span class="math inline">\(\varepsilon\)</span>-DP and let <span class="math inline">\(\phi\)</span> take values in <span class="math inline">\([0,1]\)</span>. Write its average as an integral of tail probabilities, <span class="math inline">\(\mathbb E[\phi(M(X))] = \int_0^1 \Pr[\phi(M(X)) &gt; t]\,dt\)</span>. Each tail is the probability of the event <span class="math inline">\(T_t = \{y : \phi(y) &gt; t\}\)</span>, which <a href="#eq-rr-dp" class="quarto-xref">Equation&nbsp;<span>3.10</span></a> bounds by <span class="math inline">\(e^\varepsilon\Pr[M(X') \in T_t]\)</span>. Integrating over <span class="math inline">\(t\)</span> gives <span class="math inline">\(\mathbb E[\phi(M(X))] \le e^\varepsilon\,\mathbb E[\phi(M(X'))]\)</span>, and the same holds with <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> swapped.</li>
+<li><em>DP implies the inequalities.</em> Apply step 1 to <span class="math inline">\(\phi\)</span>, from <span class="math inline">\(X'\)</span> to <span class="math inline">\(X\)</span>: <span class="math inline">\(1 - q = \mathbb E[\phi(M(X'))] \le e^\varepsilon\,\mathbb E[\phi(M(X))] = e^\varepsilon p\)</span>. This is the second inequality. Apply step 1 to <span class="math inline">\(1 - \phi\)</span>, from <span class="math inline">\(X\)</span> to <span class="math inline">\(X'\)</span>: <span class="math inline">\(1 - p = \mathbb E[1-\phi(M(X))] \le e^\varepsilon\,\mathbb E[1-\phi(M(X'))] = e^\varepsilon q\)</span>. This is the first.</li>
+<li><em>The inequalities imply DP.</em> Take an event <span class="math inline">\(T\)</span> and the test <span class="math inline">\(\phi = \mathbf 1_T\)</span>, which answers <span class="math inline">\(H_1\)</span> exactly when the output lands in <span class="math inline">\(T\)</span>. Its error rates are <span class="math inline">\(p = \Pr[M(X)\in T]\)</span> and <span class="math inline">\(q = 1 - \Pr[M(X')\in T]\)</span>. The second inequality says <span class="math inline">\(e^\varepsilon\Pr[M(X)\in T] + 1 - \Pr[M(X')\in T] \ge 1\)</span>, that is, <span class="math inline">\(\Pr[M(X')\in T] \le e^\varepsilon \Pr[M(X)\in T]\)</span>. The pair of neighbours was arbitrary, so the same holds with the roles of <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> swapped, which is <a href="#eq-rr-dp" class="quarto-xref">Equation&nbsp;<span>3.10</span></a>.</li>
+</ol>
+</div>
+<p>At <span class="math inline">\(\varepsilon = 0\)</span> the two inequalities force <span class="math inline">\(p + q \ge 1\)</span>, which is what a test that ignores the output achieves, such as guessing at random (<span class="math inline">\(p = q = 1/2\)</span>) or always answering <span class="math inline">\(H_0\)</span> (<span class="math inline">\(p = 0\)</span>, <span class="math inline">\(q = 1\)</span>). As <span class="math inline">\(\varepsilon\)</span> grows, the region of achievable error pairs widens, and the adversary can beat blind guessing by more.</p>
+</section>
+<section id="sec-rr-meaning" class="level3" data-number="3.2.2">
+<h3 data-number="3.2.2" class="anchored" data-anchor-id="sec-rr-meaning"><span class="header-section-number">3.2.2</span> What the definition promises</h3>
+<p>In words, the probability of any event is about the same whether a given person’s data is in the dataset or is replaced by someone else’s. So any harm that can come from the output is not much more likely because the person took part. A linkage attack that succeeds with their record would succeed about as often without it, with any auxiliary data that exists now or is released later. Reconstruction attacks are prevented too, up to the number of queries that a later chapter quantifies. At <span class="math inline">\(\varepsilon = 0.1\)</span>, the chance of any bad event grows by a factor of at most <span class="math inline">\(e^{0.1} \approx 1.105\)</span>. The guarantee holds against an adversary with unlimited computation and unlimited side information, so it is information theoretic, unlike most of cryptography.</p>
+<p>The definition does not prevent inference from aggregate patterns. Suppose a study run with differential privacy finds that smoking causes cancer, and an insurer raises the premium of a smoker who took part. The study’s conclusion would have been the same without that person’s record, so the harm comes from a fact about the population, not from their participation. Learning such facts is the point of statistics, and the definition is designed to allow it. For the same reason, a task whose goal is to single out an individual, such as tracing one person’s contacts, is at odds with the definition. An aggregate version of the same task, such as warning everyone who attended an event at which many people later tested positive, fits it.</p>
+</section>
+</section>
+<section id="sec-rr-privacy" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="sec-rr-privacy"><span class="header-section-number">3.3</span> Randomized response revisited</h2>
+<p>Randomized response now has a privacy guarantee. The theorem treats the whole vector of reports as the output. The estimator <a href="#eq-rr-estimator" class="quarto-xref">Equation&nbsp;<span>3.4</span></a> is a function of that vector, so it inherits the guarantee by post-processing, a property proved in the next chapter.</p>
+<div id="thm-rr-privacy" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 3.4</strong></span> Randomized response with bias <span class="math inline">\(\gamma \in [0,1/2)\)</span>, releasing <span class="math inline">\((Y_1,\dots,Y_n)\)</span>, is <span class="math inline">\(\varepsilon\)</span>-DP for</p>
+<p><span id="eq-auto-01randomizedresponse-11"><span class="math display">\[
+\varepsilon = \ln\frac{\tfrac12+\gamma}{\tfrac12-\gamma} .
+\tag{3.15}\]</span></span></p>
+<p>Equivalently, to obtain <span class="math inline">\(\varepsilon\)</span>-DP, report the truth with probability <span class="math inline">\(\tfrac12 + \gamma = e^{\varepsilon}/(1 + e^{\varepsilon})\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Fix an output <span class="math inline">\(a \in \{0,1\}^n\)</span>. The coins are independent across people, so <span class="math inline">\(\Pr[M(X) = a] = \prod_{i=1}^n \Pr[Y_i = a_i]\)</span>, where each factor depends only on <span class="math inline">\(X_i\)</span>.</li>
+<li>Let <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> differ only in entry <span class="math inline">\(j\)</span>, and write <span class="math inline">\(Y_j'\)</span> for the report of person <span class="math inline">\(j\)</span> on <span class="math inline">\(X'\)</span>. All factors with <span class="math inline">\(i \ne j\)</span> are equal for the two datasets and cancel in the ratio:</li>
+</ol>
+<p><span id="eq-auto-01randomizedresponse-12"><span class="math display">\[
+\frac{\Pr[M(X) = a]}{\Pr[M(X') = a]} = \frac{\Pr[Y_j = a_j]}{\Pr[Y_j' = a_j]} .
+\tag{3.16}\]</span></span></p>
+<ol start="3" type="1">
+<li>Each probability on the right is <span class="math inline">\(\tfrac12+\gamma\)</span> or <span class="math inline">\(\tfrac12-\gamma\)</span>, so the ratio is at most <span class="math inline">\((\tfrac12+\gamma)/(\tfrac12-\gamma) = e^\varepsilon\)</span>.</li>
+<li><a href="#lem-rr-pointwise" class="quarto-xref">Lemma&nbsp;<span>3.1</span></a> turns this pointwise bound into the definition.</li>
+<li>Solving <span class="math inline">\(e^\varepsilon = (\tfrac12+\gamma)/(\tfrac12-\gamma)\)</span> for <span class="math inline">\(\tfrac12 + \gamma\)</span> gives <span class="math inline">\(e^\varepsilon/(1+e^\varepsilon)\)</span>.</li>
+</ol>
+</div>
+<p>For small <span class="math inline">\(\gamma\)</span> the privacy parameter is <span class="math inline">\(\varepsilon = 4\gamma + O(\gamma^3)\)</span>, so a bias of order <span class="math inline">\(\varepsilon\)</span> gives <span class="math inline">\(\varepsilon\)</span>-DP. Exactly, the bias that gives <span class="math inline">\(\varepsilon\)</span>-DP is</p>
+<p><span id="eq-auto-01randomizedresponse-13"><span class="math display">\[
+2\gamma = \frac{e^\varepsilon - 1}{e^\varepsilon + 1} = \tanh\frac{\varepsilon}{2},
+\tag{3.17}\]</span></span></p>
+<p>so <a href="#thm-rr-accuracy" class="quarto-xref">Theorem&nbsp;<span>3.2</span></a> and <a href="#thm-rr-variance" class="quarto-xref">Theorem&nbsp;<span>3.1</span></a> become, with probability at least <span class="math inline">\(1-\beta\)</span>,</p>
+<p><span id="eq-rr-tradeoff"><span class="math display">\[
+|\tilde p - p| \le \coth\!\left(\frac\varepsilon2\right)\sqrt{\frac{\ln(2/\beta)}{2n}}, \qquad \operatorname{Var}[\tilde p] = \frac{e^\varepsilon}{(e^\varepsilon-1)^2\, n}.
+\tag{3.18}\]</span></span></p>
+<p>The factor <span class="math inline">\(\coth(\varepsilon/2)\)</span> lies between <span class="math inline">\(2/\varepsilon\)</span> and <span class="math inline">\(2/\varepsilon + \varepsilon/6\)</span> for every <span class="math inline">\(\varepsilon &gt; 0\)</span>, so the error is <span class="math inline">\(O\big(1/(\varepsilon\sqrt n)\big)\)</span> for <span class="math inline">\(\varepsilon \le 1\)</span>. <a href="#fig-rr-error" class="quarto-xref">Figure&nbsp;<span>3.1</span></a> compares this bound with simulation.</p>
+<div id="fig-rr-error" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-rr-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/rr-error.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-rr-error-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.1: Error of randomized response. For each <span class="math inline">\(\varepsilon\)</span>, the solid line is the 95th percentile of <span class="math inline">\(|\tilde p - p|\)</span> over 2,000 simulated runs with <span class="math inline">\(p = 0.3\)</span>, and the dashed line is the bound of <a href="#eq-rr-tradeoff" class="quarto-xref">Equation&nbsp;<span>3.18</span></a> with <span class="math inline">\(\beta = 0.05\)</span>. Both fall as <span class="math inline">\(1/\sqrt n\)</span>. The bound is 1.4 to 2.2 times the simulated error, and it is loosest for large <span class="math inline">\(\varepsilon\)</span>, because Hoeffding’s inequality uses only the range of each term and not its smaller variance.
+</figcaption>
+</figure>
+</div>
+<div id="exm-rr-numbers" class="theorem example">
+<p><span class="theorem-title"><strong>Example 3.1</strong></span> With <span class="math inline">\(\varepsilon = 1\)</span>, each person tells the truth with probability <span class="math inline">\(e/(1+e) = 0.7311\)</span>. With <span class="math inline">\(n = 10{,}000\)</span> and <span class="math inline">\(\beta = 0.05\)</span>, the bound <a href="#eq-rr-tradeoff" class="quarto-xref">Equation&nbsp;<span>3.18</span></a> is <span class="math inline">\(\coth(0.5)\sqrt{\ln 40/20{,}000} = 2.1640 \times 0.01358 = 0.0294\)</span>. The standard deviation from <a href="#eq-rr-tradeoff" class="quarto-xref">Equation&nbsp;<span>3.18</span></a> is <span class="math inline">\(\sqrt{e/((e-1)^2 \cdot 10{,}000)} = 0.0096\)</span>.</p>
+</div>
+<p>Randomized response gives more than the definition asks for. Each person randomizes their own bit before sending it, so they need not trust the curator, and no one ever sees a true bit. This is <strong>local differential privacy</strong>, the subject of a later chapter, and it implies the central guarantee proved here. The price is accuracy. The <span class="math inline">\(\sqrt n\)</span> in the error is not necessary under central privacy: the next chapter’s Laplace mechanism estimates <span class="math inline">\(p\)</span> with error <span class="math inline">\(O(1/(\varepsilon n))\)</span>.</p>
+</section>
+<section id="sec-rr-summary" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="sec-rr-summary"><span class="header-section-number">3.4</span> Summary</h2>
+<div id="tbl-rr-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-rr-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3.1: The chapter’s results.
+</figcaption>
+<div aria-describedby="tbl-rr-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#thm-rr-accuracy" class="quarto-xref">Theorem&nbsp;<span>3.2</span></a></td>
+<td>randomized response with bias <span class="math inline">\(\gamma\)</span> has error <span class="math inline">\(\frac{1}{2\gamma}\sqrt{\ln(2/\beta)/(2n)}\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#def-rr-dp" class="quarto-xref">Definition&nbsp;<span>3.4</span></a></td>
+<td><span class="math inline">\(\Pr[M(X)\in T] \le e^\varepsilon \Pr[M(X')\in T]\)</span> for all neighbours and events</td>
+</tr>
+<tr class="odd">
+<td><a href="#lem-rr-pointwise" class="quarto-xref">Lemma&nbsp;<span>3.1</span></a></td>
+<td>for discrete outputs, single outcomes suffice</td>
+</tr>
+<tr class="even">
+<td><a href="#prp-rr-randomized" class="quarto-xref">Proposition&nbsp;<span>3.1</span></a></td>
+<td>a deterministic private algorithm is constant</td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-rr-testing" class="quarto-xref">Theorem&nbsp;<span>3.3</span></a></td>
+<td><span class="math inline">\(\varepsilon\)</span>-DP holds exactly when every test has <span class="math inline">\(p + e^\varepsilon q \ge 1\)</span> and <span class="math inline">\(e^\varepsilon p + q \ge 1\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#thm-rr-privacy" class="quarto-xref">Theorem&nbsp;<span>3.4</span></a></td>
+<td>truth with probability <span class="math inline">\(e^\varepsilon/(1+e^\varepsilon)\)</span> gives <span class="math inline">\(\varepsilon\)</span>-DP</td>
+</tr>
+<tr class="odd">
+<td><a href="#eq-rr-tradeoff" class="quarto-xref">Equation&nbsp;<span>3.18</span></a></td>
+<td>error <span class="math inline">\(\coth(\varepsilon/2)\sqrt{\ln(2/\beta)/(2n)} = O(1/(\varepsilon\sqrt n))\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-rr-notes" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="sec-rr-notes"><span class="header-section-number">3.5</span> Notes</h2>
+<ul>
+<li>Stanley L. Warner, “Randomized Response: A Survey Technique for Eliminating Evasive Answer Bias”, 1965. The original protocol, designed for surveys on sensitive questions.</li>
+<li>Cynthia Dwork, Frank McSherry, Kobbi Nissim and Adam Smith, “Calibrating Noise to Sensitivity in Private Data Analysis”, 2006. The definition of differential privacy.</li>
+<li>Larry Wasserman and Shuheng Zhou, “A Statistical Framework for Differential Privacy”, 2010. The hypothesis-testing reading of the definition.</li>
+<li>Peter Kairouz, Sewoong Oh and Pramod Viswanath, “The Composition Theorem for Differential Privacy”, 2015, and Jinshuo Dong, Aaron Roth and Weijie Su, “Gaussian Differential Privacy”, 2019. Two later uses of the hypothesis-testing reading, for optimal composition and for a definition built on testing.</li>
+<li>Cynthia Dwork and Aaron Roth, <em>The Algorithmic Foundations of Differential Privacy</em>, 2014. The standard reference for the definition and its interpretation, including the smoking example.</li>
+<li>Salil Vadhan, “The Complexity of Differential Privacy”, 2017. Section 1.6 explains why total variation distance gives no meaningful guarantee.</li>
+<li>Thomas Steinke and Jonathan Ullman, “The Pitfalls of Average-Case Differential Privacy”, 2020, a post on the DifferentialPrivacy.org blog. Why the worst case over datasets matters.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-dp-basics/00-introduction.html" class="pagination-link" aria-label="The Basics of Differential Privacy">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">The Basics of Differential Privacy</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-dp-basics/02-laplace-mechanism.html" class="pagination-link" aria-label="The Laplace Mechanism">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

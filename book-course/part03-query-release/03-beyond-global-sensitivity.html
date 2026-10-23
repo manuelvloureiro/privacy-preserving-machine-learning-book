@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>10&nbsp; Beyond Global Sensitivity – A Course in Differential Privacy</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part03-query-release/04-packing-lower-bounds.html" rel="next">
+<link href="../part03-query-release/02-sparse-vector.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-query-release/00-introduction.html">Query Release and Its Limits</a></li><li class="breadcrumb-item"><a href="../part03-query-release/03-beyond-global-sensitivity.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">A Course in Differential Privacy</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-privacy-failures/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy Failures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/01-attempts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Attempts at Data Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/02-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Reconstruction Attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-dp-basics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Basics of Differential Privacy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/01-randomized-response.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/02-laplace-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/03-approximate-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/04-advanced-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/05-exponential-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Exponential Mechanism</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-query-release/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query Release and Its Limits</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/01-multiplicative-weights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Private Multiplicative Weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/02-sparse-vector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sparse Vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/03-beyond-global-sensitivity.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/04-packing-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Packing Lower Bounds</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-learning-statistics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Private Learning and Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/01-privacy-violations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What Differential Privacy Protects</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/02-private-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/03-private-deep-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/04-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Private Mean Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/05-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Adaptive Data Analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-deployments/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deployments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/01-local-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Local Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/02-shuffle-and-central-deployments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-bgs-local" id="toc-sec-bgs-local" class="nav-link active" data-scroll-target="#sec-bgs-local"><span class="header-section-number">10.1</span> Local sensitivity</a></li>
+  <li><a href="#sec-bgs-ptr" id="toc-sec-bgs-ptr" class="nav-link" data-scroll-target="#sec-bgs-ptr"><span class="header-section-number">10.2</span> Propose-test-release</a></li>
+  <li><a href="#sec-bgs-stability" id="toc-sec-bgs-stability" class="nav-link" data-scroll-target="#sec-bgs-stability"><span class="header-section-number">10.3</span> Stability: the mode and the histogram</a></li>
+  <li><a href="#sec-bgs-bounding" id="toc-sec-bgs-bounding" class="nav-link" data-scroll-target="#sec-bgs-bounding"><span class="header-section-number">10.4</span> Privately bounding the local sensitivity</a></li>
+  <li><a href="#sec-bgs-smooth" id="toc-sec-bgs-smooth" class="nav-link" data-scroll-target="#sec-bgs-smooth"><span class="header-section-number">10.5</span> Smooth sensitivity</a></li>
+  <li><a href="#sec-bgs-summary" id="toc-sec-bgs-summary" class="nav-link" data-scroll-target="#sec-bgs-summary"><span class="header-section-number">10.6</span> Summary</a></li>
+  <li><a href="#sec-bgs-notes" id="toc-sec-bgs-notes" class="nav-link" data-scroll-target="#sec-bgs-notes"><span class="header-section-number">10.7</span> Notes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part03-query-release/00-introduction.html">Query Release and Its Limits</a></li><li class="breadcrumb-item"><a href="../part03-query-release/03-beyond-global-sensitivity.html"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The Laplace mechanism adds noise scaled to the global sensitivity of a function, the largest change one record can cause on any pair of neighbouring datasets. For many functions that worst case is far from the dataset at hand, or it is infinite. This chapter asks whether the noise can be scaled to the dataset actually held instead, while keeping differential privacy (DP).</p>
+<p>Done naively, it cannot, because the amount of noise then depends on the data and leaks it. Four techniques make the idea work. Propose-test-release checks privately that the dataset is far from any dataset where the function is sensitive. A stability argument built on it finds the most frequent element, and estimates every count of a histogram, with no dependence on the size of the domain. The last two techniques estimate a bound on the sensitivity privately, or smooth it, before using it. All four can be accurate on well-behaved datasets even when no algorithm is accurate on the worst one.</p>
+<section id="sec-bgs-local" class="level2" data-number="10.1">
+<h2 data-number="10.1" class="anchored" data-anchor-id="sec-bgs-local"><span class="header-section-number">10.1</span> Local sensitivity</h2>
+<p>Throughout the chapter, <span class="math inline">\(f\colon \mathcal X^n \to \mathbb R\)</span> is a real-valued function of the dataset. Its <strong>global sensitivity</strong> is the largest change that replacing one record can cause,</p>
+<p><span id="eq-auto-03beyondglobalsensitivity-1"><span class="math display">\[
+\Delta_f = \max_{X \sim X'} |f(X) - f(X')| ,
+\tag{10.1}\]</span></span></p>
+<p>and the <a href="../part02-dp-basics/02-laplace-mechanism.html">Laplace mechanism</a> adds to <span class="math inline">\(f(X)\)</span> a noise term drawn from <span class="math inline">\(\mathrm{Lap}(\Delta_f/\varepsilon)\)</span>, which makes the release <span class="math inline">\(\varepsilon\)</span>-DP. The maximum ranges over all pairs of neighbours, including datasets that look nothing like the one held. Fixing the first dataset gives a local version.</p>
+<div id="def-bgs-local" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 10.1 (Local sensitivity)</strong></span> The <strong>local sensitivity</strong> of <span class="math inline">\(f\)</span> at a dataset <span class="math inline">\(X \in \mathcal X^n\)</span> is</p>
+<p><span id="eq-auto-03beyondglobalsensitivity-2"><span class="math display">\[
+\mathrm{LS}_f(X) = \max_{X' \sim X} |f(X) - f(X')| .
+\tag{10.2}\]</span></span></p>
+</div>
+<p>The global sensitivity is the largest local sensitivity, <span class="math inline">\(\Delta_f = \max_X \mathrm{LS}_f(X)\)</span>, and the local sensitivity can be much smaller. The natural mechanism releases <span class="math inline">\(f(X) + \mathrm{Lap}(\mathrm{LS}_f(X)/\varepsilon)\)</span>. It fails, because the scale of the noise is itself a function of the data.</p>
+<div id="exm-bgs-closest" class="theorem example">
+<p><span class="theorem-title"><strong>Example 10.1</strong></span> Let <span class="math inline">\(\mathcal X = \mathbb R\)</span>, <span class="math inline">\(n = 3\)</span>, and let <span class="math inline">\(f(X)\)</span> be the distance between the two closest records. On the real line <span class="math inline">\(f\)</span> has infinite global sensitivity. For example, <span class="math inline">\((0, c, 2c)\)</span> and its neighbour <span class="math inline">\((0, 0, 2c)\)</span> have <span class="math inline">\(f\)</span> equal to <span class="math inline">\(c\)</span> and <span class="math inline">\(0\)</span>, for every <span class="math inline">\(c &gt; 0\)</span>, so the Laplace mechanism does not apply. Take <span class="math inline">\(X = (0, 0, 0)\)</span>. Replacing any one record leaves two records at <span class="math inline">\(0\)</span>, so <span class="math inline">\(f\)</span> stays <span class="math inline">\(0\)</span> and <span class="math inline">\(\mathrm{LS}_f(X) = 0\)</span>. Now take the neighbour <span class="math inline">\(X' = (0, 0, 5)\)</span>. It also has <span class="math inline">\(f(X') = 0\)</span>, but replacing one of its zeros by <span class="math inline">\(10\)</span> gives <span class="math inline">\((0, 10, 5)\)</span> with closest distance <span class="math inline">\(5\)</span>, so <span class="math inline">\(\mathrm{LS}_f(X') \ge 5\)</span>.</p>
+</div>
+<div id="prp-bgs-naive" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 10.1</strong></span> The mechanism <span class="math inline">\(M(X) = f(X) + \mathrm{Lap}(\mathrm{LS}_f(X)/\varepsilon)\)</span>, where <span class="math inline">\(\mathrm{Lap}(0)\)</span> means no noise, is not <span class="math inline">\(\varepsilon\)</span>-DP for any finite <span class="math inline">\(\varepsilon\)</span> when <span class="math inline">\(f\)</span> is the closest-pair distance of <a href="#exm-bgs-closest" class="quarto-xref">Example&nbsp;<span>10.1</span></a>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>On <span class="math inline">\(X = (0,0,0)\)</span> the local sensitivity is <span class="math inline">\(0\)</span>, so <span class="math inline">\(M(X) = 0\)</span> with probability <span class="math inline">\(1\)</span>.</li>
+<li>On the neighbour <span class="math inline">\(X' = (0,0,5)\)</span> the local sensitivity is positive, so <span class="math inline">\(M(X')\)</span> has a continuous distribution and <span class="math inline">\(\Pr[M(X') = 0] = 0\)</span>.</li>
+<li>So the event <span class="math inline">\(\{0\}\)</span> has probability <span class="math inline">\(1\)</span> on <span class="math inline">\(X\)</span> and <span class="math inline">\(0\)</span> on <span class="math inline">\(X'\)</span>, and no factor <span class="math inline">\(e^{\varepsilon}\)</span> with finite <span class="math inline">\(\varepsilon\)</span> can bound the first by the second.</li>
+</ol>
+</div>
+<p>The failure is that <span class="math inline">\(X\)</span> has low local sensitivity while a neighbour has high local sensitivity, and the noise level tells them apart. The local sensitivity is itself a statistic of the data, and releasing it, even only through the scale of the noise, leaks information. The techniques below each account for the sensitivity of nearby datasets, not just of <span class="math inline">\(X\)</span>.</p>
+</section>
+<section id="sec-bgs-ptr" class="level2" data-number="10.2">
+<h2 data-number="10.2" class="anchored" data-anchor-id="sec-bgs-ptr"><span class="header-section-number">10.2</span> Propose-test-release</h2>
+<p>The first technique proposes a bound <span class="math inline">\(b\)</span> on the local sensitivity, tests privately that the bound holds at <span class="math inline">\(X\)</span> and at every dataset near <span class="math inline">\(X\)</span>, and releases <span class="math inline">\(f(X)\)</span> with noise scaled to <span class="math inline">\(b\)</span> only if the test passes. The test measures how many records must change before the bound fails. The <strong>Hamming distance</strong> <span class="math inline">\(d(X, X')\)</span> between two datasets is the number of entries in which they differ.</p>
+<div id="def-bgs-distance" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 10.2 (Distance to instability)</strong></span> For a proposed bound <span class="math inline">\(b \ge 0\)</span>, the <strong>distance to instability</strong> of <span class="math inline">\(X\)</span> is</p>
+<p><span id="eq-auto-03beyondglobalsensitivity-3"><span class="math display">\[
+\gamma_b(X) = \min\{\, d(X, X') : X' \in \mathcal X^n,\ \mathrm{LS}_f(X') &gt; b \,\},
+\tag{10.3}\]</span></span></p>
+<p>the fewest records that must change to reach a dataset whose local sensitivity exceeds <span class="math inline">\(b\)</span>. If no dataset has local sensitivity above <span class="math inline">\(b\)</span>, set <span class="math inline">\(\gamma_b \equiv \infty\)</span>.</p>
+</div>
+<p>So <span class="math inline">\(\gamma_b(X) = 0\)</span> exactly when <span class="math inline">\(\mathrm{LS}_f(X) &gt; b\)</span>. The distance is a count of records, and that gives it sensitivity <span class="math inline">\(1\)</span> whatever <span class="math inline">\(f\)</span> is.</p>
+<div id="lem-bgs-distance" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 10.1</strong></span> If <span class="math inline">\(\gamma_b\)</span> is finite, then <span class="math inline">\(|\gamma_b(X) - \gamma_b(X')| \le 1\)</span> for all neighbours <span class="math inline">\(X \sim X'\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>If some dataset <span class="math inline">\(Z\)</span> has <span class="math inline">\(\mathrm{LS}_f(Z) &gt; b\)</span>, every dataset is within distance <span class="math inline">\(n\)</span> of <span class="math inline">\(Z\)</span>, so <span class="math inline">\(\gamma_b\)</span> is finite everywhere.</li>
+<li>Let <span class="math inline">\(Z\)</span> attain the minimum for <span class="math inline">\(X'\)</span>, so <span class="math inline">\(d(X', Z) = \gamma_b(X')\)</span> and <span class="math inline">\(\mathrm{LS}_f(Z) &gt; b\)</span>. The Hamming distance satisfies the triangle inequality, so <span class="math inline">\(d(X, Z) \le d(X, X') + d(X', Z) = 1 + \gamma_b(X')\)</span>. Hence <span class="math inline">\(\gamma_b(X) \le \gamma_b(X') + 1\)</span>.</li>
+<li>Swapping the roles of <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> gives the other inequality.</li>
+</ol>
+</div>
+<div id="def-bgs-ptr" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 10.3 (Propose-test-release)</strong></span> The mechanism takes a proposed bound <span class="math inline">\(b &gt; 0\)</span> and privacy parameters <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>. On input <span class="math inline">\(X\)</span>, it does three steps.</p>
+<ol type="1">
+<li>compute <span class="math inline">\(\hat\gamma = \gamma_b(X) + Z_1\)</span> with <span class="math inline">\(Z_1 \sim \mathrm{Lap}(1/\varepsilon)\)</span>;</li>
+<li>if <span class="math inline">\(\hat\gamma \le \ln(1/\delta)/\varepsilon\)</span>, output <span class="math inline">\(\perp\)</span>, meaning “no answer”;</li>
+<li>otherwise output <span class="math inline">\(f(X) + Z_2\)</span> with <span class="math inline">\(Z_2 \sim \mathrm{Lap}(b/\varepsilon)\)</span>, independent of <span class="math inline">\(Z_1\)</span>.</li>
+</ol>
+</div>
+<p>The test spends one budget of <span class="math inline">\(\varepsilon\)</span>, and the release spends another. The test can wrongly pass on a sensitive dataset, and <span class="math inline">\(\delta\)</span> pays for that. The release step is the naive mechanism of <a href="#prp-bgs-naive" class="quarto-xref">Proposition&nbsp;<span>10.1</span></a> with the scale <span class="math inline">\(b\)</span> in place of <span class="math inline">\(\mathrm{LS}_f(X)\)</span>. It is safe now because <span class="math inline">\(b\)</span> is fixed in advance, and the decision to use it depends on the data only through the private estimate <span class="math inline">\(\hat\gamma\)</span>.</p>
+<div id="thm-bgs-ptr" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 10.1</strong></span> Propose-test-release is <span class="math inline">\((2\varepsilon, \delta)\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Fix neighbours <span class="math inline">\(X \sim X'\)</span> and an event <span class="math inline">\(T \subseteq \mathbb R \cup \{\perp\}\)</span>. Write <span class="math inline">\(\tau = \ln(1/\delta)/\varepsilon\)</span> for the threshold. If <span class="math inline">\(\gamma_b \equiv \infty\)</span>, the test always passes and <span class="math inline">\(b \ge \Delta_f\)</span>, so the output is the Laplace mechanism and is <span class="math inline">\(\varepsilon\)</span>-DP. Assume from now on that <span class="math inline">\(\gamma_b\)</span> is finite.</p>
+<ol type="1">
+<li><em>The test is <span class="math inline">\(\varepsilon\)</span>-DP.</em> By <a href="#lem-bgs-distance" class="quarto-xref">Lemma&nbsp;<span>10.1</span></a>, <span class="math inline">\(\gamma_b\)</span> has sensitivity <span class="math inline">\(1\)</span>, so <span class="math inline">\(\hat\gamma\)</span> is the Laplace mechanism and is <span class="math inline">\(\varepsilon\)</span>-DP. The events <span class="math inline">\(\{\hat\gamma \le \tau\}\)</span> and <span class="math inline">\(\{\hat\gamma &gt; \tau\}\)</span> are post-processing of <span class="math inline">\(\hat\gamma\)</span>, so each has probability on <span class="math inline">\(X\)</span> at most <span class="math inline">\(e^{\varepsilon}\)</span> times its probability on <span class="math inline">\(X'\)</span>.</li>
+<li><em>Case <span class="math inline">\(\mathrm{LS}_f(X) &gt; b\)</span>.</em> Then <span class="math inline">\(\gamma_b(X) = 0\)</span>, and the test passes only if <span class="math inline">\(Z_1 &gt; \tau\)</span>, which has probability <span class="math inline">\(\frac12 e^{-\varepsilon\tau} = \delta/2\)</span>. Splitting on whether the output is <span class="math inline">\(\perp\)</span> and using step 1,</li>
+</ol>
+<p><span id="eq-auto-03beyondglobalsensitivity-4"><span class="math display">\[
+\Pr[M(X) \in T] \le \Pr[M(X) = \perp]\,\mathbf 1\{\perp \in T\} + \Pr[M(X) \ne \perp] \le e^{\varepsilon}\Pr[M(X') \in T] + \tfrac\delta2 .
+\tag{10.4}\]</span></span></p>
+<ol start="3" type="1">
+<li><em>Case <span class="math inline">\(\mathrm{LS}_f(X) \le b\)</span>.</em> Then <span class="math inline">\(|f(X) - f(X')| \le \mathrm{LS}_f(X) \le b\)</span>, so the release step is the Laplace mechanism for a pair at distance at most <span class="math inline">\(b\)</span>, with scale <span class="math inline">\(b/\varepsilon\)</span>. Its density at any <span class="math inline">\(y\)</span> changes by a factor at most <span class="math inline">\(e^{\varepsilon}\)</span> between <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span>. Write <span class="math inline">\(S = T \cap \mathbb R\)</span>. The two steps use independent noise, so</li>
+</ol>
+<p><span id="eq-auto-03beyondglobalsensitivity-5"><span class="math display">\[
+\Pr[M(X) \in T] = \Pr[\hat\gamma \le \tau]\,\mathbf 1\{\perp \in T\} + \Pr[\hat\gamma &gt; \tau]\,\Pr[f(X) + Z_2 \in S] .
+\tag{10.5}\]</span></span></p>
+<p>Each probability on the right is at most <span class="math inline">\(e^{\varepsilon}\)</span> times the same probability on <span class="math inline">\(X'\)</span>, by step 1 and by the Laplace mechanism. So <span class="math inline">\(\Pr[M(X) \in T] \le e^{2\varepsilon}\Pr[M(X') \in T]\)</span>.</p>
+<ol start="4" type="1">
+<li>In both cases <span class="math inline">\(\Pr[M(X) \in T] \le e^{2\varepsilon}\Pr[M(X') \in T] + \delta\)</span>. The pair was arbitrary, so this holds for every ordered pair of neighbours.</li>
+</ol>
+</div>
+<p>The test passes with high probability on datasets far from instability. If <span class="math inline">\(\gamma_b(X) \ge 2\ln(1/\delta)/\varepsilon\)</span>, then the output is <span class="math inline">\(\perp\)</span> only if <span class="math inline">\(Z_1 \le -\ln(1/\delta)/\varepsilon\)</span>, which has probability <span class="math inline">\(\delta/2\)</span>. The price is computation. Evaluating <span class="math inline">\(\mathrm{LS}_f\)</span> at one dataset takes up to <span class="math inline">\(n(|\mathcal X| - 1)\)</span> evaluations of <span class="math inline">\(f\)</span>, one per neighbour, and <span class="math inline">\(\gamma_b\)</span> is a minimum over all <span class="math inline">\(|\mathcal X|^n\)</span> datasets. So the distance to instability has to be worked out by hand for each function. The median is the standard case where this can be done efficiently.</p>
+</section>
+<section id="sec-bgs-stability" class="level2" data-number="10.3">
+<h2 data-number="10.3" class="anchored" data-anchor-id="sec-bgs-stability"><span class="header-section-number">10.3</span> Stability: the mode and the histogram</h2>
+<p>Propose-test-release is most striking with the bound <span class="math inline">\(b = 0\)</span>. Then the test checks that the answer does not change at all near <span class="math inline">\(X\)</span>, and the release step adds no noise. The mode, the most frequent element, is the standard example. If all <span class="math inline">\(n\)</span> records equal the same value <span class="math inline">\(v\)</span>, the mode stays <span class="math inline">\(v\)</span> until about <span class="math inline">\(n/2\)</span> records change, so the mode is far from instability.</p>
+<p>Let <span class="math inline">\(\mathcal X\)</span> be any set with a fixed total order, used only to break ties. Write <span class="math inline">\(c_x(X)\)</span> for the number of records of <span class="math inline">\(X\)</span> equal to <span class="math inline">\(x\)</span>, and <span class="math inline">\(c_{(1)}(X) \ge c_{(2)}(X)\)</span> for the largest and second-largest of these counts, with <span class="math inline">\(c_{(2)}(X) = 0\)</span> if all records are equal. The mode <span class="math inline">\(\mathrm{mode}(X)\)</span> is the element with the largest count, the least one in the order among ties. To change the mode, records must move from the most frequent element to the runner-up until it overtakes. So half the gap between the two largest counts is, up to <span class="math inline">\(1\)</span>, the distance to instability, and it is computed in one pass over the data whatever the domain.</p>
+<div id="lem-bgs-gap" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 10.2</strong></span> Let <span class="math inline">\(g(X) = \big(c_{(1)}(X) - c_{(2)}(X)\big)/2\)</span>. For all neighbours <span class="math inline">\(X \sim X'\)</span>:</p>
+<ol type="1">
+<li><span class="math inline">\(|g(X) - g(X')| \le 1\)</span>;</li>
+<li>if <span class="math inline">\(g(X) &gt; 1\)</span>, then <span class="math inline">\(\mathrm{mode}(X') = \mathrm{mode}(X)\)</span>.</li>
+</ol>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Replacing one record lowers one count by <span class="math inline">\(1\)</span> and raises another by <span class="math inline">\(1\)</span>, so every count changes by at most <span class="math inline">\(1\)</span>.</li>
+<li>The <span class="math inline">\(j\)</span>-th largest count is the maximum, over sets <span class="math inline">\(S\)</span> of <span class="math inline">\(j\)</span> elements, of <span class="math inline">\(\min_{x \in S} c_x\)</span>. If every count rises by at most <span class="math inline">\(1\)</span>, each such minimum rises by at most <span class="math inline">\(1\)</span>, and so does the maximum. The same holds for decreases, so <span class="math inline">\(c_{(1)}\)</span> and <span class="math inline">\(c_{(2)}\)</span> each change by at most <span class="math inline">\(1\)</span>, and <span class="math inline">\(g\)</span> changes by at most <span class="math inline">\((1 + 1)/2 = 1\)</span>. This is claim 1.</li>
+<li>For claim 2, let <span class="math inline">\(a = \mathrm{mode}(X)\)</span>. In <span class="math inline">\(X'\)</span>, the count of <span class="math inline">\(a\)</span> is at least <span class="math inline">\(c_{(1)}(X) - 1\)</span>, and every other count is at most <span class="math inline">\(c_{(2)}(X) + 1\)</span>. The condition <span class="math inline">\(g(X) &gt; 1\)</span> means <span class="math inline">\(c_{(1)}(X) - 1 &gt; c_{(2)}(X) + 1\)</span>, so <span class="math inline">\(a\)</span> has the strictly largest count in <span class="math inline">\(X'\)</span>.</li>
+</ol>
+</div>
+<div id="def-bgs-mode" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 10.4 (Stable mode)</strong></span> Given <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>, on input <span class="math inline">\(X\)</span>, compute <span class="math inline">\(\hat g = g(X) + Z\)</span> with <span class="math inline">\(Z \sim \mathrm{Lap}(1/\varepsilon)\)</span>. If <span class="math inline">\(\hat g \le 1 + \ln(1/\delta)/\varepsilon\)</span>, output <span class="math inline">\(\perp\)</span>, and otherwise output <span class="math inline">\(\mathrm{mode}(X)\)</span> exactly.</p>
+</div>
+<div id="thm-bgs-mode" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 10.2</strong></span> The stable mode is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. On every dataset whose two largest counts differ by at least <span class="math inline">\(2 + 4\ln(1/\delta)/\varepsilon\)</span>, it outputs the mode with probability at least <span class="math inline">\(1 - \delta/2\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Fix neighbours <span class="math inline">\(X \sim X'\)</span> and an event <span class="math inline">\(T\)</span>, and write <span class="math inline">\(\tau = 1 + \ln(1/\delta)/\varepsilon\)</span>.</p>
+<ol type="1">
+<li><em>The gap is <span class="math inline">\(\varepsilon\)</span>-DP.</em> By <a href="#lem-bgs-gap" class="quarto-xref">Lemma&nbsp;<span>10.2</span></a>, claim 1, <span class="math inline">\(\hat g\)</span> is the Laplace mechanism for a function of sensitivity <span class="math inline">\(1\)</span>, so it is <span class="math inline">\(\varepsilon\)</span>-DP.</li>
+<li><em>Case <span class="math inline">\(\mathrm{mode}(X') = \mathrm{mode}(X)\)</span>.</em> The output on both datasets is the same function of <span class="math inline">\(\hat g\)</span>, namely <span class="math inline">\(\perp\)</span> below the threshold and the common mode above it. Post-processing gives <span class="math inline">\(\Pr[M(X) \in T] \le e^{\varepsilon}\Pr[M(X') \in T]\)</span>.</li>
+<li><em>Case <span class="math inline">\(\mathrm{mode}(X') \ne \mathrm{mode}(X)\)</span>.</em> By <a href="#lem-bgs-gap" class="quarto-xref">Lemma&nbsp;<span>10.2</span></a>, claim 2, <span class="math inline">\(g(X) \le 1\)</span>. The mode is released only if <span class="math inline">\(Z &gt; \tau - g(X) \ge \ln(1/\delta)/\varepsilon\)</span>, which has probability at most <span class="math inline">\(\delta/2\)</span>. As in the proof of <a href="#thm-bgs-ptr" class="quarto-xref">Theorem&nbsp;<span>10.1</span></a>, <span class="math inline">\(\Pr[M(X) \in T] \le e^{\varepsilon}\Pr[M(X') \in T] + \delta/2\)</span>.</li>
+<li><em>Accuracy.</em> If <span class="math inline">\(c_{(1)} - c_{(2)} \ge 2 + 4\ln(1/\delta)/\varepsilon\)</span>, then <span class="math inline">\(g(X) \ge \tau + \ln(1/\delta)/\varepsilon\)</span>. The output is <span class="math inline">\(\perp\)</span> only if <span class="math inline">\(Z \le -\ln(1/\delta)/\varepsilon\)</span>, which has probability <span class="math inline">\(\delta/2\)</span>.</li>
+</ol>
+</div>
+<div id="exm-bgs-mode" class="theorem example">
+<p><span class="theorem-title"><strong>Example 10.2</strong></span> With <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, the threshold is <span class="math inline">\(1 + \ln(10^6) = 14.82\)</span>. A gap of <span class="math inline">\(2 + 4 \times 13.82 = 57.3\)</span>, so <span class="math inline">\(58\)</span> records, between the most frequent element and the runner-up is enough. The domain plays no part. It may be the set of all strings, which is infinite.</p>
+</div>
+<p>The stable mode costs <span class="math inline">\(\varepsilon\)</span>, not <span class="math inline">\(2\varepsilon\)</span>, because the release step adds no noise and spends no budget. Its accuracy depends on the gap, not on the domain. Under pure DP no such bound is possible. The Laplace histogram has error of order <span class="math inline">\(\ln|\mathcal X|/\varepsilon\)</span>, which is useless for an infinite domain. The <a href="../part03-query-release/04-packing-lower-bounds.html">packing chapter</a> shows that an <span class="math inline">\(\varepsilon\)</span>-DP algorithm that finds the mode of a dataset over <span class="math inline">\(k\)</span> elements needs at least <span class="math inline">\(\ln(k/2)/\varepsilon\)</span> records, even when all records are equal. The cost <span class="math inline">\(\ln k\)</span> of a large domain is replaced here by <span class="math inline">\(\ln(1/\delta)\)</span>.</p>
+<p>The same idea estimates every count at once. The algorithm adds noise only to the counts of elements that appear in the data, and it reports only those whose noisy count clears a threshold. An element that appears once in <span class="math inline">\(X\)</span> and not at all in a neighbour is the only danger, and the threshold hides it except with probability <span class="math inline">\(\delta/2\)</span>.</p>
+<div id="def-bgs-histogram" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 10.5 (Stability-based histogram)</strong></span> Given <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>, let <span class="math inline">\(\tau = 1 + 2\ln(1/\delta)/\varepsilon\)</span>. On input <span class="math inline">\(X\)</span>, for each element <span class="math inline">\(x\)</span> with <span class="math inline">\(c_x(X) &gt; 0\)</span>, draw an independent <span class="math inline">\(Z_x \sim \mathrm{Lap}(2/\varepsilon)\)</span> and set <span class="math inline">\(\hat c_x = c_x(X) + Z_x\)</span>. Output the list of pairs <span class="math inline">\((x, \hat c_x)\)</span> with <span class="math inline">\(\hat c_x &gt; \tau\)</span>. An element not on the list has estimate <span class="math inline">\(\hat c_x = 0\)</span>.</p>
+</div>
+<div id="thm-bgs-histogram" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 10.3</strong></span> The stability-based histogram is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. For every <span class="math inline">\(\beta \in (0,1)\)</span>, with probability at least <span class="math inline">\(1 - \beta\)</span>, every element <span class="math inline">\(x \in \mathcal X\)</span> has</p>
+<p><span id="eq-bgs-histogram"><span class="math display">\[
+|\hat c_x - c_x(X)| \le \tau + \frac{2}{\varepsilon}\ln\frac{n}{\beta} .
+\tag{10.6}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span><em>Privacy.</em> Let <span class="math inline">\(X'\)</span> be <span class="math inline">\(X\)</span> with one record equal to <span class="math inline">\(a\)</span> replaced by <span class="math inline">\(b \ne a\)</span>. Let <span class="math inline">\(C\)</span> be the set of elements that appear in both datasets. Any element that appears only in <span class="math inline">\(X\)</span> is <span class="math inline">\(a\)</span>, with count <span class="math inline">\(1\)</span>, and any element that appears only in <span class="math inline">\(X'\)</span> is <span class="math inline">\(b\)</span>, with count <span class="math inline">\(1\)</span>. Write <span class="math inline">\(O(X) = O_C(X) \cup O_A(X)\)</span>, where <span class="math inline">\(O_C\)</span> is the part of the list from <span class="math inline">\(C\)</span> and <span class="math inline">\(O_A\)</span> the part from elements only in <span class="math inline">\(X\)</span>. Define <span class="math inline">\(O_C(X')\)</span> and <span class="math inline">\(O_B(X')\)</span> in the same way. Fix an event <span class="math inline">\(T\)</span> and let <span class="math inline">\(q = \Pr[O_C(X') \in T]\)</span>.</p>
+<ol type="1">
+<li><em>The extra element of <span class="math inline">\(X\)</span>.</em> An element with count <span class="math inline">\(1\)</span> is listed only if its noise exceeds <span class="math inline">\(\tau - 1 = 2\ln(1/\delta)/\varepsilon\)</span>, which has probability <span class="math inline">\(\frac12 e^{-\ln(1/\delta)} = \delta/2\)</span>. When <span class="math inline">\(O_A(X)\)</span> is empty, <span class="math inline">\(O(X) = O_C(X)\)</span>, so <span class="math inline">\(\Pr[O(X) \in T] \le \Pr[O_C(X) \in T] + \delta/2\)</span>.</li>
+<li><em>The common elements.</em> On <span class="math inline">\(C\)</span>, the counts of <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> differ by at most <span class="math inline">\(1\)</span> at <span class="math inline">\(a\)</span> and at <span class="math inline">\(b\)</span>, so in <span class="math inline">\(\ell_1\)</span> by at most <span class="math inline">\(2\)</span>. Laplace noise of scale <span class="math inline">\(2/\varepsilon\)</span> makes the noisy counts on <span class="math inline">\(C\)</span> <span class="math inline">\(\varepsilon\)</span>-DP, and the list is post-processing of them. So <span class="math inline">\(\Pr[O_C(X) \in T] \le \min(1, e^{\varepsilon} q)\)</span>.</li>
+<li><em>The extra element of <span class="math inline">\(X'\)</span>.</em> The parts <span class="math inline">\(O_C(X')\)</span> and <span class="math inline">\(O_B(X')\)</span> are independent, and <span class="math inline">\(O_B(X')\)</span> is empty with probability at least <span class="math inline">\(1 - \delta/2\)</span> by the computation of step 1. When it is empty, <span class="math inline">\(O(X') = O_C(X')\)</span>. So <span class="math inline">\(\Pr[O(X') \in T] \ge (1 - \delta/2)\, q\)</span>.</li>
+<li><em>Combining.</em> If <span class="math inline">\(e^{\varepsilon}q \le 1\)</span>, then <span class="math inline">\(\min(1, e^\varepsilon q) - e^{\varepsilon}(1-\delta/2)q = e^{\varepsilon}q\,\delta/2 \le \delta/2\)</span>. Otherwise <span class="math inline">\(1 - e^{\varepsilon}(1-\delta/2)q &lt; 1 - (1 - \delta/2) = \delta/2\)</span>. In both cases, steps 1 to 3 give</li>
+</ol>
+<p><span id="eq-auto-03beyondglobalsensitivity-6"><span class="math display">\[
+\Pr[O(X) \in T] \le e^{\varepsilon}(1 - \delta/2)\,q + \tfrac\delta2 + \tfrac\delta2 \le e^{\varepsilon}\Pr[O(X') \in T] + \delta .
+\tag{10.7}\]</span></span></p>
+<p><em>Accuracy.</em></p>
+<ol start="5" type="1">
+<li>At most <span class="math inline">\(n\)</span> elements appear in <span class="math inline">\(X\)</span>. A Laplace variable of scale <span class="math inline">\(2/\varepsilon\)</span> exceeds <span class="math inline">\(s\)</span> in absolute value with probability <span class="math inline">\(e^{-\varepsilon s/2}\)</span>, so by a union bound all of them satisfy <span class="math inline">\(|Z_x| \le (2/\varepsilon)\ln(n/\beta)\)</span> with probability at least <span class="math inline">\(1 - \beta\)</span>.</li>
+<li>On that event, take any element <span class="math inline">\(x\)</span>. If it is listed, its error is <span class="math inline">\(|Z_x|\)</span>. If it appears in <span class="math inline">\(X\)</span> but is not listed, then <span class="math inline">\(c_x + Z_x \le \tau\)</span>, so its error is <span class="math inline">\(c_x \le \tau + |Z_x|\)</span>. If it does not appear, both its count and its estimate are <span class="math inline">\(0\)</span>. In every case the error is at most <a href="#eq-bgs-histogram" class="quarto-xref">Equation&nbsp;<span>10.6</span></a>.</li>
+</ol>
+</div>
+<p>In the usual regime <span class="math inline">\(\delta \le 1/n\)</span>, the bound <a href="#eq-bgs-histogram" class="quarto-xref">Equation&nbsp;<span>10.6</span></a> is at most <span class="math inline">\(1 + (2/\varepsilon)\big(2\ln(1/\delta) + \ln(1/\beta)\big)\)</span>. Every count is then accurate to within a number of order <span class="math inline">\(\ln(1/\delta)/\varepsilon\)</span>, with no dependence on the size of the domain. The Laplace histogram under pure DP pays <span class="math inline">\(\ln|\mathcal X|\)</span> instead, and the <a href="../part03-query-release/04-packing-lower-bounds.html">packing chapter</a> shows that pure DP cannot avoid that cost.</p>
+</section>
+<section id="sec-bgs-bounding" class="level2" data-number="10.4">
+<h2 data-number="10.4" class="anchored" data-anchor-id="sec-bgs-bounding"><span class="header-section-number">10.4</span> Privately bounding the local sensitivity</h2>
+<p>Propose-test-release guesses a bound and checks it. A second technique estimates the local sensitivity itself, privately, and uses the estimate as the noise scale. It applies when the local sensitivity does not change fast between neighbours, that is, when <span class="math inline">\(\mathrm{LS}_f\)</span> has bounded global sensitivity.</p>
+<div id="def-bgs-bounding" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 10.6 (Noisy local sensitivity)</strong></span> Suppose that <span class="math inline">\(\lambda &gt; 0\)</span> and <span class="math inline">\(|\mathrm{LS}_f(X) - \mathrm{LS}_f(X')| \le \lambda\)</span> for all neighbours <span class="math inline">\(X \sim X'\)</span>. Given <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>, on input <span class="math inline">\(X\)</span>:</p>
+<ol type="1">
+<li>compute <span class="math inline">\(\hat s = \mathrm{LS}_f(X) + Z_1 + \lambda\ln(1/\delta)/\varepsilon\)</span> with <span class="math inline">\(Z_1 \sim \mathrm{Lap}(\lambda/\varepsilon)\)</span>;</li>
+<li>if <span class="math inline">\(\hat s \le 0\)</span>, output <span class="math inline">\(\perp\)</span>, and otherwise output <span class="math inline">\(f(X) + Z_2\)</span> with <span class="math inline">\(Z_2 \sim \mathrm{Lap}(\hat s/\varepsilon)\)</span>.</li>
+</ol>
+</div>
+<p>The shift <span class="math inline">\(\lambda\ln(1/\delta)/\varepsilon\)</span> makes the estimate <span class="math inline">\(\hat s\)</span> an overestimate of <span class="math inline">\(\mathrm{LS}_f(X)\)</span> except with probability <span class="math inline">\(\delta/2\)</span>. On that good event, the noise is large enough for privacy.</p>
+<div id="thm-bgs-bounding" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 10.4</strong></span> Let <span class="math inline">\(\lambda &gt; 0\)</span> satisfy <span class="math inline">\(|\mathrm{LS}_f(X) - \mathrm{LS}_f(X')| \le \lambda\)</span> for all neighbours <span class="math inline">\(X \sim X'\)</span>, and let <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>. Then noisy local sensitivity with these parameters is <span class="math inline">\((2\varepsilon, \delta)\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Fix neighbours <span class="math inline">\(X \sim X'\)</span>. It suffices to prove the guarantee for the pair <span class="math inline">\((\hat s, \text{output})\)</span>, since the output alone is post-processing of it.</p>
+<ol type="1">
+<li><em>The good event.</em> Let <span class="math inline">\(G = \{\hat s \ge \mathrm{LS}_f(X)\}\)</span>, computed with the data <span class="math inline">\(X\)</span>. It fails only if <span class="math inline">\(Z_1 &lt; -\lambda\ln(1/\delta)/\varepsilon\)</span>, which has probability <span class="math inline">\(\delta/2\)</span>.</li>
+<li><em>Density of the scale.</em> The function <span class="math inline">\(\mathrm{LS}_f\)</span> has sensitivity <span class="math inline">\(\lambda\)</span>, so the density of <span class="math inline">\(\hat s\)</span> on <span class="math inline">\(X\)</span> is at most <span class="math inline">\(e^{\varepsilon}\)</span> times its density on <span class="math inline">\(X'\)</span>, at every value <span class="math inline">\(s\)</span>.</li>
+<li><em>Density of the release.</em> Fix a value <span class="math inline">\(s\)</span> with <span class="math inline">\(s \ge \mathrm{LS}_f(X)\)</span> and <span class="math inline">\(s &gt; 0\)</span>. Then <span class="math inline">\(|f(X) - f(X')| \le \mathrm{LS}_f(X) \le s\)</span>, so the Laplace density of scale <span class="math inline">\(s/\varepsilon\)</span> at any <span class="math inline">\(y\)</span> changes by a factor at most <span class="math inline">\(e^{\varepsilon |f(X) - f(X')|/s} \le e^{\varepsilon}\)</span> between <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span>.</li>
+<li><em>Combining.</em> On values of <span class="math inline">\(\hat s\)</span> in <span class="math inline">\(G\)</span>, the joint density of <span class="math inline">\((\hat s, \text{output})\)</span> on <span class="math inline">\(X\)</span> is at most <span class="math inline">\(e^{2\varepsilon}\)</span> times that on <span class="math inline">\(X'\)</span>, by steps 2 and 3. For an event <span class="math inline">\(T\)</span>, split on <span class="math inline">\(G\)</span>:</li>
+</ol>
+<p><span id="eq-auto-03beyondglobalsensitivity-7"><span class="math display">\[
+\Pr[(\hat s, M(X)) \in T] \le e^{2\varepsilon}\Pr[(\hat s, M(X')) \in T] + \Pr[\text{not } G] \le e^{2\varepsilon}\Pr[(\hat s, M(X')) \in T] + \tfrac\delta2 .
+\tag{10.8}\]</span></span></p>
+</div>
+<p>Two quantities must be worked out by hand for each function: the local sensitivity at <span class="math inline">\(X\)</span>, and a bound <span class="math inline">\(\lambda\)</span> on how fast it changes. The first takes up to <span class="math inline">\(n(|\mathcal X| - 1)\)</span> evaluations of <span class="math inline">\(f\)</span>, one per neighbour, and can sometimes be computed even for an infinite domain. For some functions it is much faster, such as the mode, whose local sensitivity depends only on the two largest counts. The technique is simpler to run than propose-test-release, which needs the distance to instability, but it applies to fewer functions, because it needs the local sensitivity to change slowly everywhere.</p>
+</section>
+<section id="sec-bgs-smooth" class="level2" data-number="10.5">
+<h2 data-number="10.5" class="anchored" data-anchor-id="sec-bgs-smooth"><span class="header-section-number">10.5</span> Smooth sensitivity</h2>
+<p>The last technique also lets the local sensitivity grow away from <span class="math inline">\(X\)</span>, but discounts each dataset by its distance. Take the closest-pair function of <a href="#exm-bgs-closest" class="quarto-xref">Example&nbsp;<span>10.1</span></a> on the bounded domain <span class="math inline">\(\mathcal X = [0, 10]\)</span>, so that its global sensitivity is finite. The dataset <span class="math inline">\(X = (0,0,0)\)</span> still has local sensitivity <span class="math inline">\(0\)</span>, while its neighbour <span class="math inline">\((0,0,5)\)</span> has local sensitivity at least <span class="math inline">\(5\)</span>. A safe noise scale at <span class="math inline">\(X\)</span> must account for that neighbour, but less than for <span class="math inline">\(X\)</span> itself.</p>
+<div id="def-bgs-smooth" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 10.7 (Smooth sensitivity)</strong></span> For a parameter <span class="math inline">\(s &gt; 0\)</span>, the <strong>smooth sensitivity</strong> of <span class="math inline">\(f\)</span> at <span class="math inline">\(X\)</span> is</p>
+<p><span id="eq-auto-03beyondglobalsensitivity-8"><span class="math display">\[
+S_{f,s}(X) = \sup_{X' \in \mathcal X^n} \mathrm{LS}_f(X')\, e^{-s\, d(X, X')} .
+\tag{10.9}\]</span></span></p>
+</div>
+<p>The supremum ranges over all datasets, not only neighbours. Every dataset is within distance <span class="math inline">\(n\)</span> of every other, so <span class="math inline">\(e^{-sn}\Delta_f \le S_{f,s}(X) \le \Delta_f\)</span>. The smooth sensitivity is therefore finite exactly when the global sensitivity is, and it can be smaller by a factor up to <span class="math inline">\(e^{sn}\)</span>. Two properties follow from the definition, and they are all that privacy needs.</p>
+<div id="lem-bgs-smooth" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 10.3</strong></span> For every <span class="math inline">\(X\)</span>, <span class="math inline">\(S_{f,s}(X) \ge \mathrm{LS}_f(X)\)</span>. For all neighbours <span class="math inline">\(X \sim X'\)</span>, <span class="math inline">\(S_{f,s}(X) \le e^{s} S_{f,s}(X')\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>The term <span class="math inline">\(X' = X\)</span> in the supremum is <span class="math inline">\(\mathrm{LS}_f(X)\)</span>, so the supremum is at least that.</li>
+<li>For any dataset <span class="math inline">\(Z\)</span>, the triangle inequality gives <span class="math inline">\(d(X, Z) \ge d(X', Z) - 1\)</span>, so <span class="math inline">\(\mathrm{LS}_f(Z)e^{-s\,d(X,Z)} \le e^{s}\,\mathrm{LS}_f(Z)e^{-s\,d(X',Z)} \le e^{s} S_{f,s}(X')\)</span>. Taking the supremum over <span class="math inline">\(Z\)</span> gives the second claim.</li>
+</ol>
+</div>
+<p>Laplace noise scaled to the smooth sensitivity is not enough for pure DP. The scale moves by a factor up to <span class="math inline">\(e^{s}\)</span> between neighbours, and far in the tail a Laplace density changes by much more than that when its scale changes. Noise with polynomial tails changes little under rescaling, and it works. The standard Cauchy distribution is such a noise, with density at a point <span class="math inline">\(z\)</span> equal to</p>
+<p><span id="eq-auto-03beyondglobalsensitivity-9"><span class="math display">\[
+h(z) = \frac{1}{\pi(1+z^2)} .
+\tag{10.10}\]</span></span></p>
+<div id="thm-bgs-smooth" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 10.5 (Smooth sensitivity with Cauchy noise)</strong></span> Let <span class="math inline">\(f\)</span> be non-constant with finite global sensitivity <span class="math inline">\(\Delta_f\)</span>, let <span class="math inline">\(\varepsilon &gt; 0\)</span>, and let <span class="math inline">\(S = S_{f, \varepsilon/2}\)</span>. The mechanism</p>
+<p><span id="eq-auto-03beyondglobalsensitivity-10"><span class="math display">\[
+M(X) = f(X) + \frac{2\,S(X)}{\varepsilon}\, Z, \qquad Z \sim \text{standard Cauchy},
+\tag{10.11}\]</span></span></p>
+<p>is <span class="math inline">\(\varepsilon\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>The scale is positive and finite.</em> Some dataset <span class="math inline">\(Z_0\)</span> has <span class="math inline">\(\mathrm{LS}_f(Z_0) &gt; 0\)</span> because <span class="math inline">\(f\)</span> is not constant, and every <span class="math inline">\(X\)</span> is within distance <span class="math inline">\(n\)</span> of it, so <span class="math inline">\(S(X) \ge \mathrm{LS}_f(Z_0)e^{-\varepsilon n/2} &gt; 0\)</span>. Every term of the supremum is at most <span class="math inline">\(\Delta_f\)</span>, so <span class="math inline">\(S(X) \le \Delta_f &lt; \infty\)</span>.</li>
+<li><em>Two facts about <span class="math inline">\(h\)</span>.</em> The derivative of <span class="math inline">\(\ln(1+z^2)\)</span> is <span class="math inline">\(2z/(1+z^2)\)</span>, which lies in <span class="math inline">\([-1, 1]\)</span>, so <span class="math inline">\(h(z)/h(z + u) \le e^{|u|}\)</span> for all <span class="math inline">\(z\)</span> and <span class="math inline">\(u\)</span>. For every <span class="math inline">\(\lambda\)</span> and <span class="math inline">\(v\)</span>, <span class="math inline">\(e^{-\lambda}h(v)/h(e^{\lambda}v) = e^{-\lambda}(1 + e^{2\lambda}v^2)/(1+v^2) \le e^{-\lambda}\max(1, e^{2\lambda}) = e^{|\lambda|}\)</span>.</li>
+<li><em>The ratio of densities.</em> Fix neighbours <span class="math inline">\(X \sim X'\)</span> and write <span class="math inline">\(a = \varepsilon/2\)</span>. The density of <span class="math inline">\(M(X)\)</span> at <span class="math inline">\(y\)</span> is <span class="math inline">\((a/S(X))\,h\big(a(y - f(X))/S(X)\big)\)</span>. Set <span class="math inline">\(u = a(y - f(X))/S(X)\)</span>, <span class="math inline">\(w = a(f(X) - f(X'))/S(X)\)</span> and <span class="math inline">\(e^{\lambda} = S(X)/S(X')\)</span>. Then <span class="math inline">\(a(y - f(X'))/S(X') = e^{\lambda}(u + w)\)</span>, and the ratio of the densities on <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> is</li>
+</ol>
+<p><span id="eq-auto-03beyondglobalsensitivity-11"><span class="math display">\[
+e^{-\lambda}\,\frac{h(u)}{h(e^{\lambda}(u+w))} = \frac{h(u)}{h(u+w)} \cdot \frac{e^{-\lambda}\,h(u+w)}{h(e^{\lambda}(u+w))} \le e^{|w|}\,e^{|\lambda|} ,
+\tag{10.12}\]</span></span></p>
+<p>by the two facts of step 2.</p>
+<ol start="4" type="1">
+<li><em>Bounding the exponents.</em> By <a href="#lem-bgs-smooth" class="quarto-xref">Lemma&nbsp;<span>10.3</span></a>, <span class="math inline">\(|f(X) - f(X')| \le \mathrm{LS}_f(X) \le S(X)\)</span>, so <span class="math inline">\(|w| \le a = \varepsilon/2\)</span>. By the same lemma applied in both directions, <span class="math inline">\(|\lambda| \le \varepsilon/2\)</span>. The densities therefore differ by a factor at most <span class="math inline">\(e^{\varepsilon}\)</span>, and integrating over any event gives <span class="math inline">\(\varepsilon\)</span>-DP.</li>
+</ol>
+</div>
+<p>The Cauchy distribution has such heavy tails that it has no mean. Its tail is <span class="math inline">\(\Pr[|Z| &gt; z] = \frac2\pi\arctan(1/z) \le 2/(\pi z)\)</span>, so the error exceeds <span class="math inline">\(4S(X)/(\pi\varepsilon\beta)\)</span> with probability at most <span class="math inline">\(\beta\)</span>, which grows as <span class="math inline">\(1/\beta\)</span> rather than as <span class="math inline">\(\ln(1/\beta)\)</span>. Laplace or Gaussian noise scaled to the smooth sensitivity, with a smaller smoothing parameter, gives approximate DP with lighter tails. Laplace and Gaussian tails decay exponentially, which is where the logarithms in earlier error bounds come from. Computing <span class="math inline">\(S_{f,s}\)</span> means a maximum over all datasets, which is hard in general. For the median it takes polynomial time, and near-linear time with more care.</p>
+</section>
+<section id="sec-bgs-summary" class="level2" data-number="10.6">
+<h2 data-number="10.6" class="anchored" data-anchor-id="sec-bgs-summary"><span class="header-section-number">10.6</span> Summary</h2>
+<div id="tbl-bgs-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-bgs-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;10.1: The chapter’s results.
+</figcaption>
+<div aria-describedby="tbl-bgs-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#prp-bgs-naive" class="quarto-xref">Proposition&nbsp;<span>10.1</span></a></td>
+<td>Laplace noise scaled to the local sensitivity is not private</td>
+</tr>
+<tr class="even">
+<td><a href="#lem-bgs-distance" class="quarto-xref">Lemma&nbsp;<span>10.1</span></a></td>
+<td>the distance to instability has sensitivity <span class="math inline">\(1\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-bgs-ptr" class="quarto-xref">Theorem&nbsp;<span>10.1</span></a></td>
+<td>propose-test-release is <span class="math inline">\((2\varepsilon, \delta)\)</span>-DP</td>
+</tr>
+<tr class="even">
+<td><a href="#thm-bgs-mode" class="quarto-xref">Theorem&nbsp;<span>10.2</span></a></td>
+<td>the stable mode is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP and exact when the top two counts differ by <span class="math inline">\(2 + 4\ln(1/\delta)/\varepsilon\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-bgs-histogram" class="quarto-xref">Theorem&nbsp;<span>10.3</span></a></td>
+<td>the stability-based histogram is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP with every count within <span class="math inline">\(\tau + (2/\varepsilon)\ln(n/\beta)\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#thm-bgs-bounding" class="quarto-xref">Theorem&nbsp;<span>10.4</span></a></td>
+<td>a noisy overestimate of a Lipschitz local sensitivity gives <span class="math inline">\((2\varepsilon,\delta)\)</span>-DP</td>
+</tr>
+<tr class="odd">
+<td><a href="#lem-bgs-smooth" class="quarto-xref">Lemma&nbsp;<span>10.3</span></a></td>
+<td>smooth sensitivity bounds the local sensitivity and changes by at most <span class="math inline">\(e^{s}\)</span> between neighbours</td>
+</tr>
+<tr class="even">
+<td><a href="#thm-bgs-smooth" class="quarto-xref">Theorem&nbsp;<span>10.5</span></a></td>
+<td>Cauchy noise of scale <span class="math inline">\(2S_{f,\varepsilon/2}(X)/\varepsilon\)</span> gives <span class="math inline">\(\varepsilon\)</span>-DP when <span class="math inline">\(0 &lt; \Delta_f &lt; \infty\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-bgs-notes" class="level2" data-number="10.7">
+<h2 data-number="10.7" class="anchored" data-anchor-id="sec-bgs-notes"><span class="header-section-number">10.7</span> Notes</h2>
+<ul>
+<li>Kobbi Nissim, Sofya Raskhodnikova and Adam Smith, “Smooth Sensitivity and Sampling in Private Data Analysis”, 2007. Local and smooth sensitivity, the failure of naive local noise, and noise distributions for smooth sensitivity under pure and approximate DP.</li>
+<li>Cynthia Dwork and Jing Lei, “Differential Privacy and Robust Statistics”, 2009. The propose-test-release framework.</li>
+<li>Abhradeep Thakurta and Adam Smith, “Differentially Private Feature Selection via Stability Arguments, and the Robustness of the Lasso”, 2013. The distance-to-instability approach behind the stable mode.</li>
+<li>Aleksandra Korolova, Krishnaram Kenthapadi, Nina Mishra and Alexandros Ntoulas, “Releasing Search Queries and Clicks Privately”, 2009. Thresholded noisy counts over an unbounded domain, the idea of the stability-based histogram.</li>
+<li>Cynthia Dwork and Aaron Roth, <em>The Algorithmic Foundations of Differential Privacy</em>, 2014. Chapter 7 covers propose-test-release and stability-based algorithms.</li>
+<li>Salil Vadhan, “The Complexity of Differential Privacy”, 2017. Section 3 treats local sensitivity, propose-test-release, the stability-based histogram (Theorem 3.5) and privately bounding the local sensitivity, with an example on graphs.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part03-query-release/02-sparse-vector.html" class="pagination-link" aria-label="Sparse Vector">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sparse Vector</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part03-query-release/04-packing-lower-bounds.html" class="pagination-link" aria-label="Packing Lower Bounds">
+        <span class="nav-page-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Packing Lower Bounds</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

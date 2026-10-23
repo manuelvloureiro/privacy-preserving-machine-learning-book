@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>43&nbsp; Public data and private fine-tuning – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>47&nbsp; Public data and private fine-tuning – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -71,8 +71,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../part05-dp-ml/07-user-level.html" rel="next">
-<link href="../part05-dp-ml/05-private-prediction.html" rel="prev">
+<link href="../part05-dp-ml/14-private-llm-finetuning.html" rel="next">
+<link href="../part05-dp-ml/09-choosing-epsilon.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/06-public-data.html"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/06-public-data.html"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -305,6 +305,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -319,67 +325,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -395,26 +407,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -425,26 +425,44 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -461,49 +479,31 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -514,14 +514,50 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -559,24 +595,23 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">43.1</span> Why this matters</a></li>
-  <li><a href="#sec-pub-dimension" id="toc-sec-pub-dimension" class="nav-link" data-scroll-target="#sec-pub-dimension"><span class="header-section-number">43.2</span> How many weights to train</a></li>
-  <li><a href="#sec-pub-features" id="toc-sec-pub-features" class="nav-link" data-scroll-target="#sec-pub-features"><span class="header-section-number">43.3</span> Linear probing first</a></li>
-  <li><a href="#sec-pub-lora" id="toc-sec-pub-lora" class="nav-link" data-scroll-target="#sec-pub-lora"><span class="header-section-number">43.4</span> Low-rank adapters and full fine-tuning</a></li>
-  <li><a href="#sec-pub-run" id="toc-sec-pub-run" class="nav-link" data-scroll-target="#sec-pub-run"><span class="header-section-number">43.5</span> Which method at which budget</a></li>
-  <li><a href="#sec-pub-caveats" id="toc-sec-pub-caveats" class="nav-link" data-scroll-target="#sec-pub-caveats"><span class="header-section-number">43.6</span> What public data does not buy</a></li>
-  <li><a href="#sec-pub-code" id="toc-sec-pub-code" class="nav-link" data-scroll-target="#sec-pub-code"><span class="header-section-number">43.7</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">43.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">43.9</span> Further reading</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">47.1</span> Why this matters</a></li>
+  <li><a href="#sec-pub-dimension" id="toc-sec-pub-dimension" class="nav-link" data-scroll-target="#sec-pub-dimension"><span class="header-section-number">47.2</span> How many weights to train</a></li>
+  <li><a href="#sec-pub-features" id="toc-sec-pub-features" class="nav-link" data-scroll-target="#sec-pub-features"><span class="header-section-number">47.3</span> Linear probing first</a></li>
+  <li><a href="#sec-pub-lora" id="toc-sec-pub-lora" class="nav-link" data-scroll-target="#sec-pub-lora"><span class="header-section-number">47.4</span> Low-rank adapters and full fine-tuning</a></li>
+  <li><a href="#sec-pub-run" id="toc-sec-pub-run" class="nav-link" data-scroll-target="#sec-pub-run"><span class="header-section-number">47.5</span> Which method at which budget</a></li>
+  <li><a href="#sec-pub-caveats" id="toc-sec-pub-caveats" class="nav-link" data-scroll-target="#sec-pub-caveats"><span class="header-section-number">47.6</span> What public data does not buy</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">47.7</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">47.8</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/06-public-data.html"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/06-public-data.html"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></h1>
+<h1 class="title"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></h1>
 </div>
 
 
@@ -593,40 +628,50 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="43.1">
-<h2 data-number="43.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">43.1</span> Why this matters</h2>
-<p>Training from random weights with the differential privacy (DP) version of stochastic gradient descent (SGD), <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, loses a great deal of accuracy at a privacy loss <span class="math inline">\(\varepsilon\)</span> of 1 and below. The most accurate private models are built differently. They start from a model <strong>pretrained</strong> without privacy on a large public dataset, and only <strong>fine-tune</strong> it privately on the sensitive data. Such models are far more accurate than those trained privately from scratch, as Tramèr &amp; Boneh (2021) and later work report.</p>
-<p>Fine-tuning only a small part of the model, such as the last layer or a low-rank update to each matrix, often helps further. That is because DP-SGD adds noise to every weight it trains, while the useful signal is bounded by clipping and usually lies in a few directions. This chapter gives the order in which to try the options and what public data does <em>not</em> protect.</p>
+<section id="why-this-matters" class="level2" data-number="47.1">
+<h2 data-number="47.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">47.1</span> Why this matters</h2>
+<p>The differential privacy (DP) version of stochastic gradient descent (SGD), <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, loses much accuracy when it trains a model from random weights. The loss is large at a privacy loss <span class="math inline">\(\varepsilon\)</span> of 1 or below.</p>
+<p>The most accurate private models avoid that. They start from a model <strong>pretrained</strong> without privacy on a large public dataset, and only <strong>fine-tune</strong> it privately on the sensitive data. That makes them far more accurate than models trained privately from scratch (Tramèr &amp; Boneh 2021).</p>
+<p>Fine-tuning only a small part of the model often helps further. DP-SGD adds noise to every weight it trains, while the useful signal does not grow with their number, so fewer weights mean less noise for the same signal. This chapter says which weights to train, and what public data does <em>not</em> protect, and the workflow <a href="../part05-dp-ml/14-private-llm-finetuning.html">Fine-tune a language model privately with LoRA</a> does the job end to end.</p>
 </section>
-<section id="sec-pub-dimension" class="level2" data-number="43.2">
-<h2 data-number="43.2" class="anchored" data-anchor-id="sec-pub-dimension"><span class="header-section-number">43.2</span> How many weights to train</h2>
-<p>The privacy argument of DP-SGD needs only that one record changes the clipped gradient sum by at most the clipping norm <span class="math inline">\(C\)</span>, whichever weights are trained. So the choice of trainable weights leaves <span class="math inline">\(\varepsilon\)</span> unchanged and changes only how much noise lands on the model. Public data are free for a related reason, because anything computed from public data alone, such as the starting weights, is a fixed input as far as the private data are concerned. The condition is that nothing in it was chosen by looking at the private data. That includes normalization statistics and tokenizers, which are fine when fitted on public data and a leak when fitted on private data.</p>
-<p>The noise grows with the number <span class="math inline">\(k\)</span> of trainable weights. Write <span class="math inline">\(\sigma\)</span> for the noise multiplier and <span class="math inline">\(B\)</span> for the expected batch size. Then the noise on the averaged gradient has length about <span id="eq-pub-noise-length"><span class="math display">\[\text{noise length} \approx \frac{\sigma C\sqrt k}{B}. \tag{43.1}\]</span></span> The signal, the average clipped gradient, is at most <span class="math inline">\(C\)</span> long whatever <span class="math inline">\(k\)</span> is, and it can even grow when fewer weights are trained, because shorter gradients are clipped less.</p>
-<p>This part’s running example is a small network with 3,329 weights, pretrained on a related public task and then fine-tuned on 10,000 private records. It trains for 10,000 steps with a clipping norm of 0.5 and a batch size of 100, at a slack <span class="math inline">\(\delta\)</span> of <span class="math inline">\(10^{-5}\)</span>. At <span class="math inline">\(\varepsilon = 1\)</span> the noise multiplier is 4.13, and the noise length is 1.191 for all weights against 0.166 for the 65 weights of the last layer.</p>
-<p>Measured against the signal, the noise is 92.0 times larger for all weights but only 6.7 times for the last layer. So the signal needs about 8,455 steps to show through the noise for all weights, and only 44 for the last layer.</p>
-<p>Counting weights overstates the cost, though. Noise hurts only in directions in which the loss is curved enough to notice it within the run (Li, Liu et al.&nbsp;2022). Write <span class="math inline">\(h_j\)</span> for the curvature of the loss in its <span class="math inline">\(j\)</span>-th principal direction. With step size <span class="math inline">\(\eta\)</span>, the number of directions the noise has time to fill is the <strong>effective dimension</strong> <span id="eq-pub-noise-cost"><span class="math display">\[d_{\text{eff}} = \sum_{j=1}^k\Big(1 - (1 - \eta h_j)^{2T}\Big), \tag{43.2}\]</span></span> and the noise raises the loss in proportion to it. On the running example, full fine-tuning has an effective dimension of 451 out of 3,329 weights. So its noise is 51 times larger in squared length than the last layer’s, but it costs only about 7.5 times more. A larger step size or a longer run fills more flat directions with noise, which is why private fine-tuning wants smaller step sizes than training from scratch.</p>
-<p>Freezing weights has a cost too, a <strong>bias</strong>, because no amount of private data can move the model along a frozen direction that the task needs.</p>
+<section id="sec-pub-dimension" class="level2" data-number="47.2">
+<h2 data-number="47.2" class="anchored" data-anchor-id="sec-pub-dimension"><span class="header-section-number">47.2</span> How many weights to train</h2>
+<p>Which weights you train leaves <span class="math inline">\(\varepsilon\)</span> unchanged, because the guarantee of DP-SGD needs only that one record changes the clipped gradient sum by at most the clipping norm <span class="math inline">\(C\)</span>. The choice changes only how much noise lands on the model. Anything else computed from public data alone, such as the starting weights, also costs no privacy, provided nothing in it was chosen by looking at the private data. So a tokenizer or normalization statistics fitted on public data are free, while fitted on the private data they leak.</p>
+<p>The noise grows with the number <span class="math inline">\(k\)</span> of trainable weights. Write <span class="math inline">\(\sigma\)</span> for the noise multiplier and <span class="math inline">\(B\)</span> for the expected batch size, expected because DP-SGD’s Poisson sampling draws batches of random size. Then the noise on the averaged gradient has length about <span id="eq-pub-noise-length"><span class="math display">\[\text{noise length} \approx \frac{\sigma C\sqrt k}{B}. \tag{47.1}\]</span></span> The signal, the average clipped gradient, is at most <span class="math inline">\(C\)</span> long whatever <span class="math inline">\(k\)</span> is. It can even get longer when fewer weights train, because clipping then cuts each record’s gradient less.</p>
+<p>The running example of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, a small network with 3,329 weights, is pretrained on a public task close to the private one and then fine-tuned on the 10,000 private records. It trains for 10,000 steps with batches of 100 and a clipping norm of 0.5, and at <span class="math inline">\(\varepsilon = 1\)</span> the noise multiplier is 4.13. Compared with the signal at the pretrained weights, the noise is then 92.0 times longer when all weights train. It is only 6.7 times longer when the 65 weights of the last layer train. The gap is wider than the formula predicts, because the signal is longer when only the last layer trains (0.0250 against 0.0130).</p>
+<p>Counting weights overstates the cost of training them all, though. Noise does harm only along the directions in which the loss is curved, because a step along a flat direction barely changes the loss. Near a pretrained model few directions are curved (Li, Liu et al.&nbsp;2022). So on the running example, full fine-tuning has 51 times the last layer’s weights, but its noise is predicted to raise the training loss only about 7.5 times as much.</p>
+<p>A larger step size lets the noise into more of the nearly flat directions within a run, so private fine-tuning wants smaller steps than training from scratch. Training fewer weights has its own cost, a <strong>bias</strong>, because no amount of private data can move the model along a frozen direction that the task needs.</p>
 </section>
-<section id="sec-pub-features" class="level2" data-number="43.3">
-<h2 data-number="43.3" class="anchored" data-anchor-id="sec-pub-features"><span class="header-section-number">43.3</span> Linear probing first</h2>
-<p>The simplest option freezes everything but the last layer and trains a linear classifier on the frozen features, which is <strong>linear probing</strong>. Tramèr &amp; Boneh (2021) showed that it beats end-to-end private training on standard image benchmarks at moderate budgets. It turns private deep learning back into the convex problem of <a href="../part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, so it is the safe first baseline.</p>
-<p>Its accuracy is capped by the features. The error of a private probe is the privacy cost of convex empirical risk minimization (ERM) in <span class="math inline">\(k\)</span> dimensions plus the <strong>feature gap</strong>. That gap is how far the best linear model on the features falls short of the best model of any kind, and it does not shrink with more records or a larger <span class="math inline">\(\varepsilon\)</span>. The best possible probe reaches 0.9536, against 0.9606 for a network trained non-privately from scratch. The private probe stays within 0.006 of its ceiling at every budget, but it can never pass it. So measure the probe’s non-private ceiling first, and if it already meets your target, stop there. To train the probe privately, feed the frozen features to <code>diffprivlib.models.LogisticRegression</code>, or run DP-SGD on the one layer.</p>
+<section id="sec-pub-features" class="level2" data-number="47.3">
+<h2 data-number="47.3" class="anchored" data-anchor-id="sec-pub-features"><span class="header-section-number">47.3</span> Linear probing first</h2>
+<p>The simplest option freezes everything but the last layer and trains a linear classifier on the frozen features, which is <strong>linear probing</strong>. Because the features are fixed, the probe’s loss is convex. Linear probing thus turns private deep learning back into the problem of <a href="../part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>, which makes it the safe first baseline.</p>
+<p>The error of a private probe is the error that privacy adds to convex empirical risk minimization (ERM), which grows with the number <span class="math inline">\(k\)</span> of features, plus the <strong>feature gap</strong>. That gap is how far the best linear model on the features falls short of the best model of any kind. No number of records or size of <span class="math inline">\(\varepsilon\)</span> closes it. For example, the running example’s probe fitted without privacy, its ceiling, has a test accuracy of 0.9536, while a network trained without privacy from scratch reaches 0.9606. The private probe stays within 0.006 of that ceiling, but never passes it.</p>
+<p>Measure the probe’s ceiling first, by fitting it without privacy on labelled public data that resemble the task. If it already meets your target, stop there. To train the probe privately, feed the frozen features to the <code>LogisticRegression</code> of diffprivlib, IBM’s library of private scikit-learn models, or run DP-SGD on the one layer.</p>
 </section>
-<section id="sec-pub-lora" class="level2" data-number="43.4">
-<h2 data-number="43.4" class="anchored" data-anchor-id="sec-pub-lora"><span class="header-section-number">43.4</span> Low-rank adapters and full fine-tuning</h2>
-<p>When the features are not quite right, the probe stops at its ceiling, and you need to change the earlier layers. <strong>Low-rank adaptation</strong> (LoRA, Hu et al.&nbsp;2022) freezes each pretrained matrix <span class="math inline">\(W_0\)</span> and learns a correction <span class="math inline">\(UV^\top\)</span> whose rank, the number <span class="math inline">\(r\)</span> of columns of the two factors, is small. For a matrix with <span class="math inline">\(d_{\text{in}}\)</span> inputs and <span class="math inline">\(d_{\text{out}}\)</span> outputs, that is <span id="eq-pub-lora-count"><span class="math display">\[k = r(d_{\text{in}} + d_{\text{out}}) \tag{43.3}\]</span></span> trainable weights instead of <span class="math inline">\(d_{\text{in}}d_{\text{out}}\)</span>.</p>
-<p>Training starts with the factor <span class="math inline">\(U\)</span> at zero, so the model begins exactly at the pretrained one, and with the factor <span class="math inline">\(V\)</span> random. That random draw must be independent of the private data. The adapter’s per-example gradients are outer products, so the ghost clipping of <a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-ghost">DP-SGD</a> applies and no per-example matrix is ever formed. Yu et al.&nbsp;(2022) showed that private fine-tuning of language models with LoRA matches or beats private full fine-tuning, at a fraction of the cost.</p>
-<p>Full fine-tuning is not ruled out. Li, Tramèr et al.&nbsp;(2022) matched or beat the adapters by fine-tuning all the weights of language models, with large batches, a step size tuned for private training, and a fine-tuning objective that resembles the pretraining one. The evidence on accuracy goes both ways, but the adapter is cheaper to store, compute and clip.</p>
-<p>In PyTorch, the usual stack is Hugging Face’s <code>peft</code> library for the adapter and Opacus for DP-SGD. Build a <code>LoraConfig(r=..., target_modules=...)</code> and wrap the base model with <code>get_peft_model(model, config)</code>, so that only the adapter’s weights require gradients. Then pass the model, its optimizer and data loader to the <code>make_private</code> method of Opacus’s <code>PrivacyEngine</code>, which computes per-sample gradients only for the trainable parameters. For large language models, the <code>private-transformers</code> package of Li et al.&nbsp;and Microsoft’s <code>dp-transformers</code> wrap this setup, with ghost clipping to save memory.</p>
-<p>A third option projects each private gradient onto a subspace estimated from public gradients and adds noise only there (Zhou, Wu &amp; Banerjee 2021). It keeps the same <span class="math inline">\(\varepsilon\)</span> and trades noise for the bias of the signal it projects away.</p>
+<section id="sec-pub-lora" class="level2" data-number="47.4">
+<h2 data-number="47.4" class="anchored" data-anchor-id="sec-pub-lora"><span class="header-section-number">47.4</span> Low-rank adapters and full fine-tuning</h2>
+<p>When the features are not quite right, the probe stops at a ceiling below your target, and only changing the earlier layers can lift it. <strong>Low-rank adaptation</strong> (LoRA, Hu et al.&nbsp;2022) freezes each pretrained matrix and learns a small correction to it. The correction is the product of two thin matrices that each have <span class="math inline">\(r\)</span> columns, where <span class="math inline">\(r\)</span> is the rank. A matrix with <span class="math inline">\(d_{\text{in}}\)</span> inputs and <span class="math inline">\(d_{\text{out}}\)</span> outputs has <span class="math inline">\(d_{\text{in}}d_{\text{out}}\)</span> weights, while its adapter has only <span id="eq-pub-lora-count"><span class="math display">\[k = r(d_{\text{in}} + d_{\text{out}}). \tag{47.2}\]</span></span></p>
+<p>The adapter comes from Hugging Face’s <code>peft</code> library. This snippet puts a rank-4 adapter on the first layer of a network shaped like the running example, and trains its last layer in full.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> peft <span class="im">import</span> LoraConfig, get_peft_model</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> torch.nn.Sequential(torch.nn.Linear(<span class="dv">50</span>, <span class="dv">64</span>), torch.nn.Tanh(), torch.nn.Linear(<span class="dv">64</span>, <span class="dv">1</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> model.parameters()))  <span class="co"># 3329</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> LoraConfig(r<span class="op">=</span><span class="dv">4</span>, lora_alpha<span class="op">=</span><span class="dv">8</span>, target_modules<span class="op">=</span>[<span class="st">"0"</span>], modules_to_save<span class="op">=</span>[<span class="st">"2"</span>], lora_dropout<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>adapted <span class="op">=</span> get_peft_model(model, config)  <span class="co"># freezes every pretrained weight</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> adapted.parameters() <span class="cf">if</span> p.requires_grad))  <span class="co"># 521</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>In the snippet, <code>target_modules</code> and <code>modules_to_save</code> name layers by their index in the <code>Sequential</code>, and <code>lora_alpha</code> scales the correction. It trains 521 weights, the adapter’s <span class="math inline">\(4 \times (50 + 64) = 456\)</span> and the last layer’s 65. The run in <a href="#sec-pub-run" class="quarto-xref"><span>Section 47.5</span></a> treats the first layer’s biases as a 51st input, so its adapter has <span class="math inline">\(4 \times (51 + 64) = 460\)</span> weights, and 525 with the last layer. Opacus’s <code>PrivacyEngine</code>, used as in <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, then computes per-sample gradients only for the parameters that require them, so the frozen weights cost nothing. Call <code>model.train()</code> before <code>make_private</code>, since Opacus rejects a model left in evaluation mode, as a pretrained model often is after you measure it.</p>
+<p>The adapter’s second factor starts at zero, so training begins exactly at the pretrained model. The first factor starts random, and that draw must not depend on the private data.</p>
+<p>Yu et al.&nbsp;(2022) showed that private fine-tuning of language models with LoRA matches or beats private full fine-tuning, at a fraction of the compute and memory. Each adapter factor is an ordinary linear layer, so the ghost clipping of <a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-ghost">DP-SGD</a> applies to it. It gets each record’s gradient norm without ever forming the per-example gradient.</p>
+<p>Full fine-tuning is not ruled out. Li, Tramèr et al.&nbsp;(2022) matched the adapters by fine-tuning all the weights of language models. They used large batches and a step size tuned for private training, so the evidence goes both ways. A third option adds noise only in the few directions in which public gradients mostly lie, and throws away the private signal outside them (Zhou, Wu &amp; Banerjee 2021).</p>
 </section>
-<section id="sec-pub-run" class="level2" data-number="43.5">
-<h2 data-number="43.5" class="anchored" data-anchor-id="sec-pub-run"><span class="header-section-number">43.5</span> Which method at which budget</h2>
-<p>On the running example, DP-SGD fine-tunes the last layer, a rank-4 adapter on the first layer plus the last layer, or all weights, against a baseline trained from scratch. Each method’s step size was chosen at <span class="math inline">\(\varepsilon = 1\)</span> on half of the private test set, and accuracy is reported on the other half.</p>
+<section id="sec-pub-run" class="level2" data-number="47.5">
+<h2 data-number="47.5" class="anchored" data-anchor-id="sec-pub-run"><span class="header-section-number">47.5</span> Which method at which budget</h2>
+<p>The numbers in this section come from the full edition’s synthetic running example. No practitioner script reproduces them, so treat them as one task’s evidence. On it, DP-SGD fine-tunes the last layer, a rank-4 adapter plus the last layer, or all weights, against a model trained privately from scratch. Each method’s step size was chosen at <span class="math inline">\(\varepsilon = 1\)</span> on half of the private test set, and accuracy is reported on the other half. That choice looked at private data without paying for it, so the table compares methods at their best rather than what a real run could claim (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</p>
 <div id="tbl-pub-run" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pub-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;43.1: Test accuracy (mean of two runs), <span class="math inline">\(\delta = 10^{-5}\)</span>. The pretrained model without fine-tuning has 0.9035.
+Table&nbsp;47.1: Test accuracy (mean of two runs), <span class="math inline">\(\delta = 10^{-5}\)</span>. The pretrained model without fine-tuning has 0.9035.
 </figcaption>
 <div aria-describedby="tbl-pub-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -687,48 +732,28 @@ Table&nbsp;43.1: Test accuracy (mean of two runs), <span class="math inline">\(\
 </div>
 </figure>
 </div>
-<p>On this task, pretraining is worth about a factor of eight in <span class="math inline">\(\varepsilon\)</span>, since the adapter at <span class="math inline">\(\varepsilon = 1\)</span> matches training from scratch at <span class="math inline">\(\varepsilon = 8\)</span>.</p>
-<p>Which weights to train depends on the budget. At <span class="math inline">\(\varepsilon = 0.5\)</span> the last layer is best, because its noise is 7.2 times shorter than full fine-tuning’s and its ceiling is not yet binding. From <span class="math inline">\(\varepsilon = 1\)</span> on, it is stuck near that ceiling, while the adapter and full fine-tuning keep improving. The adapter is never more than 0.0022 below the best method at any budget, so it is the robust middle choice.</p>
-<p>The step size matters as much as the method. A step size three times too large costs full fine-tuning 1.3 points of accuracy. Their best step size is 2.5 times smaller than the one for training from scratch. The adapter’s rank, by contrast, is cheap to get roughly right, since ranks from 1 to 16 differ by less than the run-to-run spread.</p>
+<p>Here pretraining is worth about a factor of eight in <span class="math inline">\(\varepsilon\)</span>, since the adapter at <span class="math inline">\(\varepsilon = 1\)</span> matches training from scratch at <span class="math inline">\(\varepsilon = 8\)</span>.</p>
+<p>At <span class="math inline">\(\varepsilon = 0.5\)</span> the last layer is best, because its noise is 7.2 times shorter than full fine-tuning’s and its ceiling is not yet binding. From <span class="math inline">\(\varepsilon = 1\)</span> on, it is stuck near its ceiling while the others keep improving. The adapter is never more than 0.0022 below the best method at any budget, so it is the robust middle choice here. That ranking depends on the task. A public task further from the private one can reverse it even when the probe’s ceiling looks fine. So rerun the comparison on a public stand-in for your task before you commit.</p>
+<p>The step size matters as much as the method, since a step three times too large costs full fine-tuning 1.3 percentage points of accuracy. The adapter’s rank, by contrast, is cheap to get roughly right, because at <span class="math inline">\(\varepsilon = 1\)</span> ranks 1, 4 and 16 differ by about the run-to-run spread.</p>
 </section>
-<section id="sec-pub-caveats" class="level2" data-number="43.6">
-<h2 data-number="43.6" class="anchored" data-anchor-id="sec-pub-caveats"><span class="header-section-number">43.6</span> What public data does not buy</h2>
-<p>The guarantee is exactly this. For every fixed public dataset, the map from the private dataset to the fine-tuned model is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. With respect to the public dataset, there is no guarantee of any kind. Non-private pretraining can memorize individual records (<a href="../part02-attacks/05-memorization-extraction.html">Memorization and training-data extraction</a>), and the fine-tuned model inherits whatever the pretrained weights encode (Tramèr, Kamath &amp; Carlini 2024).</p>
-<p>This matters most for a person whose record is in both datasets, because only the private copy is protected, and a membership attack against the pretrained model (<a href="../part02-attacks/02-membership-inference.html">Membership inference</a>) has no bound at all. Web-scale “public” datasets contain posts, profiles and leaked documents, so a private set of medical notes or emails may well overlap with them.</p>
-<p>Before you train and when you report, go through this checklist.</p>
+<section id="sec-pub-caveats" class="level2" data-number="47.6">
+<h2 data-number="47.6" class="anchored" data-anchor-id="sec-pub-caveats"><span class="header-section-number">47.6</span> What public data does not buy</h2>
+<p>Whatever the public data are, training on the private data is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, where <span class="math inline">\(\delta\)</span> is the small additive slack the guarantee allows. The public data get no guarantee of any kind. Non-private pretraining can memorize individual records (<a href="../part02-attacks/05-memorization-extraction.html">Memorization and training-data extraction</a>), and the fine-tuned model inherits whatever the pretrained weights encode (Tramèr, Kamath &amp; Carlini 2024).</p>
+<p>A person in both datasets is protected only in the private copy. A membership attack against the pretrained model (<a href="../part02-attacks/02-membership-inference.html">Membership inference</a>) has no bound at all. Web-scale “public” datasets contain posts, profiles and leaked documents, so private notes or emails may well overlap with them.</p>
+<p>Text raises a second question, which unit the guarantee protects, called the privacy unit. A language model trains on fixed-length sequences, but one person’s documents span many of them, so a guarantee per sequence protects far less than a person (<a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a>).</p>
+<p>Check three things before you train and when you report.</p>
 <ol type="1">
-<li>Deduplicate the private set against the public data. That protects copies, not people, because exact matching misses paraphrases and records about the same person.</li>
-<li>Check that the public data resemble the private task, because benchmarks with a “private” set close to curated public data overstate what you will get on genuinely sensitive data.</li>
-<li>Choose the public model, the step size, the adapter rank and the architecture on public data, or pay for every private run. Keeping the best of three privately fine-tuned models spends the budget of all three runs, unless you use a private selection procedure (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</li>
-<li>Say what the public data are, how they were obtained and whether overlap was checked, and state that the guarantee covers the private data given the pretrained model.</li>
+<li>Check that the public data resemble the private task, and deduplicate the private set against them. Deduplication protects copies, not people, since exact matching misses paraphrases.</li>
+<li>Choose the public model and the hyperparameters on public data. Otherwise every private run costs privacy (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</li>
+<li>Name the public data and the overlap check, and state that the guarantee covers the private data given the pretrained model.</li>
 </ol>
 </section>
-<section id="sec-pub-code" class="level2" data-number="43.7">
-<h2 data-number="43.7" class="anchored" data-anchor-id="sec-pub-code"><span class="header-section-number">43.7</span> Code</h2>
-<p>Before choosing what to fine-tune, compare the candidates’ noise lengths at the noise multiplier your accountant gives.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> sqrt</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> noise_length(sigma: <span class="bu">float</span>, clip: <span class="bu">float</span>, batch: <span class="bu">float</span>, trainable: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sigma <span class="op">*</span> clip <span class="op">*</span> sqrt(trainable) <span class="op">/</span> batch</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lora_weights(rank: <span class="bu">int</span>, d_in: <span class="bu">int</span>, d_out: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> rank <span class="op">*</span> (d_in <span class="op">+</span> d_out)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>adapter <span class="op">=</span> lora_weights(<span class="dv">4</span>, <span class="dv">51</span>, <span class="dv">64</span>) <span class="op">+</span> <span class="dv">65</span>  <span class="co"># first-layer adapter plus the 65-weight last layer</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(adapter)  <span class="co"># 525</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>noise_length(<span class="fl">4.13</span>, <span class="fl">0.5</span>, <span class="dv">100</span>, <span class="dv">3329</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 1.191</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>noise_length(<span class="fl">4.13</span>, <span class="fl">0.5</span>, <span class="dv">100</span>, adapter)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.473</span></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>noise_length(<span class="fl">4.13</span>, <span class="fl">0.5</span>, <span class="dv">100</span>, <span class="dv">65</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.166</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="cheat-sheet" class="level2" data-number="43.8">
-<h2 data-number="43.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">43.8</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="47.7">
+<h2 data-number="47.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">47.7</span> Cheat sheet</h2>
 <div id="tbl-pub-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-pub-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;43.2: Which weights to fine-tune privately. The noise length is <span class="math inline">\(\sigma C\sqrt k/B\)</span> for <span class="math inline">\(k\)</span> trainable weights, whatever they are.
+Table&nbsp;47.2: Where to start when fine-tuning privately; the ranking depends on the task.
 </figcaption>
 <div aria-describedby="tbl-pub-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -746,39 +771,32 @@ Table&nbsp;43.2: Which weights to fine-tune privately. The noise length is <span
 </thead>
 <tbody>
 <tr class="odd">
-<td>Very small budget, or a probe already meets the target</td>
+<td>Tiny budget, or the probe meets the target</td>
 <td>Last layer (linear probe)</td>
-<td>Fewest weights, convex, known ceiling</td>
+<td>Fewest weights; convex</td>
 </tr>
 <tr class="even">
 <td>Moderate budget, features not quite right</td>
 <td>Low-rank adapter plus last layer</td>
-<td>Never far from the best; cheap to clip and store</td>
+<td>Never far from the best</td>
 </tr>
 <tr class="odd">
 <td>Larger budget, large batches, tuned step size</td>
 <td>All weights</td>
-<td>Pays for the effective dimension, not every weight</td>
+<td>Noise costs only along curved directions</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p><strong>Rules of thumb</strong></p>
-<ul>
-<li>Start from a model pretrained on public data that resembles the private task.</li>
-<li>Measure the linear probe’s ceiling before anything else.</li>
-<li>Use large batches and a step size smaller than for training from scratch, and tune them on public data.</li>
-<li>Never call the pretrained model private, since nothing protects its training data.</li>
-<li>Expect little from a public model far from the task.</li>
-</ul>
+<p><strong>Rule of thumb.</strong> Measure the linear probe’s ceiling before anything else. Then use large batches and a smaller step size than for training from scratch. Tune the step size by DP-SGD runs at the target noise on public data, since a non-private sweep does not show how the noise moves the best step.</p>
 </section>
-<section id="further-reading" class="level2" data-number="43.9">
-<h2 data-number="43.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">43.9</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="47.8">
+<h2 data-number="47.8" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">47.8</span> Further reading</h2>
 <ul>
 <li>Tramèr &amp; Boneh, “Differentially Private Learning Needs Better Features (or Much More Data)” (ICLR 2021): linear probing on good features.</li>
-<li>Li, Tramèr, Liang &amp; Hashimoto, “Large Language Models Can Be Strong Differentially Private Learners” (ICLR 2022), and Yu et al., “Differentially Private Fine-tuning of Language Models” (ICLR 2022): full and parameter-efficient private fine-tuning, and the hyperparameters that make each work.</li>
+<li>Li, Tramèr, Liang &amp; Hashimoto, “Large Language Models Can Be Strong Differentially Private Learners” (ICLR 2022), and Yu et al., “Differentially Private Fine-tuning of Language Models” (ICLR 2022): full and adapter-based private fine-tuning.</li>
 </ul>
 <p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part05-dp-ml/06-public-data.html">the full edition’s chapter</a>.</p>
 
@@ -1188,13 +1206,13 @@ Table&nbsp;43.2: Which weights to fine-tune privately. The noise length is <span
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part05-dp-ml/05-private-prediction.html" class="pagination-link" aria-label="Private prediction: PATE and in-context learning">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span>
+      <a href="../part05-dp-ml/09-choosing-epsilon.html" class="pagination-link" aria-label="Choosing ε">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../part05-dp-ml/07-user-level.html" class="pagination-link" aria-label="User-level differential privacy">
-        <span class="nav-page-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="pagination-link" aria-label="Fine-tune a language model privately with LoRA">
+        <span class="nav-page-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

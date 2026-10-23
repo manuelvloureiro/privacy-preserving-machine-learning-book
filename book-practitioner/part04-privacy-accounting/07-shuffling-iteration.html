@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>35&nbsp; Amplification by shuffling and by iteration – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>40&nbsp; Amplification by shuffling and by iteration – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,41 +26,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -71,8 +36,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../part04-privacy-accounting/08-adaptive-composition.html" rel="next">
-<link href="../part04-privacy-accounting/06-numerical-accounting.html" rel="prev">
+<link href="../part05-dp-ml/00-introduction.html" rel="next">
+<link href="../part04-privacy-accounting/03-concentrated-dp.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -152,7 +117,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/07-shuffling-iteration.html"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/07-shuffling-iteration.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -305,6 +270,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -319,67 +290,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -395,26 +372,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -425,26 +390,44 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -461,49 +444,31 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -514,14 +479,50 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -559,24 +560,20 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">35.1</span> Why this matters</a></li>
-  <li><a href="#sec-shuf-rr" id="toc-sec-shuf-rr" class="nav-link" data-scroll-target="#sec-shuf-rr"><span class="header-section-number">35.2</span> Shuffled binary randomized response, exactly</a></li>
-  <li><a href="#sec-shuf-clones" id="toc-sec-shuf-clones" class="nav-link" data-scroll-target="#sec-shuf-clones"><span class="header-section-number">35.3</span> The clone bound for any local randomizer</a></li>
-  <li><a href="#sec-shuf-deploy" id="toc-sec-shuf-deploy" class="nav-link" data-scroll-target="#sec-shuf-deploy"><span class="header-section-number">35.4</span> Choosing ε₀ and deploying a shuffler</a></li>
-  <li><a href="#sec-shuf-iteration" id="toc-sec-shuf-iteration" class="nav-link" data-scroll-target="#sec-shuf-iteration"><span class="header-section-number">35.5</span> Amplification by iteration</a></li>
-  <li><a href="#sec-shuf-hidden" id="toc-sec-shuf-hidden" class="nav-link" data-scroll-target="#sec-shuf-hidden"><span class="header-section-number">35.6</span> Hidden state: privacy that stops growing</a></li>
-  <li><a href="#sec-shuf-code" id="toc-sec-shuf-code" class="nav-link" data-scroll-target="#sec-shuf-code"><span class="header-section-number">35.7</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">35.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">35.9</span> Further reading</a></li>
+  <li><a href="#sec-shuf-rr" id="toc-sec-shuf-rr" class="nav-link active" data-scroll-target="#sec-shuf-rr"><span class="header-section-number">40.1</span> What it is</a></li>
+  <li><a href="#when-you-meet-it" id="toc-when-you-meet-it" class="nav-link" data-scroll-target="#when-you-meet-it"><span class="header-section-number">40.2</span> When you meet it</a></li>
+  <li><a href="#sec-shuf-clones" id="toc-sec-shuf-clones" class="nav-link" data-scroll-target="#sec-shuf-clones"><span class="header-section-number">40.3</span> How to use it</a></li>
+  <li><a href="#sec-shuf-hidden" id="toc-sec-shuf-hidden" class="nav-link" data-scroll-target="#sec-shuf-hidden"><span class="header-section-number">40.4</span> What goes wrong</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">40.5</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/07-shuffling-iteration.html"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/07-shuffling-iteration.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></h1>
+<h1 class="title"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></h1>
 </div>
 
 
@@ -593,26 +590,24 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="35.1">
-<h2 data-number="35.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">35.1</span> Why this matters</h2>
-<p>Uncertainty is worth privacy, as <a href="../part04-privacy-accounting/05-subsampling.html">subsampling</a> showed, and two other kinds of it matter in practice. The first is about which report is yours. In the shuffle model (<a href="../part03-dp-foundations/09-trust-models.html">Local, shuffle and distributed trust models</a>), each of <span class="math inline">\(n\)</span> users randomizes their own data, and a <strong>shuffler</strong> strips identities and mixes the order. Each report satisfies local differential privacy (DP) at a level <span class="math inline">\(\varepsilon_0\)</span> that is usually large. But your report hides among the others, so the bag of reports satisfies central DP with an <span class="math inline">\(\varepsilon\)</span> that falls like <span class="math inline">\(1/\sqrt n\)</span>.</p>
-<p>The second is uncertainty about what happened inside training. If only the final model is released, later noise also covers a record used early, and on a convex loss the privacy loss can even stop growing. Of the two, shuffling is a deployable tool with a computable guarantee, used for example in Prochlo (Bittau et al.&nbsp;2017). Hidden-state amplification, by contrast, rarely applies to deep learning. All results use replace-one neighbours, two datasets of the same size that differ in the value of one record.</p>
+<section id="sec-shuf-rr" class="level2" data-number="40.1">
+<h2 data-number="40.1" class="anchored" data-anchor-id="sec-shuf-rr"><span class="header-section-number">40.1</span> What it is</h2>
+<p>In the <a href="../part03-dp-foundations/09-trust-models.html">shuffle model</a>, each of <span class="math inline">\(n\)</span> users randomizes their own data, so each report satisfies local differential privacy (DP) at a level <span class="math inline">\(\varepsilon_0\)</span>. A <strong>shuffler</strong> strips identities and mixes the order, so each report hides among the others. The bag of reports then satisfies central DP at a much smaller <span class="math inline">\(\varepsilon\)</span>, which falls like <span class="math inline">\(\sqrt{\ln(1/\delta)/n}\)</span> for a slack <span class="math inline">\(\delta\)</span>. Shuffling never lowers the pure-DP level <span class="math inline">\(\varepsilon_0\)</span> itself, so the smaller <span class="math inline">\(\varepsilon\)</span> always needs <span class="math inline">\(\delta\)</span> above 0. All results here are for <a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes">replace-one neighbours</a>.</p>
+<p>For binary <a href="../part03-dp-foundations/09-trust-models.html">randomized response</a>, the shuffled guarantee can be computed exactly, because the analyst learns only the count of 1-reports. For any other local randomizer, use the clone bound of Feldman, McMillan and Talwar (2021). With probability <span class="math inline">\(e^{-\varepsilon_0}\)</span>, another user’s report looks exactly like one you could have sent, and such <strong>clones</strong> hide yours. The <strong>numeric clone bound</strong> computes this exactly, while the paper’s closed form is looser and needs enough users.</p>
 </section>
-<section id="sec-shuf-rr" class="level2" data-number="35.2">
-<h2 data-number="35.2" class="anchored" data-anchor-id="sec-shuf-rr"><span class="header-section-number">35.2</span> Shuffled binary randomized response, exactly</h2>
-<p>For the simplest local randomizer, the shuffled guarantee can be computed exactly. Each user holds a bit and sends it through binary randomized response (<a href="../part03-dp-foundations/01-definition.html#sec-dpdef-rr">The definition of differential privacy</a>). The user reports the true bit with probability <span class="math inline">\(\theta = e^{\varepsilon_0}/(1 + e^{\varepsilon_0})\)</span> and the flipped bit otherwise. After shuffling, the analyst learns only how many reports are 1, and your report moves that count by at most one.</p>
-<p>So the guarantee is the privacy of a pair of count distributions. Let your bit be 0 in <span class="math inline">\(D\)</span> and 1 in <span class="math inline">\(D'\)</span>, and suppose the other users all hold 0. Each of them reports 1 with probability <span class="math inline">\(1 - \theta\)</span>, so the number of their 1-reports is binomial, and we write <span class="math inline">\(b(y)\)</span> for its chance of being <span class="math inline">\(y\)</span>. The count is then distributed as <span id="eq-shuf-rr-pair"><span class="math display">\[P(y) = \theta\,b(y) + (1 - \theta)\,b(y - 1), \qquad Q(y) = (1 - \theta)\,b(y) + \theta\,b(y - 1), \tag{35.1}\]</span></span> when you hold 0 and when you hold 1. Its exact privacy curve is a sum over the possible counts, the same sum as in <a href="../part04-privacy-accounting/06-numerical-accounting.html#sec-num-pld">Numerical accounting</a>. You compute it in both directions and keep the larger, which the snippet in <a href="#sec-shuf-code" class="quarto-xref"><span>Section 35.7</span></a> does in a few seconds. Other values for the other users change it by less than <span class="math inline">\(10^{-4}\)</span> in the full edition’s checks.</p>
-<p>For intuition, the count is close to normal, and your report shifts its mean against a spread that grows like <span class="math inline">\(\sqrt n\)</span>. So the shuffled count approximately satisfies Gaussian differential privacy (GDP) (<a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian DP</a>), with a shift in standard deviations of <span id="eq-shuf-rr-clt"><span class="math display">\[\mu \approx \frac{2\sinh(\varepsilon_0/2)}{\sqrt n}. \tag{35.2}\]</span></span> Don’t deploy with this approximation, because it fails when the others send few 1-reports. For example, with 1000 users at <span class="math inline">\(\varepsilon_0 = 4\)</span>, it gives 0.9667 where the exact value is 1.6910.</p>
-<p>Shuffling never improves pure DP, the guarantee whose slack <span class="math inline">\(\delta\)</span> is zero. An all-zero count is still <span class="math inline">\(e^{\varepsilon_0}\)</span> times likelier when you hold 0, however many users there are, and shuffling only makes it rare. So any shuffled guarantee below <span class="math inline">\(\varepsilon_0\)</span> needs <span class="math inline">\(\delta &gt; 0\)</span>.</p>
+<section id="when-you-meet-it" class="level2" data-number="40.2">
+<h2 data-number="40.2" class="anchored" data-anchor-id="when-you-meet-it"><span class="header-section-number">40.2</span> When you meet it</h2>
+<p>Shuffling appears in telemetry and analytics systems such as Prochlo (Bittau et al.&nbsp;2017), where the decision is how large <span class="math inline">\(\varepsilon_0\)</span> can be. No maintained library accounts for it, so use the full edition’s script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part04-privacy-accounting/shuffling_iteration.py">shuffling_iteration.py</a>.</p>
+<p>Two other things share the name and get none of this amplification. A data loader that shuffles the training set once per epoch is a sampler, accounted as in <a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes">Match the sampler to the accountant</a>. And federated training in which clients join rounds when they are available, rather than by Poisson sampling, has no shuffler either. Account it without amplification, or with <a href="../part05-dp-ml/04-matrix-mechanisms.html">matrix mechanisms</a>, which need no sampling.</p>
+<p>Amplification by iteration, where later training noise also protects earlier records, appears in papers that release only the final model. It holds for convex models, rarely for deep learning (<a href="#sec-shuf-hidden" class="quarto-xref"><span>Section 40.4</span></a>).</p>
 </section>
-<section id="sec-shuf-clones" class="level2" data-number="35.3">
-<h2 data-number="35.3" class="anchored" data-anchor-id="sec-shuf-clones"><span class="header-section-number">35.3</span> The clone bound for any local randomizer</h2>
-<p>Real deployments send histograms, categories or noisy vectors, so you need a bound for every <span class="math inline">\(\varepsilon_0\)</span>-DP <strong>local randomizer</strong>, the randomized map from one user’s data to their report. The bound to use is that of Feldman, McMillan &amp; Talwar (2021). Its idea is that each other user is, with probability <span class="math inline">\(e^{-\varepsilon_0}\)</span>, a <strong>clone</strong> whose report looks exactly like one of your two possible reports.</p>
-<p>That reduction gives a small pair of count distributions, whose exact <span class="math inline">\(\delta(\varepsilon)\)</span> is the <strong>numeric clone bound</strong>. It holds for every <span class="math inline">\(\varepsilon_0\)</span>-DP randomizer, even one chosen adaptively, as when each user randomizes their own gradient in shuffled stochastic gradient descent (SGD). The same paper also gives a closed form, which needs enough clones to hide among, <span id="eq-auto-07shufflingiteration-1"><span class="math display">\[\varepsilon_0 \le \ln\frac{n}{16\ln(2/\delta)}. \tag{35.3}\]</span></span> When that holds, the shuffled output is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span id="eq-shuf-clone-bound"><span class="math display">\[\varepsilon \le \ln\left(1 + \frac{e^{\varepsilon_0} - 1}{e^{\varepsilon_0} + 1}\left(\frac{8\sqrt{e^{\varepsilon_0}\ln(4/\delta)}}{\sqrt n} + \frac{8e^{\varepsilon_0}}{n}\right)\right). \tag{35.4}\]</span></span> For large <span class="math inline">\(n\)</span> its leading term gives the shape to remember, because the central <span class="math inline">\(\varepsilon\)</span> falls like <span class="math inline">\(\sqrt{\ln(1/\delta)/n}\)</span> with a constant that grows like <span class="math inline">\(e^{\varepsilon_0/2}\)</span>. Where the condition fails, though, the closed form says nothing.</p>
+<section id="sec-shuf-clones" class="level2" data-number="40.3">
+<h2 data-number="40.3" class="anchored" data-anchor-id="sec-shuf-clones"><span class="header-section-number">40.3</span> How to use it</h2>
+<p>Work backwards from the target. Compute the numeric clone bound for a few values of <span class="math inline">\(\varepsilon_0\)</span> and keep the largest that meets it, which means the least noise per report.</p>
 <div id="tbl-shuf-compare" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shuf-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;35.1: Central <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-6}\)</span> after shuffling <span class="math inline">\(n\)</span> reports that are each <span class="math inline">\(\varepsilon_0\)</span>-DP. “n/a” marks where the condition of <a href="#eq-shuf-clone-bound" class="quarto-xref">Equation&nbsp;<span>35.4</span></a> fails.
+Table&nbsp;40.1: Central <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-6}\)</span> after shuffling the reports of <span class="math inline">\(n\)</span> users. “n/a” marks too few users for the closed form.
 </figcaption>
 <div aria-describedby="tbl-shuf-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -666,132 +661,27 @@ Table&nbsp;35.1: Central <span class="math inline">\(\varepsilon\)</span> at <sp
 </div>
 </figure>
 </div>
-<p><a href="#tbl-shuf-compare" class="quarto-xref">Table&nbsp;<span>35.1</span></a> shows what generality costs. Where many clones are expected, the numeric clone bound is 1.44 to 2.00 times the exact value for randomized response. The closed form is 3.10 to 4.75 times the numeric bound where it applies. So use the closed form to reason about scaling, and compute the numeric bound to deploy.</p>
-</section>
-<section id="sec-shuf-deploy" class="level2" data-number="35.4">
-<h2 data-number="35.4" class="anchored" data-anchor-id="sec-shuf-deploy"><span class="header-section-number">35.4</span> Choosing ε₀ and deploying a shuffler</h2>
-<p>The practical question runs backwards, because you want the largest <span class="math inline">\(\varepsilon_0\)</span> that meets a target central guarantee, which means the least noise per report. So compute the bound for a few candidate values of <span class="math inline">\(\varepsilon_0\)</span> and keep the largest that meets the target. The choice of bound can decide feasibility, and a larger <span class="math inline">\(\varepsilon_0\)</span> buys accuracy. Take 100,000 users and a target of 0.2 at <span class="math inline">\(\delta = 10^{-6}\)</span>. Among the values in <a href="#tbl-shuf-compare" class="quarto-xref">Table&nbsp;<span>35.1</span></a>, the closed form allows <span class="math inline">\(\varepsilon_0\)</span> up to 2, while the numeric clone bound allows 4.</p>
-<p>Before you report a shuffled <span class="math inline">\(\varepsilon\)</span>, check that the deployment meets the assumptions of the bound.</p>
+<p>The choice of bound can decide feasibility. For 100,000 users and a target of 0.2 in <a href="#tbl-shuf-compare" class="quarto-xref">Table&nbsp;<span>40.1</span></a>, the closed form allows <span class="math inline">\(\varepsilon_0\)</span> up to 2 but the numeric clone bound allows 4. So deploy the numeric bound, and use the closed form only for rough sizing.</p>
+<p>Before reporting a shuffled <span class="math inline">\(\varepsilon\)</span>, check the bound’s assumptions.</p>
 <ul>
-<li><strong>The order is uniformly random and hidden.</strong> With a fixed or leaked order, or metadata such as arrival time or network address, the analyst knows which report is yours, and the guarantee falls back to <span class="math inline">\(\varepsilon_0\)</span>.</li>
-<li><strong>The shuffler is trusted not to collude with the analyst.</strong> If they collude, again only <span class="math inline">\(\varepsilon_0\)</span> remains.</li>
-<li><strong>The other users are honest.</strong> Users who collude with the analyst reveal their own reports, so count only honest users in <span class="math inline">\(n\)</span>.</li>
-<li><strong>The computation uses the number of reports actually shuffled.</strong> The bound gets worse as <span class="math inline">\(n\)</span> falls, so use the smallest batch you will release, not the number of users enrolled.</li>
-<li><strong>Each user sends one report per batch.</strong> Otherwise the reports compose like any other releases.</li>
+<li><strong>The order is uniformly random and hidden,</strong> with no metadata such as arrival time or network address.</li>
+<li><strong>The shuffler does not collude with the analyst.</strong></li>
+<li><strong>Only honest users count in <span class="math inline">\(n\)</span>,</strong> since colluders reveal their reports to the analyst.</li>
+<li><strong>The count of users is the number of reports shuffled,</strong> so with several batches it is the smallest batch.</li>
+<li><strong>Each user sends one report per batch,</strong> or the reports compose like any other releases.</li>
 </ul>
+<p>A leaked order or a colluding shuffler leaves only <span class="math inline">\(\varepsilon_0\)</span>.</p>
 </section>
-<section id="sec-shuf-iteration" class="level2" data-number="35.5">
-<h2 data-number="35.5" class="anchored" data-anchor-id="sec-shuf-iteration"><span class="header-section-number">35.5</span> Amplification by iteration</h2>
-<p>Suppose projected noisy SGD makes one pass over <span class="math inline">\(n\)</span> records and releases only the final model. Then the noise of every later step protects a record used early (Feldman et al.&nbsp;2018). The guarantee needs every step to be a <strong>contraction</strong>, a map that never pushes two models further apart. Write <span class="math inline">\(\beta\)</span> for the smoothness of the loss, the most its gradient changes per unit of distance. A gradient step on a convex loss is then a contraction when the step size is at most <span class="math inline">\(2/\beta\)</span>. A projection onto a convex set is one too. With Lipschitz losses as well, the record used at the <span class="math inline">\(t\)</span>-th step gets one Gaussian step’s Rényi differential privacy (RDP) curve. That curve is divided by the <span class="math inline">\(n - t + 1\)</span> noisy steps from <span class="math inline">\(t\)</span> to the end.</p>
-<p>So the guarantee depends on the position, and a report must state the worst one. For a pass over 10,000 records with noise multiplier 1, the last record gets <span class="math inline">\(\varepsilon = 5.2985\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>, converted as in <a href="../part04-privacy-accounting/02-rdp-conversions.html#sec-conv-improved">RDP conversions</a>. That is a single Gaussian step, with no amplification at all, while the record in the middle gets 0.0707.</p>
+<section id="sec-shuf-hidden" class="level2" data-number="40.4">
+<h2 data-number="40.4" class="anchored" data-anchor-id="sec-shuf-hidden"><span class="header-section-number">40.4</span> What goes wrong</h2>
+<p>Shortcuts fail where users are few or <span class="math inline">\(\varepsilon_0\)</span> is large. The closed form then says nothing, and a normal approximation of the count of 1-reports understates <span class="math inline">\(\varepsilon\)</span>. For 1,000 users at <span class="math inline">\(\varepsilon_0 = 4\)</span>, it gives 0.9667 where the exact value is 1.6910.</p>
+<p>Amplification by iteration covers one pass of noisy stochastic gradient descent (SGD) that keeps the weights in a fixed convex set (Feldman et al.&nbsp;2018). It needs two conditions. Only the final model may be released. And every step must be a contraction, never moving two sets of weights further apart, which takes a convex, smooth loss and a small enough step. Even then the gain depends on the record. Over 10,000 records with noise multiplier 1, the middle record gets <span class="math inline">\(\varepsilon = 0.0707\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. But the last record gains nothing and gets 5.2985 through <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>, as one Gaussian step does, so report the worst record’s value. On a bounded set, the privacy loss of full-batch noisy gradient descent even stops growing (Altschuler and Talwar 2022).</p>
+<p>Deep learning breaks both conditions. Checkpoints, logged models and a best checkpoint picked from several all release more than the final model, and non-convex losses are not contractions. Annamalai (2024) builds a non-convex loss whose final model leaks as much as all the intermediate models together. So never report an <span class="math inline">\(\varepsilon\)</span> from amplification by iteration for deep learning, only for convex models, such as logistic regression, that release just their final weights.</p>
 </section>
-<section id="sec-shuf-hidden" class="level2" data-number="35.6">
-<h2 data-number="35.6" class="anchored" data-anchor-id="sec-shuf-hidden"><span class="header-section-number">35.6</span> Hidden state: privacy that stops growing</h2>
-<p>Full-batch noisy gradient descent (GD) uses every record at every step, so composition charges in proportion to the number of steps. On a bounded convex set, though, the runs on <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> can never drift further apart than the set’s <strong>diameter</strong> <span class="math inline">\(d_K\)</span>, the largest distance between two of its points. Altschuler &amp; Talwar (2022) prove that the privacy loss of the last iterate then stops growing. Write <span class="math inline">\(s\)</span> for the per-step shift between the runs and <span class="math inline">\(\sigma\)</span> for the per-step noise, both in parameter units. When <span class="math inline">\(d_K/s\)</span> is an integer, the RDP of the last iterate stays below <span id="eq-shuf-plateau"><span class="math display">\[\varepsilon(\alpha) \le \frac{2\alpha d_Ks}{\sigma^2} \tag{35.5}\]</span></span> however long you train.</p>
-<p>For example, on the unit interval with <span class="math inline">\(s = 0.01\)</span> and <span class="math inline">\(\sigma = 0.1\)</span>, the bound stops at 4.0000 at order 2, while composition charges 20.0000 for 2000 steps. <strong>Strong convexity</strong> gives a plateau without a bounded set, because each step then shrinks the gap between the runs. The plateau arrives after about as many steps as the loss’s condition number (Chourasia, Ye &amp; Shokri 2021).</p>
-<p>These results need two conditions, and deep learning breaks both. No mainstream library, Opacus or <code>dp_accounting</code> included, offers last-iterate accounting. The first is that <strong>only the last iterate is released</strong>. Checkpoints, logged models or picking the best checkpoint put you back to composition. The second is that every step is a contraction, which requires a convex loss. Annamalai (2024) constructs a non-convex loss for which the last iterate of differentially private SGD (DP-SGD) leaks as much as all iterates together. So never report a hidden-state <span class="math inline">\(\varepsilon\)</span> for non-convex training, and account for it with the ordinary DP-SGD composition instead. Use it for convex models, such as private logistic regression, that release only their final weights.</p>
-</section>
-<section id="sec-shuf-code" class="level2" data-number="35.7">
-<h2 data-number="35.7" class="anchored" data-anchor-id="sec-shuf-code"><span class="header-section-number">35.7</span> Code</h2>
-<p>This snippet computes the exact central <span class="math inline">\(\varepsilon\)</span> of shuffled binary randomized response from <a href="#eq-shuf-rr-pair" class="quarto-xref">Equation&nbsp;<span>35.1</span></a>, so you can use it to choose <span class="math inline">\(\varepsilon_0\)</span>. With SciPy, <code>scipy.stats.binom.pmf</code> gives the binomial probabilities directly.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> exp, lgamma, log</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> log_binom_pmf(k: <span class="bu">int</span>, n: <span class="bu">int</span>, p: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lgamma(n <span class="op">+</span> <span class="dv">1</span>) <span class="op">-</span> lgamma(k <span class="op">+</span> <span class="dv">1</span>) <span class="op">-</span> lgamma(n <span class="op">-</span> k <span class="op">+</span> <span class="dv">1</span>) <span class="op">+</span> k <span class="op">*</span> log(p) <span class="op">+</span> (n <span class="op">-</span> k) <span class="op">*</span> log(<span class="dv">1</span> <span class="op">-</span> p)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> shuffled_rr_pair(n: <span class="bu">int</span>, eps0: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">tuple</span>[<span class="bu">list</span>[<span class="bu">float</span>], <span class="bu">list</span>[<span class="bu">float</span>]]:</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    theta <span class="op">=</span> exp(eps0) <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> exp(eps0))</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    b <span class="op">=</span> [exp(log_binom_pmf(y, n <span class="op">-</span> <span class="dv">1</span>, <span class="dv">1</span> <span class="op">-</span> theta)) <span class="cf">for</span> y <span class="kw">in</span> <span class="bu">range</span>(n)] <span class="op">+</span> [<span class="fl">0.0</span>]</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    P <span class="op">=</span> [theta <span class="op">*</span> b[y] <span class="op">+</span> (<span class="dv">1</span> <span class="op">-</span> theta) <span class="op">*</span> (b[y <span class="op">-</span> <span class="dv">1</span>] <span class="cf">if</span> y <span class="cf">else</span> <span class="fl">0.0</span>) <span class="cf">for</span> y <span class="kw">in</span> <span class="bu">range</span>(n <span class="op">+</span> <span class="dv">1</span>)]</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    Q <span class="op">=</span> [(<span class="dv">1</span> <span class="op">-</span> theta) <span class="op">*</span> b[y] <span class="op">+</span> theta <span class="op">*</span> (b[y <span class="op">-</span> <span class="dv">1</span>] <span class="cf">if</span> y <span class="cf">else</span> <span class="fl">0.0</span>) <span class="cf">for</span> y <span class="kw">in</span> <span class="bu">range</span>(n <span class="op">+</span> <span class="dv">1</span>)]</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> P, Q</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> hockey_stick(P: <span class="bu">list</span>[<span class="bu">float</span>], Q: <span class="bu">list</span>[<span class="bu">float</span>], eps: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">sum</span>(<span class="bu">max</span>(p <span class="op">-</span> exp(eps) <span class="op">*</span> q, <span class="fl">0.0</span>) <span class="cf">for</span> p, q <span class="kw">in</span> <span class="bu">zip</span>(P, Q))</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> shuffled_rr_epsilon(n: <span class="bu">int</span>, eps0: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    P, Q <span class="op">=</span> shuffled_rr_pair(n, eps0)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    lo, hi <span class="op">=</span> <span class="fl">0.0</span>, eps0  <span class="co"># shuffling never does worse than the local eps0</span></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">50</span>):</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        mid <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        worst <span class="op">=</span> <span class="bu">max</span>(hockey_stick(P, Q, mid), hockey_stick(Q, P, mid))</span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>        lo, hi <span class="op">=</span> (mid, hi) <span class="cf">if</span> worst <span class="op">&gt;</span> delta <span class="cf">else</span> (lo, mid)</span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> hi</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>shuffled_rr_epsilon(<span class="dv">10_000</span>, <span class="fl">2.0</span>, <span class="fl">1e-6</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.0870</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>shuffled_rr_epsilon(<span class="dv">100_000</span>, <span class="fl">4.0</span>, <span class="fl">1e-6</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.0847</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>shuffled_rr_epsilon(<span class="dv">1_000</span>, <span class="fl">4.0</span>, <span class="fl">1e-6</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 1.6910</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="cheat-sheet" class="level2" data-number="35.8">
-<h2 data-number="35.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">35.8</span> Cheat sheet</h2>
-<div id="tbl-shuf-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shuf-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;35.2: Which accountant for which kind of amplification. All use replace-one neighbours.
-</figcaption>
-<div aria-describedby="tbl-shuf-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Situation</th>
-<th>Accountant</th>
-<th>Conditions and pitfalls</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Binary randomized response behind a shuffler</td>
-<td>Exact count pair, <a href="#eq-shuf-rr-pair" class="quarto-xref">Equation&nbsp;<span>35.1</span></a></td>
-<td>The normal approximation fails with few 1-reports</td>
-</tr>
-<tr class="even">
-<td>Any <span class="math inline">\(\varepsilon_0\)</span>-DP randomizer behind a shuffler</td>
-<td>Numeric clone bound</td>
-<td>1.44 to 2.36 times the exact value for randomized response</td>
-</tr>
-<tr class="odd">
-<td>One-pass noisy SGD, last iterate</td>
-<td><span class="math inline">\(\varepsilon_t(\alpha) = \frac{\alpha}{2\tilde\sigma^2(n - t + 1)}\)</span></td>
-<td>Convex, smooth, Lipschitz; report the last record’s value</td>
-</tr>
-<tr class="even">
-<td>Full-batch GD on a bounded convex set</td>
-<td>Plateau <span class="math inline">\(\frac{2\alpha d_Ks}{\sigma^2}\)</span></td>
-<td>Only the last iterate released</td>
-</tr>
-<tr class="odd">
-<td>Non-convex training, or checkpoints released</td>
-<td>Ordinary composition</td>
-<td>No hidden-state amplification</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p><strong>Rules of thumb</strong></p>
+<section id="further-reading" class="level2" data-number="40.5">
+<h2 data-number="40.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">40.5</span> Further reading</h2>
 <ul>
-<li>Choose <span class="math inline">\(\varepsilon_0\)</span> with the numeric bound at the smallest batch size you will release.</li>
-<li>Don’t deploy with the closed form or the normal approximation when users are few or <span class="math inline">\(\varepsilon_0\)</span> is large, because both fail there.</li>
-<li>A leaked order, a colluding shuffler or identifying metadata turns the guarantee back into <span class="math inline">\(\varepsilon_0\)</span>.</li>
-<li>Never claim hidden-state privacy for deep learning, and for convex models release only the final weights.</li>
-</ul>
-</section>
-<section id="further-reading" class="level2" data-number="35.9">
-<h2 data-number="35.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">35.9</span> Further reading</h2>
-<ul>
-<li>Feldman, McMillan &amp; Talwar, “Hiding Among the Clones: A Simple and Nearly Optimal Analysis of Privacy Amplification by Shuffling” (FOCS 2021): the clone bound and how to compute it. The full edition’s script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part04-privacy-accounting/shuffling_iteration.py">shuffling_iteration.py</a>, computes it too.</li>
-<li>Annamalai, “It’s Our Loss: No Privacy Amplification for Hidden State DP-SGD With Non-Convex Loss” (AISec 2024): why hidden-state results fail for deep learning.</li>
+<li>Feldman, McMillan &amp; Talwar, “Hiding Among the Clones” (FOCS 2021): the clone bound and how to compute it.</li>
 </ul>
 <p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part04-privacy-accounting/07-shuffling-iteration.html">the full edition’s chapter</a>.</p>
 
@@ -1201,13 +1091,13 @@ Table&nbsp;35.2: Which accountant for which kind of amplification. All use repla
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="pagination-link" aria-label="Numerical accounting with privacy loss distributions">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span>
+      <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="pagination-link" aria-label="Concentrated differential privacy">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="pagination-link" aria-label="Adaptive composition: filters, odometers and individual accounting">
-        <span class="nav-page-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../part05-dp-ml/00-introduction.html" class="pagination-link" aria-label="Differential privacy in machine learning">
+        <span class="nav-page-text">Differential privacy in machine learning</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

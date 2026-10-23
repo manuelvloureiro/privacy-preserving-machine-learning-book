@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>14&nbsp; Private Deep Learning – A Course in Differential Privacy</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part04-learning-statistics/04-mean-estimation.html" rel="next">
+<link href="../part04-learning-statistics/02-private-erm.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-learning-statistics/00-introduction.html">Private Learning and Statistics</a></li><li class="breadcrumb-item"><a href="../part04-learning-statistics/03-private-deep-learning.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">A Course in Differential Privacy</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-privacy-failures/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy Failures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/01-attempts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Attempts at Data Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/02-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Reconstruction Attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-dp-basics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Basics of Differential Privacy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/01-randomized-response.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/02-laplace-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/03-approximate-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/04-advanced-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/05-exponential-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Exponential Mechanism</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-query-release/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query Release and Its Limits</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/01-multiplicative-weights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Private Multiplicative Weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/02-sparse-vector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sparse Vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/03-beyond-global-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/04-packing-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Packing Lower Bounds</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-learning-statistics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Private Learning and Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/01-privacy-violations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What Differential Privacy Protects</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/02-private-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/03-private-deep-learning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/04-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Private Mean Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/05-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Adaptive Data Analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-deployments/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deployments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/01-local-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Local Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/02-shuffle-and-central-deployments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-dpdl-networks" id="toc-sec-dpdl-networks" class="nav-link active" data-scroll-target="#sec-dpdl-networks"><span class="header-section-number">14.1</span> Neural networks</a></li>
+  <li><a href="#sec-dpdl-dpsgd" id="toc-sec-dpdl-dpsgd" class="nav-link" data-scroll-target="#sec-dpdl-dpsgd"><span class="header-section-number">14.2</span> Differentially private SGD</a></li>
+  <li><a href="#sec-dpdl-accounting" id="toc-sec-dpdl-accounting" class="nav-link" data-scroll-target="#sec-dpdl-accounting"><span class="header-section-number">14.3</span> Privacy accounting</a></li>
+  <li><a href="#sec-dpdl-practice" id="toc-sec-dpdl-practice" class="nav-link" data-scroll-target="#sec-dpdl-practice"><span class="header-section-number">14.4</span> DP-SGD in practice</a></li>
+  <li><a href="#sec-dpdl-pate" id="toc-sec-dpdl-pate" class="nav-link" data-scroll-target="#sec-dpdl-pate"><span class="header-section-number">14.5</span> Private aggregation of teacher ensembles</a></li>
+  <li><a href="#sec-dpdl-summary" id="toc-sec-dpdl-summary" class="nav-link" data-scroll-target="#sec-dpdl-summary"><span class="header-section-number">14.6</span> Summary</a></li>
+  <li><a href="#sec-dpdl-notes" id="toc-sec-dpdl-notes" class="nav-link" data-scroll-target="#sec-dpdl-notes"><span class="header-section-number">14.7</span> Notes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-learning-statistics/00-introduction.html">Private Learning and Statistics</a></li><li class="breadcrumb-item"><a href="../part04-learning-statistics/03-private-deep-learning.html"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The private stochastic gradient descent (SGD) of <a href="../part04-learning-statistics/02-private-erm.html">the previous chapter</a> needs a convex, Lipschitz loss, and its privacy analysis loses large constants. Neural networks have neither property, and in practice the constants decide whether a guarantee is meaningful. This chapter adapts noisy SGD to neural networks under differential privacy (DP) by clipping each gradient. It then replaces the composition argument with a tighter accounting built on the moments of the privacy loss. Finally, it presents a second approach that turns any non-private learner into a private one by a vote among models trained on disjoint data.</p>
+<section id="sec-dpdl-networks" class="level2" data-number="14.1">
+<h2 data-number="14.1" class="anchored" data-anchor-id="sec-dpdl-networks"><span class="header-section-number">14.1</span> Neural networks</h2>
+<p>The setting is the one of the previous chapter. Each record is a pair of a feature vector and a label, and training minimizes the total loss of the records over a parameter vector <span class="math inline">\(\theta\)</span>,</p>
+<p><span id="eq-auto-03privatedeeplearning-1"><span class="math display">\[
+\mathcal L(\theta; X) = \sum_{i=1}^n \ell(\theta; x_i, y_i).
+\tag{14.1}\]</span></span></p>
+<p>Here a feature vector <span class="math inline">\(x\)</span> lies in <span class="math inline">\(\mathbb R^{m_0}\)</span>, and a label is one of <span class="math inline">\(K\)</span> classes, <span class="math inline">\(y \in \{1, \dots, K\}\)</span>.</p>
+<div id="def-dpdl-network" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 14.1 (Multilayer perceptron)</strong></span> A network with <span class="math inline">\(D\)</span> layers sets <span class="math inline">\(v^{(0)} = x\)</span> and, for <span class="math inline">\(j = 1, \dots, D\)</span>,</p>
+<p><span id="eq-auto-03privatedeeplearning-2"><span class="math display">\[
+v^{(j)} = f\big(W^{(j)}v^{(j-1)} + c^{(j)}\big),
+\tag{14.2}\]</span></span></p>
+<p>where <span class="math inline">\(W^{(j)}\)</span> is an <span class="math inline">\(m_j \times m_{j-1}\)</span> matrix of weights, <span class="math inline">\(c^{(j)} \in \mathbb R^{m_j}\)</span> is a vector of offsets, and the <strong>activation function</strong> <span class="math inline">\(f\colon \mathbb R \to \mathbb R\)</span> is applied to each coordinate. The last layer has no activation and outputs <span class="math inline">\(o \in \mathbb R^K\)</span>, one score per class. The parameter vector <span class="math inline">\(\theta\)</span> collects all weights and offsets.</p>
+</div>
+<p>Without the activation the network would be a composition of linear maps, and so a single linear map. Common activations are the rectified linear unit <span class="math inline">\(f(u) = \max(0, u)\)</span>, the sigmoid <span class="math inline">\(f(u) = 1/(1 + e^{-u})\)</span> and <span class="math inline">\(\tanh(u) = (e^u - e^{-u})/(e^u + e^{-u})\)</span>. The rectified linear unit is the usual choice without privacy.</p>
+<p>The scores become a probability vector over the classes through the <strong>softmax</strong> function, <span class="math inline">\(\hat y_k = e^{o_k}/\sum_{j=1}^K e^{o_j}\)</span>. This is a smooth stand-in for picking the largest score, and <span class="math inline">\(\hat y\)</span> reads as the network’s confidence in each class. The prediction is the class with the largest <span class="math inline">\(\hat y_k\)</span>. The loss is the <strong>cross-entropy</strong>, the negative log of the probability given to the true class,</p>
+<p><span id="eq-auto-03privatedeeplearning-3"><span class="math display">\[
+\ell(\theta; x, y) = -\ln \hat y_y = -\sum_{k=1}^K \mathbf 1[k = y]\,\ln \hat y_k ,
+\tag{14.3}\]</span></span></p>
+<p>where <span class="math inline">\(\hat y\)</span> depends on <span class="math inline">\(\theta\)</span> through every layer. The analysis of the previous chapter does not apply to this loss. It is not convex in <span class="math inline">\(\theta\)</span>, so no convergence theorem holds, although SGD works well in practice. It is not Lipschitz either. In a two-layer network, the gradient with respect to the first layer’s weights is multiplied by the second layer’s weights, which can be arbitrarily large. Without Lipschitz continuity, a single gradient has unbounded sensitivity.</p>
+</section>
+<section id="sec-dpdl-dpsgd" class="level2" data-number="14.2">
+<h2 data-number="14.2" class="anchored" data-anchor-id="sec-dpdl-dpsgd"><span class="header-section-number">14.2</span> Differentially private SGD</h2>
+<p>Two changes make noisy SGD practical. Each gradient is <strong>clipped</strong> to a fixed norm, which bounds sensitivity directly. And each step uses a random batch of records, called a <strong>lot</strong>, chosen by Poisson sampling.</p>
+<div id="def-dpdl-clip" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 14.2 (Clipping)</strong></span> For a clipping norm <span class="math inline">\(C &gt; 0\)</span>, the clipping of a vector <span class="math inline">\(g\)</span> is</p>
+<p><span id="eq-auto-03privatedeeplearning-4"><span class="math display">\[
+\mathrm{clip}_C(g) = g\cdot\min\left(1, \frac{C}{\|g\|_2}\right).
+\tag{14.4}\]</span></span></p>
+</div>
+<p>A vector inside the ball of radius <span class="math inline">\(C\)</span> is unchanged, and a longer one is scaled back onto the sphere. So every clipped vector has norm at most <span class="math inline">\(C\)</span>.</p>
+<div id="def-dpdl-dpsgd" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 14.3 (DP-SGD)</strong></span> Fix a sampling rate <span class="math inline">\(q \in (0, 1]\)</span>, a noise multiplier <span class="math inline">\(\sigma &gt; 0\)</span>, a clipping norm <span class="math inline">\(C\)</span>, a number of steps <span class="math inline">\(T\)</span>, step sizes <span class="math inline">\(\eta_t\)</span> and a start <span class="math inline">\(\theta_0\)</span>. For <span class="math inline">\(t = 1, \dots, T\)</span>:</p>
+<ol type="1">
+<li>Form the lot <span class="math inline">\(S_t\)</span> by including each index <span class="math inline">\(i \in \{1,\dots,n\}\)</span> independently with probability <span class="math inline">\(q\)</span>.</li>
+<li>Compute the noisy average of clipped gradients, <span id="eq-auto-03privatedeeplearning-5"><span class="math display">\[
+\tilde g_t = \frac{1}{qn}\left(\sum_{i\in S_t}\mathrm{clip}_C\big(\nabla\ell(\theta_{t-1}; z_i)\big) + b_t\right), \qquad b_t \sim \mathcal N(0, \sigma^2C^2 I_d).
+\tag{14.5}\]</span></span></li>
+<li>Step: <span class="math inline">\(\theta_t = \theta_{t-1} - \eta_t\,\tilde g_t\)</span>.</li>
+</ol>
+<p>Output <span class="math inline">\(\theta_T\)</span>.</p>
+</div>
+<p>Compared with the private SGD of the previous chapter, a step uses a lot of expected size <span class="math inline">\(qn\)</span> instead of one record, and the gradient is clipped instead of bounded by assumption. The noise is calibrated to <span class="math inline">\(C\)</span>, the most one record can contribute to the sum.</p>
+<div id="lem-dpdl-clip" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 14.1</strong></span> Adding or removing one record changes the clipped sum <span class="math inline">\(\sum_{i\in S}\mathrm{clip}_C(\nabla\ell(\theta; z_i))\)</span> by a vector of norm at most <span class="math inline">\(C\)</span>. Replacing one record changes it by at most <span class="math inline">\(2C\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Adding or removing a record adds or removes one clipped vector, of norm at most <span class="math inline">\(C\)</span>. A replacement does both, and the triangle inequality gives <span class="math inline">\(2C\)</span>.</p>
+</div>
+<p>Clipping has a cost. The clipped average is a biased estimate of the gradient, so even the convergence theorem for convex losses would no longer apply. For neural networks no such theorem was available anyway, and clipped SGD works well in practice.</p>
+<p>The privacy analysis depends on how the lot is drawn, and schemes that look alike differ for privacy. <strong>Poisson sampling</strong> includes each record independently with probability <span class="math inline">\(q\)</span>, so the lot size is random. Even at <span class="math inline">\(q = 1/n\)</span> this is not the same as picking one record, because the lot may be empty or hold several records. <strong>Sampling without replacement</strong> draws a lot of fixed size <span class="math inline">\(m\)</span> uniformly among subsets. Picking one record, as in the previous chapter, is the case <span class="math inline">\(m = 1\)</span>. <strong>Sampling with replacement</strong> draws <span class="math inline">\(m\)</span> records independently, so a record can appear more than once. The analyses below assume Poisson sampling, and they use the add-or-remove notion of neighbours under which <a href="#lem-dpdl-clip" class="quarto-xref">Lemma&nbsp;<span>14.1</span></a> gives sensitivity <span class="math inline">\(C\)</span>. In practice, implementations often shuffle the data once and cut it into consecutive batches of fixed size. Every batch is then a uniform sample, but the batches are dependent, so the Poisson analysis does not apply to them. Reporting it for shuffled batches is a common error.</p>
+</section>
+<section id="sec-dpdl-accounting" class="level2" data-number="14.3">
+<h2 data-number="14.3" class="anchored" data-anchor-id="sec-dpdl-accounting"><span class="header-section-number">14.3</span> Privacy accounting</h2>
+<p>DP-SGD can be analysed exactly as in the previous chapter. Without sampling, a single step is the Gaussian mechanism with noise multiplier <span class="math inline">\(\sigma\)</span>, and suppose it is <span class="math inline">\((\varepsilon_0, \delta_0)\)</span>-DP. Amplification by Poisson sampling then makes it about <span class="math inline">\((2q\varepsilon_0, q\delta_0)\)</span>-DP, and advanced composition over <span class="math inline">\(T\)</span> steps gives</p>
+<p><span id="eq-auto-03privatedeeplearning-6"><span class="math display">\[
+\Big(O\big(q\varepsilon_0\sqrt{T\ln(1/\delta)}\big),\ Tq\delta_0 + \delta\Big)\text{-DP}.
+\tag{14.6}\]</span></span></p>
+<p>Abadi and coauthors proved a better bound for the same algorithm.</p>
+<div id="thm-dpdl-abadi" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 14.1 (Moments accountant, asymptotic form)</strong></span> There are constants <span class="math inline">\(c_1\)</span> and <span class="math inline">\(c_2\)</span> such that, for every sampling rate <span class="math inline">\(q\)</span> and number of steps <span class="math inline">\(T\)</span>, every <span class="math inline">\(\varepsilon &lt; c_1q^2T\)</span> and every <span class="math inline">\(\delta &gt; 0\)</span>, DP-SGD is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP under add-or-remove neighbours if</p>
+<p><span id="eq-auto-03privatedeeplearning-7"><span class="math display">\[
+\sigma \ge c_2\,\frac{q\sqrt{T\ln(1/\delta)}}{\varepsilon}.
+\tag{14.7}\]</span></span></p>
+</div>
+<p>The proof is Theorem 1 of Abadi and coauthors, 2016. In the composition bound, the Gaussian mechanism of <a href="../part02-dp-basics/03-approximate-dp.html">the approximate DP chapter</a> gives <span class="math inline">\(\varepsilon_0\)</span> with <span class="math inline">\(\sigma = \sqrt{2\ln(1/\delta_0) + \varepsilon_0}/\varepsilon_0\)</span>, so <span class="math inline">\(\varepsilon_0\)</span> is about <span class="math inline">\(\sqrt{2\ln(1/\delta_0)}/\sigma\)</span>, and the composition route needs <span class="math inline">\(\sigma\)</span> larger by a factor of order <span class="math inline">\(\sqrt{\ln(1/\delta_0)}\)</span>, and it pays <span class="math inline">\(Tq\delta_0\)</span> in failure probability. These look like small gains, but constant and logarithmic factors in <span class="math inline">\(\varepsilon\)</span> separate a meaningful guarantee from an empty one. The rest of this section proves the ingredients of the accountant and shows the gain numerically.</p>
+<p>The starting point is the privacy loss. For a mechanism <span class="math inline">\(M\)</span> whose output has density <span class="math inline">\(p_X\)</span> on dataset <span class="math inline">\(X\)</span>, the <strong>privacy loss</strong> at an output <span class="math inline">\(y\)</span> is <span class="math inline">\(\ln\big(p_X(y)/p_{X'}(y)\big)\)</span>. When <span class="math inline">\(y\)</span> is drawn from <span class="math inline">\(M(X)\)</span>, it is a random variable. Pure <span class="math inline">\(\varepsilon\)</span>-DP says that it never exceeds <span class="math inline">\(\varepsilon\)</span>. By the privacy loss criterion of <a href="../part02-dp-basics/03-approximate-dp.html">the approximate DP chapter</a>, <span class="math inline">\((\varepsilon,\delta)\)</span>-DP follows if, for every ordered pair of neighbours, it exceeds <span class="math inline">\(\varepsilon\)</span> with probability at most <span class="math inline">\(\delta\)</span>. That criterion only counts the mass above <span class="math inline">\(\varepsilon\)</span>, and says nothing about how far above it lies. Moments describe the whole distribution, and unlike tail bounds, they compose by simple addition.</p>
+<div id="def-dpdl-moments" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 14.4 (Log-moments of the privacy loss)</strong></span> For <span class="math inline">\(\lambda &gt; 0\)</span>, the <span class="math inline">\(\lambda\)</span>-th log-moment of <span class="math inline">\(M\)</span> is</p>
+<p><span id="eq-auto-03privatedeeplearning-8"><span class="math display">\[
+\alpha_M(\lambda) = \sup_{X\sim X'}\ \ln\ \mathbb E_{y\sim M(X)}\left[\left(\frac{p_X(y)}{p_{X'}(y)}\right)^{\lambda}\right].
+\tag{14.8}\]</span></span></p>
+</div>
+<p>Up to a factor, this is the Rényi divergence of order <span class="math inline">\(\lambda + 1\)</span> between the two output distributions, and a bound on it for every pair of neighbours is Rényi differential privacy (RDP). A bound on one log-moment already implies approximate privacy, by Markov’s inequality.</p>
+<div id="thm-dpdl-convert" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 14.2 (From moments to approximate DP)</strong></span> For every <span class="math inline">\(\lambda &gt; 0\)</span> and <span class="math inline">\(\varepsilon \ge 0\)</span>, the mechanism <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with</p>
+<p><span id="eq-auto-03privatedeeplearning-9"><span class="math display">\[
+\delta = \exp\big(\alpha_M(\lambda) - \lambda\varepsilon\big).
+\tag{14.9}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Fix neighbours <span class="math inline">\(X \sim X'\)</span> and write <span class="math inline">\(Z = \ln(p_X(y)/p_{X'}(y))\)</span> for <span class="math inline">\(y \sim M(X)\)</span>. The map <span class="math inline">\(u \mapsto e^{\lambda u}\)</span> is increasing, so <span class="math inline">\(\Pr[Z &gt; \varepsilon] \le \Pr[e^{\lambda Z} \ge e^{\lambda\varepsilon}]\)</span>.</li>
+<li>Markov’s inequality bounds the right side by <span class="math inline">\(\mathbb E[e^{\lambda Z}]\,e^{-\lambda\varepsilon}\)</span>, and <span class="math inline">\(\mathbb E[e^{\lambda Z}] \le e^{\alpha_M(\lambda)}\)</span> by definition.</li>
+<li>So the privacy loss exceeds <span class="math inline">\(\varepsilon\)</span> with probability at most <span class="math inline">\(\delta\)</span>, and the privacy loss criterion gives <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</li>
+</ol>
+</div>
+<div id="lem-dpdl-compose" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 14.2 (Composition of moments)</strong></span> Let <span class="math inline">\(M_1\)</span> have output <span class="math inline">\(y_1\)</span>, and let <span class="math inline">\(M_2(\cdot\,; y_1)\)</span> be a mechanism chosen as a function of <span class="math inline">\(y_1\)</span> with <span class="math inline">\(\alpha_{M_2(\cdot;y_1)}(\lambda) \le \alpha_2\)</span> for every <span class="math inline">\(y_1\)</span>. The mechanism <span class="math inline">\(M\)</span> that outputs <span class="math inline">\((y_1, y_2)\)</span> satisfies <span class="math inline">\(\alpha_M(\lambda) \le \alpha_{M_1}(\lambda) + \alpha_2\)</span>. By induction, <span class="math inline">\(T\)</span> adaptive steps have log-moments at most the sum of theirs.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>The density of <span class="math inline">\((y_1, y_2)\)</span> on <span class="math inline">\(X\)</span> is <span class="math inline">\(p_X(y_1)\,p_X(y_2 \mid y_1)\)</span>, so the ratio for neighbours factors as <span class="math inline">\(r_1(y_1)\,r_2(y_2 \mid y_1)\)</span>.</li>
+<li>Taking the expectation over <span class="math inline">\(y_2\)</span> first, given <span class="math inline">\(y_1\)</span>, gives <span id="eq-auto-03privatedeeplearning-10"><span class="math display">\[
+\mathbb E\big[r_1^\lambda r_2^\lambda\big] = \mathbb E_{y_1}\Big[r_1(y_1)^\lambda\ \mathbb E_{y_2}\big[r_2(y_2\mid y_1)^\lambda \,\big|\, y_1\big]\Big] \le e^{\alpha_2}\,\mathbb E_{y_1}\big[r_1(y_1)^\lambda\big] \le e^{\alpha_2 + \alpha_{M_1}(\lambda)}.
+\tag{14.10}\]</span></span></li>
+<li>Taking logarithms and the supremum over neighbours gives the claim.</li>
+</ol>
+</div>
+<p>For the Gaussian mechanism the log-moments have a closed form.</p>
+<div id="lem-dpdl-gaussian" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 14.3</strong></span> Let <span class="math inline">\(M(X) = f(X) + b\)</span> with <span class="math inline">\(b \sim \mathcal N(0, \sigma^2 I_d)\)</span>, where <span class="math inline">\(f\)</span> has <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta\)</span>. Then for every <span class="math inline">\(\lambda &gt; 0\)</span>,</p>
+<p><span id="eq-auto-03privatedeeplearning-11"><span class="math display">\[
+\alpha_M(\lambda) = \frac{\lambda(\lambda + 1)\Delta^2}{2\sigma^2}.
+\tag{14.11}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Fix neighbours, write <span class="math inline">\(\mu = f(X)\)</span> and <span class="math inline">\(\mu' = f(X')\)</span>, and let <span class="math inline">\(\Delta' = \|\mu - \mu'\|_2 \le \Delta\)</span>. For <span class="math inline">\(y = \mu + \sigma g\)</span> with <span class="math inline">\(g\)</span> standard normal, the privacy loss is <span id="eq-auto-03privatedeeplearning-12"><span class="math display">\[
+\frac{\|y - \mu'\|^2 - \|y - \mu\|^2}{2\sigma^2} = \frac{\Delta'^2}{2\sigma^2} + \frac{\langle g, \mu - \mu'\rangle}{\sigma}.
+\tag{14.12}\]</span></span></li>
+<li>So the privacy loss is normal with mean <span class="math inline">\(m = \Delta'^2/(2\sigma^2)\)</span> and variance <span class="math inline">\(\Delta'^2/\sigma^2 = 2m\)</span>.</li>
+<li>A normal variable <span class="math inline">\(Z\)</span> with mean <span class="math inline">\(m\)</span> and variance <span class="math inline">\(s^2\)</span> has <span class="math inline">\(\mathbb E[e^{\lambda Z}] = e^{\lambda m + \lambda^2s^2/2}\)</span>. Here the exponent is <span class="math inline">\(\lambda m + \lambda^2 m = \lambda(\lambda+1)\Delta'^2/(2\sigma^2)\)</span>.</li>
+<li>This increases with <span class="math inline">\(\Delta'\)</span>, and the supremum is reached at <span class="math inline">\(\Delta' = \Delta\)</span>.</li>
+</ol>
+</div>
+<div id="cor-dpdl-gaussian-composition" class="theorem corollary">
+<p><span class="theorem-title"><strong>Corollary 14.1</strong></span> Let <span class="math inline">\(\rho = \Delta^2/(2\sigma^2)\)</span>. Any adaptive sequence of <span class="math inline">\(T\)</span> Gaussian mechanisms, each with sensitivity <span class="math inline">\(\Delta\)</span> and noise <span class="math inline">\(\mathcal N(0,\sigma^2I_d)\)</span>, is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP for every <span class="math inline">\(\delta \in (0,1)\)</span>, with</p>
+<p><span id="eq-auto-03privatedeeplearning-13"><span class="math display">\[
+\varepsilon = T\rho + 2\sqrt{T\rho\ln(1/\delta)}.
+\tag{14.13}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>By <a href="#lem-dpdl-gaussian" class="quarto-xref">Lemma&nbsp;<span>14.3</span></a> and <a href="#lem-dpdl-compose" class="quarto-xref">Lemma&nbsp;<span>14.2</span></a>, the sequence has <span class="math inline">\(\alpha(\lambda) \le \lambda(\lambda+1)T\rho\)</span>.</li>
+<li>By <a href="#thm-dpdl-convert" class="quarto-xref">Theorem&nbsp;<span>14.2</span></a>, it is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP whenever <span class="math inline">\(\lambda(\lambda+1)T\rho - \lambda\varepsilon \le \ln\delta\)</span>, that is, whenever <span class="math inline">\(\varepsilon \ge (\lambda+1)T\rho + \ln(1/\delta)/\lambda\)</span>.</li>
+<li>The right side is smallest at <span class="math inline">\(\lambda = \sqrt{\ln(1/\delta)/(T\rho)}\)</span>, where it equals <span class="math inline">\(T\rho + 2\sqrt{T\rho\ln(1/\delta)}\)</span>.</li>
+</ol>
+</div>
+<p>For comparison, take the same <span class="math inline">\(T\)</span> Gaussian steps with <span class="math inline">\(\Delta = 1\)</span>. Advanced composition needs a per-step guarantee first, about <span class="math inline">\(\varepsilon_0 = \sqrt{2\ln(1/\delta_0)}/\sigma\)</span> by the Gaussian mechanism, and then gives <span class="math inline">\(\varepsilon \approx \varepsilon_0\sqrt{2T\ln(1/\delta)}\)</span>, which is <span class="math inline">\(2\sqrt{T\ln(1/\delta_0)\ln(1/\delta)}/\sigma\)</span>. The corollary gives <span class="math inline">\(\sqrt{2T\ln(1/\delta)}/\sigma\)</span> plus a lower-order term, smaller by a factor of about <span class="math inline">\(\sqrt{2\ln(1/\delta_0)}\)</span>, and with no failure probability <span class="math inline">\(T\delta_0\)</span> to pay.</p>
+<p>DP-SGD adds Poisson sampling to each step. Its log-moments come from a one-dimensional pair of distributions. By <a href="#lem-dpdl-clip" class="quarto-xref">Lemma&nbsp;<span>14.1</span></a> and scaling by <span class="math inline">\(C\)</span>, a step compares the noise distribution <span class="math inline">\(\mathcal N(0, \sigma^2)\)</span> with the mixture <span class="math inline">\((1-q)\,\mathcal N(0, \sigma^2) + q\,\mathcal N(1, \sigma^2)\)</span>, in which the extra record was sampled with probability <span class="math inline">\(q\)</span>.</p>
+<div id="thm-dpdl-sampled" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 14.3 (Log-moments of the sampled Gaussian)</strong></span> For every integer <span class="math inline">\(\lambda \ge 1\)</span>, one step of DP-SGD with sampling rate <span class="math inline">\(q\)</span> and noise multiplier <span class="math inline">\(\sigma\)</span> has, under add-or-remove neighbours,</p>
+<p><span id="eq-auto-03privatedeeplearning-14"><span class="math display">\[
+\alpha(\lambda) \le \ln A_{\lambda+1}, \qquad A_{a} = \sum_{k=0}^{a}\binom{a}{k}(1-q)^{a-k}q^k\exp\left(\frac{k^2 - k}{2\sigma^2}\right).
+\tag{14.14}\]</span></span></p>
+</div>
+<p>The quantity <span class="math inline">\(A_a\)</span> is computed by expanding the <span class="math inline">\(a\)</span>-th power of the density ratio between the mixture and <span class="math inline">\(\mathcal N(0,\sigma^2)\)</span> with the binomial theorem. Each term is then a Gaussian integral, <span class="math inline">\(\mathbb E[e^{kg/\sigma^2}] = e^{k^2/(2\sigma^2)}\)</span> for <span class="math inline">\(g \sim \mathcal N(0,\sigma^2)\)</span>. The hard part is to show that this pair, in this order, is the worst case over all neighbours and over the reverse order. Mironov, Talwar and Zhang prove it in “Rényi Differential Privacy of the Sampled Gaussian Mechanism”, 2019. Earlier, Abadi and coauthors proved, for <span class="math inline">\(\sigma \ge 1\)</span>, small <span class="math inline">\(q\)</span> and moderate <span class="math inline">\(\lambda\)</span>, the asymptotic bound <span class="math inline">\(\alpha(\lambda) \le q^2\lambda(\lambda+1)/((1-q)\sigma^2) + O(q^3\lambda^3/\sigma^3)\)</span> that yields <a href="#thm-dpdl-abadi" class="quarto-xref">Theorem&nbsp;<span>14.1</span></a>.</p>
+<p>Putting the pieces together gives the <strong>moments accountant</strong>. Compute the log-moment of one step for every <span class="math inline">\(\lambda\)</span>, multiply by <span class="math inline">\(T\)</span> by <a href="#lem-dpdl-compose" class="quarto-xref">Lemma&nbsp;<span>14.2</span></a>, and convert with <a href="#thm-dpdl-convert" class="quarto-xref">Theorem&nbsp;<span>14.2</span></a>, choosing the best <span class="math inline">\(\lambda\)</span>:</p>
+<p><span id="eq-dpdl-accountant"><span class="math display">\[
+\varepsilon(\delta) = \min_{\lambda \ge 1}\ \frac{T\ln A_{\lambda+1} + \ln(1/\delta)}{\lambda}.
+\tag{14.15}\]</span></span></p>
+<p>The computation depends only on <span class="math inline">\(q\)</span>, <span class="math inline">\(\sigma\)</span>, <span class="math inline">\(T\)</span> and <span class="math inline">\(\delta\)</span>, never on the data. So the privacy cost of a training run can be fixed before the data is touched, and the noise or the number of steps adjusted to meet a target.</p>
+<div id="fig-dpdl-accounting" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dpdl-accounting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/dpdl-accounting.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dpdl-accounting-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;14.1: Privacy parameter <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of DP-SGD with sampling rate <span class="math inline">\(q = 0.01\)</span> and noise multiplier <span class="math inline">\(\sigma = 4\)</span>, against the number of epochs, where one epoch is <span class="math inline">\(1/q\)</span> steps. Dashed: each step is <span class="math inline">\((\varepsilon_0,\delta_0)\)</span>-DP by <a href="#cor-dpdl-gaussian-composition" class="quarto-xref">Corollary&nbsp;<span>14.1</span></a> with <span class="math inline">\(T = 1\)</span>, Poisson sampling turns that into <span class="math inline">\((\ln(1 + q(e^{\varepsilon_0}-1)), q\delta_0)\)</span>, and advanced composition combines the steps, with <span class="math inline">\(\delta\)</span> split evenly between the composition and the steps. Solid: the moments accountant <a href="#eq-dpdl-accountant" class="quarto-xref">Equation&nbsp;<span>14.15</span></a>.
+</figcaption>
+</figure>
+</div>
+<div id="exm-dpdl-accounting" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.1</strong></span> With <span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 4\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>, <a href="#fig-dpdl-accounting" class="quarto-xref">Figure&nbsp;<span>14.1</span></a> shows the two accountings of the same algorithm. After <span class="math inline">\(100\)</span> epochs, or <span class="math inline">\(T = 10{,}000\)</span> steps, the composition route certifies <span class="math inline">\(\varepsilon = 22.08\)</span> and the moments accountant certifies <span class="math inline">\(\varepsilon = 1.26\)</span>. After <span class="math inline">\(400\)</span> epochs the values are <span class="math inline">\(61.41\)</span> and <span class="math inline">\(2.58\)</span>. The first is no guarantee at all, and the second is a reasonable one.</p>
+</div>
+<p>The analyses certify upper bounds, and later work tightened them further. How much room is left can be tested from the other side. Jagielski, Ullman and Oprea trained models with DP-SGD on datasets with and without a few deliberately poisoned records, and measured how well an attacker could tell the two apart. Their attacks achieve privacy losses that come close to the certified bounds in some settings, so the accounting is not far from the truth there. Last, a caution about neighbours: these analyses use add-or-remove neighbours, while this book uses replacement. A replacement is a removal followed by an addition, so a guarantee for one converts to the other at the cost of roughly doubling <span class="math inline">\(\varepsilon\)</span>.</p>
+</section>
+<section id="sec-dpdl-practice" class="level2" data-number="14.4">
+<h2 data-number="14.4" class="anchored" data-anchor-id="sec-dpdl-practice"><span class="header-section-number">14.4</span> DP-SGD in practice</h2>
+<p>DP-SGD is designed as a drop-in replacement for SGD, but its behaviour differs in several ways.</p>
+<p><strong>Accuracy.</strong> On the handwritten-digit benchmark MNIST, a well-tuned DP-SGD reached <span class="math inline">\(98.1\%\)</span> accuracy at <span class="math inline">\(\varepsilon = 2.93\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>, against about <span class="math inline">\(99.8\%\)</span> without privacy. On the harder image benchmark CIFAR-10, it reached <span class="math inline">\(66.2\%\)</span> at <span class="math inline">\(\varepsilon = 7.53\)</span>, far below non-private accuracy. Both results are from Papernot and coauthors, 2020. The first is respectable, and the second is weak in both accuracy and privacy.</p>
+<p><strong>Speed.</strong> Standard frameworks compute the gradient of a whole batch at once on parallel hardware, and never form the gradient of each record. DP-SGD needs every per-example gradient in order to clip it, and computing them one at a time loses the parallelism. One workaround is <strong>micro-batching</strong>: average the gradients over small groups of <span class="math inline">\(b\)</span> records, clip each group average, and add noise to their sum. One record changes one clipped group average by a vector of norm at most <span class="math inline">\(2C\)</span>, so the noise cannot be smaller than with per-example clipping. The signal, on the other hand, is now a sum of averages, and it shrinks by a factor of about <span class="math inline">\(b\)</span>. Faster training is paid for in accuracy. Other workarounds compute per-example gradients efficiently, using tricks with automatic differentiation or frameworks such as JAX with vectorized maps and just-in-time compilation.</p>
+<p><strong>Architecture.</strong> Bounded activations such as <span class="math inline">\(\tanh\)</span> work better than the rectified linear unit under DP-SGD, the opposite of the non-private experience. Size matters too. The noise vector <span class="math inline">\(b_t\)</span> has expected squared norm <span class="math inline">\(d\sigma^2C^2\)</span>, while the clipped sum has norm at most <span class="math inline">\(qnC\)</span>. So the ratio of signal to noise is at most about <span class="math inline">\(qn/(\sigma\sqrt d)\)</span>, and it falls as the number of parameters <span class="math inline">\(d\)</span> grows. Without privacy bigger networks are better, but under DP-SGD a network must be large enough to fit the task and no larger.</p>
+<p><strong>Hyperparameters.</strong> The learning rate, lot size, clipping norm and number of epochs must be tuned, and each training run on the private data spends privacy budget. Many reported results tune on the private data and do not count the cost, which overstates the privacy of the final model. A principled alternative is private selection, which picks the best of many private runs at a small constant factor in <span class="math inline">\(\varepsilon\)</span>, as shown by Liu and Talwar in 2019. A practical one is public data. One can tune hyperparameters on a public dataset that resembles the private one. One can also pretrain a network on public data, freeze most of its layers, and train only the last layers privately. Fewer trained parameters mean a smaller <span class="math inline">\(d\)</span> and less noise. Abadi and coauthors pretrained on CIFAR-100, treated as public, and trained privately on CIFAR-10 in this way.</p>
+</section>
+<section id="sec-dpdl-pate" class="level2" data-number="14.5">
+<h2 data-number="14.5" class="anchored" data-anchor-id="sec-dpdl-pate"><span class="header-section-number">14.5</span> Private aggregation of teacher ensembles</h2>
+<p>DP-SGD modifies the inside of one training algorithm. Private aggregation of teacher ensembles (PATE) treats the learner as a black box, so any improvement in non-private learning carries over. The price is a different model of the data. Besides a sensitive labelled training set, PATE needs a supply of <strong>public unlabelled</strong> feature vectors, for example from users who agreed to share their data.</p>
+<p>PATE is an instance of <strong>sample and aggregate</strong>. The data is split into disjoint parts, a non-private algorithm runs on each part, and the answers are combined by a private aggregation. One record affects only one part, so the aggregation has low sensitivity. Here the parts train <span class="math inline">\(m\)</span> classifiers, the <strong>teachers</strong>, and the aggregation is a vote.</p>
+<p>The simplest task is one private prediction for a public feature vector <span class="math inline">\(x\)</span>. Each teacher votes for a label, and <span class="math inline">\(c_k\)</span> is the number of votes for label <span class="math inline">\(k\)</span>. The <strong>mode</strong> <span class="math inline">\(a\)</span> is the label with the most votes, the smallest one in case of a tie, and the <strong>gap</strong> <span class="math inline">\(\tau = c_a - \max_{k\ne a}c_k\)</span> measures how far the vote is from changing its winner.</p>
+<div id="def-dpdl-mode" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 14.5 (Private mode of the teachers)</strong></span> Let <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0, 1/2)\)</span>. Split the dataset into <span class="math inline">\(m\)</span> fixed disjoint parts by position, train one teacher on each, and collect their votes on <span class="math inline">\(x\)</span>. Draw <span class="math inline">\(Z \sim \mathrm{Lap}(2/\varepsilon)\)</span>. If</p>
+<p><span id="eq-auto-03privatedeeplearning-15"><span class="math display">\[
+\tau + Z &gt; t, \qquad t = 2 + \frac{2}{\varepsilon}\ln\frac{1}{2\delta},
+\tag{14.16}\]</span></span></p>
+<p>output the mode <span class="math inline">\(a\)</span>. Otherwise output a symbol <span class="math inline">\(\bot\)</span> for “no answer”, or a uniformly random label.</p>
+</div>
+<p>When the teachers agree, the mode is stable, and releasing it exactly costs little privacy. This is the propose-test-release idea of <a href="../part03-query-release/03-beyond-global-sensitivity.html">the chapter on beyond global sensitivity</a>: test privately that the data is far from a dataset with another answer, and if so, release the answer without noise. The private mode is that chapter’s stable mode applied to the votes, with the threshold lowered so that the failure probability is <span class="math inline">\(\delta\)</span> rather than <span class="math inline">\(\delta/2\)</span>.</p>
+<div id="thm-dpdl-mode" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 14.4</strong></span> The private mode is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP. The teachers’ training algorithm may be randomized, with coins independent of everything else.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Fix the teachers’ coins; a guarantee for every fixed choice of coins implies one for random coins. Neighbours differ in one record, which lies in one part, so at most one teacher’s vote changes. That moves one vote from one label to another, and changes each count by at most <span class="math inline">\(1\)</span>.</li>
+<li><em>The gap has sensitivity <span class="math inline">\(2\)</span>.</em> If the mode stays the same, both terms of <span class="math inline">\(\tau\)</span> change by at most <span class="math inline">\(1\)</span>. If the mode changes from <span class="math inline">\(a\)</span> on <span class="math inline">\(X\)</span> to <span class="math inline">\(a' \ne a\)</span> on <span class="math inline">\(X'\)</span>, then <span class="math inline">\(c_{a'} + 1 \ge c'_{a'} \ge c'_a \ge c_a - 1\)</span>, so <span class="math inline">\(\tau \le c_a - c_{a'} \le 2\)</span>, and likewise <span class="math inline">\(\tau' \le 2\)</span>. In both cases <span class="math inline">\(|\tau - \tau'| \le 2\)</span>. So, by the Laplace mechanism, the indicator that the test passes is <span class="math inline">\(\varepsilon\)</span>-DP.</li>
+<li><em>Same mode.</em> The output is a function of the test indicator and of the common mode, so it is <span class="math inline">\(\varepsilon\)</span>-DP by post-processing.</li>
+<li><em>Different modes.</em> By step 2, <span class="math inline">\(\tau \le 2\)</span>. The test then passes on <span class="math inline">\(X\)</span> with probability at most <span class="math inline">\(\Pr[Z &gt; t - 2] = \tfrac12 e^{-\varepsilon(t-2)/2} = \delta\)</span>. Outside that event the output is <span class="math inline">\(\bot\)</span>, so for every set <span class="math inline">\(T\)</span> of outputs, <span id="eq-auto-03privatedeeplearning-16"><span class="math display">\[
+\Pr[M(X)\in T] \le \Pr[M(X) = \bot]\,\mathbf 1[\bot\in T] + \delta \le e^\varepsilon\Pr[M(X') = \bot]\,\mathbf 1[\bot\in T] + \delta \le e^\varepsilon\Pr[M(X')\in T] + \delta,
+\tag{14.17}\]</span></span> where the middle step is the <span class="math inline">\(\varepsilon\)</span>-DP of the test from step 2. Replacing <span class="math inline">\(\bot\)</span> by a random label is post-processing.</li>
+</ol>
+</div>
+<p>The accuracy depends on how good the teachers are. Suppose the records are independent draws from a distribution. Then teachers trained on disjoint parts vote independently on a fixed <span class="math inline">\(x\)</span>.</p>
+<div id="prp-dpdl-mode-accuracy" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 14.1</strong></span> Let <span class="math inline">\(\beta \in (0,1)\)</span>. Suppose each teacher, independently, votes for the correct label <span class="math inline">\(y\)</span> of <span class="math inline">\(x\)</span> with probability at least <span class="math inline">\(3/4\)</span>. If</p>
+<p><span id="eq-auto-03privatedeeplearning-17"><span class="math display">\[
+m \ge \max\left(4t + \frac8\varepsilon\ln\frac1\beta,\ 32\ln\frac2\beta\right),
+\tag{14.18}\]</span></span></p>
+<p>then the private mode outputs <span class="math inline">\(y\)</span> with probability at least <span class="math inline">\(1 - \beta\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Let <span class="math inline">\(V\)</span> be the number of correct votes. Its mean is at least <span class="math inline">\(3m/4\)</span>, and Hoeffding’s inequality for independent indicators gives <span class="math inline">\(\Pr[V \le 5m/8] \le e^{-2m(1/8)^2} = e^{-m/32} \le \beta/2\)</span>.</li>
+<li>If <span class="math inline">\(V &gt; 5m/8\)</span>, then <span class="math inline">\(y\)</span> has a majority, so it is the mode, and every other label has at most <span class="math inline">\(m - V\)</span> votes. So <span class="math inline">\(\tau \ge 2V - m &gt; m/4\)</span>.</li>
+<li>The test then fails with probability <span class="math inline">\(\Pr[Z \le t - \tau] \le \tfrac12 e^{-\varepsilon(m/4 - t)/2}\)</span>, because <span class="math inline">\(m/4 &gt; t\)</span>. The first lower bound on <span class="math inline">\(m\)</span> makes this at most <span class="math inline">\(\beta/2\)</span>.</li>
+<li>A union bound over the two failure events gives the claim.</li>
+</ol>
+</div>
+<div id="exm-dpdl-teachers" class="theorem example">
+<p><span class="theorem-title"><strong>Example 14.2</strong></span> With <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span> and <span class="math inline">\(\beta = 0.01\)</span>, the threshold is <span class="math inline">\(t = 2 + 2\ln(50{,}000) = 23.64\)</span>. The two lower bounds are <span class="math inline">\(94.56 + 8\ln 100 = 131.4\)</span> and <span class="math inline">\(32\ln 200 = 169.5\)</span>, so <span class="math inline">\(170\)</span> teachers suffice. If a teacher needs <span class="math inline">\(n_0\)</span> records to be right three times in four, the private prediction needs <span class="math inline">\(170\,n_0\)</span>.</p>
+</div>
+<p>The required number of teachers grows like <span class="math inline">\(\ln(1/\delta)/\varepsilon\)</span>. This is the general price of sample and aggregate: about <span class="math inline">\(1/\varepsilon\)</span> times more data than the non-private algorithm, which is often more than the best private algorithm for a specific task needs.</p>
+<p>Answering <span class="math inline">\(k\)</span> queries by running the private mode <span class="math inline">\(k\)</span> times costs, by advanced composition, about <span class="math inline">\(\varepsilon\sqrt{2k\ln(1/\delta')}\)</span>. The sparse vector technique of <a href="../part03-query-release/02-sparse-vector.html">the sparse vector chapter</a> does better when most queries are stable. It answers a stream of threshold queries, and pays only for the queries whose answer is above the threshold. Here each query asks whether the gap on the next point is small, so the technique pays only for the unstable points, where it outputs a random label, and answers the stable ones with the exact mode. If the teachers are accurate, few points are unstable. Bassily, Thakkar and Thakurta prove this version, with a privacy cost that grows like the square root of the number of unstable queries rather than of all <span class="math inline">\(k\)</span>.</p>
+<p>The privately labelled points then serve a further purpose. The answers <span class="math inline">\((x_1,\hat y_1), \dots, (x_k,\hat y_k)\)</span>, with public features and private labels, form a labelled dataset that is safe to release. A non-private learner, the <strong>student</strong>, is trained on it. By post-processing, the student is as private as the labels: if the labelling is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP and the public features do not depend on the private data, the student is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP too. The student can then answer any number of queries at no further cost, which is how PATE turns a bounded number of private predictions into a private model.</p>
+</section>
+<section id="sec-dpdl-summary" class="level2" data-number="14.6">
+<h2 data-number="14.6" class="anchored" data-anchor-id="sec-dpdl-summary"><span class="header-section-number">14.6</span> Summary</h2>
+<div id="tbl-dpdl-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dpdl-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;14.1: The chapter’s results.
+</figcaption>
+<div aria-describedby="tbl-dpdl-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#lem-dpdl-clip" class="quarto-xref">Lemma&nbsp;<span>14.1</span></a></td>
+<td>one record changes the clipped sum by at most <span class="math inline">\(C\)</span>, or <span class="math inline">\(2C\)</span> under replacement</td>
+</tr>
+<tr class="even">
+<td><a href="#thm-dpdl-abadi" class="quarto-xref">Theorem&nbsp;<span>14.1</span></a></td>
+<td>DP-SGD is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP with <span class="math inline">\(\sigma = O\big(q\sqrt{T\ln(1/\delta)}/\varepsilon\big)\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-dpdl-convert" class="quarto-xref">Theorem&nbsp;<span>14.2</span></a></td>
+<td>a log-moment bound <span class="math inline">\(\alpha(\lambda)\)</span> gives <span class="math inline">\((\varepsilon, e^{\alpha(\lambda)-\lambda\varepsilon})\)</span>-DP</td>
+</tr>
+<tr class="even">
+<td><a href="#lem-dpdl-compose" class="quarto-xref">Lemma&nbsp;<span>14.2</span></a></td>
+<td>log-moments add up under adaptive composition</td>
+</tr>
+<tr class="odd">
+<td><a href="#lem-dpdl-gaussian" class="quarto-xref">Lemma&nbsp;<span>14.3</span></a></td>
+<td>the Gaussian mechanism has <span class="math inline">\(\alpha(\lambda) = \lambda(\lambda+1)\Delta^2/(2\sigma^2)\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#cor-dpdl-gaussian-composition" class="quarto-xref">Corollary&nbsp;<span>14.1</span></a></td>
+<td><span class="math inline">\(T\)</span> Gaussian steps give <span class="math inline">\(\varepsilon = T\rho + 2\sqrt{T\rho\ln(1/\delta)}\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-dpdl-sampled" class="quarto-xref">Theorem&nbsp;<span>14.3</span></a></td>
+<td>a sampled Gaussian step has <span class="math inline">\(\alpha(\lambda) \le \ln A_{\lambda+1}\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#eq-dpdl-accountant" class="quarto-xref">Equation&nbsp;<span>14.15</span></a></td>
+<td>the moments accountant for <span class="math inline">\(T\)</span> steps of DP-SGD</td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-dpdl-mode" class="quarto-xref">Theorem&nbsp;<span>14.4</span></a></td>
+<td>releasing the teachers’ mode when its noisy gap exceeds <span class="math inline">\(t\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP</td>
+</tr>
+<tr class="even">
+<td><a href="#prp-dpdl-mode-accuracy" class="quarto-xref">Proposition&nbsp;<span>14.1</span></a></td>
+<td><span class="math inline">\(O(\ln(1/\delta)/\varepsilon + \ln(1/\beta)/\varepsilon)\)</span> accurate teachers suffice</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-dpdl-notes" class="level2" data-number="14.7">
+<h2 data-number="14.7" class="anchored" data-anchor-id="sec-dpdl-notes"><span class="header-section-number">14.7</span> Notes</h2>
+<ul>
+<li>Martín Abadi, Andy Chu, Ian Goodfellow, H. Brendan McMahan, Ilya Mironov, Kunal Talwar and Li Zhang, “Deep Learning with Differential Privacy”, 2016. DP-SGD with clipping and Poisson sampling, the moments accountant, and pretraining on public data.</li>
+<li>Ilya Mironov, “Rényi Differential Privacy”, 2017. The privacy notion built on the moments of the privacy loss, and its composition and conversion rules.</li>
+<li>Ilya Mironov, Kunal Talwar and Li Zhang, “Rényi Differential Privacy of the Sampled Gaussian Mechanism”, 2019. The exact log-moments of the sampled Gaussian, <a href="#thm-dpdl-sampled" class="quarto-xref">Theorem&nbsp;<span>14.3</span></a>.</li>
+<li>Yu-Xiang Wang, Borja Balle and Shiva Kasiviswanathan, “Subsampled Rényi Differential Privacy and Analytical Moments Accountant”, 2019. Log-moment bounds for subsampled mechanisms under sampling without replacement.</li>
+<li>Borja Balle, Gilles Barthe and Marco Gaboardi, “Privacy Amplification by Subsampling: Tight Analyses via Couplings and Divergences”, 2018. Amplification by Poisson sampling, used in <a href="#fig-dpdl-accounting" class="quarto-xref">Figure&nbsp;<span>14.1</span></a>.</li>
+<li>Matthew Jagielski, Jonathan Ullman and Alina Oprea, “Auditing Differentially Private Machine Learning: How Private is Private SGD?”, 2020. Attacks that bound from below the privacy of DP-SGD.</li>
+<li>Nicolas Papernot, Abhradeep Thakurta, Shuang Song, Steve Chien and Úlfar Erlingsson, “Tempered Sigmoid Activations for Deep Learning with Differential Privacy”, 2020. Bounded activations under DP-SGD, and the accuracy figures quoted above.</li>
+<li>Ian Goodfellow, “Efficient Per-Example Gradient Computations”, 2015. A trick for per-example gradients in simple networks.</li>
+<li>Jingcheng Liu and Kunal Talwar, “Private Selection from Private Candidates”, 2019. Hyperparameter selection at a constant factor in privacy.</li>
+<li>Kobbi Nissim, Sofya Raskhodnikova and Adam Smith, “Smooth Sensitivity and Sampling in Private Data Analysis”, 2007. The sample and aggregate framework.</li>
+<li>Nicolas Papernot, Martín Abadi, Úlfar Erlingsson, Ian Goodfellow and Kunal Talwar, “Semi-Supervised Knowledge Transfer for Deep Learning from Private Training Data”, 2017, and Nicolas Papernot, Shuang Song, Ilya Mironov, Ananth Raghunathan, Kunal Talwar and Úlfar Erlingsson, “Scalable Private Learning with PATE”, 2018. The PATE framework and its refinements.</li>
+<li>Raef Bassily, Om Thakkar and Abhradeep Thakurta, “Model-Agnostic Private Learning”, 2018. The analysis of PATE with the sparse vector technique.</li>
+<li>Abhradeep Thakurta and Adam Smith, “Differentially Private Feature Selection via Stability Arguments, and the Robustness of the Lasso”, 2013. Stability-based release of a stable answer, as in <a href="#thm-dpdl-mode" class="quarto-xref">Theorem&nbsp;<span>14.4</span></a>.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part04-learning-statistics/02-private-erm.html" class="pagination-link" aria-label="Private Empirical Risk Minimization">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part04-learning-statistics/04-mean-estimation.html" class="pagination-link" aria-label="Private Mean Estimation">
+        <span class="nav-page-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Private Mean Estimation</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

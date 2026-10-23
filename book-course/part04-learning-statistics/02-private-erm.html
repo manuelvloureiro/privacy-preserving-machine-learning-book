@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>13&nbsp; Private Empirical Risk Minimization – A Course in Differential Privacy</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part04-learning-statistics/03-private-deep-learning.html" rel="next">
+<link href="../part04-learning-statistics/01-privacy-violations.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-learning-statistics/00-introduction.html">Private Learning and Statistics</a></li><li class="breadcrumb-item"><a href="../part04-learning-statistics/02-private-erm.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">A Course in Differential Privacy</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-privacy-failures/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy Failures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/01-attempts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Attempts at Data Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/02-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Reconstruction Attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-dp-basics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Basics of Differential Privacy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/01-randomized-response.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/02-laplace-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/03-approximate-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/04-advanced-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/05-exponential-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Exponential Mechanism</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-query-release/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query Release and Its Limits</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/01-multiplicative-weights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Private Multiplicative Weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/02-sparse-vector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sparse Vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/03-beyond-global-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/04-packing-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Packing Lower Bounds</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-learning-statistics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Private Learning and Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/01-privacy-violations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What Differential Privacy Protects</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/02-private-erm.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/03-private-deep-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/04-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Private Mean Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/05-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Adaptive Data Analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-deployments/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deployments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/01-local-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Local Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/02-shuffle-and-central-deployments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-erm-setup" id="toc-sec-erm-setup" class="nav-link active" data-scroll-target="#sec-erm-setup"><span class="header-section-number">13.1</span> Empirical risk minimization</a></li>
+  <li><a href="#sec-erm-nonprivate" id="toc-sec-erm-nonprivate" class="nav-link" data-scroll-target="#sec-erm-nonprivate"><span class="header-section-number">13.2</span> Why the minimizer is not private</a></li>
+  <li><a href="#sec-erm-output" id="toc-sec-erm-output" class="nav-link" data-scroll-target="#sec-erm-output"><span class="header-section-number">13.3</span> Output perturbation</a></li>
+  <li><a href="#sec-erm-objective" id="toc-sec-erm-objective" class="nav-link" data-scroll-target="#sec-erm-objective"><span class="header-section-number">13.4</span> Objective perturbation</a></li>
+  <li><a href="#sec-erm-gradient" id="toc-sec-erm-gradient" class="nav-link" data-scroll-target="#sec-erm-gradient"><span class="header-section-number">13.5</span> Gradient perturbation</a></li>
+  <li><a href="#sec-erm-summary" id="toc-sec-erm-summary" class="nav-link" data-scroll-target="#sec-erm-summary"><span class="header-section-number">13.6</span> Summary</a></li>
+  <li><a href="#sec-erm-notes" id="toc-sec-erm-notes" class="nav-link" data-scroll-target="#sec-erm-notes"><span class="header-section-number">13.7</span> Notes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-learning-statistics/00-introduction.html">Private Learning and Statistics</a></li><li class="breadcrumb-item"><a href="../part04-learning-statistics/02-private-erm.html"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Most of machine learning fits a model by minimizing its average loss on a training set. This chapter asks how to do that under differential privacy (DP) when the loss is convex. Noise can enter at three places: in the output of a non-private solver, in the objective that the solver minimizes, or in each step of gradient descent. The chapter proves a privacy guarantee for each, and an accuracy guarantee for the third, which is the method that the next chapter scales to neural networks.</p>
+<section id="sec-erm-setup" class="level2" data-number="13.1">
+<h2 data-number="13.1" class="anchored" data-anchor-id="sec-erm-setup"><span class="header-section-number">13.1</span> Empirical risk minimization</h2>
+<p>Each record <span class="math inline">\(z = (x, y)\)</span> is a pair of a feature vector <span class="math inline">\(x\)</span> and a label <span class="math inline">\(y\)</span>. The dataset <span class="math inline">\(X = (z_1, \dots, z_n)\)</span> holds <span class="math inline">\(n\)</span> records.</p>
+<p>A model is described by a parameter vector <span class="math inline">\(\theta\)</span> in <span class="math inline">\(\mathbb R^d\)</span>. A <strong>loss function</strong> <span class="math inline">\(\ell(\theta; z)\)</span> measures how badly the model <span class="math inline">\(\theta\)</span> fits the record <span class="math inline">\(z\)</span>.</p>
+<div id="def-erm-erm" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 13.1 (Empirical risk minimization)</strong></span> Let <span class="math inline">\(C \subseteq \mathbb R^d\)</span> be a nonempty, closed, convex set of allowed parameters. The empirical risk of <span class="math inline">\(\theta\)</span> on <span class="math inline">\(X\)</span> is the total loss</p>
+<p><span id="eq-auto-02privateerm-1"><span class="math display">\[
+\mathcal L(\theta; X) = \sum_{i=1}^n \ell(\theta; z_i),
+\tag{13.1}\]</span></span></p>
+<p>and <span class="math inline">\(\theta^* \in C\)</span> denotes a minimizer of <span class="math inline">\(\mathcal L(\cdot\,; X)\)</span> over <span class="math inline">\(C\)</span>. An algorithm that outputs <span class="math inline">\(\hat\theta \in C\)</span> has <strong>excess empirical risk</strong> <span class="math inline">\(\mathbb E[\mathcal L(\hat\theta; X)] - \mathcal L(\theta^*; X)\)</span>, where the expectation is over the algorithm’s coins only. The dataset is fixed.</p>
+</div>
+<p>The problem is called empirical risk minimization (ERM). In practice one cares about the loss on new data from the same distribution, which is <strong>generalization</strong>. Where a uniform convergence argument applies, a good empirical minimizer also generalizes, so this chapter studies the empirical problem only. A model <span class="math inline">\(\theta\)</span> comes with a predictor, such as <span class="math inline">\(x \mapsto \langle x, \theta\rangle\)</span> for linear regression, which the chapter does not need.</p>
+<p>In this generality the problem is hopeless, so three assumptions are made throughout. They use the following terms.</p>
+<div id="def-erm-convex" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 13.2 (Diameter, convexity, Lipschitz continuity)</strong></span> &nbsp;</p>
+<ul>
+<li>The <strong>diameter</strong> of <span class="math inline">\(C\)</span> is <span class="math inline">\(\|C\|_2 = \sup_{\theta, \theta' \in C}\|\theta - \theta'\|_2\)</span>.</li>
+<li>A function <span class="math inline">\(f\)</span> on a convex set <span class="math inline">\(K\)</span> is <strong>convex</strong> if <span class="math inline">\(f(t\theta + (1-t)\theta') \le t f(\theta) + (1-t)f(\theta')\)</span> for all <span class="math inline">\(\theta, \theta' \in K\)</span> and <span class="math inline">\(t \in [0,1]\)</span>.</li>
+<li>A function <span class="math inline">\(f\)</span> on <span class="math inline">\(K\)</span> is <strong><span class="math inline">\(L\)</span>-Lipschitz</strong> if <span class="math inline">\(|f(\theta) - f(\theta')| \le L\|\theta - \theta'\|_2\)</span> for all <span class="math inline">\(\theta, \theta' \in K\)</span>.</li>
+<li>A vector <span class="math inline">\(g\)</span> is a <strong>subgradient</strong> of a convex <span class="math inline">\(f\)</span> at <span class="math inline">\(\theta\)</span> if <span class="math inline">\(f(\theta') \ge f(\theta) + \langle g, \theta' - \theta\rangle\)</span> for all <span class="math inline">\(\theta'\)</span>. Where <span class="math inline">\(f\)</span> is differentiable, its gradient <span class="math inline">\(\nabla f(\theta)\)</span>, the vector of partial derivatives, is the only subgradient.</li>
+</ul>
+</div>
+<p>The assumptions are that <span class="math inline">\(C\)</span> has finite diameter, and that for every record <span class="math inline">\(z\)</span> the loss <span class="math inline">\(\theta \mapsto \ell(\theta; z)\)</span> is convex and <span class="math inline">\(L\)</span>-Lipschitz on <span class="math inline">\(\mathbb R^d\)</span>. A convex function that is finite on all of <span class="math inline">\(\mathbb R^d\)</span> has a subgradient at every point, and we write <span class="math inline">\(\nabla\ell(\theta; z)\)</span> for a gradient, or a subgradient where <span class="math inline">\(\ell\)</span> is not differentiable. Lipschitz continuity matters to privacy because it bounds every gradient, and so the effect of one record on a gradient step.</p>
+<div id="lem-erm-gradient" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 13.1</strong></span> If a convex function <span class="math inline">\(f\)</span> is <span class="math inline">\(L\)</span>-Lipschitz on <span class="math inline">\(\mathbb R^d\)</span>, then every subgradient <span class="math inline">\(g\)</span> of <span class="math inline">\(f\)</span> satisfies <span class="math inline">\(\|g\|_2 \le L\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Suppose <span class="math inline">\(g \ne 0\)</span>, take any point <span class="math inline">\(\theta\)</span>, and set <span class="math inline">\(u = g/\|g\|_2\)</span>. The definition of a subgradient at <span class="math inline">\(\theta' = \theta + u\)</span> gives <span class="math inline">\(f(\theta + u) - f(\theta) \ge \langle g, u\rangle = \|g\|_2\)</span>.</li>
+<li>The Lipschitz condition gives <span class="math inline">\(f(\theta+u) - f(\theta) \le L\|u\|_2 = L\)</span>. Together, <span class="math inline">\(\|g\|_2 \le L\)</span>.</li>
+</ol>
+</div>
+<div id="exm-erm-losses" class="theorem example">
+<p><span class="theorem-title"><strong>Example 13.1 (Common losses)</strong></span> Take <span class="math inline">\(x, \theta \in \mathbb R^d\)</span>.</p>
+<ul>
+<li><strong>Linear regression</strong>, <span class="math inline">\(y \in \mathbb R\)</span>: the squared loss <span class="math inline">\(\ell(\theta; x, y) = (\langle x, \theta\rangle - y)^2\)</span>. It is convex, and Lipschitz only on bounded sets.</li>
+<li><strong>Logistic regression</strong>, <span class="math inline">\(y \in \{-1, 1\}\)</span>: <span class="math inline">\(\ell(\theta; x, y) = \ln\big(1 + e^{-y\langle x, \theta\rangle}\big)\)</span>. Its gradient is <span class="math inline">\(-y\,x/(1 + e^{y\langle x,\theta\rangle})\)</span>, of norm at most <span class="math inline">\(\|x\|_2\)</span>, so it is <span class="math inline">\(\|x\|_2\)</span>-Lipschitz.</li>
+<li><strong>Geometric median</strong>, no label: <span class="math inline">\(\ell(\theta; x) = \|\theta - x\|_2\)</span>. By the triangle inequality it is <span class="math inline">\(1\)</span>-Lipschitz. In one dimension it is <span class="math inline">\(|\theta - x|\)</span>, and its minimizer is the median. The squared version <span class="math inline">\(\|\theta - x\|_2^2\)</span> is minimized by the mean.</li>
+<li><strong>Support vector machine (SVM)</strong>, <span class="math inline">\(y \in \{-1, 1\}\)</span>: the hinge loss <span class="math inline">\(\ell(\theta; x, y) = \max(0, 1 - y\langle x, \theta\rangle)\)</span>. It is a maximum of two functions that are linear in <span class="math inline">\(\theta\)</span>, so it is convex and <span class="math inline">\(\|x\|_2\)</span>-Lipschitz.</li>
+</ul>
+</div>
+<p>Other assumptions, such as strong convexity of the loss or smoothness, give faster rates, but they are not needed here. The non-private problem is a convex optimization problem, and until <a href="#sec-erm-gradient" class="quarto-xref"><span>Section 13.5</span></a> we treat the solver as a black box.</p>
+</section>
+<section id="sec-erm-nonprivate" class="level2" data-number="13.2">
+<h2 data-number="13.2" class="anchored" data-anchor-id="sec-erm-nonprivate"><span class="header-section-number">13.2</span> Why the minimizer is not private</h2>
+<p>Releasing an exact minimizer can reveal records outright. The median is the simplest case.</p>
+<div id="prp-erm-median" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 13.1</strong></span> Let <span class="math inline">\(d = 1\)</span>, <span class="math inline">\(\ell(\theta; x) = |\theta - x|\)</span>, records in <span class="math inline">\([-R, R]\)</span> with <span class="math inline">\(R &gt; 0\)</span>, <span class="math inline">\(C = [-R, R]\)</span>, and <span class="math inline">\(n\)</span> odd. Then the empirical risk has a unique minimizer, the median <span class="math inline">\(x_{(m)}\)</span> with <span class="math inline">\(m = (n+1)/2\)</span>, where <span class="math inline">\(x_{(1)} \le \dots \le x_{(n)}\)</span> are the sorted records. The algorithm that outputs it is not <span class="math inline">\((\varepsilon,\delta)\)</span>-DP for any <span class="math inline">\(\varepsilon\)</span> and any <span class="math inline">\(\delta &lt; 1\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Away from the records, the function <span class="math inline">\(\theta \mapsto \sum_i |\theta - x_i|\)</span> has slope equal to the number of records below <span class="math inline">\(\theta\)</span> minus the number above. For <span class="math inline">\(\theta &lt; x_{(m)}\)</span> at least <span class="math inline">\(m\)</span> records lie above, so the slope is at most <span class="math inline">\((m-1) - m = -1\)</span>. For <span class="math inline">\(\theta &gt; x_{(m)}\)</span> the slope is at least <span class="math inline">\(1\)</span> in the same way. The function is continuous, so <span class="math inline">\(x_{(m)}\)</span> is its unique minimizer.</li>
+<li>On the dataset with every record equal to <span class="math inline">\(-R\)</span> the output is <span class="math inline">\(-R\)</span>, and on the dataset with every record equal to <span class="math inline">\(R\)</span> it is <span class="math inline">\(R\)</span>. A path of <span class="math inline">\(n\)</span> replacements joins the two datasets, so some neighbours <span class="math inline">\(X \sim X'\)</span> have different outputs <span class="math inline">\(v \ne v'\)</span>.</li>
+<li>The algorithm is deterministic. For the event <span class="math inline">\(T = \{v\}\)</span> this gives <span class="math inline">\(\Pr[M(X) \in T] = 1\)</span> and <span class="math inline">\(\Pr[M(X') \in T] = 0\)</span>, and <span class="math inline">\(1 \le e^\varepsilon \cdot 0 + \delta\)</span> fails for every <span class="math inline">\(\delta &lt; 1\)</span>.</li>
+</ol>
+</div>
+<p>The same happens for support vector machines. With separable data, the solution of maximum margin is a combination of the few records closest to the separating hyperplane, the <strong>support vectors</strong>. One added record close to that hyperplane becomes a support vector and can move the solution far.</p>
+<p>One way out is <strong>input perturbation</strong>: privatize each record, then run any non-private algorithm, which is private by post-processing. Randomizing each record separately is local differential privacy, which needs far more data for the same accuracy, so we do not pursue it. The three methods below add noise after the data has been pooled.</p>
+</section>
+<section id="sec-erm-output" class="level2" data-number="13.3">
+<h2 data-number="13.3" class="anchored" data-anchor-id="sec-erm-output"><span class="header-section-number">13.3</span> Output perturbation</h2>
+<p>The obvious method computes the minimizer and adds noise scaled to its sensitivity. As <a href="#prp-erm-median" class="quarto-xref">Proposition&nbsp;<span>13.1</span></a> shows, the minimizer itself can have large sensitivity, and the fix is regularization.</p>
+<p>Polynomial regression shows the problem. With records <span class="math inline">\((x_i, y_i) \in \mathbb R^2\)</span> and the squared loss <span class="math inline">\(\ell(\theta; x, y) = \big(\sum_{j=0}^{k}\theta_j x^j - y\big)^2\)</span>, the model is a polynomial of degree <span class="math inline">\(k\)</span>. If the degree is not known in advance and is set as high as <span class="math inline">\(k = n - 1\)</span>, then for distinct features the minimizer passes through every point. Its excess risk is zero, but it fits new data poorly and swings wildly when one point moves. These are two views of the same instability, as the left panel of <a href="#fig-erm-regularization" class="quarto-xref">Figure&nbsp;<span>13.1</span></a> shows.</p>
+<p><strong>Regularization</strong> adds a penalty that favours simple models. For a function <span class="math inline">\(N\)</span> of the parameters alone, called the <strong>regularizer</strong>, and a weight <span class="math inline">\(\lambda &gt; 0\)</span>, the regularized objective is</p>
+<p><span id="eq-auto-02privateerm-2"><span class="math display">\[
+F_X(\theta) = \mathcal L(\theta; X) + \lambda N(\theta).
+\tag{13.2}\]</span></span></p>
+<p>At <span class="math inline">\(\lambda = 0\)</span> there is no regularization, and as <span class="math inline">\(\lambda \to \infty\)</span> the data is ignored. The usual choice is <span class="math inline">\(N(\theta) = \tfrac12\|\theta\|_2^2\)</span>. Its effect on sensitivity follows from strong convexity.</p>
+<div id="def-erm-strong" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 13.3 (Strong convexity)</strong></span> For <span class="math inline">\(\mu &gt; 0\)</span>, a function <span class="math inline">\(f\)</span> on a convex set <span class="math inline">\(K\)</span> is <strong><span class="math inline">\(\mu\)</span>-strongly convex</strong> if, for all <span class="math inline">\(\theta, \theta' \in K\)</span> and <span class="math inline">\(t \in [0,1]\)</span>,</p>
+<p><span id="eq-auto-02privateerm-3"><span class="math display">\[
+f(t\theta + (1-t)\theta') \le t f(\theta) + (1-t) f(\theta') - \frac\mu2\, t(1-t)\,\|\theta - \theta'\|_2^2 .
+\tag{13.3}\]</span></span></p>
+</div>
+<p>The function <span class="math inline">\(\tfrac12\|\theta\|_2^2\)</span> is <span class="math inline">\(1\)</span>-strongly convex, with equality, by the identity <span class="math inline">\(t\|a\|^2 + (1-t)\|b\|^2 - \|ta + (1-t)b\|^2 = t(1-t)\|a - b\|^2\)</span>. A <span class="math inline">\(\mu\)</span>-strongly convex function plus a convex function is <span class="math inline">\(\mu\)</span>-strongly convex. A strongly convex function grows at least quadratically away from its minimizer.</p>
+<div id="lem-erm-growth" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 13.2</strong></span> Let <span class="math inline">\(f\)</span> be <span class="math inline">\(\mu\)</span>-strongly convex on a convex set <span class="math inline">\(K\)</span>, with a minimizer <span class="math inline">\(\hat\theta\)</span> over <span class="math inline">\(K\)</span>. Then for every <span class="math inline">\(\theta \in K\)</span>,</p>
+<p><span id="eq-auto-02privateerm-4"><span class="math display">\[
+f(\theta) - f(\hat\theta) \ge \frac\mu2\|\theta - \hat\theta\|_2^2 .
+\tag{13.4}\]</span></span></p>
+<p>In particular, the minimizer is unique.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>For <span class="math inline">\(t \in (0, 1)\)</span>, the point <span class="math inline">\(\hat\theta + t(\theta - \hat\theta)\)</span> lies in <span class="math inline">\(K\)</span>, so its value is at least <span class="math inline">\(f(\hat\theta)\)</span>.</li>
+<li>Strong convexity, applied with weight <span class="math inline">\(t\)</span> on <span class="math inline">\(\theta\)</span>, bounds that value by <span class="math inline">\(t f(\theta) + (1-t) f(\hat\theta) - \frac\mu2 t(1-t)\|\theta - \hat\theta\|_2^2\)</span>.</li>
+<li>Combining the two and dividing by <span class="math inline">\(t\)</span> gives <span class="math inline">\(f(\theta) - f(\hat\theta) \ge \frac\mu2(1-t)\|\theta - \hat\theta\|_2^2\)</span>. Letting <span class="math inline">\(t \to 0\)</span> gives the claim.</li>
+<li>A second minimizer <span class="math inline">\(\theta\)</span> would have <span class="math inline">\(f(\theta) - f(\hat\theta) = 0\)</span>, which forces <span class="math inline">\(\theta = \hat\theta\)</span>.</li>
+</ol>
+</div>
+<div id="thm-erm-sensitivity" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 13.1 (Sensitivity of the regularized minimizer)</strong></span> Let <span class="math inline">\(C\)</span> be nonempty, closed, convex and bounded. Suppose that for every record <span class="math inline">\(z\)</span> the loss <span class="math inline">\(\ell(\cdot\,; z)\)</span> is convex and <span class="math inline">\(L\)</span>-Lipschitz on <span class="math inline">\(C\)</span>, and that <span class="math inline">\(N\)</span> is continuous and <span class="math inline">\(1\)</span>-strongly convex. For each dataset <span class="math inline">\(X\)</span>, let <span class="math inline">\(\theta_X\)</span> be the minimizer of <span class="math inline">\(F_X = \mathcal L(\cdot\,; X) + \lambda N\)</span> over <span class="math inline">\(C\)</span>. Then for all neighbours <span class="math inline">\(X \sim X'\)</span>,</p>
+<p><span id="eq-auto-02privateerm-5"><span class="math display">\[
+\|\theta_X - \theta_{X'}\|_2 \le \frac{2L}{\lambda}.
+\tag{13.5}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><span class="math inline">\(F_X\)</span> is continuous on the closed bounded set <span class="math inline">\(C\)</span>, so it has a minimizer, and it is <span class="math inline">\(\lambda\)</span>-strongly convex, so the minimizer is unique by <a href="#lem-erm-growth" class="quarto-xref">Lemma&nbsp;<span>13.2</span></a>. The same holds for <span class="math inline">\(F_{X'}\)</span>.</li>
+<li>Write <span class="math inline">\(\theta = \theta_X\)</span> and <span class="math inline">\(\theta' = \theta_{X'}\)</span>. <a href="#lem-erm-growth" class="quarto-xref">Lemma&nbsp;<span>13.2</span></a> applied to each function gives <span id="eq-auto-02privateerm-6"><span class="math display">\[
+F_X(\theta') - F_X(\theta) \ge \frac\lambda2\|\theta - \theta'\|_2^2, \qquad F_{X'}(\theta) - F_{X'}(\theta') \ge \frac\lambda2\|\theta - \theta'\|_2^2 .
+\tag{13.6}\]</span></span></li>
+<li>Add the two inequalities. The left side becomes <span class="math inline">\(h(\theta') - h(\theta)\)</span>, where <span class="math inline">\(h = F_X - F_{X'}\)</span>, and the right side becomes <span class="math inline">\(\lambda\|\theta - \theta'\|_2^2\)</span>.</li>
+<li>If <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> differ in record <span class="math inline">\(j\)</span>, then <span class="math inline">\(h(\cdot) = \ell(\cdot\,; z_j) - \ell(\cdot\,; z'_j)\)</span> is a difference of two <span class="math inline">\(L\)</span>-Lipschitz functions, so <span class="math inline">\(h(\theta') - h(\theta) \le 2L\|\theta - \theta'\|_2\)</span>.</li>
+<li>So <span class="math inline">\(\lambda\|\theta - \theta'\|_2^2 \le 2L\|\theta - \theta'\|_2\)</span>, and dividing by <span class="math inline">\(\lambda\|\theta - \theta'\|_2\)</span> gives the claim. If <span class="math inline">\(\theta = \theta'\)</span>, there is nothing to prove.</li>
+</ol>
+</div>
+<p>The bound depends on neither <span class="math inline">\(n\)</span> nor the dimension. With it, the Gaussian mechanism of <a href="../part02-dp-basics/03-approximate-dp.html">the approximate DP chapter</a> finishes the job. Take a function whose <span class="math inline">\(\ell_2\)</span> sensitivity, the largest change in Euclidean norm between neighbours, is some <span class="math inline">\(\Delta\)</span>. The mechanism adds Gaussian noise <span class="math inline">\(\mathcal N(0, \sigma^2 I_d)\)</span> with standard deviation <span class="math inline">\(\sigma\)</span> in each coordinate. For every <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span> it is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, the relaxation that allows an additive slack <span class="math inline">\(\delta\)</span>, when</p>
+<p><span id="eq-auto-02privateerm-7"><span class="math display">\[
+\sigma = \frac{\Delta}{\varepsilon}\sqrt{2\ln(1/\delta) + \varepsilon}.
+\tag{13.7}\]</span></span></p>
+<div id="thm-erm-output" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 13.2 (Output perturbation)</strong></span> Under the assumptions of <a href="#thm-erm-sensitivity" class="quarto-xref">Theorem&nbsp;<span>13.1</span></a>, let <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>. The algorithm that outputs <span class="math inline">\(\hat\theta = \theta_X + b\)</span>, with <span class="math inline">\(b \sim \mathcal N(0, \sigma^2 I_d)\)</span> and</p>
+<p><span id="eq-auto-02privateerm-8"><span class="math display">\[
+\sigma = \frac{2L}{\lambda}\cdot\frac{\sqrt{2\ln(1/\delta) + \varepsilon}}{\varepsilon},
+\tag{13.8}\]</span></span></p>
+<p>is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP. So is its projection onto <span class="math inline">\(C\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>The map <span class="math inline">\(X \mapsto \theta_X\)</span> has <span class="math inline">\(\ell_2\)</span> sensitivity at most <span class="math inline">\(2L/\lambda\)</span> by <a href="#thm-erm-sensitivity" class="quarto-xref">Theorem&nbsp;<span>13.1</span></a>, so the Gaussian mechanism gives the guarantee. The projection is post-processing.</p>
+</div>
+<div id="fig-erm-regularization" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-erm-regularization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/erm-regularization.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-erm-regularization-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13.1: Polynomials of degree <span class="math inline">\(9\)</span> fitted by least squares to <span class="math inline">\(10\)</span> points, on a dataset and on a neighbour in which one label is raised (the square). Without regularization, both fits pass through every point, and moving one point changes the curve over the whole interval. With the penalty <span class="math inline">\(\tfrac\lambda2\|\theta\|_2^2\)</span>, the fit no longer interpolates, and the two fits stay close.
+</figcaption>
+</figure>
+</div>
+<p>Output perturbation is simple and works with any exact solver. Its accuracy is often weak, because the regularization strength that privacy needs can be far from the one that fits the data best.</p>
+</section>
+<section id="sec-erm-objective" class="level2" data-number="13.4">
+<h2 data-number="13.4" class="anchored" data-anchor-id="sec-erm-objective"><span class="header-section-number">13.4</span> Objective perturbation</h2>
+<p>The second method adds noise to the objective instead of the output. It minimizes</p>
+<p><span id="eq-auto-02privateerm-9"><span class="math display">\[
+J_b(\theta) = \mathcal L(\theta; X) + \frac\lambda2\|\theta\|_2^2 + \langle b, \theta\rangle
+\tag{13.9}\]</span></span></p>
+<p>for a random vector <span class="math inline">\(b\)</span>, and releases the exact minimizer. The linear term rewards or penalizes each direction of the parameter space by a random amount. With <span class="math inline">\(b\)</span> Gaussian the result is approximately private. With <span class="math inline">\(b\)</span> drawn from a density proportional to <span class="math inline">\(e^{-c\|b\|_2}\)</span>, whose norm has a Gamma distribution, it is purely private.</p>
+<p>The proof below is for losses of <strong>generalized linear</strong> form, which covers logistic regression and smoothed versions of the hinge loss. Such a loss is <span class="math inline">\(\ell(\theta; x, y) = \phi(\langle x, \theta\rangle, y)\)</span>, where for each label <span class="math inline">\(y\)</span> the scalar function <span class="math inline">\(u \mapsto \phi(u, y)\)</span> is convex and twice continuously differentiable with derivatives <span class="math inline">\(|\phi'| \le L\)</span> and <span class="math inline">\(0 \le \phi'' \le \beta\)</span>. The features satisfy <span class="math inline">\(\|x\|_2 \le 1\)</span>. Then <span class="math inline">\(\nabla\ell = \phi'(\langle x,\theta\rangle, y)\,x\)</span> has norm at most <span class="math inline">\(L\)</span>, and the Hessian <span class="math inline">\(\nabla^2\ell = \phi''(\langle x,\theta\rangle, y)\,xx^\top\)</span> has rank at most one and eigenvalues in <span class="math inline">\([0, \beta]\)</span>. The proof also needs a criterion from <a href="../part02-dp-basics/03-approximate-dp.html">the approximate DP chapter</a>, stated in terms of the <strong>privacy loss</strong> <span class="math inline">\(\ln\big(p_X(\theta)/p_{X'}(\theta)\big)\)</span>, where <span class="math inline">\(p_X\)</span> is the density of the output on <span class="math inline">\(X\)</span>. If, for every ordered pair of neighbours, the privacy loss at an output drawn from <span class="math inline">\(M(X)\)</span> exceeds <span class="math inline">\(\varepsilon\)</span> with probability at most <span class="math inline">\(\delta\)</span>, then <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</p>
+<div id="thm-erm-objective" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 13.3 (Objective perturbation)</strong></span> Let <span class="math inline">\(C = \mathbb R^d\)</span> and let <span class="math inline">\(\ell\)</span> be a generalized linear loss as above. Let <span class="math inline">\(\varepsilon \in (0, 4]\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>, and set</p>
+<p><span id="eq-auto-02privateerm-10"><span class="math display">\[
+\lambda \ge \frac{\beta}{e^{\varepsilon/2} - 1}, \qquad \sigma = \frac{4L\big(1 + \sqrt{2\ln(1/\delta)}\big)}{\varepsilon}.
+\tag{13.10}\]</span></span></p>
+<p>Then the algorithm that draws <span class="math inline">\(b \sim \mathcal N(0, \sigma^2 I_d)\)</span> and outputs the exact minimizer <span class="math inline">\(\hat\theta\)</span> of <span class="math inline">\(J_b\)</span> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>The output as a function of the noise.</em> For each <span class="math inline">\(b\)</span>, the function <span class="math inline">\(J_b\)</span> is continuous and <span class="math inline">\(\lambda\)</span>-strongly convex on <span class="math inline">\(\mathbb R^d\)</span>, so it has a unique minimizer, where its gradient vanishes. So <span class="math inline">\(\hat\theta = \theta\)</span> exactly when <span class="math inline">\(b = g_X(\theta)\)</span>, where <span class="math inline">\(g_X(\theta) = -\nabla\mathcal L(\theta; X) - \lambda\theta\)</span>. Every <span class="math inline">\(\theta\)</span> is the minimizer for the noise <span class="math inline">\(g_X(\theta)\)</span>, and each noise has one minimizer, so <span class="math inline">\(g_X\)</span> is a bijection of <span class="math inline">\(\mathbb R^d\)</span> and <span class="math inline">\(\hat\theta = g_X^{-1}(b)\)</span>.</li>
+<li><em>The density of the output.</em> The map <span class="math inline">\(g_X\)</span> is continuously differentiable with Jacobian <span class="math inline">\(-(H_X(\theta) + \lambda I)\)</span>, where <span class="math inline">\(H_X(\theta) = \sum_i \nabla^2\ell(\theta; z_i)\)</span> is positive semidefinite. By the change of variables formula, <span class="math inline">\(\hat\theta\)</span> has density <span id="eq-auto-02privateerm-11"><span class="math display">\[
+p_X(\theta) = \varphi_\sigma\big(g_X(\theta)\big)\,\det\big(H_X(\theta) + \lambda I\big),
+\tag{13.11}\]</span></span> where <span class="math inline">\(\varphi_\sigma\)</span> is the density of <span class="math inline">\(\mathcal N(0,\sigma^2 I_d)\)</span>.</li>
+<li><em>The determinants.</em> Let <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> differ in the last record, <span class="math inline">\(z = (x, y)\)</span> in <span class="math inline">\(X\)</span> and <span class="math inline">\(z' = (x', y')\)</span> in <span class="math inline">\(X'\)</span>. Fix <span class="math inline">\(\theta\)</span> and write <span class="math inline">\(A = \sum_{i&lt;n}\nabla^2\ell(\theta; z_i) + \lambda I\)</span>, which satisfies <span class="math inline">\(A \succeq \lambda I\)</span>. Then <span class="math inline">\(H_X + \lambda I = A + a\,xx^\top\)</span> with <span class="math inline">\(a = \phi''(\langle x,\theta\rangle, y) \in [0,\beta]\)</span>. The matrix determinant lemma gives <span id="eq-auto-02privateerm-12"><span class="math display">\[
+\det(A + a\,xx^\top) = \det(A)\,\big(1 + a\,x^\top A^{-1}x\big) \in \big[\det A,\ (1 + \beta/\lambda)\det A\big],
+\tag{13.12}\]</span></span> because <span class="math inline">\(0 \le x^\top A^{-1} x \le \|x\|_2^2/\lambda \le 1/\lambda\)</span>. The same holds for <span class="math inline">\(X'\)</span>. So the ratio of the two determinants is at most <span class="math inline">\(1 + \beta/\lambda \le e^{\varepsilon/2}\)</span>, by the choice of <span class="math inline">\(\lambda\)</span>.</li>
+<li><em>The Gaussian factors.</em> The two noise vectors that lead to <span class="math inline">\(\theta\)</span> differ by <span class="math inline">\(u = g_{X'}(\theta) - g_X(\theta) = \nabla\ell(\theta; z) - \nabla\ell(\theta; z')\)</span>. This vector has norm at most <span class="math inline">\(2L\)</span>, and it lies in the subspace <span class="math inline">\(V\)</span> spanned by <span class="math inline">\(x\)</span> and <span class="math inline">\(x'\)</span>, which does not depend on <span class="math inline">\(\theta\)</span>. With <span class="math inline">\(b = g_X(\theta)\)</span> and <span class="math inline">\(P_V\)</span> the orthogonal projection onto <span class="math inline">\(V\)</span>, <span id="eq-auto-02privateerm-13"><span class="math display">\[
+\ln\frac{\varphi_\sigma(b)}{\varphi_\sigma(b + u)} = \frac{2\langle b, u\rangle + \|u\|_2^2}{2\sigma^2} \le \frac{2L\,\|P_V b\|_2}{\sigma^2} + \frac{2L^2}{\sigma^2},
+\tag{13.13}\]</span></span> by the Cauchy–Schwarz inequality applied to <span class="math inline">\(\langle b, u\rangle = \langle P_V b, u\rangle\)</span>.</li>
+<li><em>The privacy loss.</em> When the output is drawn from <span class="math inline">\(M(X)\)</span>, the vector <span class="math inline">\(g_X(\hat\theta)\)</span> is the noise <span class="math inline">\(b\)</span> itself. Steps 2 to 4 bound the privacy loss at the output by <span id="eq-auto-02privateerm-14"><span class="math display">\[
+\ln\frac{p_X(\hat\theta)}{p_{X'}(\hat\theta)} \le \frac\varepsilon2 + \frac{2L\,\|P_V b\|_2}{\sigma^2} + \frac{2L^2}{\sigma^2}.
+\tag{13.14}\]</span></span></li>
+<li><em>The tail.</em> The subspace <span class="math inline">\(V\)</span> has dimension <span class="math inline">\(k \le 2\)</span>, so <span class="math inline">\(\|P_V b\|_2^2/\sigma^2\)</span> is chi-squared with <span class="math inline">\(k\)</span> degrees of freedom. Its tail is at most that of two degrees of freedom, which is <span class="math inline">\(e^{-r/2}\)</span> beyond <span class="math inline">\(r\)</span>. Write <span class="math inline">\(s = \sqrt{2\ln(1/\delta)}\)</span> for the cut-off. Then <span id="eq-auto-02privateerm-15"><span class="math display">\[
+\Pr\big[\|P_V b\|_2 &gt; \sigma s\big] \le e^{-s^2/2} = \delta .
+\tag{13.15}\]</span></span></li>
+<li>Outside that event, substituting <span class="math inline">\(\sigma = 4L(1+s)/\varepsilon\)</span> into step 5 gives <span id="eq-auto-02privateerm-16"><span class="math display">\[
+\ln\frac{p_X(\hat\theta)}{p_{X'}(\hat\theta)} \le \frac\varepsilon2 + \frac\varepsilon2\left(\frac{s}{1+s} + \frac{\varepsilon}{4(1+s)^2}\right) \le \frac\varepsilon2 + \frac\varepsilon2\cdot\frac{s + 1}{1+s} = \varepsilon,
+\tag{13.16}\]</span></span> where the second step uses <span class="math inline">\(\varepsilon \le 4\)</span> and <span class="math inline">\(1/(1+s)^2 \le 1/(1+s)\)</span>.</li>
+<li>The privacy loss criterion turns this bound into <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</li>
+</ol>
+</div>
+<p>The constants come from this proof, and the original analyses obtain similar ones by the same change of variables. The theorem has a practical weakness: it holds only for the exact minimizer. A real solver never returns one. Floating-point arithmetic cannot represent most real numbers, and Mironov showed that even a naive floating-point implementation of the Laplace mechanism leaks the data through the low-order bits of its output. Iterative solvers such as gradient descent only approach the minimizer. Later versions of objective perturbation need only an approximate minimizer and perform well in practice for convex problems, and a version for non-convex losses keeps the privacy guarantee, though not the accuracy one.</p>
+</section>
+<section id="sec-erm-gradient" class="level2" data-number="13.5">
+<h2 data-number="13.5" class="anchored" data-anchor-id="sec-erm-gradient"><span class="header-section-number">13.5</span> Gradient perturbation</h2>
+<p>The third method, now the standard one, runs gradient descent and adds noise to each gradient. Its analysis starts from the non-private algorithm. Write <span class="math inline">\(\Pi_C(u) = \arg\min_{\theta\in C}\|\theta - u\|_2\)</span> for the <strong>projection</strong> onto <span class="math inline">\(C\)</span>, the closest point of <span class="math inline">\(C\)</span>, which exists and is unique because <span class="math inline">\(C\)</span> is closed and convex.</p>
+<div id="def-erm-sgd" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 13.4 (Projected stochastic gradient descent)</strong></span> Fix a start <span class="math inline">\(\theta_0 \in C\)</span>, a number of steps <span class="math inline">\(T\)</span> and a step size <span class="math inline">\(\eta &gt; 0\)</span>. For <span class="math inline">\(t = 1, \dots, T\)</span>, draw a random vector <span class="math inline">\(G_t\)</span> and set</p>
+<p><span id="eq-auto-02privateerm-17"><span class="math display">\[
+\theta_t = \Pi_C(\theta_{t-1} - \eta\,G_t).
+\tag{13.17}\]</span></span></p>
+<p>Output the average <span class="math inline">\(\bar\theta = \frac1T\sum_{t=0}^{T-1}\theta_t\)</span>. With <span class="math inline">\(G_t = \nabla\mathcal L(\theta_{t-1}; X)\)</span> this is projected <strong>gradient descent</strong>. With <span class="math inline">\(G_t = n\,\nabla\ell(\theta_{t-1}; z_{I_t})\)</span>, for an index <span class="math inline">\(I_t\)</span> drawn uniformly from <span class="math inline">\(\{1,\dots,n\}\)</span>, it is projected stochastic gradient descent (SGD).</p>
+</div>
+<p>A step moves against the gradient, the direction of steepest increase, and the projection brings a step that leaves <span class="math inline">\(C\)</span> back to the nearest allowed point. Projection never moves a point away from <span class="math inline">\(C\)</span>.</p>
+<div id="lem-erm-projection" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 13.3</strong></span> For every <span class="math inline">\(u \in \mathbb R^d\)</span> and every <span class="math inline">\(\theta \in C\)</span>, <span class="math inline">\(\|\Pi_C(u) - \theta\|_2 \le \|u - \theta\|_2\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Let <span class="math inline">\(q = \Pi_C(u)\)</span>. For <span class="math inline">\(t \in (0,1]\)</span> the point <span class="math inline">\(q + t(\theta - q)\)</span> is in <span class="math inline">\(C\)</span>, so it is no closer to <span class="math inline">\(u\)</span> than <span class="math inline">\(q\)</span>: <span class="math inline">\(\|u - q - t(\theta-q)\|^2 \ge \|u - q\|^2\)</span>. Expanding, dividing by <span class="math inline">\(t\)</span> and letting <span class="math inline">\(t \to 0\)</span> gives <span class="math inline">\(\langle u - q, \theta - q\rangle \le 0\)</span>.</li>
+<li>Then <span class="math inline">\(\|u - \theta\|^2 = \|u - q\|^2 + \|q - \theta\|^2 + 2\langle u - q, q - \theta\rangle \ge \|q - \theta\|^2\)</span>, because the last term is nonnegative by step 1.</li>
+</ol>
+</div>
+<p>The convergence theorem asks only that each <span class="math inline">\(G_t\)</span> be right on average and not too large.</p>
+<div id="thm-erm-sgd" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 13.4 (Convergence of projected SGD)</strong></span> Let <span class="math inline">\(F\)</span> be convex on <span class="math inline">\(\mathbb R^d\)</span>, and let <span class="math inline">\(\theta^*\)</span> minimize <span class="math inline">\(F\)</span> over <span class="math inline">\(C\)</span>. Suppose that, given <span class="math inline">\(\theta_0, \dots, \theta_{t-1}\)</span>, the conditional mean <span class="math inline">\(\mathbb E[G_t \mid \theta_0, \dots, \theta_{t-1}]\)</span> is a subgradient of <span class="math inline">\(F\)</span> at <span class="math inline">\(\theta_{t-1}\)</span>, and that <span class="math inline">\(\mathbb E\|G_t\|_2^2 \le G^2\)</span> for every <span class="math inline">\(t\)</span>. With step size <span class="math inline">\(\eta = \|C\|_2/(G\sqrt T)\)</span>,</p>
+<p><span id="eq-auto-02privateerm-18"><span class="math display">\[
+\mathbb E[F(\bar\theta)] - F(\theta^*) \le \frac{\|C\|_2\, G}{\sqrt T}.
+\tag{13.18}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>By <a href="#lem-erm-projection" class="quarto-xref">Lemma&nbsp;<span>13.3</span></a> with <span class="math inline">\(\theta = \theta^*\)</span>, <span id="eq-auto-02privateerm-19"><span class="math display">\[
+\|\theta_t - \theta^*\|^2 \le \|\theta_{t-1} - \eta G_t - \theta^*\|^2 = \|\theta_{t-1} - \theta^*\|^2 - 2\eta\langle G_t, \theta_{t-1} - \theta^*\rangle + \eta^2\|G_t\|^2 .
+\tag{13.19}\]</span></span></li>
+<li>Condition on the past and let <span class="math inline">\(g\)</span> be the conditional mean of <span class="math inline">\(G_t\)</span>, a subgradient at <span class="math inline">\(\theta_{t-1}\)</span>. The definition of a subgradient gives <span class="math inline">\(\langle g, \theta_{t-1} - \theta^*\rangle \ge F(\theta_{t-1}) - F(\theta^*)\)</span>. Taking expectations in step 1, <span id="eq-auto-02privateerm-20"><span class="math display">\[
+\mathbb E[F(\theta_{t-1})] - F(\theta^*) \le \frac{\mathbb E\|\theta_{t-1} - \theta^*\|^2 - \mathbb E\|\theta_t - \theta^*\|^2}{2\eta} + \frac{\eta G^2}{2}.
+\tag{13.20}\]</span></span></li>
+<li>Summing over <span class="math inline">\(t = 1, \dots, T\)</span>, the distances telescope. The first is at most <span class="math inline">\(\|C\|_2^2\)</span> and the last is nonnegative, so <span id="eq-auto-02privateerm-21"><span class="math display">\[
+\sum_{t=0}^{T-1}\big(\mathbb E[F(\theta_t)] - F(\theta^*)\big) \le \frac{\|C\|_2^2}{2\eta} + \frac{T\eta G^2}{2}.
+\tag{13.21}\]</span></span></li>
+<li>The average <span class="math inline">\(\bar\theta\)</span> lies in <span class="math inline">\(C\)</span>, and convexity gives <span class="math inline">\(F(\bar\theta) \le \frac1T\sum_t F(\theta_t)\)</span>. Dividing step 3 by <span class="math inline">\(T\)</span> and substituting <span class="math inline">\(\eta\)</span> makes both terms <span class="math inline">\(\|C\|_2 G/(2\sqrt T)\)</span>.</li>
+</ol>
+</div>
+<p>The theorem is stated for the average of the iterates. Shamir and Zhang proved that the last iterate <span class="math inline">\(\theta_T\)</span> does almost as well, with step sizes <span class="math inline">\(\eta_t = \|C\|_2/(G\sqrt t)\)</span>: its excess risk is at most <span class="math inline">\(2\|C\|_2 G(2 + \ln T)/\sqrt T\)</span>.</p>
+<div id="cor-erm-sgd" class="theorem corollary">
+<p><span class="theorem-title"><strong>Corollary 13.1</strong></span> Under the assumptions of the chapter, gradient descent and SGD both reach excess empirical risk at most <span class="math inline">\(\alpha\)</span> after <span class="math inline">\(T = \lceil n^2L^2\|C\|_2^2/\alpha^2\rceil\)</span> steps. Gradient descent evaluates <span class="math inline">\(nT\)</span> gradients of <span class="math inline">\(\ell\)</span>, and SGD evaluates <span class="math inline">\(T\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>For gradient descent, <span class="math inline">\(G_t = \sum_i\nabla\ell(\theta_{t-1}; z_i)\)</span> is a subgradient of <span class="math inline">\(\mathcal L\)</span>, and by <a href="#lem-erm-gradient" class="quarto-xref">Lemma&nbsp;<span>13.1</span></a> its norm is at most <span class="math inline">\(nL\)</span>.</li>
+<li>For SGD, the conditional mean of <span class="math inline">\(G_t = n\nabla\ell(\theta_{t-1}; z_{I_t})\)</span> is <span class="math inline">\(\frac1n\sum_i n\nabla\ell(\theta_{t-1}; z_i)\)</span>, the same subgradient. Its second moment is <span class="math inline">\(\frac1n\sum_i n^2\|\nabla\ell(\theta_{t-1}; z_i)\|^2 \le n^2L^2\)</span>.</li>
+<li>In both cases <span class="math inline">\(G = nL\)</span>, and <a href="#thm-erm-sgd" class="quarto-xref">Theorem&nbsp;<span>13.4</span></a> gives excess risk at most <span class="math inline">\(\|C\|_2 nL/\sqrt T \le \alpha\)</span>.</li>
+</ol>
+</div>
+<p>For a constant <span class="math inline">\(\alpha\)</span>, gradient descent costs about <span class="math inline">\(n^3\)</span> gradient evaluations and SGD about <span class="math inline">\(n^2\)</span>. SGD is also the easier one to make private, because each step touches one record, and the noise has only one natural place to go.</p>
+<div id="def-erm-noisy" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 13.5 (Private SGD)</strong></span> Let <span class="math inline">\(\varepsilon \in (0,1]\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>. Run projected SGD for <span class="math inline">\(T = n^2\)</span> steps with</p>
+<p><span id="eq-auto-02privateerm-22"><span class="math display">\[
+G_t = n\,\nabla\ell(\theta_{t-1}; z_{I_t}) + b_t, \qquad b_t \sim \mathcal N(0, \sigma^2 I_d), \qquad \sigma = \frac{16\,nL\sqrt{\ln(3.3n/\delta)\,\ln(2/\delta)}}{\varepsilon},
+\tag{13.22}\]</span></span></p>
+<p>with fresh, independent indices <span class="math inline">\(I_t\)</span> and noise <span class="math inline">\(b_t\)</span>, and step size <span class="math inline">\(\eta = \|C\|_2/(G\sqrt T)\)</span> where <span class="math inline">\(G^2 = n^2L^2 + d\sigma^2\)</span>.</p>
+</div>
+<p>Accuracy is the easier half, because the noise has mean zero and only enlarges the second moment.</p>
+<div id="thm-erm-noisy-utility" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 13.5</strong></span> Under the assumptions of the chapter, with <span class="math inline">\(\ell(\cdot\,;z)\)</span> convex and <span class="math inline">\(L\)</span>-Lipschitz on <span class="math inline">\(\mathbb R^d\)</span>, private SGD satisfies</p>
+<p><span id="eq-auto-02privateerm-23"><span class="math display">\[
+\mathbb E[\mathcal L(\bar\theta; X)] - \mathcal L(\theta^*; X) \le \|C\|_2\sqrt{L^2 + \frac{d\sigma^2}{n^2}} \le \|C\|_2\,L\left(1 + \frac{16\sqrt{d\,\ln(3.3n/\delta)\ln(2/\delta)}}{\varepsilon}\right).
+\tag{13.23}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Given the past, <span class="math inline">\(b_t\)</span> has mean zero and is independent of <span class="math inline">\(I_t\)</span>, so the conditional mean of <span class="math inline">\(G_t\)</span> is the subgradient of step 2 of <a href="#cor-erm-sgd" class="quarto-xref">Corollary&nbsp;<span>13.1</span></a>.</li>
+<li>Expanding the square, <span id="eq-auto-02privateerm-24"><span class="math display">\[
+\mathbb E\|G_t\|^2 = n^2\,\mathbb E\|\nabla\ell(\theta_{t-1}; z_{I_t})\|^2 + 2n\,\mathbb E\langle\nabla\ell(\theta_{t-1}; z_{I_t}), b_t\rangle + \mathbb E\|b_t\|^2 \le n^2L^2 + 0 + d\sigma^2 .
+\tag{13.24}\]</span></span> The first term is bounded by <a href="#lem-erm-gradient" class="quarto-xref">Lemma&nbsp;<span>13.1</span></a>. The middle term vanishes because <span class="math inline">\(b_t\)</span> is independent of the gradient and has mean zero. The last is a sum of <span class="math inline">\(d\)</span> squared Gaussians of variance <span class="math inline">\(\sigma^2\)</span>.</li>
+<li><a href="#thm-erm-sgd" class="quarto-xref">Theorem&nbsp;<span>13.4</span></a> with <span class="math inline">\(T = n^2\)</span> gives <span class="math inline">\(\|C\|_2 G/n\)</span>, which is the first bound. The second uses <span class="math inline">\(\sqrt{a + b} \le \sqrt a + \sqrt b\)</span> and the value of <span class="math inline">\(\sigma\)</span>.</li>
+</ol>
+</div>
+<p>Up to logarithmic factors, the excess risk is <span class="math inline">\(O\big(\|C\|_2 L\sqrt{d\ln(1/\delta)}/\varepsilon\big)\)</span>, so the average excess risk per record falls as <span class="math inline">\(1/n\)</span>. The price of privacy is the factor <span class="math inline">\(\sqrt d\)</span>, and Bassily, Smith and Thakurta proved that some dependence of this kind is unavoidable. The constant <span class="math inline">\(16\)</span>, however, comes from a loose chain of bounds. For example, with <span class="math inline">\(n = 10{,}000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, the noise is <span class="math inline">\(\sigma = 299.9\,nL\)</span>. With <span class="math inline">\(d = 100\)</span>, the bound per record is <span class="math inline">\(\|C\|_2L(1 + 2999)/10{,}000 = 0.30\,\|C\|_2L\)</span>. The next chapter replaces this chain with a much tighter one.</p>
+<p>Privacy combines three tools. The first is the Gaussian mechanism, restated above. The second is <strong>amplification by subsampling</strong>: a mechanism run on one record picked at random is more private than the same mechanism run on a fixed record.</p>
+<div id="lem-erm-amplification" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 13.4 (Amplification by sampling one record)</strong></span> Let <span class="math inline">\(A\)</span> be an algorithm whose input is a single record and which satisfies <span class="math inline">\(\Pr[A(z)\in T] \le e^{\varepsilon_0}\Pr[A(z')\in T] + \delta_0\)</span> for all records <span class="math inline">\(z, z'\)</span> and all events <span class="math inline">\(T\)</span>. Let <span class="math inline">\(M(X) = A(z_I)\)</span> with <span class="math inline">\(I\)</span> uniform on <span class="math inline">\(\{1,\dots,n\}\)</span>. Then <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon_1, \delta_0/n)\)</span>-DP with</p>
+<p><span id="eq-auto-02privateerm-25"><span class="math display">\[
+\varepsilon_1 = \ln\left(1 + \frac{e^{\varepsilon_0} - 1}{n}\right) \le \frac{e^{\varepsilon_0}-1}{n}.
+\tag{13.25}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Let <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> differ in record <span class="math inline">\(j\)</span>, fix <span class="math inline">\(T\)</span>, and write <span class="math inline">\(p_i = \Pr[A(z_i)\in T]\)</span> and <span class="math inline">\(p'_j = \Pr[A(z'_j)\in T]\)</span>. Let <span class="math inline">\(r\)</span> be the average of <span class="math inline">\(p_i\)</span> over <span class="math inline">\(i \ne j\)</span> and <span class="math inline">\(\gamma = 1/n\)</span>. Then <span id="eq-auto-02privateerm-26"><span class="math display">\[
+P = \Pr[M(X)\in T] = (1-\gamma)r + \gamma p_j, \qquad P' = \Pr[M(X')\in T] = (1-\gamma)r + \gamma p'_j .
+\tag{13.26}\]</span></span></li>
+<li>The hypothesis, applied to <span class="math inline">\(z_j\)</span> against <span class="math inline">\(z'_j\)</span> and against each <span class="math inline">\(z_i\)</span> and then averaged, gives two bounds: <span id="eq-auto-02privateerm-27"><span class="math display">\[
+p_j - p'_j \le (e^{\varepsilon_0} - 1)p'_j + \delta_0, \qquad p_j - p'_j \le e^{\varepsilon_0}r - p'_j + \delta_0 .
+\tag{13.27}\]</span></span></li>
+<li>Let <span class="math inline">\(c = e^{\varepsilon_0} - 1\)</span> and take the convex combination of the two bounds with weights <span class="math inline">\(w\)</span> and <span class="math inline">\(1-w\)</span>, where <span class="math inline">\(1 - w = c(1-\gamma)/e^{\varepsilon_0} \in [0,1)\)</span>. The coefficient of <span class="math inline">\(r\)</span> becomes <span class="math inline">\(c(1-\gamma)\)</span>, and that of <span class="math inline">\(p'_j\)</span> becomes <span class="math inline">\(we^{\varepsilon_0} - 1 = c\gamma\)</span>. So <span id="eq-auto-02privateerm-28"><span class="math display">\[
+p_j - p'_j \le c\big((1-\gamma)r + \gamma p'_j\big) + \delta_0 = cP' + \delta_0 .
+\tag{13.28}\]</span></span></li>
+<li>Then <span class="math inline">\(P = P' + \gamma(p_j - p'_j) \le (1 + \gamma c)P' + \gamma\delta_0\)</span>, which is the claim. The inequality <span class="math inline">\(\ln(1+x) \le x\)</span> gives the simpler bound on <span class="math inline">\(\varepsilon_1\)</span>.</li>
+</ol>
+</div>
+<p>For <span class="math inline">\(\varepsilon_0 \le 1\)</span>, convexity of the exponential gives <span class="math inline">\(e^{\varepsilon_0} - 1 \le (e-1)\varepsilon_0 \le 2\varepsilon_0\)</span>, so sampling one record of <span class="math inline">\(n\)</span> cuts the privacy parameter by a factor of about <span class="math inline">\(n/2\)</span>. The third tool is advanced composition, from <a href="../part02-dp-basics/04-advanced-composition.html">the advanced composition chapter</a>. It says that running <span class="math inline">\(k\)</span> mechanisms in sequence, each <span class="math inline">\((\varepsilon_0,\delta_0)\)</span>-DP and each chosen adaptively from the outputs of the previous ones, is <span class="math inline">\((\varepsilon, k\delta_0 + \delta')\)</span>-DP for every <span class="math inline">\(\delta' \in (0,1)\)</span>, where</p>
+<p><span id="eq-auto-02privateerm-29"><span class="math display">\[
+\varepsilon = \varepsilon_0\sqrt{2k\ln(1/\delta')} + k\varepsilon_0\,\frac{e^{\varepsilon_0} - 1}{e^{\varepsilon_0} + 1} \le \varepsilon_0\sqrt{2k\ln(1/\delta')} + \frac{k\varepsilon_0^2}{2},
+\tag{13.29}\]</span></span></p>
+<p>and the inequality uses <span class="math inline">\((e^{x}-1)/(e^{x}+1) = \tanh(x/2) \le x/2\)</span> for <span class="math inline">\(x \ge 0\)</span>.</p>
+<div id="thm-erm-noisy-privacy" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 13.6 (Privacy of private SGD)</strong></span> For <span class="math inline">\(\varepsilon \in (0,1]\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>, private SGD is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, even if it releases every iterate <span class="math inline">\(\theta_1, \dots, \theta_T\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>One step, fixed index.</em> Fix the previous iterate and the index <span class="math inline">\(i\)</span>. The step releases a post-processing of <span class="math inline">\(n\nabla\ell(\theta_{t-1}; z_i) + b_t\)</span>. As a function of the single record <span class="math inline">\(z_i\)</span>, the vector <span class="math inline">\(n\nabla\ell\)</span> has <span class="math inline">\(\ell_2\)</span> sensitivity at most <span class="math inline">\(2nL\)</span>, by <a href="#lem-erm-gradient" class="quarto-xref">Lemma&nbsp;<span>13.1</span></a>. Set <span class="math inline">\(\varepsilon_0 = \varepsilon/\big(4\sqrt{2\ln(2/\delta)}\big)\)</span>, which is below <span class="math inline">\(1\)</span>, and <span class="math inline">\(\delta_0 = \delta/(2n)\)</span>. The Gaussian mechanism is <span class="math inline">\((\varepsilon_0,\delta_0)\)</span>-DP with respect to <span class="math inline">\(z_i\)</span> at the noise level <span id="eq-auto-02privateerm-30"><span class="math display">\[
+\sigma_0 = \frac{2nL}{\varepsilon_0}\sqrt{2\ln(1/\delta_0) + \varepsilon_0} \le \frac{2nL}{\varepsilon_0}\sqrt{2\ln\frac{2\sqrt e\,n}{\delta}} \le \frac{2nL}{\varepsilon_0}\sqrt{2\ln\frac{3.3n}{\delta}} = \sigma,
+\tag{13.30}\]</span></span> where the first inequality uses <span class="math inline">\(\varepsilon_0 \le 1 = 2\ln\sqrt e\)</span>, and the last equality is the <span class="math inline">\(\sigma\)</span> of <a href="#def-erm-noisy" class="quarto-xref">Definition&nbsp;<span>13.5</span></a>. Noise of variance <span class="math inline">\(\sigma^2 \ge \sigma_0^2\)</span> is noise of variance <span class="math inline">\(\sigma_0^2\)</span> plus an independent Gaussian of variance <span class="math inline">\(\sigma^2 - \sigma_0^2\)</span>, a post-processing, so the step is <span class="math inline">\((\varepsilon_0,\delta_0)\)</span>-DP with respect to <span class="math inline">\(z_i\)</span>.</li>
+<li><em>One step, random index.</em> By <a href="#lem-erm-amplification" class="quarto-xref">Lemma&nbsp;<span>13.4</span></a>, each step is <span class="math inline">\((\varepsilon_1, \delta_0/n)\)</span>-DP with respect to the dataset, where <span class="math inline">\(\varepsilon_1 \le (e^{\varepsilon_0}-1)/n \le 2\varepsilon_0/n\)</span>.</li>
+<li><em>All steps.</em> Each step is chosen adaptively from the previous iterates. Advanced composition over <span class="math inline">\(T = n^2\)</span> steps with <span class="math inline">\(\delta' = \delta/2\)</span> gives total failure probability <span class="math inline">\(n^2\cdot\delta/(2n^2) + \delta/2 = \delta\)</span>, and privacy parameter <span id="eq-auto-02privateerm-31"><span class="math display">\[
+\varepsilon_1\sqrt{2n^2\ln(2/\delta)} + \frac{n^2\varepsilon_1^2}{2} \le 2\varepsilon_0\sqrt{2\ln(2/\delta)} + 2\varepsilon_0^2 = \frac\varepsilon2 + 2\varepsilon_0^2 .
+\tag{13.31}\]</span></span></li>
+<li>Finally, the second term is small because <span class="math inline">\(\varepsilon \le 1\)</span> and <span class="math inline">\(\ln(2/\delta) &gt; \ln 2 &gt; 1/8\)</span>: <span id="eq-auto-02privateerm-32"><span class="math display">\[
+2\varepsilon_0^2 = \frac{\varepsilon^2}{16\ln(2/\delta)} \le \frac\varepsilon2 .
+\tag{13.32}\]</span></span> The average <span class="math inline">\(\bar\theta\)</span> is a post-processing of the iterates.</li>
+</ol>
+</div>
+<p>The privacy cost per step is about <span class="math inline">\(\varepsilon/n\)</span>, and composition over <span class="math inline">\(n^2\)</span> steps multiplies it by only <span class="math inline">\(\sqrt{n^2} = n\)</span>. Every piece of the argument is generic: noise in the right place, amplification, composition and post-processing. That modularity is why the same recipe extends to models for which no convergence theorem is available.</p>
+</section>
+<section id="sec-erm-summary" class="level2" data-number="13.6">
+<h2 data-number="13.6" class="anchored" data-anchor-id="sec-erm-summary"><span class="header-section-number">13.6</span> Summary</h2>
+<div id="tbl-erm-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-erm-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;13.1: The chapter’s results.
+</figcaption>
+<div aria-describedby="tbl-erm-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#prp-erm-median" class="quarto-xref">Proposition&nbsp;<span>13.1</span></a></td>
+<td>the exact median is not <span class="math inline">\((\varepsilon,\delta)\)</span>-DP for any <span class="math inline">\(\delta &lt; 1\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#thm-erm-sensitivity" class="quarto-xref">Theorem&nbsp;<span>13.1</span></a></td>
+<td>the minimizer of loss plus <span class="math inline">\(\lambda\cdot\)</span>(<span class="math inline">\(1\)</span>-strongly convex) has sensitivity <span class="math inline">\(2L/\lambda\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-erm-output" class="quarto-xref">Theorem&nbsp;<span>13.2</span></a></td>
+<td>adding Gaussian noise to that minimizer is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP</td>
+</tr>
+<tr class="even">
+<td><a href="#thm-erm-objective" class="quarto-xref">Theorem&nbsp;<span>13.3</span></a></td>
+<td>the exact minimizer of a Gaussian-perturbed objective is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP</td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-erm-sgd" class="quarto-xref">Theorem&nbsp;<span>13.4</span></a></td>
+<td>projected SGD has excess risk <span class="math inline">\(\|C\|_2G/\sqrt T\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#lem-erm-amplification" class="quarto-xref">Lemma&nbsp;<span>13.4</span></a></td>
+<td>sampling one record of <span class="math inline">\(n\)</span> turns <span class="math inline">\(\varepsilon_0\)</span> into <span class="math inline">\(\ln(1 + (e^{\varepsilon_0}-1)/n)\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-erm-noisy-privacy" class="quarto-xref">Theorem&nbsp;<span>13.6</span></a></td>
+<td>private SGD with <span class="math inline">\(n^2\)</span> steps is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP</td>
+</tr>
+<tr class="even">
+<td><a href="#thm-erm-noisy-utility" class="quarto-xref">Theorem&nbsp;<span>13.5</span></a></td>
+<td>its excess risk is <span class="math inline">\(O\big(\|C\|_2L\sqrt{d\ln(1/\delta)}/\varepsilon\big)\)</span> up to logarithmic factors</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-erm-notes" class="level2" data-number="13.7">
+<h2 data-number="13.7" class="anchored" data-anchor-id="sec-erm-notes"><span class="header-section-number">13.7</span> Notes</h2>
+<ul>
+<li>Kamalika Chaudhuri, Claire Monteleoni and Anand Sarwate, “Differentially Private Empirical Risk Minimization”, 2011. Output and objective perturbation for regularized convex losses, with the sensitivity bound of <a href="#thm-erm-sensitivity" class="quarto-xref">Theorem&nbsp;<span>13.1</span></a> for averaged losses.</li>
+<li>Benjamin Rubinstein, Peter Bartlett, Ling Huang and Nina Taft, “Learning in a Large Function Space: Privacy-Preserving Mechanisms for SVM Learning”, 2012. Output perturbation for support vector machines.</li>
+<li>Daniel Kifer, Adam Smith and Abhradeep Thakurta, “Private Convex Empirical Risk Minimization and High-Dimensional Regression”, 2012. Objective perturbation with Gaussian noise and the change-of-variables analysis used in <a href="#thm-erm-objective" class="quarto-xref">Theorem&nbsp;<span>13.3</span></a>.</li>
+<li>Ilya Mironov, “On Significance of the Least Significant Bits for Differential Privacy”, 2012. The floating-point attack on the Laplace mechanism.</li>
+<li>Roger Iyengar, Joseph Near, Dawn Song, Om Thakkar, Abhradeep Thakurta and Lun Wang, “Towards Practical Differentially Private Convex Optimization”, 2019. Objective perturbation with approximate minimizers.</li>
+<li>Seth Neel, Aaron Roth, Giuseppe Vietri and Zhiwei Steven Wu, “Oracle Efficient Private Non-Convex Optimization”, 2020. Privacy of objective perturbation without convexity.</li>
+<li>Oliver Williams and Frank McSherry, “Probabilistic Inference and Differential Privacy”, 2010, and Shuang Song, Kamalika Chaudhuri and Anand Sarwate, “Stochastic Gradient Descent with Differentially Private Updates”, 2013. Early versions of noisy gradient descent.</li>
+<li>Raef Bassily, Adam Smith and Abhradeep Thakurta, “Private Empirical Risk Minimization: Efficient Algorithms and Tight Error Bounds”, 2014. Private SGD with the privacy argument of this chapter (Gaussian noise, amplification and advanced composition), and matching lower bounds. Their constants differ from the ones derived here.</li>
+<li>Ohad Shamir and Tong Zhang, “Stochastic Gradient Descent for Non-Smooth Optimization: Convergence Results and Optimal Averaging Schemes”, 2013. Theorem 2 is the bound on the last iterate.</li>
+<li>Borja Balle, Gilles Barthe and Marco Gaboardi, “Privacy Amplification by Subsampling: Tight Analyses via Couplings and Divergences”, 2018. Tight amplification bounds for several sampling schemes, including <a href="#lem-erm-amplification" class="quarto-xref">Lemma&nbsp;<span>13.4</span></a>.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part04-learning-statistics/01-privacy-violations.html" class="pagination-link" aria-label="What Differential Privacy Protects">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What Differential Privacy Protects</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part04-learning-statistics/03-private-deep-learning.html" class="pagination-link" aria-label="Private Deep Learning">
+        <span class="nav-page-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

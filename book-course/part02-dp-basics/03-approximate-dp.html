@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>5&nbsp; Approximate Differential Privacy – A Course in Differential Privacy</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-dp-basics/04-advanced-composition.html" rel="next">
+<link href="../part02-dp-basics/02-laplace-mechanism.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-dp-basics/00-introduction.html">The Basics of Differential Privacy</a></li><li class="breadcrumb-item"><a href="../part02-dp-basics/03-approximate-dp.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">A Course in Differential Privacy</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-privacy-failures/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy Failures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/01-attempts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Attempts at Data Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/02-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Reconstruction Attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-dp-basics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Basics of Differential Privacy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/01-randomized-response.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/02-laplace-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/03-approximate-dp.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/04-advanced-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/05-exponential-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Exponential Mechanism</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-query-release/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query Release and Its Limits</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/01-multiplicative-weights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Private Multiplicative Weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/02-sparse-vector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sparse Vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/03-beyond-global-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/04-packing-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Packing Lower Bounds</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-learning-statistics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Private Learning and Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/01-privacy-violations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What Differential Privacy Protects</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/02-private-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/03-private-deep-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/04-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Private Mean Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/05-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Adaptive Data Analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-deployments/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deployments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/01-local-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Local Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/02-shuffle-and-central-deployments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-adp-definition" id="toc-sec-adp-definition" class="nav-link active" data-scroll-target="#sec-adp-definition"><span class="header-section-number">5.1</span> The definition</a></li>
+  <li><a href="#sec-adp-loss" id="toc-sec-adp-loss" class="nav-link" data-scroll-target="#sec-adp-loss"><span class="header-section-number">5.2</span> The privacy loss random variable</a></li>
+  <li><a href="#sec-adp-delta" id="toc-sec-adp-delta" class="nav-link" data-scroll-target="#sec-adp-delta"><span class="header-section-number">5.3</span> How small δ must be</a></li>
+  <li><a href="#sec-adp-gaussian" id="toc-sec-adp-gaussian" class="nav-link" data-scroll-target="#sec-adp-gaussian"><span class="header-section-number">5.4</span> The Gaussian mechanism</a>
+  <ul class="collapse">
+  <li><a href="#sec-adp-gaussian-proof" id="toc-sec-adp-gaussian-proof" class="nav-link" data-scroll-target="#sec-adp-gaussian-proof"><span class="header-section-number">5.4.1</span> Proof of privacy</a></li>
+  </ul></li>
+  <li><a href="#sec-adp-properties" id="toc-sec-adp-properties" class="nav-link" data-scroll-target="#sec-adp-properties"><span class="header-section-number">5.5</span> Properties</a></li>
+  <li><a href="#sec-adp-summary" id="toc-sec-adp-summary" class="nav-link" data-scroll-target="#sec-adp-summary"><span class="header-section-number">5.6</span> Summary</a></li>
+  <li><a href="#sec-adp-notes" id="toc-sec-adp-notes" class="nav-link" data-scroll-target="#sec-adp-notes"><span class="header-section-number">5.7</span> Notes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-dp-basics/00-introduction.html">The Basics of Differential Privacy</a></li><li class="breadcrumb-item"><a href="../part02-dp-basics/03-approximate-dp.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Pure differential privacy (DP) bounds the ratio of two output probabilities by <span class="math inline">\(e^\varepsilon\)</span> on every event. This chapter adds a small additive slack <span class="math inline">\(\delta\)</span> to that bound. The relaxed definition, <span class="math inline">\((\varepsilon,\delta)\)</span>-DP, lets an algorithm fail with probability about <span class="math inline">\(\delta\)</span>, and in exchange it admits the Gaussian mechanism, which adds less noise than the Laplace mechanism to statistics with many coordinates. It is also the setting in which the next chapter’s advanced composition holds.</p>
+<p>The chapter defines the relaxation and reads it through the privacy loss random variable. Two examples then show how badly a mechanism may behave with probability <span class="math inline">\(\delta\)</span>, which forces <span class="math inline">\(\delta\)</span> to be much smaller than <span class="math inline">\(1/n\)</span>. The Gaussian mechanism comes next, with a full privacy proof, and the chapter ends by checking that post-processing, group privacy and composition survive the relaxation.</p>
+<section id="sec-adp-definition" class="level2" data-number="5.1">
+<h2 data-number="5.1" class="anchored" data-anchor-id="sec-adp-definition"><span class="header-section-number">5.1</span> The definition</h2>
+<p>An additive bound alone is the wrong notion of privacy. Suppose we asked only that, for all neighbours and all events,</p>
+<p><span id="eq-auto-03approximatedp-1"><span class="math display">\[
+\Pr[M(X)\in T] \le \Pr[M(X')\in T] + \delta .
+\tag{5.1}\]</span></span></p>
+<p>This allows no useful accuracy when <span class="math inline">\(\delta\)</span> is small, and it allows harmful algorithms when <span class="math inline">\(\delta\)</span> is large (Vadhan, 2017, Section 1.6). The second failure appears in <a href="#sec-adp-delta" class="quarto-xref"><span>Section 5.3</span></a>. Combined with the multiplicative bound of pure DP, however, an additive term gives the right definition.</p>
+<div id="def-adp-dp" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 5.1 (Approximate differential privacy)</strong></span> Let <span class="math inline">\(\varepsilon \ge 0\)</span> and <span class="math inline">\(\delta \in [0,1]\)</span>. A randomized algorithm <span class="math inline">\(M\colon \mathcal X^n \to \mathcal Y\)</span> is <strong><span class="math inline">\((\varepsilon,\delta)\)</span>-differentially private</strong> if for all neighbours <span class="math inline">\(X \sim X'\)</span> and all events <span class="math inline">\(T \subseteq \mathcal Y\)</span>,</p>
+<p><span id="eq-adp-dp"><span class="math display">\[
+\Pr[M(X) \in T] \le e^{\varepsilon}\Pr[M(X') \in T] + \delta .
+\tag{5.2}\]</span></span></p>
+</div>
+<p>At <span class="math inline">\(\delta = 0\)</span> this is the <span class="math inline">\(\varepsilon\)</span>-DP of <a href="../part02-dp-basics/01-randomized-response.html">the randomized response chapter</a>, which from now on is called <strong>pure DP</strong>. A definition with <span class="math inline">\(\delta &gt; 0\)</span> is called <strong>approximate DP</strong>. The rest of the chapter is about what the extra <span class="math inline">\(\delta\)</span> permits.</p>
+</section>
+<section id="sec-adp-loss" class="level2" data-number="5.2">
+<h2 data-number="5.2" class="anchored" data-anchor-id="sec-adp-loss"><span class="header-section-number">5.2</span> The privacy loss random variable</h2>
+<p>To read <a href="#def-adp-dp" class="quarto-xref">Definition&nbsp;<span>5.1</span></a>, compare the two output distributions outcome by outcome. Fix neighbours <span class="math inline">\(X \sim X'\)</span>, and write <span class="math inline">\(P\)</span> and <span class="math inline">\(Q\)</span> for the distributions of <span class="math inline">\(M(X)\)</span> and <span class="math inline">\(M(X')\)</span>. Let <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> be their densities with respect to a common measure: the counting measure when <span class="math inline">\(\mathcal Y\)</span> is countable, so that <span class="math inline">\(p(y) = \Pr[M(X) = y]\)</span>, and Lebesgue measure when both have ordinary densities. In general, the measure <span class="math inline">\(P + Q\)</span> always serves.</p>
+<div id="def-adp-loss" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 5.2 (Privacy loss)</strong></span> The <strong>privacy loss</strong> of an outcome <span class="math inline">\(y\)</span> is</p>
+<p><span id="eq-auto-03approximatedp-2"><span class="math display">\[
+\ell(y) = \ln\frac{p(y)}{q(y)},
+\tag{5.3}\]</span></span></p>
+<p>with <span class="math inline">\(\ell(y) = +\infty\)</span> when <span class="math inline">\(p(y) &gt; 0 = q(y)\)</span>. The <strong>privacy loss random variable</strong> is <span class="math inline">\(L = \ell(Y)\)</span> for <span class="math inline">\(Y \sim P\)</span>, that is, for <span class="math inline">\(Y\)</span> drawn from <span class="math inline">\(M(X)\)</span>.</p>
+</div>
+<p>Outcomes with <span class="math inline">\(p(y) = 0\)</span> have probability zero under <span class="math inline">\(P\)</span>, so <span class="math inline">\(L\)</span> is defined with probability <span class="math inline">\(1\)</span>. A large value of <span class="math inline">\(L\)</span> means that the observed outcome is much more likely under <span class="math inline">\(X\)</span> than under <span class="math inline">\(X'\)</span>, so it is evidence that the dataset is <span class="math inline">\(X\)</span>. An infinite value means that the outcome is impossible under <span class="math inline">\(X'\)</span>, and seeing it rules <span class="math inline">\(X'\)</span> out.</p>
+<p>The Laplace mechanism of <a href="../part02-dp-basics/02-laplace-mechanism.html">the previous chapter</a> gives a first example. It applies to a function <span class="math inline">\(f\colon\mathcal X^n \to \mathbb R\)</span> whose value changes by at most <span class="math inline">\(\Delta_1\)</span> between neighbours. The mechanism releases <span class="math inline">\(f(X) + Y\)</span>, where the noise <span class="math inline">\(Y\)</span> has the Laplace density <span class="math inline">\(\frac{1}{2b}e^{-|y|/b}\)</span> with scale <span class="math inline">\(b = \Delta_1/\varepsilon\)</span>, and it is <span class="math inline">\(\varepsilon\)</span>-DP.</p>
+<div id="exm-adp-laplace-loss" class="theorem example">
+<p><span class="theorem-title"><strong>Example 5.1</strong></span> Take neighbours with <span class="math inline">\(f(X) = a\)</span> and <span class="math inline">\(f(X') = a - \Delta_1\)</span>, the largest gap allowed. The densities give</p>
+<p><span id="eq-auto-03approximatedp-3"><span class="math display">\[
+\ell(y) = \frac{\varepsilon}{\Delta_1}\big(|y - a + \Delta_1| - |y - a|\big),
+\tag{5.4}\]</span></span></p>
+<p>which equals <span class="math inline">\(\varepsilon\)</span> for <span class="math inline">\(y \ge a\)</span>, equals <span class="math inline">\(-\varepsilon\)</span> for <span class="math inline">\(y \le a - \Delta_1\)</span>, and is linear in between.</p>
+<ol type="1">
+<li>The event <span class="math inline">\(y \ge a\)</span> has probability <span class="math inline">\(\tfrac12\)</span> under <span class="math inline">\(P\)</span>, because the noise is symmetric. So <span class="math inline">\(L\)</span> has an atom of mass <span class="math inline">\(\tfrac12\)</span> at <span class="math inline">\(\varepsilon\)</span>.</li>
+<li>The event <span class="math inline">\(y \le a - \Delta_1\)</span> needs noise below <span class="math inline">\(-\Delta_1 = -\varepsilon b\)</span>, which has probability <span class="math inline">\(\tfrac12 e^{-\varepsilon}\)</span>. So <span class="math inline">\(L\)</span> has an atom of mass <span class="math inline">\(\tfrac12 e^{-\varepsilon}\)</span> at <span class="math inline">\(-\varepsilon\)</span>.</li>
+<li>In between, write <span class="math inline">\(y = a - s\)</span> with <span class="math inline">\(s \in (0, \Delta_1)\)</span>, so that <span class="math inline">\(L = \varepsilon - 2\varepsilon s/\Delta_1\)</span>. The variable <span class="math inline">\(s\)</span> has density <span class="math inline">\(\frac{\varepsilon}{2\Delta_1}e^{-\varepsilon s/\Delta_1}\)</span>, and the change of variables gives <span class="math inline">\(L\)</span> the density <span class="math inline">\(\tfrac14 e^{(\ell - \varepsilon)/2}\)</span> on <span class="math inline">\((-\varepsilon, \varepsilon)\)</span>, of total mass <span class="math inline">\(\tfrac12(1 - e^{-\varepsilon})\)</span>.</li>
+</ol>
+<p>The three masses add up to <span class="math inline">\(1\)</span>. The privacy loss never leaves <span class="math inline">\([-\varepsilon, \varepsilon]\)</span>, as <a href="#fig-adp-loss" class="quarto-xref">Figure&nbsp;<span>5.1</span></a> shows on the left.</p>
+</div>
+<div id="fig-adp-loss" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-adp-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/adp-loss.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-adp-loss-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5.1: Privacy loss for two mechanisms on neighbours whose values differ by the full sensitivity. Left, the Laplace mechanism with <span class="math inline">\(\varepsilon = 1\)</span>, from <a href="#exm-adp-laplace-loss" class="quarto-xref">Example&nbsp;<span>5.1</span></a>: atoms of mass <span class="math inline">\(0.5\)</span> at <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(0.184\)</span> at <span class="math inline">\(-\varepsilon\)</span>, and a density in between. Right, the Gaussian mechanism with noise standard deviation <span class="math inline">\(\sigma = \Delta_2\)</span>, from <a href="#lem-adp-gaussian-loss" class="quarto-xref">Lemma&nbsp;<span>5.4</span></a>: the loss is Gaussian with mean <span class="math inline">\(1/2\)</span> and variance <span class="math inline">\(1\)</span>, so it exceeds <span class="math inline">\(\varepsilon = 1\)</span> with probability <span class="math inline">\(0.309\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>The example is an instance of a general fact. Pure DP says that the privacy loss is bounded by <span class="math inline">\(\varepsilon\)</span> with probability <span class="math inline">\(1\)</span>, and approximate DP says, roughly, that it is bounded by <span class="math inline">\(\varepsilon\)</span> except with probability <span class="math inline">\(\delta\)</span>. Both follow from one identity, which computes the largest violation of the multiplicative bound over all events.</p>
+<div id="lem-adp-hockey" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 5.1</strong></span> For neighbours <span class="math inline">\(X \sim X'\)</span> and <span class="math inline">\(\varepsilon \ge 0\)</span>,</p>
+<p><span id="eq-adp-hockey"><span class="math display">\[
+\sup_{T \subseteq \mathcal Y}\Big(\Pr[M(X)\in T] - e^\varepsilon \Pr[M(X')\in T]\Big) = \mathbb E\Big[\big(1 - e^{\varepsilon - L}\big)_+\Big],
+\tag{5.5}\]</span></span></p>
+<p>where <span class="math inline">\((z)_+ = \max(z, 0)\)</span> and <span class="math inline">\(e^{-\infty} = 0\)</span>. So <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP if and only if the right-hand side is at most <span class="math inline">\(\delta\)</span> for every ordered pair of neighbours.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>For an event <span class="math inline">\(T\)</span>, write the difference as an integral, <span class="math inline">\(P(T) - e^\varepsilon Q(T) = \int_T (p - e^\varepsilon q)\)</span>. The integrand is positive exactly on <span class="math inline">\(B = \{y : p(y) &gt; e^\varepsilon q(y)\}\)</span>, so the integral is largest for <span class="math inline">\(T = B\)</span>, where it equals <span class="math inline">\(\int (p - e^\varepsilon q)_+\)</span>.</li>
+<li>Where <span class="math inline">\(p(y) = 0\)</span>, the integrand <span class="math inline">\((p - e^\varepsilon q)_+\)</span> is <span class="math inline">\(0\)</span>. Where <span class="math inline">\(p(y) &gt; 0\)</span>, it equals <span class="math inline">\(p(y)\big(1 - e^{\varepsilon}q(y)/p(y)\big)_+ = p(y)\big(1 - e^{\varepsilon - \ell(y)}\big)_+\)</span>, which is also right when <span class="math inline">\(q(y) = 0\)</span> and <span class="math inline">\(\ell(y) = \infty\)</span>.</li>
+<li>Integrating <span class="math inline">\(p(y)\)</span> times a function of <span class="math inline">\(y\)</span> is taking the expectation under <span class="math inline">\(P\)</span>, so <span class="math inline">\(\int(p - e^\varepsilon q)_+ = \mathbb E[(1 - e^{\varepsilon - L})_+]\)</span>.</li>
+<li><a href="#def-adp-dp" class="quarto-xref">Definition&nbsp;<span>5.1</span></a> asks that the left-hand side of <a href="#eq-adp-hockey" class="quarto-xref">Equation&nbsp;<span>5.5</span></a> be at most <span class="math inline">\(\delta\)</span> for every ordered pair of neighbours, which proves the last sentence.</li>
+</ol>
+</div>
+<p>The right-hand side of <a href="#eq-adp-hockey" class="quarto-xref">Equation&nbsp;<span>5.5</span></a> is called the <strong>hockey-stick divergence</strong> of <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span>, after the shape of the function <span class="math inline">\(z \mapsto (1 - e^{\varepsilon - z})_+\)</span>. Its integrand is <span class="math inline">\(0\)</span> when <span class="math inline">\(L \le \varepsilon\)</span> and at most <span class="math inline">\(1\)</span> otherwise, which gives the two readings of the definition.</p>
+<div id="thm-adp-loss" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 5.1</strong></span> Let <span class="math inline">\(M\colon\mathcal X^n \to \mathcal Y\)</span> be a randomized algorithm, and let <span class="math inline">\(L\)</span> be its privacy loss random variable for an ordered pair of neighbours <span class="math inline">\(X \sim X'\)</span>.</p>
+<ol type="1">
+<li><span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP if and only if <span class="math inline">\(L \le \varepsilon\)</span> with probability <span class="math inline">\(1\)</span> for every ordered pair of neighbours. In that case <span class="math inline">\(|L| \le \varepsilon\)</span> with probability <span class="math inline">\(1\)</span>.</li>
+<li>If <span class="math inline">\(\Pr[L &gt; \varepsilon] \le \delta\)</span> for every ordered pair of neighbours, then <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</li>
+<li>If <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP, then for every <span class="math inline">\(t &gt; 0\)</span> and every ordered pair of neighbours,</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-4"><span class="math display">\[
+\Pr[L &gt; \varepsilon + t] \le \frac{\delta}{1 - e^{-t}} .
+\tag{5.6}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>With <span class="math inline">\(\delta = 0\)</span>, <a href="#lem-adp-hockey" class="quarto-xref">Lemma&nbsp;<span>5.1</span></a> says that <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-DP exactly when <span class="math inline">\(\mathbb E[(1 - e^{\varepsilon-L})_+] = 0\)</span> for every pair. The integrand is nonnegative, so this holds exactly when it is <span class="math inline">\(0\)</span> with probability <span class="math inline">\(1\)</span>, that is, when <span class="math inline">\(L \le \varepsilon\)</span> with probability <span class="math inline">\(1\)</span>. For the lower bound, apply the same fact to the pair <span class="math inline">\((X', X)\)</span>. It gives <span class="math inline">\(q \le e^\varepsilon p\)</span> except on a set of <span class="math inline">\(Q\)</span>-probability <span class="math inline">\(0\)</span>, and that set also has <span class="math inline">\(P\)</span>-probability <span class="math inline">\(0\)</span>, because pure DP gives <span class="math inline">\(P(T) \le e^\varepsilon Q(T)\)</span>. So <span class="math inline">\(\ell \ge -\varepsilon\)</span> with probability <span class="math inline">\(1\)</span> under <span class="math inline">\(P\)</span>.</li>
+<li>The integrand <span class="math inline">\((1 - e^{\varepsilon - L})_+\)</span> is <span class="math inline">\(0\)</span> when <span class="math inline">\(L \le \varepsilon\)</span> and at most <span class="math inline">\(1\)</span> when <span class="math inline">\(L &gt; \varepsilon\)</span>. So its expectation is at most <span class="math inline">\(\Pr[L &gt; \varepsilon] \le \delta\)</span>, and <a href="#lem-adp-hockey" class="quarto-xref">Lemma&nbsp;<span>5.1</span></a> gives <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</li>
+<li>On the event <span class="math inline">\(L &gt; \varepsilon + t\)</span>, the integrand is at least <span class="math inline">\(1 - e^{-t}\)</span>. So <span class="math inline">\((1 - e^{-t})\Pr[L &gt; \varepsilon + t] \le \mathbb E[(1 - e^{\varepsilon-L})_+] \le \delta\)</span>, by <a href="#lem-adp-hockey" class="quarto-xref">Lemma&nbsp;<span>5.1</span></a>.</li>
+</ol>
+</div>
+<p>The converse of part 2 fails with the same parameters, which is why part 3 pays in both <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span>. For example, the Gaussian mechanism on the right of <a href="#fig-adp-loss" class="quarto-xref">Figure&nbsp;<span>5.1</span></a> has privacy loss above <span class="math inline">\(1\)</span> with probability <span class="math inline">\(0.309\)</span>, yet <a href="#prp-adp-gaussian-exact" class="quarto-xref">Proposition&nbsp;<span>5.3</span></a> below shows that it is <span class="math inline">\((1, 0.127)\)</span>-DP. Taking <span class="math inline">\(t = \varepsilon\)</span>, an <span class="math inline">\((\varepsilon,\delta)\)</span>-DP mechanism has privacy loss above <span class="math inline">\(2\varepsilon\)</span> with probability at most <span class="math inline">\(\delta/(1 - e^{-\varepsilon})\)</span>. Up to these constants, then, <span class="math inline">\((\varepsilon,\delta)\)</span>-DP says that the privacy loss is at most <span class="math inline">\(\varepsilon\)</span> except with probability about <span class="math inline">\(\delta\)</span>. The definition says nothing about what happens on that rare event.</p>
+</section>
+<section id="sec-adp-delta" class="level2" data-number="5.3">
+<h2 data-number="5.3" class="anchored" data-anchor-id="sec-adp-delta"><span class="header-section-number">5.3</span> How small δ must be</h2>
+<p>On the event of probability <span class="math inline">\(\delta\)</span>, the privacy loss may be infinite. The first example shows this in its crudest form.</p>
+<div id="exm-adp-release-all" class="theorem example">
+<p><span class="theorem-title"><strong>Example 5.2</strong></span> Let <span class="math inline">\(\bot\)</span> be a fixed symbol. The mechanism <span class="math inline">\(M(X)\)</span> outputs <span class="math inline">\(\bot\)</span> with probability <span class="math inline">\(1 - \delta\)</span> and outputs the whole dataset <span class="math inline">\(X\)</span> with probability <span class="math inline">\(\delta\)</span>. For neighbours <span class="math inline">\(X \ne X'\)</span> and an event <span class="math inline">\(T\)</span>,</p>
+<p><span id="eq-auto-03approximatedp-5"><span class="math display">\[
+\Pr[M(X)\in T] \le (1-\delta)\,\mathbf 1[\bot \in T] + \delta \le \Pr[M(X')\in T] + \delta ,
+\tag{5.7}\]</span></span></p>
+<p>so <span class="math inline">\(M\)</span> is <span class="math inline">\((0,\delta)\)</span>-DP. With probability <span class="math inline">\(1 - \delta\)</span> the privacy loss is <span class="math inline">\(\ln\frac{1-\delta}{1-\delta} = 0\)</span>, and with probability <span class="math inline">\(\delta\)</span> it is infinite, because the output <span class="math inline">\(X\)</span> is impossible under <span class="math inline">\(X'\)</span>.</p>
+</div>
+<p>This mechanism publishes everyone’s data with probability <span class="math inline">\(\delta\)</span>, so <span class="math inline">\(\delta\)</span> must be small. The next example shows how small. It publishes each record on its own, and that makes <span class="math inline">\(\delta\)</span> comparable to <span class="math inline">\(1/n\)</span>.</p>
+<div id="def-adp-name-shame" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 5.3 (Name and shame)</strong></span> For <span class="math inline">\(\delta \in [0,1]\)</span>, the mechanism <span class="math inline">\(\mathrm{NS}_\delta\)</span> draws independent coins <span class="math inline">\(c_1, \dots, c_n\)</span>, each equal to <span class="math inline">\(1\)</span> with probability <span class="math inline">\(\delta\)</span>, and outputs the set of pairs <span class="math inline">\(\{(i, X_i) : c_i = 1\}\)</span>.</p>
+</div>
+<p>Each record, which might be a person’s medical file, is published in the clear with probability <span class="math inline">\(\delta\)</span>.</p>
+<div id="prp-adp-name-shame" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 5.1</strong></span> For every <span class="math inline">\(\delta \in [0,1]\)</span>, <span class="math inline">\(\mathrm{NS}_\delta\)</span> is <span class="math inline">\((0,\delta)\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Let <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span> differ only in entry <span class="math inline">\(i\)</span>, and run the mechanism on both datasets with the same coins. Let <span class="math inline">\(E\)</span> be the event <span class="math inline">\(c_i = 1\)</span>, so <span class="math inline">\(\Pr[E] = \delta\)</span>.</li>
+<li>On the complement <span class="math inline">\(\bar E\)</span>, entry <span class="math inline">\(i\)</span> is not published, and the output is a function of the coins and of the entries <span class="math inline">\(j \ne i\)</span>, which the two datasets share. So on <span class="math inline">\(\bar E\)</span> the two outputs are equal.</li>
+<li>For an event <span class="math inline">\(T\)</span>, split on <span class="math inline">\(E\)</span> and use step 2:</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-6"><span class="math display">\[
+\Pr[\mathrm{NS}_\delta(X) \in T] = \Pr[\mathrm{NS}_\delta(X) \in T,\ \bar E] + \Pr[\mathrm{NS}_\delta(X)\in T,\ E] \le \Pr[\mathrm{NS}_\delta(X') \in T,\ \bar E] + \Pr[E] .
+\tag{5.8}\]</span></span></p>
+<ol start="4" type="1">
+<li>The first term is at most <span class="math inline">\(\Pr[\mathrm{NS}_\delta(X') \in T]\)</span> and the second is <span class="math inline">\(\delta\)</span>, which is <a href="#eq-adp-dp" class="quarto-xref">Equation&nbsp;<span>5.2</span></a> with <span class="math inline">\(\varepsilon = 0\)</span>.</li>
+</ol>
+</div>
+<div id="prp-adp-name-shame-release" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 5.2</strong></span> The probability that <span class="math inline">\(\mathrm{NS}_\delta\)</span> publishes at least one record is <span class="math inline">\(1 - (1-\delta)^n\)</span>, and</p>
+<p><span id="eq-auto-03approximatedp-7"><span class="math display">\[
+n\delta - \frac{(n\delta)^2}{2} \le 1 - (1-\delta)^n \le n\delta .
+\tag{5.9}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>The coins are independent, so no record is published with probability <span class="math inline">\((1-\delta)^n\)</span>, and the complement gives the formula.</li>
+<li>The upper bound is the union bound over the <span class="math inline">\(n\)</span> records, each published with probability <span class="math inline">\(\delta\)</span>.</li>
+<li>For the lower bound, <span class="math inline">\(1 - \delta \le e^{-\delta}\)</span> gives <span class="math inline">\((1-\delta)^n \le e^{-n\delta}\)</span>. The inequality <span class="math inline">\(e^{-x} \le 1 - x + x^2/2\)</span> for <span class="math inline">\(x \ge 0\)</span> then gives <span class="math inline">\(1 - (1-\delta)^n \ge n\delta - (n\delta)^2/2\)</span>.</li>
+</ol>
+</div>
+<p>So the chance that someone is named is about <span class="math inline">\(n\delta\)</span> when <span class="math inline">\(n\delta\)</span> is small. At <span class="math inline">\(\delta = 1/n\)</span>, step 3 of the proof gives a chance of at least <span class="math inline">\(1 - e^{-1} \approx 0.632\)</span> that some record is published in the clear. A guarantee that allows this is not privacy, so <span class="math inline">\(\delta\)</span> must be well below <span class="math inline">\(1/n\)</span>. Even <span class="math inline">\(\delta = n^{-1.1}\)</span> allows a chance of up to <span class="math inline">\(n\delta = n^{-0.1}\)</span>, which is <span class="math inline">\(0.25\)</span> for a million records. Common choices are <span class="math inline">\(\delta \le 1/n^2\)</span>, or a <span class="math inline">\(\delta\)</span> that is <strong>cryptographically small</strong>, smaller than every inverse polynomial in <span class="math inline">\(n\)</span>.</p>
+<p>In both examples the privacy loss is <span class="math inline">\(0\)</span> or infinite, so the rare event is a catastrophe. Without more information about a mechanism, one has to assume this worst case. Many mechanisms degrade gracefully instead. Their privacy loss exceeds <span class="math inline">\(\varepsilon\)</span> with probability about <span class="math inline">\(\delta\)</span> but rarely exceeds it by much, and they satisfy a family of guarantees at once, such as <span class="math inline">\((1, 10^{-3})\)</span>-DP and <span class="math inline">\((2, 10^{-6})\)</span>-DP. The Gaussian mechanism of the next section is the main example, as <a href="#exm-adp-gaussian-numbers" class="quarto-xref">Example&nbsp;<span>5.5</span></a> shows. A single pair <span class="math inline">\((\varepsilon,\delta)\)</span> is a crude threshold on the distribution of the privacy loss. Rényi differential privacy and concentrated differential privacy describe the whole tail of that distribution, and they appear in later chapters.</p>
+<p>The definition must be stated for events, not single outcomes. For pure DP the two are equivalent on countable outputs, by the pointwise lemma of <a href="../part02-dp-basics/01-randomized-response.html">the randomized response chapter</a>. For approximate DP the pointwise version is much weaker.</p>
+<div id="exm-adp-pointwise" class="theorem example">
+<p><span class="theorem-title"><strong>Example 5.3</strong></span> Let <span class="math inline">\(m = \lceil 1/\delta\rceil\)</span> for some <span class="math inline">\(\delta \in (0,1)\)</span>. The mechanism <span class="math inline">\(M(X) = (X, S)\)</span> outputs the whole dataset together with a number <span class="math inline">\(S\)</span> drawn uniformly from <span class="math inline">\(\{1, \dots, m\}\)</span>. Every single outcome has probability at most <span class="math inline">\(1/m \le \delta\)</span>, so for all neighbours and all outcomes <span class="math inline">\(y\)</span>,</p>
+<p><span id="eq-auto-03approximatedp-8"><span class="math display">\[
+\Pr[M(X) = y] \le e^{\varepsilon}\Pr[M(X') = y] + \delta .
+\tag{5.10}\]</span></span></p>
+<p>Yet the event <span class="math inline">\(T = \{(X, s) : 1 \le s \le m\}\)</span> has probability <span class="math inline">\(1\)</span> under <span class="math inline">\(X\)</span> and <span class="math inline">\(0\)</span> under <span class="math inline">\(X'\)</span>, so <span class="math inline">\(M\)</span> is not <span class="math inline">\((\varepsilon, \delta')\)</span>-DP for any <span class="math inline">\(\varepsilon\)</span> and any <span class="math inline">\(\delta' &lt; 1\)</span>.</p>
+</div>
+<p>The privacy loss of this mechanism is infinite with probability <span class="math inline">\(1\)</span>. So <a href="#thm-adp-loss" class="quarto-xref">Theorem&nbsp;<span>5.1</span></a>, which looks at one outcome at a time through the privacy loss, catches the failure that the pointwise inequality misses.</p>
+</section>
+<section id="sec-adp-gaussian" class="level2" data-number="5.4">
+<h2 data-number="5.4" class="anchored" data-anchor-id="sec-adp-gaussian"><span class="header-section-number">5.4</span> The Gaussian mechanism</h2>
+<p>The Laplace mechanism calibrates its noise to the <span class="math inline">\(\ell_1\)</span> sensitivity. The Gaussian mechanism adds Gaussian noise instead, calibrated to the <span class="math inline">\(\ell_2\)</span> sensitivity, which can be much smaller.</p>
+<div id="def-adp-l2" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 5.4 (ℓ2 sensitivity)</strong></span> The <strong><span class="math inline">\(\ell_2\)</span> sensitivity</strong> of a function <span class="math inline">\(f\colon \mathcal X^n \to \mathbb R^k\)</span> is</p>
+<p><span id="eq-auto-03approximatedp-9"><span class="math display">\[
+\Delta_2(f) = \sup_{X \sim X'} \|f(X) - f(X')\|_2 .
+\tag{5.11}\]</span></span></p>
+</div>
+<p>The <span class="math inline">\(\ell_1\)</span> sensitivity <span class="math inline">\(\Delta_1(f)\)</span> of the previous chapter is the same supremum with the <span class="math inline">\(\ell_1\)</span> norm. The two norms, and so the two sensitivities, are within a factor <span class="math inline">\(\sqrt k\)</span> of each other.</p>
+<div id="lem-adp-norms" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 5.2</strong></span> For every <span class="math inline">\(x \in \mathbb R^k\)</span>, <span class="math inline">\(\|x\|_2 \le \|x\|_1 \le \sqrt k\,\|x\|_2\)</span>. Hence <span class="math inline">\(\Delta_2(f) \le \Delta_1(f) \le \sqrt k\,\Delta_2(f)\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Expanding the square, <span class="math inline">\(\|x\|_1^2 = \sum_i x_i^2 + \sum_{i\ne j}|x_i||x_j| \ge \|x\|_2^2\)</span>.</li>
+<li>The Cauchy–Schwarz inequality applied to <span class="math inline">\((|x_1|,\dots,|x_k|)\)</span> and the all-ones vector gives <span class="math inline">\(\|x\|_1 = \sum_i |x_i|\cdot 1 \le \|x\|_2\sqrt k\)</span>.</li>
+<li>Applying both inequalities to <span class="math inline">\(f(X) - f(X')\)</span> and taking the supremum over neighbours gives the bounds on the sensitivities.</li>
+</ol>
+</div>
+<p>The Gaussian distribution <span class="math inline">\(\mathcal N(\mu, \sigma^2)\)</span> with mean <span class="math inline">\(\mu\)</span> and variance <span class="math inline">\(\sigma^2\)</span> has density</p>
+<p><span id="eq-auto-03approximatedp-10"><span class="math display">\[
+\frac{1}{\sqrt{2\pi\sigma^2}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right).
+\tag{5.12}\]</span></span></p>
+<p>Its tails fall like <span class="math inline">\(e^{-x^2/(2\sigma^2)}\)</span>, faster than the <span class="math inline">\(e^{-|x|/b}\)</span> of the Laplace distribution. We write <span class="math inline">\(\mathcal N(0, \sigma^2 I_k)\)</span> for the vector of <span class="math inline">\(k\)</span> independent <span class="math inline">\(\mathcal N(0,\sigma^2)\)</span> coordinates.</p>
+<div id="def-adp-gaussian" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 5.5 (Gaussian mechanism)</strong></span> For <span class="math inline">\(f\colon\mathcal X^n \to \mathbb R^k\)</span> and a noise level <span class="math inline">\(\sigma &gt; 0\)</span>, the Gaussian mechanism outputs</p>
+<p><span id="eq-auto-03approximatedp-11"><span class="math display">\[
+M(X) = f(X) + Y, \qquad Y \sim \mathcal N(0, \sigma^2 I_k).
+\tag{5.13}\]</span></span></p>
+</div>
+<div id="thm-adp-gaussian" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 5.2 (Privacy of the Gaussian mechanism)</strong></span> Let <span class="math inline">\(f\)</span> have <span class="math inline">\(0 &lt; \Delta_2(f) &lt; \infty\)</span>, and let <span class="math inline">\(\varepsilon &gt; 0\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>. The Gaussian mechanism with</p>
+<p><span id="eq-adp-sigma"><span class="math display">\[
+\sigma = \frac{\Delta_2(f)}{\varepsilon}\sqrt{2\ln(1/\delta) + \varepsilon}
+\tag{5.14}\]</span></span></p>
+<p>is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</p>
+</div>
+<p>The proof is in <a href="#sec-adp-gaussian-proof" class="quarto-xref"><span>Section 5.4.1</span></a>. Asymptotically the noise level is <span class="math inline">\(\sigma = \frac{\Delta_2}{\varepsilon}\sqrt{2\ln(1/\delta)}\,(1 + o(1))\)</span> as <span class="math inline">\(\delta \to 0\)</span>. Compared with the Laplace mechanism, whose noise has scale <span class="math inline">\(\Delta_1/\varepsilon\)</span> in each coordinate, there are two differences. The Gaussian mechanism pays a factor <span class="math inline">\(\sqrt{2\ln(1/\delta)}\)</span> and gives only approximate DP, and it measures sensitivity in <span class="math inline">\(\ell_2\)</span>, which can save a factor <span class="math inline">\(\sqrt k\)</span>. The next example shows that the saving can be the larger effect.</p>
+<div id="exm-adp-mean" class="theorem example">
+<p><span class="theorem-title"><strong>Example 5.4</strong></span> Each of <span class="math inline">\(n\)</span> people answers <span class="math inline">\(d\)</span> yes-or-no questions, so the dataset is <span class="math inline">\(X \in \{0,1\}^{n\times d}\)</span> with rows <span class="math inline">\(X_i \in \{0,1\}^d\)</span>. The analyst wants the vector of averages <span class="math inline">\(f(X) = \frac1n\sum_i X_i\)</span>, with small error in <span class="math inline">\(\ell_2\)</span> norm.</p>
+<ol type="1">
+<li>Replacing row <span class="math inline">\(x\)</span> by row <span class="math inline">\(x'\)</span> changes <span class="math inline">\(f\)</span> by <span class="math inline">\((x - x')/n\)</span>. The largest change is from the all-ones row to the all-zeros row, so <span class="math inline">\(\Delta_1 = d/n\)</span> and <span class="math inline">\(\Delta_2 = \sqrt d/n\)</span>.</li>
+<li>The Laplace mechanism adds <span class="math inline">\(\mathrm{Lap}(d/(\varepsilon n))\)</span> to each coordinate, and each coordinate has variance <span class="math inline">\(2d^2/(\varepsilon n)^2\)</span>. The root mean squared <span class="math inline">\(\ell_2\)</span> error is</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-12"><span class="math display">\[
+\sqrt{\mathbb E\|Y\|_2^2} = \sqrt{d \cdot \frac{2d^2}{\varepsilon^2n^2}} = \frac{\sqrt2\, d^{3/2}}{\varepsilon n}.
+\tag{5.15}\]</span></span></p>
+<ol start="3" type="1">
+<li>The Gaussian mechanism with <a href="#eq-adp-sigma" class="quarto-xref">Equation&nbsp;<span>5.14</span></a> adds <span class="math inline">\(\mathcal N(0,\sigma^2)\)</span> to each coordinate with <span class="math inline">\(\sigma = \frac{\sqrt d}{\varepsilon n}\sqrt{2\ln(1/\delta)+\varepsilon}\)</span>, so its root mean squared error is</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-13"><span class="math display">\[
+\sqrt d\,\sigma = \frac{d\sqrt{2\ln(1/\delta) + \varepsilon}}{\varepsilon n}.
+\tag{5.16}\]</span></span></p>
+<ol start="4" type="1">
+<li>The ratio of the two errors is <span class="math inline">\(\sqrt{2d/(2\ln(1/\delta)+\varepsilon)}\)</span>. So the Gaussian mechanism is more accurate as soon as <span class="math inline">\(d &gt; \ln(1/\delta) + \varepsilon/2\)</span>, and its advantage grows like <span class="math inline">\(\sqrt d\)</span>.</li>
+</ol>
+<p>With <span class="math inline">\(d = 100\)</span> questions, <span class="math inline">\(n = 10{,}000\)</span> people, <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-6}\)</span>, the Laplace error is <span class="math inline">\(\sqrt2\cdot 1000/10{,}000 = 0.1414\)</span> and the Gaussian error is <span class="math inline">\(100\sqrt{27.63+1}/10{,}000 = 0.0535\)</span>, smaller by a factor <span class="math inline">\(2.64\)</span>. A simulation of 20,000 runs of each mechanism gives <span class="math inline">\(0.1413\)</span> and <span class="math inline">\(0.0535\)</span>.</p>
+</div>
+<p>Which mechanism to use is a trade-off. The Laplace mechanism gives the stronger guarantee of pure DP, and the Gaussian mechanism gives a weaker guarantee with less noise in high dimension.</p>
+<section id="sec-adp-gaussian-proof" class="level3" data-number="5.4.1">
+<h3 data-number="5.4.1" class="anchored" data-anchor-id="sec-adp-gaussian-proof"><span class="header-section-number">5.4.1</span> Proof of privacy</h3>
+<p>The proof has two steps. First, the privacy loss of the Gaussian mechanism is itself Gaussian. Second, a Gaussian tail bound shows that it exceeds <span class="math inline">\(\varepsilon\)</span> with probability at most <span class="math inline">\(\delta\)</span>, and part 2 of <a href="#thm-adp-loss" class="quarto-xref">Theorem&nbsp;<span>5.1</span></a> concludes. Two facts about Gaussians come first.</p>
+<div id="lem-adp-gaussian-facts" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 5.3</strong></span> Let <span class="math inline">\(Z \sim \mathcal N(0,1)\)</span>.</p>
+<ol type="1">
+<li>For constants <span class="math inline">\(\mu\)</span> and <span class="math inline">\(a \ne 0\)</span>, <span class="math inline">\(\mu + aZ \sim \mathcal N(\mu, a^2)\)</span>.</li>
+<li>If <span class="math inline">\(Y_1 \sim \mathcal N(0, a^2)\)</span> and <span class="math inline">\(Y_2 \sim \mathcal N(0, b^2)\)</span> are independent, then <span class="math inline">\(Y_1 + Y_2 \sim \mathcal N(0, a^2 + b^2)\)</span>.</li>
+<li>For every <span class="math inline">\(u \ge 0\)</span>, <span class="math inline">\(\Pr[Z &gt; u] \le e^{-u^2/2}\)</span>.</li>
+<li>For every <span class="math inline">\(u &gt; 0\)</span>, <span class="math inline">\(\Pr[Z &gt; u] \le e^{-u^2/2}/(u\sqrt{2\pi})\)</span>.</li>
+</ol>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Completing the square in the density gives the moment generating function <span class="math inline">\(\mathbb E[e^{\lambda Z}] = e^{\lambda^2/2}\)</span>. A distribution is determined by its moment generating function when that function is finite near <span class="math inline">\(0\)</span>, as it is for all the variables here.</li>
+<li>For part 1, <span class="math inline">\(\mathbb E[e^{\lambda(\mu + aZ)}] = e^{\lambda\mu + \lambda^2a^2/2}\)</span>, which is the moment generating function of <span class="math inline">\(\mathcal N(\mu, a^2)\)</span>.</li>
+<li>For part 2, independence makes the moment generating function of the sum the product <span class="math inline">\(e^{\lambda^2a^2/2}e^{\lambda^2b^2/2} = e^{\lambda^2(a^2+b^2)/2}\)</span>.</li>
+<li>For part 3, Markov’s inequality applied to <span class="math inline">\(e^{uZ}\)</span> gives <span class="math inline">\(\Pr[Z &gt; u] \le e^{-u^2}\,\mathbb E[e^{uZ}] = e^{-u^2/2}\)</span>.</li>
+<li>For part 4, write <span class="math inline">\(\varphi(z) = e^{-z^2/2}/\sqrt{2\pi}\)</span> for the density, whose derivative is <span class="math inline">\(-z\varphi(z)\)</span>. On <span class="math inline">\(z \ge u\)</span> the ratio <span class="math inline">\(z/u\)</span> is at least <span class="math inline">\(1\)</span>, so <span class="math inline">\(\Pr[Z &gt; u] \le \int_u^\infty \frac zu\varphi(z)\,dz = \frac{\varphi(u)}{u}\)</span>.</li>
+</ol>
+</div>
+<div id="lem-adp-gaussian-loss" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 5.4</strong></span> Let <span class="math inline">\(X \sim X'\)</span>, let <span class="math inline">\(M\)</span> be the Gaussian mechanism with noise level <span class="math inline">\(\sigma\)</span>, and write <span class="math inline">\(v = f(X) - f(X')\)</span>. The privacy loss random variable of <span class="math inline">\(M(X)\)</span> against <span class="math inline">\(M(X')\)</span> is distributed as</p>
+<p><span id="eq-adp-gaussian-loss"><span class="math display">\[
+L \sim \mathcal N\!\left(\eta,\ 2\eta\right), \qquad \eta = \frac{\|v\|_2^2}{2\sigma^2}.
+\tag{5.17}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>The output is <span class="math inline">\(f(X) + x\)</span> with <span class="math inline">\(x \sim \mathcal N(0, \sigma^2 I_k)\)</span>. Its density under <span class="math inline">\(X\)</span> is proportional to <span class="math inline">\(\exp(-\|x\|_2^2/(2\sigma^2))\)</span>. Under <span class="math inline">\(X'\)</span>, the same point is at distance <span class="math inline">\(x + v\)</span> from the mean <span class="math inline">\(f(X')\)</span>, so its density is proportional to <span class="math inline">\(\exp(-\|x + v\|_2^2/(2\sigma^2))\)</span>, with the same constant.</li>
+<li>The constants cancel in the ratio, and the logarithm gives</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-14"><span class="math display">\[
+L = \frac{\|x+v\|_2^2 - \|x\|_2^2}{2\sigma^2} = \frac{1}{2\sigma^2}\sum_{j=1}^k\big((x_j+v_j)^2 - x_j^2\big) = \frac{1}{2\sigma^2}\sum_{j=1}^k \big(2x_jv_j + v_j^2\big).
+\tag{5.18}\]</span></span></p>
+<ol start="3" type="1">
+<li>The constant part is <span class="math inline">\(\sum_j v_j^2/(2\sigma^2) = \eta\)</span>, the claimed mean.</li>
+<li>The random part is <span class="math inline">\(\frac{1}{\sigma^2}\sum_j v_jx_j\)</span>, and the terms with <span class="math inline">\(v_j = 0\)</span> vanish. By part 1 of <a href="#lem-adp-gaussian-facts" class="quarto-xref">Lemma&nbsp;<span>5.3</span></a> each remaining term <span class="math inline">\(v_jx_j\)</span> is <span class="math inline">\(\mathcal N(0, \sigma^2v_j^2)\)</span>, and the terms are independent. By part 2 their sum is <span class="math inline">\(\mathcal N(0, \sigma^2\|v\|_2^2)\)</span>. Dividing by <span class="math inline">\(\sigma^2\)</span> gives <span class="math inline">\(\mathcal N(0, \|v\|_2^2/\sigma^2) = \mathcal N(0, 2\eta)\)</span>.</li>
+</ol>
+</div>
+<p>The mean and the variance of the privacy loss are tied, with variance twice the mean. For a single coordinate, <span class="math inline">\(k = 1\)</span>, the proof is just the identity <span class="math inline">\(L = vx/\sigma^2 + v^2/(2\sigma^2)\)</span>. A Gaussian privacy loss is special to this mechanism. The Laplace mechanism, by <a href="#exm-adp-laplace-loss" class="quarto-xref">Example&nbsp;<span>5.1</span></a>, has a loss with atoms.</p>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span><em>Proof of <a href="#thm-adp-gaussian" class="quarto-xref">Theorem&nbsp;<span>5.2</span></a>.</em></p>
+<ol type="1">
+<li>By part 2 of <a href="#thm-adp-loss" class="quarto-xref">Theorem&nbsp;<span>5.1</span></a>, it suffices to show <span class="math inline">\(\Pr[L &gt; \varepsilon] \le \delta\)</span> for every ordered pair of neighbours. If <span class="math inline">\(v = 0\)</span> then <span class="math inline">\(L = 0\)</span>, so assume <span class="math inline">\(v \ne 0\)</span>.</li>
+<li>By <a href="#lem-adp-gaussian-loss" class="quarto-xref">Lemma&nbsp;<span>5.4</span></a> and part 1 of <a href="#lem-adp-gaussian-facts" class="quarto-xref">Lemma&nbsp;<span>5.3</span></a>, <span class="math inline">\(L = \eta + \sqrt{2\eta}\,Z\)</span> with <span class="math inline">\(Z \sim \mathcal N(0,1)\)</span>. So</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-15"><span class="math display">\[
+\Pr[L &gt; \varepsilon] = \Pr\left[Z &gt; g(\eta)\right], \qquad g(\eta) = \frac{\varepsilon - \eta}{\sqrt{2\eta}} = \frac{\varepsilon}{\sqrt{2\eta}} - \sqrt{\frac{\eta}{2}} .
+\tag{5.19}\]</span></span></p>
+<ol start="3" type="1">
+<li>The function <span class="math inline">\(g\)</span> decreases in <span class="math inline">\(\eta\)</span>, and <span class="math inline">\(\eta \le \Delta_2^2/(2\sigma^2)\)</span> by the definition of <span class="math inline">\(\Delta_2\)</span>. Write <span class="math inline">\(t = \sqrt{2\ln(1/\delta)+\varepsilon}\)</span>, so that <a href="#eq-adp-sigma" class="quarto-xref">Equation&nbsp;<span>5.14</span></a> reads <span class="math inline">\(\sigma = \Delta_2 t/\varepsilon\)</span> and the largest value of <span class="math inline">\(\eta\)</span> is <span class="math inline">\(\varepsilon^2/(2t^2)\)</span>. Then</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-16"><span class="math display">\[
+g(\eta) \ge g\!\left(\frac{\varepsilon^2}{2t^2}\right) = t - \frac{\varepsilon}{2t} =: u .
+\tag{5.20}\]</span></span></p>
+<ol start="4" type="1">
+<li>The value <span class="math inline">\(u\)</span> is positive, because <span class="math inline">\(t^2 \ge \varepsilon &gt; \varepsilon/2\)</span>. Its square is <span class="math inline">\(u^2 = t^2 - \varepsilon + \varepsilon^2/(4t^2) \ge t^2 - \varepsilon = 2\ln(1/\delta)\)</span>.</li>
+<li>By part 3 of <a href="#lem-adp-gaussian-facts" class="quarto-xref">Lemma&nbsp;<span>5.3</span></a>, <span class="math inline">\(\Pr[L &gt; \varepsilon] \le \Pr[Z &gt; u] \le e^{-u^2/2} \le e^{-\ln(1/\delta)} = \delta\)</span>.</li>
+</ol>
+</div>
+<p>Only the upper tail of <span class="math inline">\(L\)</span> matters in this proof, because part 2 of <a href="#thm-adp-loss" class="quarto-xref">Theorem&nbsp;<span>5.1</span></a> bounds <span class="math inline">\(\Pr[L &gt; \varepsilon]\)</span>, not <span class="math inline">\(\Pr[|L| &gt; \varepsilon]\)</span>. For <span class="math inline">\(\varepsilon \le 1\)</span> the noise level <a href="#eq-adp-sigma" class="quarto-xref">Equation&nbsp;<span>5.14</span></a> is at most <span class="math inline">\(\frac{\Delta_2}{\varepsilon}\sqrt{2\ln(1.65/\delta)}\)</span>. The sharper tail bound of part 4 of <a href="#lem-adp-gaussian-facts" class="quarto-xref">Lemma&nbsp;<span>5.3</span></a> lowers the constant <span class="math inline">\(1.65\)</span> to <span class="math inline">\(1.25\)</span>, which is the form of the Gaussian mechanism that later chapters use.</p>
+<div id="cor-adp-gaussian-classic" class="theorem corollary">
+<p><span class="theorem-title"><strong>Corollary 5.1 (Gaussian mechanism for ε ≤ 1)</strong></span> Let <span class="math inline">\(f\)</span> have <span class="math inline">\(0 &lt; \Delta_2(f) &lt; \infty\)</span>, and let <span class="math inline">\(\varepsilon \in (0,1]\)</span> and <span class="math inline">\(\delta \in (0,1)\)</span>. The Gaussian mechanism with</p>
+<p><span id="eq-auto-03approximatedp-17"><span class="math display">\[
+\sigma = \frac{\Delta_2(f)}{\varepsilon}\sqrt{2\ln(1.25/\delta)}
+\tag{5.21}\]</span></span></p>
+<p>is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Write <span class="math inline">\(t = \sqrt{2\ln(1.25/\delta)}\)</span>, so that <span class="math inline">\(\sigma = \Delta_2 t/\varepsilon\)</span> and <span class="math inline">\(e^{-t^2/2} = \delta/1.25\)</span>. Steps 1 to 3 of the proof of <a href="#thm-adp-gaussian" class="quarto-xref">Theorem&nbsp;<span>5.2</span></a> used only <span class="math inline">\(\sigma = \Delta_2 t/\varepsilon\)</span>, so they give <span class="math inline">\(\Pr[L &gt; \varepsilon] \le \Pr[Z &gt; u]\)</span> with <span class="math inline">\(u = t - \varepsilon/(2t)\)</span>.</li>
+<li>Since <span class="math inline">\(\varepsilon \le 1\)</span>, the value <span class="math inline">\(u\)</span> is at least <span class="math inline">\(t - 1/(2t)\)</span>, which increases in <span class="math inline">\(t\)</span>. Also <span class="math inline">\(u^2 = t^2 - \varepsilon + \varepsilon^2/(4t^2) \ge t^2 - 1\)</span>.</li>
+<li><em>Case <span class="math inline">\(\delta \le 0.74\)</span>.</em> Then <span class="math inline">\(t \ge \sqrt{2\ln(1.25/0.74)} \ge 1.0239\)</span>, and by step 2, <span class="math inline">\(u \ge 0.5356\)</span>. By part 4 of <a href="#lem-adp-gaussian-facts" class="quarto-xref">Lemma&nbsp;<span>5.3</span></a> and step 2,</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-18"><span class="math display">\[
+\Pr[Z &gt; u] \le \frac{e^{-u^2/2}}{u\sqrt{2\pi}} \le \frac{e^{1/2}\,e^{-t^2/2}}{0.5356\sqrt{2\pi}} = \frac{e^{1/2}}{1.25 \cdot 0.5356\sqrt{2\pi}}\,\delta \le 0.983\,\delta .
+\tag{5.22}\]</span></span></p>
+<ol start="4" type="1">
+<li><em>Case <span class="math inline">\(\delta &gt; 0.74\)</span>.</em> Then <span class="math inline">\(t &gt; \sqrt{2\ln 1.25} \ge 0.6680\)</span>, and by step 2, <span class="math inline">\(u &gt; -0.0805\)</span>. The density of <span class="math inline">\(Z\)</span> is at most <span class="math inline">\(1/\sqrt{2\pi}\)</span>, so <span class="math inline">\(\Pr[Z &gt; u] \le \tfrac12 + 0.0805/\sqrt{2\pi} \le 0.533 &lt; \delta\)</span>.</li>
+<li>In both cases <span class="math inline">\(\Pr[L &gt; \varepsilon] \le \delta\)</span>, and part 2 of <a href="#thm-adp-loss" class="quarto-xref">Theorem&nbsp;<span>5.1</span></a> gives <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</li>
+</ol>
+</div>
+<p>This is the bound of Dwork and Roth (2014, Theorem A.1). On a grid of <span class="math inline">\(\varepsilon\)</span> from <span class="math inline">\(0.01\)</span> to <span class="math inline">\(1\)</span> and <span class="math inline">\(\delta\)</span> from <span class="math inline">\(0.89\)</span> down to <span class="math inline">\(10^{-20}\)</span>, the exact <span class="math inline">\(\delta\)</span> of <a href="#prp-adp-gaussian-exact" class="quarto-xref">Proposition&nbsp;<span>5.3</span></a> at this noise level is at most <span class="math inline">\(0.233\)</span> times the target. Both constants are loose, because the tail bounds of <a href="#lem-adp-gaussian-facts" class="quarto-xref">Lemma&nbsp;<span>5.3</span></a> are loose. The exact <span class="math inline">\(\delta\)</span> follows from <a href="#lem-adp-hockey" class="quarto-xref">Lemma&nbsp;<span>5.1</span></a>.</p>
+<div id="prp-adp-gaussian-exact" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 5.3</strong></span> Let <span class="math inline">\(\Phi\)</span> be the distribution function of <span class="math inline">\(\mathcal N(0,1)\)</span>, let <span class="math inline">\(f\)</span> have <span class="math inline">\(0 &lt; \Delta_2(f) &lt; \infty\)</span>, and let <span class="math inline">\(s = \Delta_2(f)/\sigma\)</span>. For every <span class="math inline">\(\varepsilon \ge 0\)</span>, the Gaussian mechanism with noise level <span class="math inline">\(\sigma\)</span> is <span class="math inline">\((\varepsilon, \delta(\varepsilon))\)</span>-DP for</p>
+<p><span id="eq-adp-gaussian-exact"><span class="math display">\[
+\delta(\varepsilon) = \Phi\!\left(\frac s2 - \frac\varepsilon s\right) - e^{\varepsilon}\,\Phi\!\left(-\frac s2 - \frac\varepsilon s\right),
+\tag{5.23}\]</span></span></p>
+<p>and for no smaller <span class="math inline">\(\delta\)</span> when some pair of neighbours has <span class="math inline">\(\|f(X) - f(X')\|_2 = \Delta_2(f)\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Fix a pair of neighbours and let <span class="math inline">\(r = \|v\|_2/\sigma \in (0, s]\)</span>, so that <span class="math inline">\(\eta = r^2/2\)</span> and <span class="math inline">\(L = r^2/2 + rZ\)</span>. By <a href="#lem-adp-hockey" class="quarto-xref">Lemma&nbsp;<span>5.1</span></a>, the smallest <span class="math inline">\(\delta\)</span> for this pair is <span class="math inline">\(\mathbb E[(1 - e^{\varepsilon - L})\mathbf 1[L &gt; \varepsilon]]\)</span>.</li>
+<li>The event <span class="math inline">\(L &gt; \varepsilon\)</span> is <span class="math inline">\(Z &gt; c\)</span> with <span class="math inline">\(c = \varepsilon/r - r/2\)</span>, so it has probability <span class="math inline">\(\Phi(r/2 - \varepsilon/r)\)</span>.</li>
+<li>Write <span class="math inline">\(\varphi\)</span> for the standard normal density. Completing the square gives <span class="math inline">\(e^{-rz}\varphi(z) = e^{r^2/2}\varphi(z + r)\)</span>, so <span class="math inline">\(\mathbb E[e^{-rZ}\mathbf 1[Z &gt; c]] = e^{r^2/2}\,\Phi(-c - r)\)</span>. Since <span class="math inline">\(e^{\varepsilon - L} = e^{\varepsilon - r^2/2}e^{-rZ}\)</span> and <span class="math inline">\(-c-r = -r/2 - \varepsilon/r\)</span>,</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-19"><span class="math display">\[
+\mathbb E\big[e^{\varepsilon - L}\mathbf 1[L&gt;\varepsilon]\big] = e^{\varepsilon - r^2/2}\,e^{r^2/2}\,\Phi\!\left(-\frac r2 - \frac\varepsilon r\right) = e^\varepsilon\,\Phi\!\left(-\frac r2 - \frac\varepsilon r\right).
+\tag{5.24}\]</span></span> 4. Subtracting step 3 from step 2 gives <a href="#eq-adp-gaussian-exact" class="quarto-xref">Equation&nbsp;<span>5.23</span></a> with <span class="math inline">\(r\)</span> in place of <span class="math inline">\(s\)</span>. Call that function <span class="math inline">\(h(r)\)</span>. 5. Write <span class="math inline">\(a = r/2 - \varepsilon/r\)</span> and <span class="math inline">\(b = -r/2 - \varepsilon/r\)</span>. Then <span class="math inline">\((a^2 - b^2)/2 = (a-b)(a+b)/2 = -\varepsilon\)</span>, so <span class="math inline">\(e^\varepsilon\varphi(b) = \varphi(a)\)</span>. Differentiating, <span class="math inline">\(h'(r) = \varphi(a)(\tfrac12 + \varepsilon/r^2) + e^\varepsilon\varphi(b)(\tfrac12 - \varepsilon/r^2) = \varphi(a) &gt; 0\)</span>. 6. So <span class="math inline">\(h\)</span> increases in <span class="math inline">\(r\)</span>, the worst pair is the one with the largest <span class="math inline">\(r\)</span>, and <span class="math inline">\(h(r) \le h(s) = \delta(\varepsilon)\)</span>, with equality when some pair attains <span class="math inline">\(\Delta_2\)</span>.</p>
+</div>
+<div id="exm-adp-gaussian-numbers" class="theorem example">
+<p><span class="theorem-title"><strong>Example 5.5</strong></span> For <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta = 10^{-5}\)</span>, <a href="#eq-adp-sigma" class="quarto-xref">Equation&nbsp;<span>5.14</span></a> gives <span class="math inline">\(\sigma = \sqrt{2\ln(10^5) + 1}\,\Delta_2 = 4.9016\,\Delta_2\)</span>. At this noise level, <a href="#eq-adp-gaussian-exact" class="quarto-xref">Equation&nbsp;<span>5.23</span></a> gives the following guarantees, all at once:</p>
+<ul>
+<li><span class="math inline">\((0.5,\ 6.1\times 10^{-4})\)</span>-DP,</li>
+<li><span class="math inline">\((1,\ 3.0\times 10^{-8})\)</span>-DP,</li>
+<li><span class="math inline">\((2,\ 3.0\times 10^{-24})\)</span>-DP.</li>
+</ul>
+<p>The guarantee at <span class="math inline">\(\varepsilon = 1\)</span> is far better than the <span class="math inline">\(\delta = 10^{-5}\)</span> that was asked for, and the smallest noise level that gives <span class="math inline">\((1, 10^{-5})\)</span>-DP is <span class="math inline">\(\sigma = 3.7306\,\Delta_2\)</span>. As <span class="math inline">\(\varepsilon\)</span> grows, <span class="math inline">\(\delta\)</span> falls faster than exponentially, so the privacy loss of this mechanism degrades gracefully.</p>
+</div>
+</section>
+</section>
+<section id="sec-adp-properties" class="level2" data-number="5.5">
+<h2 data-number="5.5" class="anchored" data-anchor-id="sec-adp-properties"><span class="header-section-number">5.5</span> Properties</h2>
+<p>The properties of pure DP proved in <a href="../part02-dp-basics/02-laplace-mechanism.html">the Laplace mechanism chapter</a> carry over to approximate DP. Post-processing and composition carry over unchanged, and group privacy carries over with a worse <span class="math inline">\(\delta\)</span>.</p>
+<div id="thm-adp-post" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 5.3 (Post-processing)</strong></span> Let <span class="math inline">\(M\colon\mathcal X^n \to \mathcal Y\)</span> be <span class="math inline">\((\varepsilon,\delta)\)</span>-DP, and let <span class="math inline">\(F\colon\mathcal Y \to \mathcal Z\)</span> be a randomized map whose coins are independent of those of <span class="math inline">\(M\)</span>. Then <span class="math inline">\(F \circ M\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Write <span class="math inline">\(F(y) = g_R(y)\)</span>, where <span class="math inline">\(R\)</span> is the coins of <span class="math inline">\(F\)</span> and each <span class="math inline">\(g_r\)</span> is a deterministic function. So <span class="math inline">\(F\)</span> is a random choice of a deterministic function.</li>
+<li>For neighbours <span class="math inline">\(X \sim X'\)</span> and an event <span class="math inline">\(T \subseteq \mathcal Z\)</span>, condition on <span class="math inline">\(R\)</span> and apply <a href="#eq-adp-dp" class="quarto-xref">Equation&nbsp;<span>5.2</span></a> to the event <span class="math inline">\(g_R^{-1}(T)\)</span>:</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-20"><span class="math display">\[
+\Pr[F(M(X))\in T] = \mathbb E_R\Big[\Pr[M(X) \in g_R^{-1}(T)]\Big] \le \mathbb E_R\Big[e^\varepsilon\Pr[M(X') \in g_R^{-1}(T)] + \delta\Big] = e^\varepsilon\Pr[F(M(X'))\in T] + \delta .
+\tag{5.25}\]</span></span></p>
+</div>
+<p>For group privacy, recall that an <span class="math inline">\(\varepsilon\)</span>-DP mechanism satisfies the bound with <span class="math inline">\(e^{k\varepsilon}\)</span> on datasets that differ in <span class="math inline">\(k\)</span> entries. With approximate DP, the <span class="math inline">\(\delta\)</span> is multiplied by the factors <span class="math inline">\(e^\varepsilon\)</span> that it meets along the way.</p>
+<div id="thm-adp-group" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 5.4 (Group privacy)</strong></span> Let <span class="math inline">\(M\)</span> be <span class="math inline">\((\varepsilon,\delta)\)</span>-DP, and let <span class="math inline">\(X, X' \in \mathcal X^n\)</span> differ in <span class="math inline">\(k \ge 1\)</span> entries. For every event <span class="math inline">\(T\)</span>,</p>
+<p><span id="eq-adp-group"><span class="math display">\[
+\Pr[M(X)\in T] \le e^{k\varepsilon}\Pr[M(X')\in T] + \delta\sum_{j=0}^{k-1}e^{j\varepsilon} \le e^{k\varepsilon}\Pr[M(X')\in T] + k e^{(k-1)\varepsilon}\delta .
+\tag{5.26}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Change the differing entries one at a time to get a chain <span class="math inline">\(X = X^{(0)} \sim X^{(1)} \sim \dots \sim X^{(k)} = X'\)</span> of neighbours. Write <span class="math inline">\(P_j = \Pr[M(X^{(j)})\in T]\)</span>.</li>
+<li>We show <span class="math inline">\(P_0 \le e^{j\varepsilon}P_j + \delta\sum_{i=0}^{j-1}e^{i\varepsilon}\)</span> by induction on <span class="math inline">\(j\)</span>. The case <span class="math inline">\(j = 1\)</span> is <a href="#eq-adp-dp" class="quarto-xref">Equation&nbsp;<span>5.2</span></a>.</li>
+<li>If the bound holds for <span class="math inline">\(j\)</span>, apply <a href="#eq-adp-dp" class="quarto-xref">Equation&nbsp;<span>5.2</span></a> to <span class="math inline">\(X^{(j)} \sim X^{(j+1)}\)</span>, which gives <span class="math inline">\(P_j \le e^{\varepsilon}P_{j+1} + \delta\)</span>. Substituting,</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-21"><span class="math display">\[
+P_0 \le e^{j\varepsilon}\big(e^\varepsilon P_{j+1} + \delta\big) + \delta\sum_{i=0}^{j-1}e^{i\varepsilon} = e^{(j+1)\varepsilon}P_{j+1} + \delta\sum_{i=0}^{j}e^{i\varepsilon} .
+\tag{5.27}\]</span></span></p>
+<ol start="4" type="1">
+<li>At <span class="math inline">\(j = k\)</span> this is the first inequality in <a href="#eq-adp-group" class="quarto-xref">Equation&nbsp;<span>5.26</span></a>. Each of the <span class="math inline">\(k\)</span> terms of the sum is at most <span class="math inline">\(e^{(k-1)\varepsilon}\)</span>, which gives the second.</li>
+</ol>
+</div>
+<p>The additive term grows exponentially in the group size. It exceeds <span class="math inline">\(1\)</span>, and the bound says nothing, once <span class="math inline">\(k\)</span> is a little over <span class="math inline">\(\ln(1/\delta)/\varepsilon\)</span>.</p>
+<p>Composition needs one more tool. The definition bounds probabilities of events, and the proof also needs averages of functions with values in <span class="math inline">\([0,1]\)</span>.</p>
+<div id="lem-adp-functions" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 5.5</strong></span> Let <span class="math inline">\(M\)</span> be <span class="math inline">\((\varepsilon,\delta)\)</span>-DP and let <span class="math inline">\(h\colon\mathcal Y \to [0,1]\)</span>. For all neighbours <span class="math inline">\(X \sim X'\)</span>,</p>
+<p><span id="eq-auto-03approximatedp-22"><span class="math display">\[
+\mathbb E[h(M(X))] \le e^\varepsilon\,\mathbb E[h(M(X'))] + \delta .
+\tag{5.28}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>A variable with values in <span class="math inline">\([0,1]\)</span> has mean equal to the integral of its tail, so <span class="math inline">\(\mathbb E[h(M(X))] = \int_0^1\Pr[h(M(X)) &gt; t]\,dt\)</span>.</li>
+<li>Each tail is the probability of the event <span class="math inline">\(\{y : h(y) &gt; t\}\)</span>, which <a href="#eq-adp-dp" class="quarto-xref">Equation&nbsp;<span>5.2</span></a> bounds by <span class="math inline">\(e^\varepsilon\Pr[h(M(X')) &gt; t] + \delta\)</span>.</li>
+<li>Integrating over <span class="math inline">\(t \in [0,1]\)</span> gives <span class="math inline">\(e^\varepsilon\,\mathbb E[h(M(X'))] + \delta\)</span>.</li>
+</ol>
+</div>
+<p>In an adaptive composition, <span class="math inline">\(M_1\)</span> runs on the dataset, then <span class="math inline">\(M_2\)</span> is chosen in the light of the output <span class="math inline">\(y_1\)</span> of <span class="math inline">\(M_1\)</span> and runs on the same dataset, and so on. Formally, for each <span class="math inline">\(i\)</span> and each sequence of earlier outputs <span class="math inline">\(y_{&lt;i} = (y_1,\dots,y_{i-1})\)</span>, the mechanism <span class="math inline">\(M_i(\cdot\,; y_{&lt;i})\)</span> is <span class="math inline">\((\varepsilon_i,\delta_i)\)</span>-DP, with fresh coins. The composition releases <span class="math inline">\((y_1, \dots, y_k)\)</span>.</p>
+<div id="thm-adp-composition" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 5.5 (Basic composition)</strong></span> If each <span class="math inline">\(M_i(\cdot\,;y_{&lt;i})\)</span> is <span class="math inline">\((\varepsilon_i, \delta_i)\)</span>-DP for every <span class="math inline">\(y_{&lt;i}\)</span>, where the parameters <span class="math inline">\(\varepsilon_i\)</span> and <span class="math inline">\(\delta_i\)</span> are fixed in advance, then the adaptive composition of <span class="math inline">\(M_1, \dots, M_k\)</span> is <span class="math inline">\(\big(\sum_i\varepsilon_i, \sum_i\delta_i\big)\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>The composition of the first <span class="math inline">\(k-1\)</span> mechanisms is itself a mechanism. So by induction on <span class="math inline">\(k\)</span> it suffices to treat <span class="math inline">\(k = 2\)</span>.</li>
+<li>Fix neighbours <span class="math inline">\(X \sim X'\)</span> and an event <span class="math inline">\(T\)</span> in <span class="math inline">\(\mathcal Y_1\times\mathcal Y_2\)</span>. For an output <span class="math inline">\(y_1\)</span>, write <span class="math inline">\(T_{y_1} = \{y_2 : (y_1,y_2)\in T\}\)</span> and <span class="math inline">\(g_D(y_1) = \Pr[M_2(D; y_1) \in T_{y_1}]\)</span> for a dataset <span class="math inline">\(D\)</span>. Conditioning on the first output,</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-23"><span class="math display">\[
+\Pr[M(X)\in T] = \mathbb E_{y_1\sim M_1(X)}\big[g_X(y_1)\big].
+\tag{5.29}\]</span></span></p>
+<ol start="3" type="1">
+<li>Since <span class="math inline">\(M_2(\cdot\,;y_1)\)</span> is <span class="math inline">\((\varepsilon_2,\delta_2)\)</span>-DP and <span class="math inline">\(g_X \le 1\)</span>, we have <span class="math inline">\(g_X(y_1) \le \min\{1, e^{\varepsilon_2}g_{X'}(y_1) + \delta_2\} \le h(y_1) + \delta_2\)</span>, where <span class="math inline">\(h = \min\{1, e^{\varepsilon_2}g_{X'}\}\)</span> takes values in <span class="math inline">\([0,1]\)</span>.</li>
+<li>By <a href="#lem-adp-functions" class="quarto-xref">Lemma&nbsp;<span>5.5</span></a> applied to <span class="math inline">\(M_1\)</span> and <span class="math inline">\(h\)</span>,</li>
+</ol>
+<p><span id="eq-auto-03approximatedp-24"><span class="math display">\[
+\Pr[M(X)\in T] \le \mathbb E_{M_1(X)}[h] + \delta_2 \le e^{\varepsilon_1}\,\mathbb E_{M_1(X')}[h] + \delta_1 + \delta_2 .
+\tag{5.30}\]</span></span></p>
+<ol start="5" type="1">
+<li>Finally <span class="math inline">\(h \le e^{\varepsilon_2}g_{X'}\)</span>, and <span class="math inline">\(\mathbb E_{y_1\sim M_1(X')}[g_{X'}(y_1)] = \Pr[M(X')\in T]\)</span> by step 2 applied to <span class="math inline">\(X'\)</span>. So <span class="math inline">\(\Pr[M(X)\in T] \le e^{\varepsilon_1+\varepsilon_2}\Pr[M(X')\in T] + \delta_1+\delta_2\)</span>.</li>
+</ol>
+</div>
+<p>The parameters must be fixed in advance. If the analyst could choose <span class="math inline">\(\varepsilon_i\)</span> in the light of earlier outputs, the sum would no longer be a valid bound without further work. With <span class="math inline">\(k\)</span> mechanisms that are each <span class="math inline">\((\varepsilon,\delta)\)</span>-DP, basic composition gives <span class="math inline">\((k\varepsilon, k\delta)\)</span>-DP. <a href="../part02-dp-basics/04-advanced-composition.html">The next chapter</a> proves that, for every <span class="math inline">\(\delta' &gt; 0\)</span>, the same composition is also <span class="math inline">\((\varepsilon', k\delta + \delta')\)</span>-DP with</p>
+<p><span id="eq-auto-03approximatedp-25"><span class="math display">\[
+\varepsilon' = \varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\,(e^\varepsilon - 1).
+\tag{5.31}\]</span></span></p>
+<p>When <span class="math inline">\(\varepsilon\)</span> is of order <span class="math inline">\(1/\sqrt k\)</span> or smaller, the second term is of the same order as the first or smaller, so <span class="math inline">\(\varepsilon'\)</span> grows like <span class="math inline">\(\sqrt k\)</span> rather than <span class="math inline">\(k\)</span>. That allows quadratically more analyses for the same privacy, and it requires <span class="math inline">\(\delta' &gt; 0\)</span> even when every mechanism is pure.</p>
+</section>
+<section id="sec-adp-summary" class="level2" data-number="5.6">
+<h2 data-number="5.6" class="anchored" data-anchor-id="sec-adp-summary"><span class="header-section-number">5.6</span> Summary</h2>
+<div id="tbl-adp-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-adp-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5.1: The chapter’s results.
+</figcaption>
+<div aria-describedby="tbl-adp-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#def-adp-dp" class="quarto-xref">Definition&nbsp;<span>5.1</span></a></td>
+<td><span class="math inline">\(\Pr[M(X)\in T] \le e^\varepsilon\Pr[M(X')\in T] + \delta\)</span> for all neighbours and events</td>
+</tr>
+<tr class="even">
+<td><a href="#lem-adp-hockey" class="quarto-xref">Lemma&nbsp;<span>5.1</span></a></td>
+<td>the largest violation over events is <span class="math inline">\(\mathbb E[(1-e^{\varepsilon-L})_+]\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-adp-loss" class="quarto-xref">Theorem&nbsp;<span>5.1</span></a></td>
+<td>pure DP is <span class="math inline">\(L \le \varepsilon\)</span> almost surely; <span class="math inline">\(\Pr[L &gt; \varepsilon] \le \delta\)</span> implies <span class="math inline">\((\varepsilon,\delta)\)</span>-DP; the converse holds with <span class="math inline">\(\varepsilon + t\)</span> and <span class="math inline">\(\delta/(1-e^{-t})\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#prp-adp-name-shame" class="quarto-xref">Proposition&nbsp;<span>5.1</span></a></td>
+<td>publishing each record with probability <span class="math inline">\(\delta\)</span> is <span class="math inline">\((0,\delta)\)</span>-DP, so <span class="math inline">\(\delta\)</span> must be well below <span class="math inline">\(1/n\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#exm-adp-pointwise" class="quarto-xref">Example&nbsp;<span>5.3</span></a></td>
+<td>for approximate DP, single outcomes do not suffice</td>
+</tr>
+<tr class="even">
+<td><a href="#lem-adp-norms" class="quarto-xref">Lemma&nbsp;<span>5.2</span></a></td>
+<td><span class="math inline">\(\Delta_2 \le \Delta_1 \le \sqrt k\,\Delta_2\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#lem-adp-gaussian-loss" class="quarto-xref">Lemma&nbsp;<span>5.4</span></a></td>
+<td>the Gaussian mechanism’s privacy loss is <span class="math inline">\(\mathcal N(\eta, 2\eta)\)</span> with <span class="math inline">\(\eta = \|f(X)-f(X')\|_2^2/(2\sigma^2)\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#thm-adp-gaussian" class="quarto-xref">Theorem&nbsp;<span>5.2</span></a></td>
+<td><span class="math inline">\(\sigma = \Delta_2\sqrt{2\ln(1/\delta)+\varepsilon}/\varepsilon\)</span> gives <span class="math inline">\((\varepsilon,\delta)\)</span>-DP</td>
+</tr>
+<tr class="odd">
+<td><a href="#cor-adp-gaussian-classic" class="quarto-xref">Corollary&nbsp;<span>5.1</span></a></td>
+<td>for <span class="math inline">\(\varepsilon \le 1\)</span>, <span class="math inline">\(\sigma = \Delta_2\sqrt{2\ln(1.25/\delta)}/\varepsilon\)</span> suffices</td>
+</tr>
+<tr class="even">
+<td><a href="#prp-adp-gaussian-exact" class="quarto-xref">Proposition&nbsp;<span>5.3</span></a></td>
+<td>exact <span class="math inline">\(\delta(\varepsilon) = \Phi(s/2 - \varepsilon/s) - e^\varepsilon\Phi(-s/2-\varepsilon/s)\)</span> with <span class="math inline">\(s = \Delta_2/\sigma\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-adp-post" class="quarto-xref">Theorem&nbsp;<span>5.3</span></a></td>
+<td>post-processing keeps <span class="math inline">\((\varepsilon,\delta)\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#thm-adp-group" class="quarto-xref">Theorem&nbsp;<span>5.4</span></a></td>
+<td>groups of <span class="math inline">\(k\)</span>: <span class="math inline">\((k\varepsilon,\ k e^{(k-1)\varepsilon}\delta)\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-adp-composition" class="quarto-xref">Theorem&nbsp;<span>5.5</span></a></td>
+<td>adaptive composition adds the <span class="math inline">\(\varepsilon_i\)</span> and the <span class="math inline">\(\delta_i\)</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-adp-notes" class="level2" data-number="5.7">
+<h2 data-number="5.7" class="anchored" data-anchor-id="sec-adp-notes"><span class="header-section-number">5.7</span> Notes</h2>
+<ul>
+<li>Cynthia Dwork, Krishnaram Kenthapadi, Frank McSherry, Ilya Mironov and Moni Naor, “Our Data, Ourselves: Privacy via Distributed Noise Generation”, 2006. The definition of <span class="math inline">\((\varepsilon,\delta)\)</span>-DP and the first analysis of Gaussian noise.</li>
+<li>Cynthia Dwork and Aaron Roth, <em>The Algorithmic Foundations of Differential Privacy</em>, 2014. The privacy loss random variable (Section 3.5), the Gaussian mechanism with the constant <span class="math inline">\(\sqrt{2\ln(1.25/\delta)}\)</span> (Theorem A.1), and the composition theorems (Theorems 3.16 and 3.20).</li>
+<li>Salil Vadhan, “The Complexity of Differential Privacy”, 2017. Section 1.6 explains why an additive bound alone fails, and the tutorial proves the properties of approximate DP.</li>
+<li>Shiva Prasad Kasiviswanathan and Adam Smith, “On the ‘Semantics’ of Differential Privacy: A Bayesian Formulation”, 2014. The relation between <span class="math inline">\((\varepsilon,\delta)\)</span>-DP and tail bounds on the privacy loss.</li>
+<li>Borja Balle and Yu-Xiang Wang, “Improving the Gaussian Mechanism for Differential Privacy: Analytical Calibration and Optimal Denoising”, 2018. The exact <span class="math inline">\(\delta\)</span> of the Gaussian mechanism, <a href="#eq-adp-gaussian-exact" class="quarto-xref">Equation&nbsp;<span>5.23</span></a>, and its calibration.</li>
+<li>Cynthia Dwork, Guy Rothblum and Salil Vadhan, “Boosting and Differential Privacy”, 2010. Advanced composition.</li>
+<li>Ryan Rogers, Aaron Roth, Jonathan Ullman and Salil Vadhan, “Privacy Odometers and Filters: Pay-as-you-Go Composition”, 2016. What goes wrong, and what can be saved, when the privacy parameters are chosen adaptively.</li>
+<li>Ilya Mironov, “Rényi Differential Privacy”, 2017, Cynthia Dwork and Guy Rothblum, “Concentrated Differential Privacy”, 2016, and Mark Bun and Thomas Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds”, 2016. Definitions that describe the whole distribution of the privacy loss rather than one threshold.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-dp-basics/02-laplace-mechanism.html" class="pagination-link" aria-label="The Laplace Mechanism">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-dp-basics/04-advanced-composition.html" class="pagination-link" aria-label="Advanced Composition">
+        <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

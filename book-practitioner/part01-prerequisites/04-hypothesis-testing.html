@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -270,6 +305,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -284,67 +325,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -360,26 +407,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -390,26 +425,44 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -426,49 +479,31 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -479,14 +514,50 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -564,65 +635,97 @@ window.Quarto = {
 
 <section id="why-this-matters" class="level2" data-number="4.1">
 <h2 data-number="4.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">4.1</span> Why this matters</h2>
-<p>A spam filter must call an email legitimate or spam, and a fraud detector must call a transaction normal or fraudulent. A monitoring job must likewise decide from a batch of readings whether a sensor has drifted. In each case an observation came from one of two distributions, and you must decide which. So every detector and every binary classifier is a hypothesis test, and evaluating one means measuring a test’s two error rates.</p>
-<p>This chapter gives you the best possible test, the curve that says how good any test can be, and a way to measure a real detector’s error rates on a finite set of trials. Throughout, a single summary number such as accuracy or the area under the curve hides how a detector behaves when false alarms must be rare. That regime is often the one that matters.</p>
+<p>A spam filter must call an email legitimate or spam, and a fraud detector must call a transaction normal or fraudulent. In each case an observation came from one of two distributions, and you must decide which. So every detector and every binary classifier is a hypothesis test, and evaluating one means measuring its two kinds of error, false alarms and missed cases.</p>
+<p>What matters throughout is how a detector does when false alarms must be rare, which accuracy hides.</p>
 </section>
 <section id="sec-ht-setup" class="level2" data-number="4.2">
 <h2 data-number="4.2" class="anchored" data-anchor-id="sec-ht-setup"><span class="header-section-number">4.2</span> Tests and their two errors</h2>
-<p>The default assumption, called the <strong>null hypothesis</strong> <span class="math inline">\(H_0\)</span>, is that the observation comes from a distribution <span class="math inline">\(P\)</span>, such as the scores of normal transactions. The <strong>alternative hypothesis</strong> <span class="math inline">\(H_1\)</span> is that it comes from a distribution <span class="math inline">\(Q\)</span>, such as the scores of fraudulent ones. A <strong>test</strong> decides whether to reject the null, which here means flagging the transaction.</p>
-<p>A test can make two kinds of mistake. Flagging a normal case is a false positive, and its probability is the <strong>false positive rate (FPR)</strong>, written <span class="math inline">\(\alpha\)</span>. Missing a real case is a false negative, with probability <span class="math inline">\(\beta\)</span>, the <strong>false negative rate (FNR)</strong>. The <strong>power</strong> <span class="math inline">\(1 - \beta\)</span> is the <strong>true positive rate (TPR)</strong>, the share of real cases the test catches. Catching more of them always means more false alarms. So the convention is to fix a budget for the FPR first, called the <strong>level</strong>, and then to find the most powerful test within it.</p>
+<p>The default assumption, called the <strong>null hypothesis</strong> <span class="math inline">\(H_0\)</span>, is that the observation comes from a distribution <span class="math inline">\(P\)</span>, such as a fraud model’s scores for normal transactions. The <strong>alternative hypothesis</strong> <span class="math inline">\(H_1\)</span> is that it comes from a distribution <span class="math inline">\(Q\)</span>, such as its scores for fraudulent ones. A <strong>test</strong> decides whether to reject the null, which here means flagging the transaction.</p>
+<p>A test can make two kinds of mistake. Flagging a normal case is a false positive, and its probability is the <strong>false positive rate (FPR)</strong>, written <span class="math inline">\(\alpha\)</span>. Missing a real case is a false negative, with probability <span class="math inline">\(\beta\)</span>, the <strong>false negative rate (FNR)</strong>. The share of real cases caught, <span class="math inline">\(1 - \beta\)</span>, is the <strong>true positive rate (TPR)</strong>.</p>
+<p>Lowering a test’s threshold catches more real cases but raises more false alarms. So you fix a budget for the FPR first, called the <strong>level</strong>, and then find the test with the highest TPR, or <strong>power</strong>, within it.</p>
 </section>
 <section id="sec-ht-np" class="level2" data-number="4.3">
 <h2 data-number="4.3" class="anchored" data-anchor-id="sec-ht-np"><span class="header-section-number">4.3</span> The Neyman–Pearson lemma</h2>
-<p>Write <span class="math inline">\(p(x)\)</span> and <span class="math inline">\(q(x)\)</span> for the probabilities, or densities, of an observation <span class="math inline">\(x\)</span> under the two hypotheses. Their quotient is the <strong>likelihood ratio</strong> <span id="eq-auto-04hypothesistesting-1"><span class="math display">\[\Lambda(x) = \frac{q(x)}{p(x)}, \tag{4.1}\]</span></span> which puts the alternative on top, unlike <a href="../part01-prerequisites/03-divergences.html">Divergences</a>. A <strong>likelihood ratio (LR) test</strong> picks a threshold <span class="math inline">\(\eta\)</span> and rejects wherever the ratio exceeds it. The <strong>Neyman–Pearson lemma</strong> says that this is the most powerful test at its level. The reason is that rejecting <span class="math inline">\(x\)</span> costs <span class="math inline">\(p(x)\)</span> of false-alarm budget and buys <span class="math inline">\(q(x)\)</span> of power, so the best test spends its budget on the best exchange rates first. On discrete data the LR test may have to reject a boundary value only with some probability, a <strong>randomized test</strong>, to hit a budget exactly.</p>
-<p>So the best test looks at an observation only through its likelihood ratio. A single global threshold on a raw score is not that test when the score behaves differently for different items. For example, some merchants’ normal transactions score high anyway, while for others a high score is rare unless something is wrong. The better test models each merchant’s own two score distributions and thresholds the ratio between them. With a number <span class="math inline">\(n\)</span> of independent observations, the LR test thresholds a sum of log ratios. Its FNR at a fixed FPR then falls like <span id="eq-auto-04hypothesistesting-2"><span class="math display">\[e^{-n\,\mathrm{KL}(P\|Q)}, \tag{4.2}\]</span></span> where <span class="math inline">\(\mathrm{KL}(P\|Q)\)</span> is the Kullback–Leibler (KL) divergence. This is the Chernoff–Stein lemma.</p>
+<p>Write <span class="math inline">\(p(x)\)</span> and <span class="math inline">\(q(x)\)</span> for the probabilities, or densities, of an observation <span class="math inline">\(x\)</span> under the two hypotheses. Their quotient is the <strong>likelihood ratio</strong> <span id="eq-auto-04hypothesistesting-1"><span class="math display">\[\Lambda(x) = \frac{q(x)}{p(x)}, \tag{4.1}\]</span></span> and a <strong>likelihood ratio (LR) test</strong> rejects wherever it exceeds a threshold <span class="math inline">\(\eta\)</span>, set so that the test’s FPR equals the budget. The <strong>Neyman–Pearson lemma</strong> says that no other test at that level catches more real cases.</p>
+<p>So the best test looks at an observation only through its likelihood ratio. A threshold on a raw score is that test only when a higher score always means a higher ratio. To estimate the ratio from labelled scores, fit a logistic regression of the label on the score; its log-odds, less the log prior odds, estimate <span class="math inline">\(\ln\Lambda\)</span>. If a known group shifts the scores, the ratio depends on the group, so the best test thresholds within each group. Independent observations of one case combine by adding their log ratios, and at a fixed FPR the FNR then falls exponentially with their number.</p>
 </section>
 <section id="sec-ht-tradeoff" class="level2" data-number="4.4">
 <h2 data-number="4.4" class="anchored" data-anchor-id="sec-ht-tradeoff"><span class="header-section-number">4.4</span> Trade-off curves</h2>
-<p>To say how hard it is to tell <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span>, record the best FNR at every level. As a function of the budget, this is the <strong>trade-off function</strong> <span class="math inline">\(T(\alpha)\)</span>, and you compute it by sweeping the LR threshold. The <strong>receiver operating characteristic (ROC)</strong> curve holds the same information upside down, as TPR against FPR. Any particular detector traces its own ROC curve, which lies on or below the best one. Every trade-off curve lies on or below the coin-flip line <span class="math inline">\(1 - \alpha\)</span> and is convex, because randomizing between two tests reaches every point between them.</p>
+<p>To say how hard it is to tell <span class="math inline">\(P\)</span> from <span class="math inline">\(Q\)</span>, record the best FNR at every level. As a function of the budget, this is the <strong>trade-off function</strong> <span class="math inline">\(T(\alpha)\)</span>, and you compute it by sweeping the LR threshold. The <strong>receiver operating characteristic (ROC)</strong> curve holds the same information upside down, as TPR against FPR. Any particular detector traces its own ROC curve, which lies on or below the best one.</p>
 </section>
 <section id="sec-ht-gaussian" class="level2" data-number="4.5">
 <h2 data-number="4.5" class="anchored" data-anchor-id="sec-ht-gaussian"><span class="header-section-number">4.5</span> The Gaussian trade-off curve</h2>
-<p>The most common pair in practice is a score that is normal under both hypotheses, with the same spread. Write <span class="math inline">\(\mu\)</span> for the distance between the two centres in standard deviations, and <span class="math inline">\(\Phi\)</span> for the standard normal cumulative distribution function. The best test thresholds at <span class="math inline">\(\Phi^{-1}(1 - \alpha)\)</span>, and its FNR is <span id="eq-ht-gaussian-tradeoff"><span class="math display">\[T(\alpha) = \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big). \tag{4.3}\]</span></span> In SciPy this is <code>norm.cdf(norm.ppf(1 - alpha) - mu)</code>, and at a tiny <span class="math inline">\(\alpha\)</span> use <code>norm.isf(alpha)</code> for the threshold, because <span class="math inline">\(1 - \alpha\)</span> loses the digits that matter. So a single number <span class="math inline">\(\mu\)</span> fixes the best TPR at every FPR.</p>
-<p>For example, take <span class="math inline">\(\mu = 2\)</span>. At an FPR of 5%, the best test has a TPR of 0.6388. If false alarms must be rare, at a rate of <span class="math inline">\(10^{-3}\)</span>, the TPR drops to 0.1378.</p>
+<p>A common pair is a score that is normal under both hypotheses, with the same spread, scaled so that normal cases have mean 0 and standard deviation 1. Write <span class="math inline">\(\mu\)</span> for the distance between the two centres in standard deviations, and <span class="math inline">\(\Phi\)</span> for the standard normal cumulative distribution function. The best test thresholds at <span class="math inline">\(\Phi^{-1}(1 - \alpha)\)</span>, and its FNR is <span id="eq-ht-gaussian-tradeoff"><span class="math display">\[T(\alpha) = \Phi\big(\Phi^{-1}(1 - \alpha) - \mu\big). \tag{4.2}\]</span></span> In SciPy this is <code>norm.cdf(norm.isf(alpha) - mu)</code>, with <code>isf</code> because <code>norm.ppf(1 - alpha)</code> loses the digits that matter at a tiny <span class="math inline">\(\alpha\)</span>. So a single number <span class="math inline">\(\mu\)</span> fixes the best TPR at every FPR. Turned around, a measured pair gives <span class="math inline">\(\mu = \Phi^{-1}(1 - \alpha) + \Phi^{-1}(\mathrm{TPR})\)</span>, <code>norm.isf(alpha) + norm.ppf(tpr)</code>. If that estimate changes with <span class="math inline">\(\alpha\)</span>, the scores are not of this shape.</p>
+<p>For example, take <span class="math inline">\(\mu = 2\)</span>. At an FPR of 5%, the best test has a TPR of 0.6388. At an FPR of <span class="math inline">\(10^{-3}\)</span>, it drops to 0.1378.</p>
 </section>
 <section id="sec-ht-laplace" class="level2" data-number="4.6">
 <h2 data-number="4.6" class="anchored" data-anchor-id="sec-ht-laplace"><span class="header-section-number">4.6</span> The Laplace trade-off curve</h2>
-<p>For a Laplace distribution and a copy shifted by <span class="math inline">\(\kappa\)</span> scales, the likelihood ratio is capped between <span class="math inline">\(e^{-\kappa}\)</span> and <span class="math inline">\(e^{\kappa}\)</span> (<a href="../part01-prerequisites/01-distributions.html">Probability distributions</a>). No test can buy power faster than the cap per unit of FPR, so every test has <span id="eq-auto-04hypothesistesting-3"><span class="math display">\[\mathrm{TPR} \le e^\kappa\,\mathrm{FPR}. \tag{4.4}\]</span></span> At <span class="math inline">\(\kappa = 1\)</span> and an FPR of 0.05, the best TPR is 0.1359. The full curve has two more pieces, which the full edition gives. The same cap holds for any pair whose likelihood ratio is bounded by <span class="math inline">\(e^\kappa\)</span>, so at a low FPR every test on such a pair has a very small TPR.</p>
-<p>A Laplace pair at <span class="math inline">\(\kappa = 1\)</span> and a normal pair at <span class="math inline">\(\mu = 1.0301\)</span> have the same best advantage. At a level of <span class="math inline">\(10^{-6}\)</span>, though, the best test on the normal pair has 36 times the power, because the unbounded normal ratio lets it find rare, overwhelming observations. So plan for the level you will actually use.</p>
+<p>For a Laplace distribution and a copy shifted by <span class="math inline">\(\kappa\)</span> times its scale, the likelihood ratio is capped between <span class="math inline">\(e^{-\kappa}\)</span> and <span class="math inline">\(e^{\kappa}\)</span> (<a href="../part01-prerequisites/03-divergences.html">Divergences</a>). No test can buy power faster than the cap per unit of FPR, so every test has <span id="eq-auto-04hypothesistesting-2"><span class="math display">\[\mathrm{TPR} \le e^\kappa\,\mathrm{FPR}. \tag{4.3}\]</span></span> At a low FPR the best test reaches this cap, so at <span class="math inline">\(\kappa = 1\)</span> and an FPR of 0.05 its TPR is 0.1359.</p>
+<p>A Laplace pair at <span class="math inline">\(\kappa = 1\)</span> and a normal pair at <span class="math inline">\(\mu = 1.0301\)</span> have the same best advantage, the largest TPR minus FPR of any test (<a href="#sec-ht-tv" class="quarto-xref"><span>Section 4.7</span></a>). But at a level of <span class="math inline">\(10^{-6}\)</span> the normal pair allows 36 times the TPR, because its unbounded ratio lets a test find rare, highly telling observations. So judge a pair at the level you will use.</p>
 </section>
 <section id="sec-ht-tv" class="level2" data-number="4.7">
 <h2 data-number="4.7" class="anchored" data-anchor-id="sec-ht-tv"><span class="header-section-number">4.7</span> Best advantage and total variation</h2>
-<p>The <strong>advantage</strong> of a test is its TPR minus its FPR, called Youden’s index in medicine. The best advantage over all tests is the <strong>total variation (TV)</strong> distance of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>: <span id="eq-auto-04hypothesistesting-4"><span class="math display">\[\max(\mathrm{TPR} - \mathrm{FPR}) = \mathrm{TV}(P, Q) = \frac12\sum_x |q(x) - p(x)|. \tag{4.5}\]</span></span> It is reached by the test that rejects exactly where <span class="math inline">\(q\)</span> exceeds <span class="math inline">\(p\)</span>. For the normal pair it is <span class="math inline">\(2\Phi(\mu/2) - 1\)</span>, or 0.3829 at a shift of one standard deviation. Accuracy on a balanced set of positives and negatives measures the same point. But that point says nothing about the ends of the curve, as the Laplace and normal pairs above show. So never report only accuracy or advantage for a detector.</p>
+<p>The <strong>advantage</strong> of a test is its TPR minus its FPR. The best advantage over all tests is the <strong>total variation (TV)</strong> distance of <a href="../part01-prerequisites/03-divergences.html">Divergences</a>: <span id="eq-auto-04hypothesistesting-3"><span class="math display">\[\max(\mathrm{TPR} - \mathrm{FPR}) = \mathrm{TV}(P, Q) = \frac12\sum_x |q(x) - p(x)|. \tag{4.4}\]</span></span> It is reached by the test that rejects exactly where <span class="math inline">\(q\)</span> exceeds <span class="math inline">\(p\)</span>. For the normal pair it is <span class="math inline">\(2\Phi(\mu/2) - 1\)</span>, or 0.3829 at a shift of one standard deviation. Accuracy on a balanced set is one half plus half the advantage, so it measures the same point, which says nothing about the low-FPR end of the curve.</p>
 </section>
 <section id="sec-ht-auc" class="level2" data-number="4.8">
 <h2 data-number="4.8" class="anchored" data-anchor-id="sec-ht-auc"><span class="header-section-number">4.8</span> ROC summaries: why AUC hides the low-FPR regime</h2>
-<p>Detectors are often compared by the <strong>area under the curve (AUC)</strong> of their ROC curves. It is the chance that a random positive scores higher than a random negative: <span id="eq-auto-04hypothesistesting-5"><span class="math display">\[\mathrm{AUC} = \Pr[S_+ &gt; S_-]. \tag{4.6}\]</span></span> But the AUC weighs mostly false-alarm rates nobody would operate at, while the question is often whether a detector can flag some cases with confidence, as when a fraud team can review only a few transactions.</p>
-<p>Two detectors with standard normal scores on negatives make the point. Detector A’s positives score normal with mean 1 and standard deviation 1. Detector B’s positives are more spread out, with mean 1.5811 and standard deviation 2. Both have an AUC of 0.7602. At an FPR of <span class="math inline">\(10^{-3}\)</span>, though, A catches 0.0183 of the positives, while B catches about 12 times as many. A few of B’s spread-out positives score far above every negative, and those are exactly the cases a strict threshold catches.</p>
-<p>So plot the full ROC curve on log–log axes, and report the TPR at fixed low FPRs such as <span class="math inline">\(10^{-2}\)</span> and <span class="math inline">\(10^{-3}\)</span>. In scikit-learn, <code>sklearn.metrics.roc_curve(y_true, y_score)</code> returns the FPRs and TPRs to read them from, and <code>roc_auc_score(y_true, y_score)</code> gives the AUC for comparison with older work. Don’t read a TPR at an FPR below one over the number of negatives, though, because there the curve rests on a single false positive or none, and it is noise.</p>
+<p>Detectors are often compared by the <strong>area under the curve (AUC)</strong> of their ROC curves. It is the chance that a random positive scores higher than a random negative. But the area weighs every FPR from 0 to 1 equally, so the low FPRs where a strict detector operates add almost nothing to it.</p>
+<p>Two detectors with standard normal scores on negatives make the point. Detector A’s positives score normal with mean 1 and standard deviation 1. B’s are more spread out, with standard deviation 2. Their mean, 1.5811, is chosen so that both detectors have an AUC of 0.7602. Yet at an FPR of <span class="math inline">\(10^{-3}\)</span>, A catches 0.0183 of the positives and B about 12 times as many (<a href="#fig-ht-auc-low-fpr" class="quarto-xref">Figure&nbsp;<span>4.1</span></a>). A few of B’s positives score far above every negative, and a strict threshold catches exactly those.</p>
+<div id="fig-ht-auc-low-fpr" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ht-auc-low-fpr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/hypothesis_testing_auc_low_fpr.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ht-auc-low-fpr-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4.1: Two detectors with the same AUC of 0.760, on linear axes (left) and log axes (right).
+</figcaption>
+</figure>
+</div>
+<p>So plot the ROC curve on log–log axes, dropping the first point of <code>roc_curve</code>, whose FPR is 0, and report the TPR at fixed low FPRs. In scikit-learn, <code>roc_curve(y_true, y_score)</code> needs scores, not the labels from <code>predict</code>. At a target FPR, take the highest TPR among the points at or below it, not a value interpolated with <code>np.interp</code>, which no single threshold reaches. And don’t read a TPR at an FPR below one over the number of negatives, because there the curve rests on one false positive or none.</p>
 </section>
 <section id="sec-ht-bayes" class="level2" data-number="4.9">
 <h2 data-number="4.9" class="anchored" data-anchor-id="sec-ht-bayes"><span class="header-section-number">4.9</span> The Bayesian view</h2>
-<p>Often you know a base rate <span class="math inline">\(\pi\)</span>, such as one transaction in a thousand being fraud. Bayes’ rule says that the odds of <span class="math inline">\(H_1\)</span> after seeing <span class="math inline">\(x\)</span> are the odds before, multiplied by the likelihood ratio: <span id="eq-ht-posterior-odds"><span class="math display">\[\frac{\Pr[H_1 \mid x]}{\Pr[H_0 \mid x]} = \frac{\pi}{1 - \pi} \times \Lambda(x). \tag{4.7}\]</span></span> So the decision with the fewest errors says <span class="math inline">\(H_1\)</span> when the ratio exceeds <span class="math inline">\((1 - \pi)/\pi\)</span>, which is again an LR test.</p>
-<p>The same rule applies to an alarm, whose likelihood ratio is the TPR divided by the FPR. Take the test with <span class="math inline">\(\mu = 2\)</span> in a population where 1% are positive. At an FPR of 0.05, a flagged case is positive with probability only 0.114, so most alarms are false. At an FPR of <span class="math inline">\(10^{-3}\)</span>, the test flags fewer cases, but a flagged case is positive with probability 0.582. So when positives are rare, the FPR decides whether an alarm is worth believing.</p>
+<p>Often you know a base rate <span class="math inline">\(\pi\)</span>, such as one transaction in a thousand being fraud. Bayes’ rule says that the odds of <span class="math inline">\(H_1\)</span> after seeing <span class="math inline">\(x\)</span> are the odds before, multiplied by the likelihood ratio: <span id="eq-ht-posterior-odds"><span class="math display">\[\frac{\Pr[H_1 \mid x]}{\Pr[H_0 \mid x]} = \frac{\pi}{1 - \pi} \times \Lambda(x). \tag{4.5}\]</span></span> So the decision with the fewest errors, which says <span class="math inline">\(H_1\)</span> when these odds exceed 1, is again an LR test.</p>
+<p>The same rule applies to an alarm, whose likelihood ratio is the TPR divided by the FPR. Take the test with <span class="math inline">\(\mu = 2\)</span> in a population where 1% are positive. At an FPR of 0.05, a flagged case is positive with probability only 0.114, so most alarms are false. At an FPR of <span class="math inline">\(10^{-3}\)</span>, that probability rises to 0.582. So when positives are rare, the FPR decides whether an alarm is worth believing.</p>
 </section>
 <section id="sec-ht-estimation" class="level2" data-number="4.10">
 <h2 data-number="4.10" class="anchored" data-anchor-id="sec-ht-estimation"><span class="header-section-number">4.10</span> Measuring rates from finite trials</h2>
-<p>You measure a detector’s FPR by counting false positives among <span class="math inline">\(n\)</span> test negatives. If each negative is flagged independently with the same probability, the count <span class="math inline">\(k\)</span> is binomial, and its relative uncertainty is about <span class="math inline">\(1/\sqrt k\)</span>. So the precision of a measured rate depends on how many events you see, not on <span class="math inline">\(n\)</span> alone.</p>
-<p>The <strong>Clopper–Pearson interval</strong> gives the range of true rates that make the observed count unsurprising. Write <span class="math inline">\(1 - a\)</span> for the confidence. Its lower end <span class="math inline">\(l\)</span> and upper end <span class="math inline">\(u\)</span> solve <span id="eq-auto-04hypothesistesting-6"><span class="math display">\[\Pr[\mathrm{Bin}(n, l) \ge k] = \frac a2, \qquad \Pr[\mathrm{Bin}(n, u) \le k] = \frac a2. \tag{4.8}\]</span></span> It is exact, because it uses the binomial itself, and conservative, because it covers the true rate at least <span class="math inline">\(1 - a\)</span> of the time. In SciPy, <code>scipy.stats.binomtest(k, n).proportion_ci(confidence_level=0.95, method="exact")</code> computes it, and statsmodels’ <code>proportion_confint(k, n, alpha=0.05, method="beta")</code> does the same.</p>
-<p>To claim that an FPR is below a target, use the upper end alone. The upper end of a two-sided 90% interval is a one-sided 95% bound, which is 0.0047 for 1 false positive in 1,000 negatives. With no events at all, the one-sided 95% bound is about <span class="math inline">\(3/n\)</span>, the <strong>rule of three</strong>. So certifying an FPR below <span class="math inline">\(10^{-3}\)</span> takes 2,995 negatives with no false positive.</p>
-<p>Even 10 false positives in 10,000 negatives give the interval <span class="math inline">\([0.00048, 0.00184]\)</span>, from about half to almost twice the target. As a rule of thumb, measuring an FPR of <span class="math inline">\(\alpha\)</span> to within about 20% takes on the order of <span class="math inline">\(100/\alpha\)</span> negatives. A common shortcut fails here, because the <strong>Wald interval</strong>, a normal approximation, is too narrow and collapses to <span class="math inline">\([0, 0]\)</span> with no events.</p>
+<p>You measure a detector’s FPR by counting false positives among <span class="math inline">\(n\)</span> test negatives. If each negative is flagged independently with the same small probability, the count <span class="math inline">\(k\)</span> is binomial and fluctuates by about <span class="math inline">\(\sqrt k\)</span>.</p>
+<p>The <strong>Clopper–Pearson interval</strong> gives the range of true rates that make the observed count unsurprising. Write <span class="math inline">\(1 - a\)</span> for the confidence level (<span class="math inline">\(a\)</span>, since <span class="math inline">\(\alpha\)</span> is the FPR). Its lower end <span class="math inline">\(l\)</span> and upper end <span class="math inline">\(u\)</span> solve <span id="eq-auto-04hypothesistesting-4"><span class="math display">\[\Pr[\mathrm{Bin}(n, l) \ge k] = \frac a2, \qquad \Pr[\mathrm{Bin}(n, u) \le k] = \frac a2. \tag{4.6}\]</span></span> It is exact, because it uses the binomial itself, and conservative, because it covers the true rate at least <span class="math inline">\(1 - a\)</span> of the time. In SciPy, <code>binomtest(k, n).proportion_ci(method="exact")</code> computes it.</p>
+<p>To claim that an FPR is below a target, you need only the upper end, and passing <code>alternative="less"</code> to <code>binomtest</code> gives that one-sided bound. With no events at all, the one-sided 95% bound is about <span class="math inline">\(3/n\)</span>, the <strong>rule of three</strong>. Computed exactly, certifying an FPR below <span class="math inline">\(10^{-3}\)</span> takes 2,995 negatives with no false positive.</p>
+<p>These intervals are wide. Even 10 false positives in 10,000 negatives give the interval <span class="math inline">\([0.00048, 0.00184]\)</span>, from about half to almost twice the observed rate. About 100 events pin a rate to within about 20%. So measuring an FPR of <span class="math inline">\(\alpha\)</span> takes on the order of <span class="math inline">\(100/\alpha\)</span> negatives. The <strong>Wald interval</strong>, which treats the count as normal, fails here: it is too narrow and collapses to <span class="math inline">\([0, 0]\)</span> with no events.</p>
 </section>
 <section id="sec-ht-recipe" class="level2" data-number="4.11">
 <h2 data-number="4.11" class="anchored" data-anchor-id="sec-ht-recipe"><span class="header-section-number">4.11</span> Evaluating a detector at a low false positive rate</h2>
-<p>These results give a recipe for evaluating any detector or binary classifier.</p>
 <ol type="1">
 <li>Fix the target FPRs, such as <span class="math inline">\(10^{-2}\)</span> and <span class="math inline">\(10^{-3}\)</span>.</li>
 <li>Plan the trials with about <span class="math inline">\(100/\alpha\)</span> negatives for a target FPR <span class="math inline">\(\alpha\)</span>.</li>
-<li>Choose the threshold on one split and measure the rates on another, because a threshold tuned on the evaluation set looks better there than it is.</li>
-<li>Report the TPR at each target FPR, with Clopper–Pearson intervals on both rates, and the full ROC curve on log–log axes.</li>
-<li>Compare two detectors at the same FPR, never by AUC or accuracy alone. On a shared evaluation set, a paired test such as McNemar’s (<code>statsmodels.stats.contingency_tables.mcnemar</code>) compares the positives each one catches.</li>
+<li>Choose the threshold on the negatives of one split and measure the rates on another, because a threshold tuned on the evaluation set looks better there than it is. The calibration split needs as many negatives, since below one over their number <code>np.quantile</code> only interpolates between the top scores.</li>
+<li>Report the TPR and FPR measured at that threshold, with Clopper–Pearson intervals on both, and the full ROC curve on log–log axes. A TPR read off the test split’s ROC curve is optimistic, because it picks its threshold on the test data.</li>
+<li>Compare two detectors at the same FPR, never by AUC or accuracy alone, and on a shared evaluation set check the gap with McNemar’s test, <code>binomtest(b, b + c, 0.5)</code>, where <span class="math inline">\(b\)</span> and <span class="math inline">\(c\)</span> count the positives that only one of them catches.</li>
 </ol>
+<p>The snippet below runs steps 3 and 4 on the breast cancer dataset bundled with scikit-learn, with a logistic regression as the detector and malignant tumours as positives. It holds out 30% of the data for calibration and 30% for testing. The threshold is the 99th percentile of the calibration split’s benign scores (<code>decision_function</code>, the model’s log-odds), for a target FPR of 1%.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> binomtest</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.datasets <span class="im">import</span> load_breast_cancer</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.pipeline <span class="im">import</span> make_pipeline</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> StandardScaler</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> load_breast_cancer(return_X_y<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> y  <span class="co"># make malignant (coded 0) the positive class</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>X_tr, X_ev, y_tr, y_ev <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.6</span>, stratify<span class="op">=</span>y, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>X_cal, X_te, y_cal, y_te <span class="op">=</span> train_test_split(X_ev, y_ev, test_size<span class="op">=</span><span class="fl">0.5</span>, stratify<span class="op">=</span>y_ev, random_state<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> make_pipeline(StandardScaler(), LogisticRegression(max_iter<span class="op">=</span><span class="dv">1000</span>)).fit(X_tr, y_tr)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> np.quantile(model.decision_function(X_cal[y_cal <span class="op">==</span> <span class="dv">0</span>]), <span class="fl">0.99</span>)  <span class="co"># target FPR 1%, set on calibration</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> model.decision_function(X_te)</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>pos, neg <span class="op">=</span> s[y_te <span class="op">==</span> <span class="dv">1</span>] <span class="op">&gt;</span> threshold, s[y_te <span class="op">==</span> <span class="dv">0</span>] <span class="op">&gt;</span> threshold  <span class="co"># flagged positives, negatives</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>tpr <span class="op">=</span> binomtest(<span class="bu">int</span>(pos.<span class="bu">sum</span>()), pos.size).proportion_ci(method<span class="op">=</span><span class="st">"exact"</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>fpr_upper <span class="op">=</span> binomtest(<span class="bu">int</span>(neg.<span class="bu">sum</span>()), neg.size, alternative<span class="op">=</span><span class="st">"less"</span>).proportion_ci(method<span class="op">=</span><span class="st">"exact"</span>).high</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(pos.<span class="bu">sum</span>(), pos.size, <span class="ss">f"</span><span class="sc">{</span>pos<span class="sc">.</span>mean()<span class="sc">:.3f}</span><span class="ss"> [</span><span class="sc">{</span>tpr<span class="sc">.</span>low<span class="sc">:.3f}</span><span class="ss">, </span><span class="sc">{</span>tpr<span class="sc">.</span>high<span class="sc">:.3f}</span><span class="ss">]"</span>)  <span class="co"># 56 63 0.889 [0.784, 0.954]</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(neg.<span class="bu">sum</span>(), neg.size, <span class="ss">f"</span><span class="sc">{</span>neg<span class="sc">.</span>mean()<span class="sc">:.4f}</span><span class="ss"> &lt;= </span><span class="sc">{</span>fpr_upper<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 2 108 0.0185 &lt;= 0.0571</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The detector catches 56 of the 63 malignant test cases, a TPR of 0.889 with a 95% interval from 0.784 to 0.954. But the threshold aimed at 1% flags 2 of the 108 benign test cases, and the one-sided 95% bound from those counts certifies only an FPR below 0.0571. Step 2 asks for about 10,000 negatives at this target, so on a dataset this small, report the interval and don’t claim the target. To use every negative, cross-validate: count on each held-out fold at a threshold set without it, and pool the counts, which gives an approximate interval, since the folds share training data.</p>
 </section>
 <section id="cheat-sheet" class="level2" data-number="4.12">
 <h2 data-number="4.12" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">4.12</span> Cheat sheet</h2>
@@ -646,7 +749,7 @@ Table&nbsp;4.1: The questions of this chapter and their answers.
 <tbody>
 <tr class="odd">
 <td>What is the best test?</td>
-<td>Threshold the likelihood ratio, per item if items differ (Neyman–Pearson)</td>
+<td>Threshold the likelihood ratio, per group if groups score differently (Neyman–Pearson)</td>
 </tr>
 <tr class="even">
 <td>How good can any test be?</td>
@@ -679,14 +782,15 @@ Table&nbsp;4.1: The questions of this chapter and their answers.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Use Clopper–Pearson intervals, never the Wald interval, for rare rates.</li>
+<li>Plan for <span class="math inline">\(100/\alpha\)</span> negatives, and use Clopper–Pearson, never Wald.</li>
+<li>Report TPR at fixed low FPRs on log–log axes, never AUC alone.</li>
 </ul>
 </section>
 <section id="further-reading" class="level2" data-number="4.13">
 <h2 data-number="4.13" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">4.13</span> Further reading</h2>
 <ul>
-<li>Fawcett, “An introduction to ROC analysis” (Pattern Recognition Letters, 2006): ROC curves and AUC as a ranking probability.</li>
-<li>Brown, Cai &amp; DasGupta, “Interval Estimation for a Binomial Proportion” (Statistical Science, 2001): why the Wald interval fails and what to use instead.</li>
+<li>Fawcett, “An introduction to ROC analysis” (Pattern Recognition Letters, 2006): ROC curves and their pitfalls.</li>
+<li>Brown, Cai &amp; DasGupta, “Interval Estimation for a Binomial Proportion” (Statistical Science, 2001): why Wald fails and what to use.</li>
 </ul>
 <p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part01-prerequisites/04-hypothesis-testing.html">the full edition’s chapter</a>.</p>
 

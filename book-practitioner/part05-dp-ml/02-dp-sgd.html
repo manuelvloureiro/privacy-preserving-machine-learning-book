@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>39&nbsp; DP-SGD – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>42&nbsp; DP-SGD – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -36,7 +71,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../part05-dp-ml/03-hyperparameter-tuning.html" rel="next">
+<link href="../part05-dp-ml/13-train-dp-sgd.html" rel="next">
 <link href="../part05-dp-ml/01-dp-erm.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
@@ -117,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/02-dp-sgd.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/02-dp-sgd.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -270,6 +305,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -284,67 +325,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -360,26 +407,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -390,26 +425,44 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -426,49 +479,31 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -479,14 +514,50 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -524,25 +595,24 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">39.1</span> Why this matters</a></li>
-  <li><a href="#sec-dpsgd-algorithm" id="toc-sec-dpsgd-algorithm" class="nav-link" data-scroll-target="#sec-dpsgd-algorithm"><span class="header-section-number">39.2</span> The algorithm and its guarantee</a></li>
-  <li><a href="#sec-dpsgd-checklist" id="toc-sec-dpsgd-checklist" class="nav-link" data-scroll-target="#sec-dpsgd-checklist"><span class="header-section-number">39.3</span> The implementation checklist</a></li>
-  <li><a href="#sec-dpsgd-clipping" id="toc-sec-dpsgd-clipping" class="nav-link" data-scroll-target="#sec-dpsgd-clipping"><span class="header-section-number">39.4</span> Clipping and the step size</a></li>
-  <li><a href="#sec-dpsgd-batch" id="toc-sec-dpsgd-batch" class="nav-link" data-scroll-target="#sec-dpsgd-batch"><span class="header-section-number">39.5</span> Batch size at a fixed budget</a></li>
-  <li><a href="#sec-dpsgd-ghost" id="toc-sec-dpsgd-ghost" class="nav-link" data-scroll-target="#sec-dpsgd-ghost"><span class="header-section-number">39.6</span> Making it fast</a></li>
-  <li><a href="#sec-dpsgd-run" id="toc-sec-dpsgd-run" class="nav-link" data-scroll-target="#sec-dpsgd-run"><span class="header-section-number">39.7</span> What privacy costs in accuracy</a></li>
-  <li><a href="#sec-dpsgd-opacus" id="toc-sec-dpsgd-opacus" class="nav-link" data-scroll-target="#sec-dpsgd-opacus"><span class="header-section-number">39.8</span> The Opacus workflow</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">39.9</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">39.10</span> Further reading</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">42.1</span> Why this matters</a></li>
+  <li><a href="#sec-dpsgd-algorithm" id="toc-sec-dpsgd-algorithm" class="nav-link" data-scroll-target="#sec-dpsgd-algorithm"><span class="header-section-number">42.2</span> The algorithm and its guarantee</a></li>
+  <li><a href="#sec-dpsgd-checklist" id="toc-sec-dpsgd-checklist" class="nav-link" data-scroll-target="#sec-dpsgd-checklist"><span class="header-section-number">42.3</span> The implementation checklist</a></li>
+  <li><a href="#sec-dpsgd-clipping" id="toc-sec-dpsgd-clipping" class="nav-link" data-scroll-target="#sec-dpsgd-clipping"><span class="header-section-number">42.4</span> Clipping and the step size</a></li>
+  <li><a href="#sec-dpsgd-batch" id="toc-sec-dpsgd-batch" class="nav-link" data-scroll-target="#sec-dpsgd-batch"><span class="header-section-number">42.5</span> Batch size at a fixed budget</a></li>
+  <li><a href="#sec-dpsgd-ghost" id="toc-sec-dpsgd-ghost" class="nav-link" data-scroll-target="#sec-dpsgd-ghost"><span class="header-section-number">42.6</span> Making it fast</a></li>
+  <li><a href="#sec-dpsgd-run" id="toc-sec-dpsgd-run" class="nav-link" data-scroll-target="#sec-dpsgd-run"><span class="header-section-number">42.7</span> What privacy costs in accuracy</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">42.8</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">42.9</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/02-dp-sgd.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/02-dp-sgd.html"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></h1>
+<h1 class="title"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></h1>
 </div>
 
 
@@ -559,56 +629,67 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="39.1">
-<h2 data-number="39.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">39.1</span> Why this matters</h2>
-<p>Nearly every deep-learning system that satisfies differential privacy (DP) runs one algorithm. It is stochastic gradient descent (SGD) with each example’s gradient clipped to a fixed length and Gaussian noise added to every step, called DP-SGD (Abadi et al.&nbsp;2016). Clipping bounds one record’s influence for any model (<a href="../part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>). An <strong>accountant</strong> then adds up the cost of every step into one privacy level <span class="math inline">\(\varepsilon\)</span> with a small slack <span class="math inline">\(\delta\)</span>.</p>
-<p>The privacy analysis never looks inside the model, so the settings split in two. The noise, the sampling rate and the number of steps decide <span class="math inline">\(\varepsilon\)</span>, while the clipping norm and the step size are free to be tuned for accuracy. Most failures come from code that silently breaks the proof, so a checklist matters as much as the settings.</p>
+<section id="why-this-matters" class="level2" data-number="42.1">
+<h2 data-number="42.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">42.1</span> Why this matters</h2>
+<p>Nearly every deep-learning system that satisfies differential privacy (DP) runs one algorithm. It is stochastic gradient descent (SGD) with each example’s gradient clipped to a fixed length and Gaussian noise added at every step, called DP-SGD (Abadi et al.&nbsp;2016). Clipping limits how far one record moves each step, whatever the model, and the noise hides that move (<a href="../part05-dp-ml/01-dp-erm.html">Private empirical risk minimization</a>). An <strong>accountant</strong> then adds up the cost of every step into one privacy level, the <span class="math inline">\(\varepsilon\)</span> of the guarantee. It comes with <span class="math inline">\(\delta\)</span>, a small additive slack that the guarantee allows on top of <span class="math inline">\(\varepsilon\)</span>.</p>
+<p>The accountant sees only the noise, the sampling rate (the chance that a record joins a batch) and the number of steps, never the model. So those three decide <span class="math inline">\(\varepsilon\)</span>, and the clipping norm and the step size are free to be tuned for accuracy. Most failures come from code that breaks an assumption of the privacy proof, so the checks matter as much as the settings. <a href="../part05-dp-ml/13-train-dp-sgd.html">Train a model with DP-SGD</a> does the whole job in Opacus.</p>
 </section>
-<section id="sec-dpsgd-algorithm" class="level2" data-number="39.2">
-<h2 data-number="39.2" class="anchored" data-anchor-id="sec-dpsgd-algorithm"><span class="header-section-number">39.2</span> The algorithm and its guarantee</h2>
-<p>A training set holds <span class="math inline">\(n\)</span> records, and the gradient of one record’s loss is its <strong>per-example gradient</strong>, written <span class="math inline">\(g_i\)</span> for record <span class="math inline">\(i\)</span>. DP-SGD repeats five operations at every step.</p>
+<section id="sec-dpsgd-algorithm" class="level2" data-number="42.2">
+<h2 data-number="42.2" class="anchored" data-anchor-id="sec-dpsgd-algorithm"><span class="header-section-number">42.2</span> The algorithm and its guarantee</h2>
+<p>A training set holds <span class="math inline">\(n\)</span> records. The gradient of one record’s loss is its <strong>per-example gradient</strong>, written <span class="math inline">\(g_i\)</span> for record <span class="math inline">\(i\)</span>. DP-SGD repeats five operations at every step.</p>
 <ol type="1">
 <li>Sample a batch. Each record enters independently with probability <span class="math inline">\(q\)</span>, the <strong>sampling rate</strong>, which is called Poisson sampling.</li>
 <li>Compute the per-example gradient of each record in the batch.</li>
 <li>Clip each gradient longer than the <strong>clipping norm</strong> <span class="math inline">\(C\)</span> to length <span class="math inline">\(C\)</span>.</li>
-<li>Add Gaussian noise with standard deviation <span class="math inline">\(\sigma C\)</span> to each coordinate of the sum, where the <strong>noise multiplier</strong> <span class="math inline">\(\sigma\)</span> measures the noise in units of <span class="math inline">\(C\)</span>.</li>
-<li>Divide by the expected batch size, the fixed number <span class="math inline">\(B = qn\)</span>, and step against the result, scaled by the step size <span class="math inline">\(\eta\)</span>.</li>
+<li>Sum the clipped gradients, and add Gaussian noise with standard deviation <span class="math inline">\(\sigma C\)</span> to each coordinate of the sum, where the <strong>noise multiplier</strong> <span class="math inline">\(\sigma\)</span> measures the noise in units of <span class="math inline">\(C\)</span>.</li>
+<li>Divide the noisy sum by the expected batch size <span class="math inline">\(B = qn\)</span>, a fixed public number, and take a step of size <span class="math inline">\(\eta\)</span> in the opposite direction.</li>
 </ol>
-<p>Write <span class="math inline">\(w_t\)</span> for the weights at step <span class="math inline">\(t\)</span> and <span class="math inline">\(S_t\)</span> for its batch. Then the update, with fresh Gaussian noise <span class="math inline">\(\xi_t\)</span>, is <span id="eq-auto-02dpsgd-1"><span class="math display">\[w_{t+1} = w_t - \frac{\eta}{B}\Big(\sum_{i\in S_t}g_i\min\Big(1, \frac{C}{\|g_i\|}\Big) + \xi_t\Big), \qquad \xi_t \sim \mathcal N(0, \sigma^2C^2I). \tag{39.1}\]</span></span> Releasing every intermediate set of weights is then <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for <strong>add/remove neighbours</strong>, datasets that differ because one has a record the other lacks. The Rényi differential privacy (RDP) accountant computes <span class="math inline">\(\varepsilon\)</span> from the sampling rate, the noise multiplier and the number of steps alone (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>).</p>
-<p>This part’s running example takes 10,000 steps with <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>, which costs <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. To pick <span class="math inline">\(\sigma\)</span> for a target, fix the rate and the number of steps and let the accountant solve for it. With the same settings, <span class="math inline">\(\varepsilon = 1\)</span> needs a noise multiplier of 4.13.</p>
+<p>Write <span class="math inline">\(w_t\)</span> for the weights at step <span class="math inline">\(t\)</span> and <span class="math inline">\(S_t\)</span> for its batch. The Gaussian noise <span class="math inline">\(\xi_t\)</span> is drawn afresh, independently on each coordinate, and the update is <span id="eq-auto-02dpsgd-1"><span class="math display">\[w_{t+1} = w_t - \frac{\eta}{B}\Big(\sum_{i\in S_t}g_i\min\Big(1, \frac{C}{\|g_i\|}\Big) + \xi_t\Big), \qquad \xi_t \sim \mathcal N(0, \sigma^2C^2I). \tag{42.1}\]</span></span> Releasing every intermediate set of weights then satisfies <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for <strong>add/remove neighbours</strong>, datasets that differ because one has a record the other lacks (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>).</p>
+<p>This part’s running example trains a small network on 10,000 synthetic records (<a href="#sec-dpsgd-run" class="quarto-xref"><span>Section 42.7</span></a>). It runs 10,000 steps with <span class="math inline">\(\sigma = 1\)</span>, and each record joins a batch with probability 0.01. The Rényi differential privacy (RDP) accountant, a standard upper bound that is slightly loose, gives it <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. To pick <span class="math inline">\(\sigma\)</span> for a target <span class="math inline">\(\varepsilon\)</span> instead, let the accountant you will report solve for it. <a href="../part05-dp-ml/13-train-dp-sgd.html#sec-trainwf-calibrate">Train a model with DP-SGD</a> does this in one Opacus call (<a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html">Calibrate and account a DP-SGD run</a>).</p>
+<p>Choose <span class="math inline">\(\delta\)</span> by the book’s default, <span class="math inline">\(\delta \le 1/n^{1.1}\)</span> rounded down to a power of ten. That keeps it safely below <span class="math inline">\(1/n\)</span> (<a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>). Here <span class="math inline">\(n\)</span> counts people, and for the running example’s 10,000 records, one per person, the rule gives its <span class="math inline">\(10^{-5}\)</span>.</p>
 </section>
-<section id="sec-dpsgd-checklist" class="level2" data-number="39.3">
-<h2 data-number="39.3" class="anchored" data-anchor-id="sec-dpsgd-checklist"><span class="header-section-number">39.3</span> The implementation checklist</h2>
-<p>The guarantee rests on four conditions, each a property of your code that a reviewer can check. Code that breaks one still trains and reports as before.</p>
-<p>First, one record must move the clipped sum by at most <span class="math inline">\(C\)</span>. Batch normalization breaks this, because its statistics let one record change every other record’s gradient, so private models use group or layer normalization instead. The clipping norm must also be fixed in advance, since a <span class="math inline">\(C\)</span> set from the current batch makes the noise depend on the data.</p>
-<p>Second, the accountant must assume the sampler the code actually runs (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes">Amplification by subsampling</a>). Many data loaders shuffle once per epoch and cut the data into fixed batches. A record is then never absent from an epoch, and the true <span class="math inline">\(\varepsilon\)</span> can be far above the Poisson number. Fixed-size batches drawn afresh at every step are covered under add/remove if you give a Poisson accountant the batch’s fraction of the data as its rate and half your noise multiplier.</p>
-<p>Third, divide the noisy sum by the public number <span class="math inline">\(B\)</span>, never by the actual batch size, because the actual size changes when the target record is added.</p>
+<section id="sec-dpsgd-checklist" class="level2" data-number="42.3">
+<h2 data-number="42.3" class="anchored" data-anchor-id="sec-dpsgd-checklist"><span class="header-section-number">42.3</span> The implementation checklist</h2>
+<p>The guarantee rests on four properties of your code, and code that breaks one still trains and reports as before.</p>
+<p>First, one record must move the clipped sum by at most <span class="math inline">\(C\)</span>. Batch normalization breaks this, because its statistics let one record change every other record’s gradient. So private models use group or layer normalization, which normalize each example on its own. With <code>strict=False</code>, Opacus’s validator lists the layers to replace instead of raising an error.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> opacus.validators <span class="im">import</span> ModuleValidator</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> torchvision.models <span class="im">import</span> resnet18</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> resnet18(weights<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">len</span>(ModuleValidator.validate(model, strict<span class="op">=</span><span class="va">False</span>)))  <span class="co"># 20</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> ModuleValidator.fix(model)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="bu">len</span>(ModuleValidator.validate(model, strict<span class="op">=</span><span class="va">False</span>)))  <span class="co"># 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The clipping norm must also be fixed in advance, from public data or from a private estimate. A <span class="math inline">\(C\)</span> read off the current batch makes the size of the noise depend on the data, and that dependence leaks information the accountant does not count.</p>
+<p>Second, the accountant must assume the sampler the code actually runs (<a href="../part04-privacy-accounting/05-subsampling.html#sec-sub-schemes">Amplification by subsampling</a>). The Poisson accountant’s saving comes from each record’s chance of being left out. A loader that shuffles once per epoch and cuts fixed batches puts every record in exactly one batch per epoch. That chance is then gone, and the true <span class="math inline">\(\varepsilon\)</span> can be far above the Poisson number.</p>
+<p>Batches of a fixed size, drawn afresh at every step, can still use a Poisson accountant. Give it the batch’s share of the data as the rate and half your noise multiplier, because a record that enters a fixed-size batch pushes another out, so the sum can move by <span class="math inline">\(2C\)</span>. That is expensive, since halving <span class="math inline">\(\sigma\)</span> raises the running example’s <span class="math inline">\(\varepsilon\)</span> from 6.71 to 47.42. The rule holds only for add/remove neighbours, and Part 4 gives what to account for under the others.</p>
+<p>Third, divide the noisy sum by the public number <span class="math inline">\(B\)</span>, never by the actual batch size. The actual size is one larger when the protected record is drawn, so dividing by it reveals whether it was, and the accountant does not count that leak.</p>
 <p>Fourth, the accountant must count every step that touched the data, including those of runs discarded during <a href="../part05-dp-ml/03-hyperparameter-tuning.html">tuning</a>.</p>
-<p>Beyond the proof, state the neighbouring relation next to every <span class="math inline">\(\varepsilon\)</span>, since under replacement one record can move the sum by <span class="math inline">\(2C\)</span>. Preprocessing that looks at the data, such as normalizing by the mean, must itself be private. And a person with many records needs <a href="../part05-dp-ml/07-user-level.html">user-level privacy</a>.</p>
+<p>Beyond the proof, state the neighbouring relation next to every <span class="math inline">\(\varepsilon\)</span>, and make data-dependent preprocessing private too. The guarantee covers one record, so a person with many records needs <a href="../part05-dp-ml/07-user-level.html">user-level privacy</a>. And the proof assumes exact Gaussian noise, which ordinary floating-point sampling does not produce, so turn on Opacus’s <code>secure_mode=True</code> for a model you release (<a href="../part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>).</p>
 </section>
-<section id="sec-dpsgd-clipping" class="level2" data-number="39.4">
-<h2 data-number="39.4" class="anchored" data-anchor-id="sec-dpsgd-clipping"><span class="header-section-number">39.4</span> Clipping and the step size</h2>
-<p>The clipping norm leaves privacy alone but controls both of its costs. A small <span class="math inline">\(C\)</span> clips more gradients, so records with large gradients count for less, and they are often rare examples (<a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a>). A large <span class="math inline">\(C\)</span> instead means more noise, since the noise is <span class="math inline">\(\sigma C\)</span>.</p>
-<p>When every gradient is clipped, only the product <span class="math inline">\(\eta C\)</span> of the step size and the clipping norm matters. So the practical recipe is to clip hard and tune one number. On the running example, holding <span class="math inline">\(\eta C\)</span> at 0.25 keeps test accuracy at 0.9599 or above for every <span class="math inline">\(C\)</span> up to 0.3. With the step size held fixed instead, a clipping norm of 10 drops accuracy to 0.8347.</p>
-<p>What goes wrong is that gradient norms drift. The median per-example gradient norm of the running example falls from 3.592 to 0.006 in a thousand steps, so a <span class="math inline">\(C\)</span> that clips everything early clips only a minority later. Adaptive clipping, which tracks a quantile of the norms privately, follows the drift for a small share of the budget, and Opacus offers it as <code>clipping="adaptive"</code>.</p>
+<section id="sec-dpsgd-clipping" class="level2" data-number="42.4">
+<h2 data-number="42.4" class="anchored" data-anchor-id="sec-dpsgd-clipping"><span class="header-section-number">42.4</span> Clipping and the step size</h2>
+<p>Clipping must happen per example. PyTorch’s <code>torch.nn.utils.clip_grad_norm_</code> clips the gradient of a whole batch, which bounds nothing about any single example, so it gives no privacy at any threshold.</p>
+<p>The clipping norm does not change <span class="math inline">\(\varepsilon\)</span>, but it sets the two ways clipping costs accuracy. A small <span class="math inline">\(C\)</span> clips more gradients, so records with large gradients count for less, and they are often rare examples (<a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a>). A large <span class="math inline">\(C\)</span> instead means more noise, since the noise is <span class="math inline">\(\sigma C\)</span>. When every gradient is clipped, each has length exactly <span class="math inline">\(C\)</span>, and the noise is proportional to <span class="math inline">\(C\)</span> too. So only the product <span class="math inline">\(\eta C\)</span> of the step size and the clipping norm matters. The practical recipe is to clip hard and tune that one number. On the running example at <span class="math inline">\(\sigma = 1\)</span>, holding <span class="math inline">\(\eta C\)</span> at 0.25 keeps test accuracy at 0.9599 or above for every <span class="math inline">\(C\)</span> up to 0.3. With the step size held at 0.5 instead, <span class="math inline">\(C = 10\)</span> drops it to 0.8347.</p>
+<p>Noise also changes the best step size. On the logistic problem of <a href="../part01-prerequisites/06-optimization.html">Optimization</a>, adding noise moves the best step on a grid down from 0.178 to 0.056. Clipping pulls the other way, because clipped gradients are shorter, which is why private runs often start from a step several times the non-private one. The two effects do not cancel predictably. So search the step again whenever <span class="math inline">\(\sigma\)</span> or <span class="math inline">\(C\)</span> changes, and count the search’s runs in <span class="math inline">\(\varepsilon\)</span>.</p>
+<p>Gradient norms also drift. The running example’s median per-example norm falls from 3.592 to 0.006 in a thousand steps, so a <span class="math inline">\(C\)</span> that clips everything early clips only a minority later. Adaptive clipping is the private estimate that the checklist allows, since it moves <span class="math inline">\(C\)</span> toward a quantile of the norms measured by a small private count. Opacus offers it with <code>clipping="adaptive"</code>, but this is not a drop-in switch. It takes five more parameters, such as <code>target_unclipped_quantile</code>, the share of gradients to leave unclipped. And because part of the noise budget goes to the count, the gradient gets more noise at the same <span class="math inline">\(\sigma\)</span>.</p>
 </section>
-<section id="sec-dpsgd-batch" class="level2" data-number="39.5">
-<h2 data-number="39.5" class="anchored" data-anchor-id="sec-dpsgd-batch"><span class="header-section-number">39.5</span> Batch size at a fixed budget</h2>
-<p>Suppose the privacy budget and the number of epochs, passes over the data, are fixed. Should you take many small steps or a few large ones? For a small sampling rate and a noise multiplier well above 1, the noise multiplier must grow like <span class="math inline">\(\sqrt q\)</span>. Since <span class="math inline">\(q\)</span> is <span class="math inline">\(B/n\)</span>, the noise on the averaged gradient falls with the batch size, <span id="eq-dpsgd-batch"><span class="math display">\[\sigma \propto \sqrt{\frac Bn}, \qquad \frac{\sigma C}{B} \propto \frac{C}{\sqrt{Bn}}. \tag{39.2}\]</span></span> Small batches are even worse than this law says, because they need a noise multiplier near or below 1, where each step costs more than the law assumes. For example, take a budget of <span class="math inline">\(\varepsilon = 4\)</span> over 100 epochs. Going from a batch of 10 to one of 1,000 then cuts the noise per averaged gradient by a factor of 18.6, where the law predicts 10.</p>
-<p>Fewer steps are the price, and a larger step size pays it. At scale, De et al.&nbsp;(2022) and Anil et al.&nbsp;(2022) report that very large batches are a main ingredient of accurate models. So choose the largest batch that your hardware and your epoch count allow, and scale the step size up with it.</p>
+<section id="sec-dpsgd-batch" class="level2" data-number="42.5">
+<h2 data-number="42.5" class="anchored" data-anchor-id="sec-dpsgd-batch"><span class="header-section-number">42.5</span> Batch size at a fixed budget</h2>
+<p>Averaging the noisy sum over <span class="math inline">\(B\)</span> records divides the added noise by <span class="math inline">\(B\)</span>, so larger batches dilute it. At a fixed budget and number of epochs, a larger batch means fewer steps, and the noise multiplier must rise to keep <span class="math inline">\(\varepsilon\)</span>, but more slowly than <span class="math inline">\(B\)</span> does. For a small sampling rate and a noise multiplier well above 1, the accountant’s cost at a fixed number of epochs depends on <span class="math inline">\(q/\sigma^2\)</span>, so the noise multiplier only has to grow like <span class="math inline">\(\sqrt q\)</span>. Since <span class="math inline">\(q\)</span> is <span class="math inline">\(B/n\)</span>, the noise on the averaged gradient falls with the batch size, <span id="eq-dpsgd-batch"><span class="math display">\[\sigma \propto \sqrt{\frac Bn}, \qquad \frac{\sigma C}{B} \propto \frac{C}{\sqrt{Bn}}. \tag{42.2}\]</span></span> Small batches are worse still, because they need a noise multiplier near or below 1, where subsampling saves much less.</p>
+<p>So choose the largest batch your hardware allows, with a larger step size for the fewer steps. When the batch does not fit in memory, Opacus’s <code>BatchMemoryManager</code> splits the logical batch, the one the sampler draws, into physical batches that fit. It still steps once per logical batch, so the sampling rate and the accounting stay the same.</p>
 </section>
-<section id="sec-dpsgd-ghost" class="level2" data-number="39.6">
-<h2 data-number="39.6" class="anchored" data-anchor-id="sec-dpsgd-ghost"><span class="header-section-number">39.6</span> Making it fast</h2>
-<p>Computed one record at a time, DP-SGD can run up to two orders of magnitude slower than ordinary training. Of the three fixes, two are free. Vectorized per-example gradients, through <code>torch.func.vmap</code> with <code>grad</code>, JAX’s <code>vmap</code> or Opacus’s backward hooks, compute exactly the same clipped sum in parallel, so they change only the running time. <strong>Ghost clipping</strong> saves memory as well. A dense layer’s per-example gradient is the outer product of the layer’s input and the error flowing back into it. Its length is therefore the product of their lengths, so the norms come without forming the gradients.</p>
-<p>Microbatching is the costly fix. It averages fixed groups of records and clips the averages, but one record can then flip its group’s clipped average, so the sensitivity doubles to <span class="math inline">\(2C\)</span>. Write <span class="math inline">\(m\)</span> for the number of records per group. The noise on each coordinate of the averaged update then becomes <span id="eq-dpsgd-microbatch"><span class="math display">\[2m\cdot\frac{\sigma C}{B} \tag{39.3}\]</span></span> at the same <span class="math inline">\(\varepsilon\)</span>. On the running example, groups of 4 cut test accuracy from 0.9589 to 0.9336, so use it only as a last resort, and check that your library charges for it.</p>
+<section id="sec-dpsgd-ghost" class="level2" data-number="42.6">
+<h2 data-number="42.6" class="anchored" data-anchor-id="sec-dpsgd-ghost"><span class="header-section-number">42.6</span> Making it fast</h2>
+<p>Computed one record at a time, DP-SGD can run tens or hundreds of times slower than ordinary training. Of three fixes, the first two are free. Vectorized per-example gradients, from <code>torch.func.vmap</code> or Opacus’s hooks, compute the same clipped sum in parallel. <strong>Ghost clipping</strong> also saves memory, because it gets each example’s gradient norm from each layer’s inputs and back-propagated errors without forming the gradient. Opacus turns it on with <code>grad_sample_mode="ghost"</code>, and <code>make_private</code> then also returns a loss function to train with.</p>
+<p>Microbatching is the costly fix. It clips the average gradient of each fixed group of <span class="math inline">\(m\)</span> records instead of each record’s gradient. One record can then change its group’s clipped average by up to <span class="math inline">\(2C\)</span>, so the noise must double. And since the update divides it by the <span class="math inline">\(B/m\)</span> groups rather than by <span class="math inline">\(B\)</span> records, the noise on each coordinate of the averaged update becomes <span id="eq-dpsgd-microbatch"><span class="math display">\[2m\cdot\frac{\sigma C}{B}. \tag{42.3}\]</span></span> On the running example at <span class="math inline">\(\sigma = 1\)</span>, groups of 4 cut test accuracy from 0.9589 with per-example clipping to 0.9336, so use it only as a last resort.</p>
 </section>
-<section id="sec-dpsgd-run" class="level2" data-number="39.7">
-<h2 data-number="39.7" class="anchored" data-anchor-id="sec-dpsgd-run"><span class="header-section-number">39.7</span> What privacy costs in accuracy</h2>
-<p>The running example is a network with one hidden layer of 64 tanh units, trained on 10,000 synthetic records with <span class="math inline">\(C\)</span> and <span class="math inline">\(\eta\)</span> both 0.5. <a href="#tbl-dpsgd-run" class="quarto-xref">Table&nbsp;<span>39.1</span></a> trains it at four budgets.</p>
+<section id="sec-dpsgd-run" class="level2" data-number="42.7">
+<h2 data-number="42.7" class="anchored" data-anchor-id="sec-dpsgd-run"><span class="header-section-number">42.7</span> What privacy costs in accuracy</h2>
+<p>The running example is a network with one hidden layer of 64 tanh units. <a href="#tbl-dpsgd-run" class="quarto-xref">Table&nbsp;<span>42.1</span></a> trains it at four budgets, with <span class="math inline">\(C\)</span> and <span class="math inline">\(\eta\)</span> both 0.5.</p>
 <div id="tbl-dpsgd-run" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dpsgd-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;39.1: Test accuracy of the running example under DP-SGD at four budgets, with <span class="math inline">\(\delta = 10^{-5}\)</span>.
+Table&nbsp;42.1: Test accuracy of the running example under DP-SGD at four budgets, with <span class="math inline">\(\delta = 10^{-5}\)</span> and the RDP accountant.
 </figcaption>
 <div aria-describedby="tbl-dpsgd-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -650,87 +731,79 @@ Table&nbsp;39.1: Test accuracy of the running example under DP-SGD at four budge
 <td>0</td>
 <td><span class="math inline">\(0.9649 \pm 0.0009\)</span></td>
 </tr>
+<tr class="even">
+<td>Non-private SGD (1,000 steps)</td>
+<td>—</td>
+<td><span class="math inline">\(0.9610 \pm 0.0005\)</span></td>
+</tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>Clipping alone costs nothing here, so the whole loss comes from the noise, and it grows steeply as <span class="math inline">\(\varepsilon\)</span> shrinks. Going from <span class="math inline">\(\varepsilon = 8\)</span> to 4 costs half a point, while halving it from 1 to 0.5 costs almost 10.</p>
-<p>Model size matters because the noise grows with the number of trained weights while the clipped signal does not. Write <span class="math inline">\(p\)</span> for the number of trained weights. The noise vector on the averaged update is then about <span id="eq-auto-02dpsgd-2"><span class="math display">\[\frac{\sigma C\sqrt p}{B} \tag{39.4}\]</span></span> long, which in the running example is about ten times the length of the clipped signal. So the best private model is often smaller than the best non-private one, unless <a href="../part05-dp-ml/06-public-data.html">public pretraining</a> does most of the work.</p>
+<p>Clipping without noise scores slightly above non-private SGD here, so the whole loss comes from the noise, and it grows steeply as <span class="math inline">\(\varepsilon\)</span> shrinks. Going from <span class="math inline">\(\varepsilon = 8\)</span> to 4 costs half a point, while halving it from 1 to 0.5 costs almost 10. The total length of the noise on a step also grows with the square root of the number of trained weights. The clipped signal cannot exceed <span class="math inline">\(C\)</span>, so a smaller model or <a href="../part05-dp-ml/06-public-data.html">public pretraining</a> often helps.</p>
 </section>
-<section id="sec-dpsgd-opacus" class="level2" data-number="39.8">
-<h2 data-number="39.8" class="anchored" data-anchor-id="sec-dpsgd-opacus"><span class="header-section-number">39.8</span> The Opacus workflow</h2>
-<p>To make a PyTorch training loop private, Opacus wraps an ordinary model, optimizer and data loader. First, <code>ModuleValidator.fix(model)</code> replaces batch normalization with group normalization. A <code>PrivacyEngine</code> then returns private versions of all three. Its <code>make_private_with_epsilon</code> picks the noise multiplier for a target <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span> and number of epochs, while <code>make_private</code> takes <code>noise_multiplier</code> directly. Both take <code>max_grad_norm</code>, the clipping norm, and by default replace the loader with one that draws Poisson batches (<code>poisson_sampling=True</code>). The engine’s default accountant is the privacy loss random variable (PRV) accountant, <code>"prv"</code>, and <code>accountant="rdp"</code> selects the Rényi one.</p>
-<pre class="text"><code>from opacus import PrivacyEngine
-from opacus.validators import ModuleValidator
-
-model = ModuleValidator.fix(model)               # BatchNorm -&gt; GroupNorm
-optimizer = torch.optim.SGD(model.parameters(), lr=lr)
-engine = PrivacyEngine()                         # accountant="prv" by default
-model, optimizer, loader = engine.make_private_with_epsilon(
-    module=model, optimizer=optimizer, data_loader=loader,
-    target_epsilon=4.0, target_delta=1e-5, epochs=epochs, max_grad_norm=C)
-for epoch in range(epochs):
-    for x, y in loader:                          # Poisson batches
-        optimizer.zero_grad()
-        criterion(model(x), y).backward()        # per-example gradients
-        optimizer.step()                         # clip, add noise, step
-print(engine.get_epsilon(delta=1e-5))</code></pre>
-<p>To size the noise before training, <code>opacus.accountants.utils.get_noise_multiplier(target_epsilon=..., target_delta=..., sample_rate=..., epochs=...)</code> solves for <span class="math inline">\(\sigma\)</span>. When a large batch does not fit in memory, <code>BatchMemoryManager</code> from <code>opacus.utils.batch_memory_manager</code> splits it into smaller physical batches but still steps once per logical batch, so the accounting is unchanged. Passing <code>grad_sample_mode="ghost"</code> turns on ghost clipping, and <code>make_private</code> then also returns a wrapped loss function. In TensorFlow, TensorFlow Privacy’s <code>DPKerasSGDOptimizer</code> takes <code>l2_norm_clip</code>, <code>noise_multiplier</code> and <code>num_microbatches</code>, and the last should equal the batch size.</p>
-<p>Tune in a fixed order. First fix <span class="math inline">\(\varepsilon\)</span>, a <span class="math inline">\(\delta\)</span> below <span class="math inline">\(1/n\)</span> and the number of epochs, since they are the contract. Then choose a large batch, thousands of examples if you can, and let the accountant set the noise multiplier. Finally, set <span class="math inline">\(C\)</span> near or below the median per-example gradient norm, measured on public or proxy data, and search the step size, which now stands for <span class="math inline">\(\eta C\)</span>. Count that search as <a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a> explains.</p>
-<p>When a private model is much worse than its non-private twin, the noise is too long for the signal. Change the batch size first, then train fewer weights, for instance by starting from a public model. If training diverges, lower <span class="math inline">\(\eta C\)</span>. And if <span class="math inline">\(\varepsilon\)</span> looks too good, look for a shuffling loader, a microbatch setting or uncounted tuning runs.</p>
-</section>
-<section id="cheat-sheet" class="level2" data-number="39.9">
-<h2 data-number="39.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">39.9</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="42.8">
+<h2 data-number="42.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">42.8</span> Cheat sheet</h2>
 <div id="tbl-dpsgd-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dpsgd-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;39.2: DP-SGD settings and checks.
+Table&nbsp;42.2: DP-SGD starting settings and checks.
 </figcaption>
 <div aria-describedby="tbl-dpsgd-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Setting or check</th>
-<th>Rule</th>
+<th>Setting</th>
+<th>Start with</th>
+<th>Check</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>What sets <span class="math inline">\(\varepsilon\)</span></td>
-<td>The sampling rate, the noise multiplier and the number of steps only</td>
+<td><span class="math inline">\(\delta\)</span></td>
+<td><span class="math inline">\(1/n^{1.1}\)</span> rounded down to a power of ten</td>
+<td><span class="math inline">\(n\)</span> counts people</td>
 </tr>
 <tr class="even">
-<td>Sampler</td>
-<td>Poisson; fixed-size batches use rate <span class="math inline">\(m/n\)</span> and <span class="math inline">\(\sigma/2\)</span>; never shuffle-and-partition</td>
-</tr>
-<tr class="odd">
-<td>Model code</td>
-<td>Group or layer normalization; divide by <span class="math inline">\(B = qn\)</span></td>
-</tr>
-<tr class="even">
-<td>Clipping norm</td>
-<td>Fixed in advance, below the typical gradient norm; then tune <span class="math inline">\(\eta C\)</span></td>
-</tr>
-<tr class="odd">
 <td>Batch size</td>
-<td>As large as you can, with the step size scaled up</td>
-</tr>
-<tr class="even">
-<td>Speed</td>
-<td>Vectorize or ghost-clip; microbatches of <span class="math inline">\(m\)</span> multiply the noise by <span class="math inline">\(2m\)</span></td>
+<td>256 to 4,096, as large as fits</td>
+<td>Noise on the average is <span class="math inline">\(\sigma C/B\)</span></td>
 </tr>
 <tr class="odd">
-<td>Model size</td>
-<td>Noise length about <span class="math inline">\(\sigma C\sqrt p/B\)</span>; train fewer weights</td>
+<td>Epochs</td>
+<td>Fixed before calibrating; Adult uses 10</td>
+<td><span class="math inline">\(\sigma\)</span> recomputed if they change</td>
+</tr>
+<tr class="even">
+<td>Noise multiplier</td>
+<td>From the accountant you report</td>
+<td>A second accountant gives the same <span class="math inline">\(\varepsilon\)</span></td>
+</tr>
+<tr class="odd">
+<td>Clipping norm</td>
+<td>1, or the median norm on public data</td>
+<td>Per example, never <code>clip_grad_norm_</code></td>
+</tr>
+<tr class="even">
+<td>Optimizer, step size</td>
+<td>SGD with momentum 0.9; several times the non-private step (ten on Adult), chosen on public data</td>
+<td>Retuned when <span class="math inline">\(\sigma\)</span> or <span class="math inline">\(C\)</span> changes</td>
+</tr>
+<tr class="odd">
+<td>Sampler</td>
+<td>Poisson</td>
+<td>Fixed-size batches: account at <span class="math inline">\(\sigma/2\)</span> (add/remove only)</td>
 </tr>
 <tr class="even">
 <td>Report</td>
-<td><span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, the neighbouring relation, every run counted</td>
+<td><span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, neighbours, accountant</td>
+<td>Every run counted</td>
 </tr>
 </tbody>
 </table>
@@ -739,14 +812,12 @@ Table&nbsp;39.2: DP-SGD settings and checks.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Read the data loader and the model before trusting an <span class="math inline">\(\varepsilon\)</span>.</li>
+<li>Fix <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span> and the number of epochs first, since they are the contract. Then choose the batch, let the accountant set <span class="math inline">\(\sigma\)</span>, and tune the step size last.</li>
 <li>Find the <span class="math inline">\(\varepsilon\)</span> below which accuracy collapses on your task before you promise a budget.</li>
-<li>Report <span class="math inline">\(\varepsilon\)</span> for every step of training, not for the last epoch, and at the <span class="math inline">\(\delta\)</span> you state.</li>
-<li>Choose <span class="math inline">\(C\)</span> and the number of epochs on public data, or pay for the runs that chose them.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="39.10">
-<h2 data-number="39.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">39.10</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="42.9">
+<h2 data-number="42.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">42.9</span> Further reading</h2>
 <ul>
 <li>Abadi et al., “Deep Learning with Differential Privacy” (CCS 2016): DP-SGD and the moments accountant.</li>
 <li>Ponomareva et al., “How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy” (JAIR 2023): what to clip, how to tune and what to report.</li>
@@ -1160,12 +1231,12 @@ Table&nbsp;39.2: DP-SGD settings and checks.
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
       <a href="../part05-dp-ml/01-dp-erm.html" class="pagination-link" aria-label="Private empirical risk minimization">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span>
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="pagination-link" aria-label="Hyperparameter tuning and private selection">
-        <span class="nav-page-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../part05-dp-ml/13-train-dp-sgd.html" class="pagination-link" aria-label="Train a model with DP-SGD">
+        <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

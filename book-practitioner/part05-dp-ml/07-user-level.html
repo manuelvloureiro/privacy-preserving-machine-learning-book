@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>44&nbsp; User-level differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>45&nbsp; User-level differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -36,8 +71,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../part05-dp-ml/08-disparate-impact.html" rel="next">
-<link href="../part05-dp-ml/06-public-data.html" rel="prev">
+<link href="../part05-dp-ml/09-choosing-epsilon.html" rel="next">
+<link href="../part05-dp-ml/03-hyperparameter-tuning.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -117,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -270,6 +305,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -284,67 +325,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -360,26 +407,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -390,26 +425,44 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -426,49 +479,31 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -479,14 +514,50 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -524,25 +595,25 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">44.1</span> Why this matters</a></li>
-  <li><a href="#sec-ulvl-unit" id="toc-sec-ulvl-unit" class="nav-link" data-scroll-target="#sec-ulvl-unit"><span class="header-section-number">44.2</span> The privacy unit</a></li>
-  <li><a href="#sec-ulvl-group-sgd" id="toc-sec-ulvl-group-sgd" class="nav-link" data-scroll-target="#sec-ulvl-group-sgd"><span class="header-section-number">44.3</span> What an example-level model gives a user</a></li>
-  <li><a href="#sec-ulvl-dpsgd" id="toc-sec-ulvl-dpsgd" class="nav-link" data-scroll-target="#sec-ulvl-dpsgd"><span class="header-section-number">44.4</span> User-level DP-SGD</a></li>
-  <li><a href="#sec-ulvl-bounding" id="toc-sec-ulvl-bounding" class="nav-link" data-scroll-target="#sec-ulvl-bounding"><span class="header-section-number">44.5</span> Contribution bounding</a></li>
-  <li><a href="#sec-ulvl-hetero" id="toc-sec-ulvl-hetero" class="nav-link" data-scroll-target="#sec-ulvl-hetero"><span class="header-section-number">44.6</span> Heterogeneous users</a></li>
-  <li><a href="#sec-ulvl-run" id="toc-sec-ulvl-run" class="nav-link" data-scroll-target="#sec-ulvl-run"><span class="header-section-number">44.7</span> Which strategy</a></li>
-  <li><a href="#sec-ulvl-code" id="toc-sec-ulvl-code" class="nav-link" data-scroll-target="#sec-ulvl-code"><span class="header-section-number">44.8</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">44.9</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">44.10</span> Further reading</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">45.1</span> Why this matters</a></li>
+  <li><a href="#sec-ulvl-unit" id="toc-sec-ulvl-unit" class="nav-link" data-scroll-target="#sec-ulvl-unit"><span class="header-section-number">45.2</span> The privacy unit and δ</a></li>
+  <li><a href="#sec-ulvl-group-sgd" id="toc-sec-ulvl-group-sgd" class="nav-link" data-scroll-target="#sec-ulvl-group-sgd"><span class="header-section-number">45.3</span> What an example-level model gives a user</a></li>
+  <li><a href="#sec-ulvl-dpsgd" id="toc-sec-ulvl-dpsgd" class="nav-link" data-scroll-target="#sec-ulvl-dpsgd"><span class="header-section-number">45.4</span> User-level DP-SGD</a></li>
+  <li><a href="#sec-ulvl-bounding" id="toc-sec-ulvl-bounding" class="nav-link" data-scroll-target="#sec-ulvl-bounding"><span class="header-section-number">45.5</span> Contribution bounding</a></li>
+  <li><a href="#sec-ulvl-hetero" id="toc-sec-ulvl-hetero" class="nav-link" data-scroll-target="#sec-ulvl-hetero"><span class="header-section-number">45.6</span> Heterogeneous users</a></li>
+  <li><a href="#sec-ulvl-run" id="toc-sec-ulvl-run" class="nav-link" data-scroll-target="#sec-ulvl-run"><span class="header-section-number">45.7</span> Which strategy</a></li>
+  <li><a href="#sec-ulvl-code" id="toc-sec-ulvl-code" class="nav-link" data-scroll-target="#sec-ulvl-code"><span class="header-section-number">45.8</span> Code</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">45.9</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">45.10</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/07-user-level.html"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></h1>
+<h1 class="title"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></h1>
 </div>
 
 
@@ -559,23 +630,24 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="44.1">
-<h2 data-number="44.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">44.1</span> Why this matters</h2>
-<p>Every differential privacy (DP) guarantee in this part so far protects one record. On the running example, stochastic gradient descent (SGD) with clipping and noise, the <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> of this part, reaches a privacy loss <span class="math inline">\(\varepsilon\)</span> of 6.71 per record. But people do not contribute one record each. A messaging user contributes hundreds of messages and a patient dozens of visits, and together a person’s records can reveal far more than any one of them.</p>
-<p>The fix rests on one idea: <strong>the neighbouring relation is the privacy unit</strong>. Whatever differs between two neighbouring datasets is what the guarantee protects. So to protect people, make neighbours differ in all of one person’s records, bound how far one person can move the computation, and account with that bound. This chapter shows what a record-level <span class="math inline">\(\varepsilon\)</span> means for a person, and three ways to train with a guarantee for the person instead. To make it concrete, the running example’s 10,000 records are spread very unevenly over 1,000 users, so that the largest holds 348.</p>
+<section id="why-this-matters" class="level2" data-number="45.1">
+<h2 data-number="45.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">45.1</span> Why this matters</h2>
+<p>Every differential privacy (DP) guarantee in this part so far protects one record. Stochastic gradient descent (SGD) with clipping and noise, this part’s <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>, gives each record of its running example a privacy loss <span class="math inline">\(\varepsilon\)</span> of 6.71. But a messaging user contributes hundreds of messages, and together a person’s records can reveal far more than any one of them.</p>
+<p>The fix rests on one idea. A DP guarantee protects whatever differs between two neighbouring datasets, so <strong>the neighbouring relation sets the privacy unit</strong>. For the examples, this chapter gives the running example’s 10,000 synthetic records to 1,000 users, very unevenly. The median user holds 4 records and the largest 348.</p>
 </section>
-<section id="sec-ulvl-unit" class="level2" data-number="44.2">
-<h2 data-number="44.2" class="anchored" data-anchor-id="sec-ulvl-unit"><span class="header-section-number">44.2</span> The privacy unit</h2>
-<p>Take a mechanism <span class="math inline">\(M\)</span>, and two datasets <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span> that differ by adding or removing all the records of one user. The mechanism is <strong>user-level</strong> <span class="math inline">\((\varepsilon, \delta)\)</span>-DP if, for every such pair and every set <span class="math inline">\(S\)</span> of outputs, <span id="eq-auto-07userlevel-1"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta. \tag{44.1}\]</span></span> <strong>Example-level</strong> DP is the same inequality for datasets that differ in one record. User-level DP is therefore not a new notion, and every property and accountant of <a href="../part04-privacy-accounting/00-introduction.html">Part 4</a> holds for it unchanged. Only the sensitivity changes. The right unit, whether a record, a user, a household or a device, answers the question “whose participation do I want to hide?” Report it with every <span class="math inline">\(\varepsilon\)</span> (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Choosing an accountant</a>).</p>
-<p>The textbook answer for a person with <span class="math inline">\(k\)</span> records is <strong>group privacy</strong> (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). An example-level <span class="math inline">\((\varepsilon, \delta)\)</span>-DP mechanism is user-level <span class="math inline">\((k\varepsilon, \delta_k)\)</span>-DP for users with at most <span class="math inline">\(k\)</span> records, where the person’s slack is <span id="eq-ulvl-group"><span class="math display">\[\delta_k = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1}. \tag{44.2}\]</span></span> Ten records protected at <span class="math inline">\(\varepsilon = 1\)</span> each give their owner <span class="math inline">\(\varepsilon = 10\)</span>, and the slack is worse, because it multiplies the per-record <span class="math inline">\(\delta\)</span> by up to <span class="math inline">\(e^{(k-1)\varepsilon}\)</span>. On the running example, even with the per-record <span class="math inline">\(\delta\)</span> tuned so that the user’s slack is <span class="math inline">\(10^{-5}\)</span>, a user with two records gets <span class="math inline">\(\varepsilon = 18.61\)</span>, and a user with ten gets no guarantee at all.</p>
+<section id="sec-ulvl-unit" class="level2" data-number="45.2">
+<h2 data-number="45.2" class="anchored" data-anchor-id="sec-ulvl-unit"><span class="header-section-number">45.2</span> The privacy unit and δ</h2>
+<p>Take a mechanism <span class="math inline">\(M\)</span>, and call two datasets neighbours, <span class="math inline">\(D\)</span> and <span class="math inline">\(D'\)</span>, when they differ by adding or removing all the records of one user. The mechanism is <strong>user-level</strong> <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, with a small slack <span class="math inline">\(\delta\)</span>, if every such pair and every set <span class="math inline">\(S\)</span> of outputs satisfy <span id="eq-auto-07userlevel-1"><span class="math display">\[\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta. \tag{45.1}\]</span></span> <strong>Example-level</strong> DP is the same inequality for datasets that differ in one record. So user-level DP is not a new notion, and every property and accountant of <a href="../part04-privacy-accounting/00-introduction.html">Part 4</a> holds for it unchanged. What changes is the sensitivity, because one user can now move the computation with all of their records at once.</p>
+<p>The right unit, whether a record, a user, a household or a device, answers the question “whose participation do I want to hide?” Report the unit with every <span class="math inline">\(\varepsilon\)</span> (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Report and review an ε claim</a>). For a language model it is usually a document or a user, not a sentence (<a href="../part05-dp-ml/14-private-llm-finetuning.html">Fine-tune a language model privately</a>). The unit also sets the slack, because the book’s default <span class="math inline">\(\delta\)</span> (<a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>) now counts users. For 1,000 users it gives <span class="math inline">\(10^{-4}\)</span> (<a href="#sec-ulvl-code" class="quarto-xref"><span>Section 45.8</span></a>). This chapter’s <span class="math inline">\(10^{-5}\)</span> is therefore stricter than it needs to be.</p>
+<p>The textbook answer for a person with <span class="math inline">\(k\)</span> records is <strong>group privacy</strong> (<a href="../part03-dp-foundations/02-properties.html">Post-processing, group privacy and composition</a>). It says that an example-level <span class="math inline">\((\varepsilon, \delta)\)</span>-DP mechanism is also user-level DP for users with at most <span class="math inline">\(k\)</span> records. The level becomes <span class="math inline">\(k\varepsilon\)</span>, and the slack becomes <span id="eq-ulvl-group"><span class="math display">\[\delta_k = \delta\,\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1}. \tag{45.2}\]</span></span> The slack is worse, because the fraction grows like <span class="math inline">\(e^{(k-1)\varepsilon}\)</span>, which is why a record-level <span class="math inline">\(\delta\)</span> must never be read as a user’s. Holding a user’s slack at <span class="math inline">\(10^{-5}\)</span> needs a much smaller per-record <span class="math inline">\(\delta\)</span>, and so a larger per-record <span class="math inline">\(\varepsilon\)</span>. On the running example a user with two records therefore gets <span class="math inline">\(\varepsilon = 18.61\)</span>, not twice 6.71. For ten records no per-record <span class="math inline">\(\delta\)</span> is small enough, and group privacy gives no guarantee at all.</p>
 </section>
-<section id="sec-ulvl-group-sgd" class="level2" data-number="44.3">
-<h2 data-number="44.3" class="anchored" data-anchor-id="sec-ulvl-group-sgd"><span class="header-section-number">44.3</span> What an example-level model gives a user</h2>
-<p>Group privacy treats DP-SGD as a black box, but you know exactly how a user’s records enter each step. Each step includes every record independently with the sampling rate <span class="math inline">\(q\)</span>. For a user with <span class="math inline">\(k\)</span> records, what matters is the chance that some record of theirs is in the batch. While <span class="math inline">\(kq\)</span> is small, <strong>a user with <span class="math inline">\(k\)</span> records looks like one record sampled at rate <span class="math inline">\(kq\)</span></strong>. So you can screen a user’s exposure by rerunning the record-level accountant at the rate <span class="math inline">\(kq\)</span>. The user’s <span class="math inline">\(\varepsilon\)</span> then grows roughly linearly in their number of records. An exact accountant for a user with <span class="math inline">\(k\)</span> records also exists (Charles et al.&nbsp;2024), and it is a little worse than the screen.</p>
+<section id="sec-ulvl-group-sgd" class="level2" data-number="45.3">
+<h2 data-number="45.3" class="anchored" data-anchor-id="sec-ulvl-group-sgd"><span class="header-section-number">45.3</span> What an example-level model gives a user</h2>
+<p>Group privacy treats DP-SGD as a black box, but you know exactly how a user’s records enter each step. Each step includes every record independently with the sampling rate <span class="math inline">\(q\)</span>, so a step sees some record of the user’s with probability about <span class="math inline">\(kq\)</span>. While <span class="math inline">\(kq\)</span> is small, two of their records rarely share a batch, and <strong>a user with <span class="math inline">\(k\)</span> records looks like one record sampled at rate <span class="math inline">\(kq\)</span></strong>. So you can screen a user’s exposure by rerunning the record-level accountant at the rate <span class="math inline">\(kq\)</span>, as the snippet in <a href="#sec-ulvl-code" class="quarto-xref"><span>Section 45.8</span></a> does. An exact accountant for a user with <span class="math inline">\(k\)</span> records also exists (Charles et al.&nbsp;2024).</p>
 <div id="tbl-ulvl-k" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;44.1: The user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example’s example-level DP-SGD (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps) for a user with <span class="math inline">\(k\)</span> records. “None” means no <span class="math inline">\((\varepsilon, 10^{-5})\)</span> guarantee.
+Table&nbsp;45.1: The user-level <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of the running example’s example-level DP-SGD (<span class="math inline">\(q = 0.01\)</span>, <span class="math inline">\(\sigma = 1\)</span>, 10,000 steps) for a user with <span class="math inline">\(k\)</span> records, from the full edition’s Rényi accountant (6.72 at one record comes from its coarser grid of orders).
 </figcaption>
 <div aria-describedby="tbl-ulvl-k-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -599,14 +671,6 @@ Table&nbsp;44.1: The user-level <span class="math inline">\(\varepsilon\)</span>
 <td>2161.43</td>
 </tr>
 <tr class="even">
-<td>Group privacy, <a href="#eq-ulvl-group" class="quarto-xref">Equation&nbsp;<span>44.2</span></a></td>
-<td>6.71</td>
-<td>18.61</td>
-<td>118.12</td>
-<td>none</td>
-<td>none</td>
-</tr>
-<tr class="odd">
 <td>One record at rate <span class="math inline">\(kq\)</span></td>
 <td>6.71</td>
 <td>15.32</td>
@@ -619,46 +683,50 @@ Table&nbsp;44.1: The user-level <span class="math inline">\(\varepsilon\)</span>
 </div>
 </figure>
 </div>
-<p>At ten records there is no protection to speak of. Still, the direct accountant beats group privacy for every user with more than one record, so never use group privacy for DP-SGD.</p>
-<p>The rate-<span class="math inline">\(kq\)</span> screen is within 8% of the exact accountant up to ten records. It is slightly optimistic, so report the exact value, and do not discount it as pessimistic, because a person’s similar records have partly aligned gradients.</p>
+<p>At ten records the exact accountant gives 146.20, no protection to speak of. Still, it beats group privacy for every user with more than one record, so never use group privacy for DP-SGD. The rate-<span class="math inline">\(kq\)</span> screen stays within 8% of the exact accountant up to ten records but always comes out a little low. So report the exact value when you have an implementation of it. The libraries this book uses offer only the screen. Then report the screen’s value, call it a screen that can be a few percent low, and keep <span class="math inline">\(kq\)</span> small. Treat it as the guarantee, not as a pessimistic bound, because a person’s similar records do push the gradient partly the same way.</p>
 </section>
-<section id="sec-ulvl-dpsgd" class="level2" data-number="44.4">
-<h2 data-number="44.4" class="anchored" data-anchor-id="sec-ulvl-dpsgd"><span class="header-section-number">44.4</span> User-level DP-SGD</h2>
-<p>The better route makes the user the unit that DP-SGD samples, clips and accounts for (McMahan, Ramage, Talwar &amp; Zhang 2018). Starting from weights chosen without looking at the data, each step does five things.</p>
+<section id="sec-ulvl-dpsgd" class="level2" data-number="45.4">
+<h2 data-number="45.4" class="anchored" data-anchor-id="sec-ulvl-dpsgd"><span class="header-section-number">45.4</span> User-level DP-SGD</h2>
+<p>The better route makes the user the unit that DP-SGD samples, clips and accounts for (McMahan et al.&nbsp;2018), as federated learning does with a device as the user. Starting from weights chosen without looking at the data, each step does five things.</p>
 <ol type="1">
 <li><strong>Sample users.</strong> Put each user in the batch independently with probability <span class="math inline">\(q\)</span>, now the user sampling rate.</li>
-<li><strong>Compute one vector per user.</strong> From each sampled user’s records alone, compute their average gradient, or the change in weights after a few local SGD steps.</li>
+<li><strong>Compute one vector per user.</strong> From that user’s records alone, compute their average gradient, or the change in weights after a few training steps on their records.</li>
 <li><strong>Clip per user.</strong> Rescale that vector to length at most the clipping norm <span class="math inline">\(C\)</span>.</li>
-<li><strong>Add noise.</strong> Sum the clipped vectors and add Gaussian noise with standard deviation <span class="math inline">\(\sigma C\)</span> per coordinate, where <span class="math inline">\(\sigma\)</span> is the noise multiplier.</li>
+<li><strong>Add noise.</strong> Sum the clipped vectors and add Gaussian noise of standard deviation <span class="math inline">\(\sigma C\)</span>, for a noise multiplier <span class="math inline">\(\sigma\)</span>.</li>
 <li><strong>Step.</strong> Divide by the expected number of sampled users and take a gradient step.</li>
 </ol>
-<p>Because one user moves the sum by at most <span class="math inline">\(C\)</span>, however many records they have, the guarantee is user-level DP with exactly the accountant of example-level DP-SGD. A common variant clips each record instead and keeps at most <span class="math inline">\(k\)</span> records per user. It has the guarantee of DP-SGD with noise multiplier <span class="math inline">\(\sigma/k\)</span>, so it needs <span class="math inline">\(k\)</span> times more noise.</p>
-<p>Changing the unit has two consequences. First, <strong>you pay for the number of units</strong>. On the running example, with 1,000 steps and an expected batch of 100 units, sampling records needs <span class="math inline">\(\sigma = 0.778\)</span> for <span class="math inline">\(\varepsilon = 4\)</span>. Sampling users must use a rate ten times higher, and then it needs <span class="math inline">\(\sigma = 3.78\)</span>. Second, <strong>records inside a user are free</strong>. They can be averaged, used for several local steps or subsampled without changing <span class="math inline">\(\varepsilon\)</span>. More records make each user’s vector a better estimate, so the signal improves while the noise stays fixed (Levy et al.&nbsp;2021).</p>
-<p>The data plumbing comes first. Carry a user identifier through the pipeline, and shard and sample by it. Per-example libraries such as Opacus clip each row of a batch, so with them you write a data loader that yields users and compute each sampled user’s clipped vector yourself. Federated frameworks are built around this pattern, for example TensorFlow Federated’s <code>tff.learning.dp_aggregator</code>, with a device as the user. Whatever the implementation, three things break the proof:</p>
+<p>One user moves the sum by at most <span class="math inline">\(C\)</span>, however many records they have. So the guarantee is user-level DP with exactly the accountant of example-level DP-SGD, run at the user sampling rate.</p>
+<p>Changing the unit has two consequences. First, <strong>you pay for having fewer units</strong>. To see how much, take a shorter schedule on the running example, 1,000 steps with about 100 units per batch. Sampling records then needs <span class="math inline">\(\sigma = 0.778\)</span> for <span class="math inline">\(\varepsilon = 4\)</span>. Sampling users instead needs a rate ten times higher, so the same budget needs <span class="math inline">\(\sigma = 3.78\)</span>. Second, <strong>records inside a user are free</strong>, since they can be averaged, used for several training steps or subsampled without changing <span class="math inline">\(\varepsilon\)</span>.</p>
+<p>Start with the data plumbing, and carry a user identifier through the pipeline to sample by. Split training and test data by user too, so that no user’s records sit on both sides. Opacus clips each row of a batch, so for user-level training you write a data loader that yields users and clip each user’s vector yourself. Three things break the guarantee:</p>
 <ol type="1">
-<li>A user’s vector depends on other users’ data, for example through normalization by population statistics.</li>
+<li>A user’s vector depends on other users’ data, for example through normalization statistics computed over all users.</li>
 <li>One person is spread over several accounts, so the unit is the account and the person is again a group.</li>
-<li>Users are iterated in a fixed shuffled order instead of Poisson-sampled, which is a different mechanism (<a href="../part05-dp-ml/04-matrix-mechanisms.html">Matrix factorization</a>).</li>
+<li>Users are iterated in a fixed shuffled order instead of Poisson-sampled, which is a different mechanism that this accountant does not cover (<a href="../part05-dp-ml/04-matrix-mechanisms.html">Matrix factorization</a>).</li>
 </ol>
 </section>
-<section id="sec-ulvl-bounding" class="level2" data-number="44.5">
-<h2 data-number="44.5" class="anchored" data-anchor-id="sec-ulvl-bounding"><span class="header-section-number">44.5</span> Contribution bounding</h2>
-<p>If your pipeline is built around records, you can keep it and still protect users. <strong>Contribution bounding</strong> keeps at most <span class="math inline">\(k\)</span> records of each user, the cap, and runs example-level DP-SGD on what remains. The result is user-level DP with the <span class="math inline">\(\varepsilon\)</span> that the user accountant gives for <span class="math inline">\(k\)</span> records, and users with fewer records are covered too. The condition is that each user’s kept records are chosen without looking at other users’ data, for example at random. Otherwise adding one user could change which records others keep. Analytics libraries apply the same bound to queries, for example PipelineDP’s <code>max_partitions_contributed</code> and <code>max_contributions_per_partition</code> parameters, and Tumult Analytics’ <code>MaxRowsPerID</code> truncation.</p>
-<p>Choosing the cap trades noise against bias (Amin et al.&nbsp;2019). A larger cap keeps more data but needs more noise, while a smaller cap discards records and reweights the data toward light users. On the running example at a user-level <span class="math inline">\(\varepsilon = 4\)</span>, raising the cap from 1 to 50 multiplies the noise by 5.8. Accuracy then falls from 0.8917 to 0.6401. The best cap depends on the data, so take it from public knowledge of the population or choose it privately (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>). Trying caps on test accuracy spends privacy that the accountant does not see.</p>
-<p>The two techniques also combine. You can cap each user’s records only to bound the compute, and still clip one vector per user. The cap then costs data but no noise.</p>
+<section id="sec-ulvl-bounding" class="level2" data-number="45.5">
+<h2 data-number="45.5" class="anchored" data-anchor-id="sec-ulvl-bounding"><span class="header-section-number">45.5</span> Contribution bounding</h2>
+<p>A pipeline built around records can still protect users. <strong>Contribution bounding</strong> keeps at most <span class="math inline">\(k\)</span> records of each user, the cap, and runs example-level DP-SGD on what remains. The result is user-level DP with the <span class="math inline">\(\varepsilon\)</span> that the user accountant gives for <span class="math inline">\(k\)</span> records. The condition is that each user’s kept records are chosen without looking at other users’ data, for example at random. Otherwise adding one user could change which records other users keep, and neighbours would differ by more than one user’s records. In Polars, shuffle the rows with a fixed seed and keep the first <span class="math inline">\(k\)</span> of each user. Releases of statistics bound customers the same way, on the Online Retail invoice data (<a href="../part03-dp-foundations/12-release-statistics.html#sec-relstat-bound">Release statistics with a library</a>). To calibrate the noise for a cap, solve for <span class="math inline">\(\sigma\)</span> with <code>dp_accounting.calibrate_dp_mechanism</code> at the rate <span class="math inline">\(kq\)</span>, as the tuning step of <a href="../part05-dp-ml/13-train-dp-sgd.html#sec-trainwf-tune">Train a model with DP-SGD</a> does at rate <span class="math inline">\(q\)</span>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>rows <span class="op">=</span> pl.DataFrame({<span class="st">"user"</span>: [<span class="st">"a"</span>, <span class="st">"a"</span>, <span class="st">"a"</span>, <span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>, <span class="st">"c"</span>], <span class="st">"x"</span>: [<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">7</span>]})</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>k <span class="op">=</span> <span class="dv">2</span>  <span class="co"># the cap, fixed from public knowledge of the population</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>capped <span class="op">=</span> rows.sample(fraction<span class="op">=</span><span class="fl">1.0</span>, shuffle<span class="op">=</span><span class="va">True</span>, seed<span class="op">=</span><span class="dv">0</span>).group_by(<span class="st">"user"</span>).head(k)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(capped.height)  <span class="co"># 5</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(capped.group_by(<span class="st">"user"</span>).<span class="bu">len</span>()[<span class="st">"len"</span>].<span class="bu">max</span>())  <span class="co"># 2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Choosing the cap trades noise against bias (Amin et al.&nbsp;2019). A larger cap keeps more data but needs more noise, while a smaller cap discards records and reweights the data toward light users. On the running example at a user-level <span class="math inline">\(\varepsilon = 4\)</span>, raising the cap from one record to fifty multiplies the noise by 5.8. That is far less than fifty, because the batch keeps its size and so the sampling rate falls as the cap rises. Accuracy still falls from 0.8917 to 0.6401. So take the cap from public knowledge of the population. Or choose it privately and count the cost, for example from a private quantile of records per user (<a href="../part03-dp-foundations/07-sensitivity.html">Beyond global sensitivity</a>). Trying caps on test accuracy spends privacy that the accountant does not see.</p>
 </section>
-<section id="sec-ulvl-hetero" class="level2" data-number="44.6">
-<h2 data-number="44.6" class="anchored" data-anchor-id="sec-ulvl-hetero"><span class="header-section-number">44.6</span> Heterogeneous users</h2>
-<p>User-level training changes the objective, not only the noise. Example-level training weights each user by their number of records, while user-level training with averaged vectors weights users equally. For a keyboard model, weighting people equally keeps a few very active users from defining everyone’s suggestions. For a model meant to fit the overall distribution of records, it under-weights heavy users, and a per-user cap discards their extra records outright (<a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a>).</p>
-<p>If heavy users should count for more, sum a user’s gradients instead of averaging them before clipping. Their influence then rises with their records until the sum reaches <span class="math inline">\(C\)</span>. Both choices stay inside the per-user computation, so <span class="math inline">\(\varepsilon\)</span> does not change.</p>
+<section id="sec-ulvl-hetero" class="level2" data-number="45.6">
+<h2 data-number="45.6" class="anchored" data-anchor-id="sec-ulvl-hetero"><span class="header-section-number">45.6</span> Heterogeneous users</h2>
+<p>User-level training also changes the objective, because averaging per user weights users equally, while example-level training weights them by their number of records (<a href="../part05-dp-ml/08-disparate-impact.html">Disparate impact</a>). If heavy users should count for more, sum a user’s gradients instead of averaging them before clipping. Their influence then rises with their records until clipping caps the sum at <span class="math inline">\(C\)</span>, and <span class="math inline">\(\varepsilon\)</span> does not change.</p>
 </section>
-<section id="sec-ulvl-run" class="level2" data-number="44.7">
-<h2 data-number="44.7" class="anchored" data-anchor-id="sec-ulvl-run"><span class="header-section-number">44.7</span> Which strategy</h2>
-<p><a href="#tbl-ulvl-run" class="quarto-xref">Table&nbsp;<span>44.2</span></a> compares three routes on the running example, each with 1,000 steps and an expected batch of 100 units. Strategy (a) runs example-level DP-SGD on all records and accounts for the heaviest user.</p>
+<section id="sec-ulvl-run" class="level2" data-number="45.7">
+<h2 data-number="45.7" class="anchored" data-anchor-id="sec-ulvl-run"><span class="header-section-number">45.7</span> Which strategy</h2>
+<p><a href="#tbl-ulvl-run" class="quarto-xref">Table&nbsp;<span>45.2</span></a> compares three routes on the running example, each with 1,000 steps and about 100 units per batch. Strategy (a) runs example-level DP-SGD on all records and accounts for the heaviest user.</p>
 <div id="tbl-ulvl-run" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;44.2: Test accuracy and noise multiplier at the same user-level budget, <span class="math inline">\(\delta = 10^{-5}\)</span>, one run each. The non-private model reaches 0.9612.
+Table&nbsp;45.2: Test accuracy at the same user-level budget, <span class="math inline">\(\delta = 10^{-5}\)</span>, one run each. The non-private model reaches 0.9612.
 </figcaption>
 <div aria-describedby="tbl-ulvl-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -679,56 +747,62 @@ Table&nbsp;44.2: Test accuracy and noise multiplier at the same user-level budge
 <tbody>
 <tr class="odd">
 <td>1</td>
-<td>0.5318 (<span class="math inline">\(\sigma = 449\)</span>)</td>
-<td>0.8065 (<span class="math inline">\(\sigma = 12.9\)</span>)</td>
-<td>0.7084 (<span class="math inline">\(\sigma = 14.4\)</span>)</td>
+<td>0.5318</td>
+<td>0.8065</td>
+<td>0.7084</td>
 </tr>
 <tr class="even">
 <td>2</td>
-<td>0.5582 (<span class="math inline">\(\sigma = 237\)</span>)</td>
-<td>0.9028 (<span class="math inline">\(\sigma = 6.89\)</span>)</td>
-<td>0.8374 (<span class="math inline">\(\sigma = 7.62\)</span>)</td>
+<td>0.5582</td>
+<td>0.9028</td>
+<td>0.8374</td>
 </tr>
 <tr class="odd">
 <td>4</td>
-<td>0.5713 (<span class="math inline">\(\sigma = 128\)</span>)</td>
-<td>0.9347 (<span class="math inline">\(\sigma = 3.78\)</span>)</td>
-<td>0.8810 (<span class="math inline">\(\sigma = 4.18\)</span>)</td>
+<td>0.5713</td>
+<td>0.9347</td>
+<td>0.8810</td>
 </tr>
 <tr class="even">
 <td>8</td>
-<td>0.5478 (<span class="math inline">\(\sigma = 70.3\)</span>)</td>
-<td>0.9442 (<span class="math inline">\(\sigma = 2.18\)</span>)</td>
-<td>0.9333 (<span class="math inline">\(\sigma = 2.4\)</span>)</td>
+<td>0.5478</td>
+<td>0.9442</td>
+<td>0.9333</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>Keeping the record as the unit fails. Strategy (a) stays near chance at every budget, because the heaviest user dictates the noise for everyone. User-level DP-SGD is the best at every budget, and at <span class="math inline">\(\varepsilon = 4\)</span> it is 2.7 points below the non-private model. Its cost is compute, since each step processes all the records of about 100 users. The cap is the fallback when the pipeline must stay record-based. It trails by 5 to 10 points at the smaller budgets and comes close at <span class="math inline">\(\varepsilon = 8\)</span>.</p>
-<p>Single runs vary by about a point, so read the large gaps, not the small ones. Published comparisons on language models mostly agree. Chua et al.&nbsp;(2024) find that user-level DP-SGD generally beats contribution bounding for fine-tuning, while Charles et al.&nbsp;(2024) find that sampling examples sometimes wins.</p>
+<p>Keeping the record as the unit fails. Strategy (a) stays near chance on this two-class task at every budget, because the heaviest user forces a noise multiplier between 70.3 and 449 on everyone. User-level DP-SGD is the best at every budget, and at <span class="math inline">\(\varepsilon = 4\)</span> it is 2.7 points below the non-private model. Its cost is compute, since each step processes all the records of about 100 users. So the cap is the fallback when the pipeline must stay record-based, and on this task it trails by 5 to 10 points at the smaller budgets. How far it trails depends on how records are spread over users, so measure it on your data.</p>
 </section>
-<section id="sec-ulvl-code" class="level2" data-number="44.8">
-<h2 data-number="44.8" class="anchored" data-anchor-id="sec-ulvl-code"><span class="header-section-number">44.8</span> Code</h2>
-<p>The rate-<span class="math inline">\(kq\)</span> screen needs only a record-level accountant. In Google’s <code>dp_accounting</code>, it is one subsampled Gaussian step composed over the run:</p>
-<pre class="text"><code>import dp_accounting
-
-step = dp_accounting.PoissonSampledDpEvent(
-    sampling_probability=k * q,
-    event=dp_accounting.GaussianDpEvent(noise_multiplier=sigma),
-)
-accountant = dp_accounting.rdp.RdpAccountant()
-accountant.compose(dp_accounting.SelfComposedDpEvent(step, steps))
-print(accountant.get_epsilon(target_delta=1e-5))</code></pre>
-<p>With <span class="math inline">\(k = 1\)</span> and <span class="math inline">\(q\)</span> the user sampling rate, the same code accounts for user-level DP-SGD. The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/user_level.py">user_level.py</a> builds the user population, implements the exact user accountant and trains the three strategies.</p>
+<section id="sec-ulvl-code" class="level2" data-number="45.8">
+<h2 data-number="45.8" class="anchored" data-anchor-id="sec-ulvl-code"><span class="header-section-number">45.8</span> Code</h2>
+<p>The rate-<span class="math inline">\(kq\)</span> screen needs only a record-level accountant, such as Google’s <code>dp_accounting</code>. This snippet screens users with one and two records, and computes the default <span class="math inline">\(\delta\)</span> for 1,000 users.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dp_accounting</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> screen(k: <span class="bu">int</span>, q: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.01</span>, sigma: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span>, steps: <span class="bu">int</span> <span class="op">=</span> <span class="dv">10_000</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The epsilon of a user with k records, screened as one record sampled at rate k * q."""</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    step <span class="op">=</span> dp_accounting.PoissonSampledDpEvent(k <span class="op">*</span> q, dp_accounting.GaussianDpEvent(sigma))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    accountant <span class="op">=</span> dp_accounting.rdp.RdpAccountant()</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    accountant.compose(dp_accounting.SelfComposedDpEvent(step, steps))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> accountant.get_epsilon(<span class="fl">1e-5</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>screen(<span class="dv">1</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 6.71</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>screen(<span class="dv">2</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 15.35</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="dv">10</span> <span class="op">**</span> math.floor(math.log10(<span class="dv">1_000</span><span class="op">**-</span><span class="fl">1.1</span>)))  <span class="co"># 0.0001</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Its 15.35 is a little above the table’s 15.32, because the two accountants compute the Rényi guarantee at different orders, so quote the one you ran and name it. With <span class="math inline">\(k = 1\)</span> and <span class="math inline">\(q\)</span> the user sampling rate, the same code accounts for user-level DP-SGD.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="44.9">
-<h2 data-number="44.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">44.9</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="45.9">
+<h2 data-number="45.9" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">45.9</span> Cheat sheet</h2>
 <div id="tbl-ulvl-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ulvl-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;44.3: Which route to a user-level guarantee.
+Table&nbsp;45.3: Which route to a user-level guarantee.
 </figcaption>
 <div aria-describedby="tbl-ulvl-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -748,12 +822,12 @@ Table&nbsp;44.3: Which route to a user-level guarantee.
 <tr class="odd">
 <td>Example-level model already trained</td>
 <td>User accountant, or the rate-<span class="math inline">\(kq\)</span> screen</td>
-<td>User’s <span class="math inline">\(\varepsilon\)</span> grows roughly linearly in <span class="math inline">\(k\)</span>, then faster</td>
+<td>A user’s <span class="math inline">\(\varepsilon\)</span> grows about linearly in <span class="math inline">\(k\)</span>, then faster for large <span class="math inline">\(kq\)</span></td>
 </tr>
 <tr class="even">
-<td>You can group records by user</td>
+<td>Records can be grouped by user</td>
 <td>User-level DP-SGD</td>
-<td>Records’ guarantee, with users as units; pays for the number of users</td>
+<td>DP-SGD’s accountant over users</td>
 </tr>
 <tr class="odd">
 <td>Pipeline must stay record-based</td>
@@ -772,17 +846,15 @@ Table&nbsp;44.3: Which route to a user-level guarantee.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Name the privacy unit with every <span class="math inline">\(\varepsilon\)</span>.</li>
-<li>Screen a user’s exposure under an example-level model by rerunning the accountant at rate <span class="math inline">\(kq\)</span>.</li>
-<li>Don’t use group privacy for DP-SGD.</li>
-<li>Prefer sampling and clipping users, and fall back on a public cap.</li>
+<li>Name the privacy unit with every <span class="math inline">\(\varepsilon\)</span>, and set <span class="math inline">\(\delta\)</span> from the number of users.</li>
+<li>Never use group privacy for DP-SGD; screen a user at rate <span class="math inline">\(kq\)</span> instead.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="44.10">
-<h2 data-number="44.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">44.10</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="45.10">
+<h2 data-number="45.10" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">45.10</span> Further reading</h2>
 <ul>
-<li>Charles, Ganesh, McKenna, McMahan, Mitchell, Pillutla &amp; Rush, “Fine-Tuning Large Language Models with User-Level Differential Privacy” (arXiv 2407.07737, 2024): the tight user accountant, and sampling examples against sampling users.</li>
-<li>Chua, Ghazi, Huang, Kamath, Kumar, Liu, Manurangsi, Sinha &amp; Zhang, “Mind the Privacy Unit! User-Level Differential Privacy for Language Model Fine-Tuning” (Conference on Language Modeling 2024): contribution bounding against user-level DP-SGD.</li>
+<li>Charles et al., “Fine-Tuning Large Language Models with User-Level Differential Privacy” (arXiv 2407.07737, 2024): the tight user accountant, and sampling examples against sampling users.</li>
+<li>Chua et al., “Mind the Privacy Unit! User-Level Differential Privacy for Language Model Fine-Tuning” (Conference on Language Modeling 2024): contribution bounding against user-level DP-SGD.</li>
 </ul>
 <p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part05-dp-ml/07-user-level.html">the full edition’s chapter</a>.</p>
 
@@ -1192,13 +1264,13 @@ Table&nbsp;44.3: Which route to a user-level guarantee.
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part05-dp-ml/06-public-data.html" class="pagination-link" aria-label="Public data and private fine-tuning">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span>
+      <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="pagination-link" aria-label="Hyperparameter tuning and private selection">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../part05-dp-ml/08-disparate-impact.html" class="pagination-link" aria-label="Disparate impact">
-        <span class="nav-page-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../part05-dp-ml/09-choosing-epsilon.html" class="pagination-link" aria-label="Choosing ε">
+        <span class="nav-page-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

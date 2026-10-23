@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>40&nbsp; Hyperparameter tuning and private selection – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>44&nbsp; Hyperparameter tuning and private selection – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -26,6 +26,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -36,8 +71,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../part05-dp-ml/04-matrix-mechanisms.html" rel="next">
-<link href="../part05-dp-ml/02-dp-sgd.html" rel="prev">
+<link href="../part05-dp-ml/07-user-level.html" rel="next">
+<link href="../part05-dp-ml/13-train-dp-sgd.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -117,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -270,6 +305,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -284,67 +325,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -360,26 +407,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -390,26 +425,44 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -426,49 +479,31 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -479,14 +514,50 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -524,24 +595,23 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">40.1</span> Why this matters</a></li>
-  <li><a href="#sec-hpt-practice" id="toc-sec-hpt-practice" class="nav-link" data-scroll-target="#sec-hpt-practice"><span class="header-section-number">40.2</span> The procedure and the report</a></li>
-  <li><a href="#sec-hpt-leak" id="toc-sec-hpt-leak" class="nav-link" data-scroll-target="#sec-hpt-leak"><span class="header-section-number">40.3</span> The best of k runs can cost k runs</a></li>
-  <li><a href="#sec-hpt-composition" id="toc-sec-hpt-composition" class="nav-link" data-scroll-target="#sec-hpt-composition"><span class="header-section-number">40.4</span> Paying by composition</a></li>
-  <li><a href="#sec-hpt-rdp" id="toc-sec-hpt-rdp" class="nav-link" data-scroll-target="#sec-hpt-rdp"><span class="header-section-number">40.5</span> A random number of runs</a></li>
-  <li><a href="#sec-hpt-select" id="toc-sec-hpt-select" class="nav-link" data-scroll-target="#sec-hpt-select"><span class="header-section-number">40.6</span> Selecting by a noisy validation score</a></li>
-  <li><a href="#sec-hpt-run" id="toc-sec-hpt-run" class="nav-link" data-scroll-target="#sec-hpt-run"><span class="header-section-number">40.7</span> Tuning the running example</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">40.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">40.9</span> Further reading</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">44.1</span> Why this matters</a></li>
+  <li><a href="#sec-hpt-practice" id="toc-sec-hpt-practice" class="nav-link" data-scroll-target="#sec-hpt-practice"><span class="header-section-number">44.2</span> The procedure and the report</a></li>
+  <li><a href="#sec-hpt-composition" id="toc-sec-hpt-composition" class="nav-link" data-scroll-target="#sec-hpt-composition"><span class="header-section-number">44.3</span> Paying for every run</a></li>
+  <li><a href="#sec-hpt-rdp" id="toc-sec-hpt-rdp" class="nav-link" data-scroll-target="#sec-hpt-rdp"><span class="header-section-number">44.4</span> A random number of runs</a></li>
+  <li><a href="#sec-hpt-select" id="toc-sec-hpt-select" class="nav-link" data-scroll-target="#sec-hpt-select"><span class="header-section-number">44.5</span> Selecting by a noisy validation score</a></li>
+  <li><a href="#sec-hpt-run" id="toc-sec-hpt-run" class="nav-link" data-scroll-target="#sec-hpt-run"><span class="header-section-number">44.6</span> Tuning on Adult</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">44.7</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">44.8</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/03-hyperparameter-tuning.html"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></h1>
+<h1 class="title"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></h1>
 </div>
 
 
@@ -558,49 +628,34 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="40.1">
-<h2 data-number="40.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">40.1</span> Why this matters</h2>
-<p>Stochastic gradient descent (SGD) with clipped gradients and Gaussian noise satisfies differential privacy (DP) at the level its accountant reports for one run, and is called <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>. But nobody trains once. You try a grid of step sizes, score each model on a validation set and ship the best, and every run and every score touched private data. So the search leaks, and you must pay for it honestly.</p>
-<p>The answer depends on one choice. With a fixed number of runs, releasing the best can cost as much as releasing all of them. For example, one run of this part’s running example costs a privacy level <span class="math inline">\(\varepsilon\)</span> of 6.71, but a grid of 10 runs costs 27.23. Now draw the <em>number</em> of runs at random, from a distribution fixed in advance. The same expected number of runs then costs between 10.08 and 13.67.</p>
+<section id="why-this-matters" class="level2" data-number="44.1">
+<h2 data-number="44.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">44.1</span> Why this matters</h2>
+<p>Stochastic gradient descent (SGD) with clipped gradients and Gaussian noise satisfies differential privacy (DP) at the level its accountant reports for one run, and is called <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>. But nobody trains once. You try several step sizes, score each model and ship the best, and every run and every score touched private data. So the search leaks too, and the privacy level <span class="math inline">\(\varepsilon\)</span> you report must pay for it.</p>
+<p>With a fixed number of runs, releasing only the best can cost as much as releasing all of them. On the Adult census data, a grid of six runs that each meet <span class="math inline">\(\varepsilon = 4\)</span> really costs 9.84. That is less than the six costs added up (<a href="#sec-hpt-composition" class="quarto-xref"><span>Section 44.3</span></a>) but far above the 4 reported. If instead you draw the <em>number</em> of runs at random, from a distribution fixed in advance, the whole search costs little more than one run.</p>
 </section>
-<section id="sec-hpt-practice" class="level2" data-number="40.2">
-<h2 data-number="40.2" class="anchored" data-anchor-id="sec-hpt-practice"><span class="header-section-number">40.2</span> The procedure and the report</h2>
-<p>First, spend private runs only where you must, because the cheapest tuning is tuning you don’t do on private data. Runs on public or proxy data cost nothing, and so do published DP-SGD settings for similar tasks. Fix a large batch, the number of epochs and a small clipping norm in advance. Below the typical gradient norm only the clipping norm’s product with the step size matters, so that product is often the only thing left to search (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-clipping">DP-SGD</a>). Use tuners such as Optuna or Ray Tune on private data only for random search, with the number of runs drawn first.</p>
-<p>Second, fix the search before you touch the private data. Write down the candidate set, the distribution of the number of runs, the score and the validation set. Deciding to “try a few more”, or restarting a search whose result disappoints, makes the search depend on the data, and no theorem covers that.</p>
-<p>Third, make the score private, with a disjoint validation set and noise on each count of correct predictions (<a href="#sec-hpt-select" class="quarto-xref"><span>Section 40.6</span></a>). Fourth, account for the whole search. For two or three candidates, charge for every run by composition (<a href="#sec-hpt-composition" class="quarto-xref"><span>Section 40.4</span></a>). For more, use random search with a random number of runs (<a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 40.5</span></a>). Count every run that touched the private data, including crashed runs, debugging runs and evaluations used for early stopping.</p>
-<p>Log the candidate set, the drawn number of runs, and each run’s hyperparameters, accounting settings and noisy score. Opacus’s <code>get_epsilon</code> reports one run only, so compose the runs in an accountant yourself. If you trained 50 configurations at <span class="math inline">\(\varepsilon = 2\)</span> each, the honest answer is not 2 but the composition of all 50, which grows almost linearly at large <span class="math inline">\(\varepsilon\)</span> (<a href="#tbl-hpt-overhead" class="quarto-xref">Table&nbsp;<span>40.1</span></a>).</p>
-<p>Finally, report two numbers. The <span class="math inline">\(\varepsilon\)</span> of the released run says what the model alone would leak, while the <span class="math inline">\(\varepsilon\)</span> of the whole procedure is what the release actually guarantees. For the Poisson search of <a href="#sec-hpt-run" class="quarto-xref"><span>Section 40.7</span></a>, a complete report reads as follows.</p>
+<section id="sec-hpt-practice" class="level2" data-number="44.2">
+<h2 data-number="44.2" class="anchored" data-anchor-id="sec-hpt-practice"><span class="header-section-number">44.2</span> The procedure and the report</h2>
+<p>The cheapest tuning is the tuning you don’t do on private data. Runs on public or proxy data cost nothing, and neither do published settings for similar tasks. Fix a large batch, the number of epochs and a small clipping norm in advance. With the clipping norm below the typical gradient norm, only its product with the step size matters, so that product is often the only thing left to search (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-clipping">DP-SGD</a>).</p>
+<p>If you must tune on private data, fix the search before you touch the data. Write down the candidate set, the distribution of the number of runs (<a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 44.4</span></a>), the score and the validation set. Trying “a few more”, or restarting a disappointing search, makes the search depend on the data, and no accountant covers that. Make the score private as well, by scoring on records you treat as public or on noisy counts (<a href="#sec-hpt-select" class="quarto-xref"><span>Section 44.5</span></a>).</p>
+<p>Then account for the whole search. For two or three candidates, charge for every run (<a href="#sec-hpt-composition" class="quarto-xref"><span>Section 44.3</span></a>), which then costs little more than random search. For more candidates, use random search with a random number of runs (<a href="#sec-hpt-rdp" class="quarto-xref"><span>Section 44.4</span></a>). Either way, count every run that touched the private data, including crashed and debugging runs and evaluations for early stopping.</p>
+<p>Finally, log the candidate set, the drawn number of runs, and each run’s hyperparameters, accounting settings and score. Then report two numbers. The <span class="math inline">\(\varepsilon\)</span> of the released run says what the model alone would leak if its hyperparameters had been public. The <span class="math inline">\(\varepsilon\)</span> of the whole procedure is what the release actually guarantees, and an <a href="../part05-dp-ml/10-auditing.html">audit</a> cannot check it, since it tests only the released model. Set the slack <span class="math inline">\(\delta\)</span> by the book’s default (<a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>), which gives <span class="math inline">\(10^{-5}\)</span> for Adult’s 30,000 records. The Adult search of <a href="#sec-hpt-run" class="quarto-xref"><span>Section 44.6</span></a>, whose noise was set so that the whole search costs <span class="math inline">\(\varepsilon = 4\)</span>, reports as follows.</p>
 <blockquote class="blockquote">
-<p>DP-SGD with Poisson sampling rate 0.01, clipping norm 0.5, noise multiplier 1.53 and 1,000 steps. One run satisfies <span class="math inline">\((0.98, 10^{-5})\)</span>-DP. The step size was selected by random search over <span class="math inline">\(\{0.0625, 0.125, \dots, 8\}\)</span>, with a Poisson number of runs with mean 8. Each run was scored by its correct predictions on a disjoint validation set of 5,000 records, plus Gaussian noise of standard deviation 20. The whole procedure satisfies <span class="math inline">\((1.99, 10^{-5})\)</span>-DP by the Rényi bound of Papernot &amp; Steinke (2022, Theorem 6), for add/remove neighbours at the record level.</p>
+<p>DP-SGD ran for 300 steps with Poisson sampling at rate 1/30. It clipped gradients to norm 1 and added noise with multiplier 1.256, so one run satisfies <span class="math inline">\((2.73, 10^{-5})\)</span>-DP. The step size was chosen by random search over <span class="math inline">\(\{0.05, 0.1, 0.2, 0.5, 1, 2\}\)</span>. The number of runs was drawn from a Poisson distribution with mean 4, and each run was scored on 2,000 validation records treated as public. The whole procedure satisfies <span class="math inline">\((4.00, 10^{-5})\)</span>-DP for add/remove neighbours, datasets that differ by one record. It was computed with <code>dp_accounting</code> from the Rényi bound of Papernot &amp; Steinke (2022).</p>
 </blockquote>
-<p>An <a href="../part05-dp-ml/10-auditing.html">audit</a> tests only the released model, so it cannot catch a missing tuning charge.</p>
 </section>
-<section id="sec-hpt-leak" class="level2" data-number="40.3">
-<h2 data-number="40.3" class="anchored" data-anchor-id="sec-hpt-leak"><span class="header-section-number">40.3</span> The best of k runs can cost k runs</h2>
-<p>A common argument says that choosing among eight step sizes reveals at most three bits. It is wrong, because the release is a whole private run, picked because of how it came out. If each run is a randomized response that comes out “good” or “bad”, the best of <span class="math inline">\(k\)</span> runs is bad only if every run is bad. The evidence from that event multiplies across runs, so the best of <span class="math inline">\(k\)</span> runs is exactly <span class="math inline">\(k\varepsilon\)</span>-DP.</p>
-<p>Tuning without privacy and then training once privately does not escape this. Even a single chosen regularization weight can reveal whether a few outliers were in the training set (<a href="../part02-attacks/02-membership-inference.html">membership inference</a>).</p>
+<section id="sec-hpt-composition" class="level2" data-number="44.3">
+<h2 data-number="44.3" class="anchored" data-anchor-id="sec-hpt-composition"><span class="header-section-number">44.3</span> Paying for every run</h2>
+<p>A common argument says that choosing among eight step sizes reveals at most three bits. It is wrong, because the release is a whole private run, picked because of how it came out. If each run says only “good” or “bad”, the best is bad only when every run was bad, so a bad best reveals that all of them were. In the worst case that is as much as releasing every run. Tuning without privacy and then training once privately does not escape this. The winning regularization weight can change when a few outliers are added, so even that one number can reveal whether they were in the data (<a href="../part02-attacks/02-membership-inference.html">Membership inference</a>).</p>
+<p>The safe answer is to charge for every run, because the best run is computed from all the runs’ outputs (<a href="../part03-dp-foundations/04-composition.html">Composition</a>). For DP-SGD the charge is easy to compute, since a grid of <span class="math inline">\(k\)</span> runs, each with <span class="math inline">\(T\)</span> steps, costs exactly as much as one run of <span class="math inline">\(kT\)</span> steps. One run of the synthetic running example of <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a> costs <span class="math inline">\(\varepsilon = 6.71\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. Ten such runs cost 27.23, about four times one run rather than ten, because the conversion to <span class="math inline">\(\varepsilon\)</span> pays its <span class="math inline">\(\delta\)</span>-dependent cost once for the whole search.</p>
 </section>
-<section id="sec-hpt-composition" class="level2" data-number="40.4">
-<h2 data-number="40.4" class="anchored" data-anchor-id="sec-hpt-composition"><span class="header-section-number">40.4</span> Paying by composition</h2>
-<p>The safe answer is to charge for every run. The best run is computed from the runs’ outputs alone, so it costs at most what releasing all of them costs (<a href="../part03-dp-foundations/02-properties.html">Properties of DP</a>). Rényi differential privacy (RDP) describes each run by a curve <span class="math inline">\(\varepsilon(\lambda)\)</span> over orders <span class="math inline">\(\lambda\)</span> (<a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>). The curves of <span class="math inline">\(k\)</span> runs add, so the whole search has a curve <span class="math inline">\(\varepsilon_A\)</span> of at most <span id="eq-hpt-compose"><span class="math display">\[\varepsilon_A(\lambda) \le k\,\varepsilon(\lambda). \tag{40.1}\]</span></span> For DP-SGD this is simple, because <span class="math inline">\(k\)</span> runs of a number of steps <span class="math inline">\(T\)</span> cost exactly as much as one run of <span class="math inline">\(kT\)</span> steps.</p>
-<p>In the running example, ten runs cost 4.06 times one run, because the conversion to <span class="math inline">\(\varepsilon\)</span> with a small slack <span class="math inline">\(\delta\)</span> pays its fixed cost only once. To keep ten runs at the budget of one, each run needs a noise multiplier of 2.45, which costs accuracy.</p>
-</section>
-<section id="sec-hpt-rdp" class="level2" data-number="40.5">
-<h2 data-number="40.5" class="anchored" data-anchor-id="sec-hpt-rdp"><span class="header-section-number">40.5</span> A random number of runs</h2>
-<p>The way past the <span class="math inline">\(k\varepsilon\)</span> barrier is to draw the number of runs at random, independently of the data. Then “every run was bad” is mostly explained by the search stopping early. Liu &amp; Talwar (2019) showed this first for <strong>random stopping</strong>, which stops after each run with a fixed probability and costs <span class="math inline">\(3\varepsilon\)</span> for <span class="math inline">\(\varepsilon\)</span>-DP runs.</p>
-<p>For DP-SGD, use the version of Papernot &amp; Steinke (2022), which works with RDP curves. First fix the candidate set and a distribution for the number of runs <span class="math inline">\(K\)</span>. It is either Poisson or truncated negative binomial, a family with a shape parameter <span class="math inline">\(\eta\)</span>. Then draw <span class="math inline">\(K\)</span> and run that many candidates drawn at random from the set. Release the best by a noisy score. The whole search then costs about one run, plus a term that grows only with the logarithm of the expected number of runs, <span id="eq-auto-03hyperparametertuning-1"><span class="math display">\[\varepsilon_A(\lambda) \le \varepsilon(\lambda) + \frac{\ln\mathbb E[K]}{\lambda - 1} + (\text{a term set by the shape of } K). \tag{40.2}\]</span></span> For pure <span class="math inline">\(\varepsilon\)</span>-DP runs it tends to <span class="math inline">\((2 + \eta)\varepsilon\)</span>, so the logarithmic distribution (<span class="math inline">\(\eta = 0\)</span>) gives <span class="math inline">\(2\varepsilon\)</span> and the geometric (<span class="math inline">\(\eta = 1\)</span>) gives <span class="math inline">\(3\varepsilon\)</span>. Google’s <code>dp_accounting</code> computes it, by composing in an <code>RdpAccountant</code> a <code>RepeatAndSelectDpEvent(event, mean, shape)</code> that wraps one run’s event. Its shape is infinite for Poisson, 1 for geometric and 0 for logarithmic.</p>
-<pre class="text"><code>import dp_accounting
-run = dp_accounting.SelfComposedDpEvent(
-    dp_accounting.PoissonSampledDpEvent(q, dp_accounting.GaussianDpEvent(sigma)), steps)
-search = dp_accounting.dp_event.RepeatAndSelectDpEvent(run, mean=8, shape=float("inf"))
-acc = dp_accounting.rdp.RdpAccountant()
-acc.compose(search)
-print(acc.get_epsilon(1e-5))</code></pre>
-<p><a href="#tbl-hpt-overhead" class="quarto-xref">Table&nbsp;<span>40.1</span></a> evaluates the bounds on the running example.</p>
+<section id="sec-hpt-rdp" class="level2" data-number="44.4">
+<h2 data-number="44.4" class="anchored" data-anchor-id="sec-hpt-rdp"><span class="header-section-number">44.4</span> A random number of runs</h2>
+<p>The way out is to draw the number of runs <span class="math inline">\(K\)</span> at random, independently of the data. Then a search whose runs all came out bad most likely drew few runs, which says little about the data. The whole search therefore costs about one run, plus a term that grows with the logarithm of the expected number of runs. For DP-SGD, use the version of Papernot &amp; Steinke (2022). It works with the Rényi differential privacy (RDP) guarantee that DP-SGD’s accountants already compute (<a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>).</p>
+<p>To use it, fix the candidate set and the distribution of <span class="math inline">\(K\)</span>, either Poisson or a truncated negative binomial with a shape parameter <span class="math inline">\(\eta\)</span>. That family includes the geometric distribution, <span class="math inline">\(\eta = 1\)</span>, which is the <strong>random stopping</strong> of Liu &amp; Talwar, and the logarithmic one, <span class="math inline">\(\eta = 0\)</span>. Then draw <span class="math inline">\(K\)</span>, run that many candidates drawn at random from the set, and release the best one by a private score. Google’s <code>dp_accounting</code> computes the cost when you wrap the event describing one run in a <code>RepeatAndSelectDpEvent</code>, with <span class="math inline">\(\eta\)</span> as its <code>shape</code> (infinite for Poisson), and compose it in an <code>RdpAccountant</code>. If each run’s score is a noisy count on a validation set disjoint from its training set, the event for one run is the costlier of the two; otherwise compose both into one event. NumPy draws <span class="math inline">\(K\)</span> with <code>rng.poisson(mean)</code>, with <code>rng.geometric(1 / mean)</code> for the geometric case, and with <code>rng.logseries(p)</code> for the logarithmic one, whose mean is <span class="math inline">\(-p/((1 - p)\ln(1 - p))\)</span>, so solve that for the <span class="math inline">\(p\)</span> that gives your mean.</p>
 <div id="tbl-hpt-overhead" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-overhead-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;40.1: The <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of tuning with DP-SGD runs of the running example (one run: <span class="math inline">\(\varepsilon = 6.71\)</span>), by the number of runs and how it is chosen.
+Table&nbsp;44.1: The <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> of a search over runs of the running example (one run: 6.71), from the full edition’s chapter.
 </figcaption>
 <div aria-describedby="tbl-hpt-overhead-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -642,91 +697,88 @@ Table&nbsp;40.1: The <span class="math inline">\(\varepsilon\)</span> at <span c
 </div>
 </figure>
 </div>
-<p>A smaller <span class="math inline">\(\eta\)</span> gives a cheaper bound but more often stops after a single run, and the Poisson bound suits runs that are already very private. A random number of runs may also miss the best candidate. On a grid of 8 with 8 runs on average, it never tries the best one with probability 0.4667.</p>
-<p>The theorems have three conditions, and each is easy to break. First, each run must draw its candidate independently from a fixed distribution, which is random search. So Bayesian optimization, which picks each candidate from earlier scores, is not covered and needs <a href="../part04-privacy-accounting/08-adaptive-composition.html">adaptive composition</a>. Second, the number of runs must be drawn independently of the data. Third, the score that ranks the runs must be part of each run’s private output.</p>
+<p><a href="#tbl-hpt-overhead" class="quarto-xref">Table&nbsp;<span>44.1</span></a> shows how the choice plays out. The geometric and logarithmic searches barely grow from 10 to 1,000 runs, while composition grows almost linearly. For pure <span class="math inline">\(\varepsilon\)</span>-DP runs, with <span class="math inline">\(\delta = 0\)</span>, the search costs at most <span class="math inline">\((2 + \eta)\varepsilon\)</span> however many runs it expects. So a smaller <span class="math inline">\(\eta\)</span> gives a cheaper bound, but the search also stops after one run more often. The Poisson bound needs runs that are already very private, and a run at <span class="math inline">\(\varepsilon = 6.71\)</span> is not, so here it grows almost like composition. A random number of runs may also miss the best candidate. For example, with eight candidates and a geometric number of runs with mean eight, it never tries the best one with probability 0.4667.</p>
+<p>The theorems have three conditions, and each is easy to break. First, each run must draw its candidate independently from a fixed distribution, which is what random search does. Bayesian optimization picks each candidate from earlier scores, so it is not covered and needs <a href="../part04-privacy-accounting/08-adaptive-composition.html">adaptive composition</a>. Second, the number of runs must be drawn independently of the data. And third, the score that ranks the runs must be private and counted in each run’s cost (<a href="#sec-hpt-select" class="quarto-xref"><span>Section 44.5</span></a>).</p>
 </section>
-<section id="sec-hpt-select" class="level2" data-number="40.6">
-<h2 data-number="40.6" class="anchored" data-anchor-id="sec-hpt-select"><span class="header-section-number">40.6</span> Selecting by a noisy validation score</h2>
-<p>When the candidates are fixed, such as public pretrained checkpoints, only the choice among them uses private data. That is a pure <strong>selection</strong> problem, which <a href="../part03-dp-foundations/05-selection.html">Selection</a> solved. Score each candidate by its number of correct predictions on a private validation set. One record changes such a count by at most 1, while an accuracy divides by a size that is itself private. Then the <strong>exponential mechanism</strong> at a budget <span class="math inline">\(\varepsilon\)</span> picks a candidate whose expected shortfall from the best count is at most <span id="eq-auto-03hyperparametertuning-2"><span class="math display">\[\frac{2}{\varepsilon}(\ln k + 1) \tag{40.3}\]</span></span> correct predictions, among <span class="math inline">\(k\)</span> candidates. On a validation set of <span class="math inline">\(m\)</span> records, that is an accuracy gap of at most <span class="math inline">\(2(\ln k + 1)/(\varepsilon m)\)</span>. For example, choosing among eight trained models on 5,000 validation records costs about a tenth of a point of accuracy at a budget of 0.1.</p>
-<p>With disjoint training and validation sets, each record sits in one of them, so a search over trained candidates costs the larger of the training cost and the selection cost, not their sum.</p>
-<p>The random-number bounds need a private score too. An exact validation accuracy leaves the validation records unprotected, so add Gaussian noise to each run’s count of correct predictions. With noise of standard deviation 20, one noisy count costs 0.182. Eight of them stay below the training runs’ cost at every order the conversion uses, so they add nothing to the total.</p>
+<section id="sec-hpt-select" class="level2" data-number="44.5">
+<h2 data-number="44.5" class="anchored" data-anchor-id="sec-hpt-select"><span class="header-section-number">44.5</span> Selecting by a noisy validation score</h2>
+<p>Sometimes the candidates are fixed in advance, such as public pretrained checkpoints, and only the choice among them uses private data. That is a <strong>selection</strong> problem, which <a href="../part03-dp-foundations/05-selection.html">Selection</a> solves with the exponential mechanism, a random choice weighted toward high scores. Score each candidate by its number of correct predictions, which one record changes by at most 1, rather than by an accuracy, which divides by a private set size. The mechanism’s shortfall from the best count then grows only with the logarithm of the number of candidates.</p>
+<p>For the random-number bounds, add Gaussian noise to each run’s count of correct predictions, since an exact validation accuracy leaves the validation records unprotected. With noise of standard deviation 20, one noisy count costs <span class="math inline">\(\varepsilon = 0.182\)</span>. If the validation set is disjoint from the training set, each record pays only one of the two costs. So a run costs the larger of its training cost and its count’s cost, not their sum. On the running example the counts are the smaller, so they add nothing to the total.</p>
 </section>
-<section id="sec-hpt-run" class="level2" data-number="40.7">
-<h2 data-number="40.7" class="anchored" data-anchor-id="sec-hpt-run"><span class="header-section-number">40.7</span> Tuning the running example</h2>
-<p><a href="#tbl-hpt-run" class="quarto-xref">Table&nbsp;<span>40.2</span></a> tunes the running example’s step size over eight values at a total budget of <span class="math inline">\(\varepsilon = 2\)</span>. Each strategy picks the noise multiplier that keeps it within budget.</p>
+<section id="sec-hpt-run" class="level2" data-number="44.6">
+<h2 data-number="44.6" class="anchored" data-anchor-id="sec-hpt-run"><span class="header-section-number">44.6</span> Tuning on Adult</h2>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/practitioner_tuning.py">practitioner_tuning.py</a> tunes the step size of a small network on the real Adult census data, with 30,000 private training records and 300 steps per run. It asks the accountant for the noise multiplier per run that each strategy can afford.</p>
 <div id="tbl-hpt-run" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;40.2: Tuning the step size of the running example at a total budget of <span class="math inline">\(\varepsilon = 2\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>, with mean and standard deviation of the released model’s test accuracy over repetitions of the whole procedure.
+Table&nbsp;44.2: Tuning the step size on Adult at a total of <span class="math inline">\(\varepsilon = 4\)</span>, <span class="math inline">\(\delta = 10^{-5}\)</span>, with <code>dp_accounting</code>’s RDP accountant.
 </figcaption>
 <div aria-describedby="tbl-hpt-run-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Strategy</th>
-<th><span class="math inline">\(\sigma\)</span></th>
-<th><span class="math inline">\(\varepsilon\)</span> of one run</th>
+<th>Noise multiplier per run</th>
 <th>Total <span class="math inline">\(\varepsilon\)</span></th>
-<th>Test accuracy</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>No tuning: step size 0.5 from <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a></td>
-<td>1.03</td>
-<td>1.97</td>
-<td>1.97</td>
-<td><span class="math inline">\(0.9509 \pm 0.0015\)</span></td>
+<td>One run, no tuning</td>
+<td>1.029</td>
+<td>4.00</td>
 </tr>
 <tr class="even">
-<td>Grid of 8, single-run <span class="math inline">\(\varepsilon\)</span> reported</td>
-<td>1.03</td>
-<td>1.97</td>
-<td>5.60</td>
-<td><span class="math inline">\(0.9479 \pm 0.0030\)</span></td>
+<td>Grid of 6 at the noise of one run, one run’s <span class="math inline">\(\varepsilon\)</span> reported</td>
+<td>1.029</td>
+<td>9.84 (reported as 4.00)</td>
 </tr>
 <tr class="odd">
-<td>Tune on proxy data, then one run</td>
-<td>1.03</td>
-<td>1.97</td>
-<td>1.97</td>
-<td><span class="math inline">\(0.9487 \pm 0.0025\)</span></td>
+<td>Grid of 6, every run counted</td>
+<td>1.816</td>
+<td>4.00</td>
 </tr>
 <tr class="even">
-<td>Grid of 8, composition</td>
-<td>2.07</td>
-<td>0.66</td>
-<td>1.99</td>
-<td><span class="math inline">\(0.9430 \pm 0.0022\)</span></td>
-</tr>
-<tr class="odd">
-<td>Random search, Poisson, mean 8</td>
-<td>1.53</td>
-<td>0.98</td>
-<td>1.99</td>
-<td><span class="math inline">\(0.9433 \pm 0.0060\)</span></td>
-</tr>
-<tr class="even">
-<td>Random search, logarithmic, mean 8</td>
-<td>1.36</td>
-<td>1.17</td>
-<td>2.00</td>
-<td><span class="math inline">\(0.9372 \pm 0.0200\)</span></td>
+<td>Random search, Poisson number of runs with mean 4</td>
+<td>1.256</td>
+<td>4.00</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>The second row is the common reporting bug. A team runs the grid at the noise of a single run and reports that run’s 1.97, when the honest cost is 5.60. It then looks better than an honest search of the same grid.</p>
-<p>The honest searches lose about a point against one untuned run. Poisson random search beats composition only slightly, because with one run per step size on average it often misses one, and the logarithmic distribution often stops after one run. Tuning on proxy data, a related task labelled by a different random network, is nearly free.</p>
+<p>The second row is the common reporting bug that <a href="#sec-hpt-composition" class="quarto-xref"><span>Section 44.3</span></a> explains, and this snippet recomputes it together with the numbers of the report in <a href="#sec-hpt-practice" class="quarto-xref"><span>Section 44.2</span></a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dp_accounting</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> one_run(sigma: <span class="bu">float</span>) <span class="op">-&gt;</span> dp_accounting.DpEvent:</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    step <span class="op">=</span> dp_accounting.PoissonSampledDpEvent(<span class="dv">1</span> <span class="op">/</span> <span class="dv">30</span>, dp_accounting.GaussianDpEvent(sigma))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp_accounting.SelfComposedDpEvent(step, <span class="dv">300</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> epsilon(event: dp_accounting.DpEvent) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp_accounting.rdp.RdpAccountant().compose(event).get_epsilon(<span class="fl">1e-5</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>search <span class="op">=</span> dp_accounting.dp_event.RepeatAndSelectDpEvent(one_run(<span class="fl">1.256</span>), mean<span class="op">=</span><span class="dv">4</span>, shape<span class="op">=</span><span class="bu">float</span>(<span class="st">"inf"</span>))</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>naive_grid <span class="op">=</span> dp_accounting.SelfComposedDpEvent(one_run(<span class="fl">1.029</span>), <span class="dv">6</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>epsilon(one_run(<span class="fl">1.256</span>))<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 2.73</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>epsilon(search)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 4.00</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>epsilon(naive_grid)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 9.84</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The search itself, run with <code>uv run python code/part05-dp-ml/practitioner_tuning.py</code> and seed 0, was unlucky. It drew only two runs, both at the smallest step size, and its model reaches 0.828 on the test set. The run of <a href="../part05-dp-ml/13-train-dp-sgd.html">Train a model with DP-SGD</a>, whose step size was chosen for free on public stand-in rows, reaches 0.846 at the same target <span class="math inline">\(\varepsilon = 4\)</span>. So a search with few runs can miss (<a href="../part05-dp-ml/13-train-dp-sgd.html#sec-trainwf-tune">Tune honestly</a>).</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="40.8">
-<h2 data-number="40.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">40.8</span> Cheat sheet</h2>
+<section id="cheat-sheet" class="level2" data-number="44.7">
+<h2 data-number="44.7" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">44.7</span> Cheat sheet</h2>
 <div id="tbl-hpt-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-hpt-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;40.3: Which tuning strategy for which search.
+Table&nbsp;44.3: Which tuning strategy for which search.
 </figcaption>
 <div aria-describedby="tbl-hpt-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -744,33 +796,23 @@ Table&nbsp;40.3: Which tuning strategy for which search.
 </thead>
 <tbody>
 <tr class="odd">
-<td>Good hyperparameters from public or proxy data</td>
-<td>One private run</td>
-<td>One run</td>
-</tr>
-<tr class="even">
 <td>Two or three candidates</td>
 <td>Fixed grid, composition</td>
 <td><span class="math inline">\(k\)</span> runs of <span class="math inline">\(T\)</span> steps = one run of <span class="math inline">\(kT\)</span> steps</td>
 </tr>
-<tr class="odd">
-<td>Many candidates, small per-run budget</td>
-<td>Random search, Poisson number of runs</td>
-<td>One run plus a term in the log of the mean</td>
-</tr>
 <tr class="even">
-<td>Many candidates, larger per-run budget</td>
-<td>Random search, logarithmic or <span class="math inline">\(\eta = 0.5\)</span></td>
-<td>Near <span class="math inline">\((2 + \eta)\)</span> runs for pure DP; may try few</td>
+<td>Many candidates</td>
+<td>Random search; compute Poisson, geometric and logarithmic for your per-run noise and mean, and take the cheapest</td>
+<td>Poisson wins only for very private runs; at one run of 6.71, logarithmic is cheapest at every size in <a href="#tbl-hpt-overhead" class="quarto-xref">Table&nbsp;<span>44.1</span></a>, but it stops after one run more often</td>
 </tr>
 <tr class="odd">
-<td>Fixed candidates, private validation set</td>
-<td>Exponential mechanism on correct-prediction counts</td>
-<td>Gap at most <span class="math inline">\(2(\ln k + 1)/\varepsilon\)</span> predictions</td>
+<td>Fixed candidates</td>
+<td>Exponential mechanism on correct counts</td>
+<td>Shortfall grows with the log of the candidate count</td>
 </tr>
 <tr class="even">
 <td>Trained candidates, disjoint validation set</td>
-<td>Noisy counts</td>
+<td>Exponential mechanism or noisy counts</td>
 <td>The larger of training and selection costs</td>
 </tr>
 </tbody>
@@ -780,17 +822,15 @@ Table&nbsp;40.3: Which tuning strategy for which search.
 </div>
 <p><strong>Rules of thumb</strong></p>
 <ul>
-<li>Fix the search before touching the private data, and never “try a few more” or restart it.</li>
+<li>Tune on public or proxy data when you can. Otherwise fix the search before touching the private data, and never extend it.</li>
 <li>Report the whole search’s <span class="math inline">\(\varepsilon\)</span>, never the selected run’s alone.</li>
-<li>Account for Bayesian optimization as adaptive composition, not as a fixed candidate set.</li>
-<li>Never select by exact accuracy on a private validation set.</li>
 </ul>
 </section>
-<section id="further-reading" class="level2" data-number="40.9">
-<h2 data-number="40.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">40.9</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="44.8">
+<h2 data-number="44.8" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">44.8</span> Further reading</h2>
 <ul>
 <li>Papernot &amp; Steinke, “Hyperparameter Tuning with Renyi Differential Privacy” (ICLR 2022): the Poisson and truncated negative binomial bounds for DP-SGD.</li>
-<li>Liu &amp; Talwar, “Private Selection from Private Candidates” (STOC 2019): random stopping and the <span class="math inline">\(3\varepsilon\)</span> bound.</li>
+<li>Liu &amp; Talwar, “Private Selection from Private Candidates” (STOC 2019): random stopping and its bound of three times one run.</li>
 </ul>
 <p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part05-dp-ml/03-hyperparameter-tuning.html">the full edition’s chapter</a>.</p>
 
@@ -1200,13 +1240,13 @@ Table&nbsp;40.3: Which tuning strategy for which search.
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part05-dp-ml/02-dp-sgd.html" class="pagination-link" aria-label="DP-SGD">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span>
+      <a href="../part05-dp-ml/13-train-dp-sgd.html" class="pagination-link" aria-label="Train a model with DP-SGD">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="pagination-link" aria-label="DP-FTRL and matrix factorization">
-        <span class="nav-page-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../part05-dp-ml/07-user-level.html" class="pagination-link" aria-label="User-level differential privacy">
+        <span class="nav-page-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

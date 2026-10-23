@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>47&nbsp; Auditing private training – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>52&nbsp; Auditing private training – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -72,7 +72,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
 <link href="../part05-dp-ml/11-adaptive-data-analysis.html" rel="next">
-<link href="../part05-dp-ml/09-choosing-epsilon.html" rel="prev">
+<link href="../part05-dp-ml/08-disparate-impact.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/10-auditing.html"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/10-auditing.html"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -305,6 +305,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -319,67 +325,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -395,26 +407,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -425,26 +425,44 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -461,49 +479,31 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -514,14 +514,50 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -559,27 +595,22 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">47.1</span> Why this matters</a></li>
-  <li><a href="#sec-audit-choose" id="toc-sec-audit-choose" class="nav-link" data-scroll-target="#sec-audit-choose"><span class="header-section-number">47.2</span> Which audit for which question</a></li>
-  <li><a href="#sec-audit-bugs" id="toc-sec-audit-bugs" class="nav-link" data-scroll-target="#sec-audit-bugs"><span class="header-section-number">47.3</span> Known bugs, and which audit catches them</a></li>
-  <li><a href="#sec-audit-bound" id="toc-sec-audit-bound" class="nav-link" data-scroll-target="#sec-audit-bound"><span class="header-section-number">47.4</span> From an attack to a lower bound</a></li>
-  <li><a href="#sec-audit-canaries" id="toc-sec-audit-canaries" class="nav-link" data-scroll-target="#sec-audit-canaries"><span class="header-section-number">47.5</span> Canaries and threat models</a></li>
-  <li><a href="#sec-audit-tight" id="toc-sec-audit-tight" class="nav-link" data-scroll-target="#sec-audit-tight"><span class="header-section-number">47.6</span> Tight audits of the mechanism</a></li>
-  <li><a href="#sec-audit-onerun" id="toc-sec-audit-onerun" class="nav-link" data-scroll-target="#sec-audit-onerun"><span class="header-section-number">47.7</span> One-run auditing</a></li>
-  <li><a href="#sec-audit-blackbox" id="toc-sec-audit-blackbox" class="nav-link" data-scroll-target="#sec-audit-blackbox"><span class="header-section-number">47.8</span> Black-box audit of the trained network</a></li>
-  <li><a href="#sec-audit-ci" id="toc-sec-audit-ci" class="nav-link" data-scroll-target="#sec-audit-ci"><span class="header-section-number">47.9</span> Auditing in continuous integration</a></li>
-  <li><a href="#code" id="toc-code" class="nav-link" data-scroll-target="#code"><span class="header-section-number">47.10</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">47.11</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">47.12</span> Further reading</a></li>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">52.1</span> Why this matters</a></li>
+  <li><a href="#sec-audit-bugs" id="toc-sec-audit-bugs" class="nav-link" data-scroll-target="#sec-audit-bugs"><span class="header-section-number">52.2</span> Known bugs, and which audit catches them</a></li>
+  <li><a href="#sec-audit-ci" id="toc-sec-audit-ci" class="nav-link" data-scroll-target="#sec-audit-ci"><span class="header-section-number">52.3</span> A CI test for the noise and the clipping</a></li>
+  <li><a href="#sec-audit-bound" id="toc-sec-audit-bound" class="nav-link" data-scroll-target="#sec-audit-bound"><span class="header-section-number">52.4</span> From an attack to a lower bound</a></li>
+  <li><a href="#sec-audit-onerun" id="toc-sec-audit-onerun" class="nav-link" data-scroll-target="#sec-audit-onerun"><span class="header-section-number">52.5</span> A one-run audit of the trained model</a></li>
+  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">52.6</span> Cheat sheet</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">52.7</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/10-auditing.html"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/10-auditing.html"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></h1>
+<h1 class="title"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></h1>
 </div>
 
 
@@ -596,20 +627,80 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="47.1">
-<h2 data-number="47.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">47.1</span> Why this matters</h2>
-<p>The running example trains a network with differential privacy (DP), using the private form of stochastic gradient descent (SGD) called <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>. Its noise multiplier <span class="math inline">\(\sigma\)</span>, the noise’s standard deviation in units of the clipping norm, is 1. The Rényi differential privacy (RDP) accountant turns its configuration into a privacy level <span class="math inline">\(\varepsilon\)</span> of 6.71 at a slack <span class="math inline">\(\delta\)</span> of <span class="math inline">\(10^{-5}\)</span>. That number is a proof about an algorithm, while what ships is code, and a bug in the noise or the sampling barely changes the accuracy.</p>
-<p>An <strong>audit</strong> checks the code by attacking it. It plants records called <strong>canaries</strong>, trains with and without them, and counts how often a membership test guesses right. DP caps how often any test can be right, so a test that is right too often proves that the code is less private than claimed. The reverse never holds, because a weak attack also fails against a leaky model.</p>
+<section id="why-this-matters" class="level2" data-number="52.1">
+<h2 data-number="52.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">52.1</span> Why this matters</h2>
+<p>When you train with differential privacy (DP), the accountant turns your configuration into a privacy level <span class="math inline">\(\varepsilon\)</span> at a slack <span class="math inline">\(\delta\)</span>. That number is a proof about an algorithm, but what ships is code. A bug in the noise, the clipping or the sampling makes the model less private but barely changes its accuracy. Accuracy is flat across a wide range of noise levels (<a href="../part05-dp-ml/13-train-dp-sgd.html">the training workflow</a>), so the usual tests never notice the bug.</p>
+<p>An <strong>audit</strong> checks the code by attacking it. It plants records called <strong>canaries</strong>, trains with and without them, and counts how often a membership test guesses right. DP caps how often any test can be right, so a test that is right too often proves that the code is less private than claimed. A test that is rarely right proves nothing, since a weak attack also fails against a leaky model. This chapter gives you two audits to run, a unit test for continuous integration (CI) and a one-run audit of a trained model. <a href="#tbl-audit-cheat" class="quarto-xref">Table&nbsp;<span>52.2</span></a> compares them with two costlier ones.</p>
 </section>
-<section id="sec-audit-choose" class="level2" data-number="47.2">
-<h2 data-number="47.2" class="anchored" data-anchor-id="sec-audit-choose"><span class="header-section-number">47.2</span> Which audit for which question</h2>
-<p>Use the cheapest audit that answers your question (<a href="#tbl-audit-choose" class="quarto-xref">Table&nbsp;<span>47.1</span></a>). The per-step audit also works as a regression test (<a href="#sec-audit-ci" class="quarto-xref"><span>Section 47.9</span></a>).</p>
-<div id="tbl-audit-choose" class="quarto-float quarto-figure quarto-figure-center anchored">
+<section id="sec-audit-bugs" class="level2" data-number="52.2">
+<h2 data-number="52.2" class="anchored" data-anchor-id="sec-audit-bugs"><span class="header-section-number">52.2</span> Known bugs, and which audit catches them</h2>
+<p>These bugs break the private form of stochastic gradient descent (SGD), <a href="../part05-dp-ml/02-dp-sgd.html">DP-SGD</a>.</p>
+<ul>
+<li><strong>The variance passed where the standard deviation is expected,</strong> or <strong>noise scaled for the mean but added to the sum,</strong> which adds the batch size times too little noise. The CI test catches both.</li>
+<li><strong>Clipping applied after averaging, or noise from a weak seed.</strong> Nasr et al.&nbsp;(2023) found both in real code with per-step audits like the CI test below.</li>
+<li><strong>The accountant told the wrong numbers,</strong> such as a record count that includes augmented copies, which makes <span class="math inline">\(\varepsilon\)</span> look smaller than it is. Only an end-to-end audit can catch it, and only if the error is large.</li>
+<li><strong>Batches shuffled but accounted as Poisson sampling,</strong> which can make the true <span class="math inline">\(\varepsilon\)</span> several times the reported one (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>). No audit here exercises the sampling, so check the loader itself.</li>
+</ul>
+<p>Audits catch errors only in the unsafe direction, so code that adds too much noise passes them all.</p>
+</section>
+<section id="sec-audit-ci" class="level2" data-number="52.3">
+<h2 data-number="52.3" class="anchored" data-anchor-id="sec-audit-ci"><span class="header-section-number">52.3</span> A CI test for the noise and the clipping</h2>
+<p>The cheapest strong audit tests one step of the optimizer, many times. A <strong>Dirac canary</strong> is a per-example gradient that is zero except on one coordinate, where every other record’s gradient is zero. Put it into every step of one run and leave it out of another. The reading <span class="math inline">\(x_t\)</span> is step <span class="math inline">\(t\)</span>’s noisy gradient sum on that coordinate, divided by the clipping norm <span class="math inline">\(C\)</span>. The canary is longer than <span class="math inline">\(C\)</span>, so a correct optimizer clips it to length <span class="math inline">\(C\)</span> and it adds exactly 1 to the reading. The optimizer also adds noise of standard deviation <span class="math inline">\(\sigma C\)</span>, where <span class="math inline">\(\sigma\)</span> is the noise multiplier, so each reading follows <span id="eq-audit-perstep"><span class="math display">\[x_t \sim \mathcal N(0, \sigma^2) \text{ without the canary}, \qquad x_t \sim \mathcal N(1, \sigma^2) \text{ with it}. \tag{52.1}\]</span></span></p>
+<p>A threshold test says “canary in” whenever a reading exceeds a threshold. Its <strong>true positive rate (TPR)</strong> is how often it says so when the canary was there. Its <strong>false positive rate (FPR)</strong> is how often it says so when the canary was not. For two normal distributions a distance <span class="math inline">\(\mu\)</span> apart, every threshold gives <span class="math inline">\(\Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}) = \mu\)</span>, where <span class="math inline">\(\Phi\)</span> is the standard normal distribution function. So measured rates bound the true separation <span class="math inline">\(\mu\)</span>, which a correct optimizer keeps at <span class="math inline">\(1/\sigma\)</span>: <span id="eq-audit-mu"><span class="math display">\[\mu \ge \Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}). \tag{52.2}\]</span></span> The test plugs in the low end of the TPR’s Clopper–Pearson interval and the high end of the FPR’s. Each end is taken at level <span class="math inline">\(\beta/2\)</span>, so the bound holds with probability <span class="math inline">\(1 - \beta\)</span> (<a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>). If this bound exceeds <span class="math inline">\(1/\sigma\)</span>, the code adds less noise than it claims.</p>
+<p>The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/practitioner_audit.py">practitioner_audit.py</a> runs the test on Opacus’s own <code>DPOptimizer</code>. It writes per-example gradients into <code>grad_sample</code> by hand, as Opacus’s hooks would, and reads the noisy sum that <code>optimizer.step()</code> leaves in <code>grad</code>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-excerpt="audit-ci-observe"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> canary_coordinate(sigma: <span class="bu">float</span>, planted_bug: <span class="bu">str</span>, with_canary: <span class="bu">bool</span>, steps: <span class="bu">int</span>) <span class="op">-&gt;</span> Array:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Run the optimizer for `steps` steps; return the canary coordinate of each noisy sum, in units of C."""</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    layer <span class="op">=</span> torch.nn.Linear(DIM_CI, <span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    optimizer <span class="op">=</span> make_optimizer(layer, sigma, planted_bug)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    observations <span class="op">=</span> np.empty(steps)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(steps):</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="bu">setattr</span>(layer.weight, <span class="st">"grad_sample"</span>, batch_grad_samples(with_canary))  <span class="co"># as Opacus's hooks would</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        optimizer.step()  <span class="co"># clip each row to C, sum, add N(0, σ²C²)</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> layer.weight.grad <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>        observations[t] <span class="op">=</span> layer.weight.grad[<span class="dv">0</span>, CANARY_COORD].item() <span class="op">/</span> CLIP_CI</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> observations</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The canary’s gradient is ten times <span class="math inline">\(C\)</span>, so the test also exercises clipping. The test chooses its threshold on the first half of the steps and counts on the second half, and says “canary in” only for a reading strictly above it. It also checks that the canary-free readings have a standard deviation within 10% of <span class="math inline">\(\sigma\)</span>, because with no noise at all every reading is 0 and the rates mean nothing. Run <code>uv run python code/part05-dp-ml/practitioner_audit.py</code>, which tests the correct optimizer, one with the variance bug planted and one with the noise turned off, at <span class="math inline">\(\sigma = 0.7\)</span> and a batch of <span class="math inline">\(B = 64\)</span> records. The variance bug removes noise only because <span class="math inline">\(\sigma\)</span> is below 1, where <span class="math inline">\(\sigma^2 &lt; \sigma\)</span>; above 1 it would pass.</p>
+<pre class="text"><code>sigma=0.7  C=1.0  B=64  steps per run=2000  claim mu=1/sigma=1.429
+correct: noise std 0.687 (claim 0.7)  FP 206/1000  TP 710/1000
+correct: mu_lo=1.201  pass
+variance for std: noise std 0.481 (claim 0.7)  FP 206/1000  TP 862/1000
+variance for std: mu_lo=1.722  FAIL
+no noise: noise std 0.000 (claim 0.7)  FP 0/1000  TP 1000/1000
+no noise: mu_lo=5.360  FAIL</code></pre>
+<p>The correct optimizer’s bound on <span class="math inline">\(\mu\)</span> is 1.201, below its claimed 1.429, so it passes. The variance bug’s bound is 1.722 and the missing noise’s is 5.360, so both fail. The test takes seconds, so run it on every commit.</p>
+<p>Three things go wrong in practice. First, a correct optimizer still fails with probability <span class="math inline">\(\beta\)</span>, here 5%, so an unseeded test fails one build in twenty. Fix the seed, or use a <span class="math inline">\(\beta\)</span> of <span class="math inline">\(10^{-3}\)</span> with more steps. Second, the script builds its own optimizer, so it tests Opacus, not your call to it. Point it at your code by having your setup function return the optimizer it makes, and drive that one. Third, the test never draws a batch or calls the accountant. For those, assert in the same suite that the loader is Opacus’s <code>DPDataLoader</code> and that a second library’s <span class="math inline">\(\varepsilon\)</span> matches yours (<a href="../part05-dp-ml/13-train-dp-sgd.html#sec-trainwf-crosscheck">Train a model with DP-SGD</a>).</p>
+</section>
+<section id="sec-audit-bound" class="level2" data-number="52.4">
+<h2 data-number="52.4" class="anchored" data-anchor-id="sec-audit-bound"><span class="header-section-number">52.4</span> From an attack to a lower bound</h2>
+<p>For a whole training run, the attack is a membership test on a planted canary. A <strong>trial</strong> is one training run, with or without the canary. Under <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, every such test satisfies <span id="eq-audit-region"><span class="math display">\[\mathrm{TPR} \le e^\varepsilon\,\mathrm{FPR} + \delta, \qquad 1 - \mathrm{FPR} \le e^\varepsilon\,(1 - \mathrm{TPR}) + \delta. \tag{52.3}\]</span></span> Solving these two inequalities for <span class="math inline">\(\varepsilon\)</span> turns measured rates into a lower bound on it. Write <span class="math inline">\(\bar\alpha\)</span> for the one-sided Clopper–Pearson upper bound on the FPR at level <span class="math inline">\(\beta/2\)</span>, and <span class="math inline">\(\underline\tau\)</span> for the lower bound on the TPR at the same level. With probability at least <span class="math inline">\(1 - \beta\)</span>, the code is then not <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, at the claimed <span class="math inline">\(\delta\)</span>, for any <span class="math inline">\(\varepsilon\)</span> below <span id="eq-audit-eps-lo"><span class="math display">\[\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline\tau - \delta}{\bar\alpha},\ \ln\frac{1 - \bar\alpha - \delta}{1 - \underline\tau}\Big\}. \tag{52.4}\]</span></span> The bound needs independent trials, and a threshold chosen on other trials than those it counts, since one tuned on the counted trials would inflate the bound.</p>
+<p>SciPy computes it in a few lines, since a Clopper–Pearson bound is a quantile of a beta distribution. Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> log</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> beta</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> eps_lower_bound(fp: <span class="bu">int</span>, tp: <span class="bu">int</span>, n: <span class="bu">int</span>, delta: <span class="bu">float</span>, level: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.05</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    fpr_hi <span class="op">=</span> beta.ppf(<span class="dv">1</span> <span class="op">-</span> level <span class="op">/</span> <span class="dv">2</span>, fp <span class="op">+</span> <span class="dv">1</span>, n <span class="op">-</span> fp)  <span class="co"># one-sided Clopper-Pearson upper bound</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    tpr_lo <span class="op">=</span> beta.ppf(level <span class="op">/</span> <span class="dv">2</span>, tp, n <span class="op">-</span> tp <span class="op">+</span> <span class="dv">1</span>)  <span class="co"># one-sided Clopper-Pearson lower bound</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">max</span>(log((tpr_lo <span class="op">-</span> delta) <span class="op">/</span> fpr_hi), log((<span class="dv">1</span> <span class="op">-</span> fpr_hi <span class="op">-</span> delta) <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> tpr_lo)))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>eps_lower_bound(<span class="dv">1</span>, <span class="dv">500</span>, <span class="dv">1_000</span>, <span class="fl">1e-5</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 4.43</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>eps_lower_bound(<span class="dv">0</span>, <span class="dv">1_000</span>, <span class="dv">1_000</span>, <span class="fl">1e-5</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 5.60</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The raw rates alone would suggest 6.21, but confidence is expensive, and the certified bound is only 4.43. Even a perfect attack certifies only 5.60 from 1,000 trials per hypothesis, so never expect an end-to-end audit to certify the whole of a large claim. Even a <strong>white-box</strong> attacker, who sees every intermediate model, certifies only 3.63 in the full edition against a claimed 6.71.</p>
+</section>
+<section id="sec-audit-onerun" class="level2" data-number="52.5">
+<h2 data-number="52.5" class="anchored" data-anchor-id="sec-audit-onerun"><span class="header-section-number">52.5</span> A one-run audit of the trained model</h2>
+<p>Thousands of runs are out of reach for a real model, so Steinke, Nasr &amp; Jagielski (2023) get many trials from one run. Plant a number <span class="math inline">\(m\)</span> of canaries, include each one by its own fair coin, train once and score every canary. Then fix a list length <span class="math inline">\(r\)</span>. Guess “in” for the <span class="math inline">\(r/2\)</span> highest scores and “out” for the <span class="math inline">\(r/2\)</span> lowest, and make no guess about the rest. Write <span class="math inline">\(W\)</span> for the number of correct guesses.</p>
+<p>Under <span class="math inline">\(\varepsilon\)</span>-DP, no attack guesses one canary’s coin right with a probability above the limit <span class="math inline">\(p_\varepsilon\)</span> given below. So the count <span class="math inline">\(W\)</span> is no more likely to reach any value <span class="math inline">\(v\)</span> than a binomial count with that success rate is: <span id="eq-audit-onerun"><span class="math display">\[\Pr[W \ge v] \le \Pr\big[\mathrm{Bin}(r, p_\varepsilon) \ge v\big], \qquad p_\varepsilon = \frac{e^\varepsilon}{1 + e^\varepsilon}. \tag{52.5}\]</span></span> An observed count that this binomial reaches with probability below <span class="math inline">\(\beta\)</span> rules out that <span class="math inline">\(\varepsilon\)</span>. The certified bound is the largest <span class="math inline">\(\varepsilon\)</span> ruled out this way. Under <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, the paper adds at most <span class="math inline">\(2m\delta\)</span> to that probability. The coins must be independent and fair. Trying several list lengths needs a Bonferroni correction, which runs each test at <span class="math inline">\(\beta\)</span> divided by their number.</p>
+<p>The script runs it on the released pipeline of <a href="../part05-dp-ml/13-train-dp-sgd.html">Train a model with DP-SGD</a>, the Adult census data that predicts whether a person’s income exceeds $50K. It reuses that script’s whole recipe and adds only the canaries, 1,000 held-out rows with flipped labels. Each is included by a coin, and 537 join the 30,000 training rows. DP-SGD runs at the release’s noise multiplier, which gives <span class="math inline">\(\varepsilon = 3.91\)</span> for this slightly larger set. A non-private model uses the release’s baseline recipe, and a memorizing control runs non-private Adam for 60 epochs with small batches. The slack is the book’s default, <span class="math inline">\(\delta = 10^{-5}\)</span>. Each canary is scored by minus its loss. The script tries six list lengths, from 20 to 1,000, and <a href="#tbl-audit-adult" class="quarto-xref">Table&nbsp;<span>52.1</span></a> gives each model’s best.</p>
+<div id="tbl-audit-adult" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-audit-choose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;47.1: Which audit answers which question. “Here” means the running example, whose claim is 6.71.
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-audit-adult-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;52.1: One-run audit of the released pipeline on Adult with 1,000 mislabeled canaries, at 95% overall confidence and <span class="math inline">\(\delta = 10^{-5}\)</span>.
 </figcaption>
-<div aria-describedby="tbl-audit-choose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div aria-describedby="tbl-audit-adult-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
 <col style="width: 25%">
@@ -619,36 +710,81 @@ Table&nbsp;47.1: Which audit answers which question. “Here” means the runnin
 </colgroup>
 <thead>
 <tr class="header">
+<th>Training</th>
+<th>Mean canary loss, in / out</th>
+<th>Correct guesses</th>
+<th>Certified <span class="math inline">\(\varepsilon\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>DP-SGD, release recipe</td>
+<td>4.105 / 4.006</td>
+<td>10 of 20</td>
+<td>0.00</td>
+</tr>
+<tr class="even">
+<td>Non-private, release recipe</td>
+<td>2.240 / 2.222</td>
+<td>8 of 20</td>
+<td>0.00</td>
+</tr>
+<tr class="odd">
+<td>Memorizing control</td>
+<td>1.994 / 2.992</td>
+<td>75 of 100</td>
+<td>0.53</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<p>Both release-recipe models certify nothing, and the reason is the recipe, not privacy. Ten epochs with large batches barely fit the flipped labels, so included canaries have the same loss as excluded ones, with or without noise. Adult’s many near-duplicate rows with opposite labels make a flipped label look like ordinary noise. Only the memorizing control separates its canaries, and even it certifies 0.53 for a model with no finite <span class="math inline">\(\varepsilon\)</span>, because each canary is a single trial and 1,000 trials cap any bound. Here a perfect list of all 1,000 guesses would certify at most 5.27.</p>
+<p>So use the one-run audit as a test that exposes a bug when a DP model certifies more than its claim, never as evidence of privacy. Report it with its threat model, a black-box attacker who sees only the final model, and with a control that shows the attack can detect leakage on your data.</p>
+<p>Stronger black-box attacks, such as the likelihood ratio attack (LiRA) of <a href="../part02-attacks/10-risk-assessment.html#sec-risk-lira">Pre-release privacy risk assessment</a>, train <strong>shadow models</strong>, copies of the model trained with its exact recipe on similar data. Run them before release and keep their results with the release documents (<a href="../part05-dp-ml/12-release-governance.html">Release and governance</a>). LiRA’s TPR at a low FPR shows what a realistic attacker learns. But its (model, record) pairs share models, so they are not independent trials, and its rates in <a href="#eq-audit-eps-lo" class="quarto-xref">Equation&nbsp;<span>52.4</span></a> give no certified bound. Certify only from independent trials, such as the one-run audit’s coins or many separate training runs.</p>
+</section>
+<section id="cheat-sheet" class="level2" data-number="52.6">
+<h2 data-number="52.6" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">52.6</span> Cheat sheet</h2>
+<div id="tbl-audit-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-audit-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;52.2: Which audit answers which question, and its rule.
+</figcaption>
+<div aria-describedby="tbl-audit-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
 <th>Question</th>
-<th>Audit</th>
-<th>Cost</th>
+<th>Audit and cost</th>
+<th>Rule</th>
 <th>Blind to</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td>Does the code clip and add the noise it claims?</td>
-<td>Per-step audit with a Dirac canary in every step (<a href="#sec-audit-bugs" class="quarto-xref"><span>Section 47.3</span></a>)</td>
-<td>Two training runs</td>
+<td>CI test, seconds</td>
+<td>Fail if the bound on <span class="math inline">\(\mu\)</span>, <a href="#eq-audit-mu" class="quarto-xref">Equation&nbsp;<span>52.2</span></a>, exceeds <span class="math inline">\(1/\sigma\)</span></td>
 <td>Sampling and accounting bugs</td>
 </tr>
 <tr class="even">
 <td>Is the claimed <span class="math inline">\(\varepsilon\)</span> right, accounting included?</td>
-<td>End-to-end white-box audit with the likelihood-ratio statistic (<a href="#sec-audit-tight" class="quarto-xref"><span>Section 47.6</span></a>)</td>
-<td>Thousands of runs per hypothesis</td>
-<td>Bugs smaller than its shortfall, about 3 units here</td>
+<td>End-to-end audit, thousands of runs</td>
+<td><a href="#eq-audit-eps-lo" class="quarto-xref">Equation&nbsp;<span>52.4</span></a>, Clopper–Pearson at <span class="math inline">\(\beta/2\)</span></td>
+<td>Bugs smaller than the bound’s shortfall</td>
 </tr>
 <tr class="odd">
-<td>A cheap end-to-end check of a slow model</td>
-<td>One-run audit with many white-box canaries (<a href="#sec-audit-onerun" class="quarto-xref"><span>Section 47.7</span></a>)</td>
-<td>One run</td>
-<td>Most bugs, since its best bound here was 2.53</td>
+<td>Does a trained model leak planted records?</td>
+<td>One-run audit, one extra run</td>
+<td><a href="#eq-audit-onerun" class="quarto-xref">Equation&nbsp;<span>52.5</span></a> plus <span class="math inline">\(2m\delta\)</span>, Bonferroni</td>
+<td>Most bugs, since its bounds are low</td>
 </tr>
 <tr class="even">
-<td>What can a realistic attacker learn from the released model?</td>
-<td>Black-box one-run audit with mislabeled canaries (<a href="#sec-audit-blackbox" class="quarto-xref"><span>Section 47.8</span></a>)</td>
-<td>One run, plus controls</td>
-<td>The mechanism’s worst case</td>
+<td>What can a realistic attacker learn?</td>
+<td>Shadow-model attack (<a href="../part02-attacks/10-risk-assessment.html#sec-risk-lira">LiRA</a>)</td>
+<td>TPR at a low FPR; no certified bound</td>
+<td>The most the code could leak</td>
 </tr>
 </tbody>
 </table>
@@ -656,138 +792,10 @@ Table&nbsp;47.1: Which audit answers which question. “Here” means the runnin
 </figure>
 </div>
 </section>
-<section id="sec-audit-bugs" class="level2" data-number="47.3">
-<h2 data-number="47.3" class="anchored" data-anchor-id="sec-audit-bugs"><span class="header-section-number">47.3</span> Known bugs, and which audit catches them</h2>
-<p>Read the code for each bug below, since an audit catches only some of them.</p>
+<section id="further-reading" class="level2" data-number="52.7">
+<h2 data-number="52.7" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">52.7</span> Further reading</h2>
 <ul>
-<li><strong>Variance passed where a standard deviation is expected.</strong> With the running example’s clipping norm of 0.5, this halves the noise. A per-step audit catches it.</li>
-<li><strong>Noise scaled for the mean but added to the sum,</strong> which makes it too small by the batch size. A per-step audit catches it at once.</li>
-<li><strong>Clipping applied after averaging, or noise from a weak seed</strong> with only 100 possible values. Nasr et al.&nbsp;(2023) found both in real code with per-step audits.</li>
-<li><strong>The accountant told the wrong numbers,</strong> such as 20,000 records instead of 10,000 because augmented copies were counted. The noise is right, so only an end-to-end audit can catch it, and only if the error is large.</li>
-<li><strong>Batches shuffled but accounted as Poisson sampling,</strong> which can make the true <span class="math inline">\(\varepsilon\)</span> several times the reported one (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>). No cheap audit exercises the sampling, so read that code yourself.</li>
-</ul>
-<p>The per-step audit puts a Dirac canary (<a href="#sec-audit-canaries" class="quarto-xref"><span>Section 47.5</span></a>) into every step of one run and leaves it out of another. Each step’s noisy value on the canary’s coordinate, in units of the clipping norm, is one trial, and for correct code it follows <span id="eq-audit-perstep"><span class="math display">\[x_t \sim \mathcal N(0, \sigma^2) \text{ without the canary}, \qquad x_t \sim \mathcal N(1, \sigma^2) \text{ with it}. \tag{47.1}\]</span></span> The audit bounds the separation <span class="math inline">\(\mu\)</span> of these two distributions from below with <a href="#eq-audit-mu" class="quarto-xref">Equation&nbsp;<span>47.5</span></a>, and correct code has <span class="math inline">\(\mu = 1/\sigma\)</span>. On the running example, two runs of 10,000 steps bound <span class="math inline">\(\mu\)</span> by 0.886 for the correct code, against the claimed 1, while the variance bug gives 1.745 and is refuted.</p>
-<p>Audits catch errors only in the unsafe direction, so code that adds too much noise passes every audit.</p>
-</section>
-<section id="sec-audit-bound" class="level2" data-number="47.4">
-<h2 data-number="47.4" class="anchored" data-anchor-id="sec-audit-bound"><span class="header-section-number">47.4</span> From an attack to a lower bound</h2>
-<p>A <strong>trial</strong> is one training run with or without the canary, and the attack says “in” when a score, such as minus the canary’s loss, is above a threshold. Its <strong>true positive rate (TPR)</strong> is the chance that it says “in” when the canary was trained on. Its <strong>false positive rate (FPR)</strong> is the chance that it says “in” when the canary was left out. DP requires, for every test, <span id="eq-audit-region"><span class="math display">\[\mathrm{TPR} \le e^\varepsilon\,\mathrm{FPR} + \delta, \qquad 1 - \mathrm{FPR} \le e^\varepsilon\,(1 - \mathrm{TPR}) + \delta. \tag{47.2}\]</span></span></p>
-<p>The rates are measured from <span class="math inline">\(n\)</span> trials with the canary and <span class="math inline">\(n\)</span> without, so the bound must use their pessimistic ends. Write <span class="math inline">\(\bar\alpha\)</span> for the one-sided Clopper–Pearson upper bound on the FPR (<a href="../part01-prerequisites/04-hypothesis-testing.html">Hypothesis testing</a>). Write <span class="math inline">\(\underline\tau\)</span> for the lower bound on the TPR, both at level <span class="math inline">\(\beta/2\)</span>, where <span class="math inline">\(\beta\)</span> is the chance that the audit is wrong. For a count of <code>k</code> events in <code>n</code> trials, SciPy gives the upper bound as <code>scipy.stats.beta.ppf(1 - beta / 2, k + 1, n - k)</code>, and statsmodels’ <code>proportion_confint(..., method="beta")</code> gives the same interval. With probability at least <span class="math inline">\(1 - \beta\)</span>, the code is then not <span class="math inline">\((\varepsilon, \delta)\)</span>-DP for any level below <span id="eq-audit-eps-lo"><span class="math display">\[\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline\tau - \delta}{\bar\alpha},\ \ln\frac{1 - \bar\alpha - \delta}{1 - \underline\tau}\Big\}. \tag{47.3}\]</span></span> The bound needs independent trials and a threshold chosen without looking at the counted trials. So choose the threshold on half of the trials, and count on the other half.</p>
-<p>Suppose 1,000 runs with the canary give 500 true positives, and 1,000 without give one false positive. The point estimate is 6.21, but confidence is expensive, and the certified bound is only 4.43. Even a perfect attack hits a ceiling. With <span class="math inline">\(n\)</span> trials per hypothesis, it can certify at most about <span id="eq-audit-ceiling"><span class="math display">\[\varepsilon_{\max}(n) \approx \ln\frac{n}{\ln(2/\beta)}. \tag{47.4}\]</span></span> So each extra unit of <span class="math inline">\(\varepsilon\)</span> costs a factor of <span class="math inline">\(e\)</span> in trials. At 95% confidence, 1,000 trials per hypothesis certify at most 5.60, and 10,000 at most 7.90. Certifying the running example’s 6.71 takes at least 3,038, so no feasible end-to-end audit can confirm that a large claim is tight.</p>
-</section>
-<section id="sec-audit-canaries" class="level2" data-number="47.5">
-<h2 data-number="47.5" class="anchored" data-anchor-id="sec-audit-canaries"><span class="header-section-number">47.5</span> Canaries and threat models</h2>
-<p>An <strong>input-space canary</strong> is a record designed to stand out, such as a mislabeled example. A <strong>gradient-space canary</strong> has a gradient that the auditor writes directly. The strongest is the <strong>Dirac canary</strong> of Nasr et al.&nbsp;(2023). Its gradient has length exactly the clipping norm, all on one coordinate that no other record’s gradient touches.</p>
-<p>The threat model says what the attacker sees. In the <strong>black-box</strong> model it sees only the final model. In the <strong>white-box</strong> model it sees every intermediate model, and so it can recover each step’s noisy gradient sum. Against a Dirac canary seen white-box, the most powerful test thresholds a <strong>likelihood-ratio statistic</strong> built from those sums, which the full edition derives. A simpler score that adds up the canary coordinate’s total change is weaker, lowering the most the audit can certify on the running example from 6.01 to 4.35.</p>
-</section>
-<section id="sec-audit-tight" class="level2" data-number="47.6">
-<h2 data-number="47.6" class="anchored" data-anchor-id="sec-audit-tight"><span class="header-section-number">47.6</span> Tight audits of the mechanism</h2>
-<p>An end-to-end white-box audit with Dirac canaries faces the accountant’s own worst case, but it still falls far short of the claim, because at small <span class="math inline">\(\delta\)</span> the level is decided at a tiny FPR. For the running example that rate is <span class="math inline">\(8.1\times10^{-8}\)</span>, far below the <span class="math inline">\(3/n\)</span> that <span class="math inline">\(n\)</span> trials can measure. Nasr et al.&nbsp;(2023) avoid the tail by assuming a Gaussian trade-off curve. Write <span class="math inline">\(\Phi\)</span> for the standard normal distribution function. A single test then bounds the separation <span class="math inline">\(\mu\)</span> from below, <span id="eq-audit-mu"><span class="math display">\[\mu \ge \Phi^{-1}(\mathrm{TPR}) - \Phi^{-1}(\mathrm{FPR}), \tag{47.5}\]</span></span> read at a moderate FPR, where trials are cheap. Its conversion to <span class="math inline">\(\varepsilon\)</span> holds only if the curve really is Gaussian.</p>
-<p>On the running example, the rigorous bound <a href="#eq-audit-eps-lo" class="quarto-xref">Equation&nbsp;<span>47.3</span></a> reaches 3.63 with 50,000 trials per hypothesis, about half the claim. The Gaussian-shape estimate reaches 5.33.</p>
-</section>
-<section id="sec-audit-onerun" class="level2" data-number="47.7">
-<h2 data-number="47.7" class="anchored" data-anchor-id="sec-audit-onerun"><span class="header-section-number">47.7</span> One-run auditing</h2>
-<p>Steinke, Nasr &amp; Jagielski (2023) get many trials from one run. Choose a number <span class="math inline">\(m\)</span> of canaries, include each one by its own independent fair coin, train once and score every canary. For a list of <span class="math inline">\(r\)</span> guesses, guess “in” for the <span class="math inline">\(r/2\)</span> highest scores and “out” for the <span class="math inline">\(r/2\)</span> lowest. Under <span class="math inline">\(\varepsilon\)</span>-DP, the number <span class="math inline">\(W\)</span> of correct guesses is no more likely to reach any count <span class="math inline">\(v\)</span> than a binomial count is: <span id="eq-audit-onerun"><span class="math display">\[\Pr[W \ge v] \le \Pr\big[\mathrm{Bin}(r, p_\varepsilon) \ge v\big], \qquad p_\varepsilon = \frac{e^\varepsilon}{1 + e^\varepsilon}. \tag{47.6}\]</span></span> The certified bound is the largest level whose tail at the observed count is below <span class="math inline">\(\beta\)</span>.</p>
-<p>The coins must be independent and fair, and trying several list lengths needs a Bonferroni correction. Under <span class="math inline">\((\varepsilon, \delta)\)</span>-DP, the paper adds a term of at most <span class="math inline">\(2m\delta\)</span>.</p>
-<p>On the running example, one run with 1,000 white-box Dirac canaries certifies 2.22, against 2.84 from 10,000 runs per hypothesis.</p>
-</section>
-<section id="sec-audit-blackbox" class="level2" data-number="47.8">
-<h2 data-number="47.8" class="anchored" data-anchor-id="sec-audit-blackbox"><span class="header-section-number">47.8</span> Black-box audit of the trained network</h2>
-<p>To see what the released network gives away, plant <strong>mislabeled canaries</strong> and attack the final model with a loss score or the likelihood-ratio attack of <a href="../part02-attacks/02-membership-inference.html">Membership inference</a>. Run a non-private control next to it.</p>
-<p>The non-private model memorizes its canaries and certifies 2.96, but the DP-SGD model certifies only 0.13. A model with clipping but no noise, which has no finite <span class="math inline">\(\varepsilon\)</span> at all, certifies only 0.24. So a black-box bound of 0.5 against a claimed 8 does not show that the model is safe, or that its real <span class="math inline">\(\varepsilon\)</span> is 0.5. It measures this attacker only.</p>
-</section>
-<section id="sec-audit-ci" class="level2" data-number="47.9">
-<h2 data-number="47.9" class="anchored" data-anchor-id="sec-audit-ci"><span class="header-section-number">47.9</span> Auditing in continuous integration</h2>
-<p>The per-step audit is cheap enough to run as a unit test on every commit. Feed the code’s own clip-and-noise step a Dirac canary’s gradient, written by hand. In Opacus, for example, write it into a parameter’s <code>p.grad_sample</code> before the <code>DPOptimizer</code> runs <code>clip_and_accumulate</code> and <code>add_noise</code>, and read the noisy gradient afterwards. Test the code path that ships, not a copy of it. Run the steps with the canary and without, record each step’s noisy value on the canary’s coordinate, and bound <span class="math inline">\(\mu\)</span> with <a href="#eq-audit-mu" class="quarto-xref">Equation&nbsp;<span>47.5</span></a>. The test fails when the bound exceeds <span class="math inline">\(1/\sigma\)</span>.</p>
-<p>Fix the seeds so that a failure can be reproduced, and use a <span class="math inline">\(\beta\)</span> below 5%, or correct code fails for one seed in twenty.</p>
-</section>
-<section id="code" class="level2" data-number="47.10">
-<h2 data-number="47.10" class="anchored" data-anchor-id="code"><span class="header-section-number">47.10</span> Code</h2>
-<p>This snippet computes the certified bound of <a href="#eq-audit-eps-lo" class="quarto-xref">Equation&nbsp;<span>47.3</span></a> from counts, and prints the number quoted in the text.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections.abc <span class="im">import</span> Callable</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> exp, lgamma, log</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> binom_cdf(k: <span class="bu">int</span>, n: <span class="bu">int</span>, p: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Pr[Bin(n, p) &lt;= k], summed in logs so that large n is safe."""</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    log_terms <span class="op">=</span> (lgamma(n <span class="op">+</span> <span class="dv">1</span>) <span class="op">-</span> lgamma(i <span class="op">+</span> <span class="dv">1</span>) <span class="op">-</span> lgamma(n <span class="op">-</span> i <span class="op">+</span> <span class="dv">1</span>) <span class="op">+</span> i <span class="op">*</span> log(p) <span class="op">+</span> (n <span class="op">-</span> i) <span class="op">*</span> log(<span class="dv">1</span> <span class="op">-</span> p) <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(k <span class="op">+</span> <span class="dv">1</span>))</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">min</span>(<span class="fl">1.0</span>, <span class="bu">sum</span>(exp(t) <span class="cf">for</span> t <span class="kw">in</span> log_terms))</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bisect(f: Callable[[<span class="bu">float</span>], <span class="bu">float</span>], target: <span class="bu">float</span>, lo: <span class="bu">float</span>, hi: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The x in [lo, hi] with f(x) = target, for f decreasing in x."""</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        mid <span class="op">=</span> (lo <span class="op">+</span> hi) <span class="op">/</span> <span class="dv">2</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        lo, hi <span class="op">=</span> (mid, hi) <span class="cf">if</span> f(mid) <span class="op">&gt;</span> target <span class="cf">else</span> (lo, mid)</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> lo</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> eps_lower_bound(fp: <span class="bu">int</span>, tp: <span class="bu">int</span>, n: <span class="bu">int</span>, delta: <span class="bu">float</span>, beta: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.05</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The eps certified with confidence 1 - beta from fp false and tp true positives in n trials each."""</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    fpr_hi <span class="op">=</span> bisect(<span class="kw">lambda</span> p: binom_cdf(fp, n, p), beta <span class="op">/</span> <span class="dv">2</span>, <span class="fl">1e-12</span>, <span class="dv">1</span> <span class="op">-</span> <span class="fl">1e-12</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    tpr_lo <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> bisect(<span class="kw">lambda</span> p: binom_cdf(n <span class="op">-</span> tp, n, p), beta <span class="op">/</span> <span class="dv">2</span>, <span class="fl">1e-12</span>, <span class="dv">1</span> <span class="op">-</span> <span class="fl">1e-12</span>)</span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">max</span>(log((tpr_lo <span class="op">-</span> delta) <span class="op">/</span> fpr_hi), log((<span class="dv">1</span> <span class="op">-</span> fpr_hi <span class="op">-</span> delta) <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> tpr_lo)))</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>eps_lower_bound(<span class="dv">1</span>, <span class="dv">500</span>, <span class="dv">1_000</span>, <span class="fl">1e-5</span>)<span class="sc">:.2f}</span><span class="ss">"</span>)  <span class="co"># 4.43</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The full edition’s script runs every audit:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/auditing.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</section>
-<section id="cheat-sheet" class="level2" data-number="47.11">
-<h2 data-number="47.11" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">47.11</span> Cheat sheet</h2>
-<div id="tbl-audit-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-audit-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;47.2: The results of this chapter.
-</figcaption>
-<div aria-describedby="tbl-audit-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Result</th>
-<th>Formula</th>
-<th>Conditions</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Certified bound</td>
-<td><a href="#eq-audit-eps-lo" class="quarto-xref">Equation&nbsp;<span>47.3</span></a>, Clopper–Pearson at <span class="math inline">\(\beta/2\)</span></td>
-<td>Independent trials; threshold chosen on other trials</td>
-</tr>
-<tr class="even">
-<td>Ceiling</td>
-<td><a href="#eq-audit-ceiling" class="quarto-xref">Equation&nbsp;<span>47.4</span></a>, 5.60 at 1,000 trials</td>
-<td>A perfect attack</td>
-</tr>
-<tr class="odd">
-<td>One run</td>
-<td><a href="#eq-audit-onerun" class="quarto-xref">Equation&nbsp;<span>47.6</span></a>, plus at most <span class="math inline">\(2m\delta\)</span></td>
-<td>Canaries included by independent fair coins</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p><strong>Rules of thumb</strong></p>
-<ul>
-<li>An audit can refute a claim, never prove one, so report its threat model with its number.</li>
-<li>Budget trials before you start, at least <span class="math inline">\(e^\varepsilon\ln(2/\beta)\)</span> per hypothesis, and never call an audit tight with too few.</li>
-<li>Choose thresholds and list lengths on separate data, or pay with a Bonferroni correction.</li>
-<li>Read the sampling and accounting code yourself, because the cheap audits cannot see them.</li>
-<li>Never read a small black-box bound as the model’s real <span class="math inline">\(\varepsilon\)</span>.</li>
-</ul>
-</section>
-<section id="further-reading" class="level2" data-number="47.12">
-<h2 data-number="47.12" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">47.12</span> Further reading</h2>
-<ul>
-<li>Nasr, Hayes, Steinke, Balle, Tramèr, Jagielski, Carlini &amp; Terzis, “Tight Auditing of Differentially Private Machine Learning” (USENIX Security 2023): Dirac canaries, per-step audits and real bugs.</li>
+<li>Nasr et al., “Tight Auditing of Differentially Private Machine Learning” (USENIX Security 2023): Dirac canaries, per-step audits and real bugs.</li>
 <li>Steinke, Nasr &amp; Jagielski, “Privacy Auditing with One (1) Training Run” (NeurIPS 2023): the one-run audit.</li>
 </ul>
 <p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part05-dp-ml/10-auditing.html">the full edition’s chapter</a>.</p>
@@ -1198,13 +1206,13 @@ Table&nbsp;47.2: The results of this chapter.
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part05-dp-ml/09-choosing-epsilon.html" class="pagination-link" aria-label="Choosing ε">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span>
+      <a href="../part05-dp-ml/08-disparate-impact.html" class="pagination-link" aria-label="Disparate impact">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="pagination-link" aria-label="Adaptive data analysis">
-        <span class="nav-page-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

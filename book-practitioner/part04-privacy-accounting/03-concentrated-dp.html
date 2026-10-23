@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>31&nbsp; Concentrated differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
+<title>39&nbsp; Concentrated differential privacy – Privacy-Preserving Machine Learning for Practitioners</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -71,8 +71,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../part04-privacy-accounting/04-gaussian-dp.html" rel="next">
-<link href="../part04-privacy-accounting/02-rdp-conversions.html" rel="prev">
+<link href="../part04-privacy-accounting/07-shuffling-iteration.html" rel="next">
+<link href="../part04-privacy-accounting/08-adaptive-composition.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -152,7 +152,7 @@ window.Quarto = {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -305,6 +305,12 @@ window.Quarto = {
  <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
@@ -319,67 +325,73 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
   </div>
 </li>
       </ul>
@@ -395,26 +407,14 @@ window.Quarto = {
       <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -425,26 +425,44 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">Choosing an accountant</span></span></a>
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
   </div>
 </li>
       </ul>
@@ -461,49 +479,31 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -514,14 +514,50 @@ window.Quarto = {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
   </div>
 </li>
       </ul>
@@ -559,24 +595,20 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">31.1</span> Why this matters</a></li>
-  <li><a href="#sec-cdp-definition" id="toc-sec-cdp-definition" class="nav-link" data-scroll-target="#sec-cdp-definition"><span class="header-section-number">31.2</span> The zCDP ledger</a></li>
-  <li><a href="#sec-cdp-pure" id="toc-sec-cdp-pure" class="nav-link" data-scroll-target="#sec-cdp-pure"><span class="header-section-number">31.3</span> Charging other kinds of step</a></li>
-  <li><a href="#sec-cdp-conversion" id="toc-sec-cdp-conversion" class="nav-link" data-scroll-target="#sec-cdp-conversion"><span class="header-section-number">31.4</span> From ρ to (ε, δ)</a></li>
-  <li><a href="#sec-cdp-group" id="toc-sec-cdp-group" class="nav-link" data-scroll-target="#sec-cdp-group"><span class="header-section-number">31.5</span> Groups and approximate zCDP</a></li>
-  <li><a href="#sec-cdp-tcdp" id="toc-sec-cdp-tcdp" class="nav-link" data-scroll-target="#sec-cdp-tcdp"><span class="header-section-number">31.6</span> Subsampled steps: keep them out of zCDP</a></li>
-  <li><a href="#sec-cdp-code" id="toc-sec-cdp-code" class="nav-link" data-scroll-target="#sec-cdp-code"><span class="header-section-number">31.7</span> Code</a></li>
-  <li><a href="#cheat-sheet" id="toc-cheat-sheet" class="nav-link" data-scroll-target="#cheat-sheet"><span class="header-section-number">31.8</span> Cheat sheet</a></li>
-  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">31.9</span> Further reading</a></li>
+  <li><a href="#sec-cdp-definition" id="toc-sec-cdp-definition" class="nav-link active" data-scroll-target="#sec-cdp-definition"><span class="header-section-number">39.1</span> What it is</a></li>
+  <li><a href="#when-you-meet-it" id="toc-when-you-meet-it" class="nav-link" data-scroll-target="#when-you-meet-it"><span class="header-section-number">39.2</span> When you meet it</a></li>
+  <li><a href="#sec-cdp-pure" id="toc-sec-cdp-pure" class="nav-link" data-scroll-target="#sec-cdp-pure"><span class="header-section-number">39.3</span> How to use it</a></li>
+  <li><a href="#what-goes-wrong" id="toc-what-goes-wrong" class="nav-link" data-scroll-target="#what-goes-wrong"><span class="header-section-number">39.4</span> What goes wrong</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">39.5</span> Further reading</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part04-privacy-accounting/00-introduction.html">Privacy accounting</a></li><li class="breadcrumb-item"><a href="../part04-privacy-accounting/03-concentrated-dp.html"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></h1>
+<h1 class="title"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></h1>
 </div>
 
 
@@ -593,25 +625,22 @@ window.Quarto = {
 </header>
 
 
-<section id="why-this-matters" class="level2" data-number="31.1">
-<h2 data-number="31.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">31.1</span> Why this matters</h2>
-<p>Suppose you run a pipeline of Gaussian releases, such as noisy counts or the noisy marginals behind a synthetic dataset. You would like to keep its differential privacy (DP) budget as a single number that you add to after each release. <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a> describes each mechanism by a whole curve, its <strong>Rényi differential privacy (RDP) curve</strong>, with one value for each order of the Rényi divergence. The Gaussian mechanism’s curve is a straight line through the origin, so one number, its slope, carries all of it.</p>
-<p><strong>Zero-concentrated differential privacy (zCDP)</strong> is the bookkeeping built on that number, and it is the most widely used form of concentrated differential privacy (CDP). It is the right ledger for releases built from Gaussian noise on the full data. It is the wrong ledger for training on subsampled minibatches, because it throws away almost all of the privacy that subsampling buys.</p>
+<section id="sec-cdp-definition" class="level2" data-number="39.1">
+<h2 data-number="39.1" class="anchored" data-anchor-id="sec-cdp-definition"><span class="header-section-number">39.1</span> What it is</h2>
+<p>Zero-concentrated differential privacy (zCDP) keeps a differential privacy (DP) budget as one number that adds up. It builds on the curve of <a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi differential privacy</a> (RDP), which bounds how far apart a mechanism’s outputs on neighbouring datasets can be, one value for each order <span class="math inline">\(\alpha\)</span>. A mechanism is <strong><span class="math inline">\(\rho\)</span>-zCDP</strong> when that curve lies under the straight line <span class="math inline">\(\rho\alpha\)</span> through the origin, so <span class="math inline">\(\rho\)</span> is a slope. Composition adds the slopes, even when each step is chosen after seeing the earlier outputs.</p>
+<p>The Gaussian mechanism’s curve is exactly such a line. Write <span class="math inline">\(\sigma\)</span> for the standard deviation of its noise and <span class="math inline">\(\Delta\)</span> for the query’s <span class="math inline">\(\ell_2\)</span> sensitivity, the most one record can move the query in Euclidean distance. One release then costs <span id="eq-auto-03concentrateddp-1"><span class="math display">\[\rho = \frac{\Delta^2}{2\sigma^2}. \tag{39.1}\]</span></span> So a release with noise multiplier 1 (<span class="math inline">\(\sigma = \Delta\)</span>) costs <span class="math inline">\(\rho = 0.5\)</span>, and doubling the noise cuts <span class="math inline">\(\rho\)</span> to a quarter.</p>
 </section>
-<section id="sec-cdp-definition" class="level2" data-number="31.2">
-<h2 data-number="31.2" class="anchored" data-anchor-id="sec-cdp-definition"><span class="header-section-number">31.2</span> The zCDP ledger</h2>
-<p>A mechanism is zCDP when its RDP curve lies under a line through the origin. To state it, write <span class="math inline">\(D_\alpha\)</span> for the Rényi divergence of order <span class="math inline">\(\alpha\)</span>, and call two datasets neighbours when they differ in one person’s record. Then a mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\(\rho\)</span>-zCDP</strong> if, for all neighbouring datasets and all orders above 1, <span id="eq-cdp-def"><span class="math display">\[D_\alpha\big(M(D)\,\|\,M(D')\big) \le \rho\alpha. \tag{31.1}\]</span></span> Two properties make this a ledger. Composition adds the slopes, even when each step is chosen after seeing the earlier outputs, and processing an output never raises its <span class="math inline">\(\rho\)</span>.</p>
-<p>The Gaussian mechanism is the case the definition was built for. Write <span class="math inline">\(\sigma\)</span> for the standard deviation of its noise and <span class="math inline">\(\Delta\)</span> for the query’s <span class="math inline">\(\ell_2\)</span> sensitivity, the most one record can move the query’s value. Its RDP curve is exactly a line, so one step costs <span id="eq-auto-03concentrateddp-1"><span class="math display">\[\rho = \frac{\Delta^2}{2\sigma^2}. \tag{31.2}\]</span></span> With the noise multiplier convention, which measures <span class="math inline">\(\sigma\)</span> in units of the sensitivity, a step with <span class="math inline">\(\sigma = 1\)</span> costs <span class="math inline">\(0.5\)</span>. Doubling the noise multiplier cuts the cost to a quarter.</p>
-<p>The best-known user is the 2020 United States Census TopDown algorithm (Abowd et al.&nbsp;2022). It answers many queries with the discrete Gaussian mechanism (<a href="../part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>), which keeps counts as integers. Among libraries, Tumult Analytics offers a <code>RhoZCDPBudget</code>. In OpenDP, <code>dp.c.make_zCDP_to_approxDP</code> turns a zCDP measurement into one with a privacy profile, and <code>dp.c.make_fix_delta</code> then fixes the slack so that you can read off the privacy level.</p>
-<p>The Census example carries two warnings. First, <span class="math inline">\(\rho\)</span> is not the privacy parameter <span class="math inline">\(\varepsilon\)</span> of an <span class="math inline">\((\varepsilon, \delta)\)</span> guarantee, where <span class="math inline">\(\delta\)</span> is the slack. A <span class="math inline">\(0.5\)</span>-zCDP step converts to about <span class="math inline">\(\varepsilon = 4.7\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> (<a href="#sec-cdp-conversion" class="quarto-xref"><span>Section 31.4</span></a>), so a reader who mistakes one for the other badly overrates the protection. Second, <span class="math inline">\(\rho\)</span> covers only what passed through the noise. The Census Bureau released some statistics exactly, as a matter of policy, and these <strong>invariants</strong> sit outside the guarantee. A report should list such exact releases next to the budget.</p>
+<section id="when-you-meet-it" class="level2" data-number="39.2">
+<h2 data-number="39.2" class="anchored" data-anchor-id="when-you-meet-it"><span class="header-section-number">39.2</span> When you meet it</h2>
+<p>You meet zCDP in releases that add Gaussian noise to the whole dataset, such as noisy counts or the noisy marginals behind a synthetic dataset. The 2020 United States Census used it with the discrete Gaussian mechanism (<a href="../part03-dp-foundations/08-discrete-mechanisms.html">Discrete and floating-point-safe mechanisms</a>). Tumult Analytics and OpenDP both keep budgets in <span class="math inline">\(\rho\)</span>.</p>
 </section>
-<section id="sec-cdp-pure" class="level2" data-number="31.3">
-<h2 data-number="31.3" class="anchored" data-anchor-id="sec-cdp-pure"><span class="header-section-number">31.3</span> Charging other kinds of step</h2>
-<p>A real pipeline mixes mechanisms, and <a href="#tbl-cdp-charge" class="quarto-xref">Table&nbsp;<span>31.1</span></a> gives the charge in <span class="math inline">\(\rho\)</span> for the common ones.</p>
+<section id="sec-cdp-pure" class="level2" data-number="39.3">
+<h2 data-number="39.3" class="anchored" data-anchor-id="sec-cdp-pure"><span class="header-section-number">39.3</span> How to use it</h2>
+<p>Keep a ledger, a running list of releases, and charge each its <span class="math inline">\(\rho\)</span> from <a href="#tbl-cdp-charge" class="quarto-xref">Table&nbsp;<span>39.1</span></a>.</p>
 <div id="tbl-cdp-charge" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cdp-charge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;31.1: What each kind of step costs in a zCDP ledger.
+Table&nbsp;39.1: What each kind of step costs in a zCDP ledger.
 </figcaption>
 <div aria-describedby="tbl-cdp-charge-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
@@ -635,211 +664,50 @@ Table&nbsp;31.1: What each kind of step costs in a zCDP ledger.
 </tr>
 <tr class="even">
 <td>Any pure <span class="math inline">\(\varepsilon\)</span>-DP step</td>
-<td><span class="math inline">\(\varepsilon^2/2\)</span>, or sharply <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span></td>
-<td>Poor fit once <span class="math inline">\(\varepsilon \ge 2\)</span></td>
+<td><span class="math inline">\(\varepsilon^2/2\)</span>, or <span class="math inline">\(\varepsilon^2/8\)</span> for an exponential mechanism</td>
+<td>Above the plain <span class="math inline">\(\varepsilon\)</span> once <span class="math inline">\(\varepsilon \ge 2\)</span>: keep such a step in RDP</td>
 </tr>
 <tr class="odd">
-<td>Exponential mechanism at <span class="math inline">\(\varepsilon\)</span></td>
-<td><span class="math inline">\(\varepsilon^2/8\)</span></td>
-<td>Four times cheaper</td>
-</tr>
-<tr class="even">
 <td>An <span class="math inline">\((\varepsilon, \delta)\)</span>-DP step</td>
-<td><span class="math inline">\(\varepsilon^2/2\)</span>, plus <span class="math inline">\(\delta\)</span> in a second column</td>
-<td>Approximate zCDP, <a href="#sec-cdp-group" class="quarto-xref"><span>Section 31.5</span></a></td>
-</tr>
-<tr class="odd">
-<td>Any step, for a group of <span class="math inline">\(m\)</span> records</td>
-<td><span class="math inline">\(m^2\)</span> times the step’s <span class="math inline">\(\rho\)</span></td>
-<td>Exact for the Gaussian</td>
+<td><span class="math inline">\(\varepsilon^2/2\)</span>, plus <span class="math inline">\(\delta\)</span> in a second column that also adds</td>
+<td><strong>Approximate zCDP</strong></td>
 </tr>
 <tr class="even">
 <td>Poisson-subsampled Gaussian</td>
-<td><span class="math inline">\(1/(2\sigma^2)\)</span>, whatever the sampling rate</td>
-<td>No amplification, <a href="#sec-cdp-tcdp" class="quarto-xref"><span>Section 31.6</span></a></td>
+<td><span class="math inline">\(\Delta^2/(2\sigma^2)\)</span>, as without sampling</td>
+<td>No amplification</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>A pure <span class="math inline">\(\varepsilon\)</span>-DP step, such as a Laplace count or a randomized-response bit, changes the probability of any output by at most a factor <span class="math inline">\(e^\varepsilon\)</span> between neighbours. The sharp charge <span class="math inline">\(\varepsilon\tanh(\varepsilon/2)\)</span> is the smallest that holds for all such steps, because randomized response is the worst case, and at <span class="math inline">\(\varepsilon = 1\)</span> it is 0.4621. The exponential mechanism’s charge of <span class="math inline">\(\varepsilon^2/8\)</span> is due to Cesar and Rogers (2021).</p>
-<p>The general rule breaks down for large <span class="math inline">\(\varepsilon\)</span>. A pure DP step’s RDP curve never rises above <span class="math inline">\(\varepsilon\)</span>, while the line keeps climbing and passes that cap at order <span class="math inline">\(2/\varepsilon\)</span>. So a <span class="math inline">\(5\)</span>-DP step charged <span class="math inline">\(\varepsilon^2/2 = 12.5\)</span> sits above its own cap at every order. Converting that charge back gives a worse <span class="math inline">\(\varepsilon\)</span> than the 5 you started with, so keep such steps in RDP, where an accountant can charge them the exact curve of randomized response.</p>
-</section>
-<section id="sec-cdp-conversion" class="level2" data-number="31.4">
-<h2 data-number="31.4" class="anchored" data-anchor-id="sec-cdp-conversion"><span class="header-section-number">31.4</span> From ρ to (ε, δ)</h2>
-<p>You always report <span class="math inline">\((\varepsilon, \delta)\)</span> in the end. Write <span class="math inline">\(\ell\)</span> for <span class="math inline">\(\ln(1/\delta)\)</span>. Applying <a href="../part04-privacy-accounting/02-rdp-conversions.html">Mironov’s conversion</a> to a line gives the <strong>simple conversion</strong> of Bun and Steinke (2016). It says that a <span class="math inline">\(\rho\)</span>-zCDP mechanism is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with <span id="eq-cdp-simple"><span class="math display">\[\varepsilon = \rho + 2\sqrt{\rho\,\ell}. \tag{31.3}\]</span></span> The <strong>improved conversion</strong> of Canonne, Kamath and Steinke (2020) adds two negative correction terms at each order. It has no closed form, so you minimize it numerically, as the code below does. For the Gaussian the true <span class="math inline">\(\varepsilon\)</span> is also known, from its privacy profile in <a href="../part04-privacy-accounting/04-gaussian-dp.html">f-DP and Gaussian differential privacy</a>. <a href="#tbl-cdp-conversion" class="quarto-xref">Table&nbsp;<span>31.2</span></a> compares the three.</p>
-<div id="tbl-cdp-conversion" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cdp-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;31.2: <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> for a <span class="math inline">\(\rho\)</span>-zCDP mechanism: the simple and improved conversions, and the exact <span class="math inline">\(\varepsilon\)</span> of the Gaussian mechanism with the same <span class="math inline">\(\rho\)</span>.
-</figcaption>
-<div aria-describedby="tbl-cdp-conversion-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-<col style="width: 25%">
-</colgroup>
-<thead>
-<tr class="header">
-<th><span class="math inline">\(\rho\)</span></th>
-<th>Simple <a href="#eq-cdp-simple" class="quarto-xref">Equation&nbsp;<span>31.3</span></a></th>
-<th>Improved</th>
-<th>Exact, Gaussian with the same <span class="math inline">\(\rho\)</span></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>0.1</td>
-<td>2.246</td>
-<td>1.914</td>
-<td>1.760</td>
-</tr>
-<tr class="even">
-<td>0.5</td>
-<td>5.299</td>
-<td>4.728</td>
-<td>4.377</td>
-</tr>
-<tr class="odd">
-<td>1</td>
-<td>7.786</td>
-<td>7.077</td>
-<td>6.573</td>
-</tr>
-<tr class="even">
-<td>5</td>
-<td>20.174</td>
-<td>19.047</td>
-<td>17.857</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p>At <span class="math inline">\(\rho = 0.5\)</span>, the simple formula overshoots the truth by 21%, and the improved one by 8%. So use the improved conversion, or the exact Gaussian profile when every step is Gaussian.</p>
-<p>For calibration you run the conversion backwards, from a target <span class="math inline">\((\varepsilon, \delta)\)</span> to the largest total <span class="math inline">\(\rho\)</span> that meets it. Solving the simple conversion for <span class="math inline">\(\rho\)</span> shows that the target is met by any <span id="eq-cdp-inverse"><span class="math display">\[\rho \le \Big(\sqrt{\varepsilon + \ell} - \sqrt{\ell}\Big)^2. \tag{31.4}\]</span></span> Then split <span class="math inline">\(\rho\)</span> over the queries. If query number <span class="math inline">\(i\)</span> has <span class="math inline">\(\ell_2\)</span> sensitivity <span class="math inline">\(\Delta_i\)</span> and spends <span class="math inline">\(\rho_i\)</span>, its noise needs the standard deviation <span id="eq-auto-03concentrateddp-2"><span class="math display">\[\sigma_i = \frac{\Delta_i}{\sqrt{2\rho_i}}. \tag{31.5}\]</span></span> For example, a release that must be <span class="math inline">\((1, 10^{-5})\)</span>-DP may spend at most <span class="math inline">\(\rho = 0.02082\)</span>. A single query of sensitivity 1 then needs <span class="math inline">\(\sigma = 4.901\)</span>. If you split the same budget equally over four queries, each gets a quarter of <span class="math inline">\(\rho\)</span> and so needs twice the noise, 9.801.</p>
-<p>That recipe works because the split happens in <span class="math inline">\(\rho\)</span>, which adds, and never in <span class="math inline">\(\varepsilon\)</span>, which does not. Suppose you have a budget of <span class="math inline">\(\rho = 1\)</span> and have spent half of it. Each half alone converts to 4.728, and two of those are far more than the whole run’s 7.077, because the conversion grows like the square root of <span class="math inline">\(\rho\)</span>. So keep budgets in <span class="math inline">\(\rho\)</span>, subtract in <span class="math inline">\(\rho\)</span>, and convert once, at the end. In OpenDP, <code>dp.binary_search_param</code> does the last step of calibration for you, by searching for the noise scale that meets a target. Use the <span class="math inline">\(\ell_2\)</span> sensitivity here, because the <span class="math inline">\(\ell_1\)</span> sensitivity of a vector query is never smaller and so overpays in noise.</p>
-</section>
-<section id="sec-cdp-group" class="level2" data-number="31.5">
-<h2 data-number="31.5" class="anchored" data-anchor-id="sec-cdp-group"><span class="header-section-number">31.5</span> Groups and approximate zCDP</h2>
-<p>A household, a user with many records or a hospital contributes several records, so you may need the guarantee for a group. Take a <span class="math inline">\(\rho\)</span>-zCDP mechanism <span class="math inline">\(M\)</span> and two datasets that differ in <span class="math inline">\(m\)</span> records. Bun and Steinke (2016) show that <span id="eq-cdp-group"><span class="math display">\[D_\alpha\big(M(D)\,\|\,M(D')\big) \le m^2\rho\,\alpha. \tag{31.6}\]</span></span> The square is exact for the Gaussian, since a group shifts the query <span class="math inline">\(m\)</span> times as far. For example, a user with 4 records in a <span class="math inline">\(0.1\)</span>-zCDP release is protected at <span class="math inline">\(\rho = 1.6\)</span>. Plain RDP’s group bound is much weaker (<a href="../part04-privacy-accounting/01-renyi-dp.html">Rényi DP</a>).</p>
-<p>Some useful mechanisms, such as propose-test-release and stability-based histograms, are <span class="math inline">\((\varepsilon, \delta)\)</span>-DP but cannot be zCDP at all. <strong>Approximate zCDP</strong> keeps them in the ledger by adding a second column. Each such step adds <span class="math inline">\(\varepsilon^2/2\)</span> to <span class="math inline">\(\rho\)</span> and its slack to the second column, and at the end the second column’s total is added to the <span class="math inline">\(\delta\)</span> of the conversion.</p>
-</section>
-<section id="sec-cdp-tcdp" class="level2" data-number="31.6">
-<h2 data-number="31.6" class="anchored" data-anchor-id="sec-cdp-tcdp"><span class="header-section-number">31.6</span> Subsampled steps: keep them out of zCDP</h2>
-<p>Differentially private stochastic gradient descent (SGD), DP-SGD for short, runs each step on a Poisson sample of the data. Each record enters the batch independently with probability <span class="math inline">\(q\)</span>, the sampling rate, and this makes a step far more private than the Gaussian mechanism inside it (<a href="../part04-privacy-accounting/05-subsampling.html">Amplification by subsampling</a>). But zCDP cannot see the gain. The subsampled step’s RDP curve is tiny at small orders and bends up towards the unsubsampled line at large ones. A line that covers the whole curve must therefore have slope <span class="math inline">\(1/(2\sigma^2)\)</span>, whatever the sampling rate.</p>
-<p>The cost of ignoring this is enormous. On this part’s running example of 10,000 steps with <span class="math inline">\(q = 0.01\)</span> and <span class="math inline">\(\sigma = 1\)</span>, zCDP reports <span class="math inline">\(\varepsilon = 5475.8\)</span>. RDP accounting of the same run gives 6.719, because the conversion only uses the small orders where the curve is still tiny.</p>
-<p><strong>Truncated concentrated differential privacy (tCDP)</strong> asks for the line only on low orders, so it sees some of the amplification. It is rarely used, because it does no better than RDP.</p>
-<p>So if a pipeline mixes Gaussian releases with a DP-SGD run, keep all of it in RDP. A <span class="math inline">\(\rho\)</span>-zCDP step is just the RDP line <span class="math inline">\(\rho\alpha\)</span>, so it joins an RDP ledger without loss. In Google’s <code>dp_accounting</code> library, for example, you add it to an <code>RdpAccountant</code> as a <code>GaussianDpEvent</code> with noise multiplier <span class="math inline">\(1/\sqrt{2\rho}\)</span>. The training steps go in next to it as a <code>PoissonSampledDpEvent</code>.</p>
-</section>
-<section id="sec-cdp-code" class="level2" data-number="31.7">
-<h2 data-number="31.7" class="anchored" data-anchor-id="sec-cdp-code"><span class="header-section-number">31.7</span> Code</h2>
-<p>The whole zCDP ledger is a few lines of code. You charge each Gaussian step its <span class="math inline">\(\rho\)</span>, add the charges, and convert once, and the last line splits a budget over four queries.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> log, sqrt</span>
+<p>Add the charges and convert to <span class="math inline">\((\varepsilon, \delta)\)</span> once, at the end, so that you pay the conversion’s slack only once. When every release is Gaussian, the total <span class="math inline">\(\rho\)</span> costs the same as one Gaussian release with noise multiplier <span class="math inline">\(1/\sqrt{2\rho}\)</span>, so <code>get_epsilon_gaussian</code> converts it exactly. The snippet does this, then calibrates a <span class="math inline">\((1, 10^{-5})\)</span>-DP release.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> math <span class="im">import</span> sqrt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zcdp_gaussian(sigma: <span class="bu">float</span>, sensitivity: <span class="bu">float</span> <span class="op">=</span> <span class="fl">1.0</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> sensitivity<span class="op">**</span><span class="dv">2</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> sigma<span class="op">**</span><span class="dv">2</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> zcdp_to_eps_improved(rho: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Minimized over 20,001 log-spaced orders, the full edition's fine grid."""</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="bu">float</span>(<span class="st">"inf"</span>)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">20001</span>):</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        alpha <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> <span class="dv">10</span> <span class="op">**</span> (<span class="op">-</span><span class="dv">4</span> <span class="op">+</span> <span class="dv">8</span> <span class="op">*</span> i <span class="op">/</span> <span class="dv">20000</span>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>        eps <span class="op">=</span> rho <span class="op">*</span> alpha <span class="op">+</span> log(<span class="dv">1</span> <span class="op">/</span> delta) <span class="op">/</span> (alpha <span class="op">-</span> <span class="dv">1</span>) <span class="op">+</span> log(<span class="dv">1</span> <span class="op">-</span> <span class="dv">1</span> <span class="op">/</span> alpha) <span class="op">-</span> log(alpha) <span class="op">/</span> (alpha <span class="op">-</span> <span class="dv">1</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        best <span class="op">=</span> <span class="bu">min</span>(best, eps)</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> best</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> rho_for_target(eps: <span class="bu">float</span>, delta: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Largest rho whose simple conversion stays within eps at delta."""</span></span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> (sqrt(eps <span class="op">+</span> log(<span class="dv">1</span> <span class="op">/</span> delta)) <span class="op">-</span> sqrt(log(<span class="dv">1</span> <span class="op">/</span> delta))) <span class="op">**</span> <span class="dv">2</span></span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sigma_for_rho(rho: <span class="bu">float</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span> <span class="op">/</span> sqrt(<span class="dv">2</span> <span class="op">*</span> rho)</span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>rho <span class="op">=</span> <span class="dv">10</span> <span class="op">*</span> zcdp_gaussian(sigma<span class="op">=</span><span class="fl">1.0</span>)  <span class="co"># ten Gaussian steps with sigma = 1</span></span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>rho<span class="sc">:.1f}</span><span class="ss">"</span>)  <span class="co"># 5.0</span></span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>zcdp_to_eps_improved(rho, <span class="fl">1e-5</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 19.047</span></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>budget <span class="op">=</span> rho_for_target(<span class="fl">1.0</span>, <span class="fl">1e-5</span>)  <span class="co"># the whole release must be (1, 1e-5)-DP</span></span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>budget<span class="sc">:.5f}</span><span class="ss"> </span><span class="sc">{</span>sigma_for_rho(budget)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.02082 4.901</span></span>
-<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>sigma_for_rho(budget <span class="op">/</span> <span class="dv">4</span>)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 9.801</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> dp_accounting</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>rho <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> <span class="fl">1.0</span><span class="op">**</span><span class="dv">2</span>)  <span class="co"># one Gaussian release, noise multiplier 1</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>rho<span class="sc">:.1f}</span><span class="ss"> </span><span class="sc">{</span>dp_accounting<span class="sc">.</span>get_epsilon_gaussian(<span class="dv">1</span> <span class="op">/</span> sqrt(<span class="dv">2</span> <span class="op">*</span> rho), <span class="fl">1e-5</span>)<span class="sc">:.4f}</span><span class="ss">"</span>)  <span class="co"># 0.5 4.3772</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> dp_accounting.get_sigma_gaussian(<span class="fl">1.0</span>, <span class="fl">1e-5</span>)  <span class="co"># one release that must be (1, 1e-5)-DP</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>budget <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> (<span class="dv">2</span> <span class="op">*</span> sigma<span class="op">**</span><span class="dv">2</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>quarter <span class="op">=</span> budget <span class="op">/</span> <span class="dv">4</span>  <span class="co"># four releases share it</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"</span><span class="sc">{</span>budget<span class="sc">:.5f}</span><span class="ss"> </span><span class="sc">{</span>sigma<span class="sc">:.3f}</span><span class="ss"> </span><span class="sc">{</span><span class="dv">1</span> <span class="op">/</span> sqrt(<span class="dv">2</span> <span class="op">*</span> quarter)<span class="sc">:.3f}</span><span class="ss">"</span>)  <span class="co"># 0.03593 3.731 7.461</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>So the budget for <span class="math inline">\((1, 10^{-5})\)</span> is <span class="math inline">\(\rho = 0.03593\)</span>. A single query meets it with noise multiplier 3.731, while four queries that share it each get a quarter and need twice the noise. Split the budget in <span class="math inline">\(\rho\)</span>, which adds exactly, and never in <span class="math inline">\(\varepsilon\)</span>, which adds only loosely. Give each release the share its accuracy needs. A histogram in which each person sits in one cell is charged once, not once per cell (<a href="../part03-dp-foundations/02-properties.html#sec-dpprop-parallel">Parallel composition</a>).</p>
+<p>A ledger with steps that are not Gaussian has no exact conversion. The simple conversion of Bun and Steinke (2016) gives <span id="eq-auto-03concentrateddp-2"><span class="math display">\[\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}. \tag{39.2}\]</span></span> It is safe but loose, because at <span class="math inline">\(\rho = 0.5\)</span> it overshoots the exact Gaussian value by 21%. The improved conversion of Canonne, Kamath and Steinke (2020) overshoots by only 8%, and the RDP accountant in <code>dp_accounting</code> applies it. So use the improved conversion, or the exact one for an all-Gaussian ledger, and name it in the report. Laplace releases cost less as <code>LaplaceDpEvent</code> steps in a <a href="../part04-privacy-accounting/06-numerical-accounting.html">numerical accountant</a> than at <span class="math inline">\(\varepsilon^2/2\)</span>.</p>
 </section>
-<section id="cheat-sheet" class="level2" data-number="31.8">
-<h2 data-number="31.8" class="anchored" data-anchor-id="cheat-sheet"><span class="header-section-number">31.8</span> Cheat sheet</h2>
-<p>Here <span class="math inline">\(\ell\)</span> stands for <span class="math inline">\(\ln(1/\delta)\)</span>.</p>
-<div id="tbl-cdp-cheat" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-cdp-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;31.3: The tasks of this chapter; <a href="#tbl-cdp-charge" class="quarto-xref">Table&nbsp;<span>31.1</span></a> gives the charge of each kind of step.
-</figcaption>
-<div aria-describedby="tbl-cdp-cheat-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<table class="caption-top table">
-<colgroup>
-<col style="width: 33%">
-<col style="width: 33%">
-<col style="width: 33%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Task</th>
-<th>Formula</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Charge a Gaussian step</td>
-<td><span class="math inline">\(\rho = \Delta^2/(2\sigma^2)\)</span></td>
-<td>Exact</td>
-</tr>
-<tr class="even">
-<td>Convert</td>
-<td>Improved conversion, or <span class="math inline">\(\rho + 2\sqrt{\rho\ell}\)</span></td>
-<td>8% and 21% above exact at <span class="math inline">\(\rho = 0.5\)</span></td>
-</tr>
-<tr class="odd">
-<td>Calibrate</td>
-<td><span class="math inline">\(\rho = (\sqrt{\varepsilon + \ell} - \sqrt\ell)^2\)</span>, then <span class="math inline">\(\sigma_i = \Delta_i/\sqrt{2\rho_i}\)</span></td>
-<td>Split the budget in <span class="math inline">\(\rho\)</span></td>
-</tr>
-<tr class="even">
-<td>Protect a group of <span class="math inline">\(m\)</span></td>
-<td><span class="math inline">\(m^2\rho\)</span></td>
-<td>Exact for the Gaussian</td>
-</tr>
-<tr class="odd">
-<td>Account a subsampled step</td>
-<td>Not in zCDP</td>
-<td>Use RDP or a privacy loss distribution</td>
-</tr>
-</tbody>
-</table>
-</div>
-</figure>
-</div>
-<p><strong>Rules of thumb</strong></p>
-<ul>
-<li>Keep budgets in <span class="math inline">\(\rho\)</span>, which adds, and convert to <span class="math inline">\((\varepsilon, \delta)\)</span> once, at the end, with the improved conversion.</li>
-<li>Never report <span class="math inline">\(\rho\)</span> as if it were <span class="math inline">\(\varepsilon\)</span>. A <span class="math inline">\(0.5\)</span>-zCDP step is about <span class="math inline">\(4.7\)</span>-DP at <span class="math inline">\(\delta = 10^{-5}\)</span>.</li>
-<li>Report the conversion you used, and any statistics released exactly.</li>
-<li>Calibrate Gaussian noise with the <span class="math inline">\(\ell_2\)</span> sensitivity, not the <span class="math inline">\(\ell_1\)</span>.</li>
-<li>Charge a pure DP step <span class="math inline">\(\varepsilon^2/2\)</span> only for small <span class="math inline">\(\varepsilon\)</span>. From about 2 up, keep it in RDP at its own <span class="math inline">\(\varepsilon\)</span>.</li>
-<li>A pipeline with any DP-SGD in it belongs in RDP or a numerical accountant, not in zCDP.</li>
-</ul>
+<section id="what-goes-wrong" class="level2" data-number="39.4">
+<h2 data-number="39.4" class="anchored" data-anchor-id="what-goes-wrong"><span class="header-section-number">39.4</span> What goes wrong</h2>
+<p>The commonest error is reading <span class="math inline">\(\rho\)</span> as <span class="math inline">\(\varepsilon\)</span>. A Gaussian release at <span class="math inline">\(\rho = 0.5\)</span> is <span class="math inline">\((4.3772, 10^{-5})\)</span>-DP, so reading it as <span class="math inline">\(\varepsilon = 0.5\)</span> badly overrates the protection. And <span class="math inline">\(\rho\)</span> covers only what passed through the noise. The Census Bureau released some counts exactly, and such <strong>invariants</strong> sit outside the guarantee, so list them next to the budget.</p>
+<p>Subsampled steps belong outside zCDP, which gives them no amplification. On this part’s <a href="../part04-privacy-accounting/00-introduction.html">running example</a>, a run of differentially private stochastic gradient descent (SGD), or DP-SGD, zCDP reports <span class="math inline">\(\varepsilon = 5475.8\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span> where RDP gives 6.719. So keep a pipeline that includes DP-SGD in RDP or a numerical accountant. A <span class="math inline">\(\rho\)</span>-zCDP release joins an RDP accountant without loss, as a <code>GaussianDpEvent</code> with noise multiplier <span class="math inline">\(1/\sqrt{2\rho}\)</span>. And truncated concentrated differential privacy, a variant built for this, does no better.</p>
+<p>Several records of one user cost more: a group of <span class="math inline">\(m\)</span> records costs <span class="math inline">\(m^2\rho\)</span>, so four records in a 0.1-zCDP release cost <span class="math inline">\(\rho = 1.6\)</span>.</p>
+<p>A budget never renews, because next year’s releases about the same people compose with this year’s, so fix the period and its total in advance (<a href="../part05-dp-ml/12-release-governance.html#sec-relgov-after">Release and governance</a>). Diffprivlib’s <code>BudgetAccountant</code> (<a href="../part03-dp-foundations/02-properties.html#sec-dpprop-budget">Keeping a budget</a>) adds <span class="math inline">\(\varepsilon\)</span> by plain composition, so keep a long ledger in <span class="math inline">\(\rho\)</span>.</p>
 </section>
-<section id="further-reading" class="level2" data-number="31.9">
-<h2 data-number="31.9" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">31.9</span> Further reading</h2>
+<section id="further-reading" class="level2" data-number="39.5">
+<h2 data-number="39.5" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">39.5</span> Further reading</h2>
 <ul>
-<li>Bun &amp; Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (TCC 2016): the definition and every rule of this chapter, in Sections 1–3.</li>
-<li>Canonne, Kamath &amp; Steinke, “The Discrete Gaussian for Differential Privacy” (NeurIPS 2020): the discrete Gaussian and the improved conversion.</li>
+<li>Bun &amp; Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds” (TCC 2016): the definition.</li>
+<li>Canonne, Kamath &amp; Steinke, “The Discrete Gaussian for Differential Privacy” (NeurIPS 2020): the improved conversion.</li>
 </ul>
 <p><strong>Derivations.</strong> Every result here is derived step by step in <a href="../../book-full/part04-privacy-accounting/03-concentrated-dp.html">the full edition’s chapter</a>.</p>
 
@@ -1249,13 +1117,13 @@ Table&nbsp;31.3: The tasks of this chapter; <a href="#tbl-cdp-charge" class="qua
   </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="pagination-link" aria-label="From Rényi DP to (ε, δ) and to tests">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span>
+      <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="pagination-link" aria-label="Adaptive composition: filters, odometers and individual accounting">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="pagination-link" aria-label="f-DP and Gaussian differential privacy">
-        <span class="nav-page-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="pagination-link" aria-label="Amplification by shuffling and by iteration">
+        <span class="nav-page-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

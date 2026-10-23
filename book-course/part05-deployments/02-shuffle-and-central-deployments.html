@@ -1,0 +1,1193 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>18&nbsp; The Shuffle Model and Central Deployments – A Course in Differential Privacy</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../glossary.html" rel="next">
+<link href="../part05-deployments/01-local-dp.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-deployments/00-introduction.html">Deployments</a></li><li class="breadcrumb-item"><a href="../part05-deployments/02-shuffle-and-central-deployments.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">A Course in Differential Privacy</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-privacy-failures/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy Failures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/01-attempts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Attempts at Data Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/02-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Reconstruction Attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-dp-basics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Basics of Differential Privacy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/01-randomized-response.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/02-laplace-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/03-approximate-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/04-advanced-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/05-exponential-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Exponential Mechanism</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-query-release/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query Release and Its Limits</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/01-multiplicative-weights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Private Multiplicative Weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/02-sparse-vector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sparse Vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/03-beyond-global-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/04-packing-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Packing Lower Bounds</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-learning-statistics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Private Learning and Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/01-privacy-violations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What Differential Privacy Protects</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/02-private-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/03-private-deep-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/04-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Private Mean Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/05-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Adaptive Data Analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-deployments/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deployments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/01-local-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Local Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/02-shuffle-and-central-deployments.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-shuf-prochlo" id="toc-sec-shuf-prochlo" class="nav-link active" data-scroll-target="#sec-shuf-prochlo"><span class="header-section-number">18.1</span> Encode, shuffle, analyze</a></li>
+  <li><a href="#sec-shuf-model" id="toc-sec-shuf-model" class="nav-link" data-scroll-target="#sec-shuf-model"><span class="header-section-number">18.2</span> The shuffle model</a></li>
+  <li><a href="#sec-shuf-amplification" id="toc-sec-shuf-amplification" class="nav-link" data-scroll-target="#sec-shuf-amplification"><span class="header-section-number">18.3</span> Amplification by shuffling</a></li>
+  <li><a href="#sec-shuf-bits" id="toc-sec-shuf-bits" class="nav-link" data-scroll-target="#sec-shuf-bits"><span class="header-section-number">18.4</span> Counting bits in the shuffle model</a></li>
+  <li><a href="#sec-shuf-linkedin" id="toc-sec-shuf-linkedin" class="nav-link" data-scroll-target="#sec-shuf-linkedin"><span class="header-section-number">18.5</span> A query service: LinkedIn</a>
+  <ul class="collapse">
+  <li><a href="#sec-shuf-br" id="toc-sec-shuf-br" class="nav-link" data-scroll-target="#sec-shuf-br"><span class="header-section-number">18.5.1</span> Bounded range</a></li>
+  <li><a href="#sec-shuf-gumbel" id="toc-sec-shuf-gumbel" class="nav-link" data-scroll-target="#sec-shuf-gumbel"><span class="header-section-number">18.5.2</span> Top-<span class="math inline">\(k\)</span> selection with Gumbel noise</a></li>
+  <li><a href="#sec-shuf-outside" id="toc-sec-shuf-outside" class="nav-link" data-scroll-target="#sec-shuf-outside"><span class="header-section-number">18.5.3</span> Queries from outside</a></li>
+  </ul></li>
+  <li><a href="#sec-shuf-releases" id="toc-sec-shuf-releases" class="nav-link" data-scroll-target="#sec-shuf-releases"><span class="header-section-number">18.6</span> Data releases</a>
+  <ul class="collapse">
+  <li><a href="#sec-shuf-mobility" id="toc-sec-shuf-mobility" class="nav-link" data-scroll-target="#sec-shuf-mobility"><span class="header-section-number">18.6.1</span> Mobility reports</a></li>
+  <li><a href="#sec-shuf-urls" id="toc-sec-shuf-urls" class="nav-link" data-scroll-target="#sec-shuf-urls"><span class="header-section-number">18.6.2</span> A URL data set with zero-concentrated privacy</a></li>
+  </ul></li>
+  <li><a href="#sec-shuf-summary" id="toc-sec-shuf-summary" class="nav-link" data-scroll-target="#sec-shuf-summary"><span class="header-section-number">18.7</span> Summary</a></li>
+  <li><a href="#sec-shuf-notes" id="toc-sec-shuf-notes" class="nav-link" data-scroll-target="#sec-shuf-notes"><span class="header-section-number">18.8</span> Notes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-deployments/00-introduction.html">Deployments</a></li><li class="breadcrumb-item"><a href="../part05-deployments/02-shuffle-and-central-deployments.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The local model of <a href="../part05-deployments/01-local-dp.html">the previous chapter</a> asks no one to be trusted, and pays with an error <span class="math inline">\(\sqrt n\)</span> times larger than the central model’s. This chapter first studies a middle ground for differential privacy (DP), the shuffle model, in which a party that only mixes messages lets each person add far less noise. It then turns to deployments in the central model, where a company holds the data and releases statistics or answers queries. These are an analytics service that answers queries from outside analysts, and two large public data releases.</p>
+<p>Each deployment brings a piece of theory with it. The shuffle model comes with amplification by shuffling and a counting protocol whose error does not grow with <span class="math inline">\(n\)</span>. The query service comes with a sharper way to account for the exponential mechanism and a fast way to run it. The data releases come with zero-concentrated differential privacy and with a choice between protecting each action and protecting each person.</p>
+<section id="sec-shuf-prochlo" class="level2" data-number="18.1">
+<h2 data-number="18.1" class="anchored" data-anchor-id="sec-shuf-prochlo"><span class="header-section-number">18.1</span> Encode, shuffle, analyze</h2>
+<p>Google’s Prochlo system started from a failure of local privacy. Its designers wanted to learn which applications call which system interfaces, so that rarely used interfaces could be retired and old ones tracked. With a thousand applications and a hundred interfaces there are <span class="math inline">\(10^5\)</span> pairs to count. By their estimate, a local protocol such as RAPPOR would need reports from about a trillion people to count them usefully, more people than exist.</p>
+<p>Their architecture has three stages, <strong>encode, shuffle, analyze</strong>. Each person <em>encodes</em> their data on their own device, for instance with a local randomizer. A <em>shuffler</em> collects the encoded messages, strips their metadata such as arrival times and network addresses, and forwards them in a uniformly random order. The <em>analyst</em> sees only the shuffled batch and decodes statistics from it. The shuffler’s only job is to break the link between a message and its sender.</p>
+<p>Someone must run the shuffler, and the users must trust it not to reveal the order. Prochlo names three options: a trusted third party, a split of the work between several parties, or trusted hardware. It implements the last one, running the shuffle inside a trusted execution environment (TEE), an Intel SGX enclave, which is hardware designed so that even the machine’s owner cannot see the computation inside. Trust then rests on the hardware vendor, and side-channel attacks such as Spectre have shown that such hardware can leak. Splitting the work is the idea of a mix network, in which several servers each shuffle and re-encrypt the batch, so that the order stays hidden unless all of them collude. In Prochlo’s experiments on word frequencies, RAPPOR recovered less than <span class="math inline">\(5\%\)</span> as many distinct words as the shuffled system.</p>
+</section>
+<section id="sec-shuf-model" class="level2" data-number="18.2">
+<h2 data-number="18.2" class="anchored" data-anchor-id="sec-shuf-model"><span class="header-section-number">18.2</span> The shuffle model</h2>
+<p>Prochlo motivated a formal model that sits between the local and central ones. The trust barrier passes after the shuffler: the adversary sees the shuffled messages but not who sent which.</p>
+<div id="def-shuf-model" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.1 (Shuffle model)</strong></span> A protocol in the <strong>shuffle model</strong> gives each person the same randomizer <span class="math inline">\(R\colon \mathcal X \to \mathcal Y\)</span>. Person <span class="math inline">\(i\)</span> sends <span class="math inline">\(Y_i = R(X_i)\)</span> with independent coins, and the <strong>shuffler</strong> outputs <span class="math inline">\((Y_{\pi(1)}, \dots, Y_{\pi(n)})\)</span> for a permutation <span class="math inline">\(\pi\)</span> drawn uniformly at random. The protocol is <strong><span class="math inline">\((\varepsilon, \delta)\)</span>-DP in the shuffle model</strong> if this shuffled output, as a mechanism on <span class="math inline">\(X\)</span>, is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP in the central sense.</p>
+</div>
+<p>The shuffled output carries the same information as the multiset of messages, because the uniform order adds nothing. A local protocol is also a shuffle protocol with the same guarantee, since the shuffled output is a post-processing of the messages. The interesting protocols are those whose messages are <em>not</em> private one by one but become private once mixed.</p>
+<p>The benchmark task is again a sum of bits. In the central model, a count plus Laplace noise of scale <span class="math inline">\(1/\varepsilon\)</span> has error of order <span class="math inline">\(1/\varepsilon\)</span>. In the local model each person adds noise of that size, and the <span class="math inline">\(n\)</span> independent noises add up to a standard deviation of order <span class="math inline">\(\sqrt n/\varepsilon\)</span>, which no local protocol can beat by <a href="../part05-deployments/01-local-dp.html">the previous chapter’s lower bound</a>. The question is how close the shuffle model can get to <span class="math inline">\(1/\varepsilon\)</span>.</p>
+</section>
+<section id="sec-shuf-amplification" class="level2" data-number="18.3">
+<h2 data-number="18.3" class="anchored" data-anchor-id="sec-shuf-amplification"><span class="header-section-number">18.3</span> Amplification by shuffling</h2>
+<p>The first answer is general. Shuffling makes any local randomizer more private, just as subsampling did in <a href="../part04-learning-statistics/02-private-erm.html">an earlier chapter</a>. Here is the result in the form in which it was first proved.</p>
+<div id="thm-shuf-amplification" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 18.1 (Amplification by shuffling)</strong></span> Let <span class="math inline">\(n \ge 1000\)</span>, <span class="math inline">\(\delta \in (0, \frac1{100})\)</span>, and let <span class="math inline">\(R\)</span> be an <span class="math inline">\(\varepsilon_0\)</span>-local randomizer with <span class="math inline">\(0 &lt; \varepsilon_0 &lt; \frac12\)</span>. Then the shuffled output of <span class="math inline">\(R(X_1), \dots, R(X_n)\)</span> is <span class="math inline">\((\varepsilon, \delta)\)</span>-DP with</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-1"><span class="math display">\[
+\varepsilon = 12\,\varepsilon_0\sqrt{\frac{\ln(1/\delta)}{n}} .
+\tag{18.1}\]</span></span></p>
+</div>
+<p>The proof is in the 2019 paper by Erlingsson and coauthors listed in the notes (Theorem 7 and Corollary 9 there). It shuffles the records before randomizing them, which gives the same output distribution when everyone uses the same randomizer, and which also allows each randomizer to depend on the messages before it. The proof moves the one differing record to the front and swaps it into a uniformly random position, and then bounds how much each successive message reveals about that position.</p>
+<p>The gain is a factor of order <span class="math inline">\(\sqrt n\)</span>, but it applies only to randomizers that are already very private. Few deployments want <span class="math inline">\(\varepsilon_0 \le \frac12\)</span> locally, because that is the regime where local accuracy is worst. The useful regime is <span class="math inline">\(\varepsilon_0\)</span> of order <span class="math inline">\(\ln n\)</span>, which the theorem does not cover. A later analysis by Feldman, McMillan and Talwar (2021) does, and still yields a constant <span class="math inline">\(\varepsilon\)</span> there. It covers every <span class="math inline">\(\varepsilon_0 \le \ln\big(n/(16\ln(2/\delta))\big)\)</span>, with <span class="math inline">\(\varepsilon = O\big((1 - e^{-\varepsilon_0})\sqrt{e^{\varepsilon_0}\ln(1/\delta)/n}\big)\)</span>. Its proof splits each other person’s randomizer into a mixture, in which with probability <span class="math inline">\(e^{-\varepsilon_0}\)</span> the message looks like a “clone” of what the differing person might have sent, and the count of clones hides that person. The next section carries out this idea in full for one simple randomizer.</p>
+</section>
+<section id="sec-shuf-bits" class="level2" data-number="18.4">
+<h2 data-number="18.4" class="anchored" data-anchor-id="sec-shuf-bits"><span class="header-section-number">18.4</span> Counting bits in the shuffle model</h2>
+<p>For a sum of bits, a direct protocol reaches error of order <span class="math inline">\(\sqrt{\ln(1/\delta)}/\varepsilon\)</span>, independent of <span class="math inline">\(n\)</span>. Its randomizer is randomized response with a twist: almost everyone tells the truth.</p>
+<div id="def-shuf-rr" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.2 (Shuffled randomized response)</strong></span> Fix <span class="math inline">\(q \in (0,1]\)</span>. Person <span class="math inline">\(i\)</span>, with bit <span class="math inline">\(X_i\)</span>, sends <span class="math inline">\(Y_i = X_i\)</span> with probability <span class="math inline">\(1 - q\)</span>, and otherwise sends a fresh fair coin. The analyst sees the shuffled reports, counts their ones as <span class="math inline">\(Z = \sum_{i=1}^n Y_i\)</span>, and estimates the count <span class="math inline">\(c = \sum_{i=1}^n X_i\)</span> by</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-2"><span class="math display">\[
+\tilde c = \frac{Z - nq/2}{1 - q}.
+\tag{18.2}\]</span></span></p>
+</div>
+<p>In the local model, <span class="math inline">\(q\)</span> would be a constant. Here it will be of order <span class="math inline">\(\ln(1/\delta)/(\varepsilon^2 n)\)</span>, so only about <span class="math inline">\(\ln(1/\delta)/\varepsilon^2\)</span> people in total send coins. The coins of the others hide any one person, much as the clones above. Two lemmas prepare the proof. Write <span class="math inline">\(\tau = \tanh(\varepsilon/2)\)</span>, the number for which <span class="math inline">\((1+\tau)/(1-\tau) = e^\varepsilon\)</span>.</p>
+<div id="lem-shuf-binomial" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 18.1</strong></span> Let <span class="math inline">\(\varepsilon &gt; 0\)</span> and let <span class="math inline">\(s \ge 2/\tau\)</span> be an integer. Let <span class="math inline">\(N\)</span> be binomial with <span class="math inline">\(s\)</span> trials and success probability <span class="math inline">\(\frac12\)</span>, and let <span class="math inline">\(B\)</span> and <span class="math inline">\(B'\)</span> be Bernoulli variables independent of <span class="math inline">\(N\)</span>, with any parameters. Then for every set <span class="math inline">\(T\)</span> of integers,</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-3"><span class="math display">\[
+\Pr[N + B \in T] \le e^{\varepsilon}\,\Pr[N + B' \in T] + 2e^{-s\tau^2/8}.
+\tag{18.3}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Write <span class="math inline">\(P(k) = \Pr[N = k] = \binom sk 2^{-s}\)</span>. For <span class="math inline">\(1 \le k \le s\)</span>, the ratio of consecutive probabilities is <span class="math inline">\(P(k-1)/P(k) = k/(s+1-k)\)</span>.</li>
+<li>Let <span class="math inline">\(K\)</span> be the set of integers <span class="math inline">\(k\)</span> with <span class="math inline">\(|k - \frac{s+1}2| \le \frac{s+1}2\tau\)</span>. Writing <span class="math inline">\(k = \frac{s+1}2(1+v)\)</span> with <span class="math inline">\(|v| \le \tau\)</span>, the ratio becomes <span class="math inline">\((1+v)/(1-v)\)</span>, which lies in <span class="math inline">\([e^{-\varepsilon}, e^{\varepsilon}]\)</span>. Since <span class="math inline">\(\tau &lt; 1\)</span>, every <span class="math inline">\(k \in K\)</span> satisfies <span class="math inline">\(1 \le k \le s\)</span>.</li>
+<li>For <span class="math inline">\(k \in K\)</span> and any Bernoulli parameter <span class="math inline">\(b\)</span>, <span class="math inline">\(\Pr[N + B = k] = (1-b)P(k) + bP(k-1)\)</span> is at most <span class="math inline">\(\max(P(k), P(k-1))\)</span>. By step 2 this is at most <span class="math inline">\(e^\varepsilon\min(P(k), P(k-1))\)</span>, which is at most <span class="math inline">\(e^{\varepsilon}\Pr[N + B' = k]\)</span>.</li>
+<li>Outside <span class="math inline">\(K\)</span>, use <span class="math inline">\(|N + B - \frac{s+1}2| \le |N - \frac s2| + \frac12\)</span>. So <span class="math inline">\(N + B \notin K\)</span> requires <span class="math inline">\(|N - \frac s2| &gt; \frac{(s+1)\tau - 1}{2}\)</span>, and this threshold is at least <span class="math inline">\(s\tau/4\)</span> because <span class="math inline">\(s\tau \ge 2\)</span>. Hoeffding’s inequality for <span class="math inline">\(s\)</span> fair coins gives <span class="math inline">\(\Pr[N + B\notin K] \le 2\exp(-2(s\tau/4)^2/s) = 2e^{-s\tau^2/8}\)</span>.</li>
+<li>Split <span class="math inline">\(T\)</span> into <span class="math inline">\(T \cap K\)</span>, bounded by step 3, and the rest, bounded by step 4.</li>
+</ol>
+</div>
+<p>The second lemma ensures that enough people send coins. It is a lower tail for the binomial distribution, sharper than Hoeffding’s inequality when the mean is small.</p>
+<div id="lem-shuf-chernoff" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 18.2</strong></span> Let <span class="math inline">\(S\)</span> be binomial with mean <span class="math inline">\(\mu\)</span>. Then</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-4"><span class="math display">\[
+\Pr\!\left[S \le \frac\mu2\right] \le \exp\!\left(-\frac{(1-\ln 2)\,\mu}{2}\right).
+\tag{18.4}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Let <span class="math inline">\(S\)</span> have <span class="math inline">\(m\)</span> trials with success probability <span class="math inline">\(p\)</span>, so <span class="math inline">\(\mu = mp\)</span>. For <span class="math inline">\(\lambda &gt; 0\)</span>, Markov’s inequality applied to <span class="math inline">\(e^{-\lambda S}\)</span> gives <span class="math inline">\(\Pr[S \le a] \le e^{\lambda a}\,\mathbb E[e^{-\lambda S}]\)</span>.</li>
+<li>The trials are independent, so <span class="math inline">\(\mathbb E[e^{-\lambda S}] = (1 - p + pe^{-\lambda})^m\)</span>. Using <span class="math inline">\(1 + z \le e^z\)</span>, this is at most <span class="math inline">\(\exp\big(\mu(e^{-\lambda} - 1)\big)\)</span>.</li>
+<li>Take <span class="math inline">\(a = \mu/2\)</span> and <span class="math inline">\(\lambda = \ln 2\)</span>. The exponent becomes <span class="math inline">\(\mu\ln 2/2 - \mu/2\)</span>.</li>
+</ol>
+</div>
+<div id="thm-shuf-rr-privacy" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 18.2 (Privacy of shuffled randomized response)</strong></span> Let <span class="math inline">\(\varepsilon &gt; 0\)</span>, <span class="math inline">\(\delta \in (0,1)\)</span> and <span class="math inline">\(n \ge 1 + 16\ln(4/\delta)/\tau^2\)</span>, and set</p>
+<p><span id="eq-shuf-q"><span class="math display">\[
+q = \frac{16\ln(4/\delta)}{\tau^2(n-1)} .
+\tag{18.5}\]</span></span></p>
+<p>Then shuffled randomized response is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP in the shuffle model.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>Reduce to the count.</em> Given the count <span class="math inline">\(Z\)</span>, every arrangement of the shuffled bits with <span class="math inline">\(Z\)</span> ones is equally likely. So the shuffled output and <span class="math inline">\(Z\)</span> are functions of each other, up to independent randomness, and it suffices to prove that <span class="math inline">\(Z\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP.</li>
+<li><em>Isolate one person.</em> The count does not depend on the order of the people, so we may take neighbours <span class="math inline">\(X \sim X'\)</span> that differ in person <span class="math inline">\(1\)</span>. Let <span class="math inline">\(S\)</span> be the set of persons <span class="math inline">\(i \ge 2\)</span> who send coins. Its law does not depend on the data, and given <span class="math inline">\(S\)</span>,</li>
+</ol>
+<p><span id="eq-auto-02shuffleandcentraldeployments-5"><span class="math display">\[
+Z = C_S + N + Y_1, \qquad C_S = \sum_{i \ge 2,\ i \notin S} X_i,
+\tag{18.6}\]</span></span></p>
+<p>where <span class="math inline">\(N\)</span> counts the ones among the <span class="math inline">\(|S|\)</span> fair coins. Both <span class="math inline">\(C_S\)</span> and the law of <span class="math inline">\(N\)</span> are the same under <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span>, and only the Bernoulli variable <span class="math inline">\(Y_1\)</span> changes. 3. <em>Enough coins.</em> Let <span class="math inline">\(s_0 = 8\ln(4/\delta)/\tau^2\)</span>. The size <span class="math inline">\(|S|\)</span> is binomial with mean <span class="math inline">\((n-1)q = 2s_0\)</span>. By <a href="#lem-shuf-chernoff" class="quarto-xref">Lemma&nbsp;<span>18.2</span></a>, <span class="math inline">\(\Pr[|S| &lt; s_0] \le \exp(-(1-\ln 2)\,8\ln(4/\delta)/\tau^2)\)</span>. Since <span class="math inline">\(8(1-\ln 2) &gt; 2\)</span> and <span class="math inline">\(\tau &lt; 1\)</span>, this is at most <span class="math inline">\((\delta/4)^2 \le \delta/4\)</span>. 4. <em>Each large <span class="math inline">\(S\)</span> is private.</em> If <span class="math inline">\(|S| \ge s_0\)</span>, then <span class="math inline">\(|S|\tau \ge 8\ln 4/\tau &gt; 2\)</span>, so <a href="#lem-shuf-binomial" class="quarto-xref">Lemma&nbsp;<span>18.1</span></a> applies. Its error term is <span class="math inline">\(2e^{-|S|\tau^2/8} \le 2e^{-\ln(4/\delta)} = \delta/2\)</span>. Shifting by the constant <span class="math inline">\(C_S\)</span> preserves the inequality, so for every event <span class="math inline">\(T\)</span>, <span class="math inline">\(\Pr_X[Z \in T \mid S] \le e^\varepsilon\Pr_{X'}[Z\in T \mid S] + \delta/2\)</span>. 5. <em>Average over <span class="math inline">\(S\)</span>.</em> Summing over sets with <span class="math inline">\(|S| \ge s_0\)</span> and adding the probability of the others,</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-6"><span class="math display">\[
+\Pr_X[Z \in T] \le e^{\varepsilon}\Pr_{X'}[Z \in T] + \frac\delta2 + \frac\delta4 \le e^{\varepsilon}\Pr_{X'}[Z \in T] + \delta.
+\tag{18.7}\]</span></span></p>
+</div>
+<div id="thm-shuf-rr-accuracy" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 18.3 (Accuracy of shuffled randomized response)</strong></span> For every dataset, <span class="math inline">\(\tilde c\)</span> is an unbiased estimate of <span class="math inline">\(c\)</span> with variance at most <span class="math inline">\(nq/(2(1-q)^2)\)</span>. With <span class="math inline">\(q\)</span> as in <a href="#eq-shuf-q" class="quarto-xref">Equation&nbsp;<span>18.5</span></a> and <span class="math inline">\(\beta \in (0,1)\)</span>, with probability at least <span class="math inline">\(1 - \beta\)</span>,</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-7"><span class="math display">\[
+|\tilde c - c| \le \frac{1}{1-q}\sqrt{\frac{nq}{2\beta}} \le \frac{4}{(1-q)\,\tau}\sqrt{\frac{\ln(4/\delta)}{\beta}} .
+\tag{18.8}\]</span></span></p>
+<p>For <span class="math inline">\(\varepsilon \le 1\)</span> and <span class="math inline">\(q \le \frac12\)</span>, the right-hand side is at most <span class="math inline">\(18\sqrt{\ln(4/\delta)/\beta}\,/\varepsilon\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Each report is <span class="math inline">\(1\)</span> with probability <span class="math inline">\((1-q)X_i + q/2\)</span>, so <span class="math inline">\(\mathbb E[Z] = (1-q)c + nq/2\)</span>, and <span class="math inline">\(\tilde c\)</span> is unbiased.</li>
+<li>Each report is a Bernoulli variable with parameter <span class="math inline">\(q/2\)</span> or <span class="math inline">\(1 - q/2\)</span>, so its variance is <span class="math inline">\(\frac q2(1 - \frac q2) \le \frac q2\)</span>. The reports are independent, so <span class="math inline">\(\operatorname{Var}[Z] \le nq/2\)</span> and <span class="math inline">\(\operatorname{Var}[\tilde c] \le nq/(2(1-q)^2)\)</span>.</li>
+<li>Chebyshev’s inequality gives the first bound. For the second, <span class="math inline">\(nq = 16\ln(4/\delta)\,n/(\tau^2(n-1)) \le 32\ln(4/\delta)/\tau^2\)</span> when <span class="math inline">\(n \ge 2\)</span>.</li>
+<li>The function <span class="math inline">\(\tanh\)</span> is concave on <span class="math inline">\([0,\infty)\)</span>, so <span class="math inline">\(\tau \ge \tanh(\frac12)\,\varepsilon = 0.462\,\varepsilon\)</span> for <span class="math inline">\(\varepsilon \le 1\)</span>. With <span class="math inline">\(1/(1-q) \le 2\)</span>, the constant is <span class="math inline">\(8/0.462 &lt; 18\)</span>.</li>
+</ol>
+</div>
+<p>So the shuffled count has error <span class="math inline">\(O(\sqrt{\ln(1/\delta)}/\varepsilon)\)</span>, which does not grow with <span class="math inline">\(n\)</span>. It is within a factor <span class="math inline">\(\sqrt{\ln(1/\delta)}\)</span> of the central model and far from the local model’s <span class="math inline">\(\sqrt n/\varepsilon\)</span>, as <a href="#fig-shuf-counts" class="quarto-xref">Figure&nbsp;<span>18.1</span></a> shows.</p>
+<div id="exm-shuf-rr" class="theorem example">
+<p><span class="theorem-title"><strong>Example 18.1</strong></span> Take <span class="math inline">\(\varepsilon = 1\)</span>, <span class="math inline">\(\delta = 10^{-6}\)</span> and <span class="math inline">\(n = 10^6\)</span>. Then <span class="math inline">\(\tau = 0.4621\)</span>, and <a href="#eq-shuf-q" class="quarto-xref">Equation&nbsp;<span>18.5</span></a> gives <span class="math inline">\(q = 0.001139\)</span>, so about <span class="math inline">\(1{,}139\)</span> people send coins. The standard deviation of <span class="math inline">\(\tilde c\)</span> is at most <span class="math inline">\(23.9\)</span>. Local randomized response at the same <span class="math inline">\(\varepsilon\)</span> has standard deviation <span class="math inline">\(\sqrt n\,e^{1/2}/(e - 1) = 959.5\)</span>, and central Laplace noise has <span class="math inline">\(\sqrt 2 = 1.414\)</span>.</p>
+</div>
+<div id="fig-shuf-counts" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-shuf-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/shuf-counts.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-shuf-counts-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;18.1: Error of three private counts of <span class="math inline">\(n\)</span> bits at <span class="math inline">\(\varepsilon = 1\)</span>, as the 95th percentile of the absolute error over 2,000 simulated runs on data with half the bits equal to one. The local error grows as <span class="math inline">\(\sqrt n\)</span>. The shuffled error, with <span class="math inline">\(q\)</span> from <a href="#eq-shuf-q" class="quarto-xref">Equation&nbsp;<span>18.5</span></a> and <span class="math inline">\(\delta = 10^{-6}\)</span>, stays near 47, and the central Laplace error stays near 3.
+</figcaption>
+</figure>
+</div>
+<p>The price is trust in the shuffler. Each message on its own is randomized response that keeps the true bit with probability <span class="math inline">\(1 - q/2\)</span>, so it is only <span class="math inline">\(\varepsilon_0\)</span>-locally private with <span class="math inline">\(\varepsilon_0 = \ln((2-q)/q) = 7.47\)</span> in the example. A shuffler that leaked the order would expose almost every bit. That <span class="math inline">\(\varepsilon_0\)</span> is below <span class="math inline">\(\ln\big(n/(16\ln(2/\delta))\big) = 8.37\)</span>, so this protocol lies in the range that the clone analysis of the previous section covers. Prochlo’s engineering, with its anonymization and mixing, is a practice already common in industry, and the shuffle model shows that, combined with a little local noise, it yields a formal guarantee close to the central one.</p>
+</section>
+<section id="sec-shuf-linkedin" class="level2" data-number="18.5">
+<h2 data-number="18.5" class="anchored" data-anchor-id="sec-shuf-linkedin"><span class="header-section-number">18.5</span> A query service: LinkedIn</h2>
+<p>LinkedIn’s audience engagements service lets advertisers ask how members who match a target audience engage with content, such as which articles or topics they click on most. It runs in the central model: LinkedIn holds the data and answers each query with a private mechanism. Its design rests on research done for it, of which this section covers two pieces, a sharper analysis of the exponential mechanism and a fast way to run it.</p>
+<section id="sec-shuf-br" class="level3" data-number="18.5.1">
+<h3 data-number="18.5.1" class="anchored" data-anchor-id="sec-shuf-br"><span class="header-section-number">18.5.1</span> Bounded range</h3>
+<p>Recall <a href="../part02-dp-basics/05-exponential-mechanism.html">the exponential mechanism</a>. Given a score <span class="math inline">\(u(X, y)\)</span> for each output <span class="math inline">\(y\)</span> in a countable set, whose value changes by at most <span class="math inline">\(\Delta\)</span> between neighbours, it outputs <span class="math inline">\(y\)</span> with probability proportional to <span class="math inline">\(\exp(\varepsilon u(X,y)/(2\Delta))\)</span>, and it is <span class="math inline">\(\varepsilon\)</span>-DP. Write</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-8"><span class="math display">\[
+L(y) = \ln\frac{\Pr[M(X) = y]}{\Pr[M(X') = y]}
+\tag{18.9}\]</span></span></p>
+<p>for the privacy loss of output <span class="math inline">\(y\)</span> between neighbours <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span>. Pure <span class="math inline">\(\varepsilon\)</span>-DP says <span class="math inline">\(|L(y)| \le \varepsilon\)</span>, an interval of width <span class="math inline">\(2\varepsilon\)</span>. The exponential mechanism satisfies a stronger condition.</p>
+<div id="def-shuf-br" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.3 (Bounded range)</strong></span> A mechanism <span class="math inline">\(M\)</span> with a countable output set is <strong><span class="math inline">\(\varepsilon\)</span>-bounded range</strong> if for all neighbours <span class="math inline">\(X \sim X'\)</span> and all outputs <span class="math inline">\(y, y'\)</span>,</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-9"><span class="math display">\[
+\Pr[M(X) = y]\,\Pr[M(X') = y'] \le e^{\varepsilon}\,\Pr[M(X') = y]\,\Pr[M(X) = y'] .
+\tag{18.10}\]</span></span></p>
+</div>
+<p>When the outputs have positive probability, this says <span class="math inline">\(L(y) - L(y') \le \varepsilon\)</span>: the privacy losses lie in an interval of width <span class="math inline">\(\varepsilon\)</span>, wherever that interval sits.</p>
+<div id="prp-shuf-br-dp" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 18.1</strong></span> An <span class="math inline">\(\varepsilon\)</span>-bounded range mechanism is <span class="math inline">\(\varepsilon\)</span>-DP. An <span class="math inline">\(\varepsilon\)</span>-DP mechanism with a countable output set is <span class="math inline">\(2\varepsilon\)</span>-bounded range.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>Same support.</em> Let <span class="math inline">\(M\)</span> be <span class="math inline">\(\varepsilon\)</span>-bounded range. If <span class="math inline">\(\Pr[M(X) = y] &gt; 0 = \Pr[M(X') = y]\)</span>, the definition forces <span class="math inline">\(\Pr[M(X') = y'] = 0\)</span> for every <span class="math inline">\(y'\)</span>, which is impossible. So <span class="math inline">\(M(X)\)</span> and <span class="math inline">\(M(X')\)</span> give positive probability to the same outputs, and <span class="math inline">\(L\)</span> is finite on them.</li>
+<li><em>Both signs occur.</em> Both distributions sum to one over the common support, so some output <span class="math inline">\(y_+\)</span> has <span class="math inline">\(L(y_+) \ge 0\)</span> and some output <span class="math inline">\(y_-\)</span> has <span class="math inline">\(L(y_-) \le 0\)</span>.</li>
+<li><em>Width <span class="math inline">\(\varepsilon\)</span> around zero.</em> For every <span class="math inline">\(y\)</span>, bounded range gives <span class="math inline">\(L(y) \le L(y_-) + \varepsilon \le \varepsilon\)</span> and <span class="math inline">\(L(y) \ge L(y_+) - \varepsilon \ge -\varepsilon\)</span>. The pointwise lemma of <a href="../part02-dp-basics/01-randomized-response.html">the randomized response chapter</a> turns <span class="math inline">\(|L| \le \varepsilon\)</span> into <span class="math inline">\(\varepsilon\)</span>-DP.</li>
+<li><em>Converse.</em> If <span class="math inline">\(|L| \le \varepsilon\)</span> everywhere, then <span class="math inline">\(L(y) - L(y') \le 2\varepsilon\)</span>.</li>
+</ol>
+</div>
+<div id="prp-shuf-em-br" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 18.2</strong></span> The exponential mechanism with parameter <span class="math inline">\(\varepsilon\)</span> is <span class="math inline">\(\varepsilon\)</span>-bounded range.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Write <span class="math inline">\(Z_X = \sum_y \exp(\varepsilon u(X,y)/(2\Delta))\)</span> for the normalizing constant. Then <span class="math inline">\(L(y) = \frac{\varepsilon}{2\Delta}\big(u(X,y) - u(X',y)\big) + \ln(Z_{X'}/Z_X)\)</span>.</li>
+<li>The constant cancels in a difference: <span class="math inline">\(L(y) - L(y') = \frac{\varepsilon}{2\Delta}\big[(u(X,y) - u(X',y)) - (u(X,y') - u(X',y'))\big]\)</span>.</li>
+<li>Each bracketed difference is at most <span class="math inline">\(\Delta\)</span> in absolute value, so <span class="math inline">\(L(y) - L(y') \le \varepsilon\)</span>.</li>
+</ol>
+</div>
+<p>The factor of two matters when many selections are composed. Two lemmas make the composition precise. The first converts a tail bound on the privacy loss into a privacy guarantee. It holds for any output space, with <span class="math inline">\(L\)</span> the logarithm of the ratio of probability mass functions or of densities.</p>
+<div id="lem-shuf-tail" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 18.3</strong></span> Let <span class="math inline">\(\varepsilon' \ge 0\)</span> and <span class="math inline">\(\delta \in [0,1]\)</span>. If for all neighbours <span class="math inline">\(X \sim X'\)</span> the loss satisfies <span class="math inline">\(\Pr_{y \sim M(X)}[L(y) &gt; \varepsilon'] \le \delta\)</span>, then <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon', \delta)\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>Fix an event <span class="math inline">\(T\)</span> and let <span class="math inline">\(G = \{y : L(y) \le \varepsilon'\}\)</span>. On <span class="math inline">\(T \cap G\)</span> the probability under <span class="math inline">\(X\)</span> is at most <span class="math inline">\(e^{\varepsilon'}\)</span> times that under <span class="math inline">\(X'\)</span>, so <span class="math inline">\(\Pr[M(X) \in T\cap G] \le e^{\varepsilon'}\Pr[M(X')\in T]\)</span>. The rest of <span class="math inline">\(T\)</span> has probability at most <span class="math inline">\(\Pr[M(X) \notin G] \le \delta\)</span> under <span class="math inline">\(X\)</span>.</p>
+</div>
+<p>The second lemma bounds the mean loss, using Hoeffding’s lemma: a random variable <span class="math inline">\(W\)</span> in an interval of length <span class="math inline">\(\ell\)</span> satisfies <span class="math inline">\(\mathbb E[e^{\lambda(W - \mathbb E W)}] \le e^{\lambda^2\ell^2/8}\)</span> for every real <span class="math inline">\(\lambda\)</span>. This is the step at the heart of the proof of Hoeffding’s inequality.</p>
+<div id="lem-shuf-mean-loss" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 18.4</strong></span> If <span class="math inline">\(M\)</span> is <span class="math inline">\(\varepsilon\)</span>-bounded range and <span class="math inline">\(X \sim X'\)</span>, then <span class="math inline">\(\mathbb E_{y\sim M(X)}[L(y)] \le \varepsilon^2/8\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Under <span class="math inline">\(y \sim M(X)\)</span>, the variable <span class="math inline">\(W = -L(y)\)</span> lies in an interval of length <span class="math inline">\(\varepsilon\)</span>, and <span class="math inline">\(\mathbb E[e^{W}] = \sum_y \Pr[M(X) = y]\,\frac{\Pr[M(X')=y]}{\Pr[M(X)=y]} = 1\)</span>.</li>
+<li>Hoeffding’s lemma with <span class="math inline">\(\lambda = 1\)</span> gives <span class="math inline">\(1 = \mathbb E[e^W] \le e^{\mathbb E W + \varepsilon^2/8}\)</span>, so <span class="math inline">\(\mathbb E[L] = -\mathbb E[W] \le \varepsilon^2/8\)</span>.</li>
+</ol>
+</div>
+<div id="thm-shuf-br-composition" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 18.4 (Composition of bounded-range mechanisms)</strong></span> Run <span class="math inline">\(k\)</span> mechanisms in sequence on the same dataset, where the <span class="math inline">\(j\)</span>-th may be chosen as a function of the outputs of the first <span class="math inline">\(j-1\)</span>, and each is <span class="math inline">\(\varepsilon\)</span>-bounded range whatever those outputs are. For every <span class="math inline">\(\delta \in (0,1)\)</span>, the sequence of outputs is <span class="math inline">\((\varepsilon', \delta)\)</span>-DP with</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-10"><span class="math display">\[
+\varepsilon' = \frac{k\varepsilon^2}{8} + \varepsilon\sqrt{\frac{k\ln(1/\delta)}{2}} .
+\tag{18.11}\]</span></span></p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>The probability of an output sequence is the product of the conditional probabilities of its terms, so the loss is a sum <span class="math inline">\(L = \sum_{j=1}^k L_j\)</span>, where <span class="math inline">\(L_j\)</span> is the loss of the <span class="math inline">\(j\)</span>-th output given the earlier ones.</li>
+<li>Given the earlier outputs, <span class="math inline">\(L_j\)</span> lies in an interval of length <span class="math inline">\(\varepsilon\)</span>, by bounded range, and its conditional mean is at most <span class="math inline">\(\varepsilon^2/8\)</span>, by <a href="#lem-shuf-mean-loss" class="quarto-xref">Lemma&nbsp;<span>18.4</span></a>. Let <span class="math inline">\(D_j\)</span> be <span class="math inline">\(L_j\)</span> minus its conditional mean, so <span class="math inline">\(L \le \sum_j D_j + k\varepsilon^2/8\)</span>.</li>
+<li>For <span class="math inline">\(\lambda &gt; 0\)</span>, Hoeffding’s lemma applied conditionally gives <span class="math inline">\(\mathbb E[e^{\lambda D_j} \mid \text{earlier outputs}] \le e^{\lambda^2\varepsilon^2/8}\)</span>. Taking conditional expectations from the last term to the first gives <span class="math inline">\(\mathbb E[e^{\lambda\sum_j D_j}] \le e^{k\lambda^2\varepsilon^2/8}\)</span>.</li>
+<li>By Markov’s inequality, <span class="math inline">\(\Pr[\sum_j D_j \ge t] \le e^{-\lambda t + k\lambda^2\varepsilon^2/8}\)</span>. Choosing <span class="math inline">\(\lambda = 4t/(k\varepsilon^2)\)</span> makes this <span class="math inline">\(e^{-2t^2/(k\varepsilon^2)}\)</span>, which equals <span class="math inline">\(\delta\)</span> at <span class="math inline">\(t = \varepsilon\sqrt{k\ln(1/\delta)/2}\)</span>.</li>
+<li>So <span class="math inline">\(\Pr[L &gt; \varepsilon'] \le \delta\)</span> for every pair of neighbours, and <a href="#lem-shuf-tail" class="quarto-xref">Lemma&nbsp;<span>18.3</span></a> finishes the proof.</li>
+</ol>
+</div>
+<p><a href="../part02-dp-basics/04-advanced-composition.html">Advanced composition</a> gives <span class="math inline">\(\varepsilon\sqrt{2k\ln(1/\delta)} + k\varepsilon\tanh(\varepsilon/2)\)</span> for <span class="math inline">\(k\)</span> mechanisms that are only known to be <span class="math inline">\(\varepsilon\)</span>-DP. The square-root term of <a href="#thm-shuf-br-composition" class="quarto-xref">Theorem&nbsp;<span>18.4</span></a> is half as large. Its linear term <span class="math inline">\(k\varepsilon^2/8\)</span> is also smaller, about a quarter of <span class="math inline">\(k\varepsilon\tanh(\varepsilon/2) \approx k\varepsilon^2/2\)</span> for small <span class="math inline">\(\varepsilon\)</span>.</p>
+<div id="exm-shuf-br" class="theorem example">
+<p><span class="theorem-title"><strong>Example 18.2</strong></span> Compose <span class="math inline">\(k = 100\)</span> exponential mechanisms, each with <span class="math inline">\(\varepsilon = 0.1\)</span>, at <span class="math inline">\(\delta = 10^{-6}\)</span>. Basic composition gives <span class="math inline">\(10.00\)</span>, advanced composition <span class="math inline">\(5.76\)</span>, and <a href="#thm-shuf-br-composition" class="quarto-xref">Theorem&nbsp;<span>18.4</span></a> gives <span class="math inline">\(2.75\)</span>.</p>
+</div>
+</section>
+<section id="sec-shuf-gumbel" class="level3" data-number="18.5.2">
+<h3 data-number="18.5.2" class="anchored" data-anchor-id="sec-shuf-gumbel"><span class="header-section-number">18.5.2</span> Top-<span class="math inline">\(k\)</span> selection with Gumbel noise</h3>
+<p>An advertiser usually wants the few most popular items in a histogram, such as the top topics among an audience, not every count. LinkedIn’s algorithms split along two lines. The <strong>domain</strong> of items may be known in advance, or not. A person’s <strong>contribution</strong> may be <strong><span class="math inline">\(\Delta\)</span>-restricted</strong>, meaning each person adds one to at most <span class="math inline">\(\Delta\)</span> counts, or unrestricted. Hires are <span class="math inline">\(1\)</span>-restricted, since a hire adds one to one employer, but skills are not, since one person may list many.</p>
+<p>With <span class="math inline">\(\Delta\)</span>-restricted contributions, replacing one person changes the vector of counts by at most <span class="math inline">\(2\Delta\)</span> in <span class="math inline">\(\ell_1\)</span> norm. Laplace noise of scale <span class="math inline">\(2\Delta/\varepsilon\)</span> on every count, followed by taking the top <span class="math inline">\(k\)</span>, is then <span class="math inline">\(\varepsilon\)</span>-DP. Its noise grows with <span class="math inline">\(\Delta\)</span>. For unrestricted contributions, a better route is to select with the exponential mechanism, whose score for an item is its count. A count changes by at most one between neighbours, however many counts a person touches. <strong>Peeling</strong> selects the top item, removes it, and repeats <span class="math inline">\(k\)</span> times. Each round is the exponential mechanism, so by <a href="#prp-shuf-em-br" class="quarto-xref">Proposition&nbsp;<span>18.2</span></a> and <a href="#thm-shuf-br-composition" class="quarto-xref">Theorem&nbsp;<span>18.4</span></a> its cost depends on <span class="math inline">\(k\)</span> and not on <span class="math inline">\(\Delta\)</span>.</p>
+<p>Sampling from the exponential mechanism needs its normalizing constant, and peeling needs it <span class="math inline">\(k\)</span> times. Adding noise of the right shape and taking a maximum avoids both.</p>
+<div id="def-shuf-gumbel" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.4 (Gumbel distribution)</strong></span> The <strong>Gumbel distribution</strong> with scale <span class="math inline">\(b &gt; 0\)</span> has cumulative distribution function <span class="math inline">\(\Pr[G \le g] = \exp(-e^{-g/b})\)</span> for real <span class="math inline">\(g\)</span>.</p>
+</div>
+<div id="thm-shuf-gumbel" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 18.5 (Gumbel-max trick)</strong></span> Let <span class="math inline">\(u_1, \dots, u_d\)</span> be scores, let <span class="math inline">\(G_1, \dots, G_d\)</span> be independent Gumbel variables with scale <span class="math inline">\(b\)</span>, and write <span class="math inline">\(w_i = e^{u_i/b}\)</span>. Then</p>
+<ol type="1">
+<li>the index of the largest noisy score <span class="math inline">\(u_i + G_i\)</span> is <span class="math inline">\(i\)</span> with probability <span class="math inline">\(w_i/\sum_{j} w_j\)</span>;</li>
+<li>the indices of the <span class="math inline">\(k\)</span> largest noisy scores, in decreasing order, have the distribution of <span class="math inline">\(k\)</span> rounds of peeling, where each round picks a remaining item <span class="math inline">\(i\)</span> with probability proportional to <span class="math inline">\(w_i\)</span>.</li>
+</ol>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>Exponential race.</em> Let <span class="math inline">\(E_i = e^{-(u_i + G_i)/b}\)</span>. Then <span class="math inline">\(\Pr[E_i &gt; t] = \Pr[G_i &lt; -b\ln t - u_i] = \exp(-w_i t)\)</span> for <span class="math inline">\(t &gt; 0\)</span>. So the <span class="math inline">\(E_i\)</span> are independent exponential variables with rates <span class="math inline">\(w_i\)</span>, and the noisy scores in decreasing order are the <span class="math inline">\(E_i\)</span> in increasing order.</li>
+<li><em>The first finisher.</em> With <span class="math inline">\(W = \sum_j w_j\)</span>, the chance that <span class="math inline">\(E_i\)</span> is the smallest is</li>
+</ol>
+<p><span id="eq-auto-02shuffleandcentraldeployments-11"><span class="math display">\[
+\int_0^\infty w_i e^{-w_i t}\prod_{j \ne i} e^{-w_j t}\,dt = \frac{w_i}{W}.
+\tag{18.12}\]</span></span></p>
+<p>This proves the first claim. 3. <em>Memorylessness.</em> Condition on <span class="math inline">\(E_i\)</span> being smallest, with value <span class="math inline">\(t\)</span>. This is the event that <span class="math inline">\(E_j &gt; t\)</span> for every <span class="math inline">\(j \ne i\)</span>, and given it, the excesses <span class="math inline">\(E_j - t\)</span> are independent exponential variables with the original rates <span class="math inline">\(w_j\)</span>, because <span class="math inline">\(\Pr[E_j &gt; t + s \mid E_j &gt; t] = e^{-w_j s}\)</span>. 4. <em>Induction.</em> By step 3, the order of the remaining <span class="math inline">\(E_j\)</span> is a fresh exponential race among the remaining items. Step 2 applied to it shows that the next item is chosen with probability proportional to its <span class="math inline">\(w_j\)</span>, and repeating gives the second claim.</p>
+</div>
+<p>Counts change by at most one between neighbours, so take <span class="math inline">\(b = 2/\varepsilon_0\)</span>. Then <span class="math inline">\(w_i = e^{\varepsilon_0 u_i/2}\)</span>, and the first claim is the exponential mechanism with parameter <span class="math inline">\(\varepsilon_0\)</span>. By the second claim, adding Gumbel noise once and reporting the <span class="math inline">\(k\)</span> largest noisy counts <em>is</em> peeling, so it inherits peeling’s guarantee from <a href="#thm-shuf-br-composition" class="quarto-xref">Theorem&nbsp;<span>18.4</span></a>. It draws <span class="math inline">\(d\)</span> noise values and selects the top <span class="math inline">\(k\)</span> once, in time of order <span class="math inline">\(d\)</span> plus the time to select the top <span class="math inline">\(k\)</span>. Peeling would take time of order <span class="math inline">\(kd\)</span>.</p>
+</section>
+<section id="sec-shuf-outside" class="level3" data-number="18.5.3">
+<h3 data-number="18.5.3" class="anchored" data-anchor-id="sec-shuf-outside"><span class="header-section-number">18.5.3</span> Queries from outside</h3>
+<p>Unlike the deployments of the previous chapter, here outside analysts choose the queries, and they may be careless or malicious. Each advertiser has a privacy budget for its own queries. If two advertisers with budgets <span class="math inline">\(\varepsilon\)</span> each combined their answers, basic composition would only give <span class="math inline">\(2\varepsilon\)</span> about the members, and with many advertisers the guarantee would fade. The mechanisms alone cannot rule this out when each advertiser has its own budget. LinkedIn relies instead on a vetting process and on agreements in which advertisers undertake not to share results. The service also sets its parameters by modelling the attacks an analyst might mount, deliberately or by accident, and choosing <span class="math inline">\(\varepsilon\)</span> and the number of queries allowed per month so that those attacks fail. By that accounting, its monthly privacy loss is lower than the reported values for the local deployments of the previous chapter, though those systems protect very different data.</p>
+<p>LinkedIn used the same algorithms for its public labour market insights, which show which employers are hiring, which job titles are growing, and which skills new hires have, by region and industry. Hires by employer and by title are <span class="math inline">\(1\)</span>-restricted counts, so Laplace noise suits them. Skills are unrestricted, so their top lists come from Gumbel noise and peeling.</p>
+</section>
+</section>
+<section id="sec-shuf-releases" class="level2" data-number="18.6">
+<h2 data-number="18.6" class="anchored" data-anchor-id="sec-shuf-releases"><span class="header-section-number">18.6</span> Data releases</h2>
+<p>The last two deployments do not answer queries. They publish a fixed data set once, computed in the central model.</p>
+<section id="sec-shuf-mobility" class="level3" data-number="18.6.1">
+<h3 data-number="18.6.1" class="anchored" data-anchor-id="sec-shuf-mobility"><span class="header-section-number">18.6.1</span> Mobility reports</h3>
+<p>During the Covid-19 pandemic, Google published community mobility reports, built from the location history of users who had opted in. For each region and day, they gave the change in visits to six kinds of places, such as retail and recreation, grocery stores and pharmacies, parks, transit stations, workplaces and residences, relative to a baseline from before the pandemic. Weekly patterns are visible. Visits to workplaces fell on weekdays but hardly changed at weekends, when most people stay away from work anyway, and time at home rose. The counts behind these percentages are noised with Laplace noise to satisfy differential privacy. To bound each person’s influence, a person counts at most once per category and place, and at most four such pairs per day. A person with more has four pairs kept at random and the rest dropped, which is the same idea as <span class="math inline">\(\Delta\)</span>-restricted contribution. Regions smaller than <span class="math inline">\(3\)</span> square kilometres, and metrics whose noisy count of people is below <span class="math inline">\(100\)</span>, are discarded, and so are changes that the noise makes too uncertain.</p>
+</section>
+<section id="sec-shuf-urls" class="level3" data-number="18.6.2">
+<h3 data-number="18.6.2" class="anchored" data-anchor-id="sec-shuf-urls"><span class="header-section-number">18.6.2</span> A URL data set with zero-concentrated privacy</h3>
+<p>Facebook and the academic organisation Social Science One released a data set on how users interact with web links shared on Facebook. It covers more than 38 million URLs, and researchers obtain access through a proposal process. The raw data are events, such as “a woman aged 35 to 44 in Germany shared this URL on this date”. The release aggregates them by URL, month, country, age and gender, and publishes noisy counts of views, clicks, shares, likes and other reactions. A noisy count can be negative, a visible sign of the noise.</p>
+<p>The noise is Gaussian, and the guarantee is zero-concentrated differential privacy. It needs the Rényi divergence of order <span class="math inline">\(\alpha &gt; 1\)</span> between distributions with densities, or mass functions, <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span>:</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-12"><span class="math display">\[
+D_\alpha(P\,\|\,Q) = \frac{1}{\alpha - 1}\ln\int p(y)^\alpha q(y)^{1-\alpha}\,dy .
+\tag{18.13}\]</span></span></p>
+<div id="def-shuf-zcdp" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 18.5 (Zero-concentrated differential privacy)</strong></span> Let <span class="math inline">\(\rho \ge 0\)</span>. A mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\(\rho\)</span>-zero-concentrated differentially private</strong> if for all neighbours <span class="math inline">\(X \sim X'\)</span> and all <span class="math inline">\(\alpha &gt; 1\)</span>,</p>
+<p><span id="eq-auto-02shuffleandcentraldeployments-13"><span class="math display">\[
+D_\alpha\big(M(X)\,\|\,M(X')\big) \le \rho\,\alpha .
+\tag{18.14}\]</span></span></p>
+</div>
+<p>It has one parameter, like pure privacy, but composes like advanced composition, as the next three results show. It lies between the two: an <span class="math inline">\(\varepsilon\)</span>-DP mechanism is <span class="math inline">\((\varepsilon^2/2)\)</span>-zero-concentrated, and the converse direction holds with a <span class="math inline">\(\delta\)</span>.</p>
+<div id="lem-shuf-renyi-product" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 18.5</strong></span> For product distributions, <span class="math inline">\(D_\alpha(P_1\times P_2\,\|\,Q_1\times Q_2) = D_\alpha(P_1\,\|\,Q_1) + D_\alpha(P_2\,\|\,Q_2)\)</span>. So releasing the outputs of a <span class="math inline">\(\rho_1\)</span>- and a <span class="math inline">\(\rho_2\)</span>-zero-concentrated mechanism, run with independent coins, is <span class="math inline">\((\rho_1 + \rho_2)\)</span>-zero-concentrated.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span>The integral of <span class="math inline">\(p^\alpha q^{1-\alpha}\)</span> over a product space factorizes into the two integrals, and the logarithm turns the product into a sum.</p>
+</div>
+<p>The same additivity holds when the second mechanism is chosen after seeing the first output, as Bun and Steinke (2016) show.</p>
+<div id="prp-shuf-gaussian" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 18.3 (Gaussian mechanism)</strong></span> Let <span class="math inline">\(f\colon \mathcal X^n \to \mathbb R^d\)</span> change by at most <span class="math inline">\(\Delta\)</span> in Euclidean norm between neighbours. Then <span class="math inline">\(M(X) = f(X) + G\)</span>, with <span class="math inline">\(G\)</span> a vector of <span class="math inline">\(d\)</span> independent normal variables of mean <span class="math inline">\(0\)</span> and variance <span class="math inline">\(\sigma^2\)</span>, is <span class="math inline">\(\Delta^2/(2\sigma^2)\)</span>-zero-concentrated.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>In one dimension, let <span class="math inline">\(p\)</span> and <span class="math inline">\(q\)</span> be normal densities with means <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span> and variance <span class="math inline">\(\sigma^2\)</span>. Completing the square,</li>
+</ol>
+<p><span id="eq-auto-02shuffleandcentraldeployments-14"><span class="math display">\[
+\alpha(y-a)^2 + (1-\alpha)(y-b)^2 = \big(y - \alpha a - (1-\alpha)b\big)^2 + \alpha(1-\alpha)(a-b)^2 .
+\tag{18.15}\]</span></span></p>
+<ol start="2" type="1">
+<li>The first term integrates against the normal density to one, so <span class="math inline">\(\int p^\alpha q^{1-\alpha} = \exp\big(\alpha(\alpha-1)(a-b)^2/(2\sigma^2)\big)\)</span>, and <span class="math inline">\(D_\alpha = \alpha(a-b)^2/(2\sigma^2)\)</span>.</li>
+<li>In <span class="math inline">\(d\)</span> dimensions the coordinates are independent, so by <a href="#lem-shuf-renyi-product" class="quarto-xref">Lemma&nbsp;<span>18.5</span></a> the divergences add to <span class="math inline">\(\alpha\|f(X) - f(X')\|_2^2/(2\sigma^2) \le \alpha\Delta^2/(2\sigma^2)\)</span>.</li>
+</ol>
+</div>
+<div id="prp-shuf-zcdp-dp" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 18.4</strong></span> A <span class="math inline">\(\rho\)</span>-zero-concentrated mechanism is <span class="math inline">\((\rho + 2\sqrt{\rho\ln(1/\delta)}, \delta)\)</span>-DP for every <span class="math inline">\(\delta \in (0,1)\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>If <span class="math inline">\(\rho = 0\)</span>, every Rényi divergence is <span class="math inline">\(0\)</span>, so <span class="math inline">\(M(X)\)</span> and <span class="math inline">\(M(X')\)</span> have the same distribution and the claim holds. Otherwise let <span class="math inline">\(y \sim M(X)\)</span>, with density <span class="math inline">\(p\)</span>, and let <span class="math inline">\(L = \ln(p(y)/q(y))\)</span>, where <span class="math inline">\(q\)</span> is the density of <span class="math inline">\(M(X')\)</span>. For <span class="math inline">\(\alpha &gt; 1\)</span>, <span class="math inline">\(\mathbb E[e^{(\alpha-1)L}] = \int p^\alpha q^{1-\alpha} = e^{(\alpha-1)D_\alpha} \le e^{(\alpha-1)\alpha\rho}\)</span>.</li>
+<li>Markov’s inequality gives <span class="math inline">\(\Pr[L &gt; t] \le e^{(\alpha-1)(\alpha\rho - t)}\)</span>.</li>
+<li>Take <span class="math inline">\(t = \rho + 2\sqrt{\rho\ln(1/\delta)}\)</span> and <span class="math inline">\(\alpha = 1 + \sqrt{\ln(1/\delta)/\rho}\)</span>. Writing <span class="math inline">\(\ell = \ln(1/\delta)\)</span>, the exponent is <span class="math inline">\(\sqrt{\ell/\rho}\,\big(\rho + \sqrt{\rho\ell} - \rho - 2\sqrt{\rho\ell}\big) = -\ell\)</span>, so <span class="math inline">\(\Pr[L &gt; t] \le \delta\)</span>.</li>
+<li><a href="#lem-shuf-tail" class="quarto-xref">Lemma&nbsp;<span>18.3</span></a> finishes the proof.</li>
+</ol>
+</div>
+<p>The release’s budget raises a question that recurs in deployments: what is a neighbour? <strong>User-level</strong> privacy hides everything one person did, and <strong>action-level</strong> privacy hides one action, such as one click. User-level privacy is the goal, but a few users act thousands of times, and hiding them would drown every count in noise. The release instead protects every action strongly enough that almost all users get a user-level guarantee too. A user whose actions number at most a high percentile of the activity distribution enjoys a stated user-level guarantee, and heavier users still have the action-level one.</p>
+<div id="exm-shuf-budget" class="theorem example">
+<p><span class="theorem-title"><strong>Example 18.3</strong></span> Suppose each action adds one to a single cell, and the actions of one user fall in different cells. Replacing one action changes two counts by one each, a Euclidean change of <span class="math inline">\(\sqrt 2\)</span>. Replacing all <span class="math inline">\(k\)</span> actions of a user changes at most <span class="math inline">\(2k\)</span> counts, a change of at most <span class="math inline">\(\sqrt{2k}\)</span>. Then by <a href="#prp-shuf-gaussian" class="quarto-xref">Proposition&nbsp;<span>18.3</span></a>, <span class="math inline">\(k\)</span> actions cost <span class="math inline">\(k\)</span> times the action-level <span class="math inline">\(\rho\)</span>. To give users with at most <span class="math inline">\(20\)</span> actions <span class="math inline">\((0.5, 10^{-6})\)</span>-DP, solve <span class="math inline">\(\rho + 2\sqrt{\rho\ln 10^6} = 0.5\)</span> for <span class="math inline">\(\rho = 0.00444\)</span> at the user level. The action level is then <span class="math inline">\(\rho = 0.000222\)</span>, which Gaussian noise of standard deviation <span class="math inline">\(\sigma = \sqrt2/\sqrt{2\rho} = 67.1\)</span> achieves. A single action alone is protected at <span class="math inline">\((0.111, 10^{-6})\)</span>-DP.</p>
+</div>
+<p>Many other deployments exist. The largest is the US Census Bureau’s use of differential privacy for the 2020 census, a system complex enough to need a separate treatment.</p>
+</section>
+</section>
+<section id="sec-shuf-summary" class="level2" data-number="18.7">
+<h2 data-number="18.7" class="anchored" data-anchor-id="sec-shuf-summary"><span class="header-section-number">18.7</span> Summary</h2>
+<div id="tbl-shuf-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-shuf-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;18.1: The chapter’s results.
+</figcaption>
+<div aria-describedby="tbl-shuf-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#def-shuf-model" class="quarto-xref">Definition&nbsp;<span>18.1</span></a></td>
+<td>the adversary sees the messages in a uniformly random order, not who sent which</td>
+</tr>
+<tr class="even">
+<td><a href="#thm-shuf-amplification" class="quarto-xref">Theorem&nbsp;<span>18.1</span></a></td>
+<td>shuffling turns <span class="math inline">\(\varepsilon_0\)</span>-local into <span class="math inline">\(\big(12\varepsilon_0\sqrt{\ln(1/\delta)/n}, \delta\big)\)</span>-DP, for <span class="math inline">\(\varepsilon_0 &lt; \frac12\)</span> and <span class="math inline">\(n \ge 1000\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-shuf-rr-privacy" class="quarto-xref">Theorem&nbsp;<span>18.2</span></a></td>
+<td>randomized response with <span class="math inline">\(q = 16\ln(4/\delta)/(\tau^2(n-1))\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP once shuffled</td>
+</tr>
+<tr class="even">
+<td><a href="#thm-shuf-rr-accuracy" class="quarto-xref">Theorem&nbsp;<span>18.3</span></a></td>
+<td>its count has error <span class="math inline">\(O(\sqrt{\ln(1/\delta)/\beta}/\varepsilon)\)</span>, independent of <span class="math inline">\(n\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#prp-shuf-br-dp" class="quarto-xref">Proposition&nbsp;<span>18.1</span></a></td>
+<td><span class="math inline">\(\varepsilon\)</span>-bounded range implies <span class="math inline">\(\varepsilon\)</span>-DP, which implies <span class="math inline">\(2\varepsilon\)</span>-bounded range</td>
+</tr>
+<tr class="even">
+<td><a href="#prp-shuf-em-br" class="quarto-xref">Proposition&nbsp;<span>18.2</span></a></td>
+<td>the exponential mechanism is <span class="math inline">\(\varepsilon\)</span>-bounded range</td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-shuf-br-composition" class="quarto-xref">Theorem&nbsp;<span>18.4</span></a></td>
+<td><span class="math inline">\(k\)</span> bounded-range steps cost <span class="math inline">\(k\varepsilon^2/8 + \varepsilon\sqrt{k\ln(1/\delta)/2}\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#thm-shuf-gumbel" class="quarto-xref">Theorem&nbsp;<span>18.5</span></a></td>
+<td>Gumbel noise and a maximum sample the exponential mechanism, and the top <span class="math inline">\(k\)</span> is peeling</td>
+</tr>
+<tr class="odd">
+<td><a href="#prp-shuf-gaussian" class="quarto-xref">Proposition&nbsp;<span>18.3</span></a></td>
+<td>Gaussian noise with sensitivity <span class="math inline">\(\Delta\)</span> is <span class="math inline">\(\Delta^2/(2\sigma^2)\)</span>-zero-concentrated</td>
+</tr>
+<tr class="even">
+<td><a href="#prp-shuf-zcdp-dp" class="quarto-xref">Proposition&nbsp;<span>18.4</span></a></td>
+<td><span class="math inline">\(\rho\)</span>-zero-concentrated implies <span class="math inline">\((\rho + 2\sqrt{\rho\ln(1/\delta)}, \delta)\)</span>-DP</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-shuf-notes" class="level2" data-number="18.8">
+<h2 data-number="18.8" class="anchored" data-anchor-id="sec-shuf-notes"><span class="header-section-number">18.8</span> Notes</h2>
+<ul>
+<li>Andrea Bittau, Úlfar Erlingsson, Petros Maniatis, Ilya Mironov, Ananth Raghunathan, David Lie, Mitch Rudominer, Ushasree Kode, Julien Tinnes and Bernhard Seefeld, “Prochlo: Strong Privacy for Analytics in the Crowd”, 2017. The encode, shuffle, analyze architecture and its implementation with hardware enclaves.</li>
+<li>Albert Cheu, Adam Smith, Jonathan Ullman, David Zeber and Maxim Zhilyaev, “Distributed Differential Privacy via Shuffling”, 2019. The shuffle model as defined here, a one-message protocol for sums of bits with error <span class="math inline">\(O(\sqrt{\ln(1/\delta)}/\varepsilon)\)</span>, and a protocol with many one-bit messages for sums of numbers in <span class="math inline">\([0,1]\)</span> with error <span class="math inline">\(O(\ln(n/\delta)/\varepsilon)\)</span>. The constants in <a href="#thm-shuf-rr-privacy" class="quarto-xref">Theorem&nbsp;<span>18.2</span></a> are this chapter’s own.</li>
+<li>Úlfar Erlingsson, Vitaly Feldman, Ilya Mironov, Ananth Raghunathan, Kunal Talwar and Abhradeep Thakurta, “Amplification by Shuffling: From Local to Central Differential Privacy via Anonymity”, 2019. <a href="#thm-shuf-amplification" class="quarto-xref">Theorem&nbsp;<span>18.1</span></a>.</li>
+<li>Vitaly Feldman, Audra McMillan and Kunal Talwar, “Hiding Among the Clones: A Simple and Nearly Optimal Analysis of Privacy Amplification by Shuffling”, 2021. Amplification for <span class="math inline">\(\varepsilon_0\)</span> up to about <span class="math inline">\(\ln n\)</span>, by the clone decomposition.</li>
+<li>Ryan Rogers, Subbu Subramaniam, Sean Peng, David Durfee, Seunghyun Lee, Santosh Kumar Kancha, Shraddha Sahay and Parvez Ahammad, “LinkedIn’s Audience Engagements API: A Privacy Preserving Data Analytics System at Scale”, 2020. The query service, its algorithms for known and unknown domains, and its choice of parameters.</li>
+<li>David Durfee and Ryan Rogers, “Practical Differentially Private Top-<span class="math inline">\(k\)</span> Selection with Pay-what-you-get Composition”, 2019. Bounded range, Gumbel-noise top-<span class="math inline">\(k\)</span> selection and its equivalence with peeling.</li>
+<li>Jinshuo Dong, David Durfee and Ryan Rogers, “Optimal Differential Privacy Composition for Exponential Mechanisms”, 2020. The optimal composition of bounded-range mechanisms, and efficiently computable bounds that improve slightly on <a href="#thm-shuf-br-composition" class="quarto-xref">Theorem&nbsp;<span>18.4</span></a>.</li>
+<li>Emil Julius Gumbel, <em>Statistical Theory of Extreme Values and Some Practical Applications</em>, 1954. The Gumbel distribution and its use for maxima.</li>
+<li>Ryan Rogers, Adrian Rivera Cardoso, Koray Mancuhan, Akash Kaura, Nikhil Gahlawat, Neha Jain, Paul Ko and Parvez Ahammad, “A Members First Approach to Enabling LinkedIn’s Labor Market Insights at Scale”, 2020. The labour market release and its choice of algorithms.</li>
+<li>Ahmet Aktay and coauthors, “Google Covid-19 Community Mobility Reports: Anonymization Process Description”, 2020. How the mobility reports bound contributions and add noise.</li>
+<li>Solomon Messing, Christina DeGregorio, Bennett Hillenbrand, Gary King, Saurav Mahanti, Zagreb Mukerjee, Chaya Nayak, Nate Persily, Bogdan State and Arjun Wilkins, “Facebook Privacy-Protected Full URLs Data Set”, 2020. The URL release, its Gaussian noise and its action-level and user-level budget, set so that the 99th percentile of users by activity gets the user-level guarantee.</li>
+<li>Cynthia Dwork and Guy N. Rothblum, “Concentrated Differential Privacy”, 2016, and Mark Bun and Thomas Steinke, “Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds”, 2016. Concentrated privacy, and its zero-concentrated form with <a href="#prp-shuf-gaussian" class="quarto-xref">Proposition&nbsp;<span>18.3</span></a>, <a href="#prp-shuf-zcdp-dp" class="quarto-xref">Proposition&nbsp;<span>18.4</span></a> and adaptive composition.</li>
+<li>John M. Abowd and coauthors, “The 2020 Census Disclosure Avoidance System TopDown Algorithm”, 2022. The census deployment.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part05-deployments/01-local-dp.html" class="pagination-link" aria-label="Local Differential Privacy">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Local Differential Privacy</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../glossary.html" class="pagination-link" aria-label="Glossary">
+        <span class="nav-page-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

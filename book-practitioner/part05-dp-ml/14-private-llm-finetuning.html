@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>48&nbsp; Fine-tune a language model privately with LoRA – Privacy-Preserving Machine Learning for Practitioners</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part05-dp-ml/05-private-prediction.html" rel="next">
+<link href="../part05-dp-ml/06-public-data.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/14-private-llm-finetuning.html"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Privacy-Preserving Machine Learning for Practitioners</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-prerequisites/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Prerequisites</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/01-distributions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Probability distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/02-concentration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Concentration inequalities</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/03-divergences.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Divergences</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/04-hypothesis-testing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Hypothesis testing</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/05-information-theory.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Information theory</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/06-optimization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Optimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/07-stability-generalization.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Algorithmic stability and generalization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-prerequisites/08-crypto-basics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Cryptography basics</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-attacks/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Threat models and attacks</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/01-threat-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Threat models and privacy games</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/02-membership-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Membership inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/03-attribute-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Attribute inference and model inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/04-property-inference.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Property inference</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/05-memorization-extraction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Memorization and training-data extraction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/06-gradient-inversion.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Gradient inversion</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/07-linkage-reidentification.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Linkage and re-identification</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/08-syntactic-anonymity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Syntactic anonymity and how it breaks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/09-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Reconstruction attacks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-attacks/10-risk-assessment.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Pre-release privacy risk assessment</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-dp-foundations/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/01-definition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">The definition of differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/02-properties.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Post-processing, group privacy and composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/03-laplace-gaussian.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">The Laplace and Gaussian mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/04-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">22</span>&nbsp; <span class="chapter-title">Advanced and optimal composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/05-selection.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">23</span>&nbsp; <span class="chapter-title">Selection: exponential mechanism, report-noisy-max, sparse vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/06-query-release.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">24</span>&nbsp; <span class="chapter-title">Query release and private multiplicative weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/07-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">25</span>&nbsp; <span class="chapter-title">Beyond global sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/08-discrete-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">26</span>&nbsp; <span class="chapter-title">Discrete and floating-point-safe mechanisms</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/09-trust-models.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">27</span>&nbsp; <span class="chapter-title">Local, shuffle and distributed trust models</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/10-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">28</span>&nbsp; <span class="chapter-title">Lower bounds: what privacy costs</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/11-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">29</span>&nbsp; <span class="chapter-title">Private mean estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-dp-foundations/12-release-statistics.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">30</span>&nbsp; <span class="chapter-title">Release statistics with a library</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-privacy-accounting/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy accounting</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/09-choosing-an-accountant.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">31</span>&nbsp; <span class="chapter-title">Report and review an ε claim</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/10-calibrate-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">32</span>&nbsp; <span class="chapter-title">Calibrate and account a DP-SGD run</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/05-subsampling.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">33</span>&nbsp; <span class="chapter-title">Amplification by subsampling</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/01-renyi-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">34</span>&nbsp; <span class="chapter-title">Rényi differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/02-rdp-conversions.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">35</span>&nbsp; <span class="chapter-title">From Rényi DP to (ε, δ) and to tests</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/06-numerical-accounting.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">36</span>&nbsp; <span class="chapter-title">Numerical accounting with privacy loss distributions</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/04-gaussian-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">37</span>&nbsp; <span class="chapter-title">f-DP and Gaussian differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/08-adaptive-composition.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">38</span>&nbsp; <span class="chapter-title">Adaptive composition: filters, odometers and individual accounting</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/03-concentrated-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">39</span>&nbsp; <span class="chapter-title">Concentrated differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-privacy-accounting/07-shuffling-iteration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">40</span>&nbsp; <span class="chapter-title">Amplification by shuffling and by iteration</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-dp-ml/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Differential privacy in machine learning</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/01-dp-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">41</span>&nbsp; <span class="chapter-title">Private empirical risk minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/02-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">42</span>&nbsp; <span class="chapter-title">DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/13-train-dp-sgd.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">43</span>&nbsp; <span class="chapter-title">Train a model with DP-SGD</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/03-hyperparameter-tuning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">44</span>&nbsp; <span class="chapter-title">Hyperparameter tuning and private selection</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/07-user-level.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">45</span>&nbsp; <span class="chapter-title">User-level differential privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/09-choosing-epsilon.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">46</span>&nbsp; <span class="chapter-title">Choosing ε</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/06-public-data.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/14-private-llm-finetuning.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/05-private-prediction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/04-matrix-mechanisms.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">50</span>&nbsp; <span class="chapter-title">DP-FTRL and matrix factorization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/08-disparate-impact.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">51</span>&nbsp; <span class="chapter-title">Disparate impact</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/10-auditing.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">52</span>&nbsp; <span class="chapter-title">Auditing private training</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/11-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">53</span>&nbsp; <span class="chapter-title">Adaptive data analysis</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-dp-ml/12-release-governance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">54</span>&nbsp; <span class="chapter-title">Release and governance</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#why-this-matters" id="toc-why-this-matters" class="nav-link active" data-scroll-target="#why-this-matters"><span class="header-section-number">48.1</span> Why this matters</a></li>
+  <li><a href="#sec-llmwf-unit" id="toc-sec-llmwf-unit" class="nav-link" data-scroll-target="#sec-llmwf-unit"><span class="header-section-number">48.2</span> Fix the privacy unit, n and δ</a></li>
+  <li><a href="#sec-llmwf-canaries" id="toc-sec-llmwf-canaries" class="nav-link" data-scroll-target="#sec-llmwf-canaries"><span class="header-section-number">48.3</span> Plant canaries</a></li>
+  <li><a href="#sec-llmwf-public" id="toc-sec-llmwf-public" class="nav-link" data-scroll-target="#sec-llmwf-public"><span class="header-section-number">48.4</span> Load a public model and tokenizer</a></li>
+  <li><a href="#sec-llmwf-lora" id="toc-sec-llmwf-lora" class="nav-link" data-scroll-target="#sec-llmwf-lora"><span class="header-section-number">48.5</span> Choose what to train</a></li>
+  <li><a href="#sec-llmwf-opacus" id="toc-sec-llmwf-opacus" class="nav-link" data-scroll-target="#sec-llmwf-opacus"><span class="header-section-number">48.6</span> Make the model Opacus-compatible</a></li>
+  <li><a href="#sec-llmwf-train" id="toc-sec-llmwf-train" class="nav-link" data-scroll-target="#sec-llmwf-train"><span class="header-section-number">48.7</span> Calibrate and train</a></li>
+  <li><a href="#sec-llmwf-evaluate" id="toc-sec-llmwf-evaluate" class="nav-link" data-scroll-target="#sec-llmwf-evaluate"><span class="header-section-number">48.8</span> Evaluate</a></li>
+  <li><a href="#sec-llmwf-memorization" id="toc-sec-llmwf-memorization" class="nav-link" data-scroll-target="#sec-llmwf-memorization"><span class="header-section-number">48.9</span> Check memorization</a></li>
+  <li><a href="#sec-llmwf-variants" id="toc-sec-llmwf-variants" class="nav-link" data-scroll-target="#sec-llmwf-variants"><span class="header-section-number">48.10</span> Variants</a></li>
+  <li><a href="#sec-llmwf-report" id="toc-sec-llmwf-report" class="nav-link" data-scroll-target="#sec-llmwf-report"><span class="header-section-number">48.11</span> Report</a></li>
+  <li><a href="#checklist" id="toc-checklist" class="nav-link" data-scroll-target="#checklist"><span class="header-section-number">48.12</span> Checklist</a></li>
+  <li><a href="#further-reading" id="toc-further-reading" class="nav-link" data-scroll-target="#further-reading"><span class="header-section-number">48.13</span> Further reading</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part05-dp-ml/00-introduction.html">Differential privacy in machine learning</a></li><li class="breadcrumb-item"><a href="../part05-dp-ml/14-private-llm-finetuning.html"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">48</span>&nbsp; <span class="chapter-title">Fine-tune a language model privately with LoRA</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="why-this-matters" class="level2" data-number="48.1">
+<h2 data-number="48.1" class="anchored" data-anchor-id="why-this-matters"><span class="header-section-number">48.1</span> Why this matters</h2>
+<p>You have a pretrained language model and private text, such as support tickets or clinical notes. You want the model to learn from that text without being able to repeat it, yet language models do repeat what they were trained on. A model fine-tuned without privacy can write out a phone number or a password that appeared often enough in its training text (<a href="../part02-attacks/05-memorization-extraction.html">Memorization and training-data extraction</a>). The fix is to fine-tune with the differential privacy (DP) version of stochastic gradient descent (SGD), called DP-SGD. It costs least when it trains only a small adapter on top of the frozen model, which is often as accurate as training every weight (<a href="../part05-dp-ml/06-public-data.html">Public data and private fine-tuning</a>). Here the adapter is low-rank adaptation (LoRA), from Hugging Face’s <code>peft</code> library, and Opacus, the PyTorch library for DP-SGD, does the private training.</p>
+<p>This chapter does the whole job on a model and a text small enough for a CPU. The model is Pythia-14m, a public language model of 14 million parameters from EleutherAI, and the private text is Tiny Shakespeare, a million characters of Shakespeare’s plays. The script fine-tunes the model twice from the same starting point. The first run has no privacy. The second has a privacy loss <span class="math inline">\(\varepsilon\)</span> of 8 for each sequence of training text, which bounds what the model can reveal about any one sequence. Before training, the script also plants made-up secrets, called canaries, in the text, so that you can see what each model memorized. The script <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/part05-dp-ml/practitioner_lora.py">practitioner_lora.py</a> runs every step in a few minutes without a GPU.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/part05-dp-ml/practitioner_lora.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The defaults give the numbers below. The option <code>--epsilon</code> changes the private run’s target and <code>--rank</code> the adapters’ rank, and <code>--save-adapter FOLDER</code> saves the private adapter (<a href="#sec-llmwf-report" class="quarto-xref"><span>Section 48.11</span></a>).</p>
+</section>
+<section id="sec-llmwf-unit" class="level2" data-number="48.2">
+<h2 data-number="48.2" class="anchored" data-anchor-id="sec-llmwf-unit"><span class="header-section-number">48.2</span> Fix the privacy unit, n and δ</h2>
+<p>The guarantee protects one unit, so decide first what the unit is. A language model trains on fixed-length sequences of tokens, the word pieces its tokenizer cuts text into. The script cuts the text into sequences of 32 tokens, about one or two lines of verse, and makes each sequence the unit. It keeps the first 1,024 sequences as the private training set and the last 128 as a held-out set, and leaves the rest unused so that the run stays short.</p>
+<pre class="text"><code>sequences of 32 tokens: 10,632  training n=1,024  held out 128
+delta=1e-04 (privacy unit: one training sequence)</code></pre>
+<p>The slack <span class="math inline">\(\delta\)</span> is the small additive term the guarantee allows beside <span class="math inline">\(\varepsilon\)</span>. For a training set of <span class="math inline">\(n\)</span> units, the book’s default is <span class="math inline">\(\delta \le 1/n^{1.1}\)</span>, rounded down to a power of ten (<a href="../part05-dp-ml/09-choosing-epsilon.html">Choosing ε</a>). For 1,024 sequences that gives <span class="math inline">\(10^{-4}\)</span>.</p>
+<p>A sequence is the right unit for this demonstration, but rarely in production. One person’s document spans many sequences, and one user writes many documents, so a guarantee per sequence protects a person much less than it seems. In production, make the unit a document or a user, and bound how many sequences each one contributes (<a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a>). Then <span class="math inline">\(n\)</span> counts users, and <span class="math inline">\(\delta\)</span> is set from that count.</p>
+</section>
+<section id="sec-llmwf-canaries" class="level2" data-number="48.3">
+<h2 data-number="48.3" class="anchored" data-anchor-id="sec-llmwf-canaries"><span class="header-section-number">48.3</span> Plant canaries</h2>
+<p>To check memorization later, you need secrets whose presence you control. The script writes <strong>canaries</strong> into the training text. Each one is a sentence such as “the pin of Alice is 8 6 5 2 3”, whose last five digits are the secret. There are four groups of three canaries. The first group is inserted once each, and the others 4, 16 and 64 times each. Three more, the controls, are drawn the same way but never inserted, so they show what a secret the model has never seen scores in the audit of <a href="#sec-llmwf-memorization" class="quarto-xref"><span>Section 48.9</span></a>.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-excerpt="lora-canary-insert"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> insert_canaries(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    train: torch.Tensor, canaries: <span class="bu">list</span>[Canary], tokenizer: PreTrainedTokenizerBase, rng: np.random.Generator</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>) <span class="op">-&gt;</span> torch.Tensor:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Write each copy of each canary over the start of a different training sequence."""</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    train <span class="op">=</span> train.clone()</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> <span class="bu">sum</span>(c.copies <span class="cf">for</span> c <span class="kw">in</span> canaries)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> <span class="bu">iter</span>(rng.choice(<span class="bu">len</span>(train), size<span class="op">=</span>total, replace<span class="op">=</span><span class="va">False</span>).tolist())</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> canary <span class="kw">in</span> canaries:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        tokens <span class="op">=</span> torch.tensor(tokenizer(canary.text)[<span class="st">"input_ids"</span>])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(canary.copies):</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            train[<span class="bu">next</span>(rows), : <span class="bu">len</span>(tokens)] <span class="op">=</span> tokens</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> train</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Each copy overwrites the start of a different training sequence, so the 255 copies take up a quarter of the training set. That is far denser than secrets in real data, and deliberately so, because it lets a model this small memorize within a run short enough for a CPU. The audit then has a positive control, a model that is known to leak.</p>
+<pre class="text"><code>canary sequences: 255 (3 canaries each at (1, 4, 16, 64) copies)
+tokens per secret: [5]
+candidates: 2,000  exposure cap 10.97 bits  (full space 16.61)</code></pre>
+<p>The digits are separated by spaces, so that every possible secret is exactly five tokens long, and the second line, the token counts found over 1,000 random secrets, confirms it. The third line, the most that the audit’s score can show, belongs to <a href="#sec-llmwf-memorization" class="quarto-xref"><span>Section 48.9</span></a>.</p>
+</section>
+<section id="sec-llmwf-public" class="level2" data-number="48.4">
+<h2 data-number="48.4" class="anchored" data-anchor-id="sec-llmwf-public"><span class="header-section-number">48.4</span> Load a public model and tokenizer</h2>
+<p>Everything that is not trained privately must come from outside the private data. That includes the pretrained weights, and also the tokenizer, whose vocabulary would leak rare words if it were built from the private text. So both come from the same public checkpoint, Pythia-14m, pinned to one revision. The script loads the model in float32, because Hugging Face’s <code>transformers</code> library loads some checkpoints in float16, which is far slower on a CPU.</p>
+<p>The guarantee then covers the private text given the pretrained model, and nothing about the model’s own training data. Here that caveat is real. Pythia was pretrained on the Pile, which includes books from Project Gutenberg, so Shakespeare’s plays are very likely in it already. That is harmless here, but with real data, check for overlap between it and the public model’s training data (<a href="../part05-dp-ml/06-public-data.html#sec-pub-caveats">Public data and private fine-tuning</a>).</p>
+</section>
+<section id="sec-llmwf-lora" class="level2" data-number="48.5">
+<h2 data-number="48.5" class="anchored" data-anchor-id="sec-llmwf-lora"><span class="header-section-number">48.5</span> Choose what to train</h2>
+<p>DP-SGD adds noise to every weight it trains. So the noise on the averaged gradient grows with the square root of the number of trainable weights, while the clipped signal does not (<a href="../part05-dp-ml/06-public-data.html#sec-pub-dimension">Public data and private fine-tuning</a>). That makes the choice of trainable weights one of the two main levers on accuracy, with the step size. LoRA freezes each pretrained matrix and learns a correction to it, the product of two thin factors whose width is the rank.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="lora-config"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>attention_and_mlp <span class="op">=</span> [<span class="st">"query_key_value"</span>, <span class="st">"dense"</span>, <span class="st">"dense_h_to_4h"</span>, <span class="st">"dense_4h_to_h"</span>]  <span class="co"># every linear layer</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>config <span class="op">=</span> LoraConfig(r<span class="op">=</span>rank, lora_alpha<span class="op">=</span><span class="dv">2</span> <span class="op">*</span> rank, target_modules<span class="op">=</span>attention_and_mlp, lora_dropout<span class="op">=</span><span class="fl">0.0</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>lora_model <span class="op">=</span> get_peft_model(model, config)  <span class="co"># freezes the pretrained weights</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>trainable_count <span class="op">=</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> lora_model.parameters() <span class="cf">if</span> p.requires_grad)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>total_count <span class="op">=</span> <span class="bu">sum</span>(p.numel() <span class="cf">for</span> p <span class="kw">in</span> lora_model.parameters())</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"trainable parameters: LoRA </span><span class="sc">{</span>trainable_count<span class="sc">:,}</span><span class="ss">  full fine-tuning </span><span class="sc">{</span>total_count <span class="op">-</span> trainable_count<span class="sc">:,}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>full model parameters: 14,067,712
+trainable parameters: LoRA 98,304  full fine-tuning 14,067,712</code></pre>
+<p>The script prints the model’s size first, and then the excerpt’s line. By default the adapters have rank 8 and sit on every linear layer, in attention and in the feed-forward blocks. They train 98,304 weights, while the frozen weights, which full fine-tuning would train, number about 14 million. <code>lora_alpha</code> scales the adapters’ correction, and the script sets it to the usual twice the rank. Dropout is off.</p>
+<p>Where the adapters go matters too. Adapters on the attention layers alone left this small model too little room to learn, or to memorize. For a real task, choose the rank and the layers on public data, since a choice made by looking at private runs costs privacy (<a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a>).</p>
+</section>
+<section id="sec-llmwf-opacus" class="level2" data-number="48.6">
+<h2 data-number="48.6" class="anchored" data-anchor-id="sec-llmwf-opacus"><span class="header-section-number">48.6</span> Make the model Opacus-compatible</h2>
+<p>Opacus needs one gradient per sequence, and some layers make that impossible. Batch normalization is the usual culprit, because it mixes the examples of a batch. Opacus’s <code>ModuleValidator.validate</code> lists such layers before you train, and the script prints how many it found.</p>
+<pre class="text"><code>validator errors: 0</code></pre>
+<p>Pythia has none, and only the adapters train in any case. They are ordinary linear layers, which Opacus’s default hooks handle, so the script passes <code>grad_sample_mode="hooks"</code>. Opacus computes per-sequence gradients only for the weights that require gradients, so the 14 million frozen weights add no cost. For a trainable layer with no hook, Opacus falls back by itself to PyTorch’s slower functorch. Call <code>model.train()</code> before wrapping a model you have just evaluated, since Opacus rejects one in evaluation mode.</p>
+<p>One step comes after training. The hooks stay attached to the model when the training loop ends, and they slow down everything the model does next. So the script calls <code>remove_hooks()</code> on the private model before it evaluates it.</p>
+</section>
+<section id="sec-llmwf-train" class="level2" data-number="48.7">
+<h2 data-number="48.7" class="anchored" data-anchor-id="sec-llmwf-train"><span class="header-section-number">48.7</span> Calibrate and train</h2>
+<p>Fix the target <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, the sampling rate and the number of epochs, and let the accountant find the noise. The script asks for <span class="math inline">\(\varepsilon = 8\)</span> over 3 epochs, with an expected batch of 32 sequences. The sampling rate <span class="math inline">\(q\)</span> is the share of the data in an average batch, here <span class="math inline">\(32/1{,}024\)</span>, so the 3 epochs take 96 steps. The accountant is the privacy loss random variable (PRV) accountant, which computes <span class="math inline">\(\varepsilon\)</span> numerically and almost exactly (<a href="../part04-privacy-accounting/09-choosing-an-accountant.html">Report and review an ε claim</a>).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="lora-private"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>privacy_engine <span class="op">=</span> PrivacyEngine(accountant<span class="op">=</span><span class="st">"prv"</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>private_model, optimizer, loader <span class="op">=</span> privacy_engine.make_private_with_epsilon(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    module<span class="op">=</span>model,</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    optimizer<span class="op">=</span>optimizer,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    data_loader<span class="op">=</span>loader,  <span class="co"># replaced by Poisson sampling with rate BATCH / n</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    target_epsilon<span class="op">=</span>epsilon,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    target_delta<span class="op">=</span>delta,</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    epochs<span class="op">=</span>EPOCHS,</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    max_grad_norm<span class="op">=</span>MAX_GRAD_NORM,</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    grad_sample_mode<span class="op">=</span><span class="st">"hooks"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"noise multiplier: </span><span class="sc">{</span>optimizer<span class="sc">.</span>noise_multiplier<span class="sc">:.3f}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The training loop is an ordinary one. Opacus’s loader draws Poisson batches, in which each sequence joins each batch independently with probability <span class="math inline">\(q\)</span>, so a batch holds a random number of sequences.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="lora-step"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (batch,) <span class="kw">in</span> loader:  <span class="co"># each batch holds a random number of sequences</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> private_model(input_ids<span class="op">=</span>batch, labels<span class="op">=</span>batch).loss</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    loss.backward()  <span class="co"># Opacus's hooks keep one gradient per sequence</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    optimizer.step()  <span class="co"># clips each one to MAX_GRAD_NORM, sums, adds noise</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    steps <span class="op">+=</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<pre class="text"><code>noise multiplier: 0.553
+sample rate q=0.03125  steps=96  noise multiplier=0.553
+epsilon (Opacus PRV)=7.99  epsilon (dp_accounting PLD)=7.98  at delta=1e-04</code></pre>
+<p>The noise multiplier is the noise’s standard deviation in units of the clipping norm, <code>MAX_GRAD_NORM</code>, which the script sets to 1. The last line cross-checks the claimed <span class="math inline">\(\varepsilon\)</span> of 8. Google’s <code>dp_accounting</code> recomputes <span class="math inline">\(\varepsilon\)</span> from the noise multiplier, the sampling rate and the steps with its privacy loss distribution (PLD) accountant, and the two values agree to within rounding.</p>
+<p>Both runs use AdamW at a learning rate of <span class="math inline">\(10^{-3}\)</span>, and the private run differs only by clipping, noise and Poisson sampling. That learning rate, the rank and the epochs were chosen in a few non-private trial runs on the same text. A real run must choose them on public text of the same kind, such as other public-domain plays here, or pay for the trials in <span class="math inline">\(\varepsilon\)</span> as <a href="../part05-dp-ml/03-hyperparameter-tuning.html">Hyperparameter tuning</a> shows.</p>
+<p>Two more settings change for a real run. The batch of 32 is far smaller than DP-SGD likes, so with more data use batches in the thousands. Opacus’s <code>BatchMemoryManager</code> splits them into physical batches that fit in memory (<a href="../part05-dp-ml/13-train-dp-sgd.html">Train a model with DP-SGD</a>). And a model you release needs <code>secure_mode=True</code> in <code>PrivacyEngine</code>, which draws the noise from a cryptographically secure generator. That generator cannot be seeded, so the script leaves it off to make its numbers repeat.</p>
+</section>
+<section id="sec-llmwf-evaluate" class="level2" data-number="48.8">
+<h2 data-number="48.8" class="anchored" data-anchor-id="sec-llmwf-evaluate"><span class="header-section-number">48.8</span> Evaluate</h2>
+<p>A language model is judged by how well it predicts held-out text. The script measures the mean cross-entropy per token on the 128 held-out sequences, and its exponential, the <strong>perplexity</strong>. A perplexity of 159.3, the non-private model’s, means it is on average as unsure as if it chose among about 159 equally likely tokens, so lower is better.</p>
+<pre class="text"><code>held-out loss pretrained: 5.306 nats/token  perplexity 201.6
+held-out loss LoRA non-private: 5.071 nats/token  perplexity 159.3
+held-out loss LoRA DP eps=8: 5.044 nats/token  perplexity 155.1</code></pre>
+<p>Both fine-tuned models improve on the pretrained one, and the private model is no worse than the non-private one. From one seed, its slightly lower perplexity means only that DP costs nothing measurable here. Both gains are modest, because a quarter of the training sequences begin with canaries rather than Shakespeare. When the private task is classification, such as labelling tickets, measure held-out accuracy against the same two baselines instead.</p>
+<p>Do not expect privacy to be this cheap on every task, because this run is short, trains few weights, and uses text that is very likely in the pretraining data already. With a harder task or a smaller <span class="math inline">\(\varepsilon\)</span>, compare the private model with both baselines at several budgets, as <a href="../part05-dp-ml/13-train-dp-sgd.html#sec-trainwf-utility">Train a model with DP-SGD</a> does.</p>
+</section>
+<section id="sec-llmwf-memorization" class="level2" data-number="48.9">
+<h2 data-number="48.9" class="anchored" data-anchor-id="sec-llmwf-memorization"><span class="header-section-number">48.9</span> Check memorization</h2>
+<p>The canaries now answer the question that perplexity cannot, which is whether the model will repeat a secret. The script measures each canary in two ways. The first is extraction. It gives the model the prefix “the pin of Alice is”, lets it write five tokens, each time the likeliest next one, and checks whether they are the secret.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-excerpt="lora-extract"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.no_grad</span>()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> greedy_completion(model: PeftModel, tokenizer: PreTrainedTokenizerBase, prefix: <span class="bu">str</span>) <span class="op">-&gt;</span> <span class="bu">str</span>:</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The five tokens the model writes after the prefix when it always picks the likeliest one."""</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    ids <span class="op">=</span> tokenizer(prefix, return_tensors<span class="op">=</span><span class="st">"pt"</span>)[<span class="st">"input_ids"</span>]</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        next_token <span class="op">=</span> model(input_ids<span class="op">=</span>ids).logits[:, <span class="op">-</span><span class="dv">1</span>].argmax(dim<span class="op">=-</span><span class="dv">1</span>, keepdim<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        ids <span class="op">=</span> torch.cat([ids, next_token], dim<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> tokenizer.batch_decode(ids[:, <span class="op">-</span><span class="dv">5</span>:])[<span class="dv">0</span>].strip()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The second is the <strong>exposure</strong> of <a href="../part02-attacks/05-memorization-extraction.html#sec-memo-exposure">Memorization and training-data extraction</a>. It ranks the canary’s secret among random secrets of the same format by how likely the model finds each, and turns the rank into bits. Each bit halves the number of guesses an attacker needs. The script scores each secret by the summed log-probability of its five digits.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13" data-excerpt="lora-exposure"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="at">@torch.no_grad</span>()</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> secret_scores(model: PeftModel, tokenizer: PreTrainedTokenizerBase, prefix: <span class="bu">str</span>, secrets: <span class="bu">list</span>[<span class="bu">str</span>]) <span class="op">-&gt;</span> Scores:</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Summed log-probability of each secret's five digit tokens after the prefix."""</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    prefix_ids <span class="op">=</span> tokenizer(prefix)[<span class="st">"input_ids"</span>]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    rows <span class="op">=</span> [prefix_ids <span class="op">+</span> tokenizer(<span class="st">" "</span> <span class="op">+</span> s)[<span class="st">"input_ids"</span>] <span class="cf">for</span> s <span class="kw">in</span> secrets]</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    ids <span class="op">=</span> torch.tensor(rows)  <span class="co"># every secret is five tokens, so the rows have equal length</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    logits <span class="op">=</span> model(input_ids<span class="op">=</span>ids[:, :<span class="op">-</span><span class="dv">1</span>], logits_to_keep<span class="op">=</span><span class="dv">5</span>).logits  <span class="co"># the predictions of the five digits</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    logprobs <span class="op">=</span> logits.log_softmax(dim<span class="op">=-</span><span class="dv">1</span>).gather(<span class="op">-</span><span class="dv">1</span>, ids[:, <span class="op">-</span><span class="dv">5</span>:, <span class="va">None</span>])</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> logprobs.<span class="bu">sum</span>(dim<span class="op">=</span>(<span class="dv">1</span>, <span class="dv">2</span>)).double().numpy()</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> exposure(canary_score: <span class="bu">float</span>, candidate_scores: Scores) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""log2 of 1 / (the share of candidates the model finds at least as likely), canary included."""</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    at_least <span class="op">=</span> <span class="dv">1</span> <span class="op">+</span> np.<span class="bu">sum</span>(candidate_scores <span class="op">&gt;=</span> canary_score)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.log2((<span class="bu">len</span>(candidate_scores) <span class="op">+</span> <span class="dv">1</span>) <span class="op">/</span> at_least)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The script ranks each secret among 2,000 random candidates, so a canary that beats them all reaches a cap of 10.97 bits. A secret the model has never seen averages about 1.44 bits (<span class="math inline">\(\log_2 e\)</span>), because its rank among the candidates is then random. Each line below gives a group’s mean exposure, the same past the cap (explained below), and how many of its three secrets greedy decoding wrote out.</p>
+<pre class="text"><code>non-private 1 copies: mean exposure 2.0 bits  extrapolated 2.0  extracted 0/3
+non-private 4 copies: mean exposure 5.9 bits  extrapolated 5.7  extracted 0/3
+non-private 16 copies: mean exposure 10.0 bits  extrapolated 13.0  extracted 0/3
+non-private 64 copies: mean exposure 11.0 bits  extrapolated 16.3  extracted 3/3
+non-private controls: mean exposure 1.4 bits  extrapolated 1.5  extracted 0/3
+DP 1 copies: mean exposure 0.9 bits  extrapolated 0.9  extracted 0/3
+DP 4 copies: mean exposure 0.6 bits  extrapolated 0.6  extracted 0/3
+DP 16 copies: mean exposure 4.2 bits  extrapolated 4.3  extracted 0/3
+DP 64 copies: mean exposure 4.0 bits  extrapolated 3.9  extracted 0/3
+DP controls: mean exposure 2.2 bits  extrapolated 2.2  extracted 0/3</code></pre>
+<p>The non-private model is the positive control, and it leaks. Exposure rises with the number of copies, from 2.0 bits for one copy to the cap for 64. The model writes out all three 64-copy secrets from their prefixes. The extrapolated column sees past the cap. It fits a skew-normal distribution, a normal with one heavier tail, to the candidates’ scores, and reads off how far into that tail each secret lies. It puts the 64-copy secrets near the 16.61 bits of the whole space of secrets. The 4-copy canaries are the instructive case. Two of the three reach 6.9 and 8.2 bits, yet none is extracted, so exposure detects memorization that extraction alone would miss.</p>
+<p>Nothing can be extracted from the private model, and its canaries with 1 or 4 copies score no higher than its controls. Those controls average 2.2 bits rather than 1.44, but a mean over three secrets scatters widely. Still, DP limits the effect without erasing it, since the canaries with 16 and 64 copies still average about 4 bits. The guarantee allows that, because <span class="math inline">\(\varepsilon = 8\)</span> protects one sequence, while a canary with many copies is many sequences. Group privacy bounds a group of <span class="math inline">\(k\)</span> units at about <span class="math inline">\(k\)</span> times <span class="math inline">\(\varepsilon\)</span>. So a canary with 16 copies gets a level of <span class="math inline">\(16 \times 8\)</span>, far too large to promise anything (<a href="../part05-dp-ml/07-user-level.html">User-level differential privacy</a>). A secret that a user repeats across many documents is the same case, which is one more reason to make the unit the user.</p>
+<p>Two cautions apply. Because the canaries are so dense, a real non-private model may leak less than this one, and a real audit should plant fewer copies. And three canaries per group is a small sample. For a fuller assessment before release, run the attacks of <a href="../part02-attacks/10-risk-assessment.html">Pre-release privacy risk assessment</a>. For a statistical lower bound on <span class="math inline">\(\varepsilon\)</span>, use the one-run audit of <a href="../part05-dp-ml/10-auditing.html">Auditing private training</a>.</p>
+</section>
+<section id="sec-llmwf-variants" class="level2" data-number="48.10">
+<h2 data-number="48.10" class="anchored" data-anchor-id="sec-llmwf-variants"><span class="header-section-number">48.10</span> Variants</h2>
+<p>Three variants matter for real models: ghost clipping, LoRA on GPT-2, and packages that wrap the whole loop. The block below shows them with pinned versions, and it was not run.</p>
+<pre class="text"><code># opacus==1.6.0: ghost clipping, when per-sequence gradients do not fit in memory
+model, optimizer, criterion, loader = privacy_engine.make_private_with_epsilon(
+    module=model, optimizer=optimizer, data_loader=loader, criterion=torch.nn.CrossEntropyLoss(),
+    target_epsilon=8.0, target_delta=1e-4, epochs=3, max_grad_norm=1.0, grad_sample_mode="ghost",
+)
+logits = model(input_ids=batch).logits[:, :-1]                 # predict each next token
+loss = criterion(logits.flatten(0, 1), batch[:, 1:].flatten(), shape=logits.shape)
+loss.backward()                                                # norms first, then the clipped sum
+
+# peft==0.21.2: GPT-2 stores its attention as Conv1D, with the weight transposed
+LoraConfig(r=8, lora_alpha=16, target_modules=["c_attn"], fan_in_fan_out=True)
+
+# dp-transformers==1.0.0 (Microsoft): Opacus inside the Hugging Face Trainer
+# private-transformers (Li et al.): install from its GitHub repository, pinned to a commit</code></pre>
+<p>Ghost clipping gets each sequence’s gradient norm without storing the gradient, so memory no longer holds one gradient per sequence (<a href="../part05-dp-ml/02-dp-sgd.html#sec-dpsgd-ghost">DP-SGD</a>). dp-transformers and private-transformers wrap the same steps for the Hugging Face trainer.</p>
+</section>
+<section id="sec-llmwf-report" class="level2" data-number="48.11">
+<h2 data-number="48.11" class="anchored" data-anchor-id="sec-llmwf-report"><span class="header-section-number">48.11</span> Report</h2>
+<p>The release statement names the unit, here one sequence of 32 tokens, along with <span class="math inline">\(n\)</span> and <span class="math inline">\(\delta\)</span>. It names the accountant and the three inputs it needs, which are the noise multiplier, the sampling rate and the number of steps. It says that the guarantee covers the private text given the pretrained model, and names that model and its revision. It also says how the hyperparameters were chosen, here by non-private trials on the private text, which a real release could not claim for free. Attach the canary audit as evidence, with its caveats. <a href="../part05-dp-ml/12-release-governance.html">Release and governance</a> assembles all of this into a record and a statement.</p>
+<p>What ships is the adapter. With <code>--save-adapter</code>, the script saves it after <code>remove_hooks()</code> and loads it back onto the same pinned checkpoint.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16" data-excerpt="lora-save"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>private.save_pretrained(path)  <span class="co"># only the adapter weights and config, after Opacus's hooks are removed</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>base_model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(folder, dtype<span class="op">=</span>torch.float32)  <span class="co"># the same pinned checkpoint</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>reloaded <span class="op">=</span> PeftModel.from_pretrained(base_model, path)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The folder holds only the adapter, so the statement names the base checkpoint and revision it fits. The guarantee covers the adapter and anything computed from it.</p>
+</section>
+<section id="checklist" class="level2" data-number="48.12">
+<h2 data-number="48.12" class="anchored" data-anchor-id="checklist"><span class="header-section-number">48.12</span> Checklist</h2>
+<div id="tbl-llmwf-checklist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-llmwf-checklist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;48.1: The steps of fine-tuning a language model privately, their defaults and their checks.
+</figcaption>
+<div aria-describedby="tbl-llmwf-checklist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Step</th>
+<th>Default</th>
+<th>Check</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Unit, <span class="math inline">\(n\)</span>, <span class="math inline">\(\delta\)</span></td>
+<td>Document or user in production; <span class="math inline">\(\delta \le 1/n^{1.1}\)</span> rounded down</td>
+<td><span class="math inline">\(n\)</span> counts units, not tokens or lines</td>
+</tr>
+<tr class="even">
+<td>Canaries</td>
+<td>A few per group, inserted 1 to many times, plus controls</td>
+<td>Controls near 1.44 bits, allowing for the scatter of a few</td>
+</tr>
+<tr class="odd">
+<td>Public model and tokenizer</td>
+<td>One public checkpoint, pinned revision, float32</td>
+<td>Nothing fitted on private text; overlap checked</td>
+</tr>
+<tr class="even">
+<td>What to train</td>
+<td>LoRA, rank 8, on every linear layer</td>
+<td>Trainable count printed; chosen on public data</td>
+</tr>
+<tr class="odd">
+<td>Opacus</td>
+<td>Validator; hooks; <code>remove_hooks()</code> after training</td>
+<td>No validator errors</td>
+</tr>
+<tr class="even">
+<td>Calibrate and train</td>
+<td>PRV accountant; Poisson sampling; large batches</td>
+<td>PLD agrees with PRV</td>
+</tr>
+<tr class="odd">
+<td>Evaluate</td>
+<td>Held-out perplexity against the pretrained and non-private models</td>
+<td>Private model beats the pretrained one</td>
+</tr>
+<tr class="even">
+<td>Memorization</td>
+<td>Exposure and greedy extraction, non-private and private</td>
+<td>Nothing extracted; one-copy canaries no higher than the controls</td>
+</tr>
+<tr class="odd">
+<td>Report and save</td>
+<td>Unit, <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, accountant, public model, tuning; adapter saved after <code>remove_hooks()</code></td>
+<td>Statement names what is not covered and the base revision</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="further-reading" class="level2" data-number="48.13">
+<h2 data-number="48.13" class="anchored" data-anchor-id="further-reading"><span class="header-section-number">48.13</span> Further reading</h2>
+<ul>
+<li>Yu et al., “Differentially Private Fine-tuning of Language Models” (ICLR 2022): LoRA and other adapters with DP-SGD, and their accuracy.</li>
+<li>Li, Tramèr, Liang &amp; Hashimoto, “Large Language Models Can Be Strong Differentially Private Learners” (ICLR 2022): full fine-tuning with ghost clipping, and the hyperparameters that make it work.</li>
+<li>Carlini et al., “The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks” (USENIX Security 2019): canaries and exposure.</li>
+</ul>
+<p><strong>Derivations.</strong> This workflow draws on the full edition’s chapters on <a href="../../book-full/part05-dp-ml/06-public-data.html">public data and private fine-tuning</a>, <a href="../../book-full/part05-dp-ml/02-dp-sgd.html">DP-SGD</a> and <a href="../../book-full/part02-attacks/05-memorization-extraction.html">memorization and training-data extraction</a>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part05-dp-ml/06-public-data.html" class="pagination-link" aria-label="Public data and private fine-tuning">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">47</span>&nbsp; <span class="chapter-title">Public data and private fine-tuning</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part05-dp-ml/05-private-prediction.html" class="pagination-link" aria-label="Private prediction: PATE and in-context learning">
+        <span class="nav-page-text"><span class="chapter-number">49</span>&nbsp; <span class="chapter-title">Private prediction: PATE and in-context learning</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

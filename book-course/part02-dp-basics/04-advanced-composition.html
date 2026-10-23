@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>6&nbsp; Advanced Composition – A Course in Differential Privacy</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../part02-dp-basics/05-exponential-mechanism.html" rel="next">
+<link href="../part02-dp-basics/03-approximate-dp.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-78f503ea39f784e8964cd205807fbe37.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-dp-basics/00-introduction.html">The Basics of Differential Privacy</a></li><li class="breadcrumb-item"><a href="../part02-dp-basics/04-advanced-composition.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">A Course in Differential Privacy</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part01-privacy-failures/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Privacy Failures</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/01-attempts.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Attempts at Data Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part01-privacy-failures/02-reconstruction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Reconstruction Attacks</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part02-dp-basics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">The Basics of Differential Privacy</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/01-randomized-response.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">Randomized Response and the Definition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/02-laplace-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">The Laplace Mechanism</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/03-approximate-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/04-advanced-composition.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part02-dp-basics/05-exponential-mechanism.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Exponential Mechanism</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part03-query-release/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Query Release and Its Limits</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/01-multiplicative-weights.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Private Multiplicative Weights</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/02-sparse-vector.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">9</span>&nbsp; <span class="chapter-title">Sparse Vector</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/03-beyond-global-sensitivity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">10</span>&nbsp; <span class="chapter-title">Beyond Global Sensitivity</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part03-query-release/04-packing-lower-bounds.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Packing Lower Bounds</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part04-learning-statistics/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Private Learning and Statistics</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/01-privacy-violations.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">What Differential Privacy Protects</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/02-private-erm.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Private Empirical Risk Minimization</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/03-private-deep-learning.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Private Deep Learning</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/04-mean-estimation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Private Mean Estimation</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part04-learning-statistics/05-adaptive-data-analysis.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Adaptive Data Analysis</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../part05-deployments/00-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deployments</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/01-local-dp.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Local Differential Privacy</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../part05-deployments/02-shuffle-and-central-deployments.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">The Shuffle Model and Central Deployments</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Appendices</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../glossary.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">A</span>&nbsp; <span class="chapter-title">Glossary</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../term-index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">B</span>&nbsp; <span class="chapter-title">Index</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-ac-theorem" id="toc-sec-ac-theorem" class="nav-link active" data-scroll-target="#sec-ac-theorem"><span class="header-section-number">6.1</span> The theorem</a></li>
+  <li><a href="#sec-ac-reduction" id="toc-sec-ac-reduction" class="nav-link" data-scroll-target="#sec-ac-reduction"><span class="header-section-number">6.2</span> Reduction to four outcomes</a></li>
+  <li><a href="#sec-ac-binary" id="toc-sec-ac-binary" class="nav-link" data-scroll-target="#sec-ac-binary"><span class="header-section-number">6.3</span> Composing the four-outcome pair</a></li>
+  <li><a href="#sec-ac-summary" id="toc-sec-ac-summary" class="nav-link" data-scroll-target="#sec-ac-summary"><span class="header-section-number">6.4</span> Summary</a></li>
+  <li><a href="#sec-ac-notes" id="toc-sec-ac-notes" class="nav-link" data-scroll-target="#sec-ac-notes"><span class="header-section-number">6.5</span> Notes</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../part02-dp-basics/00-introduction.html">The Basics of Differential Privacy</a></li><li class="breadcrumb-item"><a href="../part02-dp-basics/04-advanced-composition.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Advanced Composition</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>Running <span class="math inline">\(k\)</span> private analyses on the same data costs privacy, and basic composition says the cost adds up: <span class="math inline">\(k\)</span> mechanisms that are each <span class="math inline">\((\varepsilon,\delta)\)</span>-differentially private are together <span class="math inline">\((k\varepsilon, k\delta)\)</span>-differentially private. This chapter shows that the privacy parameter grows much more slowly, about as <span class="math inline">\(\varepsilon\sqrt{k}\)</span>, if you accept a small extra <span class="math inline">\(\delta'\)</span>. The proof has two steps. The first reduces any pair of private output distributions to one simple pair with four outcomes. The second analyses <span class="math inline">\(k\)</span> copies of that pair with Hoeffding’s inequality.</p>
+<section id="sec-ac-theorem" class="level2" data-number="6.1">
+<h2 data-number="6.1" class="anchored" data-anchor-id="sec-ac-theorem"><span class="header-section-number">6.1</span> The theorem</h2>
+<p>Write <span class="math inline">\(X \sim X'\)</span> for neighbouring datasets, which differ in one entry. The chapter on <a href="../part02-dp-basics/03-approximate-dp.html">approximate differential privacy</a> relaxed the definition of differential privacy (DP) by an additive term. A mechanism <span class="math inline">\(M\)</span> is <strong><span class="math inline">\((\varepsilon,\delta)\)</span>-DP</strong> if, for all neighbours <span class="math inline">\(X \sim X'\)</span> and all events <span class="math inline">\(T\)</span>,</p>
+<p><span id="eq-auto-04advancedcomposition-1"><span class="math display">\[
+\Pr[M(X)\in T] \le e^{\varepsilon}\Pr[M(X')\in T] + \delta .
+\tag{6.1}\]</span></span></p>
+<p>The proofs below compare two output distributions at a time, so it helps to name that condition for a pair of random variables.</p>
+<div id="def-ac-indist" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 6.1 (Indistinguishable pair)</strong></span> Let <span class="math inline">\(\varepsilon, \delta \ge 0\)</span>. Two random variables <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> with values in the same space are <strong><span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable</strong> if, for every event <span class="math inline">\(T\)</span>,</p>
+<p><span id="eq-auto-04advancedcomposition-2"><span class="math display">\[
+\Pr[A\in T] \le e^\varepsilon \Pr[B\in T] + \delta \qquad\text{and}\qquad \Pr[B\in T] \le e^\varepsilon \Pr[A\in T] + \delta .
+\tag{6.2}\]</span></span></p>
+</div>
+<p>So <span class="math inline">\(M\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP exactly when <span class="math inline">\(M(X)\)</span> and <span class="math inline">\(M(X')\)</span> are <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable for every pair of neighbours. The analyses we compose may be chosen one after another, each depending on the answers so far.</p>
+<div id="def-ac-adaptive" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 6.2 (Adaptive composition)</strong></span> Let <span class="math inline">\(M_1, \dots, M_k\)</span> be mechanisms, where <span class="math inline">\(M_j\)</span> takes the dataset <span class="math inline">\(X\)</span> and the earlier outputs <span class="math inline">\(y_{&lt;j} = (y_1,\dots,y_{j-1})\)</span> and returns <span class="math inline">\(y_j\)</span>. Their <strong>adaptive composition</strong> <span class="math inline">\(M\)</span> runs them in order on the same <span class="math inline">\(X\)</span>, with <span class="math inline">\(y_j \sim M_j(X; y_{&lt;j})\)</span> drawn with fresh coins, and outputs the whole transcript <span class="math inline">\((y_1,\dots,y_k)\)</span>.</p>
+</div>
+<p>Basic composition, proved in the two previous chapters, says that if each <span class="math inline">\(M_j(\,\cdot\,; y_{&lt;j})\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP for every fixed <span class="math inline">\(y_{&lt;j}\)</span>, then <span class="math inline">\(M\)</span> is <span class="math inline">\((k\varepsilon, k\delta)\)</span>-DP. The theorem of this chapter improves the first parameter. Throughout, every output space is countable, so that probabilities are sums over outcomes.</p>
+<div id="thm-ac-advanced" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 6.1 (Advanced composition)</strong></span> Let <span class="math inline">\(\varepsilon \ge 0\)</span>, <span class="math inline">\(\delta \in [0,1)\)</span> and <span class="math inline">\(\delta' \in (0,1)\)</span>. Let <span class="math inline">\(M\)</span> be the adaptive composition of <span class="math inline">\(k\)</span> mechanisms such that <span class="math inline">\(M_j(\,\cdot\,; y_{&lt;j})\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP for every <span class="math inline">\(j\)</span> and every <span class="math inline">\(y_{&lt;j}\)</span>. Then <span class="math inline">\(M\)</span> is <span class="math inline">\((\tilde\varepsilon, \tilde\delta)\)</span>-DP with</p>
+<p><span id="eq-ac-advanced"><span class="math display">\[
+\tilde\varepsilon = \varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\,\frac{e^\varepsilon - 1}{e^\varepsilon + 1}, \qquad \tilde\delta = k\delta + \delta' .
+\tag{6.3}\]</span></span></p>
+</div>
+<p>The first term of <span class="math inline">\(\tilde\varepsilon\)</span> is the important one, and it grows as <span class="math inline">\(\varepsilon\sqrt k\)</span> instead of <span class="math inline">\(k\varepsilon\)</span>. The second term is small when <span class="math inline">\(\varepsilon\)</span> is small. Its factor is <span class="math inline">\((e^\varepsilon-1)/(e^\varepsilon+1) = \tanh(\varepsilon/2)\)</span>, and <span class="math inline">\(\tanh x \le x\)</span> for <span class="math inline">\(x \ge 0\)</span>, so the second term is at most <span class="math inline">\(k\varepsilon^2/2\)</span>. That is also at most <span class="math inline">\(k\varepsilon(e^\varepsilon - 1)\)</span>, because <span class="math inline">\(e^\varepsilon - 1 \ge \varepsilon\)</span>, so the theorem implies the weaker form with <span class="math inline">\(k\varepsilon(e^\varepsilon-1)\)</span> that <a href="../part02-dp-basics/03-approximate-dp.html">the previous chapter</a> quoted. The extra failure probability <span class="math inline">\(\delta'\)</span> is a free parameter. A larger <span class="math inline">\(\delta'\)</span> makes <span class="math inline">\(\ln(1/\delta')\)</span> smaller and so lowers <span class="math inline">\(\tilde\varepsilon\)</span>, which means the theorem trades a bigger <span class="math inline">\(\delta\)</span> for a smaller <span class="math inline">\(\varepsilon\)</span>.</p>
+<p>The proof of <a href="#thm-ac-advanced" class="quarto-xref">Theorem&nbsp;<span>6.1</span></a> is in <a href="#sec-ac-binary" class="quarto-xref"><span>Section 6.3</span></a>. Before it, <a href="#exm-ac-numbers" class="quarto-xref">Example&nbsp;<span>6.1</span></a> and <a href="#fig-ac-composition" class="quarto-xref">Figure&nbsp;<span>6.1</span></a> say how much the theorem gains, and <a href="#cor-ac-budget" class="quarto-xref">Corollary&nbsp;<span>6.1</span></a> turns it into a rule for splitting a privacy budget.</p>
+<div id="exm-ac-numbers" class="theorem example">
+<p><span class="theorem-title"><strong>Example 6.1</strong></span> Take <span class="math inline">\(\varepsilon = 0.1\)</span> and <span class="math inline">\(\delta' = 10^{-6}\)</span>, so that <span class="math inline">\(\ln(1/\delta') = 13.8155\)</span> and <span class="math inline">\(\tanh(0.05) = 0.04996\)</span>. For <span class="math inline">\(k = 100\)</span> mechanisms, basic composition gives <span class="math inline">\(10\)</span>. Advanced composition gives <span class="math inline">\(0.1\sqrt{200 \times 13.8155} + 100 \times 0.1 \times 0.04996 = 5.257 + 0.500 = 5.756\)</span>. For <span class="math inline">\(k = 1{,}000\)</span>, basic composition gives <span class="math inline">\(100\)</span> and advanced composition gives <span class="math inline">\(16.623 + 4.996 = 21.618\)</span>. Advanced composition is the smaller of the two from <span class="math inline">\(k = 31\)</span> on.</p>
+</div>
+<div id="fig-ac-composition" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ac-composition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/ac-composition.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ac-composition-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6.1: The total privacy parameter of <span class="math inline">\(k\)</span> mechanisms that are each <span class="math inline">\(0.1\)</span>-DP, at <span class="math inline">\(\delta' = 10^{-6}\)</span>. The solid line is basic composition, the dashed line is <a href="#eq-ac-advanced" class="quarto-xref">Equation&nbsp;<span>6.3</span></a>, and the dotted line is the exact smallest <span class="math inline">\(\tilde\varepsilon\)</span> for <span class="math inline">\(k\)</span> independent randomized responses, which is the worst case for pure DP by <a href="#sec-ac-reduction" class="quarto-xref"><span>Section 6.2</span></a>. Advanced composition overtakes basic composition at <span class="math inline">\(k = 31\)</span> and is within 21% of the exact value for every <span class="math inline">\(k\)</span> from <span class="math inline">\(100\)</span> to <span class="math inline">\(10{,}000\)</span>.
+</figcaption>
+</figure>
+</div>
+<p>The exact curve in <a href="#fig-ac-composition" class="quarto-xref">Figure&nbsp;<span>6.1</span></a> shows that <a href="#thm-ac-advanced" class="quarto-xref">Theorem&nbsp;<span>6.1</span></a> is close to the truth, within 7% of it at <span class="math inline">\(k = 10{,}000\)</span>. So growth as <span class="math inline">\(\varepsilon\sqrt{k\ln(1/\delta')}\)</span> is how privacy really degrades, not an artefact of the proof. Kairouz, Oh and Viswanath (2015) computed the exact optimal <span class="math inline">\(\tilde\varepsilon\)</span> for every <span class="math inline">\(k\)</span>, <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span> and <span class="math inline">\(\delta'\)</span>. Their formula is tighter but harder to use, while <a href="#eq-ac-advanced" class="quarto-xref">Equation&nbsp;<span>6.3</span></a> is a good general-purpose bound.</p>
+<p>When you have a total budget <span class="math inline">\(\varepsilon_0\)</span> to spend on <span class="math inline">\(k\)</span> analyses, you can invert <a href="#eq-ac-advanced" class="quarto-xref">Equation&nbsp;<span>6.3</span></a>. The next corollary gives a simple choice that always works.</p>
+<div id="cor-ac-budget" class="theorem corollary">
+<p><span class="theorem-title"><strong>Corollary 6.1</strong></span> Let <span class="math inline">\(\varepsilon_0 \in (0,1]\)</span> and <span class="math inline">\(\delta' \in (0, 1/2]\)</span>. If each of <span class="math inline">\(k\)</span> adaptively composed mechanisms is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP with</p>
+<p><span id="eq-auto-04advancedcomposition-3"><span class="math display">\[
+\varepsilon = \frac{\varepsilon_0}{2\sqrt{2k\ln(1/\delta')}},
+\tag{6.4}\]</span></span></p>
+<p>then the composition is <span class="math inline">\((\varepsilon_0, k\delta + \delta')\)</span>-DP.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>By <a href="#thm-ac-advanced" class="quarto-xref">Theorem&nbsp;<span>6.1</span></a>, the composition is <span class="math inline">\((\tilde\varepsilon, k\delta+\delta')\)</span>-DP. Its first term is <span class="math inline">\(\varepsilon\sqrt{2k\ln(1/\delta')} = \varepsilon_0/2\)</span>.</li>
+<li>The second term is <span class="math inline">\(k\varepsilon\tanh(\varepsilon/2) \le k\varepsilon^2/2\)</span>, because <span class="math inline">\(\tanh x \le x\)</span>. Substituting <span class="math inline">\(\varepsilon\)</span> gives <span class="math inline">\(k\varepsilon^2/2 = \varepsilon_0^2/(16\ln(1/\delta'))\)</span>.</li>
+<li>Since <span class="math inline">\(\delta' \le 1/2\)</span>, we have <span class="math inline">\(\ln(1/\delta') \ge \ln 2 &gt; 1/8\)</span>, and since <span class="math inline">\(\varepsilon_0 \le 1\)</span>, the second term is at most <span class="math inline">\(\varepsilon_0^2/2 \le \varepsilon_0/2\)</span>.</li>
+<li>Adding the two terms gives <span class="math inline">\(\tilde\varepsilon \le \varepsilon_0\)</span>. A mechanism that is <span class="math inline">\((\tilde\varepsilon,\tilde\delta)\)</span>-DP is also <span class="math inline">\((\varepsilon_0,\tilde\delta)\)</span>-DP for every <span class="math inline">\(\varepsilon_0 \ge \tilde\varepsilon\)</span>.</li>
+</ol>
+</div>
+<p>The corollary is conservative by about a factor of <span class="math inline">\(2\)</span>. With <span class="math inline">\(\varepsilon_0 = 1\)</span>, <span class="math inline">\(k = 1{,}000\)</span> and <span class="math inline">\(\delta' = 10^{-6}\)</span>, it allows <span class="math inline">\(\varepsilon = 0.00301\)</span> per mechanism, and <a href="#eq-ac-advanced" class="quarto-xref">Equation&nbsp;<span>6.3</span></a> then gives a total of only <span class="math inline">\(0.5045\)</span>. Solving <a href="#eq-ac-advanced" class="quarto-xref">Equation&nbsp;<span>6.3</span></a> numerically allows <span class="math inline">\(\varepsilon = 0.00591\)</span>, almost twice as much. Basic composition with that same <span class="math inline">\(\varepsilon\)</span> would give a total of <span class="math inline">\(5.911\)</span>.</p>
+<p>The gain matters most when the number of analyses grows with the problem, as in the next example.</p>
+<div id="exm-ac-mean" class="theorem example">
+<p><span class="theorem-title"><strong>Example 6.2 (Mean estimation with the Laplace mechanism)</strong></span> Each of <span class="math inline">\(n\)</span> people holds a vector <span class="math inline">\(X_i \in \{0,1\}^d\)</span>, and the analyst wants the mean <span class="math inline">\(f(X) = \frac1n\sum_i X_i\)</span>. Recall the <a href="../part02-dp-basics/02-laplace-mechanism.html">Laplace mechanism</a>: if <span class="math inline">\(f\)</span> has <span class="math inline">\(\ell_1\)</span> sensitivity <span class="math inline">\(\Delta\)</span>, meaning that <span class="math inline">\(\|f(X) - f(X')\|_1 \le \Delta\)</span> for all neighbours, then adding independent noise from the Laplace distribution with scale <span class="math inline">\(\Delta/\varepsilon\)</span> to each coordinate is <span class="math inline">\(\varepsilon\)</span>-DP. A Laplace variable with scale <span class="math inline">\(b\)</span> has mean <span class="math inline">\(0\)</span> and variance <span class="math inline">\(2b^2\)</span>, so the expected squared <span class="math inline">\(\ell_2\)</span> error of the noise vector is <span class="math inline">\(2db^2\)</span>.</p>
+<p><em>All coordinates at once.</em> Replacing one person changes each coordinate of the mean by at most <span class="math inline">\(1/n\)</span>, so <span class="math inline">\(\Delta = d/n\)</span>, and the noise has scale <span class="math inline">\(d/(n\varepsilon)\)</span>. The root mean squared <span class="math inline">\(\ell_2\)</span> error is <span class="math inline">\(\sqrt{2d}\,d/(n\varepsilon) = \sqrt2\, d^{3/2}/(n\varepsilon)\)</span>.</p>
+<p><em>One coordinate at a time.</em> Each coordinate is a mechanism with sensitivity <span class="math inline">\(1/n\)</span>, released with Laplace noise of scale <span class="math inline">\(1/(n\varepsilon_1)\)</span>, which makes it <span class="math inline">\(\varepsilon_1\)</span>-DP. With <span class="math inline">\(\varepsilon_1\)</span> from <a href="#cor-ac-budget" class="quarto-xref">Corollary&nbsp;<span>6.1</span></a> for <span class="math inline">\(k = d\)</span> and <span class="math inline">\(\delta = 0\)</span>, the <span class="math inline">\(d\)</span> releases together are <span class="math inline">\((\varepsilon, \delta')\)</span>-DP for <span class="math inline">\(\varepsilon \le 1\)</span>. The root mean squared error is</p>
+<p><span id="eq-auto-04advancedcomposition-4"><span class="math display">\[
+\frac{\sqrt{2d}}{n\varepsilon_1} = \frac{\sqrt{2d}\cdot 2\sqrt{2d\ln(1/\delta')}}{n\varepsilon} = \frac{4d\sqrt{\ln(1/\delta')}}{n\varepsilon} .
+\tag{6.5}\]</span></span></p>
+<p>The error now grows as <span class="math inline">\(d\)</span> instead of <span class="math inline">\(d^{3/2}\)</span>, which is the order the Gaussian mechanism achieves. Take <span class="math inline">\(n = 100{,}000\)</span>, <span class="math inline">\(\varepsilon = 1\)</span> and <span class="math inline">\(\delta' = 10^{-6}\)</span>. At <span class="math inline">\(d = 1{,}000\)</span>, the two errors are <span class="math inline">\(0.4472\)</span> and <span class="math inline">\(0.1487\)</span>. At <span class="math inline">\(d = 10{,}000\)</span>, they are <span class="math inline">\(14.14\)</span> and <span class="math inline">\(1.487\)</span>, nearly ten times apart. The price is the move from pure to approximate DP.</p>
+</div>
+</section>
+<section id="sec-ac-reduction" class="level2" data-number="6.2">
+<h2 data-number="6.2" class="anchored" data-anchor-id="sec-ac-reduction"><span class="header-section-number">6.2</span> Reduction to four outcomes</h2>
+<p>A pair of output distributions <span class="math inline">\(M_j(X)\)</span> and <span class="math inline">\(M_j(X')\)</span> can be complicated. The first step of the proof replaces every such pair by one fixed pair, the simplest pair that is <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable. It has two ordinary outcomes, <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>, on which the probabilities differ by the factor <span class="math inline">\(e^\varepsilon\)</span>. It also has two catastrophic outcomes, each with probability <span class="math inline">\(\delta\)</span>, which reveal which distribution the sample came from.</p>
+<div id="def-ac-uv" class="theorem definition">
+<p><span class="theorem-title"><strong>Definition 6.3 (The four-outcome pair)</strong></span> For <span class="math inline">\(\varepsilon \ge 0\)</span> and <span class="math inline">\(\delta \in [0,1)\)</span>, let <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> take values in <span class="math inline">\(\{0, 1, \text{I am } U, \text{I am } V\}\)</span> with</p>
+<p><span id="eq-auto-04advancedcomposition-5"><span class="math display">\[
+\begin{aligned}
+\Pr[U = 0] &amp;= \frac{e^\varepsilon(1-\delta)}{1+e^\varepsilon}, &amp; \Pr[U = 1] &amp;= \frac{1-\delta}{1+e^\varepsilon}, &amp; \Pr[U = \text{I am } U] &amp;= \delta, &amp; \Pr[U = \text{I am } V] &amp;= 0, \\
+\Pr[V = 0] &amp;= \frac{1-\delta}{1+e^\varepsilon}, &amp; \Pr[V = 1] &amp;= \frac{e^\varepsilon(1-\delta)}{1+e^\varepsilon}, &amp; \Pr[V = \text{I am } U] &amp;= 0, &amp; \Pr[V = \text{I am } V] &amp;= \delta .
+\end{aligned}
+\tag{6.6}\]</span></span></p>
+</div>
+<p>For <span class="math inline">\(\delta = 0\)</span> this is randomized response with truth probability <span class="math inline">\(e^\varepsilon/(1+e^\varepsilon)\)</span>, from <a href="../part02-dp-basics/01-randomized-response.html">the first chapter of this part</a>, where <span class="math inline">\(U\)</span> is the report of a person whose bit is <span class="math inline">\(0\)</span> and <span class="math inline">\(V\)</span> that of a person whose bit is <span class="math inline">\(1\)</span>.</p>
+<div id="lem-ac-uv" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 6.1</strong></span> The pair <span class="math inline">\(U, V\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>On the outcomes <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>, the ratio <span class="math inline">\(\Pr[U = t]/\Pr[V = t]\)</span> is <span class="math inline">\(e^\varepsilon\)</span> or <span class="math inline">\(e^{-\varepsilon}\)</span>, so <span class="math inline">\(\Pr[U = t] \le e^\varepsilon\Pr[V = t]\)</span>.</li>
+<li>Take an event <span class="math inline">\(T\)</span>. Sum step 1 over the outcomes of <span class="math inline">\(T\)</span> in <span class="math inline">\(\{0,1\}\)</span>. The outcome “I am <span class="math inline">\(U\)</span>” adds at most <span class="math inline">\(\delta\)</span> to <span class="math inline">\(\Pr[U \in T]\)</span>, and “I am <span class="math inline">\(V\)</span>” adds nothing. So <span class="math inline">\(\Pr[U\in T] \le e^\varepsilon \Pr[V\in T] + \delta\)</span>.</li>
+<li>Swapping the labels <span class="math inline">\(0 \leftrightarrow 1\)</span> and “I am <span class="math inline">\(U\)</span>” <span class="math inline">\(\leftrightarrow\)</span> “I am <span class="math inline">\(V\)</span>” turns the distribution of <span class="math inline">\(U\)</span> into that of <span class="math inline">\(V\)</span> and back, so the same argument gives the other inequality.</li>
+</ol>
+</div>
+<p>Indistinguishability survives any further processing, as privacy does. The proof is that of post-processing in <a href="../part02-dp-basics/03-approximate-dp.html">the approximate DP chapter</a>, written for a pair of random variables. Its first step extends the definition from events to functions with values in <span class="math inline">\([0,1]\)</span>, as that chapter does for mechanisms.</p>
+<div id="lem-ac-post" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 6.2 (Post-processing)</strong></span> Let <span class="math inline">\(A, B\)</span> be <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable, and let <span class="math inline">\(F\)</span> be a randomized map whose coins are independent of <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span>. Then <span class="math inline">\(F(A)\)</span> and <span class="math inline">\(F(B)\)</span> are <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><em>Functions with values in <span class="math inline">\([0,1]\)</span>.</em> Let <span class="math inline">\(g\)</span> take values in <span class="math inline">\([0,1]\)</span>. Write its average as an integral of tail probabilities, <span class="math inline">\(\mathbb E[g(A)] = \int_0^1 \Pr[g(A) &gt; s]\,ds\)</span>. Each tail is the probability of the event <span class="math inline">\(\{a : g(a) &gt; s\}\)</span>, so it is at most <span class="math inline">\(e^\varepsilon \Pr[g(B) &gt; s] + \delta\)</span>. Integrating over <span class="math inline">\(s \in [0,1]\)</span> gives <span class="math inline">\(\mathbb E[g(A)] \le e^\varepsilon\,\mathbb E[g(B)] + \delta\)</span>.</li>
+<li><em>Post-processing.</em> Fix an event <span class="math inline">\(T\)</span> and let <span class="math inline">\(g(a) = \Pr[F(a)\in T]\)</span>, a probability over the coins of <span class="math inline">\(F\)</span>. Because those coins are independent of <span class="math inline">\(A\)</span>, <span class="math inline">\(\Pr[F(A)\in T] = \mathbb E[g(A)]\)</span>, and likewise for <span class="math inline">\(B\)</span>.</li>
+<li>Step 1 applied to <span class="math inline">\(g\)</span> gives <span class="math inline">\(\Pr[F(A)\in T] \le e^\varepsilon\Pr[F(B)\in T] + \delta\)</span>. The other direction is the same with <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> swapped.</li>
+</ol>
+</div>
+<p>The four-outcome pair is the hardest pair to tell apart among all <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable pairs, in the following strong sense. Any such pair <span class="math inline">\(A, B\)</span> can be produced from <span class="math inline">\(U, V\)</span> by one randomized map.</p>
+<div id="thm-ac-simulation" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 6.2 (Simulation by the four-outcome pair)</strong></span> Let <span class="math inline">\(\varepsilon \ge 0\)</span> and <span class="math inline">\(\delta \in [0,1)\)</span>, and let <span class="math inline">\(A, B\)</span> be <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable random variables on a countable space. Then there is a randomized map <span class="math inline">\(F\)</span> such that <span class="math inline">\(F(U)\)</span> has the distribution of <span class="math inline">\(A\)</span> and <span class="math inline">\(F(V)\)</span> has the distribution of <span class="math inline">\(B\)</span>.</p>
+</div>
+<p>The map sends each of the four outcomes to a distribution on the space. The outcome “I am <span class="math inline">\(U\)</span>” covers the excess of <span class="math inline">\(A\)</span> on outcomes <span class="math inline">\(y\)</span> that are more than <span class="math inline">\(e^\varepsilon\)</span> times as likely under <span class="math inline">\(A\)</span> as under <span class="math inline">\(B\)</span>, and “I am <span class="math inline">\(V\)</span>” covers the reverse excess. The outcome <span class="math inline">\(0\)</span> puts more weight on outcomes where <span class="math inline">\(A\)</span> is the more likely of the two, and <span class="math inline">\(1\)</span> more weight where <span class="math inline">\(B\)</span> is. For <span class="math inline">\(\delta &gt; 0\)</span> these four distributions must be chosen with care. Kairouz, Oh and Viswanath (2015) prove the theorem by hypothesis testing. Indistinguishability says that every test between <span class="math inline">\(A\)</span> and <span class="math inline">\(B\)</span> has error rates that some test between <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> also has, and Blackwell’s theorem on comparing statistical experiments turns that into a randomized map. We prove the case <span class="math inline">\(\delta = 0\)</span>, which already gives the theorem for pure DP.</p>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span><em>Proof for <span class="math inline">\(\delta = 0\)</span>.</em> Write <span class="math inline">\(a(y) = \Pr[A = y]\)</span> and <span class="math inline">\(b(y) = \Pr[B = y]\)</span>.</p>
+<ol type="1">
+<li><p>Applying the definition to the single outcome <span class="math inline">\(\{y\}\)</span> gives <span class="math inline">\(a(y) \le e^\varepsilon b(y)\)</span> and <span class="math inline">\(b(y) \le e^\varepsilon a(y)\)</span>. If <span class="math inline">\(\varepsilon = 0\)</span>, then <span class="math inline">\(a = b\)</span>, and <span class="math inline">\(F\)</span> can ignore its input and output a sample of <span class="math inline">\(A\)</span>. Assume <span class="math inline">\(\varepsilon &gt; 0\)</span> from now on.</p></li>
+<li><p>Define</p>
+<p><span id="eq-auto-04advancedcomposition-6"><span class="math display">\[
+P_0(y) = \frac{e^\varepsilon a(y) - b(y)}{e^\varepsilon - 1}, \qquad P_1(y) = \frac{e^\varepsilon b(y) - a(y)}{e^\varepsilon - 1} .
+\tag{6.7}\]</span></span></p>
+<p>Both are non-negative by step 1, and each sums to <span class="math inline">\((e^\varepsilon - 1)/(e^\varepsilon - 1) = 1\)</span> over <span class="math inline">\(y\)</span>, so they are probability distributions.</p></li>
+<li><p>Let <span class="math inline">\(F\)</span> map the input <span class="math inline">\(0\)</span> to a sample from <span class="math inline">\(P_0\)</span> and the input <span class="math inline">\(1\)</span> to a sample from <span class="math inline">\(P_1\)</span>. With <span class="math inline">\(\delta = 0\)</span>, <span class="math inline">\(U\)</span> is <span class="math inline">\(0\)</span> with probability <span class="math inline">\(e^\varepsilon/(1+e^\varepsilon)\)</span> and <span class="math inline">\(1\)</span> otherwise. So <span class="math inline">\(F(U)\)</span> equals <span class="math inline">\(y\)</span> with probability</p>
+<p><span id="eq-auto-04advancedcomposition-7"><span class="math display">\[
+\frac{e^\varepsilon P_0(y) + P_1(y)}{1+e^\varepsilon} = \frac{e^{2\varepsilon}a(y) - e^\varepsilon b(y) + e^\varepsilon b(y) - a(y)}{(1+e^\varepsilon)(e^\varepsilon - 1)} = a(y).
+\tag{6.8}\]</span></span></p></li>
+<li><p>In the same way, <span class="math inline">\(F(V)\)</span> equals <span class="math inline">\(y\)</span> with probability <span class="math inline">\((P_0(y) + e^\varepsilon P_1(y))/(1+e^\varepsilon) = b(y)\)</span>.</p></li>
+</ol>
+</div>
+<p>Applying <a href="#thm-ac-simulation" class="quarto-xref">Theorem&nbsp;<span>6.2</span></a> once per step of an adaptive composition reduces the whole transcript to a map of <span class="math inline">\(k\)</span> independent copies of the four-outcome pair.</p>
+<div id="thm-ac-reduction" class="theorem">
+<p><span class="theorem-title"><strong>Theorem 6.3</strong></span> Let <span class="math inline">\(M\)</span> be the adaptive composition of <span class="math inline">\(M_1,\dots,M_k\)</span> as in <a href="#thm-ac-advanced" class="quarto-xref">Theorem&nbsp;<span>6.1</span></a>, and fix neighbours <span class="math inline">\(X \sim X'\)</span>. Let <span class="math inline">\(U_1,\dots,U_k\)</span> be independent copies of <span class="math inline">\(U\)</span> and <span class="math inline">\(V_1,\dots,V_k\)</span> independent copies of <span class="math inline">\(V\)</span>. Then there is a randomized map <span class="math inline">\(F^*\)</span> such that <span class="math inline">\(F^*(U_1,\dots,U_k)\)</span> has the distribution of <span class="math inline">\(M(X)\)</span> and <span class="math inline">\(F^*(V_1,\dots,V_k)\)</span> has the distribution of <span class="math inline">\(M(X')\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>Fix a step <span class="math inline">\(j\)</span> and an earlier transcript <span class="math inline">\(y_{&lt;j}\)</span>. The mechanism <span class="math inline">\(M_j(\,\cdot\,;y_{&lt;j})\)</span> is <span class="math inline">\((\varepsilon,\delta)\)</span>-DP, so its outputs <span class="math inline">\(M_j(X; y_{&lt;j})\)</span> and <span class="math inline">\(M_j(X'; y_{&lt;j})\)</span> are <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable. <a href="#thm-ac-simulation" class="quarto-xref">Theorem&nbsp;<span>6.2</span></a> gives a randomized map <span class="math inline">\(F_j^{y_{&lt;j}}\)</span> that turns <span class="math inline">\(U\)</span> into <span class="math inline">\(M_j(X; y_{&lt;j})\)</span> and <span class="math inline">\(V\)</span> into <span class="math inline">\(M_j(X'; y_{&lt;j})\)</span>.</li>
+<li>Define <span class="math inline">\(F^*\)</span> on an input <span class="math inline">\((z_1,\dots,z_k)\)</span> step by step. Set <span class="math inline">\(y_1 = F_1(z_1)\)</span>, then <span class="math inline">\(y_2 = F_2^{y_1}(z_2)\)</span>, and in general <span class="math inline">\(y_j = F_j^{y_{&lt;j}}(z_j)\)</span>, with fresh coins at each step. Output <span class="math inline">\((y_1,\dots,y_k)\)</span>.</li>
+<li>By induction on <span class="math inline">\(j\)</span>, the prefix <span class="math inline">\((y_1,\dots,y_j)\)</span> computed from <span class="math inline">\((U_1,\dots,U_k)\)</span> has the distribution of the first <span class="math inline">\(j\)</span> outputs of <span class="math inline">\(M(X)\)</span>. For <span class="math inline">\(j=1\)</span> this is step 1. Given the prefix <span class="math inline">\(y_{&lt;j}\)</span>, the input <span class="math inline">\(U_j\)</span> is still a fresh copy of <span class="math inline">\(U\)</span>, because it is independent of <span class="math inline">\(U_1,\dots,U_{j-1}\)</span> and of the coins used so far. So <span class="math inline">\(y_j = F_j^{y_{&lt;j}}(U_j)\)</span> has the distribution of <span class="math inline">\(M_j(X;y_{&lt;j})\)</span>, which is how <span class="math inline">\(M\)</span> draws its <span class="math inline">\(j\)</span>-th output.</li>
+<li>The same induction with <span class="math inline">\(V_1,\dots,V_k\)</span> gives the distribution of <span class="math inline">\(M(X')\)</span>.</li>
+</ol>
+</div>
+<p>The map <span class="math inline">\(F^*\)</span> depends on <span class="math inline">\(X\)</span> and <span class="math inline">\(X'\)</span>, but that is harmless. Privacy is a statement about one pair of neighbours at a time, and <a href="#lem-ac-post" class="quarto-xref">Lemma&nbsp;<span>6.2</span></a> applies to any map. So it remains to show that <span class="math inline">\((U_1,\dots,U_k)\)</span> and <span class="math inline">\((V_1,\dots,V_k)\)</span> are <span class="math inline">\((\tilde\varepsilon,\tilde\delta)\)</span>-indistinguishable.</p>
+</section>
+<section id="sec-ac-binary" class="level2" data-number="6.3">
+<h2 data-number="6.3" class="anchored" data-anchor-id="sec-ac-binary"><span class="header-section-number">6.3</span> Composing the four-outcome pair</h2>
+<p>Write <span class="math inline">\(\mathbf U = (U_1,\dots,U_k)\)</span> and <span class="math inline">\(\mathbf V = (V_1,\dots,V_k)\)</span>. For an outcome <span class="math inline">\(z\)</span> with <span class="math inline">\(\Pr[\mathbf V = z] &gt; 0\)</span>, the <strong>privacy loss</strong> at <span class="math inline">\(z\)</span> is the log of the ratio of the two probabilities,</p>
+<p><span id="eq-auto-04advancedcomposition-8"><span class="math display">\[
+L(z) = \ln\frac{\Pr[\mathbf U = z]}{\Pr[\mathbf V = z]} .
+\tag{6.9}\]</span></span></p>
+<p>The plan is to show that, for <span class="math inline">\(z\)</span> drawn from <span class="math inline">\(\mathbf U\)</span>, the loss exceeds <span class="math inline">\(\tilde\varepsilon\)</span> only with small probability. Two kinds of outcome are bad. An outcome that contains “I am <span class="math inline">\(U\)</span>” is impossible under <span class="math inline">\(\mathbf V\)</span>, so its loss is infinite, and this happens with probability about <span class="math inline">\(k\delta\)</span>. Among the other outcomes, the loss is a sum of <span class="math inline">\(k\)</span> independent terms, and Hoeffding’s inequality bounds the chance that it strays far above its mean by <span class="math inline">\(\delta'\)</span>.</p>
+<div id="lem-ac-loss" class="theorem lemma">
+<p><span class="theorem-title"><strong>Lemma 6.3</strong></span> For every <span class="math inline">\(z \in \{0,1\}^k\)</span>, the privacy loss is <span class="math inline">\(L(z) = \varepsilon\sum_{j=1}^k (1 - 2z_j)\)</span>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li>The coordinates are independent, so both probabilities factor and the log of the ratio is a sum: <span class="math inline">\(L(z) = \sum_{j=1}^k \ln\big(\Pr[U = z_j]/\Pr[V = z_j]\big)\)</span>.</li>
+<li>By <a href="#def-ac-uv" class="quarto-xref">Definition&nbsp;<span>6.3</span></a>, the ratio is <span class="math inline">\(e^\varepsilon\)</span> when <span class="math inline">\(z_j = 0\)</span> and <span class="math inline">\(e^{-\varepsilon}\)</span> when <span class="math inline">\(z_j = 1\)</span>. In both cases its logarithm is <span class="math inline">\(\varepsilon(1 - 2z_j)\)</span>.</li>
+</ol>
+</div>
+<p>Conditioned on containing no catastrophic outcome, the coordinates of <span class="math inline">\(\mathbf U\)</span> are independent bits. The loss is then a sum of independent terms, each equal to <span class="math inline">\(\varepsilon\)</span> or <span class="math inline">\(-\varepsilon\)</span>, and Hoeffding’s inequality applies to it.</p>
+<p>Take <span class="math inline">\(k\)</span> independent random variables <span class="math inline">\(W_1,\dots,W_k\)</span>, each with values in an interval <span class="math inline">\([l, u]\)</span> of length <span class="math inline">\(u - l\)</span>. <strong>Hoeffding’s inequality</strong> bounds the chance that their sum exceeds its mean by a margin <span class="math inline">\(\tau \ge 0\)</span> or more,</p>
+<p><span id="eq-ac-hoeffding"><span class="math display">\[
+\Pr\left[\sum_{j=1}^k W_j \ge \sum_{j=1}^k \mathbb E[W_j] + \tau\right] \le \exp\left(-\frac{2\tau^2}{k(u-l)^2}\right) .
+\tag{6.10}\]</span></span></p>
+<div id="prp-ac-binary" class="theorem proposition">
+<p><span class="theorem-title"><strong>Proposition 6.1</strong></span> Let <span class="math inline">\(\varepsilon \ge 0\)</span>, <span class="math inline">\(\delta \in [0,1)\)</span> and <span class="math inline">\(\delta' \in (0,1)\)</span>. Then <span class="math inline">\(\mathbf U\)</span> and <span class="math inline">\(\mathbf V\)</span> are <span class="math inline">\((\tilde\varepsilon,\tilde\delta)\)</span>-indistinguishable, with <span class="math inline">\(\tilde\varepsilon\)</span> and <span class="math inline">\(\tilde\delta\)</span> as in <a href="#eq-ac-advanced" class="quarto-xref">Equation&nbsp;<span>6.3</span></a>.</p>
+</div>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span></p>
+<ol type="1">
+<li><p><em>The events.</em> Let <span class="math inline">\(E_1\)</span> be the event that some coordinate of <span class="math inline">\(\mathbf U\)</span> is “I am <span class="math inline">\(U\)</span>”. Let <span class="math inline">\(G\)</span> be the set of good outcomes, the <span class="math inline">\(z \in \{0,1\}^k\)</span> with <span class="math inline">\(L(z) \le \tilde\varepsilon\)</span>. Every outcome <span class="math inline">\(z\)</span> with <span class="math inline">\(\Pr[\mathbf U = z] &gt; 0\)</span> that is not in <span class="math inline">\(G\)</span> either lies in <span class="math inline">\(E_1\)</span> or lies in <span class="math inline">\(\{0,1\}^k\)</span> with <span class="math inline">\(L(z) &gt; \tilde\varepsilon\)</span>. Outcomes containing “I am <span class="math inline">\(V\)</span>” have probability <span class="math inline">\(0\)</span> under <span class="math inline">\(\mathbf U\)</span>.</p></li>
+<li><p><em>The first bad event.</em> Each coordinate avoids “I am <span class="math inline">\(U\)</span>” with probability <span class="math inline">\(1-\delta\)</span>, independently, so <span class="math inline">\(\Pr[E_1] = 1 - (1-\delta)^k\)</span>. Bernoulli’s inequality <span class="math inline">\((1-\delta)^k \ge 1 - k\delta\)</span> gives <span class="math inline">\(\Pr[E_1] \le k\delta\)</span>.</p></li>
+<li><p><em>The coordinates given no catastrophe.</em> Given that <span class="math inline">\(U_j\)</span> is not “I am <span class="math inline">\(U\)</span>”, it is <span class="math inline">\(0\)</span> with probability <span class="math inline">\(\frac{e^\varepsilon(1-\delta)/(1+e^\varepsilon)}{1-\delta} = \frac{e^\varepsilon}{1+e^\varepsilon}\)</span> and <span class="math inline">\(1\)</span> otherwise. Conditioned on the complement <span class="math inline">\(\bar E_1\)</span>, the coordinates stay independent, because <span class="math inline">\(\bar E_1\)</span> is an intersection of independent events, one per coordinate.</p></li>
+<li><p><em>The mean of the loss.</em> By <a href="#lem-ac-loss" class="quarto-xref">Lemma&nbsp;<span>6.3</span></a>, given <span class="math inline">\(\bar E_1\)</span> the loss is <span class="math inline">\(\sum_j W_j\)</span> with <span class="math inline">\(W_j = \varepsilon(1-2U_j)\)</span>. Each <span class="math inline">\(W_j\)</span> is <span class="math inline">\(\varepsilon\)</span> with probability <span class="math inline">\(e^\varepsilon/(1+e^\varepsilon)\)</span> and <span class="math inline">\(-\varepsilon\)</span> otherwise, so</p>
+<p><span id="eq-auto-04advancedcomposition-9"><span class="math display">\[
+\mathbb E\Big[\sum_{j=1}^k W_j \,\Big|\, \bar E_1\Big] = k\varepsilon\,\frac{e^\varepsilon - 1}{e^\varepsilon + 1},
+\tag{6.11}\]</span></span></p>
+<p>which is the second term of <span class="math inline">\(\tilde\varepsilon\)</span>.</p></li>
+<li><p><em>The second bad event.</em> If <span class="math inline">\(\varepsilon = 0\)</span>, the loss is <span class="math inline">\(0 \le \tilde\varepsilon\)</span> and there is nothing to bound. Otherwise apply <a href="#eq-ac-hoeffding" class="quarto-xref">Equation&nbsp;<span>6.10</span></a>, conditioned on <span class="math inline">\(\bar E_1\)</span>, with <span class="math inline">\([l,u] = [-\varepsilon,\varepsilon]\)</span> and <span class="math inline">\(\tau = \varepsilon\sqrt{2k\ln(1/\delta')}\)</span>, the first term of <span class="math inline">\(\tilde\varepsilon\)</span>. The exponent is <span class="math inline">\(2\tau^2/(4k\varepsilon^2) = \ln(1/\delta')\)</span>, so</p>
+<p><span id="eq-auto-04advancedcomposition-10"><span class="math display">\[
+\Pr\big[L(\mathbf U) &gt; \tilde\varepsilon \,\big|\, \bar E_1\big] \le \delta' .
+\tag{6.12}\]</span></span></p>
+<p>Multiplying by <span class="math inline">\(\Pr[\bar E_1] \le 1\)</span> bounds the probability that <span class="math inline">\(\mathbf U \in \{0,1\}^k\)</span> and <span class="math inline">\(L(\mathbf U) &gt; \tilde\varepsilon\)</span> by <span class="math inline">\(\delta'\)</span>.</p></li>
+<li><p><em>Assembly.</em> Take any event <span class="math inline">\(T\)</span>. Split it into <span class="math inline">\(T \cap G\)</span> and the rest. On <span class="math inline">\(G\)</span>, each outcome has <span class="math inline">\(\Pr[\mathbf U = z] \le e^{\tilde\varepsilon}\Pr[\mathbf V = z]\)</span> by the definition of <span class="math inline">\(L\)</span>. By step 1, the rest has probability at most that of the two bad events. Steps 2 and 5 then give</p>
+<p><span id="eq-auto-04advancedcomposition-11"><span class="math display">\[
+\Pr[\mathbf U \in T] \le e^{\tilde\varepsilon}\Pr[\mathbf V \in T\cap G] + k\delta + \delta' \le e^{\tilde\varepsilon}\Pr[\mathbf V \in T] + \tilde\delta .
+\tag{6.13}\]</span></span></p></li>
+<li><p><em>The other direction.</em> Swapping the labels <span class="math inline">\(0 \leftrightarrow 1\)</span> and “I am <span class="math inline">\(U\)</span>” <span class="math inline">\(\leftrightarrow\)</span> “I am <span class="math inline">\(V\)</span>” in every coordinate maps <span class="math inline">\(\mathbf U\)</span> to <span class="math inline">\(\mathbf V\)</span> and back. The same argument then gives <span class="math inline">\(\Pr[\mathbf V \in T] \le e^{\tilde\varepsilon}\Pr[\mathbf U \in T] + \tilde\delta\)</span>.</p></li>
+</ol>
+</div>
+<p>The two terms of <span class="math inline">\(\tilde\delta\)</span> now have a meaning. The term <span class="math inline">\(k\delta\)</span> pays for a catastrophic outcome in some step, and <span class="math inline">\(\delta'\)</span> pays for an unusually long run of outcomes that favour <span class="math inline">\(\mathbf U\)</span>. The proof of the theorem only puts the pieces together.</p>
+<div class="proof">
+<p><span class="proof-title"><em>Proof</em>. </span><em>Proof of <a href="#thm-ac-advanced" class="quarto-xref">Theorem&nbsp;<span>6.1</span></a>.</em> Fix neighbours <span class="math inline">\(X \sim X'\)</span>.</p>
+<ol type="1">
+<li>By <a href="#thm-ac-reduction" class="quarto-xref">Theorem&nbsp;<span>6.3</span></a>, <span class="math inline">\(M(X)\)</span> and <span class="math inline">\(M(X')\)</span> have the distributions of <span class="math inline">\(F^*(\mathbf U)\)</span> and <span class="math inline">\(F^*(\mathbf V)\)</span> for one randomized map <span class="math inline">\(F^*\)</span>.</li>
+<li>By <a href="#prp-ac-binary" class="quarto-xref">Proposition&nbsp;<span>6.1</span></a>, <span class="math inline">\(\mathbf U\)</span> and <span class="math inline">\(\mathbf V\)</span> are <span class="math inline">\((\tilde\varepsilon,\tilde\delta)\)</span>-indistinguishable.</li>
+<li>By <a href="#lem-ac-post" class="quarto-xref">Lemma&nbsp;<span>6.2</span></a>, so are <span class="math inline">\(F^*(\mathbf U)\)</span> and <span class="math inline">\(F^*(\mathbf V)\)</span>. The neighbours were arbitrary, so <span class="math inline">\(M\)</span> is <span class="math inline">\((\tilde\varepsilon,\tilde\delta)\)</span>-DP.</li>
+</ol>
+</div>
+</section>
+<section id="sec-ac-summary" class="level2" data-number="6.4">
+<h2 data-number="6.4" class="anchored" data-anchor-id="sec-ac-summary"><span class="header-section-number">6.4</span> Summary</h2>
+<div id="tbl-ac-summary" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-ac-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6.1: The chapter’s results.
+</figcaption>
+<div aria-describedby="tbl-ac-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Result</th>
+<th>Statement</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#thm-ac-advanced" class="quarto-xref">Theorem&nbsp;<span>6.1</span></a></td>
+<td><span class="math inline">\(k\)</span> adaptive <span class="math inline">\((\varepsilon,\delta)\)</span>-DP steps are <span class="math inline">\(\big(\varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\tanh(\varepsilon/2),\ k\delta+\delta'\big)\)</span>-DP</td>
+</tr>
+<tr class="even">
+<td><a href="#cor-ac-budget" class="quarto-xref">Corollary&nbsp;<span>6.1</span></a></td>
+<td>per-step <span class="math inline">\(\varepsilon = \varepsilon_0/(2\sqrt{2k\ln(1/\delta')})\)</span> gives a total of <span class="math inline">\(\varepsilon_0 \le 1\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#exm-ac-mean" class="quarto-xref">Example&nbsp;<span>6.2</span></a></td>
+<td>Laplace noise per coordinate estimates a mean in <span class="math inline">\(\{0,1\}^d\)</span> with error <span class="math inline">\(4d\sqrt{\ln(1/\delta')}/(n\varepsilon)\)</span></td>
+</tr>
+<tr class="even">
+<td><a href="#lem-ac-uv" class="quarto-xref">Lemma&nbsp;<span>6.1</span></a></td>
+<td>the four-outcome pair is <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable</td>
+</tr>
+<tr class="odd">
+<td><a href="#lem-ac-post" class="quarto-xref">Lemma&nbsp;<span>6.2</span></a></td>
+<td>indistinguishability survives post-processing</td>
+</tr>
+<tr class="even">
+<td><a href="#thm-ac-simulation" class="quarto-xref">Theorem&nbsp;<span>6.2</span></a></td>
+<td>every <span class="math inline">\((\varepsilon,\delta)\)</span>-indistinguishable pair is a randomized map of the four-outcome pair</td>
+</tr>
+<tr class="odd">
+<td><a href="#thm-ac-reduction" class="quarto-xref">Theorem&nbsp;<span>6.3</span></a></td>
+<td>an adaptive composition is a map of <span class="math inline">\(k\)</span> independent copies of the four-outcome pair</td>
+</tr>
+<tr class="even">
+<td><a href="#lem-ac-loss" class="quarto-xref">Lemma&nbsp;<span>6.3</span></a></td>
+<td>on <span class="math inline">\(\{0,1\}^k\)</span>, the privacy loss is <span class="math inline">\(\varepsilon\sum_j(1-2z_j)\)</span></td>
+</tr>
+<tr class="odd">
+<td><a href="#prp-ac-binary" class="quarto-xref">Proposition&nbsp;<span>6.1</span></a></td>
+<td><span class="math inline">\(k\)</span> copies of the four-outcome pair are <span class="math inline">\((\tilde\varepsilon,\tilde\delta)\)</span>-indistinguishable</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+</section>
+<section id="sec-ac-notes" class="level2" data-number="6.5">
+<h2 data-number="6.5" class="anchored" data-anchor-id="sec-ac-notes"><span class="header-section-number">6.5</span> Notes</h2>
+<ul>
+<li>Cynthia Dwork, Guy N. Rothblum and Salil Vadhan, “Boosting and Differential Privacy”, 2010. The advanced composition theorem, first proved there.</li>
+<li>Peter Kairouz, Sewoong Oh and Pramod Viswanath, “The Composition Theorem for Differential Privacy”, 2015. The simulation of every private pair by the four-outcome pair, by hypothesis testing, and the exact optimal composition.</li>
+<li>Wassily Hoeffding, “Probability Inequalities for Sums of Bounded Random Variables”, 1963. The tail bound used for the privacy loss.</li>
+<li>Cynthia Dwork and Aaron Roth, <em>The Algorithmic Foundations of Differential Privacy</em>, 2014. Section 3.5 proves advanced composition with the privacy loss random variable, and Theorem 3.20 states it with <span class="math inline">\(k\varepsilon(e^\varepsilon - 1)\)</span> as the second term.</li>
+<li>Salil Vadhan, “The Complexity of Differential Privacy”, 2017. Section 2 presents basic and advanced composition.</li>
+<li>Jack Murtagh and Salil Vadhan, “The Complexity of Computing the Optimal Composition of Differential Privacy”, 2016. Shows that the exact optimal composition of mechanisms with different parameters is hard to compute, which is one reason the simpler bound <a href="#eq-ac-advanced" class="quarto-xref">Equation&nbsp;<span>6.3</span></a> is used in practice.</li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../part02-dp-basics/03-approximate-dp.html" class="pagination-link" aria-label="Approximate Differential Privacy">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Approximate Differential Privacy</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../part02-dp-basics/05-exponential-mechanism.html" class="pagination-link" aria-label="The Exponential Mechanism">
+        <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">The Exponential Mechanism</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
