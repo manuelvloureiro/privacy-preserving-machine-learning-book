@@ -34,7 +34,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
 
 .DEFAULT_GOAL := help
 .PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf course course-pdf \
-        website pdf book preview publish terms-check acronyms index-candidates prose prose-check format test typecheck check all clean
+        website pdf book notes note preview publish terms-check acronyms index-candidates prose prose-check format test typecheck check all clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-17s %s\n", $$1, $$2}'
@@ -157,7 +157,20 @@ website: full exercises $(if $(wildcard book-practitioner),practitioner) course 
 
 pdf: full-pdf $(if $(wildcard book-practitioner),practitioner-pdf) course-pdf ## Build every PDF into _book/
 
-book: website pdf ## Build every website and PDF
+book: website pdf notes ## Build every website and PDF, and the study notes
+
+# Each folder in notes/ is a one-page Quarto project (a standalone study note), staged and rendered
+# like a book: its page and PDF go to _book/notes/<name>/.
+notes: ## Build the study notes in notes/ into _book/notes/
+	@for dir in notes/*/; do name=$$(basename $$dir); \
+	  $(MAKE) --no-print-directory note NOTE=$$name || exit 1; done
+
+note:
+	$(call STAGE,notes/$(NOTE),notes-$(NOTE))
+	$(call RENDER,notes-$(NOTE),default,all)
+	@mkdir -p $(OUT)/notes/$(NOTE)
+	@rsync -a --delete $(BUILD)/notes-$(NOTE)/_site/ $(OUT)/notes/$(NOTE)/
+	@echo "Note: $(OUT)/notes/$(NOTE)/index.html"
 
 # The site is the contents of $(OUT)/ plus site/, committed to the gh-pages branch from a worktree
 # in $(BUILD)/gh-pages/ and served by GitHub Pages. site/index.html is the landing page, linking to
