@@ -395,6 +395,114 @@ CALIBRATION_EPS: tuple[float, ...] = (0.1, 0.25, 0.5, 1.0, 2.0, 4.0, 8.0)
 FIG_MU, FIG_EPS = 1.0, 1.0
 
 
+# --- 8. How ε, δ, σ and the sensitivity trade off ----------------------------------------------------
+
+
+def normal_upper_tail(x: float) -> float:
+    """Pr[Z > x] = ½ erfc(x/√2), computed without subtracting from 1."""
+    return 0.5 * math.erfc(x / math.sqrt(2))
+
+
+def upper_tail_by_subtraction(x: float) -> float:
+    """1 - Φ(x), the naive way: loses every digit once Φ(x) rounds to 1."""
+    return 1 - normal_cdf(x)
+
+
+def normal_cdf_by_erf(x: float) -> float:
+    """Φ(x) = ½(1 + erf(x/√2)), the textbook form: the same cancellation in the lower tail."""
+    return 0.5 * (1 + math.erf(x / math.sqrt(2)))
+
+
+def gauss_delta_by_erf(eps: float, mu: float) -> float:
+    """The exact δ(ε) with Φ computed from erf, to show the loss of precision for tiny δ."""
+    return normal_cdf_by_erf(mu / 2 - eps / mu) - math.exp(eps) * normal_cdf_by_erf(-mu / 2 - eps / mu)
+
+
+def gauss_delta_bad_set(eps: float, mu: float, width: float = 15.0, steps: int = 200_000) -> float:
+    """∫ over the bad set z < μ/2 - ε/μ of φ(z)(1 - e^{ε - L(z)}) dz, by Simpson's rule.
+
+    L(z) = μ²/2 - μz is the privacy loss at noise z (in units of σ), so the integrand is
+    φ(z) - e^ε φ(z - μ) written without subtracting two tails; expm1 keeps it accurate near the edge.
+    """
+    edge = mu / 2 - eps / mu
+    z = np.linspace(edge - width, edge, steps + 1)
+    f = np.exp(-(z**2) / 2) / math.sqrt(2 * math.pi) * -np.expm1(eps + mu * z - mu * mu / 2)
+    h = width / steps
+    return float(h / 3 * (f[0] + f[-1] + 4 * f[1:-1:2].sum() + 2 * f[2:-1:2].sum()))
+
+
+@dataclass(frozen=True)
+class DeltaParts:
+    """Each intermediate number of the exact δ(ε) for one Δ₂, σ and ε."""
+
+    mu: float
+    alpha: float
+    beta: float
+    phi_alpha: float
+    phi_beta: float
+    correction: float
+    delta: float
+
+
+def delta_parts(sens2: float, sigma: float, eps: float) -> DeltaParts:
+    mu = sens2 / sigma
+    alpha, beta = mu / 2 - eps / mu, -mu / 2 - eps / mu
+    pa, pb = normal_cdf(alpha), normal_cdf(beta)
+    return DeltaParts(mu, alpha, beta, pa, pb, math.exp(eps) * pb, pa - math.exp(eps) * pb)
+
+
+def gauss_delta_eps_derivative(eps: float, mu: float) -> float:
+    """dδ/dε = -e^ε Φ(-μ/2 - ε/μ), negative: the curve δ(ε) falls."""
+    return -math.exp(eps) * normal_cdf(-mu / 2 - eps / mu)
+
+
+def exact_eps(sens2: float, sigma: float, delta: float) -> float:
+    """The smallest ε with δ(ε; μ = Δ₂/σ) <= δ, by bisection on ε (δ falls as ε grows)."""
+    mu = sens2 / sigma
+    return bisect_increasing(lambda e: -gauss_delta(e, mu), -delta, 1e-9, 500.0)
+
+
+def normal_upper_quantile(delta: float) -> float:
+    """z_δ with Pr[Z > z_δ] = δ, by bisection."""
+    return bisect_increasing(lambda z: -normal_upper_tail(z), -delta, 1e-3, 40.0)
+
+
+def tail_sigma(sens2: float, eps: float, delta: float) -> float:
+    """The σ that makes the bad-event probability Pr[L > ε] equal δ: Δ₂(z + √(z² + 2ε)) / (2ε)."""
+    z = normal_upper_quantile(delta)
+    return sens2 * (z + math.sqrt(z * z + 2 * eps)) / (2 * eps)
+
+
+def tail_eps(sens2: float, sigma: float, delta: float) -> float:
+    """The ε at which Pr[L > ε] = δ for a given σ: z μ + μ²/2 with μ = Δ₂/σ."""
+    mu = sens2 / sigma
+    return normal_upper_quantile(delta) * mu + mu * mu / 2
+
+
+def composed_sigma(sens2: float, eps: float, delta: float, k: int) -> float:
+    """σ for k Gaussian releases that together are (ε, δ)-DP: √k times the σ of one."""
+    return math.sqrt(k) * exact_sigma(sens2, eps, delta)
+
+
+def split_sigma(sens2: float, eps: float, delta: float, k: int) -> float:
+    """σ when the budget is split evenly, each release (ε/k, δ/k)-DP, and the k guarantees added up."""
+    return exact_sigma(sens2, eps / k, delta / k)
+
+
+def exposure(delta: float, n: int) -> float:
+    """1 - (1 - δ)^n: the chance that publishing each record with probability δ exposes someone."""
+    return -math.expm1(n * math.log1p(-delta))
+
+
+TRADE_SIGMA = 4.0  # the worked example: Δ₂ = 1, σ = 4, ε = 1
+CURVE_MUS: tuple[float, ...] = (0.25, 0.5, 1.0, 2.0)
+GRID_EPS: tuple[float, ...] = (0.1, 0.5, 1.0, 2.0, 4.0)
+GRID_DELTAS: tuple[float, ...] = (1e-3, 1e-5, 1e-7, 1e-9)
+PRECISION_DELTAS: tuple[float, ...] = (1e-9, 1e-12, 1e-15, 1e-18)
+INVERSE_SIGMAS: tuple[float, ...] = (0.5, 1.0, 2.0, 5.0, 10.0, 20.0)
+DATASET_SIZES: tuple[int, ...] = (1_000, 10_000, 100_000, 1_000_000)
+
+
 # --- Table ---------------------------------------------------------------------------------------
 
 
@@ -560,6 +668,94 @@ def print_table(rng: np.random.Generator) -> None:
     print(f"[7 classic breaks] true delta exceeds 1e-5 for eps > {classic_breaks_at(DELTA):.2f}")
     print(f"[7 95% error] exact sigma at eps={EPS}: 1.96 sigma={1.96 * s_exact:.4f}")
 
+    # 8. Trade-offs.
+    pt = delta_parts(1.0, TRADE_SIGMA, 1.0)
+    print(
+        f"[8 by hand D2=1 sigma={TRADE_SIGMA:g} eps=1] mu={pt.mu:.4f}  alpha={pt.alpha:.4f}  beta={pt.beta:.4f}  "
+        f"Phi(alpha)={pt.phi_alpha:.4e}  Phi(beta)={pt.phi_beta:.4e}  e={math.e:.4f}  "
+        f"e Phi(beta)={pt.correction:.4e}  delta={pt.delta:.4e}  first/delta={pt.phi_alpha / pt.delta:.1f}"
+    )
+    print(
+        f"[8 by hand checks] bad-set integral={gauss_delta_bad_set(1.0, pt.mu):.4e}  "
+        f"D2=2 sigma=8: delta={delta_parts(2.0, 8.0, 1.0).delta:.4e}  "
+        f"D2=0.5 sigma=2: delta={delta_parts(0.5, 2.0, 1.0).delta:.4e}"
+    )
+    for x in (8.0, 9.0):
+        print(
+            f"[8 tail x={x:g}] 1 - Phi(x)={upper_tail_by_subtraction(x):.4e}  "
+            f"erf form Phi(-x)={normal_cdf_by_erf(-x):.4e}  erfc form={normal_upper_tail(x):.4e}"
+        )
+    for d in PRECISION_DELTAS:
+        s = exact_sigma(1.0, 1.0, d)
+        m = 1 / s
+        closed = gauss_delta(1.0, m)
+        integral = gauss_delta_bad_set(1.0, m)
+        print(
+            f"[8 precision eps=1 delta={d:.0e}] sigma={s:.4f}  erfc={closed:.4e}  erf={gauss_delta_by_erf(1.0, m):.4e}  "
+            f"bad-set integral={integral:.4e}  rel diff={abs(integral - closed) / closed:.0e}  "
+            f"first/delta={normal_cdf(m / 2 - 1.0 / m) / closed:.1f}"
+        )
+    for m in CURVE_MUS:
+        print(
+            f"[8 curve mu={m:g}] sigma/D2={1 / m:g}  eps at 1e-5={exact_eps(1.0, 1 / m, DELTA):.4f}  "
+            f"delta(0)={gauss_delta(0.0, m):.4f}  delta(1)={gauss_delta(1.0, m):.2e}  delta(2)={gauss_delta(2.0, m):.2e}"
+        )
+    worst = 0.0
+    for e in (0.1, 0.5, 1.0, 3.0):
+        for m in (0.1, 0.5, 1.0, 2.0):
+            h = 1e-6
+            numeric = (gauss_delta(e + h, m) - gauss_delta(e - h, m)) / (2 * h)
+            worst = max(worst, abs(numeric - gauss_delta_eps_derivative(e, m)))
+    print(f"[8 d delta/d eps] matches -e^eps Phi(beta) to below 1e-9: {worst < 1e-9}")
+    for e in GRID_EPS:
+        print(f"[8 grid eps={e:g}] " + "  ".join(f"{d:.0e}: {exact_sigma(1.0, e, d):.4f}" for d in GRID_DELTAS))
+    z = normal_upper_quantile(DELTA)
+    print(f"[8 tail rule delta=1e-5] z={z:.4f}  bend at z^2/2={z * z / 2:.2f}")
+    for e in (0.1, 0.5, 1.0, 2.0, 4.0, 8.0, 32.0):
+        se, st = exact_sigma(1.0, e, DELTA), tail_sigma(1.0, e, DELTA)
+        print(
+            f"[8 sigma vs eps={e:g}] exact={se:.4f}  eps*sigma={e * se:.4f}  tail rule={st:.4f}  "
+            f"tail/exact={st / se:.3f}  z/eps={z / e:.4f}  1/sqrt(2 eps)={1 / math.sqrt(2 * e):.4f}  "
+            f"first/delta={normal_cdf(1 / (2 * se) - e * se) / gauss_delta(e, 1 / se):.1f}"
+        )
+    for e in (0.5, 1.0):
+        s5, s6 = exact_sigma(1.0, e, 1e-5), exact_sigma(1.0, e, 1e-6)
+        print(f"[8 per decade eps={e:g}] sigma 1e-5={s5:.4f}  1e-6={s6:.4f}  ratio={s6 / s5:.3f}  added={s6 - s5:.4f}")
+    z6 = normal_upper_quantile(1e-6)
+    print(f"[8 per decade tail rule] z(1e-6)={z6:.4f}  z ratio={z6 / z:.3f}")
+    print(
+        f"[8 1e-5 to 1e-9 eps=0.5] ratio={exact_sigma(1.0, 0.5, 1e-9) / exact_sigma(1.0, 0.5, 1e-5):.3f}  "
+        f"halving eps 0.5 to 0.25: ratio={exact_sigma(1.0, 0.25, DELTA) / exact_sigma(1.0, 0.5, DELTA):.3f}"
+    )
+    for s in INVERSE_SIGMAS:
+        print(f"[8 eps vs sigma={s:g}] exact={exact_eps(1.0, s, DELTA):.4f}  tail rule={tail_eps(1.0, s, DELTA):.4f}")
+    one = exact_sigma(1.0, 1.0, DELTA)
+    for k in (10, 100):
+        c, sp = composed_sigma(1.0, 1.0, DELTA, k), split_sigma(1.0, 1.0, DELTA, k)
+        print(
+            f"[8 compose k={k} eps=1 delta=1e-5] one={one:.4f}  sqrt(k) sigma={c:.4f}  "
+            f"split (eps/k, delta/k)={sp:.4f}  split/composed={sp / c:.2f}  "
+            f"check delta(1; mu sqrt k)={gauss_delta(1.0, math.sqrt(k) / c):.3e}"
+        )
+    print(
+        f"[8 delta choice] 1/n^2 vs 1e-5 at n=10000: ratio={exact_sigma(1.0, 1.0, 1e-8) / one:.3f}  "
+        f"exposure n=1e6 delta=1e-5={exposure(DELTA, 1_000_000):.5f}  "
+        f"eps*sigma at 1 over 0.1={exact_sigma(1.0, 1.0, DELTA) / (0.1 * exact_sigma(1.0, 0.1, DELTA)):.3f}"
+    )
+    for n in DATASET_SIZES:
+        ds = (DELTA, 1 / n, n**-1.1, n**-2.0)
+        print(
+            f"[8 n={n}] sigma at eps=1: "
+            + "  ".join(
+                f"{name}={exact_sigma(1.0, 1.0, d):.4f}"
+                for name, d in zip(("1e-5", "1/n", "1/n^1.1", "1/n^2"), ds, strict=True)
+            )
+            + "  exposure: "
+            + "  ".join(
+                f"{name}={exposure(d, n):.3g}" for name, d in zip(("1e-5", "1/n", "1/n^1.1", "1/n^2"), ds, strict=True)
+            )
+        )
+
 
 # --- Figures --------------------------------------------------------------------------------------
 
@@ -651,7 +847,7 @@ def plot_exponential() -> Figure:
     numer = [math.exp(EM_EPS * (u - v) / 2) for u, v in zip(VOTES_D, VOTES_D2, strict=True)]
     norm = sum(em_weights(VOTES_D2, EM_EPS, 1.0)) / sum(em_weights(VOTES_D, EM_EPS, 1.0))
     right.bar(xs - 0.2, numer, width=0.4, label="own weight factor")
-    right.bar(xs + 0.2, [norm] * 4, width=0.4, label="normalizer factor Z(D')/Z(D)")
+    right.bar(xs + 0.2, [norm] * 4, width=0.4, label="normalizer factor W(D')/W(D)")
     right.plot(xs, [n * norm for n in numer], "ko", label="ratio = product")
     right.axhline(math.exp(EM_EPS / 2), color="tab:red", linestyle=":", label=r"$e^{\varepsilon/2}$")
     right.axhline(math.exp(EM_EPS), color="tab:red", linestyle="--", label=r"$e^{\varepsilon}$")
@@ -750,6 +946,65 @@ def plot_sigma_vs_eps() -> Figure:
     return fig
 
 
+def plot_delta_curves() -> Figure:
+    """δ(ε) for several μ = Δ₂/σ: one σ gives a whole falling curve of (ε, δ) pairs."""
+    epss = np.linspace(0.0, 12.0, 481)
+    fig, ax = plt.subplots(figsize=(6.5, 4.2))
+    for i, m in enumerate(CURVE_MUS):
+        deltas = [gauss_delta(float(e), m) for e in epss]
+        (line,) = ax.plot(epss, deltas, label=rf"$\mu$ = {m:g}  ($\sigma$ = {1 / m:g} $\Delta_2$)")
+        e5 = exact_eps(1.0, 1 / m, DELTA)
+        ax.plot([e5], [DELTA], "o", color=line.get_color())
+        offset = (5, 6) if i % 2 == 0 else (5, -13)  # alternate above and below so labels don't collide
+        ax.annotate(f"ε = {e5:.2f}", (e5, DELTA), textcoords="offset points", xytext=offset, fontsize=8)
+    ax.axhline(DELTA, color="k", linestyle="--", linewidth=1, label=r"$\delta = 10^{-5}$")
+    ax.set(
+        yscale="log",
+        ylim=(1e-12, 1.0),
+        xlim=(0.0, 12.0),
+        xlabel=r"$\varepsilon$",
+        ylabel=r"exact $\delta(\varepsilon)$",
+        title=r"One $\sigma$, a whole curve of $(\varepsilon, \delta)$ guarantees",
+    )
+    ax.legend(fontsize=8, loc="upper right")
+    return fig
+
+
+def plot_tradeoff_map() -> Figure:
+    """Left: contours of the exact σ/Δ₂ over (ε, δ). Right: ε σ / Δ₂ against ε, exact and by the tail rule."""
+    epss = np.logspace(math.log10(0.05), math.log10(20.0), 45)
+    log_deltas = np.linspace(-12.0, -2.0, 41)
+    sig = np.array([[exact_sigma(1.0, float(e), 10.0 ** float(ld)) for e in epss] for ld in log_deltas])
+    fig, (left, right) = plt.subplots(1, 2, figsize=(11, 4.4))
+    levels = [0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0]
+    colors = [plt.get_cmap("viridis")(float(x)) for x in np.linspace(0.0, 0.8, len(levels))]
+    cs = left.contour(epss, log_deltas, sig, levels=levels, colors=colors)
+    left.clabel(cs, fmt="%g", fontsize=8)
+    left.axhline(-5.0, color="gray", linestyle=":", linewidth=1)
+    left.set(
+        xscale="log",
+        xlabel=r"$\varepsilon$",
+        ylabel=r"$\log_{10}\delta$",
+        title=r"Exact noise $\sigma/\Delta_2$: each line is one $\sigma$",
+    )
+    epsr = np.logspace(math.log10(0.05), math.log10(50.0), 80)
+    for d, color in zip((1e-3, 1e-5, 1e-9), ("tab:blue", "tab:orange", "tab:green"), strict=True):
+        exact = [float(e) * exact_sigma(1.0, float(e), d) for e in epsr]
+        rule = [float(e) * tail_sigma(1.0, float(e), d) for e in epsr]
+        right.plot(epsr, exact, color=color, label=rf"exact, $\delta = 10^{{{round(math.log10(d))}}}$")
+        right.plot(epsr, rule, color=color, linestyle="--", linewidth=1)
+    right.plot([], [], color="gray", linestyle="--", linewidth=1, label="dashed: tail rule, same δ")
+    right.set(
+        xscale="log",
+        ylim=(0.0, 12.0),
+        xlabel=r"$\varepsilon$",
+        ylabel=r"$\varepsilon\sigma/\Delta_2$",
+        title=r"Flat means $\sigma \propto 1/\varepsilon$; it bends up at large $\varepsilon$",
+    )
+    right.legend(fontsize=8, loc="upper left", ncol=1)
+    return fig
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--seed", type=int, default=0)
@@ -769,6 +1024,8 @@ def main() -> None:
         "cal_classic_chain.svg": plot_classic_chain(),
         "cal_bad_region.svg": plot_bad_region(),
         "cal_sigma_vs_eps.svg": plot_sigma_vs_eps(),
+        "cal_delta_curves.svg": plot_delta_curves(),
+        "cal_tradeoff_map.svg": plot_tradeoff_map(),
     }
     for name, fig in figures.items():
         fig.tight_layout()
