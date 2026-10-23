@@ -22,7 +22,14 @@ Read the page below once, from the top, the way that reader would. For **every p
    - **unmotivated**: a result or formula that appears without saying what question it answers;
    - **garbled**: grammar or word order that makes the sentence hard to parse;
    - **unstated assumption**: a condition a result needs (non-negative, independent, bounded, fixed in
-     advance) stated as if it were a fact about the world, or without saying why the result needs it.
+     advance) stated as if it were a fact about the world, or without saying why the result needs it;
+   - **purposeless section**: a section or heading that does not say what question it answers or why
+     you need the answer now, so you cannot tell what to look for in it;
+   - **out of order**: a result used before it is proved, a theorem whose proof sits in another section,
+     or a lemma whose use you cannot yet see;
+   - **packed display**: a displayed formula that makes several moves at once (simplifies, then bounds,
+     then substitutes), or whose reason is given only after it;
+   - **formula without words**: a passage you could not follow if the formulas were replaced by "blah".
 3. Say whether the paragraph follows from the one before it (yes / weakly / no).
 
 Do not judge whether the content is correct, and do not suggest rewrites. Be literal: if you

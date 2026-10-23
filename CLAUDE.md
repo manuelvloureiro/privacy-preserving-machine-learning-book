@@ -11,12 +11,15 @@ The repository holds four [Quarto](https://quarto.org) book projects side by sid
 - `book-practitioner/` (`book-practitioner/_quarto.yml`): the practitioner edition, the same parts and chapters without proofs. Website and PDF.
 - `book-course/` (`book-course/_quarto.yml`): a course in differential privacy, one topic per chapter, light in text and complete in its proofs. It stands alone and links to no other book. Website and PDF.
 
+Next to the books, `notes/<name>/` holds standalone study notes: each is a one-page Quarto project (`_quarto.yml` and `index.md`) that `make notes` stages and renders into `_book/notes/<name>/`, a web page with its PDF. `make book` builds them too, so `make publish` keeps them on the site, and the landing page links to each. [AGENTS.md](AGENTS.md) says how to write one.
+
 Do not add another build system (MkDocs, Jupyter Book, a hand-rolled pandoc script).
 
 ```bash
 make website   # every website, into _book/book-full/, _book/book-exercises/, _book/book-practitioner/
 make pdf       # the full and practitioner PDFs, into _book/
 make book      # both
+make notes     # the study notes in notes/, into _book/notes/<name>/
 make full      # one book: full, full-pdf, exercises, practitioner, practitioner-pdf, course, course-pdf
 make preview   # serve the full edition from its staged copy (rerun after editing book-full/)
 ```

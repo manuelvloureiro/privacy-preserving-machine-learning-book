@@ -70,6 +70,21 @@ REVIEW_ONLY = [
         ),
         "unstated assumption",
     ),
+    (
+        "The first inequality is the triangle inequality, $|u|-|v|\\le|u-v|$ with $u=y-f(x')$ and $v=y-f(x)$.",
+        "packed display",
+    ),
+    (
+        "From a tail bound on the loss to $(\\varepsilon,\\delta)$-DP, and why the converse fails",
+        "purposeless section",
+    ),
+    (
+        (
+            "The advanced composition theorem states that $k$ adaptive $(\\varepsilon,\\delta_0)$-DP mechanisms "
+            "together satisfy [the theorem], with its proof two sections later."
+        ),
+        "out of order",
+    ),
 ]
 PROMPTS = ROOT / "tools" / "prose-review"
 

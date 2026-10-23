@@ -1,406 +1,681 @@
 ---
 title: "From Differential Privacy to Concentrated Privacy"
-subtitle: "A source-guided derivation of definitions, bounds, and composition"
+subtitle: "How the privacy cost of many releases adds up, derived from first principles"
 author: "Technical study notes"
 date: "23 October 2026"
 abstract: |
-  This note develops pure $\varepsilon$-DP, approximate $(\varepsilon,\delta)$-DP, mean-concentrated DP (CDP/mCDP), and zero-concentrated DP (zCDP). It follows the mathematical progression in Dwork–Rothblum–Vadhan (2010), Dwork–Rothblum (2016), and Bun–Steinke (2016). Every major formula is preceded by the question it answers. Elementary derivations are given in full, including the algebra and the probabilistic lemmas they rest on; non-elementary results are named and cited, not silently assumed.
+  When you publish many statistics about the same people, how much privacy do they lose in total? This note answers that question step by step, for a reader who knows basic probability and nothing about privacy. It defines differential privacy, finds the random quantity that every privacy guarantee controls, called the privacy loss, and shows why many small losses add up to much less than their worst case. That observation leads to two newer definitions, concentrated and zero-concentrated differential privacy, which make the saving easy to compute. Every result is proved in the text, or cited where its proof needs more machinery than the note builds.
 ---
 
-# The common mathematical object: two output distributions {#sec-object}
+A dataset holds records about people, and a statistic computed from it, such as a count or an average, reveals a little about each of them. Differential privacy limits how much. It asks that the published output be almost as likely whether or not any one person's record is in the data. Then nobody can learn much about that person from the output, because the output would have looked much the same without them. Random noise is what makes this possible. Without noise, adding one person to a count changes the answer by exactly one, which anyone comparing two releases could see. With noise, the two possible answers overlap, and a single output cannot reliably tell them apart.
 
-Take neighbouring datasets $x\sim x'$ that differ in one person's record, and one randomized mechanism $M$. Write $P=\mathcal L(M(x))$ and $Q=\mathcal L(M(x'))$ for its two output distributions, which are probability measures. For an event $S$, $P(S)$ and $Q(S)$ are probabilities. If the two measures have densities $p,q$ with respect to a common dominating measure $\nu$, then
+One release is rarely the end. An analyst who publishes a hundred statistics about the same people gives an attacker a hundred chances to learn something, so the real question is how the privacy cost of many releases adds up. The simplest answer is that the costs add, so that a hundred releases cost a hundred times as much as one. That answer is safe but very pessimistic, because it charges every release its worst case. This note shows that the cost of a release is a random quantity, which is usually far below its worst case and sometimes even negative. Over many releases, the total is the sum of small average costs, plus a random fluctuation that grows only with the square root of the number of releases. The saving is large when each release is very private and there are many releases.
 
-$$P(S)=\int_S p(y)\,\mathrm d\nu(y),\qquad Q(S)=\int_S q(y)\,\mathrm d\nu(y).$$
+You need only basic probability to follow the note: densities, expectations, variances, the normal distribution and Markov's inequality. Everything else is defined where it is first used. @tbl-map shows the question each section answers, and @tbl-symbols lists the symbols for reference.
 
-The measure $\nu$ is Lebesgue measure in continuous examples and counting measure in discrete ones (one can always take $\nu=P+Q$). The notation therefore never mistakes a density value for the probability of an individual output.
+| Section | The question it answers |
+|:---|:---|
+| @sec-loss | What does a privacy guarantee compare, output by output? |
+| @sec-pure | What is the strongest guarantee, and how much does it cost over many releases? |
+| @sec-approx | What guarantee does Gaussian noise give, since its loss is unbounded? |
+| @sec-rare | How do you prove such a guarantee? |
+| @sec-advanced | Why do many small losses add up to much less than their worst case? |
+| @sec-cdp | Can the facts behind that saving become the definition of privacy? |
+| @sec-zcdp | What definition makes the saving easy to compute? |
+| @sec-compare | How do the four definitions compare? |
+| @sec-worked | What do they give for a hundred Gaussian releases? |
 
-Whenever $P\ll Q$, define the likelihood ratio $R=\mathrm dP/\mathrm dQ$ and the **privacy loss** $L(y)=\log R(y)$. It is defined $Q$-almost surely; when we sample $Y\sim P$, $L(Y)$ is a random variable. Under pure DP, $P$ and $Q$ are mutually absolutely continuous, so the ratio is finite and bounded almost surely. Under approximate DP this need not be true: $P$ may put mass where $Q$ has none, and there we set $L=+\infty$.
+: The question each section answers. {#tbl-map}
 
-**Why almost surely?** Suppose $P(S)\le e^\varepsilon Q(S)$ holds for every measurable event. Then $p(y)\le e^\varepsilon q(y)$ for $\nu$-almost every $y$, though not necessarily at every point of an arbitrarily chosen version of the densities. The argument runs in both directions:
+| Symbol | Meaning |
+|:---|:---|
+| $x$, $x'$ | two neighbouring datasets: one contains a person's record and the other does not |
+| $M$ | a mechanism, the random procedure that computes the released output |
+| $f$, $\Delta$ | the statistic to release, and its sensitivity: how much one record can change it |
+| $P$, $Q$ | the distributions of the released output when the data are $x$ and $x'$ |
+| $p$, $q$ | their densities |
+| $L$ | the privacy loss, $\log(p/q)$ at the released output |
+| $\varepsilon$, $\delta$ | the parameters of a differential-privacy guarantee |
+| $\eta$ | a small probability that you choose yourself when you derive one guarantee from another |
+| $b$, $\sigma$ | the scale of Laplace noise, and the standard deviation of Gaussian noise |
+| $k$ | the number of releases |
+| $\mu$, $\tau$ | the two parameters of concentrated differential privacy, a mean and a spread |
+| $\xi$, $\rho$ | the two parameters of zero-concentrated differential privacy |
+| $\lambda$, $\alpha$ | the argument of a moment generating function, and the order of a Rényi divergence |
 
-* If $p\le e^\varepsilon q$ holds $\nu$-almost everywhere, integrating over $S$ gives $P(S)\le e^\varepsilon Q(S)$ exactly, because a null set contributes nothing to an integral.
-* If $p>e^\varepsilon q$ on a set $B$ with $\nu(B)>0$, then $\int_B(p-e^\varepsilon q)\,\mathrm d\nu>0$ (a strictly positive function integrated over a set of positive measure), so $P(B)>e^\varepsilon Q(B)$ and the event $S=B$ breaks the inequality.
+: The symbols the note uses. Each is also explained where it first appears. {#tbl-symbols}
 
-Whenever a density-ratio bound is used below, its scope is stated.
+# The privacy loss {#sec-loss}
 
-# Pure $\varepsilon$-differential privacy {#sec-pure}
+Every definition in this note compares two probability distributions of the released output, one for each of two datasets. This section introduces them, and then the single quantity that summarizes how they differ at each possible output. That quantity, the privacy loss, is what the rest of the note studies.
 
-## Definition and interpretation
+## Two output distributions
 
-The mechanism is $\varepsilon$-DP ($\varepsilon\ge0$) when, for every ordered pair $x\sim x'$ and every measurable $S$,
+Take two datasets $x$ and $x'$ that are the same except that $x$ contains one person's record and $x'$ does not. Such datasets are called **neighbouring**, written $x \sim x'$. Some authors instead call two datasets neighbouring when one record has been replaced by another. The derivations below work for either choice, but the numbers in the examples depend on it, and this note uses adding or removing a record throughout.
 
-$$P(S)\le e^\varepsilon Q(S). \tag{2.1}$$
+A **mechanism** $M$ is a randomized procedure that takes a dataset and releases an output. Because it is random, running it on $x$ gives an output drawn from a probability distribution, which we call $P$. Running it on $x'$ gives an output drawn from another distribution, $Q$. Both depend on the pair of datasets, although the notation does not show it. Privacy is about how different $P$ and $Q$ are. If they were identical, the output would reveal nothing about whether the person is in the data. If they differ a lot, it reveals a lot.
 
-Since the neighbour relation is symmetric, the definition also applies to $(x',x)$, so $Q(S)\le e^\varepsilon P(S)$ holds too. By the argument of @sec-object applied in both orders, the equivalent likelihood-ratio condition is
+The running example of this note is a counting query. Suppose the statistic $f(x)$ is the number of people in dataset $x$ who have some medical condition. Adding or removing one person changes the count by at most one. In general, the **sensitivity** $\Delta$ of a statistic is the most it can change between neighbouring datasets:
 
-$$e^{-\varepsilon}\le R(y)\le e^\varepsilon\quad Q\text{-a.s.},\qquad -\varepsilon\le L(y)\le\varepsilon\quad P\text{-a.s.} \tag{2.2}$$
+$$\Delta = \max_{x \sim x'} |f(x) - f(x')|.$$
 
-(The two statements agree because $P$ and $Q$ have the same null sets.) The guarantee bounds every event probability, not only typical events. At $\varepsilon=0$, $P=Q$: the outputs are identically distributed on neighbouring inputs.
+So a count has $\Delta = 1$. A mechanism for releasing the count adds random noise to the true count. With noise drawn from the Laplace distribution of scale $b$, which has density $e^{-|z|/b}/(2b)$, the output on dataset $x$ has density
 
-## Why basic composition adds $\varepsilon$
+$$p(y) = \frac{1}{2b}\exp\left(-\frac{|y - f(x)|}{b}\right).$$
 
-**What is being composed.** An adaptive analyst runs mechanisms $M_1,\dots,M_k$ in turn; the $i$-th may depend on the earlier outputs, $Y_i\sim M_i(x,y_{<i})$. The analyst's choices are the same function of the transcript whichever dataset is in use; only the data differ. The hypothesis is that for every fixed history $y_{<i}$ the mechanism $M_i(\cdot,y_{<i})$ is $\varepsilon_i$-DP. Write $p_i(\cdot\mid y_{<i})$ and $q_i(\cdot\mid y_{<i})$ for its output densities on $x$ and $x'$.
+This is a peaked curve centred at the true count $f(x)$. On the neighbouring dataset the output density $q$ is the same curve centred at $f(x')$ instead.
 
-The density of the whole transcript is the product of the conditional densities (the chain rule), on each dataset:
+## The privacy loss
 
-$$\frac{p(y_{1:k})}{q(y_{1:k})}=\prod_{i=1}^k\frac{p_i(y_i\mid y_{<i})}{q_i(y_i\mid y_{<i})},\qquad\text{so}\qquad L_{1:k}=\sum_{i=1}^kL_i .$$
+To see how much a single output reveals, imagine an observer who knows everything about the data except whether the person's record is in it. For this observer only two datasets are possible, $x$ and $x'$, and before seeing the output they hold some odds for $x$ against $x'$. Bayes' rule says how seeing the output $y$ changes those odds. The new odds are the old odds multiplied by the ratio of the two densities at $y$:
 
-Each factor is a likelihood ratio of an $\varepsilon_i$-DP mechanism with its history fixed, so by (2.2) $|L_i|\le\varepsilon_i$ almost surely, and hence $|L_{1:k}|\le\sum_i\varepsilon_i$ almost surely. Integrating that density bound over an event (@sec-object) gives the event inequality, so adaptive composition is $(\sum_i\varepsilon_i)$-DP. In particular, $k$ identical guarantees give $k\varepsilon$-DP.
+$$\frac{\Pr[x \mid y]}{\Pr[x' \mid y]} = \frac{\Pr[x]}{\Pr[x']}\cdot\frac{p(y)}{q(y)}.$$ {#eq-bayes}
+
+The ratio $p(y)/q(y)$ is therefore exactly how much the output moves the observer's belief. We take its logarithm, because later sections combine many releases, and the logarithm turns the product of their ratios into a sum. The logarithm is called the **privacy loss** at $y$:
+
+$$L(y) = \log\frac{p(y)}{q(y)}.$$
+
+A privacy loss of $0$ means the output is equally likely under both datasets and teaches the observer nothing. A loss of $1$ means that the output multiplies the odds for $x$ by $e \approx 2.7$. A negative loss moves the odds towards $x'$. If $q(y) = 0$ while $p(y) > 0$, the output is impossible under $x'$, so it proves that the data are $x$, and we set $L(y) = +\infty$.
+
+For the counting example, take Laplace noise of scale $b = 1$, and let the true counts be $f(x) = 1$ and $f(x') = 0$. The constants $1/(2b)$ cancel in the ratio, and the logarithm of a ratio of exponentials is the difference of the exponents, so $L(y) = |y| - |y - 1|$. @tbl-laplace-loss evaluates it at a few outputs.
+
+| Output $y$ | $-2$ | $0$ | $0.5$ | $1$ | $3$ |
+|:---|---:|---:|---:|---:|---:|
+| Privacy loss $L(y)$ | $-1$ | $-1$ | $0$ | $1$ | $1$ |
+
+: The privacy loss of the Laplace mechanism with scale $1$, when the true counts are $1$ and $0$. {#tbl-laplace-loss}
+
+An output of $1$ or more points towards $x$, an output of $0$ or less points towards $x'$, and an output halfway between says nothing. The loss never goes beyond $\pm 1$, however extreme the output. That bound is what makes this mechanism private, as @sec-pure shows.
+
+## The privacy loss as a random variable
+
+The output is random, so the privacy loss of the output is random too. When the data are $x$, the output $Y$ is drawn from $P$, and $L(Y)$ is a random variable. Every definition in this note is a statement about its distribution. Pure differential privacy bounds its largest value. Approximate differential privacy tolerates large values on a small part of the outputs, in a sense that @sec-rare makes precise. Concentrated differential privacy controls how large the loss is on average, and how far above its average it can stray. Each definition is also required for the swapped pair $(x', x)$, whose privacy loss is $-L$, so it constrains small values of $L$ as well.
+
+One technical point recurs. A density can be changed on a set of outputs of probability zero without changing any probability. So a statement about $L(y)$ can only be required for "almost every" $y$, that is, except on a set of outputs with probability zero. Such a set cannot affect any guarantee.
+
+# Pure differential privacy {#sec-pure}
+
+The strongest natural guarantee is that the privacy loss is small at every output. This section states that guarantee, shows how much Laplace noise achieves it, and derives what it costs over many releases.
+
+## The definition and what it says about the loss
+
+The definition is usually stated for events rather than single outputs. An **event** $S$ is a set of possible outputs, such as "the released count is above 100".
+
+::: {#def-pure name="Pure differential privacy"}
+Let $\varepsilon \ge 0$. A mechanism is **$\varepsilon$-differentially private**, or $\varepsilon$-DP, if for every pair of neighbouring datasets $x \sim x'$, in either order, and every event $S$,
+$$P(S) \le e^{\varepsilon}\, Q(S).$$
+:::
+
+In words, no event can be much more likely under one dataset than under its neighbour. For small $\varepsilon$ the factor $e^\varepsilon$ is about $1 + \varepsilon$, so with $\varepsilon = 0.1$ no event becomes more than about 10% more likely. Because the definition covers both orders of the pair, it also gives $Q(S) \le e^\varepsilon P(S)$.
+
+The definition talks about events, but the observer of @eq-bayes updates on a single output, through the privacy loss. The next result says that the two views agree. It is the reason the rest of the note can work with the privacy loss alone.
+
+::: {#thm-pure-loss name="Pure DP bounds the loss"}
+A mechanism is $\varepsilon$-DP if and only if, for every pair of neighbouring datasets, the privacy loss satisfies $-\varepsilon \le L(y) \le \varepsilon$ for almost every output $y$.
+:::
+
+The probability of an event is the integral of the density over it. So a bound on the density ratio at every output integrates to a bound on every event, and conversely a set of outputs where the ratio is too large is itself an event that breaks the definition.
+
+::: {.proof}
+**From the loss to events.** The upper bound $L \le \varepsilon$ says that $p(y) \le e^\varepsilon q(y)$ for almost every $y$. Integrating both sides over any event $S$ gives $P(S) \le e^\varepsilon Q(S)$, because a set of probability zero contributes nothing to an integral. The lower bound $L \ge -\varepsilon$ says that $q(y) \le e^\varepsilon p(y)$, and integrating it gives the other order, $Q(S) \le e^\varepsilon P(S)$.
+
+**From events to the loss.** Let $B$ be the set of outputs where $p(y) > e^\varepsilon q(y)$. On $B$ the density $p$ is positive, so if $B$ has positive length, it has positive probability under $P$, and the integrand $p - e^\varepsilon q$ is positive throughout it. Its integral over $B$ is then positive:
+$$P(B) - e^\varepsilon Q(B) = \int_B \bigl(p(y) - e^\varepsilon q(y)\bigr)\,dy > 0.$$
+That contradicts the definition for the event $B$. So $B$ has probability zero, which means that $L \le \varepsilon$ for almost every output. The same argument with $x$ and $x'$ swapped gives $L \ge -\varepsilon$.
+:::
+
+## The Laplace mechanism {#sec-laplace}
+
+How much Laplace noise makes a statistic $\varepsilon$-DP? By @thm-pure-loss it is enough to bound the privacy loss at every output. The answer is a noise scale proportional to the sensitivity.
+
+::: {#thm-laplace name="Laplace mechanism"}
+Let $f$ have sensitivity $\Delta$. The mechanism that releases $f(x) + Z$, with $Z$ drawn from the Laplace distribution of scale $b = \Delta/\varepsilon$, is $\varepsilon$-DP.
+:::
+
+The proof first computes the privacy loss, then bounds it.
+
+::: {.proof}
+**The log-ratio.** On dataset $x$ the output has the Laplace density centred at $f(x)$, and on $x'$ the same density centred at $f(x')$. Both have the normalizing constant $1/(2b)$, so it cancels in the ratio. What remains is a ratio of two exponentials, whose logarithm is the difference of their exponents:
+$$L(y) = \log\frac{p(y)}{q(y)} = \frac{|y - f(x')| - |y - f(x)|}{b}.$$ {#eq-laplace-loss}
+The numerator compares how far the output $y$ lies from each of the two true answers.
+
+**Bounding it.** That difference of distances can never exceed the distance between the two answers. To see this, write $y - f(x') = \bigl(y - f(x)\bigr) + \bigl(f(x) - f(x')\bigr)$ and apply the triangle inequality to the sum:
+$$|y - f(x')| \le |y - f(x)| + |f(x) - f(x')|.$$
+Subtracting $|y - f(x)|$ from both sides, and using the definition of the sensitivity, gives
+$$|y - f(x')| - |y - f(x)| \le |f(x) - f(x')| \le \Delta.$$
+Dividing by $b$ and substituting into @eq-laplace-loss bounds the loss at every output:
+$$L(y) \le \frac{\Delta}{b} = \varepsilon.$$
+Swapping $x$ and $x'$ turns the loss into $-L$, and the same argument shows $-L \le \varepsilon$. @thm-pure-loss turns the two bounds into $\varepsilon$-DP.
+:::
+
+For the counting query, $\Delta = 1$, so noise of scale $b = 1$ gives $1$-DP. @tbl-laplace-loss shows the bound being reached: every output at or below $0$, or at or above $1$, has a loss of exactly $\pm 1$.
+
+## Many releases: the losses add {#sec-basic}
+
+Now release several statistics, one after another. The analyst may choose each statistic after seeing the earlier answers, which is called **adaptive** composition. The $i$-th release is then a mechanism $M_i$ that depends on the dataset and on the earlier outputs $y_1, \dots, y_{i-1}$, which we call the **history**. The analyst's choices depend only on the history, never directly on the data, so for a given history they are the same whichever dataset is in use.
+
+The key fact is that the privacy loss of the whole sequence of outputs is the sum of the losses of its rounds. The probability of a sequence of outputs is the probability of the first, times the probability of the second given the first, and so on. Write $p_i(y_i \mid \text{history})$ for the density of round $i$'s output given its history, on dataset $x$, and $q_i$ for the same on $x'$. Then the density of the whole sequence is a product, on each dataset:
+
+$$p(y_1, \dots, y_k) = \prod_{i=1}^k p_i(y_i \mid y_1, \dots, y_{i-1}).$$
+
+The logarithm of a ratio of two such products is a sum of logarithms of ratios. So the total privacy loss is the sum of the per-round losses $L_i$, each computed for its own history:
+
+$$L = \sum_{i=1}^k L_i, \qquad L_i = \log\frac{p_i(y_i \mid \text{history})}{q_i(y_i \mid \text{history})}.$$ {#eq-loss-sum}
+
+::: {#thm-basic name="Basic composition"}
+Suppose that for every history, the $i$-th release, viewed as a mechanism on the dataset, is $\varepsilon_i$-DP. Then the sequence of $k$ releases is $(\varepsilon_1 + \dots + \varepsilon_k)$-DP.
+:::
+
+::: {.proof}
+For every history, round $i$ is $\varepsilon_i$-DP, so @thm-pure-loss gives $|L_i| \le \varepsilon_i$. By @eq-loss-sum the total loss is then at most $\varepsilon_1 + \dots + \varepsilon_k$ in absolute value, and @thm-pure-loss, applied to the whole sequence, turns that bound into the guarantee.
+:::
+
+So a hundred releases at $\varepsilon = 0.1$ each cost $\varepsilon = 10$. That is a weak guarantee: by @eq-bayes, a loss of $10$ multiplies an observer's odds by $e^{10} \approx 22{,}000$. The theorem is correct, but it charges every round its largest possible loss, all in the same direction. The actual loss of a round is random, and it is usually smaller.
+
+The counting example shows by how much. When the data are $x$, the output is the true count $1$ plus Laplace noise of scale $1$. With probability $\tfrac12$ it lands at or above $1$, where the loss is $+1$. With probability $\tfrac12 e^{-1} = 0.184$ it lands at or below $0$, where the loss is $-1$. In between, the loss lies strictly between $-1$ and $1$, and those outputs add $0.052$ to the average. So the loss averages $0.5 - 0.184 + 0.052 = 0.368$, well below its maximum of $1$, and it is negative more than a sixth of the time. Over many rounds these smaller and opposite losses partly cancel. @sec-advanced turns that observation into a much better bound.
 
 ## Post-processing
 
-If $g$ is any function applied to the output, then $\Pr[g(M(x))\in S]=P(g^{-1}(S))\le e^\varepsilon Q(g^{-1}(S))$, because $g^{-1}(S)$ is itself an event. A randomized $g$ is a mixture of deterministic ones, and averaging the inequality over the mixture preserves it. The same one-line argument works for $(\varepsilon,\delta)$-DP.
+Analysts transform published numbers: they round them, combine them and feed them into models. A guarantee is only useful if these transformations cannot undo it. They cannot, for any transformation that does not look at the data again.
 
-## Example: Laplace noise and sensitivity
+Suppose you apply a function $g$ to the output. The event "$g$ of the output lands in $S$" is the same event as "the output lands in the set of points that $g$ maps into $S$". The definition applies to that set too, so $g$ of the output is $\varepsilon$-DP. A randomized $g$, whose randomness is independent of the data, is an average of deterministic functions, and averaging both sides of an inequality preserves it. The same argument works for the approximate guarantee of the next section.
 
-For a numerical query $f$ with sensitivity $\Delta=\sup_{x\sim x'}|f(x)-f(x')|$, release $Y=f(x)+Z$ with $Z\sim\mathrm{Laplace}(0,b)$, whose density is $p_x(y)=(2b)^{-1}\exp(-|y-f(x)|/b)$. The normalizing constants cancel in the ratio, leaving
+# Approximate differential privacy {#sec-approx}
 
-$$\log\frac{p_x(y)}{p_{x'}(y)}=\frac{|y-f(x')|-|y-f(x)|}{b}\le\frac{|f(x)-f(x')|}{b}\le\frac{\Delta}{b}.$$
+Pure DP needs the privacy loss to be bounded. The other standard noise distribution, the Gaussian, does not give a bounded loss. This section shows why, defines the weaker guarantee that Gaussian noise does satisfy, and says exactly what its new parameter $\delta$ measures.
 
-The first inequality is the triangle inequality, $|u|-|v|\le|u-v|$ with $u=y-f(x')$ and $v=y-f(x)$. Setting $b=\Delta/\varepsilon$ gives pure $\varepsilon$-DP. This calculation bounds the ratio at every point for this continuous version of the density, which is stronger than the almost-sure bound the definition needs. For a vector-valued $f$, use independent Laplace noise in each coordinate and the $\ell_1$-sensitivity; the same calculation applies coordinate by coordinate and the bounds add.
+## The Gaussian mechanism's privacy loss {#sec-gauss-loss}
 
-# Approximate $(\varepsilon,\delta)$-differential privacy {#sec-approx}
+Gaussian noise is the other standard way to release a statistic. Its privacy loss turns out to be a normal random variable, which later sections exploit. Let the mechanism release $Y = f(x) + Z$, where $Z$ is normal with mean $0$ and standard deviation $\sigma$. Write $d = f(x) - f(x')$ for the difference between the two true answers.
 
-## Definition: what $\delta$ actually means
+To compute the privacy loss, start from the two normal densities. Their normalizing constants are equal, so the log-ratio is the difference of the exponents:
 
-For $\varepsilon\ge0$ and $0\le\delta\le1$, we require, for every neighbouring ordered pair and every event $S$,
+$$L(Y) = \frac{(Y - f(x'))^2 - (Y - f(x))^2}{2\sigma^2}.$$
 
-$$P(S)\le e^\varepsilon Q(S)+\delta. \tag{3.1}$$
+When the data are $x$, the output is $Y = f(x) + Z$. So $Y - f(x) = Z$ and $Y - f(x') = Z + d$. Substituting these and expanding $(Z + d)^2 = Z^2 + 2dZ + d^2$, the $Z^2$ terms cancel:
 
-Unlike pure DP, this does not give a likelihood ratio that is bounded almost surely. It allows an additive discrepancy in the probability of an event. It is **not** in general equivalent to "the privacy loss exceeds $\varepsilon$ with probability at most $\delta$" with the same parameters; @sec-tail makes both directions precise.
+$$L(Y) = \frac{(Z + d)^2 - Z^2}{2\sigma^2} = \frac{d^2}{2\sigma^2} + \frac{d}{\sigma^2}\,Z.$$ {#eq-gauss-loss}
 
-## The exact meaning of $\delta$: the hockey-stick divergence
+The loss is a constant plus a multiple of the normal noise $Z$, so it is itself normal. Its mean is the constant $d^2/(2\sigma^2)$. Its standard deviation is the multiplier $|d|/\sigma^2$ times the standard deviation $\sigma$ of $Z$, which is $|d|/\sigma$. For a count with $\sigma = 5$ and $d = 1$, the mean is $0.02$ and the standard deviation is $0.2$. That is a small loss on average, with typical values well inside $\pm 1$.
 
-Define $H_\varepsilon(P\|Q)=\sup_S[P(S)-e^\varepsilon Q(S)]$. With densities, the supremum is achieved by the set where $p(y)>e^\varepsilon q(y)$, so
+But a normal variable is unbounded, so there is no $\varepsilon$ that bounds this loss at every output. By @thm-pure-loss the Gaussian mechanism is not $\varepsilon$-DP for any finite $\varepsilon$. Large losses do occur, but only with tiny probability, and a useful definition has to allow for that.
 
-$$H_\varepsilon(P\|Q)=\int\bigl(p(y)-e^\varepsilon q(y)\bigr)_+\,\mathrm d\nu(y),\qquad u_+=\max(u,0). \tag{3.2}$$
+## The definition
 
-To see this, write the difference for an event as $\int_S(p-e^\varepsilon q)\,\mathrm d\nu$. Adding to $S$ points where the integrand is negative can only lower it, and adding every point where it is positive raises it to its maximum. Hence $(\varepsilon,\delta)$-DP is exactly $H_\varepsilon(P\|Q)\le\delta$ **and** $H_\varepsilon(Q\|P)\le\delta$ for every neighbouring pair. Both directions are needed because $H_\varepsilon$ is not symmetric. This is the precise operational meaning of $\delta$.
+::: {#def-approx name="Approximate differential privacy"}
+Let $\varepsilon \ge 0$ and $0 \le \delta \le 1$. A mechanism is **$(\varepsilon, \delta)$-DP** if for every pair of neighbouring datasets $x \sim x'$, in either order, and every event $S$,
+$$P(S) \le e^\varepsilon Q(S) + \delta.$$
+:::
 
-If $P$ has mass that is singular with respect to $Q$ (where $q=0$), that mass counts in full towards $H_\varepsilon$. The loss can therefore be infinite on some outcomes while $(\varepsilon,\delta)$-DP still holds.
+The only change from @def-pure is the additive slack $\delta$. It lets an event be more likely under $x$ than the factor $e^\varepsilon$ allows, by at most $\delta$ in probability.
 
-## From a tail bound on the loss to $(\varepsilon,\delta)$-DP, and why the converse fails {#sec-tail}
+The slack must be tiny, far below one over the number of people in the data. To see why, consider a mechanism that publishes each person's record in full, independently with probability $\delta$. Take an event $S$, and split it according to whether the extra person's record is published. If it is not, the output has the same distribution under $x$ and $x'$, so that part of $S$ is equally likely under both. The part where it is published is impossible under $x'$, and has probability at most $\delta$ under $x$. So $P(S) \le Q(S) + \delta$, and the mechanism is $(0, \delta)$-DP. Yet on a dataset of $n$ people it publishes about $n\delta$ records in full. In practice $\delta$ is therefore set to $10^{-5}$ or smaller.
 
-Every conversion below ends with the same step, so we prove it once.
+## What $\delta$ measures {#sec-exact-delta}
 
-**Lemma 3.1 (tail bound implies approximate DP).** If $\Pr_{Y\sim P}[L(Y)>\varepsilon]\le\eta$, then $P(S)\le e^\varepsilon Q(S)+\eta$ for every event $S$.
+Given a mechanism and an $\varepsilon$, what is the smallest $\delta$ that works? It is the largest amount by which any event breaks the pure guarantee, the largest value of $P(S) - e^\varepsilon Q(S)$. The next result computes it in terms of the privacy loss. @sec-rare uses it to explain what $\delta$ does and does not tell you, and @sec-worked uses it to find the exact guarantee of the Gaussian mechanism.
 
-*Proof.* Split $S$ into $S_{\le}=S\cap\{L\le\varepsilon\}$ and $S_>=S\cap\{L>\varepsilon\}$. On $S_\le$ the density bound $p\le e^\varepsilon q$ holds (on the part where $q=0$, $L=+\infty$, so that part lies in $S_>$), and integrating it gives $P(S_\le)\le e^\varepsilon Q(S_\le)\le e^\varepsilon Q(S)$. The other part has $P(S_>)\le P(L>\varepsilon)\le\eta$. Add the two. $\square$
+To state it, write $u_+ = \max(u, 0)$ for the positive part of a number, and $P(L > \varepsilon)$ for the probability under $P$ of the set of outputs where the loss exceeds $\varepsilon$.
 
-The same computation gives an exact formula. On the optimal set $\{L>\varepsilon\}$, $q=e^{-L}p$, so
+::: {#thm-hockey name="The exact δ"}
+For a pair of output distributions $P$ and $Q$, the largest value of $P(S) - e^\varepsilon Q(S)$ over all events $S$ is
+$$\int \bigl(p(y) - e^\varepsilon q(y)\bigr)_+\,dy.$$
+It can also be written in terms of the privacy loss in two ways:
+$$P(L > \varepsilon) - e^\varepsilon\, Q(L > \varepsilon) = \mathbb E_P\Bigl[\bigl(1 - e^{\varepsilon - L}\bigr)_+\Bigr].$$
+The mechanism is $(\varepsilon, \delta)$-DP exactly when this quantity is at most $\delta$ for every pair of neighbouring datasets, in both orders.
+:::
 
-$$H_\varepsilon(P\|Q)=\mathbb E_P\bigl[(1-e^{\varepsilon-L})_+\bigr]\le\Pr_P[L>\varepsilon]. \tag{3.3}$$
+The best event for breaking the inequality collects every output where $p$ exceeds $e^\varepsilon q$, and nothing else.
 
-The weight $1-e^{\varepsilon-L}$ is close to $0$ when $L$ only slightly exceeds $\varepsilon$ and close to $1$ when $L$ is far above it. So $\delta$ is the tail probability of the loss *discounted* by how far the loss goes beyond $\varepsilon$.
+::: {.proof}
+**The best event.** Write the quantity to maximize as an integral over the event:
+$$P(S) - e^\varepsilon Q(S) = \int_S \bigl(p(y) - e^\varepsilon q(y)\bigr)\,dy.$$
+Adding to $S$ a set of outputs where the integrand is negative lowers the integral, and adding a set where it is positive raises it. So the integral is largest for the event where the integrand is positive, which is the event $\{L > \varepsilon\}$, and its value there is the integral of the positive part.
 
-**The converse fails.** Take $\varepsilon=0$, $P=(\tfrac12,\tfrac12)$ and $Q=(\tfrac12+\delta,\tfrac12-\delta)$ on two outcomes. Then $H_0(P\|Q)=H_0(Q\|P)=\delta$, so the pair is $(0,\delta)$-indistinguishable. Yet $L>0$ on the second outcome, which has probability $\tfrac12$ under $P$, however small $\delta$ is.
+**The first form.** Split that integral into its two terms. The integral of $p$ over $\{L > \varepsilon\}$ is $P(L > \varepsilon)$, and the integral of $e^\varepsilon q$ over it is $e^\varepsilon Q(L > \varepsilon)$.
 
-## Two probabilistic tools
+**The second form.** On the event $\{L > \varepsilon\}$ the definition of the loss gives $q = e^{-L}p$, so the integrand is $p\,(1 - e^{\varepsilon - L})$. Its integral is the average under $P$ of $1 - e^{\varepsilon - L}$ over the outputs where that factor is positive, which is $\mathbb E_P[(1 - e^{\varepsilon - L})_+]$. Outputs where $q = 0$ have $L = +\infty$ and count with factor $1$.
+:::
 
-The concentration arguments below use only these two facts.
+This quantity is known as the **hockey-stick divergence**, after the shape of the graph of $u \mapsto u_+$. The second form is the one to remember. It says that $\delta$ is an average over the outputs with a loss above $\varepsilon$, in which each output is discounted by the factor $1 - e^{\varepsilon - L}$. That factor is close to $0$ when the loss only just exceeds $\varepsilon$, and close to $1$ when the loss is far above it. Outputs that are impossible under $x'$ count in full.
 
-**Chernoff's bound.** For any random variable $X$, any $t$ and any $\lambda>0$, Markov's inequality applied to the nonnegative variable $e^{\lambda X}$ gives
+# Proving a guarantee by showing that large losses are rare {#sec-rare}
 
-$$\Pr[X\ge t]=\Pr[e^{\lambda X}\ge e^{\lambda t}]\le e^{-\lambda t}\,\mathbb E[e^{\lambda X}]. \tag{3.4}$$
+Every guarantee in the rest of the note is proved the same way. You show that the privacy loss exceeds some value $\varepsilon$ only with a small probability, and you conclude that the mechanism is $(\varepsilon, \delta)$-DP with $\delta$ equal to that probability. This section proves that the conclusion is valid. It then shows that it only works in that direction, which is why @sec-composing-delta needs a separate argument for mechanisms that already have a $\delta$.
 
-**Hoeffding's lemma** (cited, not proved). If $\mathbb E X=0$ and $a\le X\le b$ almost surely, then $\mathbb E[e^{\lambda X}]\le\exp\bigl(\lambda^2(b-a)^2/8\bigr)$ for every real $\lambda$. The same holds conditionally on a $\sigma$-field when the conditional mean is $0$ and the range has width $b-a$. For a range of width $2\varepsilon$ the exponent is $\lambda^2\varepsilon^2/2$.
+The probability in these arguments is not a property of the mechanism but a number you pick when you apply a theorem: a smaller one gives a smaller slack and a larger $\varepsilon$. To keep it apart from the $\delta$ of a mechanism's existing guarantee, the note writes it $\eta$. In the final guarantee it plays the role of $\delta$.
 
-## Composition bounds
+::: {#lem-tail name="Rare large losses give approximate DP"}
+Suppose that for every pair of neighbouring datasets, in both orders, the privacy loss satisfies $P(L > \varepsilon) \le \eta$. Then the mechanism is $(\varepsilon, \eta)$-DP.
+:::
 
-Basic adaptive composition of $(\varepsilon_i,\delta_i)$-DP mechanisms gives $(\sum_i\varepsilon_i,\sum_i\delta_i)$-DP. The advanced composition theorem of Dwork–Rothblum–Vadhan (2010), with the improved mean term of Dwork–Rothblum (2016, Theorem 1.1), states that $k$ adaptive $(\varepsilon,\delta_0)$-DP mechanisms together satisfy
+The proof splits an event into the outputs with a small loss, where the pure guarantee holds, and the rest, which is rare.
 
-$$\left(\varepsilon\sqrt{2k\log(1/\eta)}+\frac{k\varepsilon(e^\varepsilon-1)}2,\;k\delta_0+\eta\right)\text{-DP}\qquad(0<\eta<1). \tag{3.5}$$
+::: {.proof}
+Fix an event $S$. Split it into the outputs with a loss of at most $\varepsilon$ and those with a larger loss:
+$$S_{\text{small}} = S \cap \{L \le \varepsilon\}, \qquad S_{\text{large}} = S \cap \{L > \varepsilon\}.$$
+On $S_{\text{small}}$ the density bound $p \le e^\varepsilon q$ holds, because that is what $L \le \varepsilon$ means. Outputs where $q = 0$ and $p > 0$ have an infinite loss, so they all lie in $S_{\text{large}}$. Integrating the density bound over $S_{\text{small}}$ gives
+$$P(S_{\text{small}}) \le e^\varepsilon Q(S_{\text{small}}).$$
+Since $S_{\text{small}}$ is part of $S$, its probability under $Q$ is at most $Q(S)$, so $P(S_{\text{small}}) \le e^\varepsilon Q(S)$. The other part is rare by assumption: $P(S_{\text{large}}) \le P(L > \varepsilon) \le \eta$. Adding the two bounds gives $P(S) \le e^\varepsilon Q(S) + \eta$.
+:::
 
-The individual mechanism's slack, often written $\delta'$, is renamed $\delta_0$ here, and the new parameter chosen when the theorem is applied, often written $\delta$, is renamed $\eta$. Both are additive terms in the final guarantee, but only $\eta$ is a free choice. The condition $\eta>0$ is needed for $\log(1/\eta)$ to be finite; at $\eta=0$, basic composition is still available.
+The lemma does not work in reverse: a mechanism can be $(\varepsilon, \delta)$-DP while its loss exceeds $\varepsilon$ far more often than with probability $\delta$. The reason is the discount in @thm-hockey. A tail probability counts every output with a loss above $\varepsilon$ in full, while $\delta$ counts an output whose loss only just exceeds $\varepsilon$ at a tiny fraction of its probability.
 
-## Where the improved mean bound comes from
+A mechanism with only two possible outputs makes this concrete. @tbl-two-outputs gives their probabilities under the two datasets, for some small $\delta$.
 
-For pure DP, $R=p/q$ satisfies $a=e^{-\varepsilon}\le R\le b=e^\varepsilon$ $Q$-almost surely, and $\mathbb E_Q[R]=\int p\,\mathrm d\nu=1$. The mean privacy loss is a Kullback–Leibler (KL) divergence:
+| Output | Probability under $P$ | Probability under $Q$ |
+|:---|:---:|:---:|
+| $0$ | $\tfrac12$ | $\tfrac12 + \delta$ |
+| $1$ | $\tfrac12$ | $\tfrac12 - \delta$ |
 
-$$\mathbb E_P[L]=\int p\log\frac pq\,\mathrm d\nu=\int qR\log R\,\mathrm d\nu=\mathbb E_Q[R\log R]=D_{\mathrm{KL}}(P\|Q).$$
+: A mechanism that is $(0, \delta)$-DP, although its loss is positive half the time. {#tbl-two-outputs}
 
-Why consider $r\log r$? It is exactly the function inside the expectation we need to bound. It is convex, since $(r\log r)''=1/r>0$, so on $[a,b]$ its graph lies below the chord joining its values at $a$ and $b$:
+Take $\varepsilon = 0$. With two outputs, the integral in @thm-hockey becomes a sum over them. Output $0$ contributes nothing, because it is less likely under $P$ than under $Q$. Output $1$ contributes the difference $\tfrac12 - (\tfrac12 - \delta) = \delta$. So the pair is $(0, \delta)$-DP in this order, and the same computation gives $\delta$ in the other order. Yet output $1$ is more likely under $P$, so its loss is positive, and it occurs with probability $\tfrac12$. The loss there is $\log\bigl(\tfrac12 / (\tfrac12 - \delta)\bigr)$, only about $2\delta$, which is why @thm-hockey discounts it almost entirely. So an $(\varepsilon, \delta)$-DP guarantee does not tell you that the loss exceeds $\varepsilon$ with probability at most $\delta$, and a proof must never assume that it does.
 
-$$R\log R\le\frac{b-R}{b-a}\,a\log a+\frac{R-a}{b-a}\,b\log b\qquad Q\text{-a.s.}$$
+# Advanced composition {#sec-advanced}
 
-The right-hand side is linear in $R$, so taking $\mathbb E_Q$ (justified by the almost-sure inequality) simply replaces $R$ by $\mathbb E_Q[R]=1$:
+@thm-basic charged $k$ releases at $\varepsilon$ each a total of $k\varepsilon$, as if every round reached its largest loss and all the losses pushed in the same direction. This section shows that the total loss of all the rounds is, with high probability, much smaller.
 
-$$D_{\mathrm{KL}}(P\|Q)\le\frac{b-1}{b-a}\,a\log a+\frac{1-a}{b-a}\,b\log b .$$
+## The idea
 
-**The algebra.** Substitute $\log a=-\varepsilon$, $\log b=\varepsilon$ and $ab=1$. The numerator is $\varepsilon\bigl[-(b-1)a+(1-a)b\bigr]=\varepsilon(a+b-2ab)=\varepsilon(a+b-2)$. Writing $s=e^{\varepsilon/2}$, we have $a+b-2=(s-s^{-1})^2$ and $b-a=(s-s^{-1})(s+s^{-1})$, so
+Think of the total loss @eq-loss-sum as a random walk with $k$ steps, each between $-\varepsilon$ and $\varepsilon$. Two facts keep the walk short.
 
-$$D_{\mathrm{KL}}(P\|Q)\le\varepsilon\,\frac{s-s^{-1}}{s+s^{-1}}=\varepsilon\tanh\frac\varepsilon2=\varepsilon\,\frac{e^\varepsilon-1}{e^\varepsilon+1}\le\frac{\varepsilon(e^\varepsilon-1)}2. \tag{3.6}$$
+First, each step is small on average. The average loss is never negative, because outputs that favour $x$ are more likely when the data are $x$. But Step 1 below shows that it is at most about $\varepsilon^2/2$, far below the worst case $\varepsilon$ when $\varepsilon$ is small. So the averages of the $k$ steps add up to about $k\varepsilon^2/2$.
 
-The last step uses $e^\varepsilon+1\ge2$. The looser right-hand side is the mean term in (3.5); the chord gives the sharper $\varepsilon\tanh(\varepsilon/2)$, which is at most $\varepsilon^2/2$ because $\tanh u\le u$ for $u\ge0$.
+Second, each step fluctuates around its average, and fluctuations partly cancel. A sum of $k$ independent fluctuations, each of size up to $\varepsilon$, typically has size about $\varepsilon\sqrt{k}$, not $k\varepsilon$. The rounds here need not be independent, since each may depend on the earlier outputs, but Step 3 shows that the same bound holds. Together, the total loss is at most about $k\varepsilon^2/2 + \varepsilon\sqrt{k}$, with the second term multiplied by a factor that grows slowly as the probability of failure $\eta$ shrinks.
 
-## Where the square-root term comes from {#sec-sqrt}
+::: {#thm-advanced name="Advanced composition"}
+Suppose that for every history, each of $k$ releases is $\varepsilon$-DP. Then for every $\eta$ between $0$ and $1$, the sequence of releases is $(\varepsilon_{\text{total}}, \eta)$-DP with
+$$\varepsilon_{\text{total}} = \varepsilon\sqrt{2k\log(1/\eta)} + \frac{k\varepsilon(e^\varepsilon - 1)}{2}.$$
+:::
 
-We prove (3.5) for $\delta_0=0$. Sample the transcript on dataset $x$, so all probabilities are under $P$. Let $\mathcal F_{i-1}$ be the $\sigma$-field of the first $i-1$ outputs. Conditionally on the history, round $i$ is an $\varepsilon$-DP mechanism, so its mean loss is a KL divergence bounded by (3.6):
+The first term is the fluctuation, and the factor $\sqrt{2\log(1/\eta)}$ is the slowly growing multiplier: halving $\eta$ increases it only a little. The second term is the sum of the averages. It is close to $k\varepsilon^2/2$ when $\varepsilon$ is small, because $e^\varepsilon - 1$ is then close to $\varepsilon$. Dwork, Rothblum and Vadhan (2010) proved the theorem with a second term twice as large, and Dwork and Rothblum (2016) gave the form above.
 
-$$\mu_i=\mathbb E[L_i\mid\mathcal F_{i-1}]\le\mu_0=\frac{\varepsilon(e^\varepsilon-1)}2 .$$
+The proof has four steps. Step 1 bounds the average loss of one round. Step 2 states the two probability tools that the rest of the proof needs. Step 3 shows that the sum of the fluctuations is rarely large. Step 4 adds the averages back and uses @lem-tail to turn the result into a guarantee.
 
-Let $X_i=L_i-\mu_i$. Then $\mathbb E[X_i\mid\mathcal F_{i-1}]=0$, and since $L_i\in[-\varepsilon,\varepsilon]$, $X_i$ lies in $[-\varepsilon-\mu_i,\varepsilon-\mu_i]$, an interval of width $2\varepsilon$ that is fixed once the history is. Hoeffding's lemma, applied conditionally, gives
+## Step 1: the average loss of one round is small {#sec-mean}
 
-$$\mathbb E[e^{\lambda X_i}\mid\mathcal F_{i-1}]\le e^{\lambda^2\varepsilon^2/2}.$$
+Fix one round and its history, and write $P$ and $Q$ for that round's two output distributions. The average privacy loss under $P$ is
 
-**The tower step.** Let $S_j=\sum_{i\le j}X_i$. Because $S_{j-1}$ is fixed by $\mathcal F_{j-1}$,
+$$\mathbb E_P[L] = \int p(y)\log\frac{p(y)}{q(y)}\,dy.$$
 
-$$\mathbb E[e^{\lambda S_j}]=\mathbb E\bigl[e^{\lambda S_{j-1}}\,\mathbb E[e^{\lambda X_j}\mid\mathcal F_{j-1}]\bigr]\le e^{\lambda^2\varepsilon^2/2}\,\mathbb E[e^{\lambda S_{j-1}}],$$
+This average is known as the **Kullback–Leibler divergence** of $P$ from $Q$, written $D_{\mathrm{KL}}(P \| Q)$. To bound it we use what $\varepsilon$-DP says about the likelihood ratio $R = p/q$, so the first move is to write the average in terms of $R$. Under $\varepsilon$-DP, $q$ is positive wherever $p$ is, so we may divide by it, and $p = qR$ turns the integral into an average under $Q$:
 
-and by induction $\mathbb E[e^{\lambda S_k}]\le e^{k\lambda^2\varepsilon^2/2}$. Chernoff's bound (3.4) then gives, for every $\lambda>0$,
+$$\mathbb E_P[L] = \int q(y)\,R(y)\log R(y)\,dy = \mathbb E_Q[R \log R].$$
 
-$$\Pr[S_k\ge t]\le\exp\left(-\lambda t+\frac{k\lambda^2\varepsilon^2}{2}\right).$$
+Two facts about $R$ are now available. Because the round is $\varepsilon$-DP, @thm-pure-loss puts $R$ between $r_- = e^{-\varepsilon}$ and $r_+ = e^\varepsilon$. And its average under $Q$ is one, because $\mathbb E_Q[R] = \int q\,(p/q) = \int p = 1$. The question is how large $\mathbb E_Q[R\log R]$ can be under these two constraints.
 
-The exponent is a parabola in $\lambda$ with its minimum where $-t+k\lambda\varepsilon^2=0$, that is at $\lambda=t/(k\varepsilon^2)$. There it equals $-t^2/(2k\varepsilon^2)$, so $\Pr[S_k\ge t]\le\exp[-t^2/(2k\varepsilon^2)]$. Choosing $t=\varepsilon\sqrt{2k\log(1/\eta)}$ makes this at most $\eta$.
+The function $r \mapsto r\log r$ is convex, since its second derivative is $1/r > 0$. A convex function lies below the straight line, or chord, joining two of its points. The chord from $r_-$ to $r_+$ gives each point between them the weights that place it on the segment, so for every $R$ between $r_-$ and $r_+$,
 
-Finally $L_{1:k}=S_k+\sum_i\mu_i\le S_k+k\mu_0$, so
+$$R\log R \le \frac{r_+ - R}{r_+ - r_-}\,r_-\log r_- + \frac{R - r_-}{r_+ - r_-}\,r_+\log r_+.$$
 
-$$\Pr_P\bigl[L_{1:k}>\varepsilon_*\bigr]\le\eta,\qquad\varepsilon_*=\varepsilon\sqrt{2k\log(1/\eta)}+k\mu_0 .$$
+The right-hand side is a straight line in $R$, so its average under $Q$ is the same line evaluated at the average of $R$, which is $1$:
 
-Lemma 3.1 turns this tail bound into $P(S)\le e^{\varepsilon_*}Q(S)+\eta$. The hypotheses are symmetric in $x$ and $x'$, so the same argument with the roles exchanged gives the other direction. This proves (3.5) when $\delta_0=0$.
+$$\mathbb E_Q[R\log R] \le \frac{(r_+ - 1)\,r_-\log r_- + (1 - r_-)\,r_+\log r_+}{r_+ - r_-}.$$
 
-**When $\delta_0>0$.** One needs an extra reduction, which we cite rather than prove. An $(\varepsilon,\delta_0)$-indistinguishable pair can be written as $P=(1-\delta_0)P'+\delta_0P''$ and $Q=(1-\delta_0)Q'+\delta_0Q''$, where $P'$ and $Q'$ are $\varepsilon$-indistinguishable (DRV10; Kairouz–Oh–Viswanath 2015 give the canonical form). Running the argument above on the primed parts and charging each round's exceptional part to the slack costs at most $k\delta_0$ in total. It is **not** valid to assume that $(\varepsilon,\delta_0)$-DP bounds $\Pr[L>\varepsilon]$ by $\delta_0$: the example in @sec-tail shows that the probability can be far larger.
+It remains to simplify this fraction. Substitute $\log r_- = -\varepsilon$ and $\log r_+ = \varepsilon$ in the numerator:
 
-# CDP: mean-concentrated differential privacy (Dwork–Rothblum) {#sec-cdp}
+$$\varepsilon\bigl((1 - r_-)\,r_+ - (r_+ - 1)\,r_-\bigr) = \varepsilon\bigl(r_+ + r_- - 2\,r_- r_+\bigr) = \varepsilon\,(r_+ + r_- - 2),$$
 
-## Motivation and definition
+where the last step uses $r_- r_+ = 1$. So the bound is $\varepsilon\,(r_+ + r_- - 2)/(r_+ - r_-)$. Both numerator and denominator factor neatly in terms of $s = e^{\varepsilon/2}$, because $r_+ + r_- - 2 = (s - 1/s)^2$ and $r_+ - r_- = (s - 1/s)(s + 1/s)$, as expanding the right-hand sides shows. The common factor $s - 1/s$ cancels:
 
-Advanced composition used two facts about $L$ beyond its worst-case value: its mean, and how fast deviations above the mean become unlikely. Dwork–Rothblum make these two quantities the *definition* of privacy.
+$$\mathbb E_P[L] \le \varepsilon\,\frac{s - 1/s}{s + 1/s} = \varepsilon\,\frac{e^{\varepsilon/2} - e^{-\varepsilon/2}}{e^{\varepsilon/2} + e^{-\varepsilon/2}} = \varepsilon\tanh\frac{\varepsilon}{2}.$$ {#eq-mean-bound}
 
-A real random variable $X$ is $\tau$-subgaussian if $\mathbb E[e^{\lambda(X-\mathbb EX)}]\le\exp(\lambda^2\tau^2/2)$ for every real $\lambda$. A mechanism is $(\mu,\tau)$-CDP when, for every ordered neighbouring pair, the privacy loss under $P$ satisfies
+The last step is the definition of the hyperbolic tangent, $\tanh u = (e^u - e^{-u})/(e^u + e^{-u})$. For $u \ge 0$ it satisfies $\tanh u \le u$, so the bound is at most $\varepsilon^2/2$, the size the idea promised. Multiplying the numerator and denominator of the middle fraction by $e^{\varepsilon/2}$ gives $\tanh(\varepsilon/2) = (e^\varepsilon - 1)/(e^\varepsilon + 1)$. Since $e^\varepsilon + 1 \ge 2$, the bound is also at most $\varepsilon(e^\varepsilon - 1)/2$, the looser form that @thm-advanced uses, following the literature. For the counting example of @sec-basic, with $\varepsilon = 1$, the exact average loss is $0.368$, the bound @eq-mean-bound gives $0.462$, and the looser form gives $0.859$.
 
-$$\mathbb E_P[L]\le\mu,\qquad\mathbb E_P\bigl[e^{\lambda(L-\mathbb E_PL)}\bigr]\le e^{\lambda^2\tau^2/2}\quad\text{for every }\lambda\in\mathbb R. \tag{4.1}$$
+## Step 2: two probability tools
 
-This version of CDP is also called mean-concentrated DP (mCDP), to distinguish it from zCDP. Unlike pure DP, it does not require a finite worst-case bound on the loss.
+Step 3 has to show that a sum of random fluctuations is rarely large. The standard way is through the moment generating function $\mathbb E[e^{\lambda X}]$ of a random variable $X$. It suits sums because the exponential of a sum is a product of exponentials, and Step 3 shows how to average that product one factor at a time. Two facts do the work.
 
-## CDP to approximate DP
+The first turns a bound on the moment generating function into a bound on a tail probability. For every $\lambda > 0$, the event $X \ge t$ is the same as the event $e^{\lambda X} \ge e^{\lambda t}$. Markov's inequality, applied to the positive variable $e^{\lambda X}$, bounds the probability of that event by $\mathbb E[e^{\lambda X}]/e^{\lambda t}$. This is **Chernoff's bound**:
 
-Apply Chernoff's bound (3.4) to $X=L-\mathbb EL$ with the subgaussian bound:
+$$\Pr[X \ge t] \le e^{-\lambda t}\,\mathbb E\bigl[e^{\lambda X}\bigr] \qquad\text{for every } \lambda > 0.$$ {#eq-chernoff}
 
-$$\Pr[L-\mathbb EL\ge t]\le\inf_{\lambda>0}\exp\left(-\lambda t+\frac{\lambda^2\tau^2}2\right).$$
+The second bounds the moment generating function of a bounded variable with mean zero. It is **Hoeffding's lemma**, which this note cites without proof (Boucheron, Lugosi and Massart, 2013, Lemma 2.2). If $X$ has mean $0$ and always lies between two numbers $\ell$ and $h$, then for every real $\lambda$
 
-The exponent is minimized where $-t+\lambda\tau^2=0$, at $\lambda=t/\tau^2$, where it equals $-t^2/(2\tau^2)$:
+$$\mathbb E\bigl[e^{\lambda X}\bigr] \le \exp\left(\frac{\lambda^2 (h - \ell)^2}{8}\right).$$ {#eq-hoeffding}
 
-$$\Pr[L-\mathbb EL\ge t]\le e^{-t^2/(2\tau^2)}.$$
+A normal variable with mean zero and standard deviation $(h - \ell)/2$ has moment generating function exactly equal to this bound. So the lemma says that a bounded variable has tails no heavier than that normal variable. The lemma is a statement about a single distribution, so it also applies to the conditional distribution given a history, provided the conditional mean is zero and $\ell$ and $h$ are fixed by the history.
 
-Choose $t=\tau\sqrt{2\log(1/\eta)}$ to make the right-hand side $\eta$. Since $\mathbb EL\le\mu$, the event $\{L>\mu+t\}$ is contained in $\{L-\mathbb EL\ge t\}$, so
+## Step 3: the fluctuations rarely add up to much
 
-$$\Pr\bigl[L>\mu+\tau\sqrt{2\log(1/\eta)}\bigr]\le\eta .$$
+Return to the $k$ rounds. All probabilities in this step are for the data $x$, so the outputs are drawn from $P$. Let $m_i$ be the average loss of round $i$ given its history. Step 1 bounds it, in the form @thm-advanced uses, by
 
-Lemma 3.1, applied to both ordered pairs, gives for each $0<\eta<1$
+$$m_i \le m_0, \qquad m_0 = \frac{\varepsilon(e^\varepsilon - 1)}{2}.$$
 
-$$(\mu,\tau)\text{-CDP}\Longrightarrow\bigl(\mu+\tau\sqrt{2\log(1/\eta)},\,\eta\bigr)\text{-DP}. \tag{4.2}$$
+The fluctuation of round $i$ is $X_i = L_i - m_i$, and it has mean zero given the history. Because $L_i$ lies between $-\varepsilon$ and $\varepsilon$, and $m_i$ is a number fixed by the history, the fluctuation lies between $-\varepsilon - m_i$ and $\varepsilon - m_i$. That interval has width $2\varepsilon$ and is fixed by the history. Hoeffding's lemma @eq-hoeffding with $h - \ell = 2\varepsilon$ then gives, for every history,
 
-## Adaptive CDP composition: what the simple argument proves
+$$\mathbb E\bigl[e^{\lambda X_i} \mid \text{history}\bigr] \le e^{\lambda^2\varepsilon^2/2}.$$
 
-Suppose that for every history, round $i$ is $(\mu_i,\tau_i)$-CDP. Let $m_i=\mathbb E[L_i\mid\mathcal F_{i-1}]$, the conditional mean, which is at most $\mu_i$ but depends on the history. For $\lambda>0$, replacing $m_i$ by the larger constant $\mu_i$ can only lower the exponent, so
+The rounds need not be independent, because each may depend on the outputs before it. The argument handles that by averaging over one round at a time, starting from the last. Let $S_j = X_1 + \dots + X_j$ be the sum of the first $j$ fluctuations. An average can be computed in two stages, first over round $j$ given everything before it, then over everything before it. This is the tower rule for conditional expectations. In the first stage, $S_{j-1}$ is fixed by the outputs before round $j$, so it comes out as a constant factor:
 
-$$\mathbb E\bigl[e^{\lambda(L_i-\mu_i)}\mid\mathcal F_{i-1}\bigr]\le\mathbb E\bigl[e^{\lambda(L_i-m_i)}\mid\mathcal F_{i-1}\bigr]\le e^{\lambda^2\tau_i^2/2}.$$
+$$\mathbb E\bigl[e^{\lambda S_j}\bigr] = \mathbb E\Bigl[e^{\lambda S_{j-1}}\;\mathbb E\bigl[e^{\lambda X_j} \mid y_1, \dots, y_{j-1}\bigr]\Bigr] \le e^{\lambda^2\varepsilon^2/2}\;\mathbb E\bigl[e^{\lambda S_{j-1}}\bigr].$$
 
-The tower step of @sec-sqrt then gives
+Repeating this for $j = k, k - 1, \dots, 1$ multiplies $k$ such factors:
 
-$$\mathbb E\Bigl[e^{\lambda(L_{1:k}-\sum_i\mu_i)}\Bigr]\le\exp\Bigl(\tfrac{\lambda^2}{2}\textstyle\sum_i\tau_i^2\Bigr)\qquad(\lambda>0). \tag{4.3}$$
+$$\mathbb E\bigl[e^{\lambda S_k}\bigr] \le e^{k\lambda^2\varepsilon^2/2}.$$
 
-This is a **one-sided, uncentred** bound, and it is all that the conversion (4.2) uses: rerunning that derivation with (4.3) gives
+Chernoff's bound @eq-chernoff turns this into a tail bound. For every $t > 0$ and every $\lambda > 0$,
 
-$$k\text{ adaptive rounds}\Longrightarrow\Bigl(\textstyle\sum_i\mu_i+\sqrt{\sum_i\tau_i^2}\,\sqrt{2\log(1/\eta)},\;\eta\Bigr)\text{-DP}. \tag{4.4}$$
+$$\Pr[S_k \ge t] \le \exp\left(-\lambda t + \frac{k\lambda^2\varepsilon^2}{2}\right).$$
 
-For identical rounds this is $k\mu+\tau\sqrt{2k\log(1/\eta)}$, the mean-plus-square-root structure of advanced composition.
+The bound holds for every positive $\lambda$, so we pick the one that makes it smallest. The exponent is a parabola in $\lambda$, smallest where its derivative $-t + k\lambda\varepsilon^2$ is zero, at $\lambda = t/(k\varepsilon^2)$. Substituting that value, the exponent becomes $-t^2/(k\varepsilon^2) + t^2/(2k\varepsilon^2) = -t^2/(2k\varepsilon^2)$. So
 
-**What this argument does not prove.** The statement that the composition is again $(\sum_i\mu_i,\sqrt{\sum_i\tau_i^2})$-CDP, in the sense of (4.1), does not follow from multiplying conditional MGFs. Definition (4.1) centres $L_{1:k}$ at its unconditional mean $\sum_i\mathbb E[m_i]$, but the conditional bounds centre each $L_i$ at the random $m_i$; the difference $\sum_i(m_i-\mathbb Em_i)$ is not controlled by the per-round hypotheses. For $\lambda<0$, moreover, replacing $m_i$ by $\mu_i$ moves the inequality the wrong way. Dwork–Rothblum (2016) state a composition theorem for CDP; Bun–Steinke (2016) discuss the technical difficulties of the mCDP definition. This note relies only on (4.3)–(4.4), which it proves.
+$$\Pr[S_k \ge t] \le \exp\left(-\frac{t^2}{2k\varepsilon^2}\right).$$
 
-## Pure DP and Gaussian noise as CDP examples
+To make this probability equal to $\eta$, choose $t = \varepsilon\sqrt{2k\log(1/\eta)}$. This is the first term of @thm-advanced.
 
-**Pure DP.** Under $\varepsilon$-DP, $L\in[-\varepsilon,\varepsilon]$ $P$-a.s., so $L-\mathbb EL$ lies in an interval of width $2\varepsilon$ and Hoeffding's lemma makes it $\varepsilon$-subgaussian. With the mean bound (3.6),
+## Step 4: add the averages back and conclude
 
-$$\varepsilon\text{-DP}\Longrightarrow\left(\frac{\varepsilon(e^\varepsilon-1)}2,\;\varepsilon\right)\text{-CDP}.$$
+The total loss is the sum of the fluctuations plus the sum of the averages, and each average is at most $m_0$:
 
-**Gaussian noise.** Take a scalar Gaussian mechanism $M(x)=f(x)+N(0,\sigma^2)$ with $|f(x)-f(x')|\le\Delta$, and let $d=f(x)-f(x')$. A sample under $P$ is $Y=f(x)+Z$ with $Z\sim N(0,\sigma^2)$, so $Y-f(x)=Z$ and $Y-f(x')=Z+d$. The normalizing constants cancel, and
+$$L = S_k + \sum_{i=1}^k m_i \le S_k + k m_0.$$
 
-$$L(Y)=\frac{(Y-f(x'))^2-(Y-f(x))^2}{2\sigma^2}=\frac{(Z+d)^2-Z^2}{2\sigma^2}=\frac{d^2}{2\sigma^2}+\frac{dZ}{\sigma^2}. \tag{4.5}$$
+So the total loss exceeds $t + k m_0$ only if $S_k$ exceeds $t$, which by Step 3 has probability at most $\eta$. The value $t + k m_0$ is exactly $\varepsilon_{\text{total}}$, so
 
-So under $P$ the loss is Gaussian with mean $d^2/(2\sigma^2)$ and variance $d^2\sigma^2/\sigma^4=d^2/\sigma^2$. A centred Gaussian with variance $v$ has MGF $\mathbb Ee^{\lambda X}=e^{\lambda^2v/2}$, so the centred loss is $(|d|/\sigma)$-subgaussian, with equality. Bounding $|d|\le\Delta$,
+$$P(L > \varepsilon_{\text{total}}) \le \eta.$$
 
-$$M\text{ is }\left(\frac{\Delta^2}{2\sigma^2},\;\frac{\Delta}{\sigma}\right)\text{-CDP}. \tag{4.6}$$
+The assumptions are the same for the swapped pair $(x', x)$, so the same bound holds in the other order. @lem-tail now gives the $(\varepsilon_{\text{total}}, \eta)$-DP guarantee, which proves @thm-advanced.
 
-The loss in (4.5) is unbounded, since $Z$ is, so the Gaussian mechanism is **not** $\varepsilon$-DP for any finite $\varepsilon$. This is the case that concentrated notions were built for.
+## How much it saves
 
-# zCDP: the Rényi-divergence formulation (Bun–Steinke) {#sec-zcdp}
+Take $k = 100$ releases at $\varepsilon = 0.1$, and choose $\eta = 10^{-5}$, so that $\log(1/\eta) = 11.513$. The first term is then $0.1\sqrt{200 \times 11.513} = 4.80$, and the second is only $0.53$. Their total of $5.32$ is about half of the $10$ that basic composition charges.
 
-## Why introduce Rényi divergence?
+The saving grows with the number of releases, because the fluctuation grows like $\sqrt{k}$ while basic composition grows like $k$. But it shrinks as $\varepsilon$ grows, because the second term grows faster than $\varepsilon$. When $\varepsilon = 1$, for example, the second term is $k(e - 1)/2 = 0.86\,k$, almost as large as the $k$ that basic composition charges in total. @sec-worked shows a case where advanced composition is worse than basic composition for this reason.
 
-CDP controls the whole MGF of the centred privacy loss, and @sec-cdp showed that the centring is what makes composition awkward. Bun–Steinke instead bound the **Rényi divergence** at every order $\alpha>1$. This keeps the useful tail bounds and makes adaptive composition clean.
+## Rounds that already have a $\delta$ {#sec-composing-delta}
 
-For $P\ll Q$, the Rényi divergence of order $\alpha>1$ is
+The Gaussian mechanism is not $\varepsilon$-DP for any $\varepsilon$, only $(\varepsilon, \delta)$-DP. To compose Gaussian releases with the theorems above, as @sec-worked does, you need versions of them for rounds that each have a slack $\delta_0$. They exist, and they cost an extra $k\delta_0$ in the slack:
 
-$$D_\alpha(P\|Q)=\frac1{\alpha-1}\log\int\left(\frac{\mathrm dP}{\mathrm dQ}\right)^{\alpha}\mathrm dQ, \tag{5.1}$$
+- by basic composition, $k$ rounds that are each $(\varepsilon, \delta_0)$-DP are $(k\varepsilon,\, k\delta_0)$-DP;
+- by advanced composition, they are $(\varepsilon_{\text{total}},\, k\delta_0 + \eta)$-DP, with $\varepsilon_{\text{total}}$ as in @thm-advanced.
 
-and $D_\alpha(P\|Q)=+\infty$ when $P\not\ll Q$. Using $R=e^L$, the integral is $\mathbb E_Q[e^{\alpha L}]$. Since $\mathrm dP=R\,\mathrm dQ$,
+The proofs above do not extend directly. Steps 1 and 3 need the loss of every round to lie between $-\varepsilon$ and $\varepsilon$. And @sec-rare showed that an $(\varepsilon, \delta_0)$ guarantee does not even imply that the loss exceeds $\varepsilon$ with probability at most $\delta_0$. The proofs instead rest on a decomposition. Call two distributions **$\varepsilon$-indistinguishable** if each event's probabilities under them are within a factor $e^\varepsilon$ of each other, as in @def-pure. Then the two output distributions of an $(\varepsilon, \delta_0)$-DP round can be written as mixtures. With probability $1 - \delta_0$ the output comes from a pair of $\varepsilon$-indistinguishable distributions, and with probability $\delta_0$ from an arbitrary pair. The arguments above then apply to the first parts, and each round's second part is charged to the slack. This note cites that decomposition rather than proving it (Dwork, Rothblum and Vadhan, 2010; Kairouz, Oh and Viswanath, 2015).
 
-$$\mathbb E_Q[e^{\alpha L}]=\mathbb E_Q\bigl[R\cdot R^{\alpha-1}\bigr]=\mathbb E_P\bigl[R^{\alpha-1}\bigr]=\mathbb E_P\bigl[e^{(\alpha-1)L}\bigr],$$
+# Concentrated differential privacy {#sec-cdp}
 
-and therefore
+The proof of advanced composition used only two facts about each round's loss. Its average is small, and its fluctuation around the average has tails no heavier than those of a normal variable. The worst-case bound $|L| \le \varepsilon$ served only to derive these two facts. The Gaussian mechanism has both properties directly: by @eq-gauss-loss its loss is normal, with average $d^2/(2\sigma^2)$, which is small when $\sigma$ is large. Yet its loss is unbounded. Dwork and Rothblum (2016) therefore made the two facts the definition of privacy, so that Gaussian noise is covered without a worst case.
 
-$$D_\alpha(P\|Q)=\frac1{\alpha-1}\log\mathbb E_P\bigl[e^{(\alpha-1)L}\bigr]. \tag{5.2}$$
+## The definition
 
-This is the exact bridge between the privacy loss and Rényi divergence: $D_\alpha$ is the cumulant generating function of $L$ under $P$, evaluated at $\lambda=\alpha-1$ and divided by $\lambda$. In the limit $\alpha\downarrow1$, $D_\alpha\to D_{\mathrm{KL}}$ under the usual regularity assumptions, and as $\alpha\to\infty$, $D_\alpha$ tends to the max-divergence $\operatorname{ess\,sup}_PL$.
+The second fact needs a name. A random variable $X$ is **$\tau$-subgaussian** if its fluctuation around its mean has a moment generating function no larger than that of a normal variable with mean zero and standard deviation $\tau$:
 
-## Definition of zCDP and its MGF form
+$$\mathbb E\bigl[e^{\lambda(X - \mathbb E X)}\bigr] \le e^{\lambda^2\tau^2/2} \quad\text{for every real } \lambda.$$
 
-A mechanism is $(\xi,\rho)$-zCDP when, for all neighbouring ordered pairs and all $\alpha>1$,
+A normal variable with standard deviation $\tau$ meets this with equality. And Hoeffding's lemma @eq-hoeffding says that a variable confined to an interval of width $2\varepsilon$ is $\varepsilon$-subgaussian. Requiring the bound for negative $\lambda$ as well as positive controls fluctuations below the mean as well as above it.
 
-$$D_\alpha(P\|Q)\le\xi+\rho\alpha,\qquad\xi,\rho\ge0. \tag{5.3}$$
+::: {#def-cdp name="Concentrated differential privacy"}
+A mechanism is **$(\mu, \tau)$-CDP** if for every pair of neighbouring datasets, in either order, the privacy loss $L$ under $P$ has mean at most $\mu$ and is $\tau$-subgaussian.
+:::
 
-When $\xi=0$ one simply says $\rho$-zCDP.
+The parameter $\mu$ bounds the average loss, and $\tau$ bounds how far the loss spreads around that average. In the literature this definition is also called mean-concentrated differential privacy.
 
-Insert (5.3) into (5.2) and set $\lambda=\alpha-1>0$, so that $\alpha=1+\lambda$:
+The Gaussian mechanism satisfies it. Its loss @eq-gauss-loss is normal with mean $d^2/(2\sigma^2)$ and standard deviation $|d|/\sigma$, and bounding $|d|$ by the sensitivity $\Delta$ shows that it is $(\Delta^2/(2\sigma^2),\; \Delta/\sigma)$-CDP. Every $\varepsilon$-DP mechanism, such as the Laplace mechanism, satisfies it too. Its average loss is at most $\varepsilon\tanh(\varepsilon/2)$ by @eq-mean-bound, and its loss lies between $-\varepsilon$ and $\varepsilon$, so it is $\varepsilon$-subgaussian by Hoeffding's lemma. So an $\varepsilon$-DP mechanism is $(\varepsilon\tanh(\varepsilon/2),\; \varepsilon)$-CDP. Dwork and Rothblum state the slightly weaker mean $\varepsilon(e^\varepsilon - 1)/2$.
 
-$$\log\mathbb E_P[e^{\lambda L}]\le\lambda\bigl(\xi+\rho(1+\lambda)\bigr)=\lambda(\xi+\rho)+\rho\lambda^2,$$
+## From CDP to approximate DP
 
-or equivalently
+A CDP guarantee is useful only if it says how likely large losses are, so that @lem-tail can turn it into an approximate-DP guarantee. The tail bound comes from Chernoff's bound, exactly as in Step 3 of @sec-advanced.
 
-$$\mathbb E_P\bigl[e^{\lambda(L-\xi-\rho)}\bigr]\le e^{\rho\lambda^2},\qquad\lambda>0. \tag{5.4}$$
+::: {#thm-cdp-dp name="CDP gives approximate DP"}
+A $(\mu, \tau)$-CDP mechanism is, for every $\eta$ between $0$ and $1$,
+$$\bigl(\mu + \tau\sqrt{2\log(1/\eta)},\; \eta\bigr)\text{-DP}.$$
+:::
 
-Compared with a Gaussian MGF $e^{\lambda^2\tau^2/2}$, the variance proxy is $\tau^2=2\rho$ and the location is $\xi+\rho$. This is a one-sided, uncentred statement, the same shape as (4.3); it is not the mCDP definition, which bounds a centred MGF for every real $\lambda$.
+::: {.proof}
+**A tail bound for the fluctuation.** Apply Chernoff's bound @eq-chernoff to $X = L - \mathbb E_P L$, and use the subgaussian bound on its moment generating function. For every $t > 0$ and every $\lambda > 0$,
+$$\Pr[L - \mathbb E_P L \ge t] \le \exp\left(-\lambda t + \frac{\lambda^2\tau^2}{2}\right).$$
+The exponent is smallest at $\lambda = t/\tau^2$, where it equals $-t^2/\tau^2 + t^2/(2\tau^2) = -t^2/(2\tau^2)$. Choosing $t = \tau\sqrt{2\log(1/\eta)}$ makes the bound equal to $\eta$.
 
-## zCDP to approximate DP
+**From the fluctuation to the loss.** The mean $\mathbb E_P L$ is at most $\mu$, so a loss above $\mu + t$ is a fluctuation above $t$. Hence $P(L > \mu + t) \le \eta$, in both orders, and @lem-tail gives the guarantee.
+:::
 
-For $t>0$ and $\lambda>0$, Chernoff's bound (3.4) with (5.4) gives
+## Composing CDP mechanisms
 
-$$\Pr[L>\xi+\rho+t]\le\exp(-\lambda t+\rho\lambda^2).$$
+What happens when $k$ rounds are each CDP? The argument of Step 3 in @sec-advanced carries over, and it gives an approximate-DP guarantee for the whole sequence. What it does not give is a CDP guarantee for the sequence, and the reason motivates @sec-zcdp.
 
-For $\rho>0$ the exponent is minimized where $-t+2\rho\lambda=0$, at $\lambda=t/(2\rho)$. There it equals $-t^2/(2\rho)+t^2/(4\rho)=-t^2/(4\rho)$, so
+::: {#thm-cdp-comp name="Composition of CDP"}
+Suppose that for every history, round $i$ is $(\mu_i, \tau_i)$-CDP. Then for every $\lambda > 0$ the total loss satisfies
+$$\mathbb E\Bigl[e^{\lambda(L - \sum_i \mu_i)}\Bigr] \le \exp\Bigl(\frac{\lambda^2}{2}\sum_i \tau_i^2\Bigr).$$
+Consequently, for every $\eta$ between $0$ and $1$, the sequence is $\bigl(\sum_i \mu_i + \sqrt{\textstyle\sum_i \tau_i^2}\,\sqrt{2\log(1/\eta)},\; \eta\bigr)$-DP.
+:::
 
-$$\Pr[L>\xi+\rho+t]\le e^{-t^2/(4\rho)}.$$
+::: {.proof}
+**One round.** Let $m_i$ be the mean of round $i$'s loss given its history, which is at most $\mu_i$. For $\lambda > 0$, replacing $m_i$ by the larger number $\mu_i$ lowers the exponent, so it can only make the average smaller. The subgaussian bound then gives
+$$\mathbb E\bigl[e^{\lambda(L_i - \mu_i)} \mid \text{history}\bigr] \le \mathbb E\bigl[e^{\lambda(L_i - m_i)} \mid \text{history}\bigr] \le e^{\lambda^2\tau_i^2/2}.$$
 
-Choose $t=2\sqrt{\rho\log(1/\eta)}$; then $t^2/(4\rho)=\log(1/\eta)$ and the tail probability is at most $\eta$. Lemma 3.1, in both directions, proves
+**All rounds.** Averaging over one round at a time, as in Step 3 of @sec-advanced, multiplies these bounds and gives the first claim.
 
-$$(\xi,\rho)\text{-zCDP}\Longrightarrow\bigl(\xi+\rho+2\sqrt{\rho\log(1/\eta)},\;\eta\bigr)\text{-DP},\qquad0<\eta<1. \tag{5.5}$$
+**The guarantee.** The proof of @thm-cdp-dp used the moment generating function only for $\lambda > 0$, and only after shifting the loss by a number at least as large as its mean. The first claim provides exactly that, with $\sum_i \mu_i$ in place of $\mu$ and $\sqrt{\sum_i \tau_i^2}$ in place of $\tau$. Repeating that proof gives the second claim.
+:::
 
-When $\rho=0$, the Rényi bound does not depend on $\alpha$; letting $\alpha\to\infty$ bounds the max-divergence by $\xi$, which is pure $\xi$-DP. Formula (5.5) remains a valid, weaker statement in that case.
+For $k$ identical rounds the guarantee is $k\mu + \tau\sqrt{2k\log(1/\eta)}$. That is the sum of the averages plus a fluctuation that grows like $\sqrt{k}$, the same shape as advanced composition.
 
-The conversion (5.5) optimizes only $\lambda$ in a Chernoff bound, so it is not tight. Sharper conversions exist (Bun–Steinke 2016; Canonne–Kamath–Steinke 2020), and for the Gaussian mechanism the exact answer is computed in @sec-worked.
+Is the sequence itself $(\sum_i \mu_i, \sqrt{\sum_i \tau_i^2})$-CDP? The proof does not show it, and the obstacle is worth understanding. @def-cdp centres the loss at its own mean and needs the bound for every $\lambda$, negative ones included. The proof's bound fails both requirements. It centres the total loss at $\sum_i \mu_i$, which is only an upper bound on its mean. And for $\lambda < 0$, replacing $m_i$ by the larger $\mu_i$ raises the exponent instead of lowering it, so the first inequality of the proof runs the wrong way. Dwork and Rothblum (2016) state a composition theorem for CDP, and Bun and Steinke (2016) discuss what makes such statements delicate. This note needs neither, because @thm-cdp-comp already gives the approximate-DP guarantee. The lesson is about which statement composes cleanly. It is a bound for positive $\lambda$ only, centred at a fixed number rather than at the mean, and zero-concentrated differential privacy makes exactly that its definition.
 
-## Adaptive composition of zCDP
+# Zero-concentrated differential privacy {#sec-zcdp}
 
-Define each $L_i$ from the conditional transcript densities, as in @sec-pure, and suppose every round is $(\xi_i,\rho_i)$-zCDP for every history. Fix $\alpha>1$. By (5.2) and (5.3), for every history,
+Bun and Steinke (2016) define privacy by a bound on the moment generating function of the loss itself, for every positive argument, with no centring. They phrase it through a family of divergences between $P$ and $Q$, called Rényi divergences, rather than directly. The divergences are standard objects with known properties, and two of those properties come for free: guarantees survive post-processing, and pure DP appears as a limiting case. This section first shows that a Rényi divergence is the moment generating function of the privacy loss in disguise.
 
-$$\mathbb E\bigl[e^{(\alpha-1)L_i}\mid\mathcal F_{i-1}\bigr]\le\exp\bigl((\alpha-1)(\xi_i+\rho_i\alpha)\bigr).$$
+## Rényi divergence and the privacy loss
 
-The tower step of @sec-sqrt, with $\lambda=\alpha-1$ and the uncentred $L_i$ in place of $X_i$, bounds the MGF of $L_{1:k}=\sum_iL_i$ by the product of these bounds. Taking logarithms and dividing by $\alpha-1$ gives
+For a number $\alpha > 1$, called the **order**, the **Rényi divergence** of $P$ from $Q$ is
 
-$$D_\alpha(P_{1:k}\|Q_{1:k})\le\sum_i\xi_i+\alpha\sum_i\rho_i .$$
+$$D_\alpha(P \| Q) = \frac{1}{\alpha - 1}\log\int q(y)\left(\frac{p(y)}{q(y)}\right)^{\alpha} dy.$$
 
-No centring appears, which is why the argument that failed for mCDP works here. Since $\alpha$ was arbitrary,
+It is set to $+\infty$ if $P$ gives positive probability to outputs that $Q$ makes impossible. Inside the integral is the likelihood ratio raised to the power $\alpha$, averaged under $Q$. The next lemma rewrites that average in terms of the privacy loss.
 
-$$\text{adaptive composition is }\Bigl(\textstyle\sum_i\xi_i,\;\sum_i\rho_i\Bigr)\text{-zCDP}. \tag{5.6}$$
+::: {#lem-renyi name="Rényi divergence is a moment generating function of the loss"}
+For every $\alpha > 1$,
+$$D_\alpha(P \| Q) = \frac{1}{\alpha - 1}\log\mathbb E_P\bigl[e^{(\alpha - 1)L}\bigr].$$
+:::
 
-Combined with (5.5), $k$ mechanisms that are each $\rho$-zCDP give $\bigl(k\rho+2\sqrt{k\rho\log(1/\eta)},\,\eta\bigr)$-DP. Both zCDP parameters add linearly, while the final approximate-DP $\varepsilon$ has a square-root term.
+::: {.proof}
+The ratio inside the integral is $p/q = e^L$, so its $\alpha$-th power is $e^{\alpha L}$, and the integral is the average of $e^{\alpha L}$ under $Q$. Split $e^{\alpha L}$ as $e^{L}\cdot e^{(\alpha - 1)L}$. Since $q\,e^{L} = q\,(p/q) = p$, the first factor turns the average under $Q$ into an average under $P$:
+$$\int q\,e^{\alpha L} = \int q\,e^{L}\,e^{(\alpha - 1)L} = \int p\,e^{(\alpha - 1)L} = \mathbb E_P\bigl[e^{(\alpha - 1)L}\bigr].$$
+Taking the logarithm and dividing by $\alpha - 1$ gives the claim.
+:::
+
+So the Rényi divergence of order $\alpha$ is the logarithm of the moment generating function of the loss at $\lambda = \alpha - 1$, divided by $\lambda$. The family spans the features of the loss that earlier sections used. As $\alpha$ decreases to $1$, $D_\alpha$ tends to the average loss, the Kullback–Leibler divergence of @sec-mean. As $\alpha$ grows, larger losses get more weight, and as $\alpha \to \infty$, $D_\alpha$ tends to the largest loss, the quantity that pure DP bounds. This note cites both limits rather than proving them (van Erven and Harremoës, 2014).
+
+## The definition
+
+::: {#def-zcdp name="Zero-concentrated differential privacy"}
+Let $\xi, \rho \ge 0$. A mechanism is **$(\xi, \rho)$-zCDP** if for every pair of neighbouring datasets, in either order, and every $\alpha > 1$,
+$$D_\alpha(P \| Q) \le \xi + \rho\,\alpha.$$
+When $\xi = 0$ it is called **$\rho$-zCDP**.
+:::
+
+The bound is a straight line in $\alpha$, and the next calculation shows why that is the natural shape: it is the shape the Gaussian mechanism produces. Substitute @lem-renyi and write $\lambda = \alpha - 1$, so that $\alpha = 1 + \lambda$. Multiplying by $\lambda$ gives, for every $\lambda > 0$,
+
+$$\log\mathbb E_P\bigl[e^{\lambda L}\bigr] \le \lambda\bigl(\xi + \rho(1 + \lambda)\bigr) = \lambda(\xi + \rho) + \rho\lambda^2.$$
+
+Moving the linear term to the left-hand side and taking exponentials,
+
+$$\mathbb E_P\bigl[e^{\lambda(L - \xi - \rho)}\bigr] \le e^{\rho\lambda^2} \quad\text{for every } \lambda > 0.$$ {#eq-zcdp-mgf}
+
+This is the form that @sec-cdp found to compose cleanly. It holds for $\lambda > 0$ only, and it centres the loss at the fixed number $\xi + \rho$ rather than at its mean. The right-hand side is the moment generating function $e^{\lambda^2 v/2}$ of a normal variable with variance $v = 2\rho$. So in its upper tail the loss behaves like a normal variable with mean $\xi + \rho$ and variance $2\rho$.
+
+## The Gaussian mechanism
+
+For the Gaussian mechanism the bound in @def-zcdp holds with equality, which makes $\rho$ a natural measure of its privacy.
+
+::: {#thm-gauss-zcdp name="Gaussian mechanism"}
+Releasing $f(x) + Z$, with $Z$ normal of mean $0$ and standard deviation $\sigma$, is $\rho$-zCDP with $\rho = \Delta^2/(2\sigma^2)$, and no smaller $\rho$ works.
+:::
+
+::: {.proof}
+**The moment generating function.** By @eq-gauss-loss the loss is normal with mean $d^2/(2\sigma^2)$ and variance $d^2/\sigma^2$. A normal variable with mean $m$ and variance $v$ has $\log\mathbb E[e^{\lambda X}] = \lambda m + \lambda^2 v/2$, so here
+$$\log\mathbb E_P\bigl[e^{\lambda L}\bigr] = \frac{\lambda d^2}{2\sigma^2} + \frac{\lambda^2 d^2}{2\sigma^2} = \lambda(1 + \lambda)\,\frac{d^2}{2\sigma^2}.$$
+
+**The divergence.** Dividing by $\lambda = \alpha - 1$, and using $1 + \lambda = \alpha$, @lem-renyi gives
+$$D_\alpha(P \| Q) = \alpha\,\frac{d^2}{2\sigma^2} \le \alpha\,\frac{\Delta^2}{2\sigma^2}.$$
+
+**Both orders, and tightness.** Swapping $x$ and $x'$ only changes the sign of $d$, and the result depends on $d^2$, so the same bound holds in the other order. Equality holds for a pair with $|d| = \Delta$, so no smaller $\rho$ works.
+:::
+
+For a count with $\sigma = 5$, each release is $0.02$-zCDP. Doubling $\sigma$ divides $\rho$ by four.
+
+## Composition: the parameters add
+
+::: {#thm-zcdp-comp name="Composition of zCDP"}
+Suppose that for every history, round $i$ is $(\xi_i, \rho_i)$-zCDP. Then the sequence of rounds is $\bigl(\sum_i \xi_i,\; \sum_i \rho_i\bigr)$-zCDP.
+:::
+
+::: {.proof}
+**One round.** Fix $\alpha > 1$ and write $\lambda = \alpha - 1$. For every history, @lem-renyi turns the definition into a bound on the moment generating function: multiply $D_\alpha \le \xi_i + \rho_i\alpha$ by $\lambda$ and take exponentials.
+$$\mathbb E\bigl[e^{\lambda L_i} \mid \text{history}\bigr] \le e^{\lambda(\xi_i + \rho_i\alpha)}.$$
+
+**All rounds.** The total loss is the sum of the round losses, by @eq-loss-sum. Averaging over one round at a time, as in Step 3 of @sec-advanced, multiplies these bounds:
+$$\mathbb E_P\bigl[e^{\lambda L}\bigr] \le e^{\lambda\sum_i(\xi_i + \rho_i\alpha)}.$$
+
+**Back to divergences.** Taking the logarithm, dividing by $\lambda$ and applying @lem-renyi to the whole sequence gives $D_\alpha \le \sum_i \xi_i + \alpha\sum_i \rho_i$. This holds for every $\alpha > 1$, and the same argument works in the other order, which is the claim.
+:::
+
+No step needed the average of a round given its history, so the obstacle of @sec-cdp does not arise. Composition is just addition.
+
+## From zCDP to approximate DP
+
+::: {#thm-zcdp-dp name="zCDP gives approximate DP"}
+A $(\xi, \rho)$-zCDP mechanism with $\rho > 0$ is, for every $\eta$ between $0$ and $1$,
+$$\bigl(\xi + \rho + 2\sqrt{\rho\log(1/\eta)},\; \eta\bigr)\text{-DP}.$$
+:::
+
+::: {.proof}
+**A tail bound.** Apply Chernoff's bound @eq-chernoff to $X = L - \xi - \rho$, using @eq-zcdp-mgf. For every $t > 0$ and every $\lambda > 0$,
+$$P(L > \xi + \rho + t) \le \exp\bigl(-\lambda t + \rho\lambda^2\bigr).$$
+
+**The best $\lambda$.** The exponent is smallest where its derivative $-t + 2\rho\lambda$ is zero, at $\lambda = t/(2\rho)$, which is positive because $\rho > 0$. Its value there is $-t^2/(2\rho) + t^2/(4\rho) = -t^2/(4\rho)$.
+
+**The guarantee.** Choosing $t = 2\sqrt{\rho\log(1/\eta)}$ makes $t^2/(4\rho)$ equal to $\log(1/\eta)$, so the tail probability is at most $\eta$. This holds in both orders, and @lem-tail gives the guarantee.
+:::
+
+Composition (@thm-zcdp-comp, with every $\xi_i = 0$) followed by this conversion gives the main formula of the note. A sequence of $k$ rounds, each $\rho$-zCDP, is
+
+$$\bigl(k\rho + 2\sqrt{k\rho\log(1/\eta)},\; \eta\bigr)\text{-DP}.$$ {#eq-zcdp-total}
+
+The parameter $\rho$ adds up linearly, and the square root appears only once, in the final conversion. That conversion is not exact, because it loses in two places. Chernoff's bound overestimates the tail even at the best $\lambda$, and @lem-tail counts every output with a loss above $\varepsilon$ in full, without the discount of @thm-hockey. Sharper conversions exist (Bun and Steinke, 2016; Canonne, Kamath and Steinke, 2020).
+
+The case $\rho = 0$, which the theorem excludes, is simpler. Then the divergence is at most $\xi$ at every order, and the limit $\alpha \to \infty$ cited above shows that the largest loss is at most $\xi$, so the mechanism is $\xi$-DP.
+
+## Pure DP and CDP give zCDP
+
+Both earlier definitions fit inside zCDP, so a mix of Laplace and Gaussian releases can be accounted for in one currency and converted once at the end.
+
+::: {#thm-pure-zcdp name="Pure DP gives zCDP"}
+An $\varepsilon$-DP mechanism is $(\varepsilon^2/2)$-zCDP.
+:::
+
+::: {.proof}
+**The fluctuation.** The loss lies between $-\varepsilon$ and $\varepsilon$, so its fluctuation $L - \mathbb E_P L$ has mean zero and lies in an interval of width $2\varepsilon$. Hoeffding's lemma @eq-hoeffding bounds its moment generating function by $e^{\lambda^2\varepsilon^2/2}$. Adding back the mean, for every $\lambda > 0$,
+$$\log\mathbb E_P\bigl[e^{\lambda L}\bigr] = \lambda\,\mathbb E_P[L] + \log\mathbb E_P\bigl[e^{\lambda(L - \mathbb E_P L)}\bigr] \le \lambda\,\mathbb E_P[L] + \frac{\lambda^2\varepsilon^2}{2}.$$
+
+**The mean.** By @eq-mean-bound the mean is at most $\varepsilon\tanh(\varepsilon/2)$, which is at most $\varepsilon^2/2$. Since $\lambda > 0$, substituting this upper bound keeps the inequality:
+$$\log\mathbb E_P\bigl[e^{\lambda L}\bigr] \le \frac{\varepsilon^2}{2}\bigl(\lambda + \lambda^2\bigr) = \frac{\varepsilon^2}{2}\,\lambda(1 + \lambda).$$
+
+**The divergence.** Dividing by $\lambda = \alpha - 1$, and using $1 + \lambda = \alpha$, @lem-renyi gives $D_\alpha(P \| Q) \le \alpha\varepsilon^2/2$. The same holds in the other order.
+:::
+
+The proof needs the sharper mean bound $\varepsilon\tanh(\varepsilon/2)$. The looser form $\varepsilon(e^\varepsilon - 1)/2$ exceeds $\varepsilon^2/2$ and would give a slightly worse $\rho$.
+
+With this theorem, the example of @sec-advanced becomes a zCDP calculation. A hundred $0.1$-DP releases are each $0.005$-zCDP, so $0.5$-zCDP in total, and @eq-zcdp-total with $\eta = 10^{-5}$ gives $\varepsilon = 5.30$. That is slightly better than the $5.32$ of advanced composition.
+
+::: {#thm-cdp-zcdp name="CDP gives zCDP"}
+A $(\mu, \tau)$-CDP mechanism is $\bigl(\max\{0, \mu - \tau^2/2\},\; \tau^2/2\bigr)$-zCDP.
+:::
+
+::: {.proof}
+**The moment generating function.** Split the loss into its mean and its fluctuation. For $\lambda > 0$, the mean is at most $\mu$ and the fluctuation is $\tau$-subgaussian, so
+$$\log\mathbb E_P\bigl[e^{\lambda L}\bigr] = \lambda\,\mathbb E_P[L] + \log\mathbb E_P\bigl[e^{\lambda(L - \mathbb E_P L)}\bigr] \le \lambda\mu + \frac{\lambda^2\tau^2}{2}.$$
+
+**The divergence.** Dividing by $\lambda = \alpha - 1$, @lem-renyi gives
+$$D_\alpha(P \| Q) \le \mu + (\alpha - 1)\frac{\tau^2}{2} = \Bigl(\mu - \frac{\tau^2}{2}\Bigr) + \alpha\,\frac{\tau^2}{2}.$$
+@def-zcdp needs a constant term of at least zero. If $\mu < \tau^2/2$, the constant here is negative, and replacing it by $0$ keeps the bound true while meeting that requirement.
+:::
+
+For the Gaussian mechanism, $\mu = \tau^2/2 = \Delta^2/(2\sigma^2)$, so this returns exactly @thm-gauss-zcdp. The converse, from zCDP to CDP, does not follow from these arguments. A zCDP bound controls the loss only through @eq-zcdp-mgf, for positive $\lambda$, while CDP needs a centred bound for every $\lambda$. Approximate DP, finally, does not fit inside zCDP at all. A mechanism with $\delta > 0$ may produce an output that is impossible under a neighbouring dataset, and then every Rényi divergence is infinite.
 
 ## Post-processing
 
-Rényi divergence satisfies the data-processing inequality: for any (possibly randomized) map $g$, $D_\alpha(g(P)\|g(Q))\le D_\alpha(P\|Q)$ (cited, not proved here; see van Erven–Harremoës 2014). Hence zCDP is closed under post-processing. Bun–Steinke (2016) point out that mCDP, as defined by (4.1), is not.
+As with differential privacy, nothing computed from a zCDP output can be less private. The reason is that a Rényi divergence can only shrink when the same transformation is applied to both outputs, a property called the data-processing inequality. This note cites it without proof (van Erven and Harremoës, 2014). Bun and Steinke (2016) show that CDP, as defined in @def-cdp, lacks this property, which is another reason to prefer zCDP.
 
-## The Gaussian mechanism has an exact zCDP parameter
+# Comparing the four definitions {#sec-compare}
 
-Return to the Gaussian privacy loss (4.5), with $d=f(x)-f(x')$:
+The four definitions control different features of the same random variable, the privacy loss. @tbl-compare puts them side by side, with the results of this note that support each entry.
 
-$$L\sim N\left(\frac{d^2}{2\sigma^2},\;\frac{d^2}{\sigma^2}\right)\quad\text{under }P.$$
-
-For a Gaussian $N(m,v)$, $\log\mathbb Ee^{\lambda L}=\lambda m+\lambda^2v/2$, so here $\log\mathbb E_P[e^{\lambda L}]=\lambda d^2/(2\sigma^2)+\lambda^2d^2/(2\sigma^2)=\lambda(1+\lambda)\,d^2/(2\sigma^2)$. Divide by $\lambda=\alpha-1$ and use $1+\lambda=\alpha$:
-
-$$D_\alpha(P\|Q)=\frac{\alpha d^2}{2\sigma^2}\le\alpha\,\frac{\Delta^2}{2\sigma^2}.$$
-
-This holds with equality when $|d|=\Delta$, so the Gaussian mechanism satisfies
-
-$$\boxed{\;\rho=\frac{\Delta^2}{2\sigma^2}\text{-zCDP},\;} \tag{5.7}$$
-
-and no smaller $\rho$ works. This agrees with the CDP parameters (4.6), $\mu=\rho$ and $\tau=\sqrt{2\rho}$. For a vector query with independent noise in each coordinate, the same calculation holds with $\Delta$ the $\ell_2$-sensitivity.
-
-## Pure DP implies zCDP
-
-Under $\varepsilon$-DP, $L\in[-\varepsilon,\varepsilon]$ almost surely, and Hoeffding's lemma applied to $L-\mathbb E_PL$ gives
-
-$$\log\mathbb E_P[e^{\lambda L}]\le\lambda\,\mathbb E_PL+\frac{\lambda^2\varepsilon^2}{2}.$$
-
-The chord bound (3.6) gives $\mathbb E_PL\le\varepsilon\tanh(\varepsilon/2)\le\varepsilon^2/2$, so
-
-$$\log\mathbb E_P[e^{\lambda L}]\le\frac{\varepsilon^2}{2}(\lambda+\lambda^2)=\frac{\varepsilon^2}{2}\,\lambda(1+\lambda).$$
-
-Divide by $\lambda=\alpha-1$ and substitute $1+\lambda=\alpha$: $D_\alpha(P\|Q)\le\alpha\varepsilon^2/2$. Therefore
-
-$$\varepsilon\text{-DP}\Longrightarrow\frac{\varepsilon^2}{2}\text{-zCDP}. \tag{5.8}$$
-
-This route explains why a quadratic parameter appears when a pure-DP guarantee is converted to a concentrated one. It needs the sharper mean bound $\varepsilon\tanh(\varepsilon/2)$; the looser $\varepsilon(e^\varepsilon-1)/2$ exceeds $\varepsilon^2/2$ and would not give (5.8).
-
-## From mCDP to zCDP
-
-The two notions are related in one direction, which follows from (5.2). Under $(\mu,\tau)$-CDP, for $\lambda>0$,
-
-$$\log\mathbb E_P[e^{\lambda L}]=\lambda\,\mathbb E_PL+\log\mathbb E_P\bigl[e^{\lambda(L-\mathbb E_PL)}\bigr]\le\lambda\mu+\frac{\lambda^2\tau^2}{2}.$$
-
-Divide by $\lambda=\alpha-1$: $D_\alpha(P\|Q)\le\mu+(\alpha-1)\tau^2/2=(\mu-\tau^2/2)+\alpha\,\tau^2/2$. If $\mu<\tau^2/2$ the constant is negative and can be dropped. Hence
-
-$$(\mu,\tau)\text{-CDP}\Longrightarrow\Bigl(\max\{0,\,\mu-\tfrac{\tau^2}2\},\;\tfrac{\tau^2}2\Bigr)\text{-zCDP}. \tag{5.9}$$
-
-For the Gaussian mechanism, $\mu=\tau^2/2=\rho$, and (5.9) returns exactly (5.7). The converse does not follow from this note's arguments: zCDP controls $L$ only through (5.4), a one-sided bound for $\lambda>0$, while mCDP needs a centred bound for every real $\lambda$.
-
-# Comparing the guarantees without confusing the symbols {#sec-compare}
-
-| Notion | What it bounds | Adaptive composition | Conversion to $(\varepsilon,\eta)$-DP | Post-processing |
+| Definition | What it bounds | How it composes | Conversion to $(\varepsilon, \eta)$-DP | Post-processing |
 |:---|:---|:---|:---|:---|
-| Pure $\varepsilon$-DP | Every event-probability ratio; $\lvert L\rvert\le\varepsilon$ a.s. | $\sum_i\varepsilon_i$, pure DP | is already DP | closed |
-| $(\varepsilon,\delta)$-DP | $H_\varepsilon\le\delta$ in both directions | basic: $(\sum\varepsilon_i,\sum\delta_i)$; advanced: (3.5) | is already DP | closed |
-| $(\mu,\tau)$-CDP (mCDP) | Mean loss $\le\mu$; centred MGF $\le e^{\lambda^2\tau^2/2}$ | one-sided bound (4.3), giving (4.4) | (4.2) | not closed (BS16) |
-| $(\xi,\rho)$-zCDP | Every Rényi divergence $D_\alpha\le\xi+\rho\alpha$ | $(\sum\xi_i,\sum\rho_i)$-zCDP, (5.6) | (5.5) | closed |
+| $\varepsilon$-DP | the largest loss, $\lvert L\rvert \le \varepsilon$ | $\varepsilon$ adds (@thm-basic); advanced (@thm-advanced) | is already DP | yes |
+| $(\varepsilon, \delta)$-DP | the exact $\delta$ of @thm-hockey | $\varepsilon$ and $\delta$ add; advanced with $k\delta_0$ (@sec-composing-delta, cited) | is already DP | yes |
+| $(\mu, \tau)$-CDP | the mean and the spread of $L$ | a one-sided bound (@thm-cdp-comp) | @thm-cdp-dp | no (cited) |
+| $(\xi, \rho)$-zCDP | every Rényi divergence, $D_\alpha \le \xi + \rho\alpha$ | $\xi$ and $\rho$ add (@thm-zcdp-comp) | @thm-zcdp-dp | yes (cited) |
 
-Bridges derived above: $\varepsilon$-DP $\Rightarrow$ $(\varepsilon(e^\varepsilon-1)/2,\varepsilon)$-CDP; $\varepsilon$-DP $\Rightarrow$ $\varepsilon^2/2$-zCDP (5.8); $(\mu,\tau)$-CDP $\Rightarrow$ zCDP (5.9); Gaussian: $\rho=\Delta^2/(2\sigma^2)$, $\mu=\rho$, $\tau=\sqrt{2\rho}$.
+: The four definitions, what each controls, and how each composes. {#tbl-compare}
 
-**Parameter warning.** Sources use $\delta$ both for the additive slack of an approximate-DP guarantee **and** for a failure probability chosen freely during a conversion or in advanced composition. The two play different roles in the derivations but end up added together in an approximate-DP statement. This note uses $\eta$ for a newly chosen tail or conversion parameter, and keeps $\delta$ or $\delta_0$ for the slack of an existing mechanism's guarantee.
+Never compare an $\varepsilon$ with a $\rho$ as numbers. They measure different features of the loss, and only the conversions relate them: a $\rho$ of $2$, for example, means an $\varepsilon$ of about $11.6$ at $\eta = 10^{-5}$, as the next section computes.
 
-# Worked comparison: repeating a Gaussian query {#sec-worked}
+# A hundred Gaussian releases {#sec-worked}
 
-A scalar query has sensitivity $\Delta=1$ and is answered with Gaussian noise of standard deviation $\sigma=5$, $k=100$ times (adaptively if you like, provided every round has sensitivity at most $1$ given the history). The target is $\delta_{\mathrm{total}}=10^{-5}$.
+This section applies every route of the note to one task, so that you can see how much each one gives away. A count with sensitivity $\Delta = 1$ is released $k = 100$ times, with Gaussian noise of standard deviation $\sigma = 5$. The analyst may choose each release after seeing the earlier ones, provided each one has sensitivity at most $1$. The aim is the smallest $\varepsilon$ for which the hundred releases together are $(\varepsilon, 10^{-5})$-DP. In the conversions, that final slack is the $\eta$ you choose, so $\eta = 10^{-5}$ and $\log(1/\eta) = 11.513$.
 
-**Through zCDP.** Each round has $\rho=1/(2\cdot25)=0.02$. Composition (5.6) gives $\rho_{\mathrm{total}}=100\times0.02=2$. With $\eta=10^{-5}$, so that $\log(1/\eta)=11.513$, the conversion (5.5) gives
+**Through zCDP.** By @thm-gauss-zcdp each release is $\rho$-zCDP with $\rho = 1/(2 \times 25) = 0.02$. By @thm-zcdp-comp the sequence is $2$-zCDP. Then @eq-zcdp-total gives
 
-$$\varepsilon_{\mathrm{total}}=2+2\sqrt{2\times11.513}=2+9.597\approx11.60,\qquad\delta_{\mathrm{total}}=10^{-5}.$$
+$$\varepsilon = 2 + 2\sqrt{2 \times 11.513} = 2 + 9.597 \approx 11.60.$$
 
-**Through mCDP.** Each round is $(0.02,\,0.2)$-CDP by (4.6), so (4.4) with $\sum\mu_i=2$ and $\sqrt{\sum\tau_i^2}=\sqrt{100\times0.04}=2$ gives $2+2\sqrt{2\times11.513}\approx11.60$, the same number. That is no accident: for Gaussian noise the two definitions carry the same information.
+**Through CDP.** Each release is $(0.02, 0.2)$-CDP. @thm-cdp-comp, with $\sum_i \mu_i = 2$ and $\sqrt{\sum_i \tau_i^2} = \sqrt{100 \times 0.04} = 2$, gives $\varepsilon = 2 + 2\sqrt{2 \times 11.513} \approx 11.60$ again. The two routes agree because for Gaussian noise $\tau^2 = 2\rho$ in every round. Then the CDP fluctuation term $\sqrt{\sum_i\tau_i^2}\,\sqrt{2\log(1/\eta)} = \sqrt{2k\rho}\,\sqrt{2\log(1/\eta)}$ equals the zCDP term $2\sqrt{k\rho\log(1/\eta)}$.
 
-**The exact answer.** For a pair of Gaussians, (3.3) can be evaluated in closed form. Write $\mu_G=|d|/\sigma$. By (4.5), under $P$ the loss is $L=\mu_G^2/2+\mu_GW$ with $W\sim N(0,1)$. Under $Q$ the same calculation with $Y=f(x')+Z$ gives $L=-\mu_G^2/2+\mu_GW$. The optimal event in (3.2) is $\{L>\varepsilon\}$, so $H_\varepsilon=P(L>\varepsilon)-e^\varepsilon Q(L>\varepsilon)$, that is,
+**The exact answer.** @thm-hockey gives the smallest $\delta$ for each $\varepsilon$, and for Gaussian noise it has a closed form. Write $\gamma = |d|/\sigma$ for the distance between the two true answers, in units of the noise's standard deviation, and $W$ for a standard normal variable.
 
-$$\delta(\varepsilon)=\Phi\!\left(\frac{\mu_G}2-\frac{\varepsilon}{\mu_G}\right)-e^{\varepsilon}\,\Phi\!\left(-\frac{\mu_G}2-\frac{\varepsilon}{\mu_G}\right), \tag{7.1}$$
+Under $P$, @eq-gauss-loss gives $L = \gamma^2/2 + (d/\sigma)(Z/\sigma)$, where $Z/\sigma$ is standard normal. A standard normal variable is symmetric about zero, so multiplying it by $d/\sigma$ has the same distribution as multiplying it by $\gamma$, whatever the sign of $d$. So under $P$ the loss is distributed as $\gamma^2/2 + \gamma W$.
 
-where $\Phi$ is the standard normal distribution function (Balle–Wang 2018). One round has $\mu_G=\Delta/\sigma=0.2$. For $100$ non-adaptive rounds with $|d|=\Delta$, the total loss is a sum of $100$ independent copies of (4.5), which is again Gaussian, of mean $100\times0.02=2$ and variance $100\times0.04=4$. That is the loss of a single Gaussian with $\mu_G=\sqrt{k}\,\Delta/\sigma=2$. (That adaptive rounds are no worse is the composition theorem for Gaussian DP, Dong–Roth–Su 2022; cited, not derived.) Solving (7.1) for $\delta=10^{-5}$ with $\mu_G=2$ gives $\varepsilon\approx10.00$.
+Under $Q$, the output is $Y = f(x') + Z$, so $Y - f(x') = Z$ and $Y - f(x) = Z - d$. Substituting into the loss and expanding, the $Z^2$ terms cancel again:
 
-**Through per-round $(\varepsilon,\delta)$-DP.** Formula (7.1) with $\mu_G=0.2$ gives each round's $\varepsilon_0$ for a chosen $\delta_0$:
+$$L = \frac{Z^2 - (Z - d)^2}{2\sigma^2} = -\frac{d^2}{2\sigma^2} + \frac{d}{\sigma^2}\,Z.$$
 
-| Route | Per-round guarantee | $\varepsilon_{\mathrm{total}}$ at $\delta_{\mathrm{total}}=10^{-5}$ |
+By the same symmetry, under $Q$ the loss is distributed as $-\gamma^2/2 + \gamma W$. The first form of @thm-hockey needs the probability that the loss exceeds $\varepsilon$ under each distribution. Under $P$, that is the probability that $W$ exceeds $\varepsilon/\gamma - \gamma/2$. Under $Q$, it is the probability that $W$ exceeds $\varepsilon/\gamma + \gamma/2$. Writing $\Phi$ for the standard normal distribution function, the probability that $W$ exceeds $c$ is $\Phi(-c)$, so
+
+$$\delta(\varepsilon) = \Phi\Bigl(\frac{\gamma}{2} - \frac{\varepsilon}{\gamma}\Bigr) - e^{\varepsilon}\,\Phi\Bigl(-\frac{\gamma}{2} - \frac{\varepsilon}{\gamma}\Bigr).$$ {#eq-gauss-exact}
+
+Swapping $x$ and $x'$ changes only the sign of $d$, so the same formula holds in the other order. The function $\delta(\varepsilon)$ is called the **privacy profile** of the mechanism, and @eq-gauss-exact is the exact profile of the Gaussian mechanism (Balle and Wang, 2018).
+
+When the hundred releases are fixed in advance, the total loss is a sum of $100$ independent losses, one per release. Under $P$ each of them is normal with mean $0.02$ and variance $0.04$. Means and variances of independent variables add, so the sum is normal with mean $2$ and variance $4$. That is the distribution of $\gamma^2/2 + \gamma W$ with $\gamma = 2$. Under $Q$ the same argument gives $-\gamma^2/2 + \gamma W$ with $\gamma = 2$. So the hundred releases together have exactly the loss of a single Gaussian release with $\gamma = 2$. Solving @eq-gauss-exact numerically for $\delta = 10^{-5}$ with $\gamma = 2$, by bisection, gives $\varepsilon = 10.00$. Releases chosen adaptively are no worse. That follows from the composition theorem of Gaussian differential privacy, a framework built around this exact profile. This note cites it (Dong, Roth and Su, 2022).
+
+**Through per-release $(\varepsilon, \delta)$ guarantees.** One release has $\gamma = 0.2$, and @eq-gauss-exact gives its $\varepsilon_0$ for any per-release slack $\delta_0$. Basic composition, from @sec-composing-delta, splits the total slack evenly, $\delta_0 = 10^{-5}/100 = 10^{-7}$. That gives $\varepsilon_0 = 0.932$ per release and $93.2$ in total.
+
+Advanced composition splits the total slack into $k\delta_0 + \eta = 10^{-5}$. A grid search over the split finds the best at $\delta_0 = 8.5 \times 10^{-8}$ and $\eta = 1.5 \times 10^{-6}$, since $100 \times 8.5 \times 10^{-8} + 1.5 \times 10^{-6} = 10^{-5}$. That gives $\varepsilon_0 = 0.938$ per release and $121.6$ in total. @tbl-worked collects the four answers.
+
+| Route | Per release | Total $\varepsilon$ at $\delta = 10^{-5}$ |
 |:---|:---|---:|
-| Basic composition | $(0.932,\;10^{-7})$-DP | $93.2$ |
-| Advanced composition (3.5), best split of $\delta$ | $(0.938,\;8.5\times10^{-8})$-DP, $\eta=1.5\times10^{-6}$ | $121.6$ |
-| zCDP or mCDP, then convert | $\rho=0.02$ | $11.60$ |
-| Exact, (7.1) | $\mu_G=0.2$ | $10.00$ |
+| Basic composition | $(0.932,\ 10^{-7})$-DP | $93.2$ |
+| Advanced composition | $(0.938,\ 8.5 \times 10^{-8})$-DP, $\eta = 1.5 \times 10^{-6}$ | $121.6$ |
+| zCDP or CDP, then convert | $\rho = 0.02$ | $11.60$ |
+| Exact | $\gamma = 0.2$ | $10.00$ |
 
-Advanced composition loses to basic composition here because $\varepsilon_0\approx0.94$ is not small: its mean term $k\varepsilon_0(e^{\varepsilon_0}-1)/2\approx72.8$ alone is most of the basic total. The concentrated notions avoid the problem because they never replace the Gaussian loss by a worst case.
+: A hundred Gaussian releases of a count, with $\sigma = 5$, by each route. {#tbl-worked}
 
-All of these are **guarantees**, upper bounds that hold for every pair of neighbours; none says the realized privacy loss equals 11.60. Increasing the noise lowers $\rho$ quadratically: doubling $\sigma$ divides each $\rho$ by four. And never equate an $\varepsilon$-DP parameter numerically with a zCDP $\rho$: they measure different objects.
+Advanced composition does worse than basic composition here. The per-release $\varepsilon_0$ is close to $1$, so its second term $k\varepsilon_0(e^{\varepsilon_0} - 1)/2 = 73.0$ is already most of the basic total, as @sec-advanced warned. The concentrated definitions avoid the problem because they never replace the Gaussian loss by a worst case. They work with its actual mean of $0.02$ and spread of $0.2$ per release, and come within 16% of the exact answer.
 
-# Limitations and exact scope of the derivations
+Every number in @tbl-worked is a guarantee, an upper bound that holds for every pair of neighbouring datasets. None of them is the loss of a particular run, which is random and usually much smaller.
 
-The steps for pure DP, the hockey-stick formula and the tail lemma, the KL chord bound, the subgaussian tails, the Rényi–MGF bridge, the Gaussian privacy loss, zCDP composition, and the CDP-to-zCDP bridge are derived in this note. Four results are cited rather than proved: Hoeffding's lemma; the decomposition of an $(\varepsilon,\delta_0)$-indistinguishable pair needed for advanced composition with $\delta_0>0$ (which is **not** implied by the false shortcut $\Pr[L>\varepsilon]\le\delta$); the data-processing inequality for Rényi divergence; and the adaptive composition theorem for Gaussian DP used for the exact figure. For mCDP, this note proves only the one-sided composition bound (4.3)–(4.4), not closure of the definition (4.1) under composition.
+# What the note proves and what it cites
 
-CDP/mCDP and zCDP are related, by (5.9), but not interchangeable. An arbitrary approximate-DP mechanism need not have finite Rényi divergence at any order, and hence need not satisfy zCDP: any mechanism with $\delta>0$ that puts mass where its neighbour puts none has $D_\alpha=\infty$. All comparisons assume one fixed adjacency convention (add/remove versus replace-one) and one privacy unit; sensitivities, and with them every number in @sec-worked, change with the convention.
+Every theorem and lemma of the note is proved in the text, apart from the results below. They are cited because their proofs need more machinery than the note builds, and each is used only where the text says so:
 
-# Primary sources and reading order
+- Hoeffding's lemma, in Step 2 of @sec-advanced and in the CDP and zCDP bounds for pure DP;
+- the mixture decomposition behind composition for rounds with $\delta_0 > 0$, in @sec-composing-delta;
+- the limits of the Rényi divergence as $\alpha \to 1$ and $\alpha \to \infty$, and its data-processing inequality, in @sec-zcdp;
+- the failure of post-processing for CDP, in @sec-zcdp;
+- the adaptive composition theorem of Gaussian differential privacy, for the exact answer in @sec-worked.
 
-1. C. Dwork, G. Rothblum, S. Vadhan (2010), *Boosting and Differential Privacy*. Original advanced-composition method and the $O(\varepsilon^2)$ mean-loss result. <https://privacytools.seas.harvard.edu/sites/g/files/omnuum6656/files/privacytools/files/05670947.pdf>
-2. C. Dwork, G. Rothblum (2016), *Concentrated Differential Privacy*. Theorem 1.1, the original $(\mu,\tau)$-CDP, concentration and Gaussian analysis, improved expected-loss bound. <https://arxiv.org/abs/1603.01887>
-3. M. Bun, T. Steinke (2016), *Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds*. Definition of $(\xi,\rho)$-zCDP, Rényi-divergence conversions, additive composition, the Gaussian mechanism, and the relation to mCDP. <https://arxiv.org/abs/1605.02065>
-4. P. Kairouz, S. Oh, P. Viswanath (2015), *The Composition Theorem for Differential Privacy*. Optimal composition beyond the standard advanced bound, and the canonical form of an $(\varepsilon,\delta)$ pair. <https://proceedings.mlr.press/v37/kairouz15.pdf>
-5. B. Balle, Y.-X. Wang (2018), *Improving the Gaussian Mechanism for Differential Privacy: Analytical Calibration and Optimal Denoising*. The exact privacy profile (7.1). <https://arxiv.org/abs/1805.06530>
-6. J. Dong, A. Roth, W. Su (2022), *Gaussian Differential Privacy*. Composition of Gaussian mechanisms under adaptivity. <https://arxiv.org/abs/1905.02383>
-7. C. Canonne, G. Kamath, T. Steinke (2020), *The Discrete Gaussian for Differential Privacy*. A sharper zCDP-to-DP conversion than (5.5). <https://arxiv.org/abs/2004.00010>
-8. T. van Erven, P. Harremoës (2014), *Rényi Divergence and Kullback–Leibler Divergence*. Properties of $D_\alpha$, including data processing. <https://arxiv.org/abs/1206.2459>
+The note does not prove that CDP is closed under composition in the full sense of @def-cdp, and it does not rely on it.
+
+# Sources
+
+1. C. Dwork, G. N. Rothblum and S. Vadhan (2010), *Boosting and Differential Privacy*. The advanced composition theorem and the bound on the average loss. <https://privacytools.seas.harvard.edu/sites/g/files/omnuum6656/files/privacytools/files/05670947.pdf>
+2. C. Dwork and G. N. Rothblum (2016), *Concentrated Differential Privacy*. The definition of CDP, the improved second term, and the analysis of Gaussian noise. <https://arxiv.org/abs/1603.01887>
+3. M. Bun and T. Steinke (2016), *Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds*. The definition of zCDP, its conversions and composition, the Gaussian mechanism, and the relation to CDP. <https://arxiv.org/abs/1605.02065>
+4. P. Kairouz, S. Oh and P. Viswanath (2015), *The Composition Theorem for Differential Privacy*. The optimal composition of $(\varepsilon, \delta)$ guarantees and the decomposition of an $(\varepsilon, \delta)$ pair. <https://proceedings.mlr.press/v37/kairouz15.pdf>
+5. B. Balle and Y.-X. Wang (2018), *Improving the Gaussian Mechanism for Differential Privacy: Analytical Calibration and Optimal Denoising*. The exact privacy profile @eq-gauss-exact. <https://arxiv.org/abs/1805.06530>
+6. J. Dong, A. Roth and W. J. Su (2022), *Gaussian Differential Privacy*. The composition of Gaussian mechanisms under adaptive choice. <https://arxiv.org/abs/1905.02383>
+7. C. Canonne, G. Kamath and T. Steinke (2020), *The Discrete Gaussian for Differential Privacy*. A sharper conversion from zCDP to approximate DP. <https://arxiv.org/abs/2004.00010>
+8. T. van Erven and P. Harremoës (2014), *Rényi Divergence and Kullback–Leibler Divergence*. The properties of Rényi divergence, including its limits and the data-processing inequality. <https://arxiv.org/abs/1206.2459>
+9. S. Boucheron, G. Lugosi and P. Massart (2013), *Concentration Inequalities: A Nonasymptotic Theory of Independence*. Hoeffding's lemma, with proof (Lemma 2.2).

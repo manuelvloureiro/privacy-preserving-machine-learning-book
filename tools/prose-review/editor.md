@@ -43,6 +43,23 @@ Rules (PROSE.md explains each, with its source):
     whole goes in display math, introduced by a sentence that names its symbols. Values and short
     arithmetic stay inline.
 
+Rules for pages with derivations (PROSE.md, "Rules for mathematics"):
+
+11. **Open every section with its question**, in words a reader without context understands, and why
+    the reader needs the answer now. A heading names the topic in plain words, never a compressed claim.
+12. **Keep a result with its proof**: question, idea, statement, proof, meaning, in one section. A tool
+    the proof needs comes just before it. Never state a theorem in one section and prove it in another.
+13. **Give the plan before the proof** when it has more than three steps, and open each step with its goal.
+14. **One move per display**, with the reason in the sentence before it, never after.
+15. **The page reads without its formulas**: replace them by "blah" and the sentences still explain.
+16. **Concrete before abstract**: the smallest case with numbers first, and one running example.
+17. **Introduce a lemma by its use**, and never write "clearly" or "it is easy to see".
+18. **Notation earns its place**: a symbol for something used three or more times, named at first
+    use, one meaning per symbol, and a table of symbols when a page has more than about eight.
+
+A structural failure of rules 11–13 (a section without a question, a proof away from its statement)
+makes the verdict **rewrite**, with the order the section should follow.
+
 For each problem, give:
 
 - the exact text (quoted, at most 40 words);
