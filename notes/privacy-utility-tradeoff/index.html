@@ -9,7 +9,7 @@
 <meta name="author" content="Study notes">
 <meta name="dcterms.date" content="2026-10-23">
 
-<title>Pricing the Privacy–Utility Trade-off</title>
+<title>The Privacy–Utility Trade-off, Worked Through</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -27,41 +27,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -118,30 +83,14 @@ window.Quarto = {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#sec-why" id="toc-sec-why" class="nav-link active" data-scroll-target="#sec-why"><span class="header-section-number">1</span> Why the curve has to be priced</a></li>
-  <li><a href="#sec-axes" id="toc-sec-axes" class="nav-link" data-scroll-target="#sec-axes"><span class="header-section-number">2</span> Putting both axes in business units</a>
-  <ul class="collapse">
-  <li><a href="#the-utility-axis" id="toc-the-utility-axis" class="nav-link" data-scroll-target="#the-utility-axis"><span class="header-section-number">2.1</span> The utility axis</a></li>
-  <li><a href="#the-privacy-axis" id="toc-the-privacy-axis" class="nav-link" data-scroll-target="#the-privacy-axis"><span class="header-section-number">2.2</span> The privacy axis</a></li>
-  </ul></li>
-  <li><a href="#sec-upside" id="toc-sec-upside" class="nav-link" data-scroll-target="#sec-upside"><span class="header-section-number">3</span> The upside: data that DP unlocks</a></li>
-  <li><a href="#sec-comparable" id="toc-sec-comparable" class="nav-link" data-scroll-target="#sec-comparable"><span class="header-section-number">4</span> Making the privacy axis comparable</a></li>
-  <li><a href="#sec-frontier" id="toc-sec-frontier" class="nav-link" data-scroll-target="#sec-frontier"><span class="header-section-number">5</span> Building the Pareto frontier</a>
-  <ul class="collapse">
-  <li><a href="#the-candidate-space" id="toc-the-candidate-space" class="nav-link" data-scroll-target="#the-candidate-space"><span class="header-section-number">5.1</span> The candidate space</a></li>
-  <li><a href="#the-procedure" id="toc-the-procedure" class="nav-link" data-scroll-target="#the-procedure"><span class="header-section-number">5.2</span> The procedure</a></li>
-  <li><a href="#paying-for-the-search" id="toc-paying-for-the-search" class="nav-link" data-scroll-target="#paying-for-the-search"><span class="header-section-number">5.3</span> Paying for the search</a></li>
-  <li><a href="#traps-when-comparing-techniques" id="toc-traps-when-comparing-techniques" class="nav-link" data-scroll-target="#traps-when-comparing-techniques"><span class="header-section-number">5.4</span> Traps when comparing techniques</a></li>
-  </ul></li>
-  <li><a href="#sec-policy" id="toc-sec-policy" class="nav-link" data-scroll-target="#sec-policy"><span class="header-section-number">6</span> Fitting the frontier to policy budgets</a>
-  <ul class="collapse">
-  <li><a href="#the-policy-sets-a-ceiling-not-a-weight" id="toc-the-policy-sets-a-ceiling-not-a-weight" class="nav-link" data-scroll-target="#the-policy-sets-a-ceiling-not-a-weight"><span class="header-section-number">6.1</span> The policy sets a ceiling, not a weight</a></li>
-  <li><a href="#one-frontier-view-per-policy" id="toc-one-frontier-view-per-policy" class="nav-link" data-scroll-target="#one-frontier-view-per-policy"><span class="header-section-number">6.2</span> One frontier view per policy</a></li>
-  <li><a href="#sharing-one-budget-across-products" id="toc-sharing-one-budget-across-products" class="nav-link" data-scroll-target="#sharing-one-budget-across-products"><span class="header-section-number">6.3</span> Sharing one budget across products</a></li>
-  <li><a href="#retraining-is-part-of-the-budget" id="toc-retraining-is-part-of-the-budget" class="nav-link" data-scroll-target="#retraining-is-part-of-the-budget"><span class="header-section-number">6.4</span> Retraining is part of the budget</a></li>
-  </ul></li>
-  <li><a href="#sec-present" id="toc-sec-present" class="nav-link" data-scroll-target="#sec-present"><span class="header-section-number">7</span> Presenting the decision</a></li>
-  <li><a href="#sec-cases" id="toc-sec-cases" class="nav-link" data-scroll-target="#sec-cases"><span class="header-section-number">8</span> How others have decided</a></li>
+  <li><a href="#sec-case" id="toc-sec-case" class="nav-link active" data-scroll-target="#sec-case"><span class="header-section-number">1</span> The use case</a></li>
+  <li><a href="#sec-goal" id="toc-sec-goal" class="nav-link" data-scroll-target="#sec-goal"><span class="header-section-number">2</span> Step 1: state the business goal as a count</a></li>
+  <li><a href="#sec-policy" id="toc-sec-policy" class="nav-link" data-scroll-target="#sec-policy"><span class="header-section-number">3</span> Step 2: turn the privacy setting into a sentence</a></li>
+  <li><a href="#sec-fixed" id="toc-sec-fixed" class="nav-link" data-scroll-target="#sec-fixed"><span class="header-section-number">4</span> Step 3: fix everything that must not be tuned on private data</a></li>
+  <li><a href="#sec-results" id="toc-sec-results" class="nav-link" data-scroll-target="#sec-results"><span class="header-section-number">5</span> Step 4: read the results, technical first</a></li>
+  <li><a href="#sec-size" id="toc-sec-size" class="nav-link" data-scroll-target="#sec-size"><span class="header-section-number">6</span> Step 5: check how much the data size matters</a></li>
+  <li><a href="#sec-decision" id="toc-sec-decision" class="nav-link" data-scroll-target="#sec-decision"><span class="header-section-number">7</span> Step 6: present the menu and decide</a></li>
+  <li><a href="#sec-other" id="toc-sec-other" class="nav-link" data-scroll-target="#sec-other"><span class="header-section-number">8</span> Doing this in another business</a></li>
   <li><a href="#sec-sources" id="toc-sec-sources" class="nav-link" data-scroll-target="#sec-sources"><span class="header-section-number">9</span> Sources</a></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="Pricing-the-Privacy-Utility-Trade-off.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
@@ -152,8 +101,8 @@ window.Quarto = {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Pricing the Privacy–Utility Trade-off</h1>
-<p class="subtitle lead">How to build the curve, compare techniques and policies, and put the choice in front of decision makers</p>
+<h1 class="title">The Privacy–Utility Trade-off, Worked Through</h1>
+<p class="subtitle lead">One use case, from the business question to a signed-off privacy setting</p>
 </div>
 
 
@@ -180,7 +129,7 @@ window.Quarto = {
 <div>
   <div class="abstract">
     <div class="block-title">Abstract</div>
-    <p>Differential privacy (DP) buys a formal guarantee by adding noise, and the noise costs accuracy. Engineers usually show that cost as a curve of accuracy against the privacy parameter <span class="math inline">\(\varepsilon\)</span>, which means little to the people who have to approve a release. This note shows how to turn both axes into units a business already uses, how to build a privacy–utility Pareto frontier that compares different DP techniques fairly, how organisational privacy budgets enter the choice, and how to present the decision as a short menu of options. It draws on research papers, government guidance and published deployments, which are listed at the end.</p>
+    <p>A bank wants to train a targeting model on its customer records, and its privacy policy says the model must be trained with differential privacy (DP). Someone has to choose how much privacy to buy, and that person is rarely the engineer. This note walks through the choice step by step on a public dataset, with every number computed by a script. It shows how to state the business goal as a count the bank cares about, how to turn the privacy setting into a sentence a privacy officer can sign, how to compare two DP techniques on the same axes, and how to end with a short menu of options and a decision.</p>
   </div>
 </div>
 
@@ -188,282 +137,435 @@ window.Quarto = {
 </header>
 
 
-<section id="sec-why" class="level1" data-number="1">
-<h1 data-number="1"><span class="header-section-number">1</span> Why the curve has to be priced</h1>
-<p>Every differentially private system has a dial. Turning it one way adds noise and strengthens the guarantee. Turning it the other way removes noise and makes the outputs more accurate. The dial is usually labelled with <span class="math inline">\(\varepsilon\)</span>, the privacy-loss parameter, where a smaller value means a stronger guarantee. An engineer can sweep that dial and draw a curve of accuracy against <span class="math inline">\(\varepsilon\)</span>, and the curve is the honest technical description of the trade-off.</p>
-<p>That curve is rarely enough to make a decision, though. A product owner cannot weigh “<span class="math inline">\(\varepsilon = 2\)</span>” against “0.91 AUC”, because neither number is in a unit they manage. The US Census Bureau put the problem plainly when it prepared the 2020 census. Its staff described accuracy against privacy loss as a fundamental trade-off. Choosing a point on it, they said, is a social choice that belongs to policy makers, within the limits of what the technology can do (<a href="https://www.census.gov/content/dam/Census/newsroom/press-kits/2019/jsm/presentation-disclosure-avoidance-at-scale.pdf">Census Bureau, 2019</a>). Inside a company the same holds. The choice belongs to whoever owns the risk and the revenue, and the engineer’s job is to give them a curve they can read.</p>
-<p>So this note has two halves. The first half (<a href="#sec-axes" class="quarto-xref">Section&nbsp;2</a> and <a href="#sec-upside" class="quarto-xref">Section&nbsp;3</a>) translates the axes. Utility becomes money or a key performance indicator, and privacy becomes the odds of a concrete harm. The second half (<a href="#sec-comparable" class="quarto-xref">Section&nbsp;4</a> to <a href="#sec-present" class="quarto-xref">Section&nbsp;7</a>) builds the curve properly, as a Pareto frontier over many techniques and settings, and then fits it to the budgets that an organisation’s privacy policy sets.</p>
+<section id="sec-case" class="level1" data-number="1">
+<h1 data-number="1"><span class="header-section-number">1</span> The use case</h1>
+<p>A retail bank is about to launch a premium credit card. The card only makes sense for customers who earn more than $50,000 a year, so the marketing team wants to send the offer to those customers and to nobody else. The bank does not record income directly, but it holds other facts about each customer, such as age, education, occupation, hours worked and marital status. The team wants a model that predicts from those facts who is likely to be eligible.</p>
+<p>The model will leave the bank’s secure environment, because an outside agency runs the campaign. The bank’s privacy policy therefore requires the model to be trained with DP, so that the model cannot be used to learn much about any single customer. The policy does not say how strict the guarantee must be. That choice is the subject of this note.</p>
+<p>We need data that behaves like the bank’s records, and the standard public dataset for this is Adult. It holds 48,842 people from the 1994 US Current Population Survey, each with the attributes above and a label saying whether their income was above $50,000 (<a href="https://archive.ics.uci.edu/dataset/2/adult">UCI Machine Learning Repository</a>). We use its training file of 32,561 people as the bank’s customer records, which the model learns from. Its test file of 16,281 people plays the customers who will receive the next campaign. Everything below is computed by one script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/privacy_utility_tradeoff.py">code/notes/privacy_utility_tradeoff.py</a>, which a reader can run to get the same numbers.</p>
+<p>The walk-through has six steps. It states the business goal as a number (<a href="#sec-goal" class="quarto-xref">Section&nbsp;2</a>), turns the privacy setting into a policy sentence (<a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>), and fixes everything that must not be tuned on private data (<a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a>). It then runs the experiment and reads the results, first in technical terms and then in business terms (<a href="#sec-results" class="quarto-xref">Section&nbsp;5</a>). The last steps look at how much the size of the dataset matters (<a href="#sec-size" class="quarto-xref">Section&nbsp;6</a>) and how to present the decision (<a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a>).</p>
 </section>
-<section id="sec-axes" class="level1" data-number="2">
-<h1 data-number="2"><span class="header-section-number">2</span> Putting both axes in business units</h1>
-<section id="the-utility-axis" class="level2" data-number="2.1">
-<h2 data-number="2.1" class="anchored" data-anchor-id="the-utility-axis"><span class="header-section-number">2.1</span> The utility axis</h2>
-<p>Model accuracy and root-mean-square error are the engineer’s measures of utility, but the business cares about what the lost accuracy does downstream. The most direct translation runs the private and the non-private model through the evaluation the business already trusts. For a fraud model that is the fraud caught at a fixed review capacity. For a recommender it is conversion in an offline replay or an A/B test, and for a demand forecast it is the cost of stock-outs and overstock. A statement such as “moving from no DP to <span class="math inline">\(\varepsilon = 4\)</span> costs 0.6% of the fraud we catch, about €400,000 a year” is something a budget holder can weigh.</p>
-<p>Published statistics need a different translation, because nobody consumes a dashboard’s error directly. What matters is whether the noise ever changes a decision. Take a count released with the Laplace mechanism, which adds noise whose typical size depends on two things. The sensitivity <span class="math inline">\(\Delta\)</span> is the most that one person can change the count, which is 1 for a plain count. The noise scale is then <span class="math inline">\(\Delta/\varepsilon\)</span>, and that is also the average size of the error:</p>
-<p><span class="math display">\[\mathbb E\,\lvert \text{noise} \rvert = \frac{\Delta}{\varepsilon}.\]</span></p>
-<p>Take a count of 2,000 customers released at <span class="math inline">\(\varepsilon = 0.5\)</span>. Its typical error is 2 customers, or 0.1%. If the dashboard is read to the nearest hundred, that error never changes a decision, and the utility cost is zero. The useful metric here is therefore a <em>decision error rate</em>. It counts how often the noisy release would lead somewhere the true value would not. Examples are ranking two regions in the wrong order, crossing a reorder threshold, or flagging an anomaly that is not there. That rate can be estimated by simulation on historical data before anything is released.</p>
-<p>The same example shows where the real cost usually lies. The error of 2 customers is fixed by <span class="math inline">\(\Delta\)</span> and <span class="math inline">\(\varepsilon\)</span>, whatever the size of the count, so it weighs far more on a small group. On a segment of 40 customers it is 5%. In general the relative error of a count or a mean over <span class="math inline">\(n\)</span> people falls like</p>
-<p><span class="math display">\[\frac{\text{error}}{\text{true value}} \approx \frac{\Delta}{n\,\varepsilon},\]</span></p>
-<p>so a dataset twice the size reaches the same accuracy at half the <span class="math inline">\(\varepsilon\)</span>. Small regions, rare products and minority populations therefore pay most of the cost of privacy. Microsoft made this visible when it released US broadband coverage by ZIP code with DP. The noise mattered most in ZIP codes with few households, so Microsoft published an error range for each ZIP code alongside the data. It also showed that publishing the ranges cost no extra privacy (<a href="https://www.microsoft.com/en-us/research/publication/u-s-broadband-coverage-data-set-a-differentially-private-data-release/">Microsoft Research, 2021</a>). A utility report should do the same and give the cost for each segment the business cares about, not only the average.</p>
-<p>The last part of the utility axis is the cost of buying accuracy back. At a fixed <span class="math inline">\(\varepsilon\)</span>, utility can often be recovered with more data, larger training batches, more compute or a model pre-trained on public data. DeepMind’s work on image classification is the clearest example. A pre-trained model fine-tuned with DP reached 86.7% top-1 accuracy on ImageNet at <span class="math inline">\(\varepsilon = 8\)</span>, about four points below the non-private state of the art (<a href="https://www.arxiv.org/pdf/2204.13650">De et al., 2022</a>). Tramèr and Boneh showed the reverse. Without good features or much more data, deep networks trained with DP lost to linear models on handcrafted features (<a href="https://arxiv.org/pdf/2011.11660">Tramèr &amp; Boneh, 2021</a>). Putting a price on the buy-back turns “we lose two points of accuracy” into “we spend €50,000 more on compute and lose nothing”, which is often an easier decision.</p>
+<section id="sec-goal" class="level1" data-number="2">
+<h1 data-number="2"><span class="header-section-number">2</span> Step 1: state the business goal as a count</h1>
+<p>Engineers usually measure a model by its accuracy or its AUC, but neither tells the marketing team what it will get. The team cares about one thing, which is how many of the offers reach eligible customers. So we need to fix how many offers are sent and then count how many of them land well.</p>
+<p>The number of offers is a business input, and here is how the bank can choose it without guessing. The Census Bureau publishes the share of people who earn more than $50,000, and in Adult that share is about 24%. If the bank sends as many offers as it expects to have eligible customers, a perfect model would reach every one of them and waste nothing. For the 16,281 campaign customers we send 3,846 offers, the number of eligible customers among them, which is what this rule gives when the published share holds for the bank’s customers.</p>
+<p>That choice makes the business metric easy to read. The model scores every customer, and the bank sends the 3,846 offers to the highest scores. The metric is the number of eligible customers among those 3,846. Every offer that does not reach an eligible customer is wasted, so the waste is 3,846 minus that number.</p>
+<p>The metric needs a baseline, and the natural one is to have no model at all. If the bank sent the 3,846 offers to customers picked at random, each offer would reach an eligible customer with probability 3,846 / 16,281, about 24%. The expected number reached would then be</p>
+<p><span class="math display">\[3{,}846 \times \frac{3{,}846}{16{,}281} \approx 909.\]</span></p>
+<p>Any model, private or not, has to beat 909 to be worth having.</p>
+<p>The money follows from the count. Write <span class="math inline">\(V\)</span> for what the bank gains from reaching one eligible customer instead of an ineligible one. It is the chance that an eligible customer takes up the card times the margin the card earns, and the finance team estimates it, not the data team. Every comparison below is a difference in eligible customers reached, so a difference of <span class="math inline">\(k\)</span> customers is worth <span class="math inline">\(k\,V\)</span> to the bank. We never need to invent a value for <span class="math inline">\(V\)</span>, because the decision in <a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a> only depends on how <span class="math inline">\(k\,V\)</span> compares with what the privacy policy protects.</p>
 </section>
-<section id="the-privacy-axis" class="level2" data-number="2.2">
-<h2 data-number="2.2" class="anchored" data-anchor-id="the-privacy-axis"><span class="header-section-number">2.2</span> The privacy axis</h2>
-<p>On its own, <span class="math inline">\(\varepsilon\)</span> is a number without units or context, and that makes it hard to explain (<a href="https://cdt.org/insights/youll-probably-be-protected-explaining-differential-privacy-guarantees/">CDT, 2023</a>). A user study by Nanayakkara and colleagues tested several ways of explaining it to people deciding whether to share their data. Explanations given as odds worked better than the alternatives. People who were told the value of <span class="math inline">\(\varepsilon\)</span> were also more willing to share, and less so as the guarantee weakened (<a href="https://www.usenix.org/conference/usenixsecurity23/presentation/nanayakkara">Nanayakkara et al., 2023</a>). The privacy axis should therefore be stated as odds.</p>
-<p>The cleanest odds statement concerns an attacker who wants to know whether one person, Alice, is in the data. Suppose the attacker starts with some belief about that, the prior, and then sees the released output. Pure <span class="math inline">\(\varepsilon\)</span>-DP guarantees that the attacker’s odds can grow by at most a factor of <span class="math inline">\(e^\varepsilon\)</span>:</p>
-<p><span class="math display">\[\frac{\Pr[\text{Alice is in}\mid\text{output}]}{\Pr[\text{Alice is out}\mid\text{output}]} \le e^{\varepsilon}\,\frac{\Pr[\text{Alice is in}]}{\Pr[\text{Alice is out}]}.\]</span></p>
-<p>Suppose the attacker thinks there is an even chance that Alice is in the data. At <span class="math inline">\(\varepsilon = 1\)</span> the output can push that belief to at most 73%, and at <span class="math inline">\(\varepsilon = 3\)</span> to at most 95%. An attacker who starts at 1% ends at most at 2.7% in the first case and 17% in the second. Those sentences are what a privacy officer can put in a risk assessment. Approximate <span class="math inline">\((\varepsilon,\delta)\)</span>-DP adds a small failure probability <span class="math inline">\(\delta\)</span>, and the statement then holds except on outcomes of total probability about <span class="math inline">\(\delta\)</span>.</p>
-<p>A second statement bounds any test the attacker might run. Write the attack’s false-positive rate, the fraction of non-members it wrongly flags, as FPR, and its true-positive rate, the fraction of members it catches, as TPR. Then every membership test against an <span class="math inline">\((\varepsilon,\delta)\)</span>-DP release satisfies</p>
-<p><span class="math display">\[\text{TPR} \le e^{\varepsilon}\,\text{FPR} + \delta.\]</span></p>
-<p>At an FPR of 0.1%, the level at which attacks are usually judged, the bound is a TPR of 0.27% at <span class="math inline">\(\varepsilon = 1\)</span> and 2% at <span class="math inline">\(\varepsilon = 3\)</span>. At <span class="math inline">\(\varepsilon = 8\)</span> the bound exceeds 100% and says nothing. That does not mean a model trained at <span class="math inline">\(\varepsilon = 8\)</span> is unprotected. It means the single pair <span class="math inline">\((\varepsilon,\delta)\)</span> throws information away, and the full privacy curve of the mechanism, which <a href="#sec-comparable" class="quarto-xref">Section&nbsp;4</a> uses, gives a much tighter bound.</p>
-<p>Bounds describe the worst case, and decision makers also respond to evidence. A privacy audit runs the strongest known attacks against the actual model and reports what they achieved. Earlier audits needed hundreds of training runs. Steinke, Nasr and Jagielski showed how to get a meaningful empirical lower bound on <span class="math inline">\(\varepsilon\)</span> from a single run (<a href="https://proceedings.neurips.cc/paper_files/paper/2023/hash/9a6f6e0d6781d1cb8689192408946d73-Abstract.html">Steinke et al., 2023</a>). Jayaraman and Evans documented a large gap between the bounds and what attacks measure in practice (<a href="https://www.usenix.org/conference/usenixsecurity19/presentation/jayaraman">Jayaraman &amp; Evans, 2019</a>). Risk and legal teams can act on a sentence such as “the best attacks we know did no better than guessing”. It should be reported next to the bound, though, and never in place of it.</p>
-<p>Two more translations help. The first places the release in the organisation’s risk register. There, the likelihood of a re-identification incident is multiplied by its impact in fines, notification costs and lost customers, and DP lowers the likelihood in a way that can be defended. Whether a DP release also counts as anonymous data, and so falls outside some data-protection obligations, is a legal question for counsel. The UK Information Commissioner’s Office treats DP as a way to produce anonymous statistics but sets no threshold for <span class="math inline">\(\varepsilon\)</span> (<a href="https://ropesgray.com/en/insights/viewpoints/102ih67/ico-issues-new-guidance-on-privacy-enhancing-technologies">summary of ICO guidance</a>). The second translation compares the choice with deployments that peers and regulators have accepted, which <a href="#sec-cases" class="quarto-xref">Section&nbsp;8</a> does.</p>
+<section id="sec-policy" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Step 2: turn the privacy setting into a sentence</h1>
+<p>DP is controlled by one number, <span class="math inline">\(\varepsilon\)</span>, and a smaller <span class="math inline">\(\varepsilon\)</span> means stronger privacy. On its own, <span class="math inline">\(\varepsilon\)</span> means nothing to a privacy officer, so we translate it into the question an attacker would ask. Suppose an attacker wants to know whether a particular person, say Alice, is one of the bank’s customers. Before seeing the model, the attacker has some belief about that. DP guarantees that seeing the model can multiply the attacker’s odds by at most <span class="math inline">\(e^{\varepsilon}\)</span>.</p>
+<p>The cleanest case is an attacker who starts at even odds, a belief of 50%. The odds are then 1 to 1, and after seeing the model they are at most <span class="math inline">\(e^\varepsilon\)</span> to 1. Turned back into a probability, the attacker’s belief can rise to at most</p>
+<p><span class="math display">\[\text{belief ceiling} = \frac{e^{\varepsilon}}{1 + e^{\varepsilon}}.\]</span></p>
+<p>At <span class="math inline">\(\varepsilon = 1\)</span> the ceiling is <span class="math inline">\(e/(1+e)\)</span>, about 73%. At <span class="math inline">\(\varepsilon = 0.1\)</span> it is about 52.5%, so the model teaches the attacker almost nothing, and at <span class="math inline">\(\varepsilon = 3\)</span> it is about 95%. That last guarantee still holds, but it is weak.</p>
+<p>This is the sentence the privacy officer signs, and in our use case they choose a ceiling of 75%. In other words, an attacker who thinks it is a coin flip whether Alice is a customer must not end up more than 75% sure. Solving the formula for <span class="math inline">\(\varepsilon\)</span> turns the sentence into a number:</p>
+<p><span class="math display">\[\frac{e^{\varepsilon}}{1+e^{\varepsilon}} \le 0.75 \quad\Longleftrightarrow\quad e^{\varepsilon} \le 3 \quad\Longleftrightarrow\quad \varepsilon \le \ln 3 \approx 1.10.\]</span></p>
+<p>The policy is set before anyone looks at the model’s results. If the ceiling were chosen after seeing the accuracy, it would drift to wherever the model happens to do well.</p>
+<p>One technical detail completes the guarantee. The training method used below adds a second parameter, <span class="math inline">\(\delta\)</span>, which is the small probability that the guarantee fails outright. A common rule sets <span class="math inline">\(\delta\)</span> below one over the number of people, so that the guarantee is not expected to fail for anyone. For 32,561 customers this gives <span class="math inline">\(\delta = 10^{-5}\)</span>, and we use that value throughout.</p>
 </section>
+<section id="sec-fixed" class="level1" data-number="4">
+<h1 data-number="4"><span class="header-section-number">4</span> Step 3: fix everything that must not be tuned on private data</h1>
+<p>A DP guarantee covers what the training run does with the data. It does not cover choices that someone made by looking at the private data beforehand. If an engineer tried twenty settings on the customer records and kept the best one, that choice would itself leak information. So everything apart from the training run is decided from public information.</p>
+<p>The preprocessing comes from the survey’s public codebook, not from the data. Ages are scaled within 17 to 90, years of education within 1 to 16 and weekly hours within 1 to 99. Capital gains and losses are scaled on a log scale up to the survey’s published cap of 99,999. Each category, such as an occupation, becomes a 0-or-1 column taken from the codebook’s list. Every customer’s row then lies in a known range, which DP needs, because it bounds how much one customer can change the training.</p>
+<p>The two techniques we compare are also fixed in advance. The first is <strong>DP-SGD</strong>, the standard way to train a model with DP. It trains a logistic regression, the same kind of model a bank would use without DP, in small random batches. It caps how much each customer can move the model at each step, which is called <em>clipping</em>, and it adds random noise to every update (<a href="https://opacus.ai/">Opacus</a>). The noise is set by Opacus’s privacy accountant so that the whole training run meets the target <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. Its settings were fixed before training and never tuned on the customer records. It uses batches of about 1,000 customers, 10 passes over the data, a clipping norm of 1 and a learning rate of 0.5. The second technique is a <strong>private naive Bayes</strong> classifier from IBM’s diffprivlib, which adds noise to simple averages per class (<a href="https://github.com/IBM/differential-privacy-library">diffprivlib</a>). It gives the stronger pure <span class="math inline">\(\varepsilon\)</span> guarantee, with no <span class="math inline">\(\delta\)</span>, so it also meets the <span class="math inline">\((\varepsilon, 10^{-5})\)</span> standard, and both techniques can be placed on the same axis.</p>
+<p>The experiment then trains each technique at ten values of <span class="math inline">\(\varepsilon\)</span> from 0.01 to 10. It repeats each setting with 20 random seeds, because DP training is random and one run can be lucky or unlucky. It also trains each model without DP, with the same settings, so that the cost of privacy can be read off directly.</p>
 </section>
-<section id="sec-upside" class="level1" data-number="3">
-<h1 data-number="3"><span class="header-section-number">3</span> The upside: data that DP unlocks</h1>
-<p>Framed as above, the trade-off is all cost, because the private model is compared with a non-private one. That comparison is often the wrong one. Many projects can only run with a formal guarantee. Legal may not approve the use of the data otherwise, a partner may not share its data, the data may not be allowed to leave a region, or a privacy review may hold the project for months. In those cases the honest comparison is between a private model and no model at all.</p>
-<p>The Internal Revenue Service’s work with Tumult Labs is a published example. Its older approach suppressed small groups to protect taxpayers, and suppression had climbed above 70% of the cells, which left data of questionable use. A DP release, with its budget tuned to the uses that stakeholders said they needed, replaced it (<a href="https://www.tmlt.io/resources/how-tumult-labs-helped-irs-support-educational-accountability-with-differential-privacy">Tumult Labs</a>). That is a vendor’s case study, so its claims are not independently checked, but the pattern is common. So the value of the use case that DP unlocks belongs on the utility side of the ledger. The cost of privacy then becomes a discount on a revenue line that would otherwise not exist.</p>
-</section>
-<section id="sec-comparable" class="level1" data-number="4">
-<h1 data-number="4"><span class="header-section-number">4</span> Making the privacy axis comparable</h1>
-<p>A frontier compares many configurations, possibly built with different techniques, and that only works if every point’s privacy is measured the same way. Two values of <span class="math inline">\(\varepsilon\)</span> can describe very different guarantees, and the ways they differ are easy to miss. <a href="#tbl-normalise" class="quarto-xref">Table&nbsp;1</a> lists what must be held fixed before any two points are compared.</p>
-<div id="tbl-normalise" class="quarto-float quarto-figure quarto-figure-center anchored">
-<figure class="quarto-float quarto-float-tbl figure">
-<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-normalise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;1: What must be the same for every point on a frontier.
+<section id="sec-results" class="level1" data-number="5">
+<h1 data-number="5"><span class="header-section-number">5</span> Step 4: read the results, technical first</h1>
+<p><a href="#fig-technical" class="quarto-xref">Figure&nbsp;1</a> shows the engineer’s view. Its vertical axis is the AUC, the probability that the model scores a randomly chosen eligible customer above a randomly chosen ineligible one. An AUC of 0.5 is guessing, and 1 is perfect. The bottom axis is <span class="math inline">\(\varepsilon\)</span>, and the top axis translates it into the attacker’s belief ceiling of <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>. The shaded bands show the range from the 10th to the 90th percentile over the seeds.</p>
+<div id="fig-technical" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-technical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/technical.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-technical-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Model quality against the privacy setting. Each line is a DP technique, averaged over 20 seeds, with its 10th–90th percentile band; each dashed line is the same model trained without DP.
 </figcaption>
-<div aria-describedby="tbl-normalise-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+</figure>
+</div>
+<p>Two things stand out. DP-SGD is better than naive Bayes at every privacy level, so naive Bayes can be dropped. And DP-SGD’s curve is flat over most of the range, which means that from about <span class="math inline">\(\varepsilon = 0.3\)</span> upwards it is almost as good as the model trained without DP. The quality only falls away below <span class="math inline">\(\varepsilon \approx 0.1\)</span>, where the attacker’s ceiling is already within a few points of 50%.</p>
+<p><a href="#fig-business" class="quarto-xref">Figure&nbsp;2</a> shows the same experiment in the bank’s terms. Its vertical axis is the number of eligible customers reached by the 3,846 offers, and it adds the two lines that matter to the business. The upper dashed line is the best model without DP, and the dotted line is no model at all. The shaded region on the right is what the privacy policy forbids.</p>
+<div id="fig-business" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-business-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/business.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-business-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Eligible customers reached by the campaign against the privacy setting. The shaded region is ruled out by the policy ceiling.
+</figcaption>
+</figure>
+</div>
+<p>The gap between a DP curve and the upper dashed line is the cost of privacy, counted in customers. The gap between the curve and the dotted line is what the model is worth compared with sending offers at random. <a href="#tbl-frontier" class="quarto-xref">Table&nbsp;1</a> lists every private configuration. A configuration is on the <em>frontier</em> when no other configuration is at least as private and reaches more customers. Only the frontier is worth considering, and here it consists of DP-SGD alone.</p>
+<div id="tbl-frontier" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Every private configuration, averaged over the seeds.
+</figcaption>
+<div aria-describedby="tbl-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 50%">
-<col style="width: 50%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Hold fixed</th>
-<th>Why it matters</th>
+<th>Technique</th>
+<th><span class="math inline">\(\varepsilon\)</span></th>
+<th>Attacker’s belief ceiling</th>
+<th>AUC</th>
+<th>Eligible reached</th>
+<th>On the frontier</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>The privacy unit (one record, one user, one user per day)</td>
-<td>A guarantee of <span class="math inline">\(\varepsilon = 2\)</span> per record is much weaker than <span class="math inline">\(\varepsilon = 2\)</span> per user when a user has fifty records.</td>
+<td>DP-SGD</td>
+<td>0.01</td>
+<td>50.2%</td>
+<td>0.548</td>
+<td>1,101 of 3,846 (29%)</td>
+<td></td>
 </tr>
 <tr class="even">
-<td>The neighbouring relation (adding or removing a record, or replacing one)</td>
-<td>For the same mechanism, replacing a record costs roughly twice as much <span class="math inline">\(\varepsilon\)</span> as adding or removing one.</td>
+<td>naive Bayes</td>
+<td>0.01</td>
+<td>50.2%</td>
+<td>0.567</td>
+<td>1,104 of 3,846 (29%)</td>
+<td>yes</td>
 </tr>
 <tr class="odd">
-<td>The horizon (one release, or a year of monthly retraining)</td>
-<td>Repeated releases compose, so the frontier should describe the whole horizon.</td>
+<td>DP-SGD</td>
+<td>0.02</td>
+<td>50.5%</td>
+<td>0.743</td>
+<td>1,753 of 3,846 (46%)</td>
+<td>yes</td>
 </tr>
 <tr class="even">
-<td>The value of <span class="math inline">\(\delta\)</span></td>
-<td>Use one value below one over the number of people, for every point.</td>
+<td>naive Bayes</td>
+<td>0.02</td>
+<td>50.5%</td>
+<td>0.575</td>
+<td>1,133 of 3,846 (29%)</td>
+<td></td>
 </tr>
 <tr class="odd">
-<td>The accountant</td>
-<td>Recompute every point with the tightest accountant available, the privacy loss distribution, so that no technique wins only because its paper used a looser bound.</td>
+<td>DP-SGD</td>
+<td>0.03</td>
+<td>50.7%</td>
+<td>0.791</td>
+<td>1,998 of 3,846 (52%)</td>
+<td>yes</td>
 </tr>
 <tr class="even">
-<td>The trust model (central, local, shuffled)</td>
-<td>The same <span class="math inline">\(\varepsilon\)</span> means different things when a trusted curator adds the noise and when each user adds it.</td>
+<td>naive Bayes</td>
+<td>0.03</td>
+<td>50.7%</td>
+<td>0.625</td>
+<td>1,259 of 3,846 (33%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>DP-SGD</td>
+<td>0.05</td>
+<td>51.2%</td>
+<td>0.843</td>
+<td>2,278 of 3,846 (59%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>naive Bayes</td>
+<td>0.05</td>
+<td>51.2%</td>
+<td>0.649</td>
+<td>1,314 of 3,846 (34%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>DP-SGD</td>
+<td>0.1</td>
+<td>52.5%</td>
+<td>0.878</td>
+<td>2,463 of 3,846 (64%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>naive Bayes</td>
+<td>0.1</td>
+<td>52.5%</td>
+<td>0.658</td>
+<td>1,346 of 3,846 (35%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>DP-SGD</td>
+<td>0.2</td>
+<td>55.0%</td>
+<td>0.890</td>
+<td>2,531 of 3,846 (66%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>naive Bayes</td>
+<td>0.2</td>
+<td>55.0%</td>
+<td>0.708</td>
+<td>1,542 of 3,846 (40%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>DP-SGD</td>
+<td>0.3</td>
+<td>57.4%</td>
+<td>0.893</td>
+<td>2,544 of 3,846 (66%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>naive Bayes</td>
+<td>0.3</td>
+<td>57.4%</td>
+<td>0.734</td>
+<td>1,686 of 3,846 (44%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>DP-SGD</td>
+<td>1</td>
+<td>73.1%</td>
+<td>0.895</td>
+<td>2,552 of 3,846 (66%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>naive Bayes</td>
+<td>1</td>
+<td>73.1%</td>
+<td>0.796</td>
+<td>2,103 of 3,846 (55%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>DP-SGD</td>
+<td>3</td>
+<td>95.3%</td>
+<td>0.895</td>
+<td>2,552 of 3,846 (66%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>naive Bayes</td>
+<td>3</td>
+<td>95.3%</td>
+<td>0.843</td>
+<td>2,367 of 3,846 (62%)</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>DP-SGD</td>
+<td>10</td>
+<td>100.0%</td>
+<td>0.895</td>
+<td>2,552 of 3,846 (66%)</td>
+<td>yes</td>
+</tr>
+<tr class="even">
+<td>naive Bayes</td>
+<td>10</td>
+<td>100.0%</td>
+<td>0.855</td>
+<td>2,430 of 3,846 (63%)</td>
+<td></td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>Ponomareva and colleagues give a checklist for reporting each of these in their practical guide to DP machine learning, and it doubles as a checklist for normalising a comparison (<a href="https://arxiv.org/pdf/2303.00654">Ponomareva et al., 2023</a>).</p>
-<p>Even with every row of the table fixed, <span class="math inline">\(\varepsilon\)</span> at one value of <span class="math inline">\(\delta\)</span> hides the shape of the guarantee. Two mechanisms with the same <span class="math inline">\((\varepsilon,\delta)\)</span> can give an attacker very different power. A more robust privacy axis is the strongest attack the full guarantee allows, such as the largest membership TPR at an FPR of 0.1%. Every modern accountant can compute it from the mechanism’s privacy curve. For a mechanism that is <span class="math inline">\(\mu\)</span>-Gaussian DP, for instance, the bound is</p>
-<p><span class="math display">\[\text{TPR} \le \Phi\bigl(\Phi^{-1}(\text{FPR}) + \mu\bigr),\]</span></p>
-<p>where <span class="math inline">\(\Phi\)</span> is the standard normal distribution function and <span class="math inline">\(\mu\)</span> measures how far apart the attacker’s two hypotheses are. Kulynych and colleagues went a step further and calibrated the noise directly to a target attack risk instead of a target <span class="math inline">\(\varepsilon\)</span>. At the same level of risk they got more utility than standard calibration (<a href="https://dblp.dagstuhl.de/pid/203/9056.html">Kulynych et al., 2024</a>). The attack-facing axis is also the one to show decision makers, with <span class="math inline">\(\varepsilon\)</span> kept as a secondary label.</p>
 </section>
-<section id="sec-frontier" class="level1" data-number="5">
-<h1 data-number="5"><span class="header-section-number">5</span> Building the Pareto frontier</h1>
-<section id="the-candidate-space" class="level2" data-number="5.1">
-<h2 data-number="5.1" class="anchored" data-anchor-id="the-candidate-space"><span class="header-section-number">5.1</span> The candidate space</h2>
-<p>A point on the frontier is one configuration, made of a technique, its hyperparameters and, when the pipeline has several private steps, a split of the budget between them. The techniques worth comparing for a machine-learning task include DP-SGD from scratch and DP fine-tuning of a public pre-trained model, either the full model, a low-rank adapter or only the last layer. They also include DP-FTRL, which does not need random sampling of the training data, and PATE, which trains teachers on disjoint data and releases their noisy votes. Beyond those come DP synthetic data followed by an ordinary model, output perturbation for convex models, and DP features feeding a non-private model.</p>
-<p>Each technique has its own hyperparameters, and most of them move both axes at once. Avent and colleagues point out that DP algorithms have more hyperparameters than their non-private versions for exactly this reason (<a href="https://www.petsymposium.org/popets/2020/popets-2020-0060.php">Avent et al., 2020</a>). For DP-SGD the main ones are the noise multiplier, the clipping norm, the sampling rate, the number of steps and the learning rate.</p>
+<section id="sec-size" class="level1" data-number="6">
+<h1 data-number="6"><span class="header-section-number">6</span> Step 5: check how much the data size matters</h1>
+<p>The flat curve in <a href="#fig-business" class="quarto-xref">Figure&nbsp;2</a> depends on the bank having many customers. DP hides each individual by adding noise, and the more customers there are, the less that noise matters relative to the signal they provide together. A bank with fewer customers, or a campaign aimed at one region, pays more for the same guarantee. The script therefore trains DP-SGD again on the first 2,000 and the first 8,000 customers, and <a href="#fig-sizes" class="quarto-xref">Figure&nbsp;3</a> compares the three sizes.</p>
+<div id="fig-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="figures/sizes.svg" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Eligible customers reached by DP-SGD trained on 2,000, 8,000 and 32,561 customers. Each dashed line is the same size without DP.
+</figcaption>
+</figure>
+</div>
+<p>With fewer customers the curve bends down at a larger <span class="math inline">\(\varepsilon\)</span>, and the gap to the model without DP is wider at every setting. <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;2</a> puts numbers on it. For the smallest base the gap stays open even at <span class="math inline">\(\varepsilon = 10\)</span>, where the noise is negligible. That part of the cost comes from clipping with settings chosen for the full dataset, and a bank in that position would tune the clipping norm and learning rate on public or synthetic data before paying it. For a business this is often the most useful finding, because it says whether the guarantee is cheap for this dataset, and whether pooling data or waiting for more customers would make a stricter policy affordable.</p>
+<div id="tbl-sizes" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Eligible customers missed because of privacy, by the number of customers the model is trained on.
+</figcaption>
+<div aria-describedby="tbl-sizes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Customers trained on</th>
+<th>Reached without DP</th>
+<th>Missed at <span class="math inline">\(\varepsilon\)</span> = 0.1</th>
+<th>Missed at <span class="math inline">\(\varepsilon\)</span> = 0.3</th>
+<th>Missed at <span class="math inline">\(\varepsilon\)</span> = 1</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2,000</td>
+<td>2,399</td>
+<td>455</td>
+<td>251</td>
+<td>209</td>
+</tr>
+<tr class="even">
+<td>8,000</td>
+<td>2,547</td>
+<td>287</td>
+<td>102</td>
+<td>73</td>
+</tr>
+<tr class="odd">
+<td>32,561</td>
+<td>2,568</td>
+<td>105</td>
+<td>24</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 </section>
-<section id="the-procedure" class="level2" data-number="5.2">
-<h2 data-number="5.2" class="anchored" data-anchor-id="the-procedure"><span class="header-section-number">5.2</span> The procedure</h2>
-<p>The sweep fixes a grid of target privacy levels and, for each technique and each target, searches for the configuration with the best utility. It works in a fixed order.</p>
-<ol type="1">
-<li>Pick the targets, for example <span class="math inline">\(\varepsilon \in \{0.5, 1, 2, 4, 8\}\)</span>, with the unit, <span class="math inline">\(\delta\)</span> and horizon fixed as in <a href="#tbl-normalise" class="quarto-xref">Table&nbsp;1</a>, and include the non-private model as a ceiling.</li>
-<li>For each technique, target and hyperparameter setting, let the accountant solve for the noise that meets the target. This step needs no training and takes milliseconds.</li>
-<li>Train with that noise, evaluate the business metric on held-out data, and repeat with three to five random seeds, because DP training is noisy.</li>
-<li>Recompute each run’s privacy with the common accountant and convert it to the attack-facing axis of <a href="#sec-comparable" class="quarto-xref">Section&nbsp;4</a>.</li>
-<li>Keep the runs that no other run beats on both axes.</li>
-</ol>
-<p>The last step is the Pareto filter. A configuration is <em>dominated</em> when another has no more privacy loss and no less utility, and is strictly better on at least one of the two. The frontier is the set of configurations that are not dominated, and it can be computed with one pass over the points sorted by privacy loss:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> non_dominated(points: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Indices of the (privacy loss, utility) points that no other point dominates."""</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">range</span>(<span class="bu">len</span>(points)), key<span class="op">=</span><span class="kw">lambda</span> i: (points[i][<span class="dv">0</span>], <span class="op">-</span>points[i][<span class="dv">1</span>]))</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    frontier: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="bu">float</span>(<span class="st">"-inf"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> order:</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> points[i][<span class="dv">1</span>] <span class="op">&gt;</span> best:</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>            frontier.append(i)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>            best <span class="op">=</span> points[i][<span class="dv">1</span>]</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> frontier</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Three practical points decide whether the frontier can be trusted. First, the accountant is free and training is not, so the grid should be pruned before any training starts. For DP-SGD, utility depends mostly on the noise relative to the batch size and on the number of steps, which rules out many settings in advance. Second, the hyperparameters must be tuned again at each target. The best clipping norm, batch size and learning rate change with <span class="math inline">\(\varepsilon\)</span>, and a frontier that reuses the non-private settings understates what DP can do. Third, the seeds give each point a confidence interval, and one point should only be said to dominate another when it is clearly better, not just better on average.</p>
-<p>When each training run is expensive, Bayesian optimisation can replace the grid. Avent and colleagues map the frontier with multi-objective Bayesian optimisation over measured utility (<a href="https://arxiv.org/pdf/1905.10862">Avent et al., 2020</a>). A 2025 framework exploits the fact that each frontier point is a maximisation of utility at a fixed privacy level and models the front directly, which needs fewer runs (<a href="https://arxiv.org/html/2509.04290v1">interactive trade-off framework, 2025</a>).</p>
-</section>
-<section id="paying-for-the-search" class="level2" data-number="5.3">
-<h2 data-number="5.3" class="anchored" data-anchor-id="paying-for-the-search"><span class="header-section-number">5.3</span> Paying for the search</h2>
-<p>Building the frontier is itself an analysis of the private data. Suppose the search tunes on that data and then reports the best run’s <span class="math inline">\(\varepsilon\)</span>. The reported number is too optimistic, because the choice of the best run leaks information too. Papernot and Steinke showed that this leakage is real, since outliers can shift which settings win. They also showed that it stays modest when each run is private and the number of runs is itself random (<a href="https://arxiv.org/pdf/2110.03620">Papernot &amp; Steinke, 2022</a>). A follow-up lowers the cost further by tuning on a random subset of the data (<a href="https://www.paperswithcode.com/paper/practical-differentially-private">NeurIPS 2023 follow-up</a>).</p>
-<p>That leaves three honest options. The search can run on public or proxy data from the same distribution, so that only the final training run touches the private data. It can charge its own cost to the budget, using the Papernot–Steinke analysis. Or it can choose a configuration and retrain once, with the report saying plainly that the search itself was not accounted for. For anything shown to a regulator, only the first two will do.</p>
-</section>
-<section id="traps-when-comparing-techniques" class="level2" data-number="5.4">
-<h2 data-number="5.4" class="anchored" data-anchor-id="traps-when-comparing-techniques"><span class="header-section-number">5.4</span> Traps when comparing techniques</h2>
-<p>A few techniques need care before they are placed on the same plot. PATE’s <span class="math inline">\(\varepsilon\)</span> is computed from the actual teacher votes, so it depends on the data, and the number itself leaks unless it is released with its own privacy mechanism. Its points should be marked differently. Public pre-training often moves the whole curve more than any other choice, but it assumes the public data really is public and does not overlap the private data, and that assumption must be stated. DP synthetic data spends its budget once for every later use, so its utility is a frontier per downstream task, and a dataset that is good for one task can be useless for another. Finally, a change of privacy unit needs new training runs. A guarantee per user needs sampling and clipping per user, and record-level runs cannot be relabelled as user-level ones.</p>
-</section>
-</section>
-<section id="sec-policy" class="level1" data-number="6">
-<h1 data-number="6"><span class="header-section-number">6</span> Fitting the frontier to policy budgets</h1>
-<section id="the-policy-sets-a-ceiling-not-a-weight" class="level2" data-number="6.1">
-<h2 data-number="6.1" class="anchored" data-anchor-id="the-policy-sets-a-ceiling-not-a-weight"><span class="header-section-number">6.1</span> The policy sets a ceiling, not a weight</h2>
-<p>A privacy policy can enter the decision in two ways. It can be a weight, so that the team maximises utility minus some price per unit of <span class="math inline">\(\varepsilon\)</span>, or it can be a ceiling, so that the team maximises utility below a limit that the policy sets. The ceiling works far better in practice. Nobody can say what a unit of <span class="math inline">\(\varepsilon\)</span> is worth in euros, while a risk owner can say which odds of re-identification they will accept. The ceiling should also be set before anyone sees the utility numbers, because otherwise it tends to drift to wherever the model happens to perform well.</p>
-<p>The 2020 census followed this order in reverse, and its example is instructive. The Bureau first fixed accuracy targets drawn from the Department of Justice’s redistricting and Voting Rights Act uses. Its engineers then searched for the smallest privacy-loss budget that met them, measuring mean absolute error, percentage error and outliers at every level of geography (<a href="https://arxiv.org/pdf/2204.08986">Abowd et al., 2022</a>; <a href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/2020-das-updates/2021-04-07.html">Census Bureau, 2021</a>). To meet those targets the global budget rose from 4.5 in earlier demonstration data to 12.2 in April 2021 (<a href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/2020-das-updates/2021-04-28.html">Census Bureau, 2021</a>), and a policy committee, not the engineers, made the final decision. Whether the constraint is placed on privacy or on utility, the frontier turns it into a single point, and a named owner signs off on that point.</p>
-</section>
-<section id="one-frontier-view-per-policy" class="level2" data-number="6.2">
-<h2 data-number="6.2" class="anchored" data-anchor-id="one-frontier-view-per-policy"><span class="header-section-number">6.2</span> One frontier view per policy</h2>
-<p>The policy fixes the unit, the horizon, <span class="math inline">\(\delta\)</span> and the ceiling. Many runs can be rescored under a different policy without retraining, because a different <span class="math inline">\(\delta\)</span> or a different horizon only changes the accounting. Only a change of privacy unit or trust model needs new runs. So the experiments can be run once and viewed under each policy, for example a stricter one for the European Union and a looser one for internal use. Each policy draws a vertical line on the plot, and its decision point is the best utility to the left of that line. The distance between two such points is exactly what the stricter policy costs.</p>
-</section>
-<section id="sharing-one-budget-across-products" class="level2" data-number="6.3">
-<h2 data-number="6.3" class="anchored" data-anchor-id="sharing-one-budget-across-products"><span class="header-section-number">6.3</span> Sharing one budget across products</h2>
-<p>Some organisations set a budget per person across everything they release, for instance “no customer’s data may contribute more than a fixed total per year, across all products”. Each project then receives a share, and the shares have to be added up correctly. Plain <span class="math inline">\(\varepsilon\)</span> values do not add up tightly under composition, while the parameter <span class="math inline">\(\rho\)</span> of zero-concentrated DP (zCDP) does, so the budget is best allocated in <span class="math inline">\(\rho\)</span>. For the Gaussian mechanism with sensitivity <span class="math inline">\(\Delta\)</span>, a share <span class="math inline">\(\rho\)</span> buys noise of standard deviation</p>
-<p><span class="math display">\[\sigma = \frac{\Delta}{\sqrt{2\rho}},\]</span></p>
-<p>and <span class="math inline">\(k\)</span> releases with shares <span class="math inline">\(\rho_1,\dots,\rho_k\)</span> cost <span class="math inline">\(\rho_1+\dots+\rho_k\)</span> in total.</p>
-<p>The allocation itself is an economic problem, and Abowd and Schmutte framed it that way for statistical agencies. Their rule is to set privacy where its marginal cost equals its marginal benefit (<a href="https://www.aeaweb.org/doi/10.1257/aer.20170627">Abowd &amp; Schmutte, 2019</a>). Applied to a portfolio of projects, write <span class="math inline">\(U_i(\rho_i)\)</span> for the business value that project <span class="math inline">\(i\)</span> achieves with budget <span class="math inline">\(\rho_i\)</span>, which its frontier provides. Maximising the total value within the organisation’s budget leads, when each frontier bends the usual way and gains less per unit as the budget grows, to the condition that every funded project gains the same value from its last unit of budget:</p>
-<p><span class="math display">\[U_i'(\rho_i) = \lambda \quad\text{for every funded project } i, \qquad \sum_i \rho_i = \rho_{\text{total}}.\]</span></p>
-<p>Here <span class="math inline">\(\lambda\)</span> is the value of one more unit of organisation-wide budget. In practice the rule is greedy. The next unit of budget goes to the project whose frontier is steepest at its current share, until the slopes match or the budget runs out. Systems that manage budgets at this scale exist. Cohere allocates budget to competing requests with weights that let business-critical tasks go first (<a href="https://arxiv.org/pdf/2301.08517">Cohere, 2023</a>), and Pujol and colleagues treat the budget as a shared resource with an entitled share per analyst (<a href="https://www.vldb.org/pvldb/vol16/p816-pujol.pdf">Pujol et al., 2023</a>).</p>
-</section>
-<section id="retraining-is-part-of-the-budget" class="level2" data-number="6.4">
-<h2 data-number="6.4" class="anchored" data-anchor-id="retraining-is-part-of-the-budget"><span class="header-section-number">6.4</span> Retraining is part of the budget</h2>
-<p>A model retrained every month spends its budget twelve times a year, and the frontier should be drawn for that whole horizon. The cadence is then a lever in its own right, because retraining less often leaves more budget for each release. Sage, a DP training platform built at Columbia, handles a stream of data with block composition, so that models can keep training on new data under one global guarantee (<a href="https://arxiv.org/pdf/1909.01502">Lécuyer et al., 2019</a>). Its “privacy-adaptive training” also follows the constraint-first logic of this section. It grows the data or the privacy budget until a model meets a quality target that the developer set in advance.</p>
-</section>
-</section>
-<section id="sec-present" class="level1" data-number="7">
-<h1 data-number="7"><span class="header-section-number">7</span> Presenting the decision</h1>
-<p>The frontier is the engineer’s working tool, and the decision maker needs a short menu taken from it. Three to five options, each near a policy ceiling, are usually enough. <a href="#tbl-menu" class="quarto-xref">Table&nbsp;2</a> shows the shape of such a menu for a fraud model. Its numbers are illustrative, not measured.</p>
+<section id="sec-decision" class="level1" data-number="7">
+<h1 data-number="7"><span class="header-section-number">7</span> Step 6: present the menu and decide</h1>
+<p>The decision maker does not need the curves. They need a few options, each with a privacy sentence and its business effect, and <a href="#tbl-menu" class="quarto-xref">Table&nbsp;3</a> gives them. The options are the best technique at a few privacy levels, plus the two reference points, no model and no DP. The membership column gives a second privacy sentence. It bounds how often any attack that wrongly accuses 1% of non-customers can correctly identify a real customer (<a href="https://arxiv.org/abs/1311.0776">Kairouz et al., 2015</a>).</p>
 <div id="tbl-menu" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Table&nbsp;2: An options menu for a fraud model. The numbers are illustrative.
+Table&nbsp;3: The options menu for one campaign of 3,846 offers, best technique at each option.
 </figcaption>
 <div aria-describedby="tbl-menu-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 <table class="caption-top table">
 <colgroup>
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
-<col style="width: 20%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 14%">
 </colgroup>
 <thead>
 <tr class="header">
 <th>Option</th>
-<th>Privacy statement</th>
-<th>Audit result</th>
-<th>Business impact</th>
-<th>Other effects</th>
+<th>Attacker’s belief ceiling</th>
+<th>Membership TPR bound at 1% FPR</th>
+<th>Eligible reached</th>
+<th>Offers wasted</th>
+<th>Missed vs.&nbsp;no DP</th>
+<th>Gained vs.&nbsp;no model</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>No DP</td>
-<td>No formal guarantee; access controls only</td>
-<td>Attack catches 3% of members at 0.1% false positives</td>
-<td>Baseline</td>
-<td>Legal blocks the partner’s data</td>
+<td>No model (random offers)</td>
+<td>—</td>
+<td>—</td>
+<td>909</td>
+<td>2,937</td>
+<td>1,659</td>
+<td>0</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(\varepsilon = 8\)</span></td>
-<td>Weak formal guarantee</td>
-<td>No better than guessing</td>
-<td>−0.3% fraud caught (−€0.4M a year)</td>
-<td>None</td>
+<td><span class="math inline">\(\varepsilon\)</span> = 0.1 (DP-SGD)</td>
+<td>52.5%</td>
+<td>1.1%</td>
+<td>2,463</td>
+<td>1,383</td>
+<td>105</td>
+<td>1,554</td>
 </tr>
 <tr class="odd">
-<td><span class="math inline">\(\varepsilon = 3\)</span></td>
-<td>An attacker at even odds reaches at most 95%</td>
-<td>No better than guessing</td>
-<td>−1.1% (−€1.5M a year)</td>
-<td>Unlocks the partner’s data (+€6M a year)</td>
+<td><span class="math inline">\(\varepsilon\)</span> = 0.3 (DP-SGD)</td>
+<td>57.4%</td>
+<td>1.4%</td>
+<td>2,544</td>
+<td>1,302</td>
+<td>24</td>
+<td>1,635</td>
 </tr>
 <tr class="even">
-<td><span class="math inline">\(\varepsilon = 1\)</span></td>
-<td>An attacker at even odds reaches at most 73%</td>
-<td>No better than guessing</td>
-<td>−4% (−€5.5M a year)</td>
-<td>Twice the compute recovers half the loss</td>
+<td><span class="math inline">\(\varepsilon\)</span> = 1 (DP-SGD)</td>
+<td>73.1%</td>
+<td>2.7%</td>
+<td>2,552</td>
+<td>1,294</td>
+<td>16</td>
+<td>1,643</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\varepsilon\)</span> = 3 (DP-SGD)</td>
+<td>95.3%</td>
+<td>20.1%</td>
+<td>2,552</td>
+<td>1,294</td>
+<td>16</td>
+<td>1,643</td>
+</tr>
+<tr class="even">
+<td>No DP (the same logistic regression, no clipping or noise)</td>
+<td>no limit</td>
+<td>no limit</td>
+<td>2,568</td>
+<td>1,278</td>
+<td>0</td>
+<td>1,659</td>
 </tr>
 </tbody>
 </table>
 </div>
 </figure>
 </div>
-<p>The process around the menu matters as much as the menu. The risk owner, usually the data-protection officer or the risk function, sets the ceiling first. Engineering then fills the menu from the frontier, and the business owner signs off on the remaining utility cost as the named owner of the decision. This mirrors the way security budgets are set, so executives recognise it. The decision, its justification and the audit evidence go into a release record. When the budget runs out or the data changes, the decision can then be reviewed instead of re-argued.</p>
+<p>The policy ceiling of <a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>, <span class="math inline">\(\varepsilon \le 1.10\)</span>, picks the option.</p>
+<p>The largest value on the grid below the ceiling is <span class="math inline">\(\varepsilon = 1\)</span>, and at that value the DP-SGD model is on the frontier. Across the seeds it reaches between 2,544 and 2,557 of the 3,846 eligible customers, 2,552 on average. The model without DP reaches 2,568, and random offers reach 909. So privacy costs about 16 eligible customers per campaign, while the private model still reaches about 1,643 more than sending the offers at random. In money, with <span class="math inline">\(V\)</span> the value to the bank of reaching one eligible customer, the cost of privacy is about <span class="math inline">\(16\,V\)</span> per campaign and the value of the private model over no model is about <span class="math inline">\(1,643\,V\)</span>. Even at <span class="math inline">\(\varepsilon = 10\)</span>, where the noise is small, the private model reaches 2,552. So almost all of the cost at the ceiling comes from clipping each customer’s influence, which DP-SGD does at every <span class="math inline">\(\varepsilon\)</span>, and almost none from the noise that the stricter policy adds.</p>
+<p>The decision then comes down to one comparison that the business can make. The finance team supplies <span class="math inline">\(V\)</span>, and the cost of privacy in money follows from the count above. The bank compares that cost with what the policy buys, which is the ability to hand the model to an outside agency at all, and a defensible answer if a regulator or a customer asks what the model reveals about them. In this use case the cost is small enough that the comparison is easy. In another use case, with fewer customers or a stricter ceiling, <a href="#tbl-sizes" class="quarto-xref">Table&nbsp;2</a> shows how quickly it can stop being easy.</p>
+<p>Three people sign the decision, each for their own part. The privacy officer signs the ceiling, which was fixed before the results were known. The engineer signs that the configuration meets it, with the accountant’s <span class="math inline">\(\varepsilon\)</span> and <span class="math inline">\(\delta\)</span> and the settings of <a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a>. The business owner signs the cost in customers, and so in money. All of this goes into a release record, together with the script that produced the numbers, so that the decision can be checked and revisited when the data or the policy changes.</p>
 </section>
-<section id="sec-cases" class="level1" data-number="8">
-<h1 data-number="8"><span class="header-section-number">8</span> How others have decided</h1>
-<p>Published deployments give both a method and a set of reference values. The 2020 census is the most thorough public example of the constraint-first method, as <a href="#sec-policy" class="quarto-xref">Section&nbsp;6</a> described. It also produced a translation that executives understand. A test on 1940 census data compared the noise with sampling. A budget of <span class="math inline">\(\varepsilon = 1\)</span> gave about the error of a random sample of half the population, and <span class="math inline">\(\varepsilon = 4\)</span> about the error of a 90% sample (<a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7216402/">Petti &amp; Flaxman, 2019</a>).</p>
-<p>Industry deployments show the budget machinery at work. LinkedIn’s Audience Engagements API gives each advertiser a budget that a central service tracks across data centres, so that nobody can average the noise away by repeating queries. The guarantee is per user, and the service uses the tightest composition bounds available to get more utility from each budget (<a href="https://arxiv.org/abs/2002.05839">Rogers et al., 2021</a>). Google has trained more than twenty production language models for its Gboard keyboard with DP-FTRL and public pre-training, at zCDP values of <span class="math inline">\(\rho\)</span> between 0.2 and 2. It now requires a DP guarantee for every new Gboard language model, a policy ceiling applied to a whole product line (<a href="https://arxiv.org/pdf/2305.18465">Xu et al., 2023</a>).</p>
-<p>For reference values, Desfontaines keeps a running list of deployments with their published parameters (<a href="https://desfontain.es/blog/real-world-differential-privacy.html">Desfontaines</a>). Khavkin and Toch surveyed 140 deployments. They found that commercial and government values of <span class="math inline">\(\varepsilon\)</span> are much looser than those in academic papers, and that they have grown over time in every sector (<a href="https://toch.tau.ac.il/wp-content/uploads/2025/09/Differential-Privacy-Configurations-Comparative-Analysis.pdf">Khavkin &amp; Toch, 2025</a>). NIST’s guidelines for evaluating DP guarantees cover the trade-off and its pitfalls for policy makers as well as engineers (<a href="https://csrc.nist.gov/pubs/sp/800/226/final">NIST SP 800-226, 2025</a>). Dwork, Kohli and Mulligan interviewed practitioners and found no agreed way to choose <span class="math inline">\(\varepsilon\)</span>, which is why they proposed a public registry of deployments (<a href="https://journalprivacyconfidentiality.org/index.php/jpc/article/view/689">Dwork et al., 2019</a>).</p>
-<p>Reference values are a sanity check, not a justification. A value is defensible because the menu, the audit and the policy support it, and the fact that a large company chose something similar adds comfort but no argument of its own. One gap remains in the literature. No source found for this note converts <span class="math inline">\(\varepsilon\)</span> into a monetary risk figure, so that step stays with each organisation’s own risk register, guided by the economic framing of Abowd and Schmutte.</p>
+<section id="sec-other" class="level1" data-number="8">
+<h1 data-number="8"><span class="header-section-number">8</span> Doing this in another business</h1>
+<p>The six steps carry over to any use case, and only the contents of each step change. The business metric is whatever count the decision turns on, such as fraud caught at a fixed number of reviews, customers retained by a fixed number of calls, or forecast error in units of stock. The baseline is always what the business would do without the model. The privacy ceiling is always a sentence about an attacker’s belief, translated into <span class="math inline">\(\varepsilon\)</span> before anyone sees the results. The experiment is always a sweep over <span class="math inline">\(\varepsilon\)</span>, techniques and seeds, read first as model quality and then as the business count. And the output is always a short menu with a cost in the business’s own units, which the people who own the risk and the revenue can sign.</p>
 </section>
 <section id="sec-sources" class="level1" data-number="9">
 <h1 data-number="9"><span class="header-section-number">9</span> Sources</h1>
-<p><strong>Building and tuning the frontier</strong></p>
 <ul>
-<li>Avent, B., González, J., Diethe, T., Paleyes, A. and Balle, B. (2020). <a href="https://www.petsymposium.org/popets/2020/popets-2020-0060.php">Automatic Discovery of Privacy–Utility Pareto Fronts</a>. <em>Proceedings on Privacy Enhancing Technologies</em>. <a href="https://arxiv.org/pdf/1905.10862">arXiv:1905.10862</a>.</li>
-<li><a href="https://arxiv.org/html/2509.04290v1">An Interactive Framework for Finding the Optimal Trade-off in Differential Privacy</a> (2025). arXiv:2509.04290.</li>
-<li><a href="https://ar5iv.labs.arxiv.org/html/2108.03888">Efficient Hyperparameter Optimization for Differentially Private Deep Learning</a> (2021). arXiv:2108.03888.</li>
-<li><a href="https://arxiv.org/pdf/2604.15959">Multi-Objective Bayesian Optimization via Adaptive ε-Constraints Decomposition</a> (2026). arXiv:2604.15959.</li>
-<li>Papernot, N. and Steinke, T. (2022). <a href="https://arxiv.org/pdf/2110.03620">Hyperparameter Tuning with Rényi Differential Privacy</a>. <em>ICLR 2022</em>.</li>
-<li><a href="https://www.paperswithcode.com/paper/practical-differentially-private">Practical Differentially Private Hyperparameter Tuning with Subsampling</a> (2023). <em>NeurIPS 2023</em>.</li>
-</ul>
-<p><strong>Comparing techniques and measuring privacy</strong></p>
-<ul>
-<li>Ponomareva, N. et al.&nbsp;(2023). <a href="https://arxiv.org/pdf/2303.00654">How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy</a>. <em>Journal of Artificial Intelligence Research</em> 77. See also the <a href="https://www.research.google/blog/making-ml-models-differentially-private-best-practices-and-open-challenges/">Google Research blog post</a>.</li>
-<li>Jayaraman, B. and Evans, D. (2019). <a href="https://www.usenix.org/conference/usenixsecurity19/presentation/jayaraman">Evaluating Differentially Private Machine Learning in Practice</a>. <em>USENIX Security 2019</em>.</li>
-<li>Kulynych, B., Gomez, J. F., Kaissis, G., Calmon, F. and Troncoso, C. (2024). Attack-Aware Noise Calibration for Differential Privacy. <em>NeurIPS 2024</em>. <a href="https://dblp.dagstuhl.de/pid/203/9056.html">DBLP record</a>.</li>
-<li>Steinke, T., Nasr, M. and Jagielski, M. (2023). <a href="https://proceedings.neurips.cc/paper_files/paper/2023/hash/9a6f6e0d6781d1cb8689192408946d73-Abstract.html">Privacy Auditing with One (1) Training Run</a>. <em>NeurIPS 2023</em>.</li>
-<li>Tramèr, F. and Boneh, D. (2021). <a href="https://arxiv.org/pdf/2011.11660">Differentially Private Learning Needs Better Features (or Much More Data)</a>. <em>ICLR 2021</em>.</li>
-<li>De, S., Berrada, L., Hayes, J., Smith, S. L. and Balle, B. (2022). <a href="https://www.arxiv.org/pdf/2204.13650">Unlocking High-Accuracy Differentially Private Image Classification through Scale</a>. arXiv:2204.13650.</li>
-</ul>
-<p><strong>Budgets, allocation and economics</strong></p>
-<ul>
-<li>Abowd, J. M. and Schmutte, I. M. (2019). <a href="https://www.aeaweb.org/doi/10.1257/aer.20170627">An Economic Analysis of Privacy Protection and Statistical Accuracy as Social Choices</a>. <em>American Economic Review</em> 109(1). <a href="https://arxiv.org/pdf/1808.06303">arXiv:1808.06303</a>.</li>
-<li>Hsu, J. et al.&nbsp;(2014). <a href="https://arxiv.org/pdf/1402.3329">Differential Privacy: An Economic Method for Choosing Epsilon</a>. <em>IEEE CSF 2014</em>.</li>
-<li>Pujol, D. et al.&nbsp;(2023). <a href="https://www.vldb.org/pvldb/vol16/p816-pujol.pdf">Multi-Analyst Differential Privacy for Online Query Answering</a>. <em>PVLDB</em> 16.</li>
-<li><a href="https://arxiv.org/pdf/2301.08517">Cohere: Managing Differential Privacy in Large Scale Systems</a> (2023). arXiv:2301.08517.</li>
-<li>Lécuyer, M., Spahn, R., Vodrahalli, K., Geambasu, R. and Hsu, D. (2019). <a href="https://arxiv.org/pdf/1909.01502">Privacy Accounting and Quality Control in the Sage Differentially Private ML Platform</a>. <em>SOSP 2019</em>.</li>
-</ul>
-<p><strong>Communicating the choice</strong></p>
-<ul>
+<li>Becker, B. and Kohavi, R. (1996). <a href="https://archive.ics.uci.edu/dataset/2/adult">Adult</a>. UCI Machine Learning Repository. Licence CC BY 4.0.</li>
+<li>Abadi, M. et al.&nbsp;(2016). <a href="https://arxiv.org/abs/1607.00133">Deep Learning with Differential Privacy</a>. <em>ACM CCS 2016</em>. The DP-SGD algorithm.</li>
+<li>Yousefpour, A. et al.&nbsp;(2021). <a href="https://arxiv.org/abs/2109.12298">Opacus: User-Friendly Differential Privacy Library in PyTorch</a>. The library and its privacy accountant.</li>
+<li>Holohan, N., Braghin, S., Mac Aonghusa, P. and Levacher, K. (2019). <a href="https://arxiv.org/abs/1907.02444">Diffprivlib: The IBM Differential Privacy Library</a>.</li>
+<li>Kairouz, P., Oh, S. and Viswanath, P. (2015). <a href="https://arxiv.org/abs/1311.0776">The Composition Theorem for Differential Privacy</a>. <em>ICML 2015</em>. The hypothesis-testing reading of <span class="math inline">\((\varepsilon,\delta)\)</span> behind the membership bound.</li>
+<li>Nanayakkara, P. et al.&nbsp;(2023). <a href="https://www.usenix.org/conference/usenixsecurity23/presentation/nanayakkara">What Are the Chances? Explaining the Epsilon Parameter in Differential Privacy</a>. <em>USENIX Security 2023</em>. Evidence that odds-based explanations of <span class="math inline">\(\varepsilon\)</span> work best.</li>
+<li>Papernot, N. and Steinke, T. (2022). <a href="https://arxiv.org/abs/2110.03620">Hyperparameter Tuning with Rényi Differential Privacy</a>. <em>ICLR 2022</em>. Why tuning on private data leaks.</li>
+<li>Ponomareva, N. et al.&nbsp;(2023). <a href="https://arxiv.org/abs/2303.00654">How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy</a>. <em>Journal of Artificial Intelligence Research</em> 77.</li>
 <li>Near, J., Darais, D., Lefkovitz, N. and Howarth, G. (2025). <a href="https://csrc.nist.gov/pubs/sp/800/226/final">Guidelines for Evaluating Differential Privacy Guarantees</a>. NIST SP 800-226.</li>
-<li>Nanayakkara, P., Smart, M. A., Cummings, R., Kaptchuk, G. and Redmiles, E. M. (2023). <a href="https://www.usenix.org/conference/usenixsecurity23/presentation/nanayakkara">What Are the Chances? Explaining the Epsilon Parameter in Differential Privacy</a>. <em>USENIX Security 2023</em>.</li>
-<li>Center for Democracy &amp; Technology (2023). <a href="https://cdt.org/insights/youll-probably-be-protected-explaining-differential-privacy-guarantees/">You’ll Probably Be Protected: Explaining Differential Privacy Guarantees</a>.</li>
-<li>Cummings, R. et al.&nbsp;(2024). <a href="https://arxiv.org/pdf/2304.06929">Advancing Differential Privacy: Where We Are Now and Future Directions for Real-World Deployment</a>. <em>Harvard Data Science Review</em> 6(1).</li>
-<li>Dwork, C., Kohli, N. and Mulligan, D. (2019). <a href="https://journalprivacyconfidentiality.org/index.php/jpc/article/view/689">Differential Privacy in Practice: Expose Your Epsilons!</a> <em>Journal of Privacy and Confidentiality</em> 9(2).</li>
-</ul>
-<p><strong>Deployments and reference values</strong></p>
-<ul>
-<li>US Census Bureau (2019). <a href="https://www.census.gov/content/dam/Census/newsroom/press-kits/2019/jsm/presentation-disclosure-avoidance-at-scale.pdf">Disclosure Avoidance at Scale</a>. Presentation at JSM 2019.</li>
-<li>Abowd, J. M. et al.&nbsp;(2022). <a href="https://arxiv.org/pdf/2204.08986">The 2020 Census Disclosure Avoidance System TopDown Algorithm</a>. arXiv:2204.08986.</li>
-<li>US Census Bureau (2021). <a href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/2020-das-updates/2021-04-07.html">Meeting Redistricting Data Requirements: Accuracy Targets</a> and <a href="https://www.census.gov/programs-surveys/decennial-census/decade/2020/planning-management/process/disclosure-avoidance/2020-das-updates/2021-04-28.html">New Disclosure Avoidance System Update Meets or Exceeds Redistricting Accuracy Targets</a>.</li>
-<li>Petti, S. and Flaxman, A. (2019). <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7216402/">Differential Privacy in the 2020 US Census: What Will It Do? Quantifying the Accuracy/Privacy Tradeoff</a>. <em>Gates Open Research</em>.</li>
-<li>Rogers, R. et al.&nbsp;(2021). <a href="https://arxiv.org/abs/2002.05839">LinkedIn’s Audience Engagements API: A Privacy Preserving Data Analytics System at Scale</a>. <em>Journal of Privacy and Confidentiality</em>.</li>
-<li>Xu, Z. et al.&nbsp;(2023). <a href="https://arxiv.org/pdf/2305.18465">Federated Learning of Gboard Language Models with Differential Privacy</a>. <em>ACL 2023 Industry Track</em>.</li>
-<li>Microsoft Research (2021). <a href="https://www.microsoft.com/en-us/research/publication/u-s-broadband-coverage-data-set-a-differentially-private-data-release/">U.S. Broadband Coverage Data Set: A Differentially Private Data Release</a>.</li>
-<li>Tumult Labs. <a href="https://www.tmlt.io/resources/how-tumult-labs-helped-irs-support-educational-accountability-with-differential-privacy">How Tumult Labs Helped the IRS Support Educational Accountability with Differential Privacy</a>. Vendor case study.</li>
-<li>Desfontaines, D. <a href="https://desfontain.es/blog/real-world-differential-privacy.html">A list of real-world uses of differential privacy</a>.</li>
-<li>Khavkin and Toch (2025). <a href="https://toch.tau.ac.il/wp-content/uploads/2025/09/Differential-Privacy-Configurations-Comparative-Analysis.pdf">Differential Privacy Configurations in the Real World: A Comparative Analysis</a>.</li>
-<li>Ropes &amp; Gray (2023). <a href="https://ropesgray.com/en/insights/viewpoints/102ih67/ico-issues-new-guidance-on-privacy-enhancing-technologies">ICO issues new guidance on privacy-enhancing technologies</a>. Summary of the UK ICO’s guidance.</li>
 </ul>
 </section>
 
