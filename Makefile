@@ -12,7 +12,8 @@ OUT       := _book
 BUILD     := _build
 # The chapter scripts that draw figures. The practitioner workflows (practitioner_*.py) are slow, need the
 # datasets in data/ and draw no figures, so their tests run them instead (pytest marker `libs`).
-SCRIPTS   := $(foreach f,$(wildcard code/*/*.py),$(if $(findstring /practitioner_,$(f)),,$(f)))
+# The study notes' scripts (code/notes/) run only when their note is built.
+SCRIPTS   := $(foreach f,$(filter-out code/notes/%,$(wildcard code/*/*.py)),$(if $(findstring /practitioner_,$(f)),,$(f)))
 QUARTO    := uv run quarto
 PDF_full         := $(OUT)/Privacy-Preserving-Machine-Learning.pdf
 PDF_practitioner := $(OUT)/Privacy-Preserving-Machine-Learning-Practitioner.pdf
@@ -60,11 +61,20 @@ datasets: ## Download the public datasets the practitioner scripts use into data
 FIG_LOGS  := $(patsubst code/%.py,$(BUILD)/logs/%.log,$(SCRIPTS))
 
 .SECONDEXPANSION:
-$(BUILD)/logs/%.log: code/%.py $$(wildcard code/$$(dir $$*)*.py)
+define RUN_SCRIPT
 	@mkdir -p $(@D)
 	@echo "== $<"
 	@uv run python $< >$@.tmp || { cat $@.tmp; rm -f $@.tmp; exit 1; }
 	@mv $@.tmp $@
+endef
+
+$(BUILD)/logs/%.log: code/%.py $$(wildcard code/$$(dir $$*)*.py)
+	$(RUN_SCRIPT)
+
+# A study note's script stands alone, so it reruns only when it or the dataset loader changes, not
+# when another note's script does (make picks this rule over the one above: its stem is shorter).
+$(BUILD)/logs/notes/%.log: code/notes/%.py code/practitioner_datasets.py
+	$(RUN_SCRIPT)
 
 figures: $(FIG_LOGS) ## Generate the figures, rerunning only the chapter scripts that changed
 
@@ -160,13 +170,22 @@ pdf: full-pdf $(if $(wildcard book-practitioner),practitioner-pdf) course-pdf ##
 book: website pdf notes ## Build every website and PDF, and the study notes
 
 # Each folder in notes/ is a one-page Quarto project (a standalone study note), staged and rendered
-# like a book: its page and PDF go to _book/notes/<name>/.
+# like a book: its page and PDF go to _book/notes/<name>/. A note with computed content has a script,
+# code/notes/<name with underscores>.py, which writes its figures and Markdown snippets into
+# $(BUILD)/figures/notes/<name>/; it reruns only when it changes, and staging copies its output into
+# the note's figures/, where the page includes it.
 notes: ## Build the study notes in notes/ into _book/notes/
 	@for dir in notes/*/; do name=$$(basename $$dir); \
 	  $(MAKE) --no-print-directory note NOTE=$$name || exit 1; done
 
+NOTE_SCRIPT = code/notes/$(subst -,_,$(NOTE)).py
+
 note:
+	@if [ -f $(NOTE_SCRIPT) ]; then \
+	  $(MAKE) --no-print-directory $(patsubst code/%.py,$(BUILD)/logs/%.log,$(NOTE_SCRIPT)) || exit 1; fi
 	$(call STAGE,notes/$(NOTE),notes-$(NOTE))
+	@if [ -d $(BUILD)/figures/notes/$(NOTE) ]; then \
+	  rsync -a $(BUILD)/figures/notes/$(NOTE)/ $(BUILD)/notes-$(NOTE)/figures/; fi
 	$(call RENDER,notes-$(NOTE),default,all)
 	@mkdir -p $(OUT)/notes/$(NOTE)
 	@rsync -a --delete $(BUILD)/notes-$(NOTE)/_site/ $(OUT)/notes/$(NOTE)/
