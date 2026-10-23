@@ -155,3 +155,51 @@ Quote a number only if a test checks it: a number the full edition's chapter quo
 - **Figures come from scripts.** Reuse the full edition's figures by name (`figures/<name>.svg`); a figure the practitioner edition needs and the full edition lacks is added to the chapter's script, or drawn by a practitioner script into `_build/figures/<part>/`.
 - **Labels and links.** Use the full edition's label prefix for the same chapter (`sec-lg-`, `eq-lg-`, `fig-lg-`, `tbl-lg-`), which keeps labels unique across the book; a workflow chapter uses its own. Use `@`-references only within a chapter; refer to another chapter by a link to its file. Link to practitioner chapters for recaps, and to the full edition only for derivations.
 - **Part pages.** Each part's `00-introduction.md` is one page of about 400 words of prose: what the part is for and who needs it, the thread that runs through its chapters and why they come in this order, which pages are workflows and which are reference pages, and what the reader will be able to do at the end. No table of chapters.
+
+## The course
+
+`book-course/` is a course in differential privacy, one topic per chapter, for a reader who knows probability and wants the subject from first principles. It is light in text and complete in its mathematics: every result is stated precisely and proved, and the prose says only what a reader needs to follow the proofs and to see why each result comes next. It is a separate book with its own parts, chapters and labels, and it does not depend on the other three. The rules above apply except where this section changes them. The reference chapter is [01-randomized-response.md](book-course/part02-dp-basics/01-randomized-response.md).
+
+**Self-contained.** The course links to no other book. Each chapter may use what earlier chapters of the course proved, and refers to it by link or `@`-reference with a one-sentence restatement of the result.
+
+### Chapter structure
+
+1. **`# Title`**, without a number.
+2. **An opening of one or two short paragraphs, with no heading**: the question the chapter answers and how it answers it.
+3. **One `##` section per topic, in teaching order**, each with an id (`{#sec-<prefix>-<name>}`). A section is a short run of numbered environments joined by prose: a sentence or two before each to say why it comes next, and a sentence after a theorem when its meaning or tightness is not obvious. `###` headings are allowed for a sub-topic.
+4. **`## Summary`**: one captioned table, each row a result of the chapter (by `@`-reference) and its statement in a line.
+5. **`## Notes`**: the papers and books the results come from, by author, title and year, each with one sentence on what it contains.
+
+There are no exercises, no check-yourself questions, no cheat sheet and no toolkit section.
+
+### Environments
+
+Definitions, results, proofs and examples use Quarto's numbered environments, written as fenced divs:
+
+```markdown
+::: {#thm-lap-privacy name="Laplace mechanism"}
+Statement, with display math.
+:::
+
+::: {.proof}
+1. One step, with the fact it uses.
+2. ...
+:::
+```
+
+Use `#def-` for definitions, `#thm-` for theorems, `#lem-` for lemmas, `#cor-` for corollaries, `#prp-` for propositions and `#exm-` for worked examples, and `.proof` and `.remark` for unnumbered blocks. Give `name="..."` to a named result. The chapter's label prefix follows the type (`thm-rr-privacy`, `sec-rr-definition`, `eq-rr-estimator`), and every prefix is unique in the course. Reference an environment as `@thm-rr-privacy`.
+
+### Rigour
+
+- **Prove what is stated.** Every theorem, lemma and proposition has a proof: complete, in numbered steps, each step naming the fact or assumption it uses. A proof that is long and standard may be cited instead ("the proof is in Dwork and Roth, 2014, Theorem 3.20"), but then the text says what the proof needs and how it goes in a sentence or two. Never present a sketch as a proof.
+- **Exact constants.** Prefer exact statements to $O(\cdot)$ statements: give the constant a proof produces, then the asymptotic form. When a result is stated only up to constants, say so.
+- **Every hypothesis named.** A condition a result needs (bounded sensitivity, independence, $\varepsilon \le 1$, a convex loss) appears in the statement, not in the prose around it.
+- **Every number checked.** A number in an example comes from the chapter's script, which a test checks, or from arithmetic shown in the text.
+
+### Prose
+
+The prose rules of [PROSE.md](PROSE.md) apply, with the course's thresholds in `tools/prose.toml`. Light in text means few sentences, not compressed ones: cut motivation that repeats, history and asides, and keep the words that say what a symbol is and why a step holds.
+
+### Code and figures
+
+A chapter has at most one script, `code/<part>/<topic>.py`, with the layout and rules of a full-edition script, and a test `tests/test_course_<topic>.py` that runs it and checks every number the chapter quotes. A chapter with no computed numbers and no figure has no script. Figures are optional: draw one only where a picture makes a definition or a bound easier to grasp, such as two neighbouring output densities or an error curve against simulation.

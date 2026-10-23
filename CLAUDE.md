@@ -4,11 +4,12 @@ How the books are built. For how to write book content (chapter structure, voice
 
 ## Build: Quarto
 
-The repository holds three [Quarto](https://quarto.org) book projects side by side, and they share `code/`, `filters/` and `terms.toml`:
+The repository holds four [Quarto](https://quarto.org) book projects side by side, and they share `code/`, `filters/` and `terms.toml`:
 
 - `book-full/` (`book-full/_quarto.yml`): the full edition, with every derivation. Website and PDF.
 - `book-exercises/` (`book-exercises/_quarto.yml`): the full edition's exercises with worked solutions, one page per chapter. Website only.
 - `book-practitioner/` (`book-practitioner/_quarto.yml`): the practitioner edition, the same parts and chapters without proofs. Website and PDF.
+- `book-course/` (`book-course/_quarto.yml`): a course in differential privacy, one topic per chapter, light in text and complete in its proofs. It stands alone and links to no other book. Website and PDF.
 
 Do not add another build system (MkDocs, Jupyter Book, a hand-rolled pandoc script).
 
@@ -16,7 +17,7 @@ Do not add another build system (MkDocs, Jupyter Book, a hand-rolled pandoc scri
 make website   # every website, into _book/book-full/, _book/book-exercises/, _book/book-practitioner/
 make pdf       # the full and practitioner PDFs, into _book/
 make book      # both
-make full      # one book: full, full-pdf, exercises, practitioner, practitioner-pdf
+make full      # one book: full, full-pdf, exercises, practitioner, practitioner-pdf, course, course-pdf
 make preview   # serve the full edition from its staged copy (rerun after editing book-full/)
 ```
 
@@ -24,7 +25,7 @@ make preview   # serve the full edition from its staged copy (rerun after editin
 
 Never render a book's folder in place. The make targets copy it to `_build/<name>-<profile>/` (for example `_build/full-website/`), add `filters/` and the figures, and render there, so Quarto's cache, LaTeX's intermediate files and the generated glossary and index never land among the sources. The rendered website is then copied to `_book/<book>/`, the PDF to `_book/`. A render fails on any Quarto warning or error, so a clean build has none.
 
-**Links between the books.** A page links to another book, to `code/` or to `tests/` by its relative path in the repository (`../../book-exercises/part03-dp-foundations/03-laplace-gaussian.md#sec-sol-lapgauss-2`), so the links also work when browsing the source. `filters/links.lua` rewrites them for the output: a link to `code/` or `tests/` points to the file on GitHub (`blob/main/`), in every format; on a website a link to another book points to its page there, since `_book/` mirrors the repository's layout; in a PDF it becomes plain text followed by "in the exercise book", "in the full edition" or "in the practitioner edition". The exercise book also cross-references the full edition's equations, sections, figures and tables as `@eq-name` and so on, which Quarto resolves only within one book: `make exercises` therefore builds the full edition first, `tools/xrefs.py` reads its labels and numbers into the staged `_xrefs.json`, and `filters/xrefs.lua` turns each reference into a link that reads "Equation 20.9".
+**Links between the books.** A page links to another book, to `code/` or to `tests/` by its relative path in the repository (`../../book-exercises/part03-dp-foundations/03-laplace-gaussian.md#sec-sol-lapgauss-2`), so the links also work when browsing the source. `filters/links.lua` rewrites them for the output: a link to `code/` or `tests/` points to the file on GitHub (`blob/main/`), in every format; on a website a link to another book points to its page there, since `_book/` mirrors the repository's layout; in a PDF it becomes plain text followed by "in the exercise book", "in the full edition", "in the practitioner edition" or "in the course". The exercise book also cross-references the full edition's equations, sections, figures and tables as `@eq-name` and so on, which Quarto resolves only within one book: `make exercises` therefore builds the full edition first, `tools/xrefs.py` reads its labels and numbers into the staged `_xrefs.json`, and `filters/xrefs.lua` turns each reference into a link that reads "Equation 20.9".
 
 The full edition's two formats set their appendices in Quarto profiles: `book-full/_quarto-website.yml` (the default) and `book-full/_quarto-pdf.yml`.
 
@@ -39,7 +40,7 @@ The SVG figures are build output too. Each script in `code/<part>/` writes its f
 The book's units are Quarto's: a folder `partNN-<topic>/` is a **part**, each file in it is a **chapter** (numbered 1, 2, … across the whole book), and each `##` heading in a file is a **section** (31.2).
 
 
-- List every new file in `book-full/_quarto.yml` under its part in the `chapters:` list, its exercise-book page (`book-exercises/<part>/NN-<topic>.md`) in `book-exercises/_quarto.yml`, and its practitioner chapter in `book-practitioner/_quarto.yml`. Quarto does not pick up new files on its own.
+- List every new file in `book-full/_quarto.yml` under its part in the `chapters:` list, its exercise-book page (`book-exercises/<part>/NN-<topic>.md`) in `book-exercises/_quarto.yml`, and its practitioner chapter in `book-practitioner/_quarto.yml`. A course chapter goes in `book-course/_quarto.yml` only. Quarto does not pick up new files on its own.
 - Write internal links as relative links to the source file (`[divergences](03-divergences.md)`). Quarto rewrites them for each output, and `filters/links.lua` rewrites links to the other books.
 
 ## Appendices
@@ -70,7 +71,7 @@ Don't write "the figure below" or "equation (3)" by hand.
 
 ## Acronyms, glossary and index
 
-`terms.toml`, shared by the three books, is the curated list of acronyms (with their expansions), names that aren't acronyms (venues, tools, organizations) and index terms. `tools/terms.py` reads it:
+`terms.toml`, shared by the four books, is the curated list of acronyms (with their expansions), names that aren't acronyms (venues, tools, organizations) and index terms. `tools/terms.py` reads it:
 
 - `make terms-check` checks each book and fails on an acronym missing from `terms.toml` or not expanded at its first use on a page. Each page is a web page a reader can land on directly, so every page expands its acronyms once, as "moment generating function (MGF)" or "PPT (probabilistic polynomial time)", using the wording in `terms.toml`. An acronym used only once in the book is spelled out instead.
 - `make acronyms` reports each acronym with its uses per page. `make index-candidates` suggests bold phrases not yet indexed.

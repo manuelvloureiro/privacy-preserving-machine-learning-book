@@ -6,6 +6,7 @@
 book-full = "full"
 book-exercises = "exercises"
 book-practitioner = "practitioner"
+book-course = "course"
 
 [profiles.practitioner]
 choppy_sentence_words = 18  # a sentence this short or shorter can be part of a choppy run
@@ -60,9 +61,30 @@ max_nominalizations_per_sentence = 4
 grade_max = 14
 page_flagged_sentence_share = 0.25
 
+# The course is light on prose and heavy on proofs: its derivations carry formulas the way worked
+# solutions do, so it takes the exercise book's limits per sentence, with the same limits on
+# length, chaining and explanation.
+[profiles.course]
+choppy_sentence_words = 18  # a sentence this short or shorter can be part of a choppy run
+choppy_run = 4             # this many short, unlinked sentences in a row read in hiccups
+mean_sentence_words = 22
+max_sentence_words = 35
+max_sentence_punctuation = 5
+max_chained_clauses = 1
+max_math_per_sentence = 7
+max_numbers_per_sentence = 5
+max_new_symbols_per_sentence = 2
+max_new_concepts_per_paragraph = 4
+max_paragraph_words = 180
+max_opening_clause_words = 15
+max_nominalizations_per_sentence = 4
+grade_max = 14
+page_flagged_sentence_share = 0.25
+
 # Symbols every page of a book may use without introducing them, because the book's notation fixes
 # them early and a reader cannot reach a page without them. Keep this list short.
 [allowed_symbols]
 book-practitioner = []
 book-full = []
 book-exercises = []
+book-course = []

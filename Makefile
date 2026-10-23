@@ -1,10 +1,11 @@
 # Common tasks. Everything runs through uv, so `make setup` is the only install step.
 # Run `make` or `make help` for the list.
 #
-# The repository holds three Quarto books, which share code/, filters/ and terms.toml:
+# The repository holds four Quarto books, which share code/, filters/ and terms.toml:
 #   book-full/          the full edition, with every derivation (website and PDF)
 #   book-exercises/     the full edition's exercises with worked solutions (website only)
 #   book-practitioner/  the practitioner edition, without proofs (website and PDF)
+#   book-course/        the course: differential privacy one topic per chapter, every proof (website and PDF)
 # Each website renders to _book/<book>/, so the sites link to each other by relative path.
 
 OUT       := _book
@@ -15,6 +16,7 @@ SCRIPTS   := $(foreach f,$(wildcard code/*/*.py),$(if $(findstring /practitioner
 QUARTO    := uv run quarto
 PDF_full         := $(OUT)/Privacy-Preserving-Machine-Learning.pdf
 PDF_practitioner := $(OUT)/Privacy-Preserving-Machine-Learning-Practitioner.pdf
+PDF_course       := $(OUT)/A-Course-in-Differential-Privacy.pdf
 
 # Keep Python's bytecode caches out of the source tree.
 export PYTHONPYCACHEPREFIX := $(CURDIR)/$(BUILD)/pycache
@@ -31,7 +33,7 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
              newcomputermodern dejavu
 
 .DEFAULT_GOAL := help
-.PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf \
+.PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf course course-pdf \
         website pdf book preview publish terms-check acronyms index-candidates prose prose-check format test typecheck check all clean
 
 help: ## List the targets
@@ -135,9 +137,25 @@ practitioner-pdf: figures ## Build the practitioner edition's PDF
 	@cp $(BUILD)/practitioner-pdf/_book/$(notdir $(PDF_practitioner)) $(PDF_practitioner)
 	@echo "PDF: $(PDF_practitioner)"
 
-website: full exercises $(if $(wildcard book-practitioner),practitioner) ## Build every website into _book/
+course: figures ## Build the course's website into _book/book-course/
+	$(call STAGE,book-course,course-website,website)
+	@uv run python tools/terms.py build --book $(BUILD)/course-website --profile website
+	$(call RENDER,course-website,website,html)
+	@mkdir -p $(OUT)/book-course
+	@rsync -a --delete --exclude '*.pdf' $(BUILD)/course-website/_book/ $(OUT)/book-course/
+	@echo "Website: $(OUT)/book-course/index.html"
 
-pdf: full-pdf $(if $(wildcard book-practitioner),practitioner-pdf) ## Build every PDF into _book/
+course-pdf: figures ## Build the course's PDF
+	$(call STAGE,book-course,course-pdf,pdf,--exclude _quarto-website.yml)
+	@uv run python tools/terms.py build --book $(BUILD)/course-pdf --profile pdf
+	$(call RENDER,course-pdf,pdf,pdf)
+	@mkdir -p $(OUT)
+	@cp $(BUILD)/course-pdf/_book/$(notdir $(PDF_course)) $(PDF_course)
+	@echo "PDF: $(PDF_course)"
+
+website: full exercises $(if $(wildcard book-practitioner),practitioner) course ## Build every website into _book/
+
+pdf: full-pdf $(if $(wildcard book-practitioner),practitioner-pdf) course-pdf ## Build every PDF into _book/
 
 book: website pdf ## Build every website and PDF
 
@@ -166,7 +184,7 @@ preview: full ## Serve the full edition from its staged copy (rerun after editin
 	$(QUARTO) preview $(BUILD)/full-website --profile website
 
 terms-check: ## Fail if an acronym isn't expanded at its first use on a page, or isn't in terms.toml
-	@for b in book-full book-exercises $(wildcard book-practitioner); do \
+	@for b in book-full book-exercises $(wildcard book-practitioner) book-course; do \
 	  echo "== $$b"; uv run python tools/terms.py check --book $$b || exit 1; done
 
 acronyms: ## Report every acronym, its expansion and the pages that use it (BOOK=book-full)
