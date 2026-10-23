@@ -24,7 +24,7 @@ So a large gap shows a leak at no cost. But **a small gap does not mean a privat
 
 The classic attack of Shokri et al. (2017) uses shadow models to learn one rule for all records, so it too fails at a low FPR.
 
-## LiRA: a likelihood-ratio test per example {#sec-mia-lira}
+## LiRA: a likelihood-ratio test per record {#sec-mia-lira}
 
 LiRA, from Carlini et al. (2022), uses the shadow models instead to estimate each record's own IN and OUT distributions. Its statistic is the logit of the model's confidence $p_y$ in the true label $y$,
 $$\phi = \ln\frac{p_y}{1 - p_y}.$$

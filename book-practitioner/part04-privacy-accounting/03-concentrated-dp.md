@@ -4,9 +4,9 @@
 
 Zero-concentrated differential privacy (zCDP) keeps a differential privacy (DP) budget as one number that adds up. It builds on the curve of [Rényi differential privacy](01-renyi-dp.md) (RDP), which bounds how far apart a mechanism's outputs on neighbouring datasets can be, one value for each order $\alpha$. A mechanism is **$\rho$-zCDP** when that curve lies under the straight line $\rho\alpha$ through the origin, so $\rho$ is a slope. Composition adds the slopes, even when each step is chosen after seeing the earlier outputs.
 
-The Gaussian mechanism's curve is exactly such a line. Write $\sigma$ for the standard deviation of its noise and $\Delta$ for the query's $\ell_2$ sensitivity, the most one record can move the query in Euclidean distance. One release then costs
-$$\rho = \frac{\Delta^2}{2\sigma^2}.$$
-So a release with noise multiplier 1 ($\sigma = \Delta$) costs $\rho = 0.5$, and doubling the noise cuts $\rho$ to a quarter.
+The Gaussian mechanism's curve is exactly such a line. Write $\sigma$ for the standard deviation of its noise. The query $f$ has an $\ell_2$ sensitivity $\Delta_2 f$, the most one record can move it in Euclidean distance. One release then costs
+$$\rho = \frac{(\Delta_2 f)^2}{2\sigma^2}.$$
+So a release with noise multiplier 1 ($\sigma = \Delta_2 f$) costs $\rho = 0.5$, and doubling the noise cuts $\rho$ to a quarter.
 
 ## When you meet it
 
@@ -18,10 +18,10 @@ Keep a ledger, a running list of releases, and charge each its $\rho$ from @tbl-
 
 | Step | Charge in $\rho$ | Notes |
 | --- | --- | --- |
-| Gaussian, sensitivity $\Delta$, noise $\sigma$ | $\Delta^2/(2\sigma^2)$ | Exact |
+| Gaussian, sensitivity $\Delta_2 f$, noise $\sigma$ | $(\Delta_2 f)^2/(2\sigma^2)$ | Exact |
 | Any pure $\varepsilon$-DP step | $\varepsilon^2/2$, or $\varepsilon^2/8$ for an exponential mechanism | Above the plain $\varepsilon$ once $\varepsilon \ge 2$: keep such a step in RDP |
 | An $(\varepsilon, \delta)$-DP step | $\varepsilon^2/2$, plus $\delta$ in a second column that also adds | **Approximate zCDP** |
-| Poisson-subsampled Gaussian | $\Delta^2/(2\sigma^2)$, as without sampling | No amplification |
+| Poisson-subsampled Gaussian | $(\Delta_2 f)^2/(2\sigma^2)$, as without sampling | No amplification |
 
 : What each kind of step costs in a zCDP ledger. {#tbl-cdp-charge}
 

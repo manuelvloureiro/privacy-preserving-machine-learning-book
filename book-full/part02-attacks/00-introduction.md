@@ -59,14 +59,16 @@ The chapters share the conventions in @tbl-attacks-notation, set in [Threat mode
 
 | Symbol | Meaning |
 | --- | --- |
-| $D$, $\pi$ | A dataset of records; the population they are drawn from |
+| $D$, $\mathcal D$ | A dataset of records; the data distribution (the population) they are drawn from |
 | $\mathcal T$, $\theta = \mathcal T(D)$ | A (possibly randomized) training algorithm, and the model it outputs |
-| $b$ | The hidden bit of a two-world game; $b = 1$ is the world where the target record is used (the member world) |
+| $\mathcal A$ | The adversary |
+| $b$, $b'$ | The hidden bit of a two-world game, and the adversary's guess; $b = 1$ is the world where the target record is used (the member world) |
+| $\pi$ | A prior over a secret; $\pi_1$ is the prior probability of $b = 1$ |
 | $V$; $P$, $Q$ | The adversary's view; its distributions when $b = 0$ and $b = 1$ |
-| $\mathrm{TPR}$, $\mathrm{FPR}$ | $\Pr[b' = 1 \mid b = 1]$ and $\Pr[b' = 1 \mid b = 0]$ for the guess $b'$ |
+| $\mathrm{TPR}$, $\mathrm{FPR}$ | $\Pr[b' = 1 \mid b = 1]$ and $\Pr[b' = 1 \mid b = 0]$ |
 | $\mathrm{Adv}$ | The advantage, $\mathrm{TPR} - \mathrm{FPR}$, at most $\mathrm{TV}(P, Q)$ |
 | $T(P, Q)$ | The trade-off function: the smallest false negative rate $1 - \mathrm{TPR}$ of any test at each FPR |
-| $\ell(\theta, z)$ | The loss of model $\theta$ on record $z$ |
+| $\ell(\theta; z)$ | The loss of model $\theta$ on record $z$ |
 
 : Notation shared by the chapters of this part. {#tbl-attacks-notation}
 

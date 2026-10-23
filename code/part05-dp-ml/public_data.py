@@ -583,13 +583,13 @@ def plot_noise_signal() -> Figure:
         grid,
         [noise_length(sigma, CLIP, batch, int(k)) for k in grid],
         color="black",
-        label="noise length σC·√k / B",
+        label="noise length σC·√d / B",
     )
     axes[0].loglog(ks, signal, marker="o", color="tab:red", ls="", label="clipped mean gradient at the start")
     names = ["last layer"] + [f"r = {r}" for r in ranks] + ["all weights"]
     for k, s, name in zip(ks, signal, names, strict=True):
         axes[0].annotate(name, (k, s), textcoords="offset points", xytext=(4, -11), fontsize=7)
-    axes[0].set_xlabel("trainable weights $k$")
+    axes[0].set_xlabel("trainable weights $d$")
     axes[0].set_ylabel("length")
     axes[0].set_title(r"$\varepsilon = 1$ ($\sigma = 4.13$), $B = 100$, $C = 0.5$")
     axes[0].legend(fontsize=8, loc="center right")
@@ -597,7 +597,7 @@ def plot_noise_signal() -> Figure:
     axes[1].loglog(ks, ratio, marker="o", color="black")
     for k, r_, name in zip(ks, ratio, names, strict=True):
         axes[1].annotate(name, (k, r_), textcoords="offset points", xytext=(4, 4), fontsize=7)
-    axes[1].set_xlabel("trainable weights $k$")
+    axes[1].set_xlabel("trainable weights $d$")
     axes[1].set_ylabel("noise length / signal length")
     axes[1].set_xlim(40, 8000)
     return fig

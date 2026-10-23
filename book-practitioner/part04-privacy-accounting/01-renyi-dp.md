@@ -34,7 +34,7 @@ Training runs thousands of mechanisms in sequence, and each may depend on what t
 $$\varepsilon_M(\alpha) \le \sum_{i=1}^k \varepsilon_i(\alpha) \qquad\text{for every order } \alpha.$$
 Different mechanisms mix freely, because you only add numbers at the same order.
 
-Two conditions come with the sum. First, every curve must describe the same neighbouring relation, such as add/remove or replace-one, and the same unit of privacy, such as one example or one user. For example, the RDP accountant of `dp_accounting` 0.6.0 composes a `PoissonSampledDpEvent` under its default add/remove relation. But it refuses a `RandomizedResponseDpEvent` there, since it computes that curve only for replaced records. Second, each step's curve must be fixed in advance. Steps may adapt to earlier outputs, but the noise level and the number of steps must not be chosen from the data during the run. Otherwise the curves themselves would depend on the data. If you stop when a validation metric looks good, you need [Adaptive composition](08-adaptive-composition.md) instead.
+Two conditions come with the sum. First, every curve must describe the same neighbouring relation, such as add/remove or replace-one, and the same unit of privacy, such as one record or one user. For example, the RDP accountant of `dp_accounting` 0.6.0 composes a `PoissonSampledDpEvent` under its default add/remove relation. But it refuses a `RandomizedResponseDpEvent` there, since it computes that curve only for replaced records. Second, each step's curve must be fixed in advance. Steps may adapt to earlier outputs, but the noise level and the number of steps must not be chosen from the data during the run. Otherwise the curves themselves would depend on the data. If you stop when a validation metric looks good, you need [Adaptive composition](08-adaptive-composition.md) instead.
 
 For Gaussian steps the sum has a useful shortcut. Adding $k$ copies of the straight line gives the curve of a single Gaussian step with noise multiplier $\sigma/\sqrt k$, whose exact $\varepsilon$ you can compute. The shortcut also shows why DP-SGD needs subsampling. This part's running example is a DP-SGD run of 10,000 steps with noise multiplier 1, each on a random 1% of the data. If every step used the full dataset, the run would act like one step with noise multiplier 0.01. Its exact $\varepsilon$ at $\delta = 10^{-5}$ would be 5425.5, which is no guarantee at all.
 
@@ -43,7 +43,7 @@ For Gaussian steps the sum has a useful shortcut. Adding $k$ copies of the strai
 Post-processing is free in RDP. Any computation on the output that does not look at the data again leaves the curve no larger at any order. So releasing the trained model or its predictions costs nothing beyond the training run.
 
 Groups are harder, because when one user contributes several records, you need a guarantee for all of them at once. RDP has a generic group rule, but it is loose, so for Gaussian noise use the group's sensitivity instead. A group of $m$ records moves the answer by at most $m$ times as much as one record, so the curve becomes
-$$\varepsilon_{\text{group}}(\alpha) = \frac{m^2\alpha}{2\sigma^2},$$
+$$\varepsilon_{\mathrm{group}}(\alpha) = \frac{m^2\alpha}{2\sigma^2},$$
 which is $m^2$ times the single-record curve. That grows fast. So when users have many records, clip each user's whole contribution and account per user ([User-level privacy](../part05-dp-ml/07-user-level.md)), which keeps the sensitivity at one clipping norm.
 
 ## Compose, then convert once {#sec-rdp-conversion}

@@ -12,8 +12,8 @@ This file is the GitHub overview. It is not part of the rendered book.
 |---|---------|--------|--------|
 | 29 | [Rényi differential privacy](01-renyi-dp.md) | Definition and RDP curve; Gaussian, Laplace and randomized-response curves; composition; post-processing and group privacy; the moments accountant; Mironov's conversion | [renyi_dp.py](../../code/part04-privacy-accounting/renyi_dp.py) |
 | 30 | [From Rényi DP to (ε, δ) and to tests](02-rdp-conversions.md) | Where the classic conversion loses; the improved conversion; the hypothesis-testing region of an RDP curve; optimizing the order; unavoidable slack | [rdp_conversions.py](../../code/part04-privacy-accounting/rdp_conversions.py) |
-| 31 | [Concentrated differential privacy](03-concentrated-dp.md) | zCDP; pure DP ⇒ zCDP; zCDP ⇒ (ε, δ); group privacy; approximate zCDP; truncated CDP and subsampling | [concentrated_dp.py](../../code/part04-privacy-accounting/concentrated_dp.py) |
-| 32 | [f-DP and Gaussian differential privacy](04-gaussian-dp.md) | Trade-off functions as privacy definitions; μ-GDP; duality with (ε, δ); composition; the central limit theorem; the CLT for DP-SGD | [gaussian_dp.py](../../code/part04-privacy-accounting/gaussian_dp.py) |
+| 31 | [Concentrated differential privacy](03-concentrated-dp.md) | zCDP; pure DP ⇒ zCDP; zCDP ⇒ $(\varepsilon, \delta)$; group privacy; approximate zCDP; truncated CDP and subsampling | [concentrated_dp.py](../../code/part04-privacy-accounting/concentrated_dp.py) |
+| 32 | [f-DP and Gaussian differential privacy](04-gaussian-dp.md) | Trade-off functions as privacy definitions; $\mu$-GDP; duality with $(\varepsilon, \delta)$; composition; the central limit theorem; the CLT for DP-SGD | [gaussian_dp.py](../../code/part04-privacy-accounting/gaussian_dp.py) |
 | 33 | [Amplification by subsampling](05-subsampling.md) | Poisson and fixed-size sampling; matching the neighbouring relation; RDP of the subsampled Gaussian; the moments accountant; DP-SGD by RDP | [subsampling.py](../../code/part04-privacy-accounting/subsampling.py) |
 | 34 | [Numerical accounting with privacy loss distributions](06-numerical-accounting.md) | PLDs; composition by convolution; pessimistic and optimistic discretization; FFT and PRV accountants; DP-SGD sandwiched | [numerical_accounting.py](../../code/part04-privacy-accounting/numerical_accounting.py) |
 | 35 | [Amplification by shuffling and by iteration](07-shuffling-iteration.md) | Shuffled randomized response exactly; the clones bound; amplification by iteration; hidden-state analysis of noisy SGD | [shuffling_iteration.py](../../code/part04-privacy-accounting/shuffling_iteration.py) |
@@ -60,7 +60,7 @@ Each chapter ends with its own references, with what each is good for.
 
 ## Exercise
 
-Write an RDP accountant for the Poisson-subsampled Gaussian and check it against Google's `dp_accounting` within 1%. Then, for DP-SGD with $q = 0.01$, $\sigma = 1$ and up to 10,000 steps, plot ε at δ = 10⁻⁵ from four accountants: RDP with Mironov's conversion, RDP with the improved conversion, the GDP central-limit approximation, and PLD, alongside advanced composition applied per step.
+Write an RDP accountant for the Poisson-subsampled Gaussian and check it against Google's `dp_accounting` within 1%. Then, for DP-SGD with $q = 0.01$, $\sigma = 1$ and up to 10,000 steps, plot $\varepsilon$ at $\delta = 10^{-5}$ from four accountants: RDP with Mironov's conversion, RDP with the improved conversion, the GDP central-limit approximation, and PLD, alongside advanced composition applied per step.
 
 The accountant is built in [Amplification by subsampling](05-subsampling.md). The four-way comparison is worked in [Choosing an accountant](09-choosing-an-accountant.md). The check against `dp_accounting` is left to you, since the library is not a dependency of this repository.
 

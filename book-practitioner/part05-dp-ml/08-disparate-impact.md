@@ -33,8 +33,8 @@ print(f"{gap - 1.96 * se:.3f} {gap + 1.96 * se:.3f}")  # 0.010 0.138
 
 So the gap is real, since its interval excludes zero, but it could be anywhere from one point to fourteen. An interval separates a 5-point gap from zero only with a few hundred test records from the group, and a 1-point gap only with thousands.
 
-The privacy cost needs a different interval, because both models are scored on the same test records, so their accuracies are not independent and @eq-fair-gap does not apply. Pair them instead. Among group $g$'s $m_g$ test records, write $b$ for the number that only the non-private model gets right, and $c$ for the number that only the private one gets right. One run's cost is then $(b - c)/m_g$, and for large counts an approximate 95% interval is
-$$\frac{b - c}{m_g} \pm \frac{1.96}{m_g}\sqrt{b + c - \frac{(b - c)^2}{m_g}}.$$ {#eq-fair-paired}
+The privacy cost needs a different interval, because both models are scored on the same test records, so their accuracies are not independent and @eq-fair-gap does not apply. Pair them instead. Among group $g$'s $m_g$ test records, write $u$ for the number that only the non-private model gets right, and $v$ for the number that only the private one gets right. One run's cost is then $(u - v)/m_g$, and for large counts an approximate 95% interval is
+$$\frac{u - v}{m_g} \pm \frac{1.96}{m_g}\sqrt{u + v - \frac{(u - v)^2}{m_g}}.$$ {#eq-fair-paired}
 
 The test records are one source of variation. Training is a second source, and a larger test set does nothing about it. A small group's accuracy varies far more from one training run to the next than a large group's. So a comparison of two recipes on one run each can easily reverse for it. Train each recipe several times with different seeds, average the per-run costs and report their spread. `fairlearn.metrics.MetricFrame` computes any metric per group, but without intervals.
 
@@ -100,7 +100,7 @@ At a fixed budget, a change to the training recipe only moves the cost between t
 | Fix | What happens | Use it? |
 | --- | --- | --- |
 | Upweight the group's loss, or use a smaller clipping norm | Clipping cuts an upweighted gradient back to $C$, and a smaller norm clips more of the group | No |
-| Larger clipping norm, with step size times $C$ held fixed | Less clipping, but more noise relative to short gradients | Rarely, since it did not help the running example |
+| Larger clipping norm, with learning rate times $C$ held fixed | Less clipping, but more noise relative to short gradients | Rarely, since it did not help the running example |
 | Clipping norm set to the largest gradient seen in the data | Breaks the privacy proof, which assumes $C$ is fixed in advance | Only if chosen privately and charged |
 | Oversample the group | Its records' $\varepsilon$ is set by their higher sampling rate, so $\sigma$ must rise | Only with that accounting |
 | Global scaling with an adaptive bound (Esipova et al. 2023), one shared scale for every gradient | Keeps the update's direction and needs no group labels | Worth a try |

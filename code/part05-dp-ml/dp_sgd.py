@@ -572,7 +572,7 @@ def plot_clipping(rng: np.random.Generator) -> Figure:
     scaled = [run(rng, task, DpsgdConfig(clip=c, lr=LR_RUN * CLIP_RUN / c)) for c in clips]
     _, log = train_dpsgd(rng, task.train, DpsgdConfig(sigma=0.0, clip=math.inf), test=task.test, log_every=500)
     fig, axes = plt.subplots(1, 2, figsize=(10, 3.8))
-    axes[0].semilogx(clips, fixed, marker="o", color="tab:blue", label=r"fixed step $\eta = 0.5$")
+    axes[0].semilogx(clips, fixed, marker="o", color="tab:blue", label=r"fixed learning rate $\eta = 0.5$")
     axes[0].semilogx(clips, scaled, marker="s", color="black", label=r"fixed $\eta C = 0.25$")
     axes[0].set_xlabel("clipping norm $C$")
     axes[0].set_ylabel("test accuracy")

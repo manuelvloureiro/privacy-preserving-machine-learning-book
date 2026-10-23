@@ -146,7 +146,7 @@ def plot_convergence(rng: np.random.Generator) -> Figure:
         ax.plot(range(len(errors)), errors, "-", color=color, label=rf"$\alpha = {a:g}$, largest error")
         ax.axhline(a, color=color, linestyle="--", linewidth=1, label=rf"target $\alpha = {a:g}$")
     ax.set_xlabel("number of updates")
-    ax.set_ylabel(r"$\max_{q \in Q} |\langle q, p^t\rangle - q(X)|$")
+    ax.set_ylabel(r"$\max_{q \in \mathcal{Q}} |\langle q, p^t\rangle - q(D)|$")
     ax.set_ylim(0, None)
     ax.legend(fontsize=8)
     ax.grid(True, alpha=0.3)

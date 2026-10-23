@@ -693,8 +693,8 @@ def plot_direction_tanh(a: float = 1.0, q: float = 0.1, alpha: float = 4.0) -> F
         ax.hlines(avg, lo, hi, color=colour, linewidth=2)
     ax.axvline(centre, color="gray", linestyle=":", label=r"common centre $(a + b)/2$")
     ax.set(
-        xlabel=r"$\theta$",
-        ylabel=r"$\tanh\theta$",
+        xlabel=r"$u$",
+        ylabel=r"$\tanh u$",
         title=rf"Averages of tanh over two intervals ($a = {a:g}$, $q = {q:g}$, $\alpha = {alpha:g}$)",
     )
     ax.legend(fontsize=8, loc="lower right")

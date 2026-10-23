@@ -14,7 +14,7 @@ Every chapter of the later parts uses these results. Each chapter here states th
 | --- | --- |
 | [Randomized response and the definition](01-randomized-response.md) | How can one collect a sensitive bit from each person, and what does it mean for an algorithm to be private? |
 | [The Laplace mechanism](02-laplace-mechanism.md) | How much noise makes a numeric statistic private, and how do private algorithms combine? |
-| [Approximate differential privacy](03-approximate-dp.md) | What does a small failure probability $\delta$ allow, how small must it be, and what does the Gaussian mechanism gain? |
+| [Approximate differential privacy](03-approximate-dp.md) | What does a small additive slack $\delta$ allow, how small must it be, and what does the Gaussian mechanism gain? |
 | [Advanced composition](04-advanced-composition.md) | Why does the privacy cost of $k$ analyses grow only like $\sqrt k$? |
 | [The exponential mechanism](05-exponential-mechanism.md) | How can one privately choose the best object from a set? |
 

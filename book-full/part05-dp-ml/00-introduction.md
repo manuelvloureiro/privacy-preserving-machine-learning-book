@@ -52,13 +52,14 @@ The part uses the notation of the earlier parts, extended in @tbl-dpml-notation.
 
 | Symbol | Meaning |
 | --- | --- |
-| $D = (z_1, \dots, z_n)$, $z_i = (x_i, y_i)$ | A training set of $n$ records with features $x_i$ and labels $y_i$ |
-| $w$, $\ell(w, z)$, $J(w; D)$ | Model weights; the loss on one record; the training objective |
-| $w^*$, $\tilde w$ | The non-private minimizer; a private release |
-| $g_i = \nabla_w\ell(w, z_i)$ | The gradient of record $i$'s loss, a per-example gradient |
+| $D = (z_1, \dots, z_n)$, $z_i = (x_i, y_i)$ | A training set of $n$ records with features $x_i$ and labels $y_i$; a neighbouring dataset $D'$ adds or removes one record, $D \simeq D'$ |
+| $\theta \in \mathbb R^d$, $\ell(\theta; z)$, $\mathcal L(\theta; D)$ | The model parameters; the loss on one record; the empirical risk, the training objective (with its regularizer, when there is one) |
+| $\theta_t$, $\theta^*$, $\tilde\theta$ | The iterate at step $t$; the non-private minimizer; a private release |
+| $g_i = \nabla_\theta\ell(\theta; z_i)$, $\bar g_i$ | The gradient of record $i$'s loss, a per-example gradient; the clipped one |
 | $C$ | The clipping norm: per-example gradients are rescaled to length at most $C$ |
 | $\sigma$ | The noise multiplier: the noise standard deviation in units of $C$ |
-| $q$, $B$, $T$ | The sampling rate; the expected batch size $qn$; the number of steps |
+| $q$, $B = qn$, $T$ | The sampling rate; the expected batch size; the number of steps |
+| $\eta$ | The learning rate |
 | $\mu(\varepsilon, \delta)$ | The largest ratio of sensitivity to noise standard deviation for which a Gaussian mechanism is $(\varepsilon, \delta)$-DP |
 
 : Notation used throughout this part, in addition to that of the earlier parts. {#tbl-dpml-notation}

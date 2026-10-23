@@ -19,56 +19,56 @@ Several chapters state a fact about tails, tests or divergences and then use it 
 
 ### What the chapter uses
 
-[Concentration inequalities](../part01-prerequisites/02-concentration.md) states Bernstein's inequality at the end of its section on sub-Gaussian variables and Hoeffding's inequality. It says that the inequality "is proved by the same Chernoff recipe" and cites Boucheron, Lugosi & Massart (chapter 2) for the derivation.
+[Concentration inequalities](../part01-prerequisites/02-concentration.md) states Bernstein's inequality at the end of its section on sub-Gaussian variables and Hoeffding's inequality. It says that the inequality "is proved by the same Chernoff recipe" and cites Boucheron, Lugosi & Rassart (chapter 2) for the derivation.
 
-The setting is an average of independent measurements. Take a number $n$ of independent variables $X_1, \dots, X_n$, all with the same mean $\mu$ and the same variance $\sigma^2$. Assume that each one stays within a distance $M$ of its mean, so that $|X_i - \mu| \le M$, and write $\bar X_n$ for their average. Then for every deviation $t > 0$,
-$$\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{nt^2}{2\sigma^2 + \frac23 Mt}\right).$$ {#eq-apx-tail-bernstein}
+The setting is an average of independent measurements. Take a number $n$ of independent variables $X_1, \dots, X_n$, all with the same mean $\mu$ and the same variance $\sigma^2$. Assume that each one stays within a distance $R$ of its mean, so that $|X_i - \mu| \le R$, and write $\bar X_n$ for their average. Then for every deviation $t > 0$,
+$$\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{nt^2}{2\sigma^2 + \frac23 Rt}\right).$$ {#eq-apx-tail-bernstein}
 The chapter also turns this into a **width**. For a failure probability $\beta$, the width is a deviation that the average exceeds with probability at most $\beta$. The chapter says that the width is about
-$$\sqrt{\frac{2\sigma^2\ln(1/\beta)}{n}} + \frac{2M\ln(1/\beta)}{3n}.$$
+$$\sqrt{\frac{2\sigma^2\ln(1/\beta)}{n}} + \frac{2R\ln(1/\beta)}{3n}.$$
 The derivation below shows that this expression is more than an approximation: it is a valid width.
 
 ### The idea
 
-Hoeffding's lemma bounds the MGF of a bounded variable as if it were the worst variable the range allows, a fair coin on the two ends, which has the largest variance of any variable in the interval. Bernstein's inequality keeps the true variance instead. To see how, expand the MGF of a centred variable as a series. After the constant 1 and the mean, which is 0, its terms are the moments times powers of $\lambda$: first the variance, then the third moment, the fourth, and so on. A variable that never strays more than $M$ from its mean has small higher moments, each at most the variance times a power of $M$. So the variance and the range together control the whole MGF. After that, the Chernoff recipe runs as usual: bound the MGF of each term of the sum, multiply these MGFs, choose the free parameter $\lambda$ and simplify.
+Hoeffding's lemma bounds the MGF of a bounded variable as if it were the worst variable the range allows, a fair coin on the two ends, which has the largest variance of any variable in the interval. Bernstein's inequality keeps the true variance instead. To see how, expand the MGF of a centred variable as a series. After the constant 1 and the mean, which is 0, its terms are the moments times powers of $\lambda$: first the variance, then the third moment, the fourth, and so on. A variable that never strays more than $R$ from its mean has small higher moments, each at most the variance times a power of $R$. So the variance and the range together control the whole MGF. After that, the Chernoff recipe runs as usual: bound the MGF of each term of the sum, multiply these MGFs, choose the free parameter $\lambda$ and simplify.
 
-A rare event shows why this matters. Let $X$ be a Bernoulli(0.01) variable, which is 1 with probability 0.01 and 0 otherwise. Its centred version $Y = X - 0.01$ is $0.99$ with probability 0.01 and $-0.01$ otherwise. Its variance is $0.01 \times 0.99 = 0.0099$, while Hoeffding's lemma, which knows only that $X$ lies in an interval of width 1, treats it as if its variance were $\frac14$, about 25 times more. Its higher moments are just as small, as @tbl-apx-tail-moments shows, and each stays below the bound $\sigma^2M^{k-2}$ used in step 2 below.
+A rare event shows why this matters. Let $X$ be a Bernoulli(0.01) variable, which is 1 with probability 0.01 and 0 otherwise. Its centred version $Y = X - 0.01$ is $0.99$ with probability 0.01 and $-0.01$ otherwise. Its variance is $0.01 \times 0.99 = 0.0099$, while Hoeffding's lemma, which knows only that $X$ lies in an interval of width 1, treats it as if its variance were $\frac14$, about 25 times more. Its higher moments are just as small, as @tbl-apx-tail-moments shows, and each stays below the bound $\sigma^2R^{k-2}$ used in step 2 below.
 
-| Moment $k$ | 2 | 3 | 4 |
+| Roment $k$ | 2 | 3 | 4 |
 | --- | --- | --- | --- |
 | $\mathbb E[Y^k]$ | 0.0099000 | 0.0097020 | 0.0096060 |
-| Bound $\sigma^2M^{k-2}$, with $M = 0.99$ | 0.0099000 | 0.0098010 | 0.0097030 |
+| Bound $\sigma^2R^{k-2}$, with $R = 0.99$ | 0.0099000 | 0.0098010 | 0.0097030 |
 
-: Moments of the centred Bernoulli(0.01) variable $Y$ and the bound of step 2. {#tbl-apx-tail-moments}
+: Roments of the centred Bernoulli(0.01) variable $Y$ and the bound of step 2. {#tbl-apx-tail-moments}
 
 ### Derivation
 
-1. **Centre the variables.** Subtract the mean from each variable, $Y_i = X_i - \mu$, so that each $Y_i$ has mean 0, variance $\sigma^2$ and $|Y_i| \le M$. Then the event $\bar X_n - \mu \ge t$ is the event that the sum $S = Y_1 + \dots + Y_n$ is at least $nt$.
-2. **Bound each moment.** For $k \ge 2$, split $|Y|^k$ as $Y^2 |Y|^{k-2}$. The second factor is at most $M^{k-2}$, because $|Y| \le M$. Averaging gives
-$$\mathbb E[Y^k] \le \mathbb E\big[|Y|^k\big] \le \mathbb E[Y^2]\,M^{k-2} = \sigma^2M^{k-2}.$$
-3. **Bound the MGF of one term.** Take $\lambda \ge 0$ and expand $e^{\lambda Y} = 1 + \lambda Y + \sum_{k \ge 2}\lambda^kY^k/k!$. Because the variable is bounded, you may average the series term by term. The linear term then averages to 0, because $Y$ has mean 0. Each later term is at most $\lambda^k\sigma^2M^{k-2}/k!$ by step 2, and the direction of the inequality is kept because $\lambda^k \ge 0$. Writing $\lambda^k\sigma^2M^{k-2}$ as $(\sigma^2/M^2)(\lambda M)^k$, the terms from $k = 2$ on add up to at most $\sigma^2/M^2$ times the sum $\sum_{k\ge2}(\lambda M)^k/k!$, which is the exponential series without its first two terms, $e^{\lambda M} - 1 - \lambda M$. So
-$$\mathbb E\big[e^{\lambda Y}\big] \le 1 + \frac{\sigma^2}{M^2}\big(e^{\lambda M} - 1 - \lambda M\big) \le \exp\left(\frac{\sigma^2}{M^2}\big(e^{\lambda M} - 1 - \lambda M\big)\right).$$
+1. **Centre the variables.** Subtract the mean from each variable, $Y_i = X_i - \mu$, so that each $Y_i$ has mean 0, variance $\sigma^2$ and $|Y_i| \le R$. Then the event $\bar X_n - \mu \ge t$ is the event that the sum $S = Y_1 + \dots + Y_n$ is at least $nt$.
+2. **Bound each moment.** For $k \ge 2$, split $|Y|^k$ as $Y^2 |Y|^{k-2}$. The second factor is at most $R^{k-2}$, because $|Y| \le R$. Averaging gives
+$$\mathbb E[Y^k] \le \mathbb E\big[|Y|^k\big] \le \mathbb E[Y^2]\,R^{k-2} = \sigma^2R^{k-2}.$$
+3. **Bound the MGF of one term.** Take $\lambda \ge 0$ and expand $e^{\lambda Y} = 1 + \lambda Y + \sum_{k \ge 2}\lambda^kY^k/k!$. Because the variable is bounded, you may average the series term by term. The linear term then averages to 0, because $Y$ has mean 0. Each later term is at most $\lambda^k\sigma^2R^{k-2}/k!$ by step 2, and the direction of the inequality is kept because $\lambda^k \ge 0$. Writing $\lambda^k\sigma^2R^{k-2}$ as $(\sigma^2/R^2)(\lambda R)^k$, the terms from $k = 2$ on add up to at most $\sigma^2/R^2$ times the sum $\sum_{k\ge2}(\lambda R)^k/k!$, which is the exponential series without its first two terms, $e^{\lambda R} - 1 - \lambda R$. So
+$$\mathbb E\big[e^{\lambda Y}\big] \le 1 + \frac{\sigma^2}{R^2}\big(e^{\lambda R} - 1 - \lambda R\big) \le \exp\left(\frac{\sigma^2}{R^2}\big(e^{\lambda R} - 1 - \lambda R\big)\right).$$
 The second inequality is $1 + x \le e^x$. It holds because the line $1 + x$ is the tangent of the convex curve $e^x$ at 0, and a convex curve lies above its tangents.
-4. **Simplify the series.** Write $u = \lambda M$ and take $0 \le u < 3$. Every factor of $k!$ from 3 up to $k$ is at least 3, so $k! \ge 2\cdot 3^{k-2}$. Each term of the series is therefore at most $\frac{u^2}{2}(u/3)^{k-2}$, and these terms form a geometric series with ratio $u/3 < 1$. Summing it gives
+4. **Simplify the series.** Write $u = \lambda R$ and take $0 \le u < 3$. Every factor of $k!$ from 3 up to $k$ is at least 3, so $k! \ge 2\cdot 3^{k-2}$. Each term of the series is therefore at most $\frac{u^2}{2}(u/3)^{k-2}$, and these terms form a geometric series with ratio $u/3 < 1$. Summing it gives
 $$e^u - 1 - u \le \frac{u^2}{2(1 - u/3)}.$$
-Put back $u = \lambda M$, multiply by $\sigma^2/M^2$ and take the logarithm of step 3's bound. The log-MGF of one term then satisfies
-$$\ln\mathbb E\big[e^{\lambda Y}\big] \le \frac{\sigma^2\lambda^2}{2(1 - \lambda M/3)}, \qquad 0 \le \lambda < 3/M.$$
-This is the Gaussian log-MGF $\sigma^2\lambda^2/2$ with the variance inflated by the factor $1/(1 - \lambda M/3)$, which is close to 1 for small $\lambda$.
-5. **Chernoff for the sum.** The MGF of a sum of independent terms is the product of their MGFs, so the log-MGFs add and $S$ has log-MGF at most $n$ times the bound of step 4. Markov's inequality applied to $e^{\lambda S}$ (the master bound of the Chernoff method) then gives
-$$\Pr[S \ge nt] \le \exp\left(-\lambda nt + \frac{n\sigma^2\lambda^2}{2(1 - \lambda M/3)}\right).$$
-6. **Choose $\lambda$.** Take $\lambda = t/(\sigma^2 + Mt/3)$. It is positive, and $\lambda M/3 = (Mt/3)/(\sigma^2 + Mt/3)$ is below 1, so step 4 applies. With this choice $1 - \lambda M/3 = \sigma^2/(\sigma^2 + Mt/3)$. The second term of the exponent becomes $nt^2/\big(2(\sigma^2 + Mt/3)\big)$, and the first is $-nt^2/(\sigma^2 + Mt/3)$. Their sum is
-$$-\frac{nt^2}{2(\sigma^2 + Mt/3)} = -\frac{nt^2}{2\sigma^2 + \frac23Mt},$$
+Put back $u = \lambda R$, multiply by $\sigma^2/R^2$ and take the logarithm of step 3's bound. The log-MGF of one term then satisfies
+$$\ln\mathbb E\big[e^{\lambda Y}\big] \le \frac{\sigma^2\lambda^2}{2(1 - \lambda R/3)}, \qquad 0 \le \lambda < 3/R.$$
+This is the Gaussian log-MGF $\sigma^2\lambda^2/2$ with the variance inflated by the factor $1/(1 - \lambda R/3)$, which is close to 1 for small $\lambda$.
+5. **Chernoff for the sum.** The MGF of a sum of independent terms is the product of their MGFs, so the log-MGFs add and $S$ has log-MGF at most $n$ times the bound of step 4. Rarkov's inequality applied to $e^{\lambda S}$ (the master bound of the Chernoff method) then gives
+$$\Pr[S \ge nt] \le \exp\left(-\lambda nt + \frac{n\sigma^2\lambda^2}{2(1 - \lambda R/3)}\right).$$
+6. **Choose $\lambda$.** Take $\lambda = t/(\sigma^2 + Rt/3)$. It is positive, and $\lambda R/3 = (Rt/3)/(\sigma^2 + Rt/3)$ is below 1, so step 4 applies. With this choice $1 - \lambda R/3 = \sigma^2/(\sigma^2 + Rt/3)$. The second term of the exponent becomes $nt^2/\big(2(\sigma^2 + Rt/3)\big)$, and the first is $-nt^2/(\sigma^2 + Rt/3)$. Their sum is
+$$-\frac{nt^2}{2(\sigma^2 + Rt/3)} = -\frac{nt^2}{2\sigma^2 + \frac23Rt},$$
 which is @eq-apx-tail-bernstein. This $\lambda$ is not the exact minimizer of step 5, but it is the one that gives a clean formula.
-7. **The width.** Write $\ell$ for $\ln(1/\beta)$. The bound equals $\beta$ when $nt^2 = \ell(2\sigma^2 + \frac23Mt)$, which is a quadratic equation in $t$ with the positive root
-$$t^* = \frac{M\ell}{3n} + \sqrt{\Big(\frac{M\ell}{3n}\Big)^2 + \frac{2\sigma^2\ell}{n}}.$$
-The exponent $nt^2/(2\sigma^2 + \frac23Mt) = nt/(2\sigma^2/t + \frac23M)$ grows with $t$, so every $t \ge t^*$ has a bound of at most $\beta$. To simplify the root, use the fact that the square root of a sum of two non-negative numbers is at most the sum of their square roots, which you can see by squaring both sides. Applied to the square root in $t^*$, it gives
-$$t^* \le \sqrt{\frac{2\sigma^2\ell}{n}} + \frac{2M\ell}{3n},$$
+7. **The width.** Write $\ell$ for $\ln(1/\beta)$. The bound equals $\beta$ when $nt^2 = \ell(2\sigma^2 + \frac23Rt)$, which is a quadratic equation in $t$ with the positive root
+$$t^* = \frac{R\ell}{3n} + \sqrt{\Big(\frac{R\ell}{3n}\Big)^2 + \frac{2\sigma^2\ell}{n}}.$$
+The exponent $nt^2/(2\sigma^2 + \frac23Rt) = nt/(2\sigma^2/t + \frac23R)$ grows with $t$, so every $t \ge t^*$ has a bound of at most $\beta$. To simplify the root, use the fact that the square root of a sum of two non-negative numbers is at most the sum of their square roots, which you can see by squaring both sides. Applied to the square root in $t^*$, it gives
+$$t^* \le \sqrt{\frac{2\sigma^2\ell}{n}} + \frac{2R\ell}{3n},$$
 the chapter's width. So with probability at least $1 - \beta$, the average exceeds $\mu$ by less than this amount.
 
 The proof also works when the variables have different variances $\sigma_i^2$. Step 5 then adds the individual bounds, and $\sigma^2$ becomes their average.
 
 ### Checking it
 
-The appendix's script, `apx_tails.py` (see the Code section), checks steps 3 and 4 for the centred Bernoulli(0.01) on a grid of $\lambda$ from 0.01 to 2.99, which is just below $3/M = 3.03$. The exact log-MGF never exceeds the series bound $\frac{\sigma^2}{M^2}(e^{\lambda M} - 1 - \lambda M)$ of step 3, and the series bound never exceeds the simpler bound of step 4. @fig-apx-tail-bernstein-mgf shows the three curves together with Hoeffding's $\lambda^2/8$. For small $\lambda$ both Bernstein curves lie on the exact one, far below Hoeffding's, because they use the variance 0.0099 rather than $\frac14$. Only near $\lambda = 3/M$ does the simplification of step 4 blow up.
+The appendix's script, `apx_tails.py` (see the Code section), checks steps 3 and 4 for the centred Bernoulli(0.01) on a grid of $\lambda$ from 0.01 to 2.99, which is just below $3/R = 3.03$. The exact log-MGF never exceeds the series bound $\frac{\sigma^2}{R^2}(e^{\lambda R} - 1 - \lambda R)$ of step 3, and the series bound never exceeds the simpler bound of step 4. @fig-apx-tail-bernstein-mgf shows the three curves together with Hoeffding's $\lambda^2/8$. For small $\lambda$ both Bernstein curves lie on the exact one, far below Hoeffding's, because they use the variance 0.0099 rather than $\frac14$. Only near $\lambda = 3/R$ does the simplification of step 4 blow up.
 
 ![The log-MGF of the centred Bernoulli(0.01) variable as a function of $\lambda$ (black), with Hoeffding's bound $\lambda^2/8$ and the two Bernstein bounds of steps 3 and 4 of the derivation, on a log scale.](figures/tail_bernstein_mgf.svg){#fig-apx-tail-bernstein-mgf}
 
@@ -85,9 +85,9 @@ $$\Pr[S_n \ge nt] \le e^{-n\psi^*(t)}, \qquad \psi^*(t) = \sup_{\lambda > 0}\big
 The chapter then says that "Cramér's theorem says that ... the probability of a large deviation decays exponentially in $n$ with exactly the rate the optimized Chernoff bound gives, so no method can improve its exponent for large sums". It does not prove this. In symbols, for every $t$ between the mean $\mu$ and the largest value $x_{\max}$ that $X$ can take,
 $$\lim_{n\to\infty}-\frac1n\ln\Pr[S_n \ge nt] = \psi^*(t).$$ {#eq-apx-tail-cramer}
 
-@sec-ht-np makes the same kind of claim about tests, and cites Cover & Thomas (chapter 11) for it. You observe $n$ independent draws and test $H_0$, that they come from $P$, against $H_1$, that they come from $Q$. Hold the type I error at a level $\alpha$ in $(0, 1)$, and write $\beta_n^*(\alpha)$ for the smallest type II error of any test, randomized or not, whose type I error is at most $\alpha$. The **Chernoff–Stein lemma** says that
-$$\lim_{n\to\infty}-\frac1n\ln\beta_n^*(\alpha) = \mathrm{KL}(P\|Q), \qquad \mathrm{KL}(P\|Q) = \mathbb E_P\Big[\ln\frac{p(X)}{q(X)}\Big],$$ {#eq-apx-tail-stein}
-where $\mathrm{KL}$ is the Kullback–Leibler (KL) divergence. In this section $\alpha$ is the type I error, as in @sec-ht-np, not a Rényi order.
+@sec-ht-np makes the same kind of claim about tests, and cites Cover & Thomas (chapter 11) for it. You observe $n$ independent draws and test $H_0$, that they come from $P$, against $H_1$, that they come from $Q$. Hold the type I error at a level $a$ in $(0, 1)$, and write $b_n^*(a)$ for the smallest type II error of any test, randomized or not, whose type I error is at most $a$. The **Chernoff–Stein lemma** says that
+$$\lim_{n\to\infty}-\frac1n\ln b_n^*(a) = D_{\mathrm{KL}}(P\|Q), \qquad D_{\mathrm{KL}}(P\|Q) = \mathbb E_P\Big[\ln\frac{p(X)}{q(X)}\Big],$$ {#eq-apx-tail-stein}
+where $D_{\mathrm{KL}}$ is the Kullback–Leibler (KL) divergence. As in @sec-ht-np, $a$ and $b$ are the type I and type II errors.
 
 ### The idea
 
@@ -95,70 +95,70 @@ Chernoff's bound shows that the probability is *at most* about $e^{-n\psi^*(t)}$
 
 Here is a concrete case. A coin lands heads with probability 0.1, and you ask how likely 100 tosses are to give at least 20 heads, twice the expected number. Tilting by $e^{\lambda x}$, with $x = 1$ for heads and 0 for tails, turns it into a coin with heads probability $0.1e^\lambda/(0.9 + 0.1e^\lambda)$. With $\lambda = \ln 2.25 = 0.8109$ that probability is exactly 0.2, so for the tilted coin 20 heads in 100 is the typical outcome, not a rare one.
 
-The Chernoff–Stein lemma uses the same trick, with the two distributions already given. Under $P$, the evidence $\sum_i\ln(p(x_i)/q(x_i))$ of a sample is close to $n\,\mathrm{KL}(P\|Q)$, by the law of large numbers. So on most samples that $P$ produces, $Q$ gives a probability about $e^{-n\mathrm{KL}}$ times smaller. A test with a small type I error must accept $H_0$ on most of $P$'s typical samples. So under $Q$ it accepts with probability about $e^{-n\mathrm{KL}}$, No test can do better, because every test of small type I error must accept those samples. And the test that accepts exactly the samples with large evidence does that well.
+The Chernoff–Stein lemma uses the same trick, with the two distributions already given. Under $P$, the evidence $\sum_i\ln(p(x_i)/q(x_i))$ of a sample is close to $n\,D_{\mathrm{KL}}(P\|Q)$, by the law of large numbers. So on most samples that $P$ produces, $Q$ gives a probability about $e^{-nD_{\mathrm{KL}}(P\|Q)}$ times smaller. A test with a small type I error must accept $H_0$ on most of $P$'s typical samples. So under $Q$ it accepts with probability about $e^{-nD_{\mathrm{KL}}(P\|Q)}$. No test can do better, because every test of small type I error must accept those samples. And the test that accepts exactly the samples with large evidence does that well.
 
 ### Derivation
 
 Two facts from the chapters do the work. The first is the **change of measure** (Fact 1 of [Divergences](../part01-prerequisites/03-divergences.md), Fact 2 of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). If $P$ and $Q'$ give positive probability to the same outcomes, then for any event $A$,
-$$P(A) = \sum_{x \in A}p(x) = \sum_{x\in A}q'(x)\frac{p(x)}{q'(x)} = \mathbb E_{Q'}\Big[\frac{p(X)}{q'(X)}\mathbf 1_A(X)\Big],$$
+$$\Pr_P[X \in A] = \sum_{x \in A}p(x) = \sum_{x\in A}q'(x)\frac{p(x)}{q'(x)} = \mathbb E_{Q'}\Big[\frac{p(X)}{q'(X)}\mathbf 1[X \in A]\Big],$$
 because multiplying and dividing by $q'(x)$ changes nothing. The second is the **tilted distribution** with parameter $\lambda$, whose probabilities are
 $$q_\lambda(x) = p(x)\,e^{\lambda x - \psi(\lambda)}.$$
 They add up to 1 because $e^{\psi(\lambda)} = \sum_xp(x)e^{\lambda x}$. Its mean is $\psi'(\lambda)$ and its variance is $\psi''(\lambda)$, as the Rényi section of [Divergences](../part01-prerequisites/03-divergences.md) shows for the log-likelihood ratio. Here you only need these facts for a bounded $X$, where the sums are finite and the derivatives can be taken term by term.
 
 **Cramér's lower bound.** Assume that $X$ is bounded and not constant, and that $\mu < t < x_{\max}$.
 
-1. **Tilt to just above $t$.** Fix a small $\varepsilon > 0$ with $t + \varepsilon < x_{\max}$. The tilted mean $\psi'(\lambda)$ equals $\mu$ at $\lambda = 0$. It increases with $\lambda$, because its derivative is a variance, which is positive for a variable that is not constant. It tends to $x_{\max}$ as $\lambda \to \infty$, because the weight $e^{\lambda x}$ favours the largest values more and more. So there is one $\lambda > 0$ with $\psi'(\lambda) = t + \varepsilon/2$.
+1. **Tilt to just above $t$.** Fix a small $\kappa > 0$ with $t + \kappa < x_{\max}$. The tilted mean $\psi'(\lambda)$ equals $\mu$ at $\lambda = 0$. It increases with $\lambda$, because its derivative is a variance, which is positive for a variable that is not constant. It tends to $x_{\max}$ as $\lambda \to \infty$, because the weight $e^{\lambda x}$ favours the largest values more and more. So there is one $\lambda > 0$ with $\psi'(\lambda) = t + \kappa/2$.
 2. **Change the measure of the whole sample.** Tilt each of the $n$ copies. The ratio of the two probabilities of a sample is the product of the ratios of its draws, $\prod_ip(x_i)/q_\lambda(x_i) = e^{-\lambda S_n + n\psi(\lambda)}$. The change of measure therefore gives, for any event $A$ about the sample,
-$$\Pr[A] = \mathbb E_{Q_\lambda}\big[e^{-\lambda S_n + n\psi(\lambda)}\,\mathbf 1_A\big].$$
-3. **Restrict to a window.** Let $A$ be the event $nt \le S_n \le n(t + \varepsilon)$. It is part of the event $S_n \ge nt$. On $A$, the sum is at most $n(t + \varepsilon)$, and $\lambda > 0$, so $e^{-\lambda S_n} \ge e^{-\lambda n(t + \varepsilon)}$. Hence
-$$\Pr[S_n \ge nt] \ge \Pr[A] \ge e^{-n(\lambda(t + \varepsilon) - \psi(\lambda))}\,Q_\lambda[A].$$
-4. **The window is likely under the tilt.** Under $Q_\lambda$, the average $S_n/n$ has mean $t + \varepsilon/2$ and variance $\psi''(\lambda)/n$. The window contains every average within $\varepsilon/2$ of that mean. Chebyshev's inequality bounds the chance of falling outside, so
-$$Q_\lambda[A] \ge 1 - \frac{4\psi''(\lambda)}{n\varepsilon^2},$$
+$$\Pr[A] = \mathbb E_{Q_\lambda}\big[e^{-\lambda S_n + n\psi(\lambda)}\,\mathbf 1[A]\big].$$
+3. **Restrict to a window.** Let $A$ be the event $nt \le S_n \le n(t + \kappa)$. It is part of the event $S_n \ge nt$. On $A$, the sum is at most $n(t + \kappa)$, and $\lambda > 0$, so $e^{-\lambda S_n} \ge e^{-\lambda n(t + \kappa)}$. Hence
+$$\Pr[S_n \ge nt] \ge \Pr[A] \ge e^{-n(\lambda(t + \kappa) - \psi(\lambda))}\,\Pr_{Q_\lambda}[A].$$
+4. **The window is likely under the tilt.** Under $Q_\lambda$, the average $S_n/n$ has mean $t + \kappa/2$ and variance $\psi''(\lambda)/n$. The window contains every average within $\kappa/2$ of that mean. Chebyshev's inequality bounds the chance of falling outside, so
+$$\Pr_{Q_\lambda}[A] \ge 1 - \frac{4\psi''(\lambda)}{n\kappa^2},$$
 which tends to 1 as $n$ grows.
-5. **Let $n$ grow.** Take logarithms in step 3 and divide by $-n$. The term $-\frac1n\ln Q_\lambda[A]$ tends to 0, so
-$$\limsup_{n\to\infty}-\frac1n\ln\Pr[S_n \ge nt] \le \lambda(t + \varepsilon) - \psi(\lambda).$$
-6. **Let $\varepsilon$ shrink.** As $\varepsilon \to 0$, the chosen $\lambda$ tends to the $\lambda_0$ with $\psi'(\lambda_0) = t$, because $\psi'$ is continuous and increasing. The right side of step 5 then tends to $\lambda_0t - \psi(\lambda_0)$. The function $\lambda t - \psi(\lambda)$ is concave, since $\psi$ is convex, and its slope $t - \psi'(\lambda)$ is zero at $\lambda_0$. So $\lambda_0$ is where it is largest, and $\lambda_0t - \psi(\lambda_0) = \psi^*(t)$.
+5. **Let $n$ grow.** Take logarithms in step 3 and divide by $-n$. The term $-\frac1n\ln \Pr_{Q_\lambda}[A]$ tends to 0, so
+$$\limsup_{n\to\infty}-\frac1n\ln\Pr[S_n \ge nt] \le \lambda(t + \kappa) - \psi(\lambda).$$
+6. **Let $\kappa$ shrink.** As $\kappa \to 0$, the chosen $\lambda$ tends to the $\lambda_0$ with $\psi'(\lambda_0) = t$, because $\psi'$ is continuous and increasing. The right side of step 5 then tends to $\lambda_0t - \psi(\lambda_0)$. The function $\lambda t - \psi(\lambda)$ is concave, since $\psi$ is convex, and its slope $t - \psi'(\lambda)$ is zero at $\lambda_0$. So $\lambda_0$ is where it is largest, and $\lambda_0t - \psi(\lambda_0) = \psi^*(t)$.
 7. **Combine with Chernoff.** Chernoff's bound gives $-\frac1n\ln\Pr[S_n \ge nt] \ge \psi^*(t)$ for every $n$. Step 6 gives the matching upper limit, which proves @eq-apx-tail-cramer.
 
 For the coin, $\psi(\lambda) = \ln(1 - p + pe^\lambda)$ with $p = 0.1$, and solving $\psi'(\lambda_0) = t$ gives $e^{\lambda_0} = t(1 - p)/\big(p(1 - t)\big)$. Substituting, the exponent is the **binary KL divergence**
-$$\psi^*(t) = \mathrm{kl}(t, p) = t\ln\frac tp + (1 - t)\ln\frac{1 - t}{1 - p}.$$
+$$\psi^*(t) = \mathrm{kl}(t\|p) = t\ln\frac tp + (1 - t)\ln\frac{1 - t}{1 - p}.$$
 With $t = 0.2$ this is $\lambda_0 = \ln 2.25 = 0.8109$, $\psi(\lambda_0) = \ln1.125 = 0.11778$, and $\psi^*(0.2) = 0.2 \times 0.8109 - 0.11778 = 0.04440$.
 
-**Chernoff–Stein, achievability.** Assume that $P$ and $Q$ give positive probability to the same outcomes. Write $L(x)$ for the evidence $\ln(p(x)/q(x))$ of one draw $x$. Under $P$ its mean is the divergence $D = \mathrm{KL}(P\|Q)$, and assume that its variance $V$ is finite. For a whole sample $x = (x_1, \dots, x_n)$, write $p^n(x)$ and $q^n(x)$ for its probabilities under the two hypotheses. Each is a product over the draws, so the change of measure becomes
+**Chernoff–Stein, achievability.** Assume that $P$ and $Q$ give positive probability to the same outcomes. Write $L(x)$ for the evidence $\ln(p(x)/q(x))$ of one draw $x$. Under $P$ its mean is the divergence $D_{\mathrm{KL}}(P\|Q)$, written $D_{\mathrm{KL}}$ below, and assume that its variance $V$ is finite. For a whole sample $x = (x_1, \dots, x_n)$, write $p^n(x)$ and $q^n(x)$ for its probabilities under the two hypotheses. Each is a product over the draws, so the change of measure becomes
 $$q^n(x) = p^n(x)\,e^{-\sum_iL(x_i)}.$$
 
-1. **The test.** Fix $\varepsilon > 0$, and accept $H_0$ exactly when the average evidence is at least $D - \varepsilon$. Call that set of samples $A_n$.
-2. **Its type I error.** It rejects when the average evidence falls more than $\varepsilon$ below its mean $D$. The average has variance $V/n$, so Chebyshev gives a type I error of at most $V/(n\varepsilon^2)$, which is below $\alpha$ once $n$ is large.
-3. **Its type II error.** On $A_n$ the total evidence is at least $n(D - \varepsilon)$, so $q^n(x) \le p^n(x)\,e^{-n(D - \varepsilon)}$. Summing over $A_n$ gives
-$$\beta_n = Q^n(A_n) \le e^{-n(D - \varepsilon)}P^n(A_n) \le e^{-n(D - \varepsilon)}.$$
-4. **The best test does at least as well.** So $\beta_n^*(\alpha) \le e^{-n(D - \varepsilon)}$ for large $n$, and $\liminf_n -\frac1n\ln\beta_n^*(\alpha) \ge D - \varepsilon$ for every $\varepsilon > 0$.
+1. **The test.** Fix $\kappa > 0$, and accept $H_0$ exactly when the average evidence is at least $D_{\mathrm{KL}} - \kappa$. Call that set of samples $A_n$.
+2. **Its type I error.** It rejects when the average evidence falls more than $\kappa$ below its mean $D_{\mathrm{KL}}$. The average has variance $V/n$, so Chebyshev gives a type I error of at most $V/(n\kappa^2)$, which is below $a$ once $n$ is large.
+3. **Its type II error.** On $A_n$ the total evidence is at least $n(D_{\mathrm{KL}} - \kappa)$, so $q^n(x) \le p^n(x)\,e^{-n(D_{\mathrm{KL}} - \kappa)}$. Summing over $A_n$ gives
+$$b_n = \Pr_{Q^n}[A_n] \le e^{-n(D_{\mathrm{KL}} - \kappa)}\Pr_{P^n}[A_n] \le e^{-n(D_{\mathrm{KL}} - \kappa)}.$$
+4. **The best test does at least as well.** So $b_n^*(a) \le e^{-n(D_{\mathrm{KL}} - \kappa)}$ for large $n$, and $\liminf_n -\frac1n\ln b_n^*(a) \ge D_{\mathrm{KL}} - \kappa$ for every $\kappa > 0$.
 
-**Chernoff–Stein, converse.** Now take any test, described by its probability $\phi(x)$ of rejecting $H_0$, with type I error $\mathbb E_{P^n}[\phi] \le \alpha$.
+**Chernoff–Stein, converse.** Now take any test, described by its probability $\phi(x)$ of rejecting $H_0$, with type I error $\mathbb E_{P^n}[\phi] \le a$.
 
-5. **Restrict to typical samples.** Let $B_n$ be the set of samples whose average evidence is at most $D + \varepsilon$. On $B_n$, $q^n(x) \ge p^n(x)\,e^{-n(D + \varepsilon)}$. The type II error is the probability of accepting under $Q$, and keeping only the samples in $B_n$ can only lower it, so
-$$\beta_n = \sum_x\big(1 - \phi(x)\big)q^n(x) \ge e^{-n(D + \varepsilon)}\sum_{x\in B_n}\big(1 - \phi(x)\big)p^n(x).$$
-6. **The test must accept most typical samples.** The last sum is the acceptance probability under $P$, minus the part outside $B_n$. That part is at most $P^n(B_n^c)$, which Chebyshev bounds by $V/(n\varepsilon^2)$. So the sum is at least $1 - \alpha - V/(n\varepsilon^2)$.
-7. **Let $n$ grow.** Taking logarithms, $-\frac1n\ln\beta_n \le D + \varepsilon - \frac1n\ln\big(1 - \alpha - V/(n\varepsilon^2)\big)$, and the last term tends to 0. (For large $n$ the factor $1 - \alpha - V/(n\varepsilon^2)$ is positive, so its logarithm is defined.) This holds for every test of level $\alpha$, so $\limsup_n-\frac1n\ln\beta_n^*(\alpha) \le D + \varepsilon$. Since $\varepsilon$ is arbitrary, steps 4 and 7 together prove @eq-apx-tail-stein.
+5. **Restrict to typical samples.** Let $B_n$ be the set of samples whose average evidence is at most $D_{\mathrm{KL}} + \kappa$. On $B_n$, $q^n(x) \ge p^n(x)\,e^{-n(D_{\mathrm{KL}} + \kappa)}$. The type II error is the probability of accepting under $Q$, and keeping only the samples in $B_n$ can only lower it, so
+$$b_n = \sum_x\big(1 - \phi(x)\big)q^n(x) \ge e^{-n(D_{\mathrm{KL}} + \kappa)}\sum_{x\in B_n}\big(1 - \phi(x)\big)p^n(x).$$
+6. **The test must accept most typical samples.** The last sum is the acceptance probability under $P$, minus the part outside $B_n$. That part is at most $\Pr_{P^n}[B_n^c]$, which Chebyshev bounds by $V/(n\kappa^2)$. So the sum is at least $1 - a - V/(n\kappa^2)$.
+7. **Let $n$ grow.** Taking logarithms, $-\frac1n\ln b_n \le D_{\mathrm{KL}} + \kappa - \frac1n\ln\big(1 - a - V/(n\kappa^2)\big)$, and the last term tends to 0. (For large $n$ the factor $1 - a - V/(n\kappa^2)$ is positive, so its logarithm is defined.) This holds for every test of level $a$, so $\limsup_n-\frac1n\ln b_n^*(a) \le D_{\mathrm{KL}} + \kappa$. Since $\kappa$ is arbitrary, steps 4 and 7 together prove @eq-apx-tail-stein.
 
 ### Checking it
 
-For the coin with $p = 0.1$ and $t = 0.2$, the script computes the exact exponent $-\frac1n\ln\Pr[S_n \ge 0.2n]$ from the binomial distribution. It is 0.06225 at $n = 100$, 0.04728 at $n = 1{,}000$ and 0.04481 at $n = 10{,}000$, and it approaches $\mathrm{kl}(0.2, 0.1) = 0.04440$ from above, as Chernoff's bound requires. The right panel of @fig-apx-tail-cramer also draws the bound of steps 3 and 4 for each $n$, with the window width $\varepsilon = 4\sqrt{t(1 - t)/n}$. The factor 4 makes Chebyshev's bound in step 4 leave about three quarters of the tilted mass in the window. It closes in from the other side, but slowly: 0.23163, 0.09152 and 0.05800 at the same three sizes. It is slow because the window must shrink like $1/\sqrt n$, the size of the typical fluctuation. The left panel shows the tilt at $n = 100$. The original count sits around 10, while the tilted count sits inside the window from 20 up.
+For the coin with $p = 0.1$ and $t = 0.2$, the script computes the exact exponent $-\frac1n\ln\Pr[S_n \ge 0.2n]$ from the binomial distribution. It is 0.06225 at $n = 100$, 0.04728 at $n = 1{,}000$ and 0.04481 at $n = 10{,}000$, and it approaches $\mathrm{kl}(0.2\|0.1) = 0.04440$ from above, as Chernoff's bound requires. The right panel of @fig-apx-tail-cramer also draws the bound of steps 3 and 4 for each $n$, with the window width $\kappa = 4\sqrt{t(1 - t)/n}$. The factor 4 makes Chebyshev's bound in step 4 leave about three quarters of the tilted mass in the window. It closes in from the other side, but slowly: 0.23163, 0.09152 and 0.05800 at the same three sizes. It is slow because the window must shrink like $1/\sqrt n$, the size of the typical fluctuation. The left panel shows the tilt at $n = 100$. The original count sits around 10, while the tilted count sits inside the window from 20 up.
 
-![Left: the distribution of the number of heads in 100 tosses of a coin with heads probability 0.1, and of the tilted coin, with the window of step 3 shaded. Right: the exact exponent $-\frac1n\ln\Pr[S_n \ge 0.2n]$ (black), the bound from the tilting argument (blue) and the Chernoff exponent $\mathrm{kl}(0.2, 0.1)$ (dashed), against $n$.](figures/tail_cramer.svg){#fig-apx-tail-cramer}
+![Left: the distribution of the number of heads in 100 tosses of a coin with heads probability 0.1, and of the tilted coin, with the window of step 3 shaded. Right: the exact exponent $-\frac1n\ln\Pr[S_n \ge 0.2n]$ (black), the bound from the tilting argument (blue) and the Chernoff exponent $\mathrm{kl}(0.2\|0.1)$ (dashed), against $n$.](figures/tail_cramer.svg){#fig-apx-tail-cramer}
 
-For the Chernoff–Stein lemma the script uses the spam example of @tbl-ht-spam. An email's count of suspicious words, capped at 3, takes the values 0, 1, 2, 3 with probabilities 0.4, 0.3, 0.2, 0.1 under ham ($P$) and 0.1, 0.2, 0.3, 0.4 under spam ($Q$). There $\mathrm{KL}(P\|Q) = 0.4564$ and the variance of the evidence is $V = 0.8348$. The evidence of one count is $\pm\ln4$ or $\pm\ln1.5$, so the evidence of a sample is $a\ln4 + b\ln1.5$ for two whole numbers $a$ and $b$. The script tracks the exact distribution of $(a, b)$ under both hypotheses and builds the most powerful test of size exactly 0.05, as the Neyman–Pearson lemma prescribes. @tbl-apx-tail-stein gives its type II error. Its last column gives the two bounds of the derivation. They use $\varepsilon = \sqrt{V/(0.05\,n)}$ for achievability, so that step 2 gives size 0.05, and $\varepsilon = \sqrt{2V/(0.95\,n)}$ for the converse, so that the factor in step 6 is $0.95/2$. A negative lower bound says nothing, because an exponent is never negative.
+For the Chernoff–Stein lemma the script uses the spam example of @tbl-ht-spam. An email's count of suspicious words, capped at 3, takes the values 0, 1, 2, 3 with probabilities 0.4, 0.3, 0.2, 0.1 under ham ($P$) and 0.1, 0.2, 0.3, 0.4 under spam ($Q$). There $D_{\mathrm{KL}}(P\|Q) = 0.4564$ and the variance of the evidence is $V = 0.8348$. The evidence of one count is $\pm\ln4$ or $\pm\ln1.5$, so the evidence of a sample is $i\ln4 + j\ln1.5$ for two whole numbers $i$ and $j$. The script tracks the exact distribution of $(i, j)$ under both hypotheses and builds the most powerful test of size exactly 0.05, as the Neyman–Pearson lemma prescribes. @tbl-apx-tail-stein gives its type II error. Its last column gives the two bounds of the derivation. They use $\kappa = \sqrt{V/(0.05\,n)}$ for achievability, so that step 2 gives size 0.05, and $\kappa = \sqrt{2V/(0.95\,n)}$ for the converse, so that the factor in step 6 is $0.95/2$. A negative lower bound says nothing, because an exponent is never negative.
 
-| $n$ | $\beta_n^*(0.05)$ | $-\frac1n\ln\beta_n^*$ | Bounds from the proof |
+| $n$ | $b_n^*(0.05)$ | $-\frac1n\ln b_n^*$ | Bounds from the proof |
 | --- | --- | --- | --- |
 | 10 | $7.702\times10^{-2}$ | 0.2564 | $[-0.8357, 0.9501]$ |
 | 50 | $1.160\times10^{-7}$ | 0.3194 | $[-0.1214, 0.6588]$ |
 | 200 | $3.959\times10^{-33}$ | 0.3730 | $[0.1675, 0.5539]$ |
 
-: Type II error of the most powerful size-0.05 test on $n$ spam-example observations, its exponent, and the two bounds of the derivation with $\varepsilon$ chosen for each $n$. The limit is $\mathrm{KL}(P\|Q) = 0.4564$. {#tbl-apx-tail-stein}
+: Type II error of the most powerful size-0.05 test on $n$ spam-example observations, its exponent, and the two bounds of the derivation with $\kappa$ chosen for each $n$. The limit is $D_{\mathrm{KL}}(P\|Q) = 0.4564$. {#tbl-apx-tail-stein}
 
 The exponent creeps up toward 0.4564, as @fig-apx-tail-stein shows. Both bounds tend to KL, at the slow rate $1/\sqrt n$. The exact exponent is also far from its limit at moderate $n$. With 200 observations it is still 18% below KL, because the test must leave room for fluctuations of the evidence of order $\sqrt n$.
 
-![The type II exponent $-\frac1n\ln\beta_n^*$ of the most powerful size-0.05 test on the spam example (black), between the achievability and converse bounds of the derivation, converging slowly to $\mathrm{KL}(P\|Q)$ (dashed).](figures/tail_stein.svg){#fig-apx-tail-stein}
+![The type II exponent $-\frac1n\ln b_n^*$ of the most powerful size-0.05 test on the spam example (black), between the achievability and converse bounds of the derivation, converging slowly to $D_{\mathrm{KL}}(P\|Q)$ (dashed).](figures/tail_stein.svg){#fig-apx-tail-stein}
 
 ### What it does not cover
 
@@ -221,7 +221,7 @@ That is @eq-renyi-psi. Here $\psi$ is the log-MGF of the evidence $\ln r$, not o
 $$\lim_{\alpha \uparrow 1}D_\alpha(P\|Q) = D_{\mathrm{KL}}(P\|Q) \text{ always}, \qquad \lim_{\alpha\downarrow1}D_\alpha(P\|Q) = D_{\mathrm{KL}}(P\|Q) \text{ if } D_{\alpha_0}(P\|Q) < \infty \text{ for some } \alpha_0 > 1.$$
 The first holds even when the KL divergence is infinite.
 
-@sec-min-entropy states the matching facts for the **Rényi entropy** $H_\alpha(X) = \frac{1}{1 - \alpha}\log\sum_xp(x)^\alpha$ of a variable with finitely many values. It says that $H_\alpha$ tends to the Shannon entropy $H$ as $\alpha \to 1$, and to the min-entropy $H_\infty$ as $\alpha \to \infty$. Both follow from the divergence limits.
+@sec-min-entropy states the matching facts for the **Rényi entropy** $H_\alpha(X) = \frac{1}{1 - \alpha}\log_2\sum_xp(x)^\alpha$, measured in bits, of a variable with finitely many values. It says that $H_\alpha$ tends to the Shannon entropy $H$ as $\alpha \to 1$, and to the min-entropy $H_\infty$ as $\alpha \to \infty$. Both follow from the divergence limits.
 
 ### The idea
 
@@ -256,10 +256,10 @@ $$\mathbb E_P[h_\lambda(r)] \le D_{1+\lambda} \le D_{\mathrm{KL}}, \qquad -1 < \
 5. **Above order 1.** For $\lambda > 0$ the same two inequalities hold, and dividing by the positive $\lambda$ keeps their direction:
 $$D_{\mathrm{KL}} \le D_{1+\lambda} \le \mathbb E_P[h_\lambda(r)], \qquad \lambda > 0.$$
 6. **The limit from above.** As $\lambda \downarrow 0$, $h_\lambda(r)$ decreases to $\ln r$. Monotone convergence now needs a finite starting point. That is the assumption: if $D_{\alpha_0} < \infty$ with $\lambda_0 = \alpha_0 - 1 > 0$, then $\mathbb E_P[r^{\lambda_0}] = e^{\lambda_0D_{\alpha_0}}$ is finite, and so is $\mathbb E_P[h_{\lambda_0}(r)]$. Then $\mathbb E_P[h_\lambda(r)] \to D_{\mathrm{KL}}$ and $D_\alpha \to D_{\mathrm{KL}}$ as $\alpha \downarrow 1$.
-7. **Rényi entropy.** Let $U$ be the uniform distribution on the $N$ values of $X$, which gives each value probability $1/N$. From the definition,
-$$D_\alpha(P\|U) = \frac{1}{\alpha - 1}\log\sum_xp(x)^\alpha N^{\alpha - 1} = \log N - H_\alpha(X),$$
-in any base of logarithm, used consistently. In the same way, the KL divergence from the uniform distribution is $\log N$ minus the Shannon entropy $H(X)$. On a finite set the likelihood ratio $Np(x)$ is at most $N$, so every $D_\alpha(P\|U)$ is finite. Both limits of steps 4 and 6 then apply, and $H_\alpha \to H$ as $\alpha \to 1$. As $\alpha \to \infty$, property 2 of @sec-div-renyi says that $D_\alpha(P\|U)$ tends to the logarithm of the largest ratio, $\log(N\max_xp(x))$. Subtracting it from $\log N$ leaves the min-entropy,
-$$\lim_{\alpha\to\infty}H_\alpha(X) = -\log\max_xp(x) = H_\infty(X).$$
+7. **Rényi entropy.** Let $U$ be the uniform distribution on the $N$ values of $X$, which gives each value probability $1/N$. Measuring the divergence in bits too, with $\log_2$ in place of $\ln$, the definition gives
+$$D_\alpha(P\|U) = \frac{1}{\alpha - 1}\log_2\sum_xp(x)^\alpha N^{\alpha - 1} = \log_2 N - H_\alpha(X).$$
+The identity holds in any base used for both sides. In the same way, the KL divergence from the uniform distribution is $\log_2 N$ minus the Shannon entropy $H(X)$. On a finite set the likelihood ratio $Np(x)$ is at most $N$, so every $D_\alpha(P\|U)$ is finite. Both limits of steps 4 and 6 then apply, and $H_\alpha \to H$ as $\alpha \to 1$. As $\alpha \to \infty$, property 2 of @sec-div-renyi says that $D_\alpha(P\|U)$ tends to the logarithm of the largest ratio, $\log_2(N\max_xp(x))$. Subtracting it from $\log_2 N$ leaves the min-entropy,
+$$\lim_{\alpha\to\infty}H_\alpha(X) = -\log_2\max_xp(x) = H_\infty(X).$$
 
 ### Checking it
 
@@ -341,7 +341,7 @@ The right panel of @fig-apx-tail-perspective draws the region that order 2 alone
 
 ### What the chapter uses
 
-The example of @sec-threat-average releases a noisy count of $m = 100$ other records plus the target's bit $b$. The adversary sees $K + b + Z$, where the unknown count $K$ of the others is $\mathrm{Binomial}(m, \frac12)$ and the noise $Z$ is normal with mean 0 and standard deviation $\sigma = 1$. Write $w_k = \binom mk2^{-m}$ for the binomial weights and $\varphi_\sigma$ for the normal density with standard deviation $\sigma$. In world 0 ($b = 0$) the observation has density
+The example of @sec-threat-average releases a noisy count of $m = 100$ other records plus the target's bit $b$. The adversary sees $K + b + Z$, where the unknown count $K$ of the others is $\mathrm{Bin}(m, \frac12)$ and the noise $Z$ is normal with mean 0 and standard deviation $\sigma = 1$. Write $w_k = \binom mk2^{-m}$ for the binomial weights and $\varphi_\sigma$ for the normal density with standard deviation $\sigma$. In world 0 ($b = 0$) the observation has density
 $$p(y) = f(y), \qquad f(y) = \sum_{k=0}^mw_k\,\varphi_\sigma(y - k),$$
 and in world 1 ($b = 1$) it has the shifted density $q(y) = f(y - 1)$.
 
@@ -408,7 +408,7 @@ uv run python code/appendix-derivations/apx_tails.py
 | Bernstein | Exact tail, mean of 1,000 Bernoulli(0.01) at $t = 0.01$ | $3.29\times10^{-3}$ |
 | Bernstein | Bernstein, optimized Chernoff, Hoeffding bounds there | $2.26\times10^{-2}$, $2.00\times10^{-2}$, 0.819 |
 | Bernstein | Width at $\beta = 0.05$: exact root, chapter formula, Hoeffding | 0.00875, 0.00968, 0.0387 |
-| Cramér | Exact exponent at $n = 100, 1{,}000, 10{,}000$; limit $\mathrm{kl}(0.2, 0.1)$ | 0.06225, 0.04728, 0.04481; 0.04440 |
+| Cramér | Exact exponent at $n = 100, 1{,}000, 10{,}000$; limit $\mathrm{kl}(0.2\|0.1)$ | 0.06225, 0.04728, 0.04481; 0.04440 |
 | Chernoff–Stein | Spam example: exponent at $n = 200$; limit KL | 0.3730; 0.4564 |
 | Clopper–Pearson | $u(0)$, $u(1)$, $u(10)$ at $n = 1{,}000$, level 0.025 | 0.003682, 0.005559, 0.018313 |
 | Clopper–Pearson | Smallest coverage at $n = 100$: Clopper–Pearson, Wald | 0.9504, 0.0488 |

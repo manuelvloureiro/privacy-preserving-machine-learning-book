@@ -688,7 +688,7 @@ def plot_eigenvectors(t: int = 16) -> Figure:
     ax.axhline(0, color="k", linewidth=0.5)
     ax.set(
         xlabel="position j",
-        ylabel=r"$\sin(j\theta_k)$",
+        ylabel=r"$\sin(j\omega_k)$",
         title=rf"Eigenvectors of $(A^{{-1}})^\top A^{{-1}}$ for T = {t}: zero at j = 0, flat at j = T + ½",
     )
     ax.legend(loc="lower left", fontsize=9)

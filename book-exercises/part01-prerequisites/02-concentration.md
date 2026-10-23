@@ -28,7 +28,7 @@ Take $0 < \mu \le a$. (If $\mu > a$, the bound $\mu/a$ exceeds 1 and says nothin
 
 The two rows of @tbl-sol-concentration-markov-tight are identical. On the die, by contrast, every roll except 5 had slack. Any mass strictly between 0 and $a$, or strictly above $a$, creates slack, because it adds to the mean without adding to $\Pr[X \ge a]$ at the full rate.
 
-Non-negativity matters. Without it, $X = a$ with probability $1 - \varepsilon$ and $X = -(a(1-\varepsilon) - \mu)/\varepsilon$ otherwise has mean $\mu$ and $\Pr[X \ge a] = 1 - \varepsilon$, as close to 1 as you like.
+Non-negativity matters. Without it, $X = a$ with probability $1 - \xi$ and $X = -(a(1-\xi) - \mu)/\xi$ otherwise has mean $\mu$ and $\Pr[X \ge a] = 1 - \xi$, as close to 1 as you like.
 
 *Markov is the best bound that uses only the mean: its worst case puts all the mass at $0$ and $a$.*
 :::
@@ -49,7 +49,7 @@ $$\Pr[X - \mu \ge t] \le \frac{\sigma^2}{\sigma^2 + t^2}.$$
 
 **How it compares with Chebyshev.** Setting $u = 0$ in step 2 gives back $\sigma^2/t^2$. The shift $u$ helps because a one-sided event lets you move the centre of the square towards the side you don't care about. At $t = \sigma$, Chebyshev gives 1 and Cantelli gives $1/2$. For a standard normal at $t = 3$, Cantelli gives $1/10 = 0.1$ against Chebyshev's $0.111$ (@tbl-concentration-results): the gain fades for large $t$, where both decay like $\sigma^2/t^2$.
 
-**It is tight.** Let $Y = t$ with probability $q = \sigma^2/(\sigma^2 + t^2)$ and $Y = -\sigma^2/t$ otherwise. Its mean is $tq - (\sigma^2/t)(1 - q) = \frac{t\sigma^2 - \sigma^2 t}{\sigma^2 + t^2} = 0$, its variance is $t^2 q + (\sigma^4/t^2)(1-q) = \frac{t^2\sigma^2 + \sigma^4}{\sigma^2 + t^2} = \sigma^2$, and $\Pr[Y \ge t] = q$.
+**It is tight.** Let $Y = t$ with probability $p = \sigma^2/(\sigma^2 + t^2)$ and $Y = -\sigma^2/t$ otherwise. Its mean is $tp - (\sigma^2/t)(1 - p) = \frac{t\sigma^2 - \sigma^2 t}{\sigma^2 + t^2} = 0$, its variance is $t^2 p + (\sigma^4/t^2)(1-p) = \frac{t^2\sigma^2 + \sigma^4}{\sigma^2 + t^2} = \sigma^2$, and $\Pr[Y \ge t] = p$.
 
 *A one-sided question deserves a one-sided bound: shifting before squaring buys up to a factor of 2 over Chebyshev.*
 :::
@@ -78,7 +78,7 @@ since each odd factor $2i - 1$ is at least 1.
 
 : The first terms of the two series. They agree up to $\lambda^2$, which is why the variance proxy 1 equals the true variance; afterwards the bound's coefficients are larger. {#tbl-sol-concentration-cosh}
 
-So $X$ is 1-sub-Gaussian. Hoeffding's lemma on $[a, b] = [-1, 1]$ gives the same constant, $(b - a)/2 = 1$: this fair coin on the endpoints is exactly the lemma's worst case. The series comparison reaches the same constant without the convexity argument.
+So $X$ is 1-sub-Gaussian. Hoeffding's lemma on $[l, u] = [-1, 1]$ gives the same constant, $(u - l)/2 = 1$: this fair coin on the endpoints is exactly the lemma's worst case. The series comparison reaches the same constant without the convexity argument.
 :::
 
 ## Sample size for a mean {#sec-sol-concentration-4}
@@ -86,7 +86,7 @@ So $X$ is 1-sub-Gaussian. Hoeffding's lemma on $[a, b] = [-1, 1]$ gives the same
 > **Exercise 4.** **Sample size for a mean.** How many samples in $[0, 1]$ does Hoeffding need to estimate a mean to within $\pm0.01$ with probability 0.99? *Check: $n \ge \ln(200)/(2\times10^{-4}) \approx 26{,}500$.* *(Hoeffding, Fact 5)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Two-sided Hoeffding** for the mean of $n$ independent variables in $[0, 1]$, so $b - a = 1$: $\Pr[|\bar X_n - \mu| \ge t] \le 2e^{-2nt^2}$ (the one-sided bound, doubled for the lower tail).
+1. **Two-sided Hoeffding** for the mean of $n$ independent variables in $[0, 1]$, so $u - l = 1$: $\Pr[|\bar X_n - \mu| \ge t] \le 2e^{-2nt^2}$ (the one-sided bound, doubled for the lower tail).
 2. **Set the failure probability** to $\beta = 1 - 0.99 = 0.01$ and require $2e^{-2nt^2} \le \beta$.
 3. **Solve for $n$** (Fact 5): take logs, $-2nt^2 \le \ln(\beta/2)$, so
 $$n \ge \frac{\ln(2/\beta)}{2t^2} = \frac{\ln 200}{2 \times 10^{-4}} = 26{,}491.6.$$
@@ -102,35 +102,35 @@ For comparison, Chebyshev with the largest possible variance on $[0, 1]$, $\sigm
 > **Exercise 5.** **Noisy argmax.** You add independent $\mathrm{Lap}(b)$ noise to each of $k$ scores and pick the largest noisy score. Show that with probability at least $1-\beta$, the true score of the item you pick is within $2b\ln(k/\beta)$ of the true maximum. *(Laplace tail + union bound)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-Write $q_1, \dots, q_k$ for the true scores, $Z_1, \dots, Z_k$ for the noise, $i^*$ for an item with the largest true score, and $\hat\imath$ for the item with the largest noisy score $q_i + Z_i$. Let $T = b\ln(k/\beta)$.
+Write $u_1, \dots, u_k$ for the true scores, $Z_1, \dots, Z_k$ for the noise, $i^*$ for an item with the largest true score, and $\hat\imath$ for the item with the largest noisy score $u_i + Z_i$. Let $\tau = b\ln(k/\beta)$.
 
-1. **One draw (Laplace tail).** For each $i$, $\Pr[|Z_i| \ge T] = e^{-T/b} = \beta/k$.
-2. **All draws at once (union bound, Fact 2).** $\Pr[\text{some } |Z_i| \ge T] \le k \cdot \beta/k = \beta$. So the event $G$ = "every $|Z_i| < T$" has probability at least $1 - \beta$.
-3. **The choice.** $\hat\imath$ maximizes the noisy score, so in particular $q_{\hat\imath} + Z_{\hat\imath} \ge q_{i^*} + Z_{i^*}$.
-4. **Rearrange:** $q_{i^*} - q_{\hat\imath} \le Z_{\hat\imath} - Z_{i^*}$.
-5. **On $G$**, both noise terms are below $T$ in absolute value, so $Z_{\hat\imath} - Z_{i^*} < 2T$. Hence $q_{i^*} - q_{\hat\imath} < 2b\ln(k/\beta)$ with probability at least $1 - \beta$.
+1. **One draw (Laplace tail).** For each $i$, $\Pr[|Z_i| \ge \tau] = e^{-\tau/b} = \beta/k$.
+2. **All draws at once (union bound, Fact 2).** $\Pr[\text{some } |Z_i| \ge \tau] \le k \cdot \beta/k = \beta$. So the event $G$ = "every $|Z_i| < \tau$" has probability at least $1 - \beta$.
+3. **The choice.** $\hat\imath$ maximizes the noisy score, so in particular $u_{\hat\imath} + Z_{\hat\imath} \ge u_{i^*} + Z_{i^*}$.
+4. **Rearrange:** $u_{i^*} - u_{\hat\imath} \le Z_{\hat\imath} - Z_{i^*}$.
+5. **On $G$**, both noise terms are below $\tau$ in absolute value, so $Z_{\hat\imath} - Z_{i^*} < 2\tau$. Hence $u_{i^*} - u_{\hat\imath} < 2b\ln(k/\beta)$ with probability at least $1 - \beta$.
 
 **Why step 2 needs the union bound.** The picked item $\hat\imath$ depends on the noise: it tends to be an item whose noise came out large. So you can't apply the one-draw bound to $Z_{\hat\imath}$ as if $\hat\imath$ were fixed in advance. Bounding all $k$ noise terms at once covers whichever item gets picked.
 
-**Size.** With $k = 100$, $b = 1$ and $\beta = 0.05$, the guarantee is $2\ln 2000 = 15.20$, twice the maximum-of-Laplace bound 7.60 of @tbl-concentration-results. It grows only like $\ln k$. It is loose, because it charges the worst case on both sides: the picked item's noise at $+T$ and the best item's at $-T$.
+**Size.** With $k = 100$, $b = 1$ and $\beta = 0.05$, the guarantee is $2\ln 2000 = 15.20$, twice the maximum-of-Laplace bound 7.60 of @tbl-concentration-results. It grows only like $\ln k$. It is loose, because it charges the worst case on both sides: the picked item's noise at $+\tau$ and the best item's at $-\tau$.
 
 *Selecting with noise costs at most twice the largest noise, and the largest of $k$ noises costs only $\ln k$.*
 :::
 
 ## Chernoff for a Poisson {#sec-sol-concentration-6}
 
-> **Exercise 6.** **Chernoff for a Poisson.** For $N \sim \mathrm{Poisson}(\mu)$, show that $\Pr[N \ge (1+\delta)\mu]$ satisfies exactly the same bound as the Bernoulli sum. Why is that no coincidence? *(Chernoff)*
+> **Exercise 6.** **Chernoff for a Poisson.** For $N \sim \mathrm{Poisson}(\mu)$, show that $\Pr[N \ge (1+r)\mu]$ satisfies exactly the same bound as the Bernoulli sum. Why is that no coincidence? *(Chernoff)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The MGF.** $\mathbb E[e^{\lambda N}] = \exp(\mu(e^\lambda - 1))$ ([Probability distributions](../../book-full/part01-prerequisites/01-distributions.md)).
-2. **Master bound** with $t = (1 + \delta)\mu$ and $\lambda > 0$: $\Pr[N \ge (1+\delta)\mu] \le \exp\big(\mu(e^\lambda - 1) - \lambda(1+\delta)\mu\big)$.
-3. **This is the Bernoulli expression.** Step 3 of the Bernoulli-sum derivation reached exactly this exponent. Steps 4 and 5 there worked on that exponent alone, without going back to the Bernoullis. So they apply verbatim: $\lambda = \ln(1 + \delta)$ gives
-$$\Pr[N \ge (1+\delta)\mu] \le \exp\big(-\mu[(1+\delta)\ln(1+\delta) - \delta]\big) \le \exp\left(-\frac{\delta^2\mu}{2+\delta}\right).$$
+2. **Master bound** with $t = (1 + r)\mu$ and $\lambda > 0$: $\Pr[N \ge (1+r)\mu] \le \exp\big(\mu(e^\lambda - 1) - \lambda(1+r)\mu\big)$.
+3. **This is the Bernoulli expression.** Step 3 of the Bernoulli-sum derivation reached exactly this exponent. Steps 4 and 5 there worked on that exponent alone, without going back to the Bernoullis. So they apply verbatim: $\lambda = \ln(1 + r)$ gives
+$$\Pr[N \ge (1+r)\mu] \le \exp\big(-\mu[(1+r)\ln(1+r) - r]\big) \le \exp\left(-\frac{r^2\mu}{2+r}\right).$$
 The lower tail works the same way: the Bernoulli lower-tail step 1 also reduced to $\exp(\lambda s + \mu(e^{-\lambda} - 1))$, which is the Poisson MGF at $-\lambda$.
 
 **Why it is no coincidence.** Step 1 of the Bernoulli derivation replaced each factor $1 + p_i(e^\lambda - 1)$ by $\exp(p_i(e^\lambda - 1))$, the MGF of a $\mathrm{Poisson}(p_i)$. The product of those is the MGF of a sum of independent Poissons, which is $\mathrm{Poisson}(\mu)$. So the Bernoulli-sum bound *is* the Chernoff bound of $\mathrm{Poisson}(\mu)$, used as an upper bound on the MGF of the sum. For the Poisson itself, that step is an equality and nothing is lost. The Poisson is the worst case among sums of independent Bernoullis with mean $\mu$, as far as the MGF can tell. It is also their limit as every $p_i \to 0$, so a bound that depends only on $\mu$ and holds for all Bernoulli sums has to hold for the Poisson anyway.
 
-**How tight.** For $\mu = 10$ and $\delta = 1$, the exact tail $\Pr[N \ge 20]$ is $3.45\times10^{-3}$. The optimized bound gives $2.10\times10^{-2}$ and the simplified one $3.57\times10^{-2}$: about 6 and 10 times too large. The exponent is right (Cramér's theorem); what the bound misses is a prefactor of order $1/\sqrt\mu$.
+**How tight.** For $\mu = 10$ and $r = 1$, the exact tail $\Pr[N \ge 20]$ is $3.45\times10^{-3}$. The optimized bound gives $2.10\times10^{-2}$ and the simplified one $3.57\times10^{-2}$: about 6 and 10 times too large. The exponent is right (Cramér's theorem); what the bound misses is a prefactor of order $1/\sqrt\mu$.
 :::
 
 ## Azuma for the coin game {#sec-sol-concentration-7}
@@ -158,13 +158,13 @@ def adaptive_martingale(rng, rule: Rule, n: int, p_low: float, p_high: float, tr
     return m
 ```
 
-The solutions script runs four rules, with $n = 200$ flips, $t = 20$ and $10^6$ games each. "When behind" tries to push the martingale up by using the 0.7 coin whenever $M_{k-1} < 0$. "Always 0.7" is not adaptive at all, so its heads count is $\mathrm{Binomial}(200, 0.7)$ and $\Pr[M_{200} \ge 20] = \Pr[\text{heads} \ge 160]$ can be computed exactly: $9.28\times10^{-4}$.
+The solutions script runs four rules, with $n = 200$ flips, $t = 20$ and $10^6$ games each. "When behind" tries to push the martingale up by using the 0.7 coin whenever $W_{k-1} < 0$. "Always 0.7" is not adaptive at all, so its heads count is $\mathrm{Bin}(200, 0.7)$ and $\Pr[W_{200} \ge 20] = \Pr[\text{heads} \ge 160]$ can be computed exactly: $9.28\times10^{-4}$.
 
-| Rule for using the 0.7 coin | Empirical $\Pr[M_{200} \ge 20]$ |
+| Rule for using the 0.7 coin | Empirical $\Pr[W_{200} \ge 20]$ |
 | --- | --- |
 | After one head (the chapter's game) | $9.13\times10^{-4}$ |
 | After two heads in a row | $1.10\times10^{-3}$ |
-| When behind ($M_{k-1} < 0$) | $1.18\times10^{-3}$ |
+| When behind ($W_{k-1} < 0$) | $1.18\times10^{-3}$ |
 | Always | $9.37\times10^{-4}$ |
 | Azuma bound $e^{-2t^2/n}$, any rule | $1.83\times10^{-2}$ |
 | Normal approximation, variance $200 \times 0.21$ | $1.01\times10^{-3}$ |
@@ -173,13 +173,13 @@ The solutions script runs four rules, with $n = 200$ flips, $t = 20$ and $10^6$ 
 
 The Azuma bound holds for every rule in @tbl-sol-concentration-azuma-rules, with a margin of more than 15 times. (The chapter's $1.12\times10^{-3}$ for the first rule came from $10^5$ games; with about 110 games in the tail, its standard error is about $1.1\times10^{-4}$, so it is within two standard errors of $9.13\times10^{-4}$.)
 
-**Why the rule does not matter.** Azuma's derivation used only one fact about each increment: given the past, $D_k$ has mean zero and lies in an interval of length $d_k$. Check it for any rule that decides from the past.
+**Why the rule does not matter.** Azuma's derivation used only one fact about each increment: given the past, $U_k$ has mean zero and lies in an interval of length $d_k$. Check it for any rule that decides from the past.
 
 1. The rule fixes $p_k$ before flip $k$, so given the past, $p_k$ is a constant.
-2. Given the past, $X_k$ is a $\mathrm{Bernoulli}(p_k)$ flip, so $D_k = X_k - p_k$ has conditional mean $p_k - p_k = 0$.
-3. $D_k$ takes the values $1 - p_k$ and $-p_k$, so it lies in $[-p_k, 1 - p_k]$, an interval of length $d_k = 1$.
+2. Given the past, $X_k$ is a $\mathrm{Bern}(p_k)$ flip, so $U_k = X_k - p_k$ has conditional mean $p_k - p_k = 0$.
+3. $U_k$ takes the values $1 - p_k$ and $-p_k$, so it lies in $[-p_k, 1 - p_k]$, an interval of length $d_k = 1$.
 
-Concretely, after the history "heads, heads" the two-heads rule picks $p_k = 0.7$: $D_k = +0.3$ with probability 0.7 and $-0.7$ with probability 0.3, with mean $0.21 - 0.21 = 0$. After any other history it picks $0.3$: $D_k = +0.7$ or $-0.3$, again with mean 0. With $d_k = 1$ for all 200 steps, $\sum_k d_k^2 = 200$ and the bound is $e^{-2 \cdot 20^2/200}$ whatever the rule. A rule that peeked at flip $k$ before choosing its coin would break step 2. That is the one thing adaptivity may not do.
+Concretely, after the history "heads, heads" the two-heads rule picks $p_k = 0.7$: $U_k = +0.3$ with probability 0.7 and $-0.7$ with probability 0.3, with mean $0.21 - 0.21 = 0$. After any other history it picks $0.3$: $U_k = +0.7$ or $-0.3$, again with mean 0. With $d_k = 1$ for all 200 steps, $\sum_k d_k^2 = 200$ and the bound is $e^{-2 \cdot 20^2/200}$ whatever the rule. A rule that peeked at flip $k$ before choosing its coin would break step 2. That is the one thing adaptivity may not do.
 
 **Why the simulated tails barely move either.** Both coins have the same variance, $0.3 \times 0.7 = 0.21$. So whatever the rule picks, each increment has conditional variance 0.21, and the martingale's total variance is $200 \times 0.21 = 42$. The normal approximation with that variance gives $1.01\times10^{-3}$, close to every row. Azuma assumes the worst-case per-step variance $d_k^2/4 = 0.25$ and uses a Chernoff-type exponent, which is why it sits 15 to 20 times above.
 
@@ -194,17 +194,17 @@ Concretely, after the history "heads, heads" the two-heads rule picks $p_k = 0.7
 Let $p$ be the true rate, $n = 5000$, $s = 3$ the count, $\hat p = s/n = 0.0006$, and $\beta = 0.05$, so $\ln(1/\beta) = \ln 20 \approx 3.00$. An upper bound needs the lower tail: a candidate rate $p$ is ruled out when, were $p$ true, a count as low as 3 would have probability below $\beta$. The 95% upper bound is the largest $p$ not ruled out. For a bound of the form "$\hat p < p - w$ with probability at most $\beta$", that is simply $\hat p + w$ (Fact 5).
 
 1. **Hoeffding** (one-sided, range $[0, 1]$): $w = \sqrt{\ln 20/(2 \times 5000)}$, so the upper bound is $0.0179$.
-2. **Bernstein** with $M = 1$, applied to the lower tail (to $-X_i$, which has the same variance and range). The chapter's plug-in version, with $\sigma^2 \approx \hat p(1 - \hat p)$, gives $\hat p + \sqrt{2\hat p(1-\hat p)\ln 20/n} + 2\ln 20/(3n) = 0.00185$. But a candidate $p$ above $\hat p$ has a larger variance $p(1-p)$, so the plug-in is optimistic. The rigorous version uses each candidate's own variance: rule out $p$ when $\exp\big(-n(p - \hat p)^2/(2p(1-p) + \frac23(p - \hat p))\big) < \beta$. The largest $p$ not ruled out, found by bisection, is $0.00256$.
-3. **Multiplicative Chernoff**, lower tail $\Pr[S \le (1-\delta)\mu] \le e^{-\delta^2\mu/2}$ with $\mu = np$. At $s = (1-\delta)\mu$ the exponent is $\delta^2\mu/2 = (\mu - s)^2/(2\mu)$. Rule out $\mu$ when $(\mu - s)^2 > 2\mu\ln 20$. The boundary is the larger root of $\mu^2 - 2(s + \ln 20)\mu + s^2 = 0$:
+2. **Bernstein** with $K = 1$, applied to the lower tail (to $-X_i$, which has the same variance and range). The chapter's plug-in version, with $\sigma^2 \approx \hat p(1 - \hat p)$, gives $\hat p + \sqrt{2\hat p(1-\hat p)\ln 20/n} + 2\ln 20/(3n) = 0.00185$. But a candidate $p$ above $\hat p$ has a larger variance $p(1-p)$, so the plug-in is optimistic. The rigorous version uses each candidate's own variance: rule out $p$ when $\exp\big(-n(p - \hat p)^2/(2p(1-p) + \frac23(p - \hat p))\big) < \beta$. The largest $p$ not ruled out, found by bisection, is $0.00256$.
+3. **Multiplicative Chernoff**, lower tail $\Pr[S \le (1-r)\mu] \le e^{-r^2\mu/2}$ with $\mu = np$. At $s = (1-r)\mu$ the exponent is $r^2\mu/2 = (\mu - s)^2/(2\mu)$. Rule out $\mu$ when $(\mu - s)^2 > 2\mu\ln 20$. The boundary is the larger root of $\mu^2 - 2(s + \ln 20)\mu + s^2 = 0$:
 $$\mu = s + \ln 20 + \sqrt{(\ln 20)^2 + 2s\ln 20},$$
-which gives the upper bound $\mu/n = 0.00224$. With the unsimplified exponent $\mu[\delta + (1-\delta)\ln(1-\delta)] = \mu - s + s\ln(s/\mu)$, it is $0.00189$.
-4. **Clopper–Pearson.** The largest $p$ with $\Pr[\mathrm{Binomial}(5000, p) \le 3] \ge 0.05$. The script finds it by bisection on the binomial cumulative sum; it equals `scipy.stats.beta.ppf(0.95, 4, 4997)`. The result is $0.00155$, matching the check value.
+which gives the upper bound $\mu/n = 0.00224$. With the unsimplified exponent $\mu[r + (1-r)\ln(1-r)] = \mu - s + s\ln(s/\mu)$, it is $0.00189$.
+4. **Clopper–Pearson.** The largest $p$ with $\Pr[\mathrm{Bin}(5000, p) \le 3] \ge 0.05$. The script finds it by bisection on the binomial cumulative sum; it equals `scipy.stats.beta.ppf(0.95, 4, 4997)`. The result is $0.00155$, matching the check value.
 
 | Method | 95% upper bound on the rate |
 | --- | --- |
 | Hoeffding | 0.0179 |
 | Bernstein (each candidate's own variance) | 0.00256 |
-| Chernoff, $e^{-\delta^2\mu/2}$ | 0.00224 |
+| Chernoff, $e^{-r^2\mu/2}$ | 0.00224 |
 | Chernoff, unsimplified exponent | 0.00189 |
 | Clopper–Pearson (exact) | 0.00155 |
 | Bernstein, plug-in $\hat p(1-\hat p)$ (heuristic) | 0.00185 |
@@ -214,8 +214,8 @@ which gives the upper bound $\mu/n = 0.00224$. With the unsimplified exponent $\
 **The ranking** in @tbl-sol-concentration-low-rate follows how much each method knows about the count.
 
 - **Hoeffding** knows only the range, so it assumes the variance $1/4$. The true variance is about $0.0006$, over 400 times smaller. Its bound is 30 times the observed rate and more than 10 times the exact one.
-- **Bernstein** knows the variance. That removes most of the gap, but it pays for the range term $\frac23 M(p - \hat p)$ with $M = 1$ and for its constants.
-- **Chernoff** knows the whole MGF of a Bernoulli sum, through its Poisson bound. Simplifying the exponent to $\delta^2\mu/2$ costs some of that.
+- **Bernstein** knows the variance. That removes most of the gap, but it pays for the range term $\frac23 K(p - \hat p)$ with $K = 1$ and for its constants.
+- **Chernoff** knows the whole MGF of a Bernoulli sum, through its Poisson bound. Simplifying the exponent to $r^2\mu/2$ costs some of that.
 - **Clopper–Pearson** uses the binomial distribution itself, with no inequality at all. Nothing valid can be smaller.
 
 The plug-in Bernstein value looks better than the rigorous one, but only because it uses the variance at $\hat p$, which is too small for the rates it should be ruling in.

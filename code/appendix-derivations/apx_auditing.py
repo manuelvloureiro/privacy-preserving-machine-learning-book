@@ -605,14 +605,14 @@ def plot_ladder(n: int = 10_000, k: int = 1000) -> Figure:
     totals = [a + b for a, b in parts]
     best = int(np.argmin(totals))
     fig, ax = plt.subplots(figsize=(7, 4))
-    ax.plot(etas, [a for a, _ in parts], label="rounding term η")
+    ax.plot(etas, [a for a, _ in parts], label="rounding term ν")
     ax.plot(etas, [b for _, b in parts], label="union-bound term")
     ax.plot(etas, totals, "k", linewidth=2, label="their sum")
-    ax.plot([etas[best]], [totals[best]], "ro", label=f"minimum {totals[best]:.3f} at η = 1/{steps[best]}")
+    ax.plot([etas[best]], [totals[best]], "ro", label=f"minimum {totals[best]:.3f} at ν = 1/{steps[best]}")
     ax.set(
         xscale="log",
         ylim=(0, 0.5),
-        xlabel="step size η",
+        xlabel="step ν",
         ylabel="bound on the leaderboard error",
         title=f"The Ladder's bound, n = {n:,} records, k = {k:,} submissions",
     )
@@ -633,7 +633,7 @@ def plot_recon() -> Figure:
         ylim=(1e-4, 1e3),
         xlabel="RDP of order 2, ε",
         ylabel="mean squared error",
-        title="Unbiased reconstruction of θ ∈ [0, 1]",
+        title="Unbiased reconstruction of x ∈ [0, 1]",
     )
     left.legend(fontsize=8)
 
@@ -643,9 +643,9 @@ def plot_recon() -> Figure:
     right.plot(hs, [gaussian_hcr_curve(h, sigma) for h in hs], label=r"$h^2/\chi^2$ for the Gaussian's own pair")
     right.plot(hs, [h**2 / math.expm1(eps) for h in hs], label=r"$h^2/(e^\varepsilon - 1)$, worst-case $\chi^2$")
     right.axhline(sigma**2, color="gray", linestyle=":", label="exact MSE σ² = 1")
-    right.axvline(0.5, color="k", linestyle="--", linewidth=1, label="h = 1/2: the page's choice at θ = 1/2")
+    right.axvline(0.5, color="k", linestyle="--", linewidth=1, label="h = 1/2: the page's choice at x = 1/2")
     right.set(
-        xlabel="distance h = |θ′ − θ|", ylabel="lower bound on the MSE", title="Where the slack comes from, ε = 1"
+        xlabel="distance h = |x′ − x|", ylabel="lower bound on the MSE", title="Where the slack comes from, ε = 1"
     )
     right.legend(fontsize=8)
     return fig

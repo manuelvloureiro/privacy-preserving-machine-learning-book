@@ -4,7 +4,7 @@
 
 Every differential privacy (DP) guarantee in this part so far protects one record. Stochastic gradient descent (SGD) with clipping and noise, this part's [DP-SGD](02-dp-sgd.md), gives each record of its running example a privacy loss $\varepsilon$ of 6.71. But a messaging user contributes hundreds of messages, and together a person's records can reveal far more than any one of them.
 
-The fix rests on one idea. A DP guarantee protects whatever differs between two neighbouring datasets, so **the neighbouring relation sets the privacy unit**. For the examples, this chapter gives the running example's 10,000 synthetic records to 1,000 users, very unevenly. The median user holds 4 records and the largest 348.
+The fix rests on one idea. A DP guarantee protects whatever differs between two neighbouring datasets, so **the neighbouring relation sets the privacy unit**. For the records, this chapter gives the running example's 10,000 synthetic records to 1,000 users, very unevenly. The median user holds 4 records and the largest 348.
 
 ## The privacy unit and δ {#sec-ulvl-unit}
 
@@ -129,7 +129,7 @@ Its 15.35 is a little above the table's 15.32, because the two accountants compu
 
 ## Further reading
 
-- Charles et al., "Fine-Tuning Large Language Models with User-Level Differential Privacy" (arXiv 2407.07737, 2024): the tight user accountant, and sampling examples against sampling users.
+- Charles et al., "Fine-Tuning Large Language Models with User-Level Differential Privacy" (arXiv 2407.07737, 2024): the tight user accountant, and sampling records against sampling users.
 - Chua et al., "Mind the Privacy Unit! User-Level Differential Privacy for Language Model Fine-Tuning" (Conference on Language Modeling 2024): contribution bounding against user-level DP-SGD.
 
 **Derivations.** Every result here is derived step by step in [the full edition's chapter](../../book-full/part05-dp-ml/07-user-level.md).

@@ -533,7 +533,7 @@ def plot_rank_one(rng: np.random.Generator) -> Figure:
     ax = fig.add_subplot(grid[1])
     lim = float(np.abs(g.w1).max())
     ax.imshow(g.w1, cmap="RdBu", vmin=-lim, vmax=lim, aspect="auto", interpolation="nearest")
-    ax.set_title(r"$\nabla_{W_1}\ell$: row $j$ is $\delta_j\,x^\top$", fontsize=9)
+    ax.set_title(r"$\nabla_{W_1}\ell$: row $j$ is $\gamma_j\,x^\top$", fontsize=9)
     ax.set_xlabel("pixel (64)")
     ax.set_ylabel("hidden unit $j$ (32)")
     ax_b = fig.add_subplot(grid[2])

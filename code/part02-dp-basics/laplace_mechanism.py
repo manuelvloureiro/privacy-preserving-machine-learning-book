@@ -83,11 +83,11 @@ def plot_mechanism(rng: np.random.Generator) -> Figure:
     fig, (left, right) = plt.subplots(1, 2, figsize=(9.0, 3.8))
     eps = 1.0
     xs = np.linspace(-5.0, 6.0, 600)
-    left.plot(xs, laplace_density(xs, 0.0, 1.0 / eps), color="C0", label="$M(X)$, $f(X) = 0$")
-    left.plot(xs, laplace_density(xs, 1.0, 1.0 / eps), color="C1", label="$M(X')$, $f(X') = 1$")
-    left.set_xlabel("output $z$")
+    left.plot(xs, laplace_density(xs, 0.0, 1.0 / eps), color="C0", label="$M(D)$, $f(D) = 0$")
+    left.plot(xs, laplace_density(xs, 1.0, 1.0 / eps), color="C1", label="$M(D')$, $f(D') = 1$")
+    left.set_xlabel("output $y$")
     left.set_ylabel("density")
-    left.set_title("Neighbouring outputs, $\\Delta_1 = 1$, $\\varepsilon = 1$", fontsize=10)
+    left.set_title("Neighbouring outputs, $\\Delta_1 f = 1$, $\\varepsilon = 1$", fontsize=10)
     left.legend(fontsize=8, loc="upper left")
     ns = np.unique(np.logspace(2, 5, 13).astype(int))
     beta = 0.05

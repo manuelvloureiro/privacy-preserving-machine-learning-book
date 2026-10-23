@@ -20,29 +20,29 @@ The notation is that of the DP-SGD chapter, and each symbol is introduced where 
 
 ### The question
 
-The noise has to hide any one record's contribution, so you need a bound on how far one record can move the sum of gradients. But a gradient can have any length. A mislabelled example far from the decision boundary can have a gradient a thousand times longer than a typical one, and nothing about the model bounds it. How do you get a bound that holds for every model and every record?
+The noise has to hide any one record's contribution, so you need a bound on how far one record can move the sum of gradients. But a gradient can have any length. A mislabelled record far from the decision boundary can have a gradient a thousand times longer than a typical one, and nothing about the model bounds it. How do you get a bound that holds for every model and every record?
 
 ### The answer
 
 Write $g_i$ for the **per-example gradient** of record $i$, the gradient of that record's own loss at the current weights. You rescale each one so that its length is at most a number $C$ that you choose, the **clipping norm**. Rescaling keeps the direction and caps the length:
-$$\bar g_i = g_i\min\Big(1, \frac{C}{\|g_i\|}\Big), \qquad S(D) = \sum_{i \in D}\bar g_i.$$ {#eq-apx-sgd-clip}
-Here $\|g_i\|$ is the Euclidean length of the gradient and $S(D)$ is the **clipped sum** over the records of a dataset $D$. Its $\ell_2$ sensitivity is the largest length of $S(D') - S(D)$ over neighbouring datasets, and it is
-$$\Delta_2 S = C \quad\text{under add/remove}, \qquad \Delta_2 S = 2C \quad\text{under replace-one}.$$ {#eq-apx-sgd-sens}
+$$\bar g_i = g_i\min\Big(1, \frac{C}{\|g_i\|}\Big), \qquad \bar G(D) = \sum_{i \in D}\bar g_i.$$ {#eq-apx-sgd-clip}
+Here $\|g_i\|$ is the Euclidean length of the gradient and $\bar G(D)$ is the **clipped sum** over the records of a dataset $D$. Its $\ell_2$ sensitivity is the largest length of $\bar G(D') - \bar G(D)$ over neighbouring datasets, and it is
+$$\Delta_2 \bar G = C \quad\text{under add/remove}, \qquad \Delta_2 \bar G = 2C \quad\text{under replace-one}.$$ {#eq-apx-sgd-sens}
 Under **replace-one**, the other common relation, neighbouring datasets have the same size and differ in the value of one record. The book uses the add/remove relation for DP-SGD, so the sensitivity is $C$.
 
 ### A worked example
 
-Take $C = 1$ and a dataset $D$ of two records with two-dimensional gradients. The first is $(3, 4)$, of length 5, so clipping divides it by 5 and gives $(0.60, 0.80)$. The second is $(0.3, -0.4)$, of length 0.5, which is shorter than $C$ and stays as it is. The clipped sum is $S(D) = (0.90, 0.40)$.
+Take $C = 1$ and a dataset $D$ of two records with two-dimensional gradients. The first is $(3, 4)$, of length 5, so clipping divides it by 5 and gives $(0.60, 0.80)$. The second is $(0.3, -0.4)$, of length 0.5, which is shorter than $C$ and stays as it is. The clipped sum is $\bar G(D) = (0.90, 0.40)$.
 
-Now add a third record $x$ with gradient $(-2.4, 0.7)$, of length 2.5. Clipping divides it by 2.5 and gives $(-0.96, 0.28)$, so $S(D') = (-0.06, 0.68)$. The sum moved by $(-0.96, 0.28)$, which is exactly the new record's clipped gradient. Its length is $\sqrt{0.96^2 + 0.28^2} = 1.00$, which is $C$.
+Now add a third record $x$ with gradient $(-2.4, 0.7)$, of length 2.5. Clipping divides it by 2.5 and gives $(-0.96, 0.28)$, so $\bar G(D') = (-0.06, 0.68)$. The sum moved by $(-0.96, 0.28)$, which is exactly the new record's clipped gradient. Its length is $\sqrt{0.96^2 + 0.28^2} = 1.00$, which is $C$.
 
-Under the replace relation, change the first record's gradient from $(3, 4)$ to $(-3, -4)$ instead. Its clipped term goes from $(0.60, 0.80)$ to $(-0.60, -0.80)$, so the sum becomes $(-0.30, -1.20)$. It moved by $(-1.20, -1.60)$, of length 2.00, which is $2C$.
+Under the replace-one relation, change the first record's gradient from $(3, 4)$ to $(-3, -4)$ instead. Its clipped term goes from $(0.60, 0.80)$ to $(-0.60, -0.80)$, so the sum becomes $(-0.30, -1.20)$. It moved by $(-1.20, -1.60)$, of length 2.00, which is $2C$.
 
 ### Why it works
 
 1. **A clipped gradient has length at most $C$.** If $\|g_i\| \le C$, the factor $\min(1, C/\|g_i\|)$ is 1 and the gradient is unchanged. Otherwise the factor is $C/\|g_i\|$, and the length becomes $\|g_i\| \cdot C/\|g_i\| = C$. Either way $\|\bar g_i\| \le C$, and the direction is the same because the factor is positive.
 2. **The other records' terms do not change.** Each record's gradient is computed from that record alone and from the current weights. The weights come from the earlier noisy steps, which are already released, so they are fixed when this step runs. Adding $x$ therefore leaves every other term of the sum exactly as it was.
-3. **Add/remove: the sum moves by one clipped gradient.** By step 2, $S(D') - S(D) = \bar g_x$, and by step 1 its length is at most $C$. That is the first half of @eq-apx-sgd-sens.
+3. **Add/remove: the sum moves by one clipped gradient.** By step 2, $\bar G(D') - \bar G(D) = \bar g_x$, and by step 1 its length is at most $C$. That is the first half of @eq-apx-sgd-sens.
 4. **Replace-one: the sum moves by a difference of two.** If record $x$ is replaced by $x'$, the sum moves by $\bar g_{x'} - \bar g_x$. The triangle inequality says that the length of a difference is at most the sum of the lengths, so it is at most $C + C = 2C$. The worked example reaches $2C$, because two gradients that point in opposite directions give the largest difference.
 
 Nothing in these steps used the loss, the architecture or the data. That is why clipping gives a sensitivity for every model.
@@ -61,7 +61,7 @@ Clip every per-example gradient to a norm $C$ that is fixed before training, and
 
 Step 2 is where implementations break the argument. Batch normalization makes each record's gradient depend on the other records in the batch, so one record can move every term of the sum. A clipping norm computed from the current batch, such as its median gradient length, has the same flaw in another place. The noise level then depends on the data, so it can itself reveal something about the records.
 
-Two other cases double the sensitivity. Clipping the mean gradient of a group of records, a microbatch, has sensitivity $2C$. The group's clipped mean is a vector of length at most $C$ both before and after one member is added, and the two vectors can point in opposite directions, as in the replace example above (@sec-dpsgd-microbatch). The replace relation also has sensitivity $2C$. In both cases the program that adds up the privacy cost, the **accountant**, must be told, because it assumes $C$ (@sec-sub-schemes).
+Two other cases double the sensitivity. Clipping the mean gradient of a group of records, a microbatch, has sensitivity $2C$. The group's clipped mean is a vector of length at most $C$ both before and after one member is added, and the two vectors can point in opposite directions, as in the replace-one example above (@sec-dpsgd-microbatch). The replace-one relation also has sensitivity $2C$. In both cases the program that adds up the privacy cost, the **accountant**, must be told, because it assumes $C$ (@sec-sub-schemes).
 
 ## One noisy step is a Gaussian mechanism {#sec-apx-sgd-step}
 
@@ -72,11 +72,11 @@ Each step releases the clipped sum plus noise. How much noise makes that one ste
 ### The answer
 
 DP-SGD adds normal noise to the clipped sum, independently in every coordinate. Its standard deviation is $\sigma C$, where the number $\sigma$ is the **noise multiplier**, the noise's standard deviation in units of the sensitivity. So step number $t$ of training releases
-$$G_t = S + \xi_t, \qquad \xi_t \sim \mathcal N(0, \sigma^2C^2I).$$
+$$G_t = \bar G + \xi_t, \qquad \xi_t \sim \mathcal N(0, \sigma^2C^2I).$$
 Here $I$ is the identity matrix, which says that the noise $\xi_t$ has the same spread in every direction.
 
 A Gaussian mechanism is described by one ratio, the sensitivity divided by the noise's standard deviation, which the book calls $\mu$. For one step it is
-$$\mu = \frac{\Delta_2 S}{\sigma C} = \frac{C}{\sigma C} = \frac1\sigma.$$
+$$\mu = \frac{\Delta_2 \bar G}{\sigma C} = \frac{C}{\sigma C} = \frac1\sigma.$$
 A larger ratio means the two output distributions overlap less, so an observer can tell them apart more easily. The exact trade-off between $\varepsilon$ and $\delta$ is the probability mass where the distribution with the record exceeds $e^\varepsilon$ times the one without it. For the mechanism with ratio $\mu$ that mass gives the condition
 $$\delta \ge \delta_\mu(\varepsilon) = \Phi\Big(\frac\mu2 - \frac\varepsilon\mu\Big) - e^\varepsilon\,\Phi\Big(-\frac\mu2 - \frac\varepsilon\mu\Big),$$ {#eq-apx-sgd-gauss-delta}
 where $\Phi(z)$ is the probability that a standard normal variable is at most $z$ (@sec-lg-analytic, and @sec-apx-cal-gauss-exact for a derivation from scratch). Without sampling, every record is used in every step. If the run has $T$ steps, they act together like one Gaussian mechanism with ratio
@@ -90,9 +90,9 @@ The DP-SGD chapter has a full-batch row in @tbl-dpsgd-batch, where every batch i
 
 ### Why it works
 
-1. **Only the ratio matters.** Compare the noisy sum on $D$ and on $D'$. The two are normal distributions with the same spread, centred $\Delta$ apart, where $\Delta$ is the length of $S(D') - S(D)$. Rotate the space so that this shift lies along the first axis. The noise has the same spread in every direction, so rotating it leaves it unchanged. Every other coordinate then has the same noise on both datasets and tells an observer nothing. What is left is one coordinate, $\mathcal N(0, \sigma^2C^2)$ against $\mathcal N(\Delta, \sigma^2C^2)$. Dividing the output by $\sigma C$ changes no probability of any event, so this is the pair $\mathcal N(0, 1)$ against $\mathcal N(\Delta/(\sigma C), 1)$.
+1. **Only the ratio matters.** Compare the noisy sum on $D$ and on $D'$. The two are normal distributions with the same spread, centred $s$ apart, where the shift $s$ is the length of $\bar G(D') - \bar G(D)$. Rotate the space so that this shift lies along the first axis. The noise has the same spread in every direction, so rotating it leaves it unchanged. Every other coordinate then has the same noise on both datasets and tells an observer nothing. What is left is one coordinate, $\mathcal N(0, \sigma^2C^2)$ against $\mathcal N(s, \sigma^2C^2)$. Dividing the output by $\sigma C$ changes no probability of any event, so this is the pair $\mathcal N(0, 1)$ against $\mathcal N(s/(\sigma C), 1)$.
 2. **The worst shift gives ratio $1/\sigma$.** By @sec-apx-sgd-clipping the shift is at most $C$, so the ratio is at most $C/(\sigma C) = 1/\sigma$. A smaller ratio is never less private, because the two distributions then overlap more. Notice that the clipping norm cancels, which is why it is not a privacy parameter.
-3. **The rest of the update is free.** The step size, the division by the expected batch size $B$, momentum, Adam and the new weights are all computed from $G_t$ and from earlier released values, without looking at the data again. Such a computation is called **post-processing**, and it cannot reveal more than its input. The reason is that an attacker who sees $G_t$ could run the same computation herself, so any event about the processed output is an event about $G_t$, and its probability obeys the same bound (@sec-dpprop-post).
+3. **The rest of the update is free.** The learning rate, the division by the expected batch size $B$, momentum, Adam and the new weights are all computed from $G_t$ and from earlier released values, without looking at the data again. Such a computation is called **post-processing**, and it cannot reveal more than its input. The reason is that an attacker who sees $G_t$ could run the same computation herself, so any event about the processed output is an event about $G_t$, and its probability obeys the same bound (@sec-dpprop-post).
 4. **Unsampled steps add up like one Gaussian.** The **privacy loss** of an output $y$ is the logarithm of how much more likely $y$ is on $D'$ than on $D$. For the pair $\mathcal N(\mu, 1)$ against $\mathcal N(0, 1)$, the loss is
 $$\ln\frac{e^{-(y - \mu)^2/2}}{e^{-y^2/2}} = \mu y - \frac{\mu^2}2.$$
 With $y \sim \mathcal N(\mu, 1)$, this is a normal variable with mean $\mu^2/2$ and variance $\mu^2$. Each step draws fresh noise, independent of the earlier steps. So over $T$ steps the joint likelihood ratio is the product of the steps' ratios, and the losses add. Each step's loss has this same distribution whatever happened before, so the sum is normal with mean $T\mu^2/2$ and variance $T\mu^2$. That is exactly the loss of one Gaussian mechanism with ratio $\sqrt T\mu = \sqrt T/\sigma$. Since $\delta$ for a given $\varepsilon$ is computed from the distribution of the loss alone, the two have the same guarantee, and @sec-apx-ccomp-gaussian proves it in full.
@@ -137,13 +137,13 @@ The idea is that with probability $1 - q$ your record is not used, and then the 
 A tiny case shows it. Suppose a step's output $y$ is three times as likely when your record is used. Under sampling, $y$'s probability with you in the dataset is $(1 - q) \cdot p + q \cdot 3p$, where $p$ is its probability without you. With $q = 0.01$ that is $0.99p + 0.03p = 1.02p$, so the ratio has fallen from 3 to 1.02. Here are the steps in general.
 
 1. **Fix everyone else's coin.** Let $U$ be the set of other records that were drawn. Each record has its own coin, so given $U$, record $x$ is drawn with probability $q$, independently of $U$.
-2. **Write both outputs given $U$.** Let $P_0$ be the output distribution of the step run on $U$, and $P_1$ that of the step run on $U \cup \{x\}$. On $D$ the output is drawn from $P_0$. On $D'$ it is drawn from $P_0$ when the coin of $x$ says no, and from $P_1$ when it says yes. So for every set of outputs $A$,
-$$P_{D'}(A \mid U) = (1 - q)P_0(A) + qP_1(A).$$
-3. **Use the step's own guarantee.** The sets $U$ and $U \cup \{x\}$ are neighbours, and the step is $\varepsilon$-DP, so $P_1(A) \le e^\varepsilon P_0(A)$ for every $A$.
-4. **Put it into the mixture.** Replacing $P_1(A)$ by the larger $e^\varepsilon P_0(A)$ gives
-$$P_{D'}(A \mid U) \le (1 - q)P_0(A) + qe^\varepsilon P_0(A) = \big(1 + q(e^\varepsilon - 1)\big)P_0(A).$$
+2. **Write both outputs given $U$.** Let $P_0$ be the output distribution of the step run on $U$, and $P_1$ that of the step run on $U \cup \{x\}$. On $D$ the output is drawn from $P_0$. On $D'$ it is drawn from $P_0$ when the coin of $x$ says no, and from $P_1$ when it says yes. So for every set of outputs $S$,
+$$P_{D'}(S \mid U) = (1 - q)P_0(S) + qP_1(S).$$
+3. **Use the step's own guarantee.** The sets $U$ and $U \cup \{x\}$ are neighbours, and the step is $\varepsilon$-DP, so $P_1(S) \le e^\varepsilon P_0(S)$ for every $S$.
+4. **Put it into the mixture.** Replacing $P_1(S)$ by the larger $e^\varepsilon P_0(S)$ gives
+$$P_{D'}(S \mid U) \le (1 - q)P_0(S) + qe^\varepsilon P_0(S) = \big(1 + q(e^\varepsilon - 1)\big)P_0(S).$$
 5. **Average over $U$.** Both datasets draw the other records' coins with the same probabilities. The bound of step 4 holds for every $U$ with the same factor, so it holds for the averages over $U$ too. This is @eq-apx-sgd-amplify in the direction "$D'$ against $D$".
-6. **Check the other direction.** DP also needs $P_D(A) \le e^{\varepsilon'}P_{D'}(A)$. The step's guarantee holds with either dataset first, so it also gives $P_1(A) \ge e^{-\varepsilon}P_0(A)$, so the mixture is at least $(1 - q + qe^{-\varepsilon})P_0(A)$. Dividing, $P_0(A) \le P_{D'}(A)/(1 - q + qe^{-\varepsilon})$. To compare the two factors, write $a = e^\varepsilon$ and multiply out:
+6. **Check the other direction.** DP also needs $P_D(S) \le e^{\varepsilon'}P_{D'}(S)$. The step's guarantee holds with either dataset first, so it also gives $P_1(S) \ge e^{-\varepsilon}P_0(S)$, so the mixture is at least $(1 - q + qe^{-\varepsilon})P_0(S)$. Dividing, $P_0(S) \le P_{D'}(S)/(1 - q + qe^{-\varepsilon})$. To compare the two factors, write $a = e^\varepsilon$ and multiply out:
 $$\big(1 - q + q/a\big)\big(1 + q(a - 1)\big) = 1 + q(1 - q)\frac{(a - 1)^2}{a} \ge 1.$$
 So $1/(1 - q + qe^{-\varepsilon}) \le 1 + q(e^\varepsilon - 1)$, and this direction is never the worse one.
 
@@ -157,7 +157,7 @@ The script takes a count with Laplace noise, whose density falls like $e^{-\vare
 
 For a step that is $\varepsilon$-DP on its batch, Poisson sampling at rate $q$ makes it $\ln(1 + q(e^\varepsilon - 1))$-DP. For small $\varepsilon$ this is about $q\varepsilon$. For large $\varepsilon$ it is about $\varepsilon - \ln(1/q)$, because when the record is drawn, which happens with probability $q$, it is fully exposed.
 
-The proof needs Poisson sampling, because step 1 needs an independent coin for your record. A batch of exactly $B$ records drawn at random has no such coin. When your record enters such a batch it pushes another one out, which is a replacement, so the analysis needs the replace relation and twice the sensitivity. Shuffling the data and cutting it into batches is worse, because then your record is in exactly one batch per epoch and is never "not used" (@sec-sub-schemes).
+The proof needs Poisson sampling, because step 1 needs an independent coin for your record. A batch of exactly $B$ records drawn at random has no such coin. When your record enters such a batch it pushes another one out, which is a replacement, so the analysis needs the replace-one relation and twice the sensitivity. Shuffling the data and cutting it into batches is worse, because then your record is in exactly one batch per epoch and is never "not used" (@sec-sub-schemes).
 
 Finally, do not add up these per-step numbers over a long run. The slacks add up too, so with 10,000 steps each step may only have a tiny share of $\delta$. A Gaussian step with a tiny $\delta$ needs a large $\varepsilon$, and there amplification only subtracts $\ln(1/q)$. @sec-sub-dpsgd shows that the total runs into the thousands, and the next section gives the quantity that composes well.
 
@@ -202,9 +202,9 @@ So by the definition, $A_\alpha = \mathbb E_{y \sim P_0}\big[(1 - q + q\,r(y))^\
 2. **Expand the power.** For a whole number $\alpha$, the binomial theorem expands the power of a sum of two numbers into $\alpha + 1$ terms. At $\alpha = 2$ it is the familiar $(a + b)^2 = a^2 + 2ab + b^2$. Here the two numbers are $1 - q$ and $qr$, so
 $$(1 - q + qr)^\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^jr^j.$$
 3. **Average term by term.** The average of a sum is the sum of the averages, and $(1 - q)^{\alpha - j}q^j$ is a constant. So $A_\alpha$ is the same sum with each $r^j$ replaced by its average $\mathbb E[r^j]$ under $P_0$.
-4. **Each average is a Gaussian moment generating function (MGF).** The MGF of a random variable $y$ is the average of $e^{sy}$, as a function of a number $s$. For $y \sim \mathcal N(0, \sigma^2)$ it is
-$$\mathbb E[e^{sy}] = e^{s^2\sigma^2/2}.$$
-To see why, complete the square in the exponent of the integrand, $sy - y^2/(2\sigma^2) = -(y - s\sigma^2)^2/(2\sigma^2) + s^2\sigma^2/2$. After you take out the constant $e^{s^2\sigma^2/2}$, what is left is a normal density centred at $s\sigma^2$, and it integrates to 1. Now $r^j = e^{-j/(2\sigma^2)}e^{(j/\sigma^2)y}$, so taking $s = j/\sigma^2$ gives
+4. **Each average is a Gaussian moment generating function (MGF).** The MGF of a random variable $y$ is the average of $e^{\lambda y}$, as a function of a number $\lambda$. For $y \sim \mathcal N(0, \sigma^2)$ it is
+$$\mathbb E[e^{\lambda y}] = e^{\lambda^2\sigma^2/2}.$$
+To see why, complete the square in the exponent of the integrand, $\lambda y - y^2/(2\sigma^2) = -(y - \lambda\sigma^2)^2/(2\sigma^2) + \lambda^2\sigma^2/2$. After you take out the constant $e^{\lambda^2\sigma^2/2}$, what is left is a normal density centred at $\lambda\sigma^2$, and it integrates to 1. Now $r^j = e^{-j/(2\sigma^2)}e^{(j/\sigma^2)y}$, so taking $\lambda = j/\sigma^2$ gives
 $$\mathbb E[r^j] = e^{-j/(2\sigma^2)}\,e^{j^2/(2\sigma^2)} = e^{(j^2 - j)/(2\sigma^2)}.$$
 For example, at $j = 2$ and $\sigma = 1$ this is $e^{-1} \cdot e^{2} = e$, the factor in the last row of @tbl-apx-sgd-alpha2.
 5. **Assemble.** Putting each average back into the sum gives $A_\alpha$ of @eq-apx-sgd-rdp, and dividing its logarithm by $\alpha - 1$ gives the curve.
@@ -238,7 +238,7 @@ Up to $\alpha = 8$ the approximation is within 30%, but then it fails abruptly, 
 
 For integer orders, compute @eq-apx-sgd-rdp with logarithms, since the terms span many orders of magnitude. For orders between the integers, average $(1 - q + qr)^\alpha$ numerically, as the chapters' accountants do. Use @eq-apx-sgd-small-q only for estimates at orders below $2\sigma^2\ln(1/q)$, never as the curve itself.
 
-The curve assumes Poisson sampling and the add/remove relation, like @sec-apx-sgd-subsampling. It also assumes the sensitivity is exactly the clipping norm. If something in your code makes the sensitivity $2C$, such as microbatches or the replace relation, give the accountant the noise multiplier $\sigma/2$ instead of $\sigma$, because the ratio is then $2C/(\sigma C) = 1/(\sigma/2)$.
+The curve assumes Poisson sampling and the add/remove relation, like @sec-apx-sgd-subsampling. It also assumes the sensitivity is exactly the clipping norm. If something in your code makes the sensitivity $2C$, such as microbatches or the replace-one relation, give the accountant the noise multiplier $\sigma/2$ instead of $\sigma$, because the ratio is then $2C/(\sigma C) = 1/(\sigma/2)$.
 
 ## From batch, noise and epochs to the final ε {#sec-apx-sgd-accounting}
 
@@ -273,11 +273,11 @@ Sampling turns thousands into single digits. The **improved conversion** of [Fro
 
 1. **The curves add.** By the definition, the Rényi divergence of the whole run is set by the average of the $\alpha$-th power of its likelihood ratio, and step 2 below writes that as the average of $e^{(\alpha - 1)L}$ for the privacy loss $L$. The run's likelihood ratio is the product of the steps' ratios, so $e^{(\alpha - 1)L}$ is a product of per-step factors. Average this product one step at a time, starting from the last. With everything before it held fixed, the last step is a subsampled Gaussian step, so its factor averages to at most $e^{(\alpha - 1)\varepsilon_{q,\sigma}(\alpha)}$, whatever the earlier steps did. That number is a constant, so it comes out of the average, and the next step is treated the same way. After $T$ steps the average is at most $e^{(\alpha - 1)T\varepsilon_{q,\sigma}(\alpha)}$, so the composed curve is $T\varepsilon_{q,\sigma}(\alpha)$, even though each step depends on the earlier ones (@sec-apx-ccomp-rdp).
 2. **The average of a power is the Rényi divergence.** Let $L$ be the privacy loss, $\ln(P(y)/Q(y))$ with $y$ drawn from $P$, where $P$ is the output distribution on the dataset with the record. Then
-$$\mathbb E_{y \sim P}\big[e^{(\alpha - 1)L}\big] = \int P\Big(\frac PQ\Big)^{\alpha - 1}dy = \int Q\Big(\frac PQ\Big)^\alpha dy = e^{(\alpha - 1)D_\alpha(P\|Q)}.$$
+$$\mathbb E_{y \sim P}\big[e^{(\alpha - 1)L}\big] = \int P\Big(\frac PQ\Big)^{\alpha - 1}\mathrm dy = \int Q\Big(\frac PQ\Big)^\alpha\,\mathrm dy = e^{(\alpha - 1)D_\alpha(P\|Q)}.$$
 3. **Markov's inequality bounds the chance of a large loss.** For a variable that cannot be negative, the chance that it is at least $a$ is at most its average divided by $a$. Apply it to $e^{(\alpha - 1)L}$ at the level $a = e^{(\alpha - 1)\varepsilon}$. With step 2 and the composed curve of step 1, this gives
 $$\Pr[L > \varepsilon] \le e^{(\alpha - 1)(T\varepsilon_{q,\sigma}(\alpha) - \varepsilon)}.$$
-4. **A rare large loss is all that $\delta$ has to cover.** Split any set of outputs $A$ into the outputs where the loss is at most $\varepsilon$ and those where it is larger. On the first part, $P$ is at most $e^\varepsilon$ times $Q$, by the definition of $L$. The second part has probability at most the chance of a loss above $\varepsilon$. Adding the two parts,
-$$P(A) \le e^\varepsilon Q(A) + \Pr[L > \varepsilon],$$
+4. **A rare large loss is all that $\delta$ has to cover.** Split any set of outputs $S$ into the outputs where the loss is at most $\varepsilon$ and those where it is larger. On the first part, $P$ is at most $e^\varepsilon$ times $Q$, by the definition of $L$. The second part has probability at most the chance of a loss above $\varepsilon$. Adding the two parts,
+$$P(S) \le e^\varepsilon Q(S) + \Pr[L > \varepsilon],$$
 so the run is $(\varepsilon, \delta)$-DP as soon as the chance of a loss above $\varepsilon$ is at most $\delta$.
 5. **Solve for $\varepsilon$.** Set the bound of step 3 equal to $\delta$, take logarithms and divide by $\alpha - 1$. This gives
 $$\varepsilon = T\varepsilon_{q,\sigma}(\alpha) + \frac{\ln(1/\delta)}{\alpha - 1}.$$
@@ -297,7 +297,7 @@ The script's accountant reproduces the chapters' numbers to every printed digit:
 
 To get $\varepsilon$ from a training configuration, follow these steps.
 
-1. Compute the sampling rate $q = B/n$ and the number of steps $T = E\,n/B$.
+1. Compute the sampling rate $q$, which is $B/n$, and the number of steps $T = E\,n/B$.
 2. Compute the per-step curve $\varepsilon_{q,\sigma}(\alpha)$ on a grid of orders, with @eq-apx-sgd-rdp at whole orders.
 3. Multiply the curve by $T$.
 4. At each order add the toll $\ln(1/\delta)/(\alpha - 1)$, or use the improved conversion, and report the smallest value with its $\delta$.
@@ -331,7 +331,7 @@ The script is [code/appendix-derivations/apx_core_dp_sgd.py](../../code/appendix
 
 | Check | Result |
 | --- | --- |
-| Clipped sum, 20,000 random datasets | Largest change: $1.0000\,C$ (add/remove), $2.0000\,C$ (replace) |
+| Clipped sum, 20,000 random datasets | Largest change: $1.0000\,C$ (add/remove), $2.0000\,C$ (replace-one) |
 | Unsampled Gaussian steps, $\sigma = 1$ | $\varepsilon = 4.38$, 91.82 and 5425.51 after 1, 100 and 10,000 steps |
 | Full batch, $\sigma = 10.8$, 100 steps | $\varepsilon = 4.005$, the chapter's target of 4 |
 | Amplification, Laplace count, $\varepsilon = 1$, $q = 0.01$ | Largest log ratio 0.017037, equal to the formula; other direction 0.006341 |

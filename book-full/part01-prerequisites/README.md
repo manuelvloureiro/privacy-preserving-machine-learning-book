@@ -15,7 +15,7 @@ This file is the GitHub overview. It is not part of the rendered book.
 | 3 | [Divergences](03-divergences.md) | Kullback–Leibler, Rényi, total variation, hockey-stick, f-divergences; data processing; Pinsker | [divergences.py](../../code/part01-prerequisites/divergences.py) |
 | 4 | [Hypothesis testing](04-hypothesis-testing.md) | Type I and II errors, Neyman–Pearson, trade-off functions and ROC curves, Gaussian and Laplace curves, AUC at low false positive rates, estimating rates from trials | [hypothesis_testing.py](../../code/part01-prerequisites/hypothesis_testing.py) |
 | 5 | [Information theory](05-information-theory.md) | Entropy, mutual information, channel capacity, min-entropy and guessing, Shannon against min-entropy leakage, Fano | [information_theory.py](../../code/part01-prerequisites/information_theory.py) |
-| 6 | [Optimization](06-optimization.md) | Convexity, Lipschitz and smooth losses, SGD convergence (convex, strongly convex, non-convex), gradient noise, how far a minimizer moves when one example changes | [optimization.py](../../code/part01-prerequisites/optimization.py) |
+| 6 | [Optimization](06-optimization.md) | Convexity, Lipschitz and smooth losses, SGD convergence (convex, strongly convex, non-convex), gradient noise, how far a minimizer moves when one record changes | [optimization.py](../../code/part01-prerequisites/optimization.py) |
 | 7 | [Algorithmic stability and generalization](07-stability-generalization.md) | Uniform stability, the expected and high-probability generalization bounds, stability of regularized ERM and of SGD, memorization | [stability.py](../../code/part01-prerequisites/stability.py) |
 | 8 | [Cryptography basics](08-crypto-basics.md) | Negligible functions, indistinguishability and hybrids, PRGs and PRFs, IND-CPA, the simulation paradigm, learning with errors | [crypto_basics.py](../../code/part01-prerequisites/crypto_basics.py) |
 
@@ -68,8 +68,8 @@ You are done with this part when you can do each of these on paper, without note
 - [ ] Prove the Neyman–Pearson lemma, and derive the trade-off curve between $\mathcal N(0,1)$ and $\mathcal N(\mu,1)$.
 - [ ] Explain why AUC can hide large differences between two classifiers at a false positive rate of $10^{-3}$.
 - [ ] Prove the $RL/\sqrt T$ rate of projected SGD for convex Lipschitz objectives.
-- [ ] Prove that the minimizer of a $\lambda$-strongly convex regularized ERM moves by at most $2L/(\lambda n)$ when one example is replaced.
-- [ ] Prove that uniform stability $\beta$ implies an expected generalization gap of at most $\beta$.
+- [ ] Prove that the minimizer of a $\lambda$-strongly convex regularized ERM moves by at most $2L/(\lambda n)$ when one record is replaced.
+- [ ] Prove that uniform stability $\gamma$ implies an expected generalization gap of at most $\gamma$.
 - [ ] Compute the min-entropy leakage of a small channel, and give a channel where Shannon and min-entropy leakage disagree badly.
 - [ ] Define a negligible function and IND-CPA security, explain why encryption must be randomized, and write a simulator for additive secret sharing.
 - [ ] State the learning with errors problem, and say why it is easy without the noise.

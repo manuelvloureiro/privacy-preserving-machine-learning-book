@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-How the books are built. For how to write book content (chapter structure, voice, derivations, code and figure rules), see [AGENTS.md](AGENTS.md); for how to check and fix the readability of the prose, see [PROSE.md](PROSE.md).
+How the books are built. For how to write book content (chapter structure, voice, derivations, code and figure rules), see [AGENTS.md](AGENTS.md); for how to check and fix the readability of the prose, see [PROSE.md](PROSE.md); for the symbols, names and spelling every book and note shares, see [NOTATION.md](NOTATION.md).
 
 ## Build: Quarto
 
@@ -86,7 +86,7 @@ Every display equation is numbered by `filters/book-checks.lua`. Label one yours
 
 ## Checks
 
-`make check` runs everything below plus the acronym check. `make help` lists all targets.
+`make check` runs everything below plus the acronym check and the notation check (`make notation-check`, which reads `notation.toml`; see [NOTATION.md](NOTATION.md)). `make help` lists all targets.
 
 ```bash
 uv run pytest

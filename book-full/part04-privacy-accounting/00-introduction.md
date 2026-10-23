@@ -30,7 +30,7 @@ Read the table from top to bottom as a ladder. An RDP curve is a lossy summary o
 
 ## The running example
 
-Every chapter that can compute it reports the same number: the $\varepsilon$ at $\delta = 10^{-5}$ of DP-SGD with Poisson sampling rate $q = 0.01$, noise multiplier $\sigma = 1$ and up to $k = 10{,}000$ steps. That is about one hundred epochs at a typical setting. A single Gaussian mechanism with $\sigma = 1$ serves as the small example. Watching the same number move from chapter to chapter shows what each tool gains. [Choosing an accountant](09-choosing-an-accountant.md) puts all the values side by side.
+Every chapter that can compute it reports the same number: the $\varepsilon$ at $\delta = 10^{-5}$ of DP-SGD with Poisson sampling rate $q = 0.01$, noise multiplier $\sigma = 1$ and up to $T = 10{,}000$ steps. That is about one hundred epochs at a typical setting. A single Gaussian mechanism with $\sigma = 1$ serves as the small example. Watching the same number move from chapter to chapter shows what each tool gains. [Choosing an accountant](09-choosing-an-accountant.md) puts all the values side by side.
 
 ## How to read this part
 
@@ -61,12 +61,12 @@ The part uses the notation of the DP foundations part, extended in @tbl-acct-not
 | $\rho$ | The zCDP parameter |
 | $T(P, Q)$, $G_\mu$, $\mu$ | Trade-off function; the Gaussian trade-off function $T(\mathcal N(0,1), \mathcal N(\mu, 1))$; the parameter of Gaussian differential privacy, so a Gaussian mechanism with noise multiplier $\sigma$ has $\mu = 1/\sigma$ |
 | $\Delta_2 f$, $\sigma$ | $\ell_2$ sensitivity; noise multiplier (noise standard deviation per unit of sensitivity) |
-| $q$, $k$ | Sampling rate; number of composed steps |
+| $q$, $k$, $T$ | Sampling rate; number of mechanisms composed; number of steps of one iterative algorithm, such as DP-SGD |
 | $h$ | Grid width of a discretized privacy loss distribution |
 
 : Notation used throughout this part, in addition to that of the earlier parts. {#tbl-acct-notation}
 
-Two symbols do double duty, and each chapter warns you when it happens. $\alpha$ is the Rényi order throughout this part, but the f-DP literature uses it for the type I error, so [f-DP and Gaussian differential privacy](04-gaussian-dp.md) renames the errors. $q$ is the sampling rate, so the chapters that subsample write output densities with capital letters, such as $Q(y)$ or $P_q(y)$, never $q(y)$.
+Two symbols do double duty, and each chapter warns you when it happens. $\alpha$ is the Rényi order throughout this part, but the f-DP literature uses it for the type I error, so [f-DP and Gaussian differential privacy](04-gaussian-dp.md) renames the errors. $q$ is the sampling rate, so the chapters in which a sampling rate appears write output densities with capital letters, such as $Q(y)$ or $P_q(y)$, never $q(y)$.
 
 ## What you will be able to do
 

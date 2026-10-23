@@ -523,18 +523,25 @@ def print_table(rng: np.random.Generator) -> None:
 def plot_lipschitz_smooth() -> Figure:
     ws = [-4 + i / 100 for i in range(801)]
     fig, (left, right) = plt.subplots(1, 2, figsize=(10, 4))
-    left.plot(ws, [abs_slope(w) if abs(w) > 1e-9 else math.nan for w in ws], label=r"$|w|$: bounded slope that jumps")
-    left.plot(ws, [quadratic_slope(w) for w in ws], label=r"$w^2/2$: smooth slope, unbounded")
-    left.plot(ws, [logistic_slope(w) for w in ws], label=r"$\ln(1+e^{-w})$: bounded and smooth")
+    left.plot(
+        ws, [abs_slope(w) if abs(w) > 1e-9 else math.nan for w in ws], label=r"$|\theta|$: bounded slope that jumps"
+    )
+    left.plot(ws, [quadratic_slope(w) for w in ws], label=r"$\theta^2/2$: smooth slope, unbounded")
+    left.plot(ws, [logistic_slope(w) for w in ws], label=r"$\ln(1+e^{-\theta})$: bounded and smooth")
     for level in (-1.0, 1.0):
         left.axhline(level, color="gray", linestyle=":", linewidth=1)
-    left.set(ylim=(-2.5, 2.5), xlabel="w", ylabel=r"slope $f'(w)$", title="Lipschitz bounds the slope")
+    left.set(ylim=(-2.5, 2.5), xlabel=r"$\theta$", ylabel=r"slope $f'(\theta)$", title="Lipschitz bounds the slope")
     left.legend(loc="upper left", fontsize=8)
-    right.plot(ws, [logistic_curvature(w) for w in ws], label=r"logistic: $\sigma(w)(1-\sigma(w))$")
-    right.plot(ws, [abs(sigmoid_loss_curvature(w)) for w in ws], label=r"sigmoid loss: $|\sigma''(w)|$")
+    right.plot(ws, [logistic_curvature(w) for w in ws], label=r"logistic: $\sigma(\theta)(1-\sigma(\theta))$")
+    right.plot(ws, [abs(sigmoid_loss_curvature(w)) for w in ws], label=r"sigmoid loss: $|\sigma''(\theta)|$")
     right.axhline(0.25, color="C0", linestyle="--", linewidth=1, label=r"$\beta = 1/4$")
     right.axhline(SIGMOID_SMOOTHNESS, color="C1", linestyle="--", linewidth=1, label=r"$\beta = 1/(6\sqrt{3})$")
-    right.set(ylim=(0, 0.3), xlabel="w", ylabel=r"curvature $|f''(w)|$", title="Smooth bounds the change of slope")
+    right.set(
+        ylim=(0, 0.3),
+        xlabel=r"$\theta$",
+        ylabel=r"curvature $|f''(\theta)|$",
+        title="Smooth bounds the change of slope",
+    )
     right.legend(loc="upper right", fontsize=8)
     return fig
 
@@ -552,10 +559,10 @@ def plot_gd_sgd_paths(rng: np.random.Generator) -> Figure:
     ax.contour(
         g1, g2, risk, levels=np.quantile(risk, [0.005, 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.7]), colors="lightgray"
     )
-    ax.plot(sgd[:, 0], sgd[:, 1], "-", color="C1", linewidth=0.7, alpha=0.8, label="SGD, one example per step, η = 0.1")
+    ax.plot(sgd[:, 0], sgd[:, 1], "-", color="C1", linewidth=0.7, alpha=0.8, label="SGD, one record per step, η = 0.1")
     ax.plot(gd[:, 0], gd[:, 1], "o-", color="C0", markersize=3, label="gradient descent, η = 1/β")
-    ax.plot([w_star[0]], [w_star[1]], "k*", markersize=12, label="minimizer w*")
-    ax.set(xlabel=r"$w_1$", ylabel=r"$w_2$", aspect="equal", title="Least squares with condition number ≈ 10")
+    ax.plot([w_star[0]], [w_star[1]], "k*", markersize=12, label=r"minimizer $\theta^*$")
+    ax.set(xlabel=r"$\theta_1$", ylabel=r"$\theta_2$", aspect="equal", title="Least squares with condition number ≈ 10")
     ax.legend(loc="upper right", fontsize=8)
     return fig
 
@@ -592,7 +599,7 @@ def plot_minibatch_variance(rng: np.random.Generator) -> Figure:
         xscale="log",
         yscale="log",
         xlabel="batch size B",
-        ylabel=r"$\mathbb{E}\|g_B - \nabla F\|^2$",
+        ylabel=r"$\mathbb{E}\|g_B - \nabla \mathcal{L}\|^2$",
         title="Minibatch gradient noise, n = 1000 logistic examples",
     )
     ax.legend(fontsize=8)
@@ -619,7 +626,7 @@ def plot_sgd_convex(rng: np.random.Generator) -> Figure:
         xscale="log",
         yscale="log",
         xlabel="steps T",
-        ylabel=r"$F(\bar w_T) - F^*$",
+        ylabel=r"$\mathcal{L}(\bar \theta_T) - \mathcal{L}^*$",
         title="Convex, 1-Lipschitz (logistic, R = 5)",
     )
     left.legend(fontsize=8)
@@ -632,7 +639,7 @@ def plot_sgd_convex(rng: np.random.Generator) -> Figure:
         xscale="log",
         yscale="log",
         xlabel="steps T",
-        ylabel=r"$J(\bar w_T) - J^*$",
+        ylabel=r"$\mathcal{L}_\lambda(\bar \theta_T) - \mathcal{L}_\lambda^*$",
         title=f"λ-strongly convex (logistic + ridge, λ = {lam:g})",
     )
     right.legend(fontsize=7)
@@ -662,7 +669,7 @@ def plot_noise_step_size(rng: np.random.Generator, steps: int = 10000) -> Figure
         yscale="log",
         ylim=(1e-4, 30),
         xlabel="step size η (dotted: η* from the bound)",
-        ylabel=r"$F(\bar w_T) - F^*$",
+        ylabel=r"$\mathcal{L}(\bar \theta_T) - \mathcal{L}^*$",
         title=f"Projected SGD on logistic regression, T = {steps}",
     )
     ax.legend(fontsize=8, ncol=3, loc="upper center", bbox_to_anchor=(0.5, -0.15))
@@ -680,9 +687,9 @@ def plot_nonconvex(rng: np.random.Generator) -> Figure:
         ts,
         [nonconvex_bound(beta, delta, sigma_sq, eta, t) for eta, t in zip(etas, ts)],
         "--",
-        label=r"bound $2\Delta/(\eta T) + \beta\eta\sigma^2$",
+        label=r"bound $2\Gamma/(\eta T) + \beta\eta\sigma^2$",
     )
-    ax.plot(ts, observed, "o-", label=r"observed $\frac{1}{T}\sum_t \|\nabla F(w_t)\|^2$")
+    ax.plot(ts, observed, "o-", label=r"observed $\frac{1}{T}\sum_t \|\nabla \mathcal{L}(\theta_t)\|^2$")
     ax.set(
         xscale="log",
         yscale="log",
@@ -704,7 +711,7 @@ def plot_erm_sensitivity(rng: np.random.Generator) -> Figure:
         xscale="log",
         yscale="log",
         xlabel="n",
-        ylabel=r"$\|w^*(D) - w^*(D')\|$",
+        ylabel=r"$\|\theta^*(D) - \theta^*(D')\|$",
         title="Observed (solid) and 2L/(λn) (dashed)",
     )
     left.legend()
@@ -715,7 +722,7 @@ def plot_erm_sensitivity(rng: np.random.Generator) -> Figure:
         xscale="log",
         yscale="log",
         xlabel="λ",
-        ylabel=r"$\|w^*(D) - w^*(D')\|$",
+        ylabel=r"$\|\theta^*(D) - \theta^*(D')\|$",
         title="n = 1000: the data adds curvature",
     )
     right.legend()
@@ -731,7 +738,10 @@ def plot_nonconvex_jump(n: int = 11) -> Figure:
         w = double_well_argmin(zbar)
         ax.plot([w], [float(double_well_risk(np.array([w]), zbar)[0])], "o", color=color, markersize=8)
     ax.set(
-        ylim=(-0.15, 0.6), xlabel="w", ylabel="empirical risk", title="Changing one example moves the minimizer across"
+        ylim=(-0.15, 0.6),
+        xlabel=r"$\theta$",
+        ylabel="empirical risk",
+        title="Changing one record moves the minimizer across",
     )
     ax.legend(loc="upper center")
     return fig

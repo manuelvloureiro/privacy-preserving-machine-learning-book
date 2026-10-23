@@ -8,36 +8,36 @@ Adding Laplace noise to every score and publishing them all would charge the bud
 
 ## Which mechanism to use {#sec-sel-choose}
 
-@tbl-sel-choose matches common tasks to the mechanisms explained below. Throughout, the **sensitivity** $\Delta$ is the most that one person's record can change any candidate's score.
+@tbl-sel-choose matches common tasks to the mechanisms explained below. Throughout, the **sensitivity** $\Delta u$ is the most that one person's record can change any candidate's score.
 
 | Task | Mechanism | Privacy cost |
 | --- | --- | --- |
 | Pick the best of a fixed list | Exponential mechanism or report-noisy-max | $\varepsilon$ |
 | Pick the top $c$, such as the most frequent items | Gumbel noise, keep the $c$ largest, or noisy max $c$ times | $c\varepsilon$ |
-| Pick a number from a range, such as a quantile or a clipping bound | Exponential mechanism over the range | $\varepsilon$ |
+| Pick a number from a range, such as a quantile or a clipping norm | Exponential mechanism over the range | $\varepsilon$ |
 | Find the first query in a stream above a threshold | AboveThreshold | $\varepsilon$, however long the stream |
 
 : Which selection mechanism to use. {#tbl-sel-choose}
 
 ## The exponential mechanism {#sec-sel-exp}
 
-Each candidate $r$ has a **score** on the dataset, written $u(D, r)$, such as the number of validation examples a model gets right. The **exponential mechanism** of McSherry and Talwar (2007) picks each candidate with probability proportional to an exponential of its score. With a privacy budget $\varepsilon$, it outputs candidate $r$ with probability
-$$\Pr[M_E(D) = r] = \frac{\exp\big(\varepsilon\,u(D, r)/(2\Delta)\big)}{\sum_s\exp\big(\varepsilon\,u(D, s)/(2\Delta)\big)}.$$ {#eq-sel-em}
+The candidates form a fixed set, written $\mathcal R$. Each candidate $r$ has a **score** on the dataset, written $u(D, r)$, such as the number of validation records a model gets right. The **exponential mechanism** of McSherry and Talwar (2007) picks each candidate with probability proportional to an exponential of its score. With a privacy budget $\varepsilon$, it outputs candidate $r$ with probability
+$$\Pr[M_E(D) = r] = \frac{\exp\big(\varepsilon\,u(D, r)/(2\Delta u)\big)}{\sum_s\exp\big(\varepsilon\,u(D, s)/(2\Delta u)\big)}.$$ {#eq-sel-em}
 It is $\varepsilon$-DP because one record changes each weight, and also their sum, by at most a factor $e^{\varepsilon/2}$, and the two factors together make $e^\varepsilon$.
 
 Two conditions decide whether a use is correct. First, fix the list of candidates before you look at the data, because a list built from the data reveals records by itself. A word in a corpus's vocabulary does that when only one person used it. Second, drop the 2 in the exponent only when the scores are **monotone**, meaning that one record pushes all of them the same way. Counts under add/remove neighbours are monotone. A histogram under replace neighbours is not, because moving one record lowers one count and raises another, so dropping the 2 there doubles the real cost.
 
 ## Accuracy, and the cost of many candidates {#sec-sel-utility}
 
-The number of candidates $k$ is free for privacy but not for accuracy, because more candidates means more bad ones to pick. Call the best score minus the chosen candidate's score the **gap**. On average it is at most
-$$\frac{2\Delta}{\varepsilon}(\ln k + 1),$$ {#eq-sel-em-utility}
-so doubling the candidates adds only $\ln 2$ to $\ln k + 1$.
+The number of candidates $|\mathcal R|$ is free for privacy but not for accuracy, because more candidates means more bad ones to pick. Call the best score minus the chosen candidate's score the **gap**. On average it is at most
+$$\frac{2\Delta u}{\varepsilon}(\ln|\mathcal R| + 1),$$ {#eq-sel-em-utility}
+so doubling the candidates adds only $\ln 2$ to $\ln|\mathcal R| + 1$.
 
-For example, suppose you trained 50 models and want to release the best one, judged on a private validation set of 1,000 examples. Model $r$, numbered from 1, gets $900 - r$ examples right, so model 1 is the best. The score is that count, so $\Delta = 1$. At $\varepsilon = 1$ the mechanism picks the best model only 39% of the time. Yet it loses just 1.54 correct predictions on average, or 0.15% accuracy, because its mistakes are mostly near-ties. [Hyperparameter tuning](../part05-dp-ml/03-hyperparameter-tuning.md) picks models this way.
+For example, suppose you trained 50 models and want to release the best one, judged on a private validation set of 1,000 records. Model $r$, numbered from 1, gets $900 - r$ records right, so model 1 is the best. The score is that count, so $\Delta u = 1$. At $\varepsilon = 1$ the mechanism picks the best model only 39% of the time. Yet it loses just 1.54 correct predictions on average, or 0.15% accuracy, because its mistakes are mostly near-ties. [Hyperparameter tuning](../part05-dp-ml/03-hyperparameter-tuning.md) picks models this way.
 
-## A private quantile or clipping bound {#sec-sel-apps}
+## A private quantile or clipping norm {#sec-sel-apps}
 
-Reading a median or a clipping bound off the data leaks it, so pick it with the exponential mechanism. First fix a range before looking at the data, and clip every record into it. The mechanism then scores each point of the range by how close the share of records below it is to the quantile you want, such as one half for the median. One added or removed record moves any score by at most 1. The score is the same between consecutive sorted records. So the mechanism picks one of these gaps, called **pieces**, favouring long pieces near the quantile, and returns a uniform point inside it.
+Reading a median or a clipping norm off the data leaks it, so pick it with the exponential mechanism. First fix a range before looking at the data, and clip every record into it. The mechanism then scores each point of the range by how close the share of records below it is to the quantile you want, such as one half for the median. One added or removed record moves any score by at most 1. The score is the same between consecutive sorted records. So the mechanism picks one of these gaps, called **pieces**, favouring long pieces near the quantile, and returns a uniform point inside it.
 
 Libraries do this. diffprivlib's `tools.quantile` and `tools.median` take an `epsilon` and the range as `bounds`. OpenDP's `.dp.quantile` and `.dp.median`, which work on Polars data frames, pick one value from a finite list of candidates instead. The script [practitioner_adult_statistics.py](../../code/part03-dp-foundations/practitioner_adult_statistics.py) takes the median age of the Adult census data at $\varepsilon = 1$. It holds 48,842 people with one row each, and the range of 17 to 90 comes from the survey's documentation.
 
@@ -65,32 +65,32 @@ released = query.release().collect()  # changes on every run: OpenDP's noise has
 
 Its summary reports `ExponentialMin` with a scale of 2.0. Under pure DP, OpenDP 0.16 adds exponential noise to every candidate's score and reports the best, which samples **permute-and-flip** (McKenna & Sheldon 2020). That selection mechanism has the exponential mechanism's $\varepsilon$ guarantee, and its expected error is never worse. The accuracy is `null`, because OpenDP gives no error bar for a quantile. Its noise has no seed, so the released value changes from run to run, and `uv run python code/part03-dp-foundations/practitioner_adult_statistics.py` prints one at the end.
 
-The error bar you can state is about rank, not value, because the guarantee bounds how unevenly the output splits the records. With probability $1 - \beta$, the exponential mechanism's gap is at most $(2\Delta/\varepsilon)(\ln k + \ln(1/\beta))$, the tail form of @eq-sel-em-utility.
+The error bar you can state is about rank, not value, because the guarantee bounds how unevenly the output splits the records. With probability $1 - \beta$, the exponential mechanism's gap is at most $(2\Delta u/\varepsilon)(\ln|\mathcal R| + \ln(1/\beta))$, the tail form of @eq-sel-em-utility.
 
-For a median over $k$ candidates, with $\Delta = 1$, the gap is the number of records by which the output misses the middle rank, so $\beta = 0.05$ gives its 95% bar. A bar in value would need the number of records near the median, which the release does not reveal. So state the bar in ranks, or spend budget on a few noisy counts below candidate values if a dashboard needs values. The width of the range enters that bound only through its logarithm, so a generous range is cheap. Private training often clips gradients at the median of their norms. For 1,000 norms whose median is 0.9804, the private median at $\varepsilon = 1$ lands on average 0.0013 from it. Widening the range from 10 to 1,000 leaves that unchanged.
+For a median over $|\mathcal R|$ candidates, with $\Delta u = 1$, the gap is the number of records by which the output misses the middle rank, so $\beta = 0.05$ gives its 95% bar. A bar in value would need the number of records near the median, which the release does not reveal. So state the bar in ranks, or spend budget on a few noisy counts below candidate values if a dashboard needs values. The width of the range enters that bound only through its logarithm, so a generous range is cheap. Private training often clips gradients at the median of their norms. For 1,000 norms whose median is 0.9804, the private median at $\varepsilon = 1$ lands on average 0.0013 from it. Widening the range from 10 to 1,000 leaves that unchanged.
 
 Two things go wrong in practice. Where the data near the quantile are sparse, the best piece is long and the output can land anywhere in it. A small error in rank is then a large error in value. The second is that the range or the candidates must not come from the data. Setting the upper end to the observed maximum reintroduces the leak, and diffprivlib warns with a `PrivacyLeakWarning` when you leave out `bounds` ([Sensitivity](07-sensitivity.md)).
 
 ## Report-noisy-max and Gumbel noise {#sec-sel-rnm}
 
-**Report-noisy-max** adds independent Laplace noise to each candidate's score, and outputs the candidate with the largest noisy score. It is $\varepsilon$-DP for any number of candidates when the noise has scale $2\Delta/\varepsilon$, and with monotone scores a scale of $\Delta/\varepsilon$ is enough. Release only the winner's index, and pay for a fresh noisy answer if you need its score.
+**Report-noisy-max** adds independent Laplace noise to each candidate's score, and outputs the candidate with the largest noisy score. It is $\varepsilon$-DP for any number of candidates when the noise has scale $2\Delta u/\varepsilon$, and with monotone scores a scale of $\Delta u/\varepsilon$ is enough. Release only the winner's index, and pay for a fresh noisy answer if you need its score.
 
 On the 50 models at $\varepsilon = 1$, it picks the best with probability 0.4241, against 0.3935 for the exponential mechanism. Neither is always better, since with two candidates the exponential mechanism wins.
 
-Noise from the Gumbel distribution, of scale $2\Delta/\varepsilon$, in place of the Laplace noise gives exactly the exponential mechanism. This **Gumbel-max trick** is how libraries sample it, because the exponential of a score in the thousands overflows, while noisy scores do not. Keeping the $c$ largest Gumbel-noised scores picks the top $c$ at once (Durfee & Rogers 2019).
+Noise from the Gumbel distribution, of scale $2\Delta u/\varepsilon$, in place of the Laplace noise gives exactly the exponential mechanism. This **Gumbel-max trick** is how libraries sample it, because the exponential of a score in the thousands overflows, while noisy scores do not. Keeping the $c$ largest Gumbel-noised scores picks the top $c$ at once (Durfee & Rogers 2019).
 
 ## The sparse vector technique {#sec-sel-svt}
 
-Sometimes queries arrive one at a time, and you want the first one that is high enough. The **sparse vector technique** (Dwork et al. 2009) compares each with one noisy threshold and pays only for the one that fires. Its basic form, **AboveThreshold**, takes a threshold $T$ and a stream of queries that share a sensitivity $\Delta$. It splits the budget into $\varepsilon_1$ for the threshold and $\varepsilon_2$ for the queries.
+Sometimes queries arrive one at a time, and you want the first one that is high enough. The **sparse vector technique** (Dwork et al. 2009) compares each with one noisy threshold and pays only for the one that fires. Its basic form, **AboveThreshold**, takes a threshold $\tau$ and a stream of queries. Every query $f$ in the stream has the same sensitivity $\Delta f$. It splits the budget into $\varepsilon_1$ for the threshold and $\varepsilon_2$ for the queries.
 
-1. Draw one threshold noise, written $\rho$, from $\mathrm{Lap}(\Delta/\varepsilon_1)$ for the whole run.
-2. For each query, draw a fresh noise from $\mathrm{Lap}(2\Delta/\varepsilon_2)$ and add it to the query's answer. If the result is at least $T + \rho$, output "above" and halt. Otherwise output "below" and go on.
+1. Draw one threshold noise, written $\nu$, from $\mathrm{Lap}(\Delta f/\varepsilon_1)$ for the whole run.
+2. For each query, draw a fresh noise from $\mathrm{Lap}(2\Delta f/\varepsilon_2)$ and add it to the query's answer. If the result is at least $\tau + \nu$, output "above" and halt. Otherwise output "below" and go on.
 
 AboveThreshold is $(\varepsilon_1 + \varepsilon_2)$-DP for any number of "below" answers, even when each query is chosen after the earlier answers. All the "below" answers together pay $\varepsilon_1$, through the one threshold noise, and the single "above" pays $\varepsilon_2$.
 
 The accuracy does depend on the stream length $k$, which must be fixed before the run for the accuracy guarantee to hold. Write $\beta$ for the chance that this guarantee fails. With an equal split, $\varepsilon_1 = \varepsilon_2 = \varepsilon/2$, every query is classified correctly unless its true value is within a margin
-$$\alpha = \frac{8\Delta\big(\ln k + \ln(2/\beta)\big)}{\varepsilon}$$ {#eq-sel-svt-alpha}
-of the threshold. For example, monitor 1,000 counts, each with $\Delta = 1$, against a threshold of 500 at $\varepsilon = 1$. With $\beta = 0.05$ the margin is 84.77. So with probability 0.95, only a count within that margin of the threshold can be misclassified.
+$$\alpha = \frac{8\Delta f\big(\ln k + \ln(2/\beta)\big)}{\varepsilon}$$ {#eq-sel-svt-alpha}
+of the threshold. For example, monitor 1,000 counts, each with $\Delta f = 1$, against a threshold of 500 at $\varepsilon = 1$. With $\beta = 0.05$ the margin is 84.77. So with probability 0.95, only a count within that margin of the threshold can be misclassified.
 
 To find the first $c$ queries above the threshold, restart AboveThreshold with fresh threshold noise after each "above", at $\varepsilon/c$ per run, and halt after the $c$-th. The margin then grows with $c$, so ask for as few alarms as you can. Lyu, Su and Li instead keep one threshold for all $c$ alarms and multiply the query noise by $c$.
 
@@ -115,11 +115,11 @@ So review the accounting, not just the noise. An implementation must draw fresh 
 
 | Mechanism | Privacy | Accuracy |
 | --- | --- | --- |
-| Exponential mechanism, @eq-sel-em | $\varepsilon$; drop the 2 only for monotone scores | Mean gap $\le \frac{2\Delta}{\varepsilon}(\ln k + 1)$ |
-| Report-noisy-max, noise $\mathrm{Lap}(2\Delta/\varepsilon)$ | $\varepsilon$, index only | Similar to the exponential mechanism |
-| AboveThreshold | $\varepsilon_1 + \varepsilon_2$ | Margin $8\Delta(\ln k + \ln\frac2\beta)/\varepsilon$, failure probability $\beta$ |
+| Exponential mechanism, @eq-sel-em | $\varepsilon$; drop the 2 only for monotone scores | Mean gap $\le \frac{2\Delta u}{\varepsilon}(\ln|\mathcal R| + 1)$ |
+| Report-noisy-max, noise $\mathrm{Lap}(2\Delta u/\varepsilon)$ | $\varepsilon$, index only | Similar to the exponential mechanism |
+| AboveThreshold | $\varepsilon_1 + \varepsilon_2$ | Margin $8\Delta f(\ln k + \ln\frac2\beta)/\varepsilon$, failure probability $\beta$ |
 
-: The selection mechanisms of this chapter, with $k$ candidates or queries. {#tbl-sel-cheat}
+: The selection mechanisms of this chapter, with $|\mathcal R|$ candidates or $k$ queries. {#tbl-sel-cheat}
 
 **Rules of thumb**
 

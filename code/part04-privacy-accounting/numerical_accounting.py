@@ -813,7 +813,7 @@ def plot_histograms(q: float = Q_RATE, sigma: float = SIGMA, h: float = 1e-4) ->
         ax.set_xlim(*lim)
         mean = float(np.sum(ell * pld.mass))
         ax.axvline(mean, color="k", lw=0.8, ls=":")
-        ax.set_title(rf"$k = {k}$ (bins of {width:g})", fontsize=10)
+        ax.set_title(rf"$T = {k}$ (bins of {width:g})", fontsize=10)
         ax.set_xlabel(r"privacy loss $\ell$")
     axes[0].set_ylabel("probability per bin")
     return fig
@@ -838,7 +838,7 @@ def plot_epsilon_vs_k(q: float = Q_RATE, sigma: float = SIGMA, delta: float = DE
     ax.plot(ks, lower, "C0v--", ms=4, label="PLD optimistic (lower bound)")
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel(r"number of steps $k$")
+    ax.set_xlabel(r"number of steps $T$")
     ax.set_ylabel(r"$\varepsilon$ at $\delta = 10^{-5}$")
     ax.set_title(rf"DP-SGD, $q = {q:g}$, $\sigma = {sigma:g}$", fontsize=10)
     ax.legend(fontsize=8, frameon=False)

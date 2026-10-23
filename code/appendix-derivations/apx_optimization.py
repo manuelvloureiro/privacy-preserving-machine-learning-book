@@ -792,13 +792,13 @@ def plot_convexity(lam: float = 0.2) -> Figure:
     chord_z = mix * fb + (1 - mix) * fa
     left.plot([z, z], [fz, chord_z], color="C0", linewidth=4, alpha=0.5)
     left.plot([a, z, b], [fa, fz, fb], "ko", markersize=4)
-    for p, text in ((a, "w"), (z, "z"), (b, "w′")):
+    for p, text in ((a, "θ"), (z, "z"), (b, "θ′")):
         left.annotate(text, (p, -0.35), ha="center")
     left.set(
         ylim=(-0.5, 5.0),
-        xlabel="w",
+        xlabel="θ",
         ylabel="value",
-        title="Gaps at w and w′ (orange) average to the gap at z (blue)",
+        title="Gaps at θ and θ′ (orange) average to the gap at z (blue)",
     )
     left.legend(loc="upper center")
 
@@ -806,14 +806,14 @@ def plot_convexity(lam: float = 0.2) -> Figure:
     f0 = float(logistic_ridge_1d(np.array([w0]), lam)[0])
     s0 = logistic_ridge_1d_slope(w0, lam)
     right.plot(ws, fs, "k", linewidth=2, label="f")
-    right.plot(ws, f0 + s0 * (ws - w0), color="C1", linestyle="--", label="tangent at w")
+    right.plot(ws, f0 + s0 * (ws - w0), color="C1", linestyle="--", label="tangent at θ")
     bowl = f0 + s0 * (ws - w0) + 0.5 * lam * (ws - w0) ** 2
-    right.plot(ws, bowl, color="C2", label="tangent + (λ/2)(w′ − w)²")
+    right.plot(ws, bowl, color="C2", label="tangent + (λ/2)(θ′ − θ)²")
     right.fill_between(ws, bowl, fs, color="C2", alpha=0.15)
     right.plot([w0], [f0], "ko", markersize=4)
     right.set(
         ylim=(-0.5, 5.0),
-        xlabel="w′",
+        xlabel="θ′",
         ylabel="value",
         title=f"Curvature at least λ = {lam}: f stays above the bowl",
     )
@@ -829,14 +829,16 @@ def plot_gd_linear(rng: np.random.Generator, steps: int = 80) -> Figure:
     ts = list(range(steps + 1))
     gap0, dist0 = float(run.gaps[0]), float(run.dists[0])
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(ts, run.gaps, "k", linewidth=2, label=r"gradient descent, $F(w_t) - F^*$")
+    ax.plot(ts, run.gaps, "k", linewidth=2, label=r"gradient descent, $\mathcal{L}(\theta_t) - \mathcal{L}^*$")
     ax.plot(
-        ts, [pl_bound(gap0, kappa, t) for t in ts], label=r"Polyak–Łojasiewicz bound $(1 - 1/\kappa)^t (F(w_0) - F^*)$"
+        ts,
+        [pl_bound(gap0, kappa, t) for t in ts],
+        label=r"Polyak–Łojasiewicz bound $(1 - 1/\kappa)^t (\mathcal{L}(\theta_0) - \mathcal{L}^*)$",
     )
     ax.plot(
         ts,
         [distance_gap_bound(beta, dist0, kappa, t) for t in ts],
-        label=r"distance bound $\frac{\beta}{2}(1 - 1/\kappa)^{2t}\|w_0 - w^*\|^2$",
+        label=r"distance bound $\frac{\beta}{2}(1 - 1/\kappa)^{2t}\|\theta_0 - \theta^*\|^2$",
     )
     w_star = ridge_minimizer(data, GD_LAM)
     h_min = float(np.linalg.eigvalsh(ridge_hessian(data, w_star, GD_LAM))[0])
@@ -845,13 +847,13 @@ def plot_gd_linear(rng: np.random.Generator, steps: int = 80) -> Figure:
         [gap0 * (1 - h_min / beta) ** (2 * t) for t in ts],
         color="gray",
         linestyle=":",
-        label="same rate with the smallest curvature at w*",
+        label="same rate with the smallest curvature at θ*",
     )
     ax.set(
         yscale="log",
         ylim=(1e-14, 10),
         xlabel="step t",
-        ylabel=r"$F(w_t) - F^*$",
+        ylabel=r"$\mathcal{L}(\theta_t) - \mathcal{L}^*$",
         title=rf"Regularized logistic regression, $\lambda = {GD_LAM}$, $\kappa = {kappa:.0f}$",
     )
     ax.legend(loc="lower left")
@@ -866,23 +868,23 @@ def plot_cocoercive(rng: np.random.Generator) -> Figure:
     top = float(max(lhs.max(), rhs.max()))
     left.plot([0, top], [0, top], "k--", label="y = x")
     left.set(
-        xlabel="(f′(u) − f′(v))² / ρ",
+        xlabel="(f′(u) − f′(v))² / β",
         ylabel="(f′(u) − f′(v)) (u − v)",
-        title="Logistic loss, ρ = 1/4: every pair lies above y = x",
+        title="Logistic loss, β = 1/4: every pair lies above y = x",
     )
     left.legend(loc="upper left")
 
     etas = np.linspace(0.05, 12.0, 240)
     worst = [float(np.max(step_ratio(u, v, float(e)))) for e in etas]
     right.plot(etas, worst, "k", linewidth=2, label="logistic loss, worst of 500 pairs")
-    right.plot(etas, np.abs(1 - etas * RHO_LOGISTIC), color="C1", label="quadratic (ρ/2)w²: |1 − ηρ|")
+    right.plot(etas, np.abs(1 - etas * RHO_LOGISTIC), color="C1", label="quadratic (β/2)θ²: |1 − ηβ|")
     right.axhline(1.0, color="gray", linestyle=":")
-    right.axvline(2 / RHO_LOGISTIC, color="C3", linestyle="--", label="η = 2/ρ = 8")
+    right.axvline(2 / RHO_LOGISTIC, color="C3", linestyle="--", label="η = 2/β = 8")
     right.set(
         ylim=(0, 2.2),
-        xlabel="step size η",
+        xlabel="learning rate η",
         ylabel="|ψ(u) − ψ(v)| / |u − v|",
-        title="One gradient step: non-expansive up to 2/ρ",
+        title="One gradient step: non-expansive up to 2/β",
     )
     right.legend(loc="upper left")
     return fig
@@ -899,7 +901,7 @@ def plot_lower_bound() -> Figure:
         xscale="log",
         yscale="log",
         xlabel="gradient queries T",
-        ylabel=r"error $f(\bar w_T) - f^*$",
+        ylabel=r"error $f(\bar\theta_T) - f^*$",
         title="R = L = 1: the method is pinned between the bounds",
     )
     ax.legend()
@@ -924,7 +926,7 @@ def plot_nn(rng: np.random.Generator) -> Figure:
     left.legend()
     right.plot(ns, [r.error for r in results], "ko-", label="1-NN test error")
     right.plot(ns, [r.plug_in for r in results], "s--", color="C0", label="average of p(1 − p′) + (1 − p)p′")
-    right.axhline(limit, color="C3", linestyle=":", label=rf"limit $E[2p(1 - p)] = {limit:.3f}$")
+    right.axhline(limit, color="C3", linestyle=":", label=rf"limit $\mathbb{{E}}[2p(1 - p)] = {limit:.3f}$")
     right.set(xscale="log", xlabel="training points n", ylabel="0-1 error", title="The error falls towards the limit")
     right.legend()
     return fig
@@ -944,7 +946,7 @@ def plot_mest_hist(rng: np.random.Generator) -> Figure:
         scaled = math.sqrt(n) * (fits.theta[:, 1] - float(half.theta[1]))
         ax.hist(scaled, bins=np.linspace(-10, 10, 41).tolist(), density=True, alpha=0.6, label="2,000 refits")
         ax.plot(grid, normal_pdf(grid, var), "k", label=f"normal, variance {var:.2f}")
-        ax.set(xlabel="√n × (fitted w₂ − population w₂)", title=f"n = {n}")
+        ax.set(xlabel="√n × (fitted θ₂ − population θ₂)", title=f"n = {n}")
     axes[0].set(ylabel="density")
     axes[0].legend(loc="upper left")
     return fig
@@ -954,7 +956,7 @@ def plot_mest_variance(rng: np.random.Generator) -> Figure:
     half = sandwich(0.5, RIDGE)
     ns = [25, 50, 100, 200, 500, 1000, 2000]
     nvars = [n * np.var(refits(rng, 2000, n, 0.5).theta, axis=0) for n in ns]
-    names = (r"$w_1$", r"$w_2$", "intercept")
+    names = (r"$\theta_1$", r"$\theta_2$", "intercept")
     inf = influence_check(rng, members=120)
     fig, (left, right) = plt.subplots(1, 2, figsize=(10, 4))
     for k in range(3):
@@ -990,7 +992,7 @@ def plot_gibbs(rng: np.random.Generator, games: int = 1500) -> Figure:
     loss = centroid_loss(g.theta, g.z)
     excess = loss - centroid_tau(g.z)
     fig, (left, right) = plt.subplots(1, 2, figsize=(10, 4), sharey=True)
-    for ax, xs, label in ((left, loss, r"loss $\ell(\theta, z)$"), (right, excess, r"$\ell(\theta, z) - \tau(z)$")):
+    for ax, xs, label in ((left, loss, r"loss $\ell(\theta; z)$"), (right, excess, r"$\ell(\theta; z) - \tau(z)$")):
         ax.scatter(xs[~g.member], log_lr[~g.member], s=6, alpha=0.5, label="non-members")
         ax.scatter(xs[g.member], log_lr[g.member], s=6, alpha=0.5, label="members")
         ax.set(xlabel=label)

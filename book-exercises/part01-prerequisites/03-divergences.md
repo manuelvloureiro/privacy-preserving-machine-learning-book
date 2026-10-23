@@ -37,16 +37,16 @@ The expected conditional KL is $0.7 \times 0.3023 = 0.2116$, and $0.0823 + 0.211
 > **Exercise 2.** **Gaussians with different variances.** Show $D_{\mathrm{KL}}(\mathcal N(m_0, \sigma_0^2)\|\mathcal N(m_1, \sigma_1^2)) = \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2 + (m_0 - m_1)^2}{2\sigma_1^2} - \frac12$. *Check: $D_{\mathrm{KL}}(\mathcal N(0, 1)\|\mathcal N(0, 4)) = \ln2 + \frac18 - \frac12 = 0.3181$.* For the Rényi divergence, repeat route 1 of the Gaussian section and find the condition on $\alpha$ under which the integral is finite. *Hint: the coefficient of $x^2$ must stay negative: $\alpha/\sigma_0^2 + (1-\alpha)/\sigma_1^2 > 0$.* *(Completing the square)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-Write $P = \mathcal N(m_0, \sigma_0^2)$ and $Q = \mathcal N(m_1, \sigma_1^2)$, with means $m_0, m_1$, and $\Delta = m_0 - m_1$.
+Write $P = \mathcal N(m_0, \sigma_0^2)$ and $Q = \mathcal N(m_1, \sigma_1^2)$, with means $m_0, m_1$, and $s = m_0 - m_1$.
 
 **KL.**
 
 1. **The log-likelihood ratio.** The normal density is $\frac{1}{\sigma\sqrt{2\pi}}e^{-(x - m)^2/(2\sigma^2)}$ for mean $m$, so
 $$L(x) = \ln\frac{\sigma_1}{\sigma_0} - \frac{(x - m_0)^2}{2\sigma_0^2} + \frac{(x - m_1)^2}{2\sigma_1^2}.$$
 Unlike the equal-variance case, $L$ is quadratic in $x$.
-2. **Two second moments under $P$.** $\mathbb E_P(X - m_0)^2 = \sigma_0^2$. For the other, write $X - m_1 = (X - m_0) + \Delta$; the cross term averages to 0, so $\mathbb E_P(X - m_1)^2 = \sigma_0^2 + \Delta^2$.
-3. **Average $L$ under $P$:** $D_{\mathrm{KL}} = \ln\frac{\sigma_1}{\sigma_0} - \frac12 + \frac{\sigma_0^2 + \Delta^2}{2\sigma_1^2}$, the claimed formula.
-4. **Check.** For $\mathcal N(0, 1)\|\mathcal N(0, 4)$: $\sigma_0 = 1$, $\sigma_1 = 2$, $\Delta = 0$, so $D_{\mathrm{KL}} = \ln2 + \frac18 - \frac12 = 0.3181$. A numerical integral of $p\ln(p/q)$ gives 0.3181 as well. In the other direction, $D_{\mathrm{KL}}(\mathcal N(0, 4)\|\mathcal N(0, 1)) = -\ln2 + 2 - \frac12 = 0.8069$: KL is not symmetric here. With $\sigma_0 = \sigma_1$ the formula reduces to $\Delta^2/(2\sigma^2)$, as in @eq-gauss-renyi.
+2. **Two second moments under $P$.** $\mathbb E_P(X - m_0)^2 = \sigma_0^2$. For the other, write $X - m_1 = (X - m_0) + s$; the cross term averages to 0, so $\mathbb E_P(X - m_1)^2 = \sigma_0^2 + s^2$.
+3. **Average $L$ under $P$:** $D_{\mathrm{KL}} = \ln\frac{\sigma_1}{\sigma_0} - \frac12 + \frac{\sigma_0^2 + s^2}{2\sigma_1^2}$, the claimed formula.
+4. **Check.** For $\mathcal N(0, 1)\|\mathcal N(0, 4)$: $\sigma_0 = 1$, $\sigma_1 = 2$, $s = 0$, so $D_{\mathrm{KL}} = \ln2 + \frac18 - \frac12 = 0.3181$. A numerical integral of $p\ln(p/q)$ gives 0.3181 as well. In the other direction, $D_{\mathrm{KL}}(\mathcal N(0, 4)\|\mathcal N(0, 1)) = -\ln2 + 2 - \frac12 = 0.8069$: KL is not symmetric here. With $\sigma_0 = \sigma_1$ the formula reduces to $s^2/(2\sigma^2)$, as in @eq-gauss-renyi.
 
 **Rényi, by route 1.**
 
@@ -55,17 +55,17 @@ $$B(x) = w_0(x - m_0)^2 + w_1(x - m_1)^2, \qquad w_0 = \frac{\alpha}{\sigma_0^2}
 2. **Finiteness.** The coefficient of $x^2$ in $-\frac12B$ is $-\frac12(w_0 + w_1)$. If $w_0 + w_1 \le 0$, the integrand does not decay in at least one direction (it grows like $e^{cx^2}$, or, when the coefficient is exactly 0, like $e^{cx}$ or a constant), and the integral is infinite. So the integral is finite exactly when
 $$w_0 + w_1 = \frac{\alpha}{\sigma_0^2} + \frac{1 - \alpha}{\sigma_1^2} > 0 \iff \sigma_\alpha^2 := \alpha\sigma_1^2 + (1 - \alpha)\sigma_0^2 > 0$$
 (multiply by $\sigma_0^2\sigma_1^2 > 0$). Note $w_0 + w_1 = \sigma_\alpha^2/(\sigma_0^2\sigma_1^2)$.
-3. **Complete the square.** For weights with $w_0 + w_1 > 0$, $w_0(x - m_0)^2 + w_1(x - m_1)^2 = (w_0 + w_1)(x - \bar m)^2 + \frac{w_0w_1}{w_0 + w_1}\Delta^2$ with $\bar m = \frac{w_0m_0 + w_1m_1}{w_0 + w_1}$. (Expand both sides: the $x^2$ and $x$ terms match by the choice of $\bar m$, and the constant is what is left.) Here $\frac{w_0w_1}{w_0 + w_1} = \frac{\alpha(1-\alpha)}{\sigma_0^2\sigma_1^2}\cdot\frac{\sigma_0^2\sigma_1^2}{\sigma_\alpha^2} = \frac{\alpha(1 - \alpha)}{\sigma_\alpha^2}$.
-4. **Integrate.** $\int e^{-(w_0 + w_1)(x - \bar m)^2/2}dx = \sqrt{2\pi/(w_0 + w_1)} = \sqrt{2\pi}\,\sigma_0\sigma_1/\sigma_\alpha$. So
-$$\int p^\alpha q^{1-\alpha}\,dx = \frac{\sigma_0^{1-\alpha}\sigma_1^{\alpha}}{\sigma_\alpha}\exp\left(-\frac{\alpha(1-\alpha)\Delta^2}{2\sigma_\alpha^2}\right).$$
-5. **Take the logarithm and divide by $\alpha - 1$.** The exponent gives $\frac{\alpha\Delta^2}{2\sigma_\alpha^2}$, as in the equal-variance case. The prefactor gives $\frac{(1-\alpha)\ln\sigma_0 + \alpha\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1} = \ln\frac{\sigma_1}{\sigma_0} + \frac{\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1}$. Together,
-$$D_\alpha(P\|Q) = \ln\frac{\sigma_1}{\sigma_0} + \frac{1}{2(\alpha - 1)}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} + \frac{\alpha\Delta^2}{2\sigma_\alpha^2} \quad\text{if } \sigma_\alpha^2 > 0, \qquad D_\alpha = \infty \text{ otherwise}.$$
+3. **Complete the square.** For weights with $w_0 + w_1 > 0$, $w_0(x - m_0)^2 + w_1(x - m_1)^2 = (w_0 + w_1)(x - \bar m)^2 + \frac{w_0w_1}{w_0 + w_1}s^2$ with $\bar m = \frac{w_0m_0 + w_1m_1}{w_0 + w_1}$. (Expand both sides: the $x^2$ and $x$ terms match by the choice of $\bar m$, and the constant is what is left.) Here $\frac{w_0w_1}{w_0 + w_1} = \frac{\alpha(1-\alpha)}{\sigma_0^2\sigma_1^2}\cdot\frac{\sigma_0^2\sigma_1^2}{\sigma_\alpha^2} = \frac{\alpha(1 - \alpha)}{\sigma_\alpha^2}$.
+4. **Integrate.** $\int e^{-(w_0 + w_1)(x - \bar m)^2/2}\mathrm dx = \sqrt{2\pi/(w_0 + w_1)} = \sqrt{2\pi}\,\sigma_0\sigma_1/\sigma_\alpha$. So
+$$\int p^\alpha q^{1-\alpha}\,\mathrm dx = \frac{\sigma_0^{1-\alpha}\sigma_1^{\alpha}}{\sigma_\alpha}\exp\left(-\frac{\alpha(1-\alpha)s^2}{2\sigma_\alpha^2}\right).$$
+5. **Take the logarithm and divide by $\alpha - 1$.** The exponent gives $\frac{\alpha s^2}{2\sigma_\alpha^2}$, as in the equal-variance case. The prefactor gives $\frac{(1-\alpha)\ln\sigma_0 + \alpha\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1} = \ln\frac{\sigma_1}{\sigma_0} + \frac{\ln\sigma_1 - \ln\sigma_\alpha}{\alpha - 1}$. Together,
+$$D_\alpha(P\|Q) = \ln\frac{\sigma_1}{\sigma_0} + \frac{1}{2(\alpha - 1)}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} + \frac{\alpha s^2}{2\sigma_\alpha^2} \quad\text{if } \sigma_\alpha^2 > 0, \qquad D_\alpha = \infty \text{ otherwise}.$$
 
 **When is it finite?** For $0 < \alpha < 1$, $\sigma_\alpha^2$ is a weighted average of two positive numbers, so always positive. For $\alpha > 1$, $\sigma_\alpha^2 = \sigma_0^2 + \alpha(\sigma_1^2 - \sigma_0^2)$. If $\sigma_1 \ge \sigma_0$ (the second distribution is at least as wide), it is positive for every $\alpha$. If $\sigma_1 < \sigma_0$, it is positive only for
 $$\alpha < \frac{\sigma_0^2}{\sigma_0^2 - \sigma_1^2}.$$
 The reason: $r^{\alpha-1}$ grows like $e^{cx^2}$ in the tails when $Q$ is the narrower one, and for large $\alpha$ that beats the decay of $p$.
 
-**Checks.** As $\alpha \to 1$, $\sigma_\alpha^2 \to \sigma_1^2$ and $\frac{1}{\alpha - 1}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} \to -\frac{\sigma_1^2 - \sigma_0^2}{\sigma_1^2}$ (the derivative of $-\ln\sigma_\alpha^2$ at $\alpha = 1$), so $D_\alpha \to \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2}{2\sigma_1^2} - \frac12 + \frac{\Delta^2}{2\sigma_1^2}$, the KL above. With $\sigma_0 = \sigma_1$, $\sigma_\alpha = \sigma$ and only $\alpha\Delta^2/(2\sigma^2)$ remains, which is @eq-gauss-renyi. @tbl-sol-divergences-gauss compares the formula with a numerical integral.
+**Checks.** As $\alpha \to 1$, $\sigma_\alpha^2 \to \sigma_1^2$ and $\frac{1}{\alpha - 1}\ln\frac{\sigma_1^2}{\sigma_\alpha^2} \to -\frac{\sigma_1^2 - \sigma_0^2}{\sigma_1^2}$ (the derivative of $-\ln\sigma_\alpha^2$ at $\alpha = 1$), so $D_\alpha \to \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2}{2\sigma_1^2} - \frac12 + \frac{s^2}{2\sigma_1^2}$, the KL above. With $\sigma_0 = \sigma_1$, $\sigma_\alpha = \sigma$ and only $\alpha s^2/(2\sigma^2)$ remains, which is @eq-gauss-renyi. @tbl-sol-divergences-gauss compares the formula with a numerical integral.
 
 | Pair $P\Vert Q$ | Order | Formula | Numerical integral |
 | --- | --- | --- | --- |
@@ -94,7 +94,7 @@ For $\mathcal N(0, 4)\|\mathcal N(0, 1)$ the limit is $\alpha < \frac{4}{4 - 1} 
 
 **For the Gaussian pair.** $P = \mathcal N(0, \sigma^2)$, $Q = \mathcal N(s, \sigma^2)$, $\mu = s/\sigma$.
 
-1. Step 4 of route 1 in the Gaussian section, at $\alpha = \frac12$, gives $\mathrm{BC} = \int\sqrt{pq}\,dx = \exp\big(-\frac{\frac12\cdot\frac12 s^2}{2\sigma^2}\big) = e^{-\mu^2/8}$.
+1. Step 4 of route 1 in the Gaussian section, at $\alpha = \frac12$, gives $\mathrm{BC} = \int\sqrt{pq}\,\mathrm dx = \exp\big(-\frac{\frac12\cdot\frac12 s^2}{2\sigma^2}\big) = e^{-\mu^2/8}$.
 2. So $D_{1/2} = -2\ln e^{-\mu^2/8} = \mu^2/4$. This is @eq-gauss-renyi at $\alpha = \frac12$.
 3. As a by-product, $H^2 = 2\big(1 - e^{-\mu^2/8}\big)$.
 
@@ -105,29 +105,29 @@ At $\mu = 1/\sqrt2$ (the Gaussian pair with the variance of the Laplace pair at 
 
 ## Rejection sampling {#sec-sol-divergences-4}
 
-> **Exercise 4.** **Rejection sampling.** In the rejection-sampling example, show in general that $\mathrm{TV}(P, M) \le E_\gamma(P\|Q)$. *Hint: write $\min(p, \gamma q) = p - e$ with $e = (p - \gamma q)_+$, so $m = (p - e)/(1 - E_\gamma)$, and use $e \le p$.* *(Hockey-stick)*
+> **Exercise 4.** **Rejection sampling.** In the rejection-sampling example, show in general that $\mathrm{TV}(P, \tilde P) \le E_\gamma(P\|Q)$. *Hint: write $\min(p, \gamma q) = p - e$ with $e = (p - \gamma q)_+$, so $\tilde p = (p - e)/(1 - E_\gamma)$, and use $e \le p$.* *(Hockey-stick)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 Write $E = E_\gamma(P\|Q)$ and assume $E < 1$, so that some proposals are accepted.
 
 1. **The uncovered part.** $\min(p, \gamma q) = p - (p - \gamma q)_+ = p - e$. (Where $p \le \gamma q$, $e = 0$ and the min is $p$; where $p > \gamma q$, the min is $\gamma q = p - e$.)
-2. **Normalize.** $\sum_xe(x) = E$ by the definition of $E_\gamma$, so $\sum_x\min(p, \gamma q) = 1 - E$ and $m = (p - e)/(1 - E)$.
-3. **The difference $p - m$.** $p - m = \frac{p(1 - E) - p + e}{1 - E} = \frac{e - pE}{1 - E}$.
+2. **Normalize.** $\sum_xe(x) = E$ by the definition of $E_\gamma$, so $\sum_x\min(p, \gamma q) = 1 - E$ and $\tilde p = (p - e)/(1 - E)$.
+3. **The difference $p - \tilde p$.** $p - \tilde p = \frac{p(1 - E) - p + e}{1 - E} = \frac{e - pE}{1 - E}$.
 4. **Use $e \le p$.** Since $e \le p$ and $E \ge 0$, $e - pE \le e - eE = e(1 - E)$. The right side is non-negative, so $(e - pE)_+ \le e(1 - E)$.
-5. **Sum, using the form $\mathrm{TV} = \sum(p - m)_+$ of @eq-tv:**
-$$\mathrm{TV}(P, M) = \frac{1}{1 - E}\sum_x(e - pE)_+ \le \frac{1}{1 - E}\sum_xe(1 - E) = E.$$
+5. **Sum, using the form $\mathrm{TV} = \sum(p - \tilde p)_+$ of @eq-tv:**
+$$\mathrm{TV}(P, \tilde P) = \frac{1}{1 - E}\sum_x(e - pE)_+ \le \frac{1}{1 - E}\sum_xe(1 - E) = E.$$
 
 **On the die.** @tbl-sol-divergences-reject runs the envelope $\gamma\cdot$fair over the range $1 \le \gamma \le 3$. The bound holds everywhere, and both sides reach 0 at $\gamma = 3 = \max r$.
 
 | $\gamma$ | 1 | 1.5 | 2 | 2.5 | 3 |
 | --- | --- | --- | --- | --- | --- |
-| $m(6)$ | 0.2500 | 0.3333 | 0.4000 | 0.4545 | 0.5000 |
-| $\mathrm{TV}(P, M)$ | 0.2500 | 0.1667 | 0.1000 | 0.0455 | 0.0000 |
+| $\tilde p(6)$ | 0.2500 | 0.3333 | 0.4000 | 0.4545 | 0.5000 |
+| $\mathrm{TV}(P, \tilde P)$ | 0.2500 | 0.1667 | 0.1000 | 0.0455 | 0.0000 |
 | $E_\gamma(P\Vert Q)$ | 0.3333 | 0.2500 | 0.1667 | 0.0833 | 0.0000 |
 
 : Rejection sampling from the loaded die with a fair-die proposal and envelope $\gamma q$: the output's distance from the target, against the hockey-stick divergence. {#tbl-sol-divergences-reject}
 
-The bound is loose by the factor $1 - E$ lost in step 4: the deficit $e$ is not all removed from $m$, because renormalizing gives part of it back.
+The bound is loose by the factor $1 - E$ lost in step 4: the deficit $e$ is not all removed from $\tilde p$, because renormalizing gives part of it back.
 
 *A low envelope costs at most $E_\gamma$ in total variation, so $E_\gamma$ tells you how low an envelope you can afford.*
 :::
@@ -155,37 +155,37 @@ $$PK(B) - \gamma QK(B) = \sum_xK(B\mid x)\big(p(x) - \gamma q(x)\big).$$
 
 ## Pinsker's constant is sharp {#sec-sol-divergences-6}
 
-> **Exercise 6.** **Pinsker's constant is sharp.** For $P = \mathrm{Bernoulli}(\frac12 + \delta)$ and $Q = \mathrm{Bernoulli}(\frac12)$, show $\mathrm{kl}(\frac12 + \delta, \frac12)/(2\delta^2) \to 1$ as $\delta \to 0$. *Hint: expand $\ln(1 \pm 2\delta)$ to second order.* *(Pinsker)*
+> **Exercise 6.** **Pinsker's constant is sharp.** For $P = \mathrm{Bern}(\frac12 + \xi)$ and $Q = \mathrm{Bern}(\frac12)$, show $\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2) \to 1$ as $\xi \to 0$. *Hint: expand $\ln(1 \pm 2\xi)$ to second order.* *(Pinsker)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Write out kl.** $\mathrm{kl}(\frac12 + \delta, \frac12) = (\frac12 + \delta)\ln\frac{1/2 + \delta}{1/2} + (\frac12 - \delta)\ln\frac{1/2 - \delta}{1/2} = (\frac12 + \delta)\ln(1 + 2\delta) + (\frac12 - \delta)\ln(1 - 2\delta)$.
-2. **Expand the logarithms.** $\ln(1 + u) = u - \frac{u^2}2 + O(u^3)$, so $\ln(1 \pm 2\delta) = \pm2\delta - 2\delta^2 + O(\delta^3)$.
-3. **Multiply out**, keeping terms up to $\delta^2$:
-$$(\tfrac12 + \delta)(2\delta - 2\delta^2) = \delta - \delta^2 + 2\delta^2 + O(\delta^3), \qquad (\tfrac12 - \delta)(-2\delta - 2\delta^2) = -\delta - \delta^2 + 2\delta^2 + O(\delta^3).$$
-4. **Add.** The $\delta$ terms cancel and the $\delta^2$ terms give $2\delta^2$: $\mathrm{kl}(\frac12 + \delta, \frac12) = 2\delta^2 + O(\delta^3)$. Divide by $2\delta^2$: the ratio is $1 + O(\delta) \to 1$.
+1. **Write out kl.** $\mathrm{kl}(\frac12 + \xi\|\frac12) = (\frac12 + \xi)\ln\frac{1/2 + \xi}{1/2} + (\frac12 - \xi)\ln\frac{1/2 - \xi}{1/2} = (\frac12 + \xi)\ln(1 + 2\xi) + (\frac12 - \xi)\ln(1 - 2\xi)$.
+2. **Expand the logarithms.** $\ln(1 + u) = u - \frac{u^2}2 + O(u^3)$, so $\ln(1 \pm 2\xi) = \pm2\xi - 2\xi^2 + O(\xi^3)$.
+3. **Multiply out**, keeping terms up to $\xi^2$:
+$$(\tfrac12 + \xi)(2\xi - 2\xi^2) = \xi - \xi^2 + 2\xi^2 + O(\xi^3), \qquad (\tfrac12 - \xi)(-2\xi - 2\xi^2) = -\xi - \xi^2 + 2\xi^2 + O(\xi^3).$$
+4. **Add.** The $\xi$ terms cancel and the $\xi^2$ terms give $2\xi^2$: $\mathrm{kl}(\frac12 + \xi\|\frac12) = 2\xi^2 + O(\xi^3)$. Divide by $2\xi^2$: the ratio is $1 + O(\xi) \to 1$.
 
-**Why this makes the constant sharp.** Here $\mathrm{TV}(P, Q) = \delta$ (one outcome gains $\delta$, the other loses it). Pinsker says $\mathrm{KL} \ge 2\,\mathrm{TV}^2 = 2\delta^2$. If some constant $c > 2$ worked, $\mathrm{KL} \ge c\,\mathrm{TV}^2$, the ratio $\mathrm{kl}/(2\delta^2)$ would stay at least $c/2 > 1$ for all $\delta$, which contradicts the limit 1.
+**Why this makes the constant sharp.** Here $\mathrm{TV}(P, Q) = \xi$ (one outcome gains $\xi$, the other loses it). Pinsker says $D_{\mathrm{KL}}(P\|Q) \ge 2\,\mathrm{TV}(P, Q)^2 = 2\xi^2$. If some constant $c > 2$ worked, $D_{\mathrm{KL}}(P\|Q) \ge c\,\mathrm{TV}(P, Q)^2$, the ratio $\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2)$ would stay at least $c/2 > 1$ for all $\xi$, which contradicts the limit 1.
 
-**How fast.** kl is even in $\delta$ (swapping heads and tails maps $\delta$ to $-\delta$), so the $O(\delta^3)$ term is in fact zero; carrying the expansion one order further gives the ratio $1 + \frac23\delta^2 + O(\delta^4)$. @tbl-sol-divergences-pinsker shows it.
+**How fast.** kl is even in $\xi$ (swapping heads and tails maps $\xi$ to $-\xi$), so the $O(\xi^3)$ term is in fact zero; carrying the expansion one order further gives the ratio $1 + \frac23\xi^2 + O(\xi^4)$. @tbl-sol-divergences-pinsker shows it.
 
-| $\delta$ | 0.2 | 0.1 | 0.01 |
+| $\xi$ | 0.2 | 0.1 | 0.01 |
 | --- | --- | --- | --- |
-| $\mathrm{kl}(\frac12 + \delta, \frac12)/(2\delta^2)$ | 1.0285 | 1.0068 | 1.0001 |
-| $1 + \frac23\delta^2$ | 1.0267 | 1.0067 | 1.0001 |
+| $\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2)$ | 1.0285 | 1.0068 | 1.0001 |
+| $1 + \frac23\xi^2$ | 1.0267 | 1.0067 | 1.0001 |
 
-: The ratio of the binary KL to Pinsker's lower bound $2\delta^2$, for a coin with bias $\frac12 + \delta$ against a fair coin. {#tbl-sol-divergences-pinsker}
+: The ratio of the binary KL to Pinsker's lower bound $2\xi^2$, for a coin with bias $\frac12 + \xi$ against a fair coin. {#tbl-sol-divergences-pinsker}
 
 *Near two fair coins, Pinsker's inequality is an equality to first order, so its constant cannot be improved.*
 :::
 
 ## Samples needed for two coins {#sec-sol-divergences-7}
 
-> **Exercise 7.** **Samples needed for two coins.** You flip a coin that is either fair or has heads probability 0.6. Use additivity and Pinsker to find how many flips $n$ are necessary before the TV between $n$ flips of the two coins can reach 0.8. *Check: $\mathrm{kl}(0.6, 0.5) = 0.02014$, so $n \ge 2\times0.8^2/0.02014$, that is $n \ge 64$.* Is this a lower or an upper bound on the flips you need? *(Additivity, Pinsker)*
+> **Exercise 7.** **Samples needed for two coins.** You flip a coin that is either fair or has heads probability 0.6. Use additivity and Pinsker to find how many flips $n$ are necessary before the TV between $n$ flips of the two coins can reach 0.8. *Check: $\mathrm{kl}(0.6\|0.5) = 0.02014$, so $n \ge 2\times0.8^2/0.02014$, that is $n \ge 64$.* Is this a lower or an upper bound on the flips you need? *(Additivity, Pinsker)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **One flip.** $\mathrm{kl}(0.6, 0.5) = 0.6\ln\frac{0.6}{0.5} + 0.4\ln\frac{0.4}{0.5} = 0.6\ln1.2 + 0.4\ln0.8 = 0.02014$.
-2. **$n$ flips, by additivity** (@eq-kl-additive): $\mathrm{KL}_n = 0.02014\,n$.
-3. **Pinsker** (@eq-pinsker): $\mathrm{TV}_n \le \sqrt{\mathrm{KL}_n/2} = \sqrt{0.02014\,n/2}$.
+1. **One flip.** $\mathrm{kl}(0.6\|0.5) = 0.6\ln\frac{0.6}{0.5} + 0.4\ln\frac{0.4}{0.5} = 0.6\ln1.2 + 0.4\ln0.8 = 0.02014$.
+2. **$n$ flips, by additivity** (@eq-kl-additive): $D_{\mathrm{KL}}(P^n\|Q^n) = 0.02014\,n$, where $P$ is the biased coin and $Q$ the fair one.
+3. **Pinsker** (@eq-pinsker): $\mathrm{TV}(P^n, Q^n) \le \sqrt{D_{\mathrm{KL}}(P^n\|Q^n)/2} = \sqrt{0.02014\,n/2}$.
 4. **Require TV to reach 0.8.** That needs $\sqrt{0.02014\,n/2} \ge 0.8$, that is $n \ge 2\times0.8^2/0.02014 = 63.6$. Since $n$ is an integer, $n \ge 64$. The check value is right.
 
 **Lower or upper bound?** A **lower bound**. Pinsker caps the TV, so with fewer than 64 flips *no* test can reach TV 0.8. It does not say 64 flips are enough. The exact TV (computed on the number of heads, which is a sufficient statistic, so by the equality case of the DPI it has the same TV as the whole sequence) is only 0.5805 at $n = 64$, and first reaches 0.8 at $n = 162$. Pinsker is off by a factor of about 2.5 here, because it is tight only near TV $= 0$. Bretagnolle–Huber (@eq-bh) gives the weaker requirement $n \ge \ln\frac{1}{1 - 0.64}/0.02014$, that is $n \ge 51$: the KL that Pinsker needs for TV $= 0.8$ is $2\times0.8^2 = 1.28$, below the crossover 1.59 of @sec-div-pinsker, so Pinsker is the stronger of the two here.

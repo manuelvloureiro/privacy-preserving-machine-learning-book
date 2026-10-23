@@ -2,7 +2,7 @@
 
 Exercises for [Post-processing, group privacy and composition](../../book-full/part03-dp-foundations/02-properties.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part03-dp-foundations/solutions_properties.py` computes every number quoted here; run it with `uv run python code/part03-dp-foundations/solutions_properties.py`.
 
-The solutions use the chapter's notation. $M$ is a mechanism, $D \simeq D'$ neighbouring datasets, $P = M(D)$ and $Q = M(D')$, and $L_{D,D'}(y) = \ln\frac{p(y)}{q(y)}$ the privacy loss. Differential privacy (DP) at level $(\varepsilon, \delta)$ means $P(S) \le e^\varepsilon Q(S) + \delta$ for every event $S$ and every ordered neighbouring pair. Randomized response at $\varepsilon_0 = \ln 3$ reports the true bit with probability $\frac34$. Logarithms are natural.
+The solutions use the chapter's notation. $M$ is a mechanism, $D \simeq D'$ neighbouring datasets, $P = M(D)$ and $Q = M(D')$, and $L_{D,D'}(y) = \ln\frac{p(y)}{q(y)}$ the privacy loss. Differential privacy (DP) at level $(\varepsilon, \delta)$ means $\Pr_P[S] \le e^\varepsilon \Pr_Q[S] + \delta$ for every event $S$ and every ordered neighbouring pair. Randomized response at $\varepsilon_0 = \ln 3$ reports the true bit with probability $\frac34$. Logarithms are natural.
 
 ## Majority of three answers {#sec-sol-dpprop-1}
 
@@ -91,8 +91,8 @@ The script computes the exact pure $\varepsilon$ of two bins with rounded Laplac
 ::: {.callout-tip collapse="true" title="Solution"}
 **Shared noise.**
 
-1. **Disjoint supports.** Under $D$ every released pair $(u, v)$ satisfies $u - v = c$, where $c = c_1(D) - c_2(D)$. Under $D'$ every pair satisfies $u - v = c - 1$. Let $A = \{(u, v) : u - v = c\}$. Then $P(A) = 1$ and $Q(A) = 0$.
-2. **The hockey-stick is at least 1.** $E_{e^\varepsilon}(P\|Q) = \max_S[P(S) - e^\varepsilon Q(S)] \ge P(A) - e^\varepsilon Q(A) = 1$.
+1. **Disjoint supports.** Under $D$ every released pair $(u, v)$ satisfies $u - v = c$, where $c = c_1(D) - c_2(D)$. Under $D'$ every pair satisfies $u - v = c - 1$. Let $A = \{(u, v) : u - v = c\}$. Then $\Pr_P[A] = 1$ and $\Pr_Q[A] = 0$.
+2. **The hockey-stick is at least 1.** $E_{e^\varepsilon}(P\|Q) = \max_S[\Pr_P[S] - e^\varepsilon \Pr_Q[S]] \ge \Pr_P[A] - e^\varepsilon \Pr_Q[A] = 1$.
 3. **And at most 1,** since $\sum(p - e^\varepsilon q)_+ \le \sum p = 1$. So it is exactly 1 for every $\varepsilon$, and the pair is not $(\varepsilon, \delta)$-DP for any $\delta < 1$.
 
 The script represents the difference $u - v$ as a point mass at $c$ under $D$ and at $c - 1$ under $D'$ and gets $E_{e^\varepsilon} = 1.0000$ at $\varepsilon = 0, 1, 5, 20$.
@@ -114,7 +114,7 @@ The script represents the difference $u - v$ as a point mass at $c$ under $D$ an
 **A tail bound on the loss gives $(\varepsilon, \delta)$.**
 
 1. **The worst event** for $E_{e^\varepsilon}(P\|Q)$ is $B = \{y : p(y) > e^\varepsilon q(y)\} = \{L > \varepsilon\}$ (Fact 3 of [Divergences](../../book-full/part01-prerequisites/03-divergences.md)).
-2. **Drop the negative term:** $E_{e^\varepsilon}(P\|Q) = P(B) - e^\varepsilon Q(B) \le P(B) = \Pr_P[L > \varepsilon] \le \delta$.
+2. **Drop the negative term:** $E_{e^\varepsilon}(P\|Q) = \Pr_P[B] - e^\varepsilon \Pr_Q[B] \le \Pr_P[B] = \Pr_P[L > \varepsilon] \le \delta$.
 3. This holds for every ordered pair, which is the hockey-stick form of $(\varepsilon, \delta)$-DP.
 
 **The mean of the loss.** For one answer under $D$ (bit 1), the loss is $+\varepsilon_0$ with probability $t = \frac{e^{\varepsilon_0}}{1 + e^{\varepsilon_0}}$ and $-\varepsilon_0$ with probability $1 - t$. Its mean is $\varepsilon_0(2t - 1)$, and
@@ -124,9 +124,9 @@ For $k$ independent answers (Fact 3 of the chapter) the mean is $k\varepsilon_0\
 **Hoeffding.**
 
 1. $L = \sum_{i=1}^kL_i$ with independent $L_i \in [-\varepsilon_0, \varepsilon_0]$, each of range $2\varepsilon_0$. Hoeffding's inequality ([Concentration](../../book-full/part01-prerequisites/02-concentration.md)) gives, for $s > 0$,
-$$\Pr[L - \mathbb E L \ge s] \le \exp\Big(-\frac{2s^2}{k(2\varepsilon_0)^2}\Big) = \exp\Big(-\frac{s^2}{2k\varepsilon_0^2}\Big).$$
+$$\Pr[L - \mathbb E[L] \ge s] \le \exp\Big(-\frac{2s^2}{k(2\varepsilon_0)^2}\Big) = \exp\Big(-\frac{s^2}{2k\varepsilon_0^2}\Big).$$
 2. **Set the right side to $\delta$:** $s = \varepsilon_0\sqrt{2k\ln(1/\delta)}$.
-3. **Combine with the first part:** with $\varepsilon = \mathbb E L + s$, $\Pr[L > \varepsilon] \le \delta$. Randomized response is symmetric in the two bits, so the same holds for the reversed pair, and $M$ is $(\varepsilon, \delta)$-DP.
+3. **Combine with the first part:** with $\varepsilon = \mathbb E[L] + s$, $\Pr[L > \varepsilon] \le \delta$. Randomized response is symmetric in the two bits, so the same holds for the reversed pair, and $M$ is $(\varepsilon, \delta)$-DP.
 
 **The check.** For $\varepsilon_0 = 0.1$, $k = 1000$, $\delta = 10^{-6}$: $s = 0.1\sqrt{2000 \ln 10^6} = 16.623$, so $\varepsilon = 4.996 + 16.623 = 21.62$. The exact tail at that point is $\Pr_D[L > 21.62] = 5.319 \times 10^{-8}$, well below $10^{-6}$, which shows how much Hoeffding gives away. The exact $\varepsilon$ at $\delta = 10^{-6}$ is 19.345 and basic composition gives 100.
 

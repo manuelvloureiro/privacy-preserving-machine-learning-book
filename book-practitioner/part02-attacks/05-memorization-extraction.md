@@ -90,7 +90,7 @@ $$\Lambda(x) = \ln p_\theta(x) - \ln p_{\mathrm{ref}}(x).$$ {#eq-memo-ratio}
 
 Raw likelihood puts first the strings that any model finds likely, such as software licences and boilerplate, which reveal nothing, and the ratio cancels them. A crude reference works. Carlini et al. (2021) used a smaller model of the same family. They also used the compressed length of the text, `len(zlib.compress(text.encode()))`, which measures how predictable the text is without any model. To audit your own fine-tuned model this way, the base model before fine-tuning is a natural reference.
 
-An attacker without the prefix extracts less than the discoverable rate suggests, but production models are not safe. Nasr et al. (2023) asked ChatGPT to repeat one word forever, until it left the assistant behaviour that alignment training gives it and wrote memorized text. For about 200 US dollars of queries they extracted over 10,000 examples, so alignment hides memorization from casual use without removing it.
+An attacker without the prefix extracts less than the discoverable rate suggests, but production models are not safe. Nasr et al. (2023) asked ChatGPT to repeat one word forever, until it left the assistant behaviour that alignment training gives it and wrote memorized text. For about 200 US dollars of queries they extracted over 10,000 records, so alignment hides memorization from casual use without removing it.
 
 ## Cheat sheet
 

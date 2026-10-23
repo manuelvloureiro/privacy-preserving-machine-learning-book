@@ -10,7 +10,7 @@ For example, at $\delta = 10^{-5}$ a budget of $\varepsilon = 1$ allows a slope 
 
 ## When you meet it {#sec-pate-when}
 
-You meet private prediction when you cannot train a private model. The common case is a large language model (LLM) behind an interface, whose prompt holds private examples and whose answers leak them. The fix splits the examples into disjoint groups, prompts the model once per group, and releases the GNMax label of the answers (Duan et al. 2023). Wu et al. (2024) answered 10,000 sentiment queries this way. At $\varepsilon = 1$ they report 91.97% accuracy, as good as one non-private prompt.
+You meet private prediction when you cannot train a private model. The common case is a large language model (LLM) behind an interface, whose prompt holds private records and whose answers leak them. The fix splits the records into disjoint groups, prompts the model once per group, and releases the GNMax label of the answers (Duan et al. 2023). Wu et al. (2024) answered 10,000 sentiment queries this way. At $\varepsilon = 1$ they report 91.97% accuracy, as good as one non-private prompt.
 
 The decision is between private answers and a private model, whose accuracy is fixed. The vote's accuracy falls as its noise grows with $\sqrt Q$, so answers win up to a **break-even** number of queries, and the model wins beyond it. On the full edition's 10,000-record synthetic task, the vote beats noisy stochastic gradient descent (SGD), [DP-SGD](02-dp-sgd.md), only on the first 18 queries at $\varepsilon = 1$. From $\varepsilon = 2$ on, DP-SGD beats even a noiseless vote of teachers trained on small shards. So compare the two at your budget and expected number of queries, with the DP-SGD baseline of [Train a model with DP-SGD](13-train-dp-sgd.md).
 
@@ -33,7 +33,7 @@ pld = PLDAccountant().compose(event).get_epsilon(1e-5)
 print(f"{rdp:.3f} {pld:.3f}")  # 0.999 0.914
 ```
 
-The RDP accountant confirms $\varepsilon = 0.999$. The privacy loss distribution (PLD) accountant, exact for Gaussian noise, gives 0.914, so solving for $\sigma$ with it gives less noise. To solve, pass a function from $\sigma$ to this event to `dp_accounting.calibrate_dp_mechanism`. For many answers the PLD is much slower than RDP, which is the fallback when it takes too long. When each query draws a fresh Poisson sample of examples, as in Wu et al., wrap each event in a `PoissonSampledDpEvent`.
+The RDP accountant confirms $\varepsilon = 0.999$. The privacy loss distribution (PLD) accountant, exact for Gaussian noise, gives 0.914, so solving for $\sigma$ with it gives less noise. To solve, pass a function from $\sigma$ to this event to `dp_accounting.calibrate_dp_mechanism`. For many answers the PLD is much slower than RDP, which is the fallback when it takes too long. When each query draws a fresh Poisson sample of records, as in Wu et al., wrap each event in a `PoissonSampledDpEvent`.
 
 ## What goes wrong {#sec-pate-wrong}
 

@@ -714,7 +714,7 @@ def plot_em_utility() -> Figure:
             [em_gap_bound(k, e, c) for c in cs],
             color=color,
             linestyle="--",
-            label=rf"bound $k e^{{-\varepsilon c/2}}$, $\varepsilon$ = {e:g}",
+            label=rf"bound $|\mathcal{{R}}| e^{{-\varepsilon c/2}}$, $\varepsilon$ = {e:g}",
         )
     left.set(
         yscale="log",
@@ -727,7 +727,7 @@ def plot_em_utility() -> Figure:
     left.legend(fontsize=8, loc="lower left")
     gaps = [i / 4 for i in range(4 * 50 + 1)]
     right.plot(gaps, [em_gap_tail(tied_profile(k, g), 1.0, g) for g in gaps], label="exact Pr[not the best]")
-    right.plot(gaps, [em_gap_bound(k, 1.0, g) for g in gaps], "--", label=r"bound $k e^{-\varepsilon g/2}$")
+    right.plot(gaps, [em_gap_bound(k, 1.0, g) for g in gaps], "--", label=r"bound $|\mathcal{R}| e^{-\varepsilon g/2}$")
     right.set(
         yscale="log",
         ylim=(1e-8, 2),
@@ -803,8 +803,8 @@ def plot_svt_path(rng: np.random.Generator, eps: float = 1.0, threshold: float =
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(idx, f, color="0.5", linewidth=1, label=r"true answers $f_i(D)$")
     ax.axhline(threshold, color="0.5", linestyle=":", label=f"threshold T = {threshold:g}")
-    ax.axhline(threshold + rho, color="C3", linestyle="--", label=r"noisy threshold $T + \rho$")
-    ax.plot(idx[:stop], noisy[:stop], "o", color="C0", label=r"$f_i + \nu_i < T + \rho$: answer $\bot$")
+    ax.axhline(threshold + rho, color="C3", linestyle="--", label=r"noisy threshold $\tau + \rho$")
+    ax.plot(idx[:stop], noisy[:stop], "o", color="C0", label=r"$f_i + \nu_i < \tau + \rho$: answer $\bot$")
     if stop < m:
         ax.plot(
             [stop],
@@ -812,7 +812,7 @@ def plot_svt_path(rng: np.random.Generator, eps: float = 1.0, threshold: float =
             "*",
             color="C1",
             markersize=14,
-            label=r"first $f_i + \nu_i \geq T + \rho$: answer $\top$, halt",
+            label=r"first $f_i + \nu_i \geq \tau + \rho$: answer $\top$, halt",
         )
         ax.plot(idx[stop + 1 :], noisy[stop + 1 :], "o", color="0.85", label="never looked at")
     ax.set(xlabel="query i", ylabel="value", title="AboveThreshold: one noisy threshold, fresh noise per query")

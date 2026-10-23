@@ -685,8 +685,8 @@ def plot_fourpoint_tradeoff() -> Figure:
     left.set(
         xlim=(0, 1),
         ylim=(0, 1),
-        xlabel="false positive rate α",
-        ylabel="false negative rate β",
+        xlabel="false positive rate",
+        ylabel="false negative rate",
         title="Trade-off curves",
     )
     left.set_aspect("equal")
@@ -710,7 +710,7 @@ def plot_fourpoint_tradeoff() -> Figure:
     right.annotate(
         rf"$\theta^* = {dec.theta:.3f}$", (dec.theta, float(small.sum())), textcoords="offset points", xytext=(8, 8)
     )
-    right.set(xlabel=r"mixing weight $\theta$", ylabel="total mass", title="Equalizing the two pure parts")
+    right.set(xlabel=r"mixing weight $\omega$", ylabel="total mass", title="Equalizing the two pure parts")
     right.legend(fontsize=8, loc="lower left")
     return fig
 
@@ -732,7 +732,7 @@ def plot_histogram_error() -> Figure:
     ax.axhline(
         stability_error_bound(bins, eps, delta, beta),
         color="tab:green",
-        label=r"stability histogram, bound $T + \ln(k/\beta)/\varepsilon$",
+        label=r"stability histogram, bound $\tau + \ln(k/\beta)/\varepsilon$",
     )
     ax.axhline(worst_q, color="tab:green", linestyle="--", label="stability histogram, exact worst case")
     ax.set(
@@ -762,7 +762,7 @@ def plot_histogram_release() -> Figure:
             markersize=4,
             label="integer counts",
         )
-        ax.axvline(t, color="gray", linestyle=":", label=f"threshold T = {t:.2f}")
+        ax.axvline(t, color="gray", linestyle=":", label=rf"threshold $\tau$ = {t:.2f}")
         ax.plot(
             [1],
             [release_probability(1, t, eps)],
@@ -773,9 +773,9 @@ def plot_histogram_release() -> Figure:
         )
         ax.set(xlabel="true count c of the bin", ylabel="probability the bin is released")
         if log:
-            ax.set(yscale="log", ylim=(1e-7, 2), title="Log scale: the tail below T is exponential")
+            ax.set(yscale="log", ylim=(1e-7, 2), title=r"Log scale: the tail below $\tau$ is exponential")
         else:
-            ax.set(ylim=(-0.02, 1.05), title="Release probability Pr[c + Z > T]")
+            ax.set(ylim=(-0.02, 1.05), title=r"Release probability $\Pr[c + Z > \tau]$")
         ax.legend(fontsize=8, loc="lower right" if log else "upper left")
     return fig
 
@@ -791,17 +791,17 @@ def plot_heavy_two_point() -> Figure:
         linefmt="tab:orange",
         markerfmt="s",
         basefmt=" ",
-        label=rf"$P_1$: mass {p:.2f} at a = {a:.2f}, mean $2\alpha$ = {2 * alpha:.1f}",
+        label=rf"$P_1$: mass {p:.2f} at $v$ = {a:.2f}, mean $2a$ = {2 * alpha:.1f}",
     )
-    ax.axvspan(-alpha, alpha, color="tab:blue", alpha=0.15, label=r"answers within $\alpha$ of 0")
-    ax.axvspan(alpha, 3 * alpha, color="tab:orange", alpha=0.15, label=r"answers within $\alpha$ of $2\alpha$")
-    ax.axvline(alpha, color="k", linestyle=":", label=r"the test: is the estimate $\geq \alpha$?")
+    ax.axvspan(-alpha, alpha, color="tab:blue", alpha=0.15, label=r"answers within $a$ of 0")
+    ax.axvspan(alpha, 3 * alpha, color="tab:orange", alpha=0.15, label=r"answers within $a$ of $2a$")
+    ax.axvline(alpha, color="k", linestyle=":", label=r"the test: is the estimate $\geq a$?")
     ax.set(
         xlim=(-0.4, a + 0.6),
         ylim=(0, 1.1),
         xlabel="record value",
         ylabel="probability",
-        title=rf"Two distributions with variance at most 1, $\alpha = {alpha}$",
+        title=rf"Two distributions with variance at most 1, $a = {alpha}$",
     )
     ax.legend(fontsize=8, loc="center right")
     return fig
@@ -826,7 +826,7 @@ def plot_heavy_rates() -> Figure:
     ax.set(
         xscale="log",
         yscale="log",
-        xlabel=r"target error $\alpha$",
+        xlabel=r"target error $a$",
         ylabel="records n",
         title=r"$\varepsilon = 1$, $\beta = 0.05$, k-th central moment at most 1",
     )

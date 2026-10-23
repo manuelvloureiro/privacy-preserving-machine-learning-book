@@ -95,7 +95,7 @@ The solutions use the chapter's notation. Differential privacy (DP) is defined b
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The bound.** At $\varepsilon = 0$, $(e^0 - 1 + 2\delta)/(e^0 + 1) = 2\delta/2 = \delta$.
 2. **An adversary for the mechanism.** In the game between $D$ and $D' = D \cup \{x\}$, guess "$D'$" exactly when $x$ appears in the output.
-3. **Its errors.** Under $D$, $x$ can never appear: the false positive rate (FPR) is $\alpha = 0$. Under $D'$, it appears with probability $\delta$: the true positive rate (TPR) is $\delta$.
+3. **Its errors.** Under $D$, $x$ can never appear: the false positive rate (FPR) is $a = 0$. Under $D'$, it appears with probability $\delta$: the true positive rate (TPR) is $\delta$.
 4. **Its advantage.** $\mathrm{TPR} - \mathrm{FPR} = \delta$, equal to the bound. So the bound is attained, and the guessing adversary is optimal.
 5. **Check by enumeration.** The best advantage is the total variation between the two output distributions (Part 2). For $n = 3$ and $\delta = 0.1$, the script computes it over all subsets of the four records: 0.1000, equal to the bound 0.1000.
 
@@ -131,7 +131,7 @@ The solutions use the chapter's notation. Differential privacy (DP) is defined b
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The path.** Two datasets $D$ and $D^*$ of $n$ records differ in at most $n$ positions. Change them one at a time to get $D = D_0, D_1, \dots, D_m = D^*$ with $m \le n$, each pair of consecutive datasets being replace neighbours.
-2. **One step.** The assumption says that $\mathrm{TV}(M(D_{i-1}), M(D_i)) \le \delta$, because TV is the largest gap $|P(S) - Q(S)|$ over events.
+2. **One step.** The assumption says that $\mathrm{TV}(M(D_{i-1}), M(D_i)) \le \delta$, because TV is the largest gap $|\Pr_P[S] - \Pr_Q[S]|$ over events.
 3. **The triangle inequality.** TV is a distance, so $\mathrm{TV}(M(D_0), M(D_m)) \le \sum_{i=1}^m\mathrm{TV}(M(D_{i-1}), M(D_i)) \le m\delta \le n\delta$.
 4. **Useless when $n\delta$ is small.** With the two datasets equally likely, the best test is right with probability $\frac12 + \frac12\mathrm{TV}$. At $n = 1000$, $\delta = 10^{-4}$: $\mathrm{TV} \le 0.1000$, so the accuracy is at most 0.5500, whatever the mechanism computes. Even "is everyone a one, or no one?" cannot be answered reliably.
 5. **Not private when $n\delta$ is large.** The mechanism that publishes each record with probability $\delta$ changes the output between neighbours only through that record's own coin, so its TV between neighbours is at most $\delta$ and it satisfies the additive definition. At $\delta = 10^{-3} = 1/n$ it publishes at least one record with probability $1 - (1 - 10^{-3})^{1000} = 0.6323$.

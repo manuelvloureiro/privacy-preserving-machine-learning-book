@@ -688,20 +688,20 @@ def plot_bernstein_mgf(p: float = 0.01) -> Figure:
     ax.plot(
         lams,
         [bernstein_log_mgf_series(lam, var, m) for lam in lams],
-        label=r"Bernstein, step 2: $\frac{\sigma^2}{M^2}(e^{\lambda M}-1-\lambda M)$",
+        label=r"Bernstein, step 2: $\frac{\sigma^2}{R^2}(e^{\lambda R}-1-\lambda R)$",
     )
     ax.plot(
         lams,
         [bernstein_log_mgf_simple(lam, var, m) for lam in lams],
         "--",
-        label=r"Bernstein, step 3: $\frac{\sigma^2\lambda^2}{2(1-\lambda M/3)}$",
+        label=r"Bernstein, step 3: $\frac{\sigma^2\lambda^2}{2(1-\lambda R/3)}$",
     )
     ax.set(
         yscale="log",
         ylim=(1e-5, 3),
         xlabel=r"$\lambda$",
         ylabel="log-MGF of the centred variable",
-        title=f"Centred Bernoulli({p}): variance {var:.4f}, range bound M = {m}",
+        title=f"Centred Bernoulli({p}): variance {var:.4f}, range bound R = {m}",
     )
     ax.legend(fontsize=8, loc="lower right")
     return fig
@@ -741,7 +741,7 @@ def plot_cramer(p: float = 0.1, t: float = 0.2) -> Figure:
         alpha=0.6,
         label=f"tilted: Bin({n}, {p_tilt:.3f})",
     )
-    left.axvspan(n * t, n * (t + eps), color="gray", alpha=0.2, label=r"window $[nt,\ n(t+\varepsilon)]$")
+    left.axvspan(n * t, n * (t + eps), color="gray", alpha=0.2, label=r"window $[nt,\ n(t+\kappa)]$")
     left.set(xlabel="count S", ylabel="probability", title=f"Tilting moves the mass into the window (n = {n})")
     left.legend(fontsize=8)
 
@@ -752,7 +752,7 @@ def plot_cramer(p: float = 0.1, t: float = 0.2) -> Figure:
     right.plot(
         ns, [cramer_rate_upper(k, p, t, cramer_eps(k, t)) for k in ns], label="tilting bound (lower bound on Pr)"
     )
-    right.axhline(kl_bernoulli(t, p), color="C3", linestyle="--", label=f"Chernoff exponent kl({t}, {p})")
+    right.axhline(kl_bernoulli(t, p), color="C3", linestyle="--", label=f"Chernoff exponent kl({t}‖{p})")
     right.set(
         ylim=(0, 0.25),
         xlabel="n",
@@ -768,11 +768,11 @@ def plot_stein(size: float = 0.05) -> Figure:
     betas = stein_betas(ns, size)
     fig, ax = plt.subplots(figsize=(6, 4))
     ax.plot(
-        ns, [-math.log(betas[n]) / n for n in ns], "ko-", markersize=3, label=r"optimal test: $-\frac{1}{n}\ln\beta_n$"
+        ns, [-math.log(betas[n]) / n for n in ns], "ko-", markersize=3, label=r"optimal test: $-\frac{1}{n}\ln b_n$"
     )
     ax.plot(ns, [stein_rate_lower(n, size) for n in ns], label="achievability bound (threshold test)")
     ax.plot(ns, [stein_rate_upper(n, size) for n in ns], label="converse bound (any test)")
-    ax.axhline(spam_kl(), color="C3", linestyle="--", label=f"KL(P‖Q) = {spam_kl():.4f}")
+    ax.axhline(spam_kl(), color="C3", linestyle="--", label=rf"$D_{{\mathrm{{KL}}}}(P\|Q)$ = {spam_kl():.4f}")
     ax.set(
         ylim=(-0.3, 1.5),
         xlabel="number of observations n",
@@ -838,8 +838,8 @@ def plot_renyi_sandwich(mu: float = 1.0) -> Figure:
             ax.plot(part, [psi(lam) / lam for lam in part], "k", linewidth=2)
             ax.plot(part, [sandwich(lam) for lam in part], color="C0")
         ax.plot([], [], "k", linewidth=2, label=r"$D_{1+\lambda} = \psi(\lambda)/\lambda$")
-        ax.plot([], [], color="C0", label=r"$\mathrm{E}_P[(r^\lambda - 1)/\lambda]$")
-        ax.axhline(kl, color="C3", linestyle="--", label=f"KL = {kl:.4f}")
+        ax.plot([], [], color="C0", label=r"$\mathbb{E}_P[(r^\lambda - 1)/\lambda]$")
+        ax.axhline(kl, color="C3", linestyle="--", label=rf"$D_{{\mathrm{{KL}}}}$ = {kl:.4f}")
         ax.axvline(0, color="gray", linewidth=0.5)
         ax.set(xlabel=r"$\lambda = \alpha - 1$", ylabel="nats", title=title)
         ax.legend(fontsize=8, loc="upper left")

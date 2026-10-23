@@ -63,9 +63,9 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 > **Exercise 4.** **Sizing the proposal.** With $\varepsilon = 1$ and $\delta = 10^{-6}$, how large must $\operatorname{dist}_b(D)$ be for propose-test-release to answer with probability at least 0.99? For the ages, what is the smallest $b$ that achieves it? *Check: distance 18 (17.73 rounded up), pass probability 0.9924; $b = A^{(17)} = 0.7892$.* *(Propose-test-release)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The pass probability.** With threshold $T = \ln(1/\delta)/\varepsilon = 13.82$ and distance $d \ge T$, the test passes when $\mathrm{Lap}(1/\varepsilon) > T - d$, which has probability $1 - \frac12e^{-\varepsilon(d - T)}$.
-2. **Solve for 0.99.** $\frac12e^{-\varepsilon(d - T)} \le 0.01$ means $d \ge T + \ln(50)/\varepsilon = 13.82 + 3.91 = 17.73$.
-3. **Round up.** The distance counts records, so it is an integer: $d \ge 18$. At $d = 18$ the pass probability is $1 - \frac12e^{-(18 - 13.82)} = 0.9924$.
+1. **The pass probability.** With threshold $\tau = \ln(1/\delta)/\varepsilon = 13.82$ and distance $k \ge \tau$, the test passes when $\mathrm{Lap}(1/\varepsilon) > \tau - k$, which has probability $1 - \frac12e^{-\varepsilon(k - \tau)}$.
+2. **Solve for 0.99.** $\frac12e^{-\varepsilon(k - \tau)} \le 0.01$ means $k \ge \tau + \ln(50)/\varepsilon = 13.82 + 3.91 = 17.73$.
+3. **Round up.** The distance counts records, so it is an integer: $k \ge 18$. At $k = 18$ the pass probability is $1 - \frac12e^{-(18 - 13.82)} = 0.9924$.
 4. **Translate into $b$.** $\operatorname{dist}_b(D) = \min\{k : A^{(k)}(D) > b\}$, and $A^{(k)}$ is non-decreasing in $k$. So $\operatorname{dist}_b(D) \ge 18$ exactly when $A^{(17)}(D) \le b$.
 5. **The ages.** $A^{(17)} = 0.7892$, so the smallest proposal that passes with probability 0.99 is $b = 0.7892$ years; the script confirms $\operatorname{dist}_{0.7892} = 18$. The chapter's $b = 1$ has distance 21, with room to spare.
 
@@ -88,16 +88,16 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 
 ## Clipping exponential data {#sec-sol-sensitivity-6}
 
-> **Exercise 6.** **Clipping exponential data.** For $X \sim \mathrm{Exponential}(1)$, show $\mathbb E[(X - C)_+] = e^{-C}$ and, ignoring the sampling term, that the best clip bound solves $e^{-2C} = 2C/(n\varepsilon)^2$. *Check: $C^* = 5.692$ for $n = 1000$, $\varepsilon = 1$; $3.616$ for $n = 100$ and $7.834$ for $n = 10{,}000$.* *(Clipping)*
+> **Exercise 6.** **Clipping exponential data.** For $X \sim \mathrm{Exp}(1)$, show $\mathbb E[(X - C)_+] = e^{-C}$ and, ignoring the sampling term, that the best clipping norm solves $e^{-2C} = 2C/(n\varepsilon)^2$. *Check: $C^* = 5.692$ for $n = 1000$, $\varepsilon = 1$; $3.616$ for $n = 100$ and $7.834$ for $n = 10{,}000$.* *(Clipping)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The bias.** $\mathbb E[(X - C)_+] = \int_C^\infty(x - C)e^{-x}\,dx$. Substitute $u = x - C$: $e^{-C}\int_0^\infty ue^{-u}\,du = e^{-C}$. (This is memorylessness: given $X > C$, the excess is again $\mathrm{Exponential}(1)$, with mean 1, and $\Pr[X > C] = e^{-C}$.)
+1. **The bias.** $\mathbb E[(X - C)_+] = \int_C^\infty(x - C)e^{-x}\,\mathrm dx$. Substitute $u = x - C$: $e^{-C}\int_0^\infty ue^{-u}\,\mathrm du = e^{-C}$. (This is memorylessness: given $X > C$, the excess is again $\mathrm{Exp}(1)$, with mean 1, and $\Pr[X > C] = e^{-C}$.)
 2. **The objective without the sampling term:** $e^{-2C} + 2C^2/(n\varepsilon)^2$.
 3. **Differentiate and set to zero:** $-2e^{-2C} + 4C/(n\varepsilon)^2 = 0$, that is $e^{-2C} = 2C/(n\varepsilon)^2$. The left side falls and the right side rises in $C$, so there is exactly one root, which bisection finds.
 4. **Numbers.** For $n = 1000$, $\varepsilon = 1$: $C^* = 5.692$, where the bias is $e^{-5.692} = 0.0034$, the noise standard deviation $\sqrt2\,C^*/1000 = 0.0080$, and their combined root-mean-square error $0.0087$. For $n = 100$, $C^* = 3.616$; for $n = 10{,}000$, $C^* = 7.834$.
 5. **Growth with $n$.** Taking logarithms, $2C^* = 2\ln(n\varepsilon) - \ln(2C^*)$, so $C^* \approx \ln(n\varepsilon)$ minus a slowly growing correction: each factor of 10 in $n$ adds about $\ln 10 = 2.3$ minus a little, as the three values show.
 
-*For a light (exponential) tail, the clip bound grows only logarithmically with $n\varepsilon$. For heavier tails, such as the chapter's log-normal incomes, it grows much faster.*
+*For a light (exponential) tail, the clipping norm grows only logarithmically with $n\varepsilon$. For heavier tails, such as the chapter's log-normal incomes, it grows much faster.*
 :::
 
 ## Smoothness at work {#sec-sol-sensitivity-7}

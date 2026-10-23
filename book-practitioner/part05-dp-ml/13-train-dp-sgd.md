@@ -2,7 +2,7 @@
 
 ## Why this matters
 
-You have a PyTorch training loop on sensitive data, and it must become private. The algorithm is stochastic gradient descent (SGD) with differential privacy (DP), called DP-SGD, which clips each example's gradient and adds Gaussian noise at every step ([DP-SGD](02-dp-sgd.md)). The library is Opacus, and the hard part is not the call that wraps the model but the dozen decisions around it, made in the right order. Most of them are inputs to the privacy guarantee, so they must be settled before the first training step. A mistake in any of them leaves code that trains exactly as before but reports a false $\varepsilon$. That is the privacy level, which bounds what the model can reveal about any one person.
+You have a PyTorch training loop on sensitive data, and it must become private. The algorithm is stochastic gradient descent (SGD) with differential privacy (DP), called DP-SGD, which clips each record's gradient and adds Gaussian noise at every step ([DP-SGD](02-dp-sgd.md)). The library is Opacus, and the hard part is not the call that wraps the model but the dozen decisions around it, made in the right order. Most of them are inputs to the privacy guarantee, so they must be settled before the first training step. A mistake in any of them leaves code that trains exactly as before but reports a false $\varepsilon$. That is the privacy level, which bounds what the model can reveal about any one person.
 
 This chapter does the whole job on a real dataset, Adult from the UCI Machine Learning Repository. It holds 48,842 people from a census survey, and the task is to predict whether a person earns more than $50,000 a year. Each section is one step of the job. The script [practitioner_dp_sgd.py](../../code/part05-dp-ml/practitioner_dp_sgd.py) runs every step except tuning, which [practitioner_tuning.py](../../code/part05-dp-ml/practitioner_tuning.py) does. Each runs in one to two minutes without a GPU. Its options `--epsilon` and `--epochs` change the main run; the defaults, 4 and 10, give the numbers below.
 
@@ -15,7 +15,7 @@ uv run python code/part05-dp-ml/practitioner_tuning.py
 
 The first decision is what one record is, because the guarantee protects exactly that ([User-level differential privacy](07-user-level.md)). In Adult each row is one person, so protecting a row protects a person. Adult has no person identifier, so this rests on how the survey was collected. When your data has one, count distinct identifiers, not rows. If a person has many rows, such as visits or messages, together they move the model much further than one row, and you need user-level training.
 
-The script splits the rows with seed 0. It keeps 30,000 rows as the private training set and 16,842 as the test set. The other 2,000 rows, the stand-in rows from here on, play the part of public data. The script uses them to choose the clipping norm, the length each example's gradient is cut to, and the learning rate, and it never trains the model on them. Treating them as public is an assumption made for the demonstration, since they come from the same survey, and in production this role belongs to genuinely public data. Without public data, the tuning runs on the private rows and its cost is counted in $\varepsilon$, as @sec-trainwf-tune shows.
+The script splits the rows with seed 0. It keeps 30,000 rows as the private training set and 16,842 as the test set. The other 2,000 rows, the stand-in rows from here on, play the part of public data. The script uses them to choose the clipping norm, the length each record's gradient is cut to, and the learning rate, and it never trains the model on them. Treating them as public is an assumption made for the demonstration, since they come from the same survey, and in production this role belongs to genuinely public data. Without public data, the tuning runs on the private rows and its cost is counted in $\varepsilon$, as @sec-trainwf-tune shows.
 
 Next comes $\delta$, the small additive slack that the guarantee allows on top of $\varepsilon$. It is fixed from the number of people $n$ in the private training set and nothing else. The book's default is $\delta \le 1/n^{1.1}$, rounded down to a power of ten, which keeps $\delta$ safely below $1/n$ ([Choosing ε](09-choosing-epsilon.md)).
 
@@ -58,11 +58,11 @@ clip only (C=1, no noise): test accuracy 0.845
 always '<=50K': test accuracy 0.759
 ```
 
-Clipping alone costs little here. Had clip-only accuracy been far below non-private, no privacy budget would fix it, because the problem would be the clipping norm or the step size.
+Clipping alone costs little here. Had clip-only accuracy been far below non-private, no privacy budget would fix it, because the problem would be the clipping norm or the learning rate.
 
 ## Check the model {#sec-trainwf-validate}
 
-Opacus computes one gradient per example, and some layers make that impossible or break the guarantee. Batch normalization is the common case, because its statistics mix the examples of a batch, so one record changes every other record's gradient. The validator lists such layers before you train.
+Opacus computes one gradient per record, and some layers make that impossible or break the guarantee. Batch normalization is the common case, because its statistics mix the records of a batch, so one record changes every other record's gradient. The validator lists such layers before you train.
 
 ```{.python excerpt="dpsgd-validate"}
 errors = ModuleValidator.validate(model, strict=False)
@@ -88,7 +88,7 @@ at initialisation: median norm 1.444  90th percentile 1.538
 fraction clipped at C=1: 1.000
 ```
 
-The median rule would give a $C$ of about 1.4. The script keeps the usual default $C = 1$ instead, just below the median, so every gradient is clipped at the start, and that costs nothing. When every gradient is clipped, each has length exactly $C$ and the noise scales with $C$ too, so the step size times $C$ is the one number that matters ([DP-SGD](02-dp-sgd.md#sec-dpsgd-clipping)).
+The median rule would give a $C$ of about 1.4. The script keeps the usual default $C = 1$ instead, just below the median, so every gradient is clipped at the start, and that costs nothing. When every gradient is clipped, each has length exactly $C$ and the noise scales with $C$ too, so the learning rate times $C$ is the one number that matters ([DP-SGD](02-dp-sgd.md#sec-dpsgd-clipping)).
 
 Next comes the expected batch size $B$, which should be as large as you can afford. It is an expected size because the sampler draws every batch at random (@sec-trainwf-train). The reason is that the noise on the averaged gradient is $\sigma C/B$, where the noise multiplier $\sigma$ is the noise's standard deviation in units of $C$. The script takes a batch of 1,000. Opacus sets the sampling rate $q$, the chance that a row joins a batch, to one over the number of batches per epoch, $1/\lceil n/B\rceil$. That is $B/n = 0.0333$ here, but not when $B$ does not divide $n$, so plan with Opacus's value. An epoch is $1/q$ steps, so 10 epochs give 300 steps. At $\sigma = 1$ the noise on each coordinate of the averaged gradient is then only 0.0010. Fix the number of epochs now, since the noise is calibrated to it.
 
@@ -119,7 +119,7 @@ For $\varepsilon = 4$ at $\delta = 10^{-5}$ it prints `sigma=0.973`. The result 
 
 ## Train {#sec-trainwf-train}
 
-The privacy engine wraps the model, the optimizer and the data loader. The optimizer it returns clips each example's gradient and adds the noise, while the loader it returns draws Poisson batches, in which each row joins each batch independently with probability $q$. The accountant assumes exactly this sampling. The loader the script passes in shuffles and cuts fixed batches, so `make_private` replaces it, and that replacement is what makes the assumption true.
+The privacy engine wraps the model, the optimizer and the data loader. The optimizer it returns clips each record's gradient and adds the noise, while the loader it returns draws Poisson batches, in which each row joins each batch independently with probability $q$. The accountant assumes exactly this sampling. The loader the script passes in shuffles and cuts fixed batches, so `make_private` replaces it, and that replacement is what makes the assumption true.
 
 ```{.python excerpt="dpsgd-setup"}
 engine = PrivacyEngine(accountant="prv")

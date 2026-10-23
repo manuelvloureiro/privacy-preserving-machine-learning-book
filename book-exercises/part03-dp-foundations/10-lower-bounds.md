@@ -14,7 +14,7 @@ The solutions use the chapter's notation. $M$ is a differential privacy (DP) mec
 3. **Disjoint regions.** As in the chapter, the $\ell_\infty$ balls of radius $\alpha$ around them are disjoint when $k > 2\alpha$. Take $k = \lfloor2\alpha\rfloor + 1 \le 2\alpha + 1$.
 4. **Packing lemma** with $m = N - 1$: $2\alpha + 1 \ge \ln((N - 1)(1 - \beta))/\varepsilon$, which rearranges to the claim.
 5. **The number.** $\ln(N - 1)$ and $\ln N$ differ by about $1/N = 10^{-6}$, so the bound is 6.3821 under both relations.
-6. **The upper bound doubles.** Replacing a record lowers one count by 1 and raises another by 1, so the $\ell_1$ sensitivity is 2 and the Laplace scale is $2/\varepsilon$. Every quantile of $\max_j|\eta_j|$ scales with it: $2\times16.79 = 33.57$ (the script computes $2 \times 16.785\ldots$ before rounding).
+6. **The upper bound doubles.** Replacing a record lowers one count by 1 and raises another by 1, so the $\ell_1$ sensitivity is 2 and the Laplace scale is $2/\varepsilon$. Every quantile of the largest noise over the bins scales with it: $2\times16.79 = 33.57$ (the script computes $2 \times 16.785\ldots$ before rounding).
 
 *The lower bound does not care about the neighbouring relation, because both relations put the packing datasets $k$ steps from $D_0$. The upper bound does, because sensitivity depends on it. So under replace neighbours the gap between Laplace and the lower bound is about twice as large.*
 :::
@@ -36,16 +36,16 @@ The solutions use the chapter's notation. $M$ is a differential privacy (DP) mec
 
 ## The lemma for a shrunk mean {#sec-sol-lower-3}
 
-> **Exercise 3.** **The lemma for a shrunk mean.** For $f = c\,\bar x$ with $0 \le c \le 1$, show that $\mathbb E[f\sum_i(x_i - p)] = 2c/3$ exactly, and that the bound in @eq-lower-fp-lemma is $\frac23 - 2(1 - c)\mathbb E|\bar x|$. Compute $\mathbb E|\bar x|$ for $n = 1$ and its limit as $n \to \infty$. *Check: for $n = 5$, $\mathbb E|\bar x| = 0.6$, so $c = 0.75$ gives correlation 0.5000 against the bound 0.3667.* *(Fingerprinting lemma)*
+> **Exercise 3.** **The lemma for a shrunk mean.** For $f = c\,\bar x$ with $0 \le c \le 1$, show that $\mathbb E[f\sum_i(x_i - p)] = 2c/3$ exactly, and that the bound in @eq-lower-fp-lemma is $\frac23 - 2(1 - c)\mathbb E[|\bar x|]$. Compute $\mathbb E[|\bar x|]$ for $n = 1$ and its limit as $n \to \infty$. *Check: for $n = 5$, $\mathbb E[|\bar x|] = 0.6$, so $c = 0.75$ gives correlation 0.5000 against the bound 0.3667.* *(Fingerprinting lemma)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The correlation.** By the equality in @eq-lower-fp-lemma, $\mathbb E[f\sum_i(x_i - p)] = 2\mathbb E[p\,f] = 2c\,\mathbb E[p\,\bar x]$. Given $p$, $\mathbb E[\bar x \mid p] = p$, so $\mathbb E[p\,\bar x] = \mathbb E[p^2] = \int_{-1}^1\frac{p^2}2\,dp = \frac13$. The correlation is $2c/3$.
-2. **The bound.** $|f - \bar x| = |c\bar x - \bar x| = (1 - c)|\bar x|$, so $\frac23 - 2\mathbb E|f - \bar x| = \frac23 - 2(1 - c)\mathbb E|\bar x|$.
-3. **$n = 1$.** $\bar x = x_1 \in \{\pm1\}$, so $\mathbb E|\bar x| = 1$.
-4. **$n \to \infty$.** $\bar x \to p$ by the law of large numbers, and $|\bar x| \le 1$, so $\mathbb E|\bar x| \to \mathbb E|p| = \int_{-1}^1\frac{|p|}2\,dp = \frac12$. The script gives 0.5050 at $n = 100$.
-5. **$n = 5$.** Summing over the six possible counts of $+1$ and integrating over $p$ gives $\mathbb E|\bar x| = 0.6000$. @tbl-sol-lower-shrunk compares the two sides.
+1. **The correlation.** By the equality in @eq-lower-fp-lemma, $\mathbb E[f\sum_i(x_i - p)] = 2\mathbb E[p\,f] = 2c\,\mathbb E[p\,\bar x]$. Given $p$, $\mathbb E[\bar x \mid p] = p$, so $\mathbb E[p\,\bar x] = \mathbb E[p^2] = \int_{-1}^1\frac{p^2}2\,\mathrm dp = \frac13$. The correlation is $2c/3$.
+2. **The bound.** $|f - \bar x| = |c\bar x - \bar x| = (1 - c)|\bar x|$, so $\frac23 - 2\mathbb E[|f - \bar x|] = \frac23 - 2(1 - c)\mathbb E[|\bar x|]$.
+3. **$n = 1$.** $\bar x = x_1 \in \{\pm1\}$, so $\mathbb E[|\bar x|] = 1$.
+4. **$n \to \infty$.** $\bar x \to p$ by the law of large numbers, and $|\bar x| \le 1$, so $\mathbb E[|\bar x|] \to \mathbb E[|p|] = \int_{-1}^1\frac{|p|}2\,\mathrm dp = \frac12$. The script gives 0.5050 at $n = 100$.
+5. **$n = 5$.** Summing over the six possible counts of $+1$ and integrating over $p$ gives $\mathbb E[|\bar x|] = 0.6000$. @tbl-sol-lower-shrunk compares the two sides.
 
-| $c$ | Correlation $2c/3$ | $\mathbb E\lvert f - \bar x\rvert = 0.6(1 - c)$ | Bound $\frac23 - 2\,\mathbb E\lvert f - \bar x\rvert$ |
+| $c$ | Correlation $2c/3$ | $\mathbb E[\lvert f - \bar x\rvert] = 0.6(1 - c)$ | Bound $\frac23 - 2\,\mathbb E[\lvert f - \bar x\rvert]$ |
 | --- | --- | --- | --- |
 | 0.25 | 0.1667 | 0.4500 | −0.2333 |
 | 0.5 | 0.3333 | 0.3000 | 0.0667 |
@@ -62,9 +62,9 @@ The solutions use the chapter's notation. $M$ is a differential privacy (DP) mec
 > **Exercise 4.** **Padding recovers $1/\alpha$.** Let $M$ release the means of $n$ records with $\ell_\infty$ error $\alpha$. Pad a dataset of $n_0$ records with $n - n_0$ records, half all $+1$ and half all $-1$, run $M$, and rescale. Show that this gives an equally private mechanism for $n_0$ records with error $\alpha n/n_0$, choose $n_0$ so that this error is $\alpha_0$, and conclude $n \ge \frac{\alpha_0}{\alpha}\cdot\frac{(2/3 - 2\alpha_0 - 4\beta)d}{(e^\varepsilon - 1)\sqrt d + 4\delta d}$ (up to rounding). Find the best $\alpha_0$. *Check: $\alpha_0 = \frac16 - \beta$, and the constant $\alpha_0(\frac23 - 2\alpha_0 - 4\beta) = (\frac23 - 4\beta)^2/8 = 0.0272$ at $\beta = 0.05$; at $d = 10^4$ the bound is 15.8 records for $\alpha = 0.1$ and 158.4 for $\alpha = 0.01$.* *(Fingerprinting, reductions)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The padded dataset.** Given a small dataset $S$ of $n_0$ records, form $\tilde D = S \cup P$, where $P$ has $(n - n_0)/2$ copies of $(+1, \dots, +1)$ and as many of $(-1, \dots, -1)$. The padding sums to 0 in every coordinate, so the mean of $\tilde D$ is $\frac{n_0}{n}\bar x_S$.
-2. **The new mechanism.** $M'(S) = \operatorname{clip}\big(\frac{n}{n_0}M(\tilde D)\big)$. When $M$ is within $\alpha$ of the mean of $\tilde D$ in every coordinate, $\frac n{n_0}M(\tilde D)$ is within $\frac n{n_0}\alpha$ of $\bar x_S$, and clipping to $[-1, 1]$ cannot move it further away. So $M'$ has error $\alpha n/n_0$ with the same failure probability $\beta$.
-3. **The same privacy.** Replacing one record of $S$ replaces one record of $\tilde D$, and the padding does not depend on $S$. So $M'$ is $(\varepsilon, \delta)$-DP whenever $M$ is; rescaling and clipping are post-processing.
+1. **The padded dataset.** Given a small dataset $D$ of $n_0$ records, form $\tilde D = D \cup P$, where $P$ has $(n - n_0)/2$ copies of $(+1, \dots, +1)$ and as many of $(-1, \dots, -1)$. The padding sums to 0 in every coordinate, so the mean of $\tilde D$ is $\frac{n_0}{n}\bar x_D$.
+2. **The new mechanism.** $M'(D) = \operatorname{clip}\big(\frac{n}{n_0}M(\tilde D)\big)$. When $M$ is within $\alpha$ of the mean of $\tilde D$ in every coordinate, $\frac n{n_0}M(\tilde D)$ is within $\frac n{n_0}\alpha$ of $\bar x_D$, and clipping to $[-1, 1]$ cannot move it further away. So $M'$ has error $\alpha n/n_0$ with the same failure probability $\beta$.
+3. **The same privacy.** Replacing one record of $D$ replaces one record of $\tilde D$, and the padding does not depend on $D$. So $M'$ is $(\varepsilon, \delta)$-DP whenever $M$ is; rescaling and clipping are post-processing.
 4. **Choose $n_0$.** Take $n_0 = \lceil\alpha n/\alpha_0\rceil$, so that the error $\alpha n/n_0$ is at most $\alpha_0$. This needs $\alpha_0 \ge \alpha$, since padding can only add records.
 5. **Apply @eq-lower-fp to $M'$** with $\alpha' = \alpha_0 + 2\beta$: $n_0 \ge (\frac23 - 2\alpha_0 - 4\beta)d/R$ with $R = (e^\varepsilon - 1)\sqrt d + 4\delta d$. Since $n_0 \le \alpha n/\alpha_0 + 1$, ignoring the $+1$ gives $n \ge \frac{\alpha_0}\alpha(\frac23 - 2\alpha_0 - 4\beta)\frac dR$.
 6. **The best $\alpha_0$.** $\phi(\alpha_0) = \alpha_0(\frac23 - 4\beta - 2\alpha_0)$ is a downward parabola with $\phi'(\alpha_0) = \frac23 - 4\beta - 4\alpha_0 = 0$ at $\alpha_0 = \frac16 - \beta$. There $\frac23 - 4\beta - 2\alpha_0 = \frac13 - 2\beta = 2\alpha_0$, so $\phi = 2(\frac16 - \beta)^2 = (\frac23 - 4\beta)^2/8$. At $\beta = 0.05$: $\alpha_0 = 0.1167$ and $\phi = 0.0272$.

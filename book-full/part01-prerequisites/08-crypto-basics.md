@@ -22,7 +22,7 @@ The whole subject is one idea, used over and over. **Security is a game.** A cha
 
 Later parts build protocols from these primitives. The probability tools used here (union bound, $1 + x \le e^x$, the normal tail) are proved in [Concentration inequalities](02-concentration.md), and total variation (TV) distance is studied in [Divergences](03-divergences.md); each is restated below where it is used.
 
-**Notation.** This chapter departs from the part's shared notation in two letters. It keeps $P$ and $Q$ for two distributions, but lowercase $q$ counts the queries an adversary makes (or the random draws in the birthday bound), and lowercase $p$ is the modulus of the arithmetic in secret sharing and learning with errors, not a density. The bit length of blocks, messages and inputs is $n$, the number of share holders is $h$, and the dimension of a learning-with-errors secret is $d$.
+**Notation.** An adversary is $\mathcal A$, and a second adversary built from it by a reduction is $\mathcal B$. The number of queries an adversary makes (or of random draws in the birthday bound) is $Q$, and an adversary's advantage is $\nu$; cryptography texts usually write these $q$ and $\varepsilon$, letters this book keeps for the sampling rate and the privacy parameter. Because $Q$ counts queries, two distributions are written $P_0$ and $P_1$ here, and lowercase $p$ is the modulus of the arithmetic in secret sharing and learning with errors, not a density. The bit length of blocks, messages and inputs is $n$, the number of share holders is $h$, and the dimension of a learning-with-errors secret is $d$.
 
 **A warning about the code.** Every scheme in this chapter's script is a toy, written to make the definitions concrete. Its parameters are far too small to be secure, nothing runs in constant time, and NumPy's generator is not a cryptographic source of randomness. Never use it to protect anything.
 
@@ -30,19 +30,19 @@ Later parts build protocols from these primitives. The probability tools used he
 
 ### Fact 1 — Advantage and guessing probability are the same thing
 
-A **distinguisher** $A$ is any procedure that receives one sample and outputs a bit, 0 or 1. Think of output 1 as "I think this sample came from $Y$". If $A$ is any good at telling distribution $X$ from distribution $Y$, it says 1 more often on samples from $Y$ than on samples from $X$, so the natural measure of its skill is the gap between those two frequencies. That gap is its **advantage**:
-$$\mathrm{Adv}_A(X, Y) = \big|\Pr[A(X) = 1] - \Pr[A(Y) = 1]\big|.$$
-Here $\Pr[A(X) = 1]$ is the probability that $A$ outputs 1 when its input is drawn from $X$. A distinguisher that ignores its input says 1 equally often on both and has advantage 0; one that is always right has advantage 1.
+A **distinguisher** $\mathcal A$ is any procedure that receives one sample and outputs a bit, 0 or 1. Think of output 1 as "I think this sample came from $Y$". If $\mathcal A$ is any good at telling distribution $X$ from distribution $Y$, it says 1 more often on samples from $Y$ than on samples from $X$, so the natural measure of its skill is the gap between those two frequencies. That gap is its **advantage**:
+$$\mathrm{Adv}_\mathcal A(X, Y) = \big|\Pr[\mathcal A(X) = 1] - \Pr[\mathcal A(Y) = 1]\big|.$$
+Here $\Pr[\mathcal A(X) = 1]$ is the probability that $\mathcal A$ outputs 1 when its input is drawn from $X$. A distinguisher that ignores its input says 1 equally often on both and has advantage 0; one that is always right has advantage 1.
 
-Games are often phrased differently, as a guessing contest. The challenger flips a fair bit $b$: if $b = 1$ it gives $A$ a sample from $Y$, and if $b = 0$ a sample from $X$. $A$ outputs a guess, and it **wins** if its guess equals $b$. So $\Pr[A \text{ wins}]$, also written $\Pr[b' = b]$ with $b'$ the guess, is the probability that the guess is correct; it is not the probability that $b$ is 1, which is $\frac12$ by construction. The coin is fair on purpose. With a fair coin, an adversary who learns nothing from its sample, and so has nothing to go on, wins exactly half the time, whether it guesses at random or always says 1. Any win rate above $\frac12$ must therefore come from information in the sample.
+Games are often phrased differently, as a guessing contest. The challenger flips a fair bit $b$: if $b = 1$ it gives $\mathcal A$ a sample from $Y$, and if $b = 0$ a sample from $X$. $\mathcal A$ outputs a guess, and it **wins** if its guess equals $b$. So $\Pr[\mathcal A \text{ wins}]$, also written $\Pr[b' = b]$ with $b'$ the guess, is the probability that the guess is correct; it is not the probability that $b$ is 1, which is $\frac12$ by construction. The coin is fair on purpose. With a fair coin, an adversary who learns nothing from its sample, and so has nothing to go on, wins exactly half the time, whether it guesses at random or always says 1. Any win rate above $\frac12$ must therefore come from information in the sample.
 
-The two phrasings measure the same thing. There are two ways to win, and they cannot happen in the same game: the coin says $Y$ and $A$ says 1, or the coin says $X$ and $A$ says 0. Each world occurs with probability $\frac12$, so the win probability is the average of the two conditional win rates. Writing $\Pr[A(X) = 0] = 1 - \Pr[A(X) = 1]$ and collecting terms,
-$$\Pr[A \text{ wins}] = \tfrac12\Pr[A(Y) = 1] + \tfrac12\Pr[A(X) = 0] = \tfrac12 + \tfrac12\big(\Pr[A(Y) = 1] - \Pr[A(X) = 1]\big).$$ {#eq-crypto-win-advantage}
-So an advantage of $\varepsilon$ means winning with probability $\frac12 + \frac\varepsilon2$: the know-nothing score, plus half the advantage. The bracket has no absolute value, so it can be negative, but then $A$ wins less than half the time, and flipping its output (saying 0 where it said 1) turns it into a distinguisher that wins $\frac12 + \frac\varepsilon2$.
+The two phrasings measure the same thing. There are two ways to win, and they cannot happen in the same game: the coin says $Y$ and $\mathcal A$ says 1, or the coin says $X$ and $\mathcal A$ says 0. Each world occurs with probability $\frac12$, so the win probability is the average of the two conditional win rates. Writing $\Pr[\mathcal A(X) = 0] = 1 - \Pr[\mathcal A(X) = 1]$ and collecting terms,
+$$\Pr[\mathcal A \text{ wins}] = \tfrac12\Pr[\mathcal A(Y) = 1] + \tfrac12\Pr[\mathcal A(X) = 0] = \tfrac12 + \tfrac12\big(\Pr[\mathcal A(Y) = 1] - \Pr[\mathcal A(X) = 1]\big).$$ {#eq-crypto-win-advantage}
+So an advantage of $\nu$ means winning with probability $\frac12 + \frac\nu2$: the know-nothing score, plus half the advantage. The bracket has no absolute value, so it can be negative, but then $\mathcal A$ wins less than half the time, and flipping its output (saying 0 where it said 1) turns it into a distinguisher that wins $\frac12 + \frac\nu2$.
 
-Here it is with a coin. $X$ is a fair coin, $Y$ lands heads with probability 0.6, and $A$ outputs 1 on heads. Each row of @tbl-crypto-coin-game is one outcome of the game. Its probability is $\frac12$ for the challenger's bit times the probability of the coin outcome in that world: $\frac12 \times 0.5 = 0.25$ for each outcome of the fair coin, $\frac12 \times 0.4 = 0.20$ for tails of the biased coin and $\frac12 \times 0.6 = 0.30$ for heads.
+Here it is with a coin. $X$ is a fair coin, $Y$ lands heads with probability 0.6, and $\mathcal A$ outputs 1 on heads. Each row of @tbl-crypto-coin-game is one outcome of the game. Its probability is $\frac12$ for the challenger's bit times the probability of the coin outcome in that world: $\frac12 \times 0.5 = 0.25$ for each outcome of the fair coin, $\frac12 \times 0.4 = 0.20$ for tails of the biased coin and $\frac12 \times 0.6 = 0.30$ for heads.
 
-| $b$ | Coin | Outcome | Probability | $A$ outputs | $A$ wins? |
+| $b$ | Coin | Outcome | Probability | $\mathcal A$ outputs | $\mathcal A$ wins? |
 | --- | --- | --- | --- | --- | --- |
 | 0 | fair | tails | 0.25 | 0 | yes |
 | 0 | fair | heads | 0.25 | 1 | no |
@@ -51,25 +51,25 @@ Here it is with a coin. $X$ is a fair coin, $Y$ lands heads with probability 0.6
 
 : The distinguishing game for a fair against a 0.6-biased coin, with the distinguisher "output 1 on heads". {#tbl-crypto-coin-game}
 
-$A$ wins in the first and last rows, with probability $0.25 + 0.30 = 0.55$. Its advantage is $\Pr[A(Y) = 1] - \Pr[A(X) = 1] = 0.6 - 0.5 = 0.1$, and indeed $0.55 = \frac12 + \frac{0.1}2$.
+$\mathcal A$ wins in the first and last rows, with probability $0.25 + 0.30 = 0.55$. Its advantage is $\Pr[\mathcal A(Y) = 1] - \Pr[\mathcal A(X) = 1] = 0.6 - 0.5 = 0.1$, and indeed $0.55 = \frac12 + \frac{0.1}2$.
 
 ### Fact 2 — No distinguisher beats total variation
 
-The **total variation distance** between two distributions $P$ and $Q$ on a finite set is the total amount of probability that $P$ puts on outcomes in excess of $Q$:
-$$\mathrm{TV}(P, Q) = \sum_{\omega:\,P(\omega) > Q(\omega)}(P(\omega) - Q(\omega)).$$
-It is 0 when the distributions are equal and 1 when they never produce the same outcome. Every distinguisher, however much time it uses, has advantage at most $\mathrm{TV}(P, Q)$. The reason is that a distinguisher can only react to which outcome it sees, and the most it can do is say 1 on exactly the outcomes that $P$ favours.
+The **total variation distance** between two distributions $P_0$ and $P_1$ on a finite set is the total amount of probability that $P_0$ puts on outcomes in excess of $P_1$:
+$$\mathrm{TV}(P_0, P_1) = \sum_{\omega:\,P_0(\omega) > P_1(\omega)}(P_0(\omega) - P_1(\omega)).$$
+It is 0 when the distributions are equal and 1 when they never produce the same outcome. Every distinguisher, however much time it uses, has advantage at most $\mathrm{TV}(P_0, P_1)$. The reason is that a distinguisher can only react to which outcome it sees, and the most it can do is say 1 on exactly the outcomes that $P_0$ favours.
 
 1. **Describe any distinguisher by its reaction to each outcome.** A randomized distinguisher outputs 1 on outcome $\omega$ with some probability $g(\omega) \in [0, 1]$. Nothing else about it matters for its advantage.
-2. **Write the gap as a sum over outcomes.** The probability of output 1 under $P$ is $\sum_\omega P(\omega)g(\omega)$, and likewise under $Q$, so $\Pr[A(P) = 1] - \Pr[A(Q) = 1] = \sum_\omega g(\omega)(P(\omega) - Q(\omega))$.
-3. **Maximize term by term.** Each term is largest when $g(\omega) = 1$ where $P(\omega) - Q(\omega)$ is positive and $g(\omega) = 0$ where it is negative. That choice gives exactly the TV distance. The same argument with $P$ and $Q$ swapped bounds the gap of the other sign, and the excess of $Q$ over $P$ is the same total, because both distributions sum to 1.
+2. **Write the gap as a sum over outcomes.** The probability of output 1 under $P_0$ is $\sum_\omega P_0(\omega)g(\omega)$, and likewise under $P_1$, so $\Pr[\mathcal A(P_0) = 1] - \Pr[\mathcal A(P_1) = 1] = \sum_\omega g(\omega)(P_0(\omega) - P_1(\omega))$.
+3. **Maximize term by term.** Each term is largest when $g(\omega) = 1$ where $P_0(\omega) - P_1(\omega)$ is positive and $g(\omega) = 0$ where it is negative. That choice gives exactly the TV distance. The same argument with $P_0$ and $P_1$ swapped bounds the gap of the other sign, and the excess of $P_1$ over $P_0$ is the same total, because both distributions sum to 1.
 
-So the best unbounded distinguisher attains the TV distance, and this splits security into three regimes. Two distributions with TV distance 0 are identical, and then no adversary has any advantage: this is **perfect** security. TV distance at most a small $\varepsilon$ is **statistical** security: even an adversary with unlimited time gains at most $\varepsilon$. Cryptography's main business is the third case, where the TV distance is large but no *efficient* distinguisher can exploit it.
+So the best unbounded distinguisher attains the TV distance, and this splits security into three regimes. Two distributions with TV distance 0 are identical, and then no adversary has any advantage: this is **perfect** security. TV distance at most a small $\nu$ is **statistical** security: even an adversary with unlimited time gains at most $\nu$. Cryptography's main business is the third case, where the TV distance is large but no *efficient* distinguisher can exploit it.
 
 ### Fact 3 — Advantages add along a chain
 
-If you walk from distribution $H_0$ to distribution $H_m$ through intermediate distributions $H_1, \dots, H_{m-1}$, a distinguisher cannot tell the two ends apart better than the sum of how well it tells each consecutive pair apart. In symbols, for any distinguisher $A$,
-$$\mathrm{Adv}_A(H_0, H_m) \le \sum_{i=1}^m \mathrm{Adv}_A(H_{i-1}, H_i).$$
-The reason is a telescoping sum: in $\sum_{i=1}^m\big(\Pr[A(H_{i-1}) = 1] - \Pr[A(H_i) = 1]\big)$, each intermediate term appears once with a plus sign and once with a minus sign and cancels, leaving $\Pr[A(H_0) = 1] - \Pr[A(H_m) = 1]$. Taking absolute values, the triangle inequality ($|a_1 + \dots + a_m| \le |a_1| + \dots + |a_m|$) gives the bound. This is the arithmetic behind every hybrid proof.
+If you walk from distribution $H_0$ to distribution $H_m$ through intermediate distributions $H_1, \dots, H_{m-1}$, a distinguisher cannot tell the two ends apart better than the sum of how well it tells each consecutive pair apart. In symbols, for any distinguisher $\mathcal A$,
+$$\mathrm{Adv}_\mathcal A(H_0, H_m) \le \sum_{i=1}^m \mathrm{Adv}_\mathcal A(H_{i-1}, H_i).$$
+The reason is a telescoping sum: in $\sum_{i=1}^m\big(\Pr[\mathcal A(H_{i-1}) = 1] - \Pr[\mathcal A(H_i) = 1]\big)$, each intermediate term appears once with a plus sign and once with a minus sign and cancels, leaving $\Pr[\mathcal A(H_0) = 1] - \Pr[\mathcal A(H_m) = 1]$. Taking absolute values, the triangle inequality ($|a_1 + \dots + a_m| \le |a_1| + \dots + |a_m|$) gives the bound. This is the arithmetic behind every hybrid proof.
 
 ### Fact 4 — A bijection maps uniform to uniform
 
@@ -77,9 +77,9 @@ If you shuffle the elements of a finite set by a fixed one-to-one rule, a unifor
 
 ### Fact 5 — Union bound and $1 - x \le e^{-x}$
 
-Both are proved in [Concentration inequalities](02-concentration.md); here is what they say and why they hold. The **union bound** says that the probability that at least one of several events happens is at most the sum of their probabilities, $\Pr[A_1 \cup \dots \cup A_q] \le \sum_i \Pr[A_i]$: the sum counts every outcome where some event happens at least once, and outcomes where several happen more than once. The inequality $1 - x \le e^{-x}$ holds for every real $x$ because the straight line $1 - x$ is the tangent to the convex curve $e^{-x}$ at $x = 0$, and a convex curve lies above its tangents. For $x_i \in [0, 1]$, multiplying the nonnegative inequalities $1 - x_i \le e^{-x_i}$ gives $\prod_i(1 - x_i) \le e^{-\sum_i x_i}$.
+Both are proved in [Concentration inequalities](02-concentration.md); here is what they say and why they hold. The **union bound** says that the probability that at least one of several events happens is at most the sum of their probabilities, $\Pr[\mathcal A_1 \cup \dots \cup \mathcal A_Q] \le \sum_i \Pr[\mathcal A_i]$: the sum counts every outcome where some event happens at least once, and outcomes where several happen more than once. The inequality $1 - x \le e^{-x}$ holds for every real $x$ because the straight line $1 - x$ is the tangent to the convex curve $e^{-x}$ at $x = 0$, and a convex curve lies above its tangents. For $x_i \in [0, 1]$, multiplying the nonnegative inequalities $1 - x_i \le e^{-x_i}$ gives $\prod_i(1 - x_i) \le e^{-\sum_i x_i}$.
 
-In this chapter they bound the probability that something goes wrong in at least one of $q$ steps: the union bound from above, and the product inequality from below (applied to the probability that nothing goes wrong).
+In this chapter they bound the probability that something goes wrong in at least one of $Q$ steps: the union bound from above, and the product inequality from below (applied to the probability that nothing goes wrong).
 
 ## Security parameter, adversaries and negligible functions
 
@@ -151,30 +151,30 @@ Suppose the key is uniform over all $2^\lambda$ strings of $\lambda$ bits. An ad
 
 Most security definitions say "these two things look the same". A ciphertext looks like random bits; the output of a generator looks like true randomness; a participant's view looks like something it could have produced alone. Computational indistinguishability makes "look the same" precise, and the hybrid argument is the tool for proving it.
 
-You already know distinguishers from machine learning. A classifier trained to tell real images from generated ones is a distinguisher. If it outputs 1 for "real", then $\Pr[A(\text{real}) = 1]$ is its true-positive rate and $\Pr[A(\text{generated}) = 1]$ is its false-positive rate, so its advantage is its true-positive rate minus its false-positive rate at the chosen threshold. Deciding which of two distributions produced a sample is a hypothesis test, and [Hypothesis testing](04-hypothesis-testing.md) studies the best such tests.
+You already know distinguishers from machine learning. A classifier trained to tell real images from generated ones is a distinguisher. If it outputs 1 for "real", then $\Pr[\mathcal A(\text{real}) = 1]$ is its true-positive rate and $\Pr[\mathcal A(\text{generated}) = 1]$ is its false-positive rate, so its advantage is its true-positive rate minus its false-positive rate at the chosen threshold. Deciding which of two distributions produced a sample is a hypothesis test, and [Hypothesis testing](04-hypothesis-testing.md) studies the best such tests.
 
 ### Definition
 
-Because security is about how things behave as $\lambda$ grows, the objects compared are not single distributions but families, one distribution for each value of $\lambda$. Two families $X = \{X_\lambda\}$ and $Y = \{Y_\lambda\}$ are **computationally indistinguishable**, written $X \approx_c Y$, if no efficient distinguisher has more than a negligible advantage: for every PPT distinguisher $A$
-$$\mathrm{Adv}_A(X_\lambda, Y_\lambda) = \big|\Pr[A(1^\lambda, X_\lambda) = 1] - \Pr[A(1^\lambda, Y_\lambda) = 1]\big| \text{ is negligible in } \lambda.$$
+Because security is about how things behave as $\lambda$ grows, the objects compared are not single distributions but families, one distribution for each value of $\lambda$. Two families $X = \{X_\lambda\}$ and $Y = \{Y_\lambda\}$ are **computationally indistinguishable**, written $X \approx_c Y$, if no efficient distinguisher has more than a negligible advantage: for every PPT distinguisher $\mathcal A$
+$$\mathrm{Adv}_\mathcal A(X_\lambda, Y_\lambda) = \big|\Pr[\mathcal A(1^\lambda, X_\lambda) = 1] - \Pr[\mathcal A(1^\lambda, Y_\lambda) = 1]\big| \text{ is negligible in } \lambda.$$
 If the TV distance itself is negligible, so that even unbounded distinguishers gain almost nothing, they are **statistically indistinguishable** ($\approx_s$), and if they are equal, **perfectly indistinguishable** ($\equiv$). By Fact 2, every distinguisher's advantage is at most the TV distance, so $\equiv$ implies $\approx_s$, which implies $\approx_c$.
 
 ### The hybrid lemma for many samples
 
 **Statement.** If one sample cannot be told apart, can many? The answer is yes, as long as "many" is polynomial. Let $X$ and $Y$ be efficiently samplable (an efficient algorithm can draw from each) with $X \approx_c Y$, and let $m = m(\lambda)$ be a polynomial. Then $m$ independent copies are still indistinguishable:
 $$(X_1, \dots, X_m) \approx_c (Y_1, \dots, Y_m).$$
-Quantitatively, a distinguisher with advantage $\varepsilon$ on $m$ copies yields one with advantage $\varepsilon/m$ on a single copy, with about the same running time.
+Quantitatively, a distinguisher with advantage $\nu$ on $m$ copies yields one with advantage $\nu/m$ on a single copy, with about the same running time.
 
-**Derivation.** The idea is to walk from all-$X$ to all-$Y$ by swapping one sample at a time. If the two ends are $\varepsilon$ apart, the $m$ steps must add up to $\varepsilon$ (Fact 3), so a typical step is worth $\varepsilon/m$. And a single step changes a single sample, so it is a one-sample problem.
+**Derivation.** The idea is to walk from all-$X$ to all-$Y$ by swapping one sample at a time. If the two ends are $\nu$ apart, the $m$ steps must add up to $\nu$ (Fact 3), so a typical step is worth $\nu/m$. And a single step changes a single sample, so it is a one-sample problem.
 
 1. **Define the hybrids.** Let $H_i = (Y_1, \dots, Y_i, X_{i+1}, \dots, X_m)$: the first $i$ entries come from $Y$, the rest from $X$. Then $H_0$ is all-$X$ and $H_m$ is all-$Y$, and consecutive hybrids differ in a single position.
-2. **Build a one-sample distinguisher.** Given a distinguisher $D$ for $m$ samples, let $D'$ on a single input $z$ pick a position $i$ uniformly from $\{1, \dots, m\}$, sample $Y_1, \dots, Y_{i-1}$ and $X_{i+1}, \dots, X_m$ itself (this is where efficient samplability is needed), put $z$ in position $i$, and output $D(Y_1, \dots, Y_{i-1}, z, X_{i+1}, \dots, X_m)$.
-3. **Identify what $D$ sees.** If $z \sim X$, the tuple handed to $D$ has $i - 1$ entries from $Y$ followed by entries from $X$, so it is distributed as $H_{i-1}$. If $z \sim Y$, it has $i$ entries from $Y$, so it is $H_i$.
-4. **Average over the random position.** Each $i$ is chosen with probability $\frac1m$, so $\Pr[D'(X) = 1] - \Pr[D'(Y) = 1] = \frac1m\sum_{i=1}^m\big(\Pr[D(H_{i-1}) = 1] - \Pr[D(H_i) = 1]\big)$.
-5. **Telescope.** As in Fact 3, but without absolute values, the intermediate terms cancel and the sum equals $\Pr[D(H_0) = 1] - \Pr[D(H_m) = 1]$, whose absolute value is $D$'s advantage $\varepsilon$. So $D'$ has advantage exactly $\varepsilon/m$.
-6. **Conclude by contradiction.** Suppose $\varepsilon$ were not negligible. Negating @eq-crypto-negligible, there would be a $c$ with $\varepsilon(\lambda) \ge \lambda^{-c}$ for infinitely many $\lambda$. With $m(\lambda) \le \lambda^{c'}$ for some exponent $c'$, this gives $\varepsilon/m \ge \lambda^{-(c+c')}$ for those same $\lambda$, so the efficient $D'$ would have non-negligible advantage on one sample, contradicting $X \approx_c Y$.
+2. **Build a one-sample distinguisher.** Given a distinguisher $\mathcal A$ for $m$ samples, let $\mathcal B$ on a single input $z$ pick a position $i$ uniformly from $\{1, \dots, m\}$, sample $Y_1, \dots, Y_{i-1}$ and $X_{i+1}, \dots, X_m$ itself (this is where efficient samplability is needed), put $z$ in position $i$, and output $\mathcal A(Y_1, \dots, Y_{i-1}, z, X_{i+1}, \dots, X_m)$.
+3. **Identify what $\mathcal A$ sees.** If $z \sim X$, the tuple handed to $\mathcal A$ has $i - 1$ entries from $Y$ followed by entries from $X$, so it is distributed as $H_{i-1}$. If $z \sim Y$, it has $i$ entries from $Y$, so it is $H_i$.
+4. **Average over the random position.** Each $i$ is chosen with probability $\frac1m$, so $\Pr[\mathcal B(X) = 1] - \Pr[\mathcal B(Y) = 1] = \frac1m\sum_{i=1}^m\big(\Pr[\mathcal A(H_{i-1}) = 1] - \Pr[\mathcal A(H_i) = 1]\big)$.
+5. **Telescope.** As in Fact 3, but without absolute values, the intermediate terms cancel and the sum equals $\Pr[\mathcal A(H_0) = 1] - \Pr[\mathcal A(H_m) = 1]$, whose absolute value is $\mathcal A$'s advantage $\nu$. So $\mathcal B$ has advantage exactly $\nu/m$.
+6. **Conclude by contradiction.** Suppose $\nu$ were not negligible. Negating @eq-crypto-negligible, there would be a $c$ with $\nu(\lambda) \ge \lambda^{-c}$ for infinitely many $\lambda$. With $m(\lambda) \le \lambda^{c'}$ for some exponent $c'$, this gives $\nu/m \ge \lambda^{-(c+c')}$ for those same $\lambda$, so the efficient $\mathcal B$ would have non-negligible advantage on one sample, contradicting $X \approx_c Y$.
 
-The same argument without the running-time bookkeeping shows $\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \le m\,\mathrm{TV}(P, Q)$, where $P^{\otimes m}$ is the distribution of $m$ independent samples from $P$.
+The same argument without the running-time bookkeeping shows $\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)$, where $P^{\otimes m}$ is the distribution of $m$ independent samples from $P$.
 
 ### Interpretation
 
@@ -182,9 +182,9 @@ Every hybrid proof has this shape: a chain from the real world to an ideal world
 
 ### Example: how many flips reveal a biased coin?
 
-$X$ is a fair coin and $Y$ lands heads with probability $\frac12 + \delta$, with $\delta = 0.01$. From one flip, the best advantage is the TV distance, which is the excess probability of heads, $\delta = 0.01$ (Fact 2). With $m$ flips, the hybrid bound gives at most $m\delta$. @tbl-crypto-coin-hybrid and @fig-crypto-hybrid compare that with the best possible advantage (the exact TV distance between the two binomial counts of heads) and with a simple distinguisher, majority vote: output 1 iff more than half the flips are heads.
+$X$ is a fair coin and $Y$ lands heads with probability $\frac12 + \xi$, with $\xi = 0.01$. From one flip, the best advantage is the TV distance, which is the excess probability of heads, $\xi = 0.01$ (Fact 2). With $m$ flips, the hybrid bound gives at most $mh$. @tbl-crypto-coin-hybrid and @fig-crypto-hybrid compare that with the best possible advantage (the exact TV distance between the two binomial counts of heads) and with a simple distinguisher, majority vote: output 1 iff more than half the flips are heads.
 
-| Flips $m$ | Majority vote (simulation) | Best possible (TV) | Hybrid bound $\min(1, m\delta)$ |
+| Flips $m$ | Majority vote (simulation) | Best possible (TV) | Hybrid bound $\min(1, mh)$ |
 | --- | --- | --- | --- |
 | 1 | 0.008 | 0.010 | 0.010 |
 | 100 | 0.082 | 0.080 | 1.000 |
@@ -192,16 +192,16 @@ $X$ is a fair coin and $Y$ lands heads with probability $\frac12 + \delta$, with
 
 : Advantage in telling $m$ flips of a $0.51$-coin from $m$ fair flips (seed 0, 200,000 simulated games per entry). {#tbl-crypto-coin-hybrid}
 
-The hybrid bound is tight for one sample and loose afterwards, and a normal approximation shows why. The number of heads has mean $m/2$ for the fair coin and $m/2 + m\delta$ for the biased one, and in both cases a standard deviation of about $\sqrt m/2$ (each flip has variance $\frac14$ or very close to it). So the two counts are two bell curves whose centres are $m\delta/(\sqrt m/2) = 2\delta\sqrt m$ standard deviations apart. The best test puts its threshold where the two curves cross, halfway between the means, at $\delta\sqrt m$ standard deviations from each. Write $\Phi$ for the standard normal cumulative distribution function, $\Phi(z) = \Pr[Z \le z]$ for $Z \sim \mathcal N(0, 1)$. The biased count lands above the threshold with probability $\Phi(\delta\sqrt m)$ and the fair one with probability $1 - \Phi(\delta\sqrt m)$, so the best advantage is about $2\Phi(\delta\sqrt m) - 1$. At $m = 100$, $\delta\sqrt m = 0.1$ and $2\Phi(0.1) - 1 = 0.080$; at $m = 10{,}000$, $\delta\sqrt m = 1$ and $2\Phi(1) - 1 = 0.683$, the two TV values in the table. The true advantage therefore grows like $\delta\sqrt m$, not $\delta m$: the means of the counts separate by $m\delta$, but each count fluctuates by about $\sqrt m/2$. To reach a constant advantage you need $\delta\sqrt m$ of order 1, that is about $1/\delta^2$ samples, while the hybrid bound would allow it after $1/\delta$.
+The hybrid bound is tight for one sample and loose afterwards, and a normal approximation shows why. The number of heads has mean $m/2$ for the fair coin and $m/2 + mh$ for the biased one, and in both cases a standard deviation of about $\sqrt m/2$ (each flip has variance $\frac14$ or very close to it). So the two counts are two bell curves whose centres are $mh/(\sqrt m/2) = 2\xi\sqrt m$ standard deviations apart. The best test puts its threshold where the two curves cross, halfway between the means, at $\xi\sqrt m$ standard deviations from each. Write $\Phi$ for the standard normal cumulative distribution function, $\Phi(z) = \Pr[Z \le z]$ for $Z \sim \mathcal N(0, 1)$. The biased count lands above the threshold with probability $\Phi(\xi\sqrt m)$ and the fair one with probability $1 - \Phi(\xi\sqrt m)$, so the best advantage is about $2\Phi(\xi\sqrt m) - 1$. At $m = 100$, $\xi\sqrt m = 0.1$ and $2\Phi(0.1) - 1 = 0.080$; at $m = 10{,}000$, $\xi\sqrt m = 1$ and $2\Phi(1) - 1 = 0.683$, the two TV values in the table. The true advantage therefore grows like $\xi\sqrt m$, not $\xi m$: the means of the counts separate by $mh$, but each count fluctuates by about $\sqrt m/2$. To reach a constant advantage you need $\xi\sqrt m$ of order 1, that is about $1/\xi^2$ samples, while the hybrid bound would allow it after $1/\xi$.
 
-Majority vote stalls at about $\frac12$, because its threshold $m/2$ sits at the centre of the fair curve instead of halfway between the two. For large $m$ the biased count is almost surely above $m/2$, but so is the fair count about half the time. At $m = 10{,}000$ the biased mean is $2\delta\sqrt m = 2$ standard deviations above $m/2$, so the biased count clears $m/2$ with probability about $\Phi(2) = 0.977$, and $0.977 - 0.5 \approx 0.48$, close to the simulated 0.481. The best test puts the threshold halfway between the two means, at $m/2 + m\delta/2$ ([Exercise 3](../../book-exercises/part01-prerequisites/08-crypto-basics.md#sec-sol-crypto-basics-3)).
+Majority vote stalls at about $\frac12$, because its threshold $m/2$ sits at the centre of the fair curve instead of halfway between the two. For large $m$ the biased count is almost surely above $m/2$, but so is the fair count about half the time. At $m = 10{,}000$ the biased mean is $2\xi\sqrt m = 2$ standard deviations above $m/2$, so the biased count clears $m/2$ with probability about $\Phi(2) = 0.977$, and $0.977 - 0.5 \approx 0.48$, close to the simulated 0.481. The best test puts the threshold halfway between the two means, at $m/2 + mh/2$ ([Exercise 3](../../book-exercises/part01-prerequisites/08-crypto-basics.md#sec-sol-crypto-basics-3)).
 
-![Advantage of telling $m$ flips of a coin with bias $\frac12 + 0.01$ from fair flips: majority vote (simulation), the best possible distinguisher (exact TV distance), and the hybrid bound $m\delta$.](figures/crypto_basics_hybrid.svg){#fig-crypto-hybrid}
+![Advantage of telling $m$ flips of a coin with bias $\frac12 + 0.01$ from fair flips: majority vote (simulation), the best possible distinguisher (exact TV distance), and the hybrid bound $mh$.](figures/crypto_basics_hybrid.svg){#fig-crypto-hybrid}
 
 ### Check yourself
 
 - Where does the hybrid lemma use that $X$ and $Y$ are efficiently samplable? *(In step 2: $D'$ must generate the other $m - 1$ entries itself, in polynomial time.)*
-- Why does the lemma need $m$ to be polynomial? *(The loss is a factor $m$. For superpolynomial $m$, $\varepsilon/m$ can be negligible even when $\varepsilon$ is not, so step 6 no longer gives a contradiction.)*
+- Why does the lemma need $m$ to be polynomial? *(The loss is a factor $m$. For superpolynomial $m$, $\nu/m$ can be negligible even when $\nu$ is not, so step 6 no longer gives a contradiction.)*
 
 ## Concrete versus asymptotic security
 
@@ -211,28 +211,28 @@ Real systems fix $\lambda$: AES uses 128-bit keys, not "a key of length $\lambda
 
 ### Definition
 
-Instead of "efficient" and "negligible", concrete security names the attacker's resources and the advantage they buy. A primitive is **$(t, q, \varepsilon)$-secure** if every adversary that runs in time at most $t$ and makes at most $q$ queries to its oracles (the procedures the game lets it call, such as "encrypt this message for me") has advantage at most $\varepsilon$. Brute force over $\kappa$-bit keys sets the benchmark: trying $t$ keys succeeds with probability $t/2^\kappa$. A primitive has **$\kappa$-bit security** if, roughly, no attack does better than that: every adversary with time $t$ has advantage at most $t/2^\kappa$.
+Instead of "efficient" and "negligible", concrete security names the attacker's resources and the advantage they buy. A primitive is **$(t, Q, \nu)$-secure** if every adversary that runs in time at most $t$ and makes at most $Q$ queries to its oracles (the procedures the game lets it call, such as "encrypt this message for me") has advantage at most $\nu$. Brute force over $\kappa$-bit keys sets the benchmark: trying $t$ keys succeeds with probability $t/2^\kappa$. A primitive has **$\kappa$-bit security** if, roughly, no attack does better than that: every adversary with time $t$ has advantage at most $t/2^\kappa$.
 
-Security proofs then become **reductions** with explicit losses: "if $A$ breaks scheme $S$ with $(t, q, \varepsilon)$, then $B$ breaks primitive $P$ with $(t', q', \varepsilon')$". Read in reverse, this says that if $P$ is hard to break, so is $S$, and the losses say how much security is lost on the way. The hybrid lemma is an example with $t' \approx t$ and $\varepsilon' = \varepsilon/m$. A reduction is **tight** when $\varepsilon' \approx \varepsilon$. A loose reduction forces larger parameters for the same guarantee, because the primitive must then be secure against advantages much smaller than the one you want for the scheme.
+Security proofs then become **reductions** with explicit losses: "if $\mathcal A$ breaks scheme $\Sigma$ with $(t, Q, \nu)$, then $\mathcal B$ breaks primitive $\Pi$ with $(t', Q', \nu')$". Read in reverse, this says that if $\Pi$ is hard to break, so is $\Sigma$, and the losses say how much security is lost on the way. The hybrid lemma is an example with $t' \approx t$ and $\nu' = \nu/m$. A reduction is **tight** when $\nu' \approx \nu$. A loose reduction forces larger parameters for the same guarantee, because the primitive must then be secure against advantages much smaller than the one you want for the scheme.
 
 ### Example: what 128-bit security buys
 
 Suppose an attacker has an exascale machine that tests $10^{18}$ keys per second, and runs it for a year. A year is about $3.16\times10^7$ seconds, so that is about $3.16\times10^{25}$ keys, which is $2^{84.7}$ keys (since $\log_2 10 \approx 3.32$). Each key is right with probability $2^{-128}$, so against a 128-bit key it succeeds with probability $2^{84.7 - 128} = 9.3\times10^{-14}$. Trying all $2^{128}$ keys would take $2^{128}/2^{84.7} = 2^{43.3}$ years, which is $1.08\times10^{13}$ years. The advantage is not zero, but it is smaller than the probability of most hardware failures during the computation.
 
-### Example: what a $q$-query bound means
+### Example: what a $Q$-query bound means
 
-The next section derives that a pseudorandom permutation on $n$-bit blocks is also a pseudorandom function, up to an extra advantage of $q^2/2^{n+1}$ after $q$ queries (@eq-crypto-switching). In words, the extra advantage is the probability that $q$ random $n$-bit values contain a repeat, which grows with the square of $q$. For a 128-bit block cipher, $q^2/2^{129} = 2^{2k - 129}$ when $q = 2^k$. With 16-byte (128-bit) blocks:
+The next section derives that a pseudorandom permutation on $n$-bit blocks is also a pseudorandom function, up to an extra advantage of $Q^2/2^{n+1}$ after $Q$ queries (@eq-crypto-switching). In words, the extra advantage is the probability that $Q$ random $n$-bit values contain a repeat, which grows with the square of $Q$. For a 128-bit block cipher, $Q^2/2^{129} = 2^{2k - 129}$ when $Q = 2^k$. With 16-byte (128-bit) blocks:
 
-- $q = 2^{32}$ blocks ($2^{36}$ bytes, 64 GiB of data): at most $2^{64 - 129} = 2^{-65}$.
-- $q = 2^{48}$ blocks ($2^{52}$ bytes, 4 PiB): at most $2^{96 - 129} = 2^{-33}$.
-- $q = 2^{64}$ blocks: the bound reaches $2^{128 - 129} = \frac12$ and says nothing.
+- $Q = 2^{32}$ blocks ($2^{36}$ bytes, 64 GiB of data): at most $2^{64 - 129} = 2^{-65}$.
+- $Q = 2^{48}$ blocks ($2^{52}$ bytes, 4 PiB): at most $2^{96 - 129} = 2^{-33}$.
+- $Q = 2^{64}$ blocks: the bound reaches $2^{128 - 129} = \frac12$ and says nothing.
 
-So a $q$-query bound is a data limit. This is why block-cipher modes recommend changing keys long before $2^{64}$ blocks: the guarantee degrades with the square of the data processed under one key.
+So a $Q$-query bound is a data limit. This is why block-cipher modes recommend changing keys long before $2^{64}$ blocks: the guarantee degrades with the square of the data processed under one key.
 
 ### Check yourself
 
-- A reduction loses a factor of $2^{20}$ (it turns advantage $\varepsilon$ into $\varepsilon/2^{20}$). If the primitive has 128-bit security, what does the scheme have? *(About $128 - 20 = 108$ bits: a scheme adversary with advantage $\varepsilon$ gives a primitive adversary with advantage $\varepsilon/2^{20} \le t/2^{128}$, so $\varepsilon \le t/2^{108}$.)*
-- Why is "$(t, \varepsilon)$-secure" usually summarized by the ratio $t/\varepsilon$? *(An adversary can trade time for success probability, for example by guessing a fraction of the key space: trying $t$ of $2^\kappa$ keys gives $\varepsilon = t/2^\kappa$, so the ratio $t/\varepsilon = 2^\kappa$ stays constant along that trade-off.)*
+- A reduction loses a factor of $2^{20}$ (it turns advantage $\nu$ into $\nu/2^{20}$). If the primitive has 128-bit security, what does the scheme have? *(About $128 - 20 = 108$ bits: a scheme adversary with advantage $\nu$ gives a primitive adversary with advantage $\nu/2^{20} \le t/2^{128}$, so $\nu \le t/2^{108}$.)*
+- Why is "$(t, \nu)$-secure" usually summarized by the ratio $t/\nu$? *(An adversary can trade time for success probability, for example by guessing a fraction of the key space: trying $t$ of $2^\kappa$ keys gives $\nu = t/2^\kappa$, so the ratio $t/\nu = 2^\kappa$ stays constant along that trade-off.)*
 
 ## Pseudorandom generators and functions
 
@@ -246,11 +246,11 @@ A generator is pseudorandom if its output, on a random seed, cannot be told from
 $$G(U_\lambda) \approx_c U_{\ell(\lambda)}.$$
 As a game: the challenger sends either $G(s)$ for a uniform seed $s$, or a uniform $\ell$-bit string, and the adversary guesses which.
 
-**A PRG is never statistically secure.** The outputs of $G$ form a tiny subset of all $\ell$-bit strings, so an adversary that can check membership in that subset wins easily. The catch is that checking takes exponential time. Let $D(y) = 1$ iff $y = G(s)$ for some seed $s$.
+**A PRG is never statistically secure.** The outputs of $G$ form a tiny subset of all $\ell$-bit strings, so an adversary that can check membership in that subset wins easily. The catch is that checking takes exponential time. Let $\mathcal A(y) = 1$ iff $y = G(s)$ for some seed $s$.
 
-1. On $G(U_\lambda)$, $D$ always outputs 1, because the input is an output of $G$ by construction.
-2. There are $2^\lambda$ seeds, so at most $2^\lambda$ of the $2^\ell$ strings are outputs of $G$. On $U_\ell$, $D$ therefore outputs 1 with probability at most $2^\lambda/2^\ell = 2^{\lambda - \ell}$, which is at most $\frac12$ because $\ell \ge \lambda + 1$.
-3. So $D$ has advantage at least $1 - \frac12 = \frac12$, and by Fact 2 the TV distance is at least $\frac12$. But $D$ loops over $2^\lambda$ seeds. Pseudorandomness is only a statement about efficient distinguishers.
+1. On $G(U_\lambda)$, $\mathcal A$ always outputs 1, because the input is an output of $G$ by construction.
+2. There are $2^\lambda$ seeds, so at most $2^\lambda$ of the $2^\ell$ strings are outputs of $G$. On $U_\ell$, $\mathcal A$ therefore outputs 1 with probability at most $2^\lambda/2^\ell = 2^{\lambda - \ell}$, which is at most $\frac12$ because $\ell \ge \lambda + 1$.
+3. So $\mathcal A$ has advantage at least $1 - \frac12 = \frac12$, and by Fact 2 the TV distance is at least $\frac12$. But $\mathcal A$ loops over $2^\lambda$ seeds. Pseudorandomness is only a statement about efficient distinguishers.
 
 PRGs exist if one-way functions exist (Håstad, Impagliazzo, Levin & Luby 1999). In practice, stream ciphers such as ChaCha20 are modelled as PRGs.
 
@@ -259,7 +259,7 @@ PRGs exist if one-way functions exist (Håstad, Impagliazzo, Levin & Luby 1999).
 A **random function** from $\mathcal X$ to $\mathcal Y$ is a table that assigns each input its own independent, uniform output. A keyed function $F: \{0,1\}^\lambda \times \mathcal X \to \mathcal Y$, written $F_k(x)$ for key $k$, is a **pseudorandom function (PRF)** if no efficient adversary can tell whether it is talking to $F_k$ with a random key or to a truly random function. Because the adversary may choose its questions, the game gives it an oracle $O$, a box it can query, and hides behind a fair coin which function is in the box:
 
 1. The challenger flips $b$. If $b = 0$ it samples a key $k$ and sets $O = F_k$. If $b = 1$ it sets $O = f$, a uniformly random function from $\mathcal X$ to $\mathcal Y$.
-2. The adversary sends queries $x_1, \dots, x_q$, adaptively (each may depend on earlier answers), and receives $O(x_1), \dots, O(x_q)$.
+2. The adversary sends queries $x_1, \dots, x_Q$, adaptively (each may depend on earlier answers), and receives $O(x_1), \dots, O(x_Q)$.
 3. It outputs a guess $b'$. Its advantage is $|\Pr[b' = 1 \mid b = 1] - \Pr[b' = 1 \mid b = 0]|$, the gap of Fact 1 between how often it says "random" in the two worlds.
 
 A random function on 128-bit inputs is a table with $2^{128}$ entries, which nobody can store. A PRF gives the same appearance from a 128-bit key. In practice the hash-based message authentication code (HMAC) is modelled as a PRF; the toy code uses HMAC-SHA256.
@@ -272,25 +272,25 @@ Goldreich, Goldwasser & Micali (1986) build a PRF from any length-doubling PRG; 
 2. For an input $x = x_1x_2\cdots x_n$, walk down the tree: the node reached after the first $i$ bits is $k_{x_1\cdots x_i} = G_{x_i}(k_{x_1\cdots x_{i-1}})$, the left or right half of the PRG applied to its parent.
 3. Output the leaf: $F_k(x) = k_x$.
 
-**Proof sketch.** The proof replaces the tree by random values one level at a time. Let hybrid $H_j$ replace every node at depth $j$ by an independent uniform string, sampled when first needed, and compute everything below it with $G$. $H_0$ is the real $F_k$, and $H_n$, where every leaf is independent and uniform, is a random function. Between $H_{j-1}$ and $H_j$, the only change is at depth $j$: in $H_{j-1}$ the nodes there are the two halves of $G$ applied to uniform parents, and in $H_j$ they are uniform. Each query is a path from root to leaf, with one node per depth, so a $q$-query adversary touches at most $q$ parents at depth $j - 1$. Telling $H_{j-1}$ from $H_j$ therefore means telling $q$ outputs of $G$ on uniform seeds from $q$ uniform strings. By the hybrid lemma that costs at most $q$ times the PRG advantage. Summing over the $n$ levels (Fact 3): $\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}$. The full proof is in Goldreich, *Foundations of Cryptography*, Vol. 1, §3.6, and @sec-apx-crypto-ggm in the appendices derives it step by step, including how the reduction handles queries chosen adaptively.
+**Proof sketch.** The proof replaces the tree by random values one level at a time. Let hybrid $H_j$ replace every node at depth $j$ by an independent uniform string, sampled when first needed, and compute everything below it with $G$. $H_0$ is the real $F_k$, and $H_n$, where every leaf is independent and uniform, is a random function. Between $H_{j-1}$ and $H_j$, the only change is at depth $j$: in $H_{j-1}$ the nodes there are the two halves of $G$ applied to uniform parents, and in $H_j$ they are uniform. Each query is a path from root to leaf, with one node per depth, so a $Q$-query adversary touches at most $Q$ parents at depth $j - 1$. Telling $H_{j-1}$ from $H_j$ therefore means telling $Q$ outputs of $G$ on uniform seeds from $Q$ uniform strings. By the hybrid lemma that costs at most $Q$ times the PRG advantage. Summing over the $n$ levels (Fact 3): $\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}$. The full proof is in Goldreich, *Foundations of Cryptography*, Vol. 1, §3.6, and @sec-apx-crypto-ggm in the appendices derives it step by step, including how the reduction handles queries chosen adaptively.
 
 ### The birthday bound
 
-**Statement.** Many arguments about random values fail only if two of them coincide, so you need to know how likely a coincidence is. The answer is the birthday bound: among $q$ values there are about $q^2/2$ pairs, each pair coincides with probability $1/N$, so collisions become likely once $q^2/2$ is comparable to $N$, after about $\sqrt N$ draws rather than $N$. Precisely, draw $q$ values independently and uniformly from a set of size $N$. The probability that two of them coincide satisfies
-$$1 - e^{-q(q-1)/(2N)} \;\le\; \Pr[\text{collision}] \;\le\; \frac{q(q-1)}{2N} \le \frac{q^2}{2N}.$$ {#eq-crypto-birthday}
+**Statement.** Many arguments about random values fail only if two of them coincide, so you need to know how likely a coincidence is. The answer is the birthday bound: among $Q$ values there are about $Q^2/2$ pairs, each pair coincides with probability $1/N$, so collisions become likely once $Q^2/2$ is comparable to $N$, after about $\sqrt N$ draws rather than $N$. Precisely, draw $Q$ values independently and uniformly from a set of size $N$. The probability that two of them coincide satisfies
+$$1 - e^{-Q(Q-1)/(2N)} \;\le\; \Pr[\text{collision}] \;\le\; \frac{Q(Q-1)}{2N} \le \frac{Q^2}{2N}.$$ {#eq-crypto-birthday}
 
 **Derivation.** The upper bound counts pairs; the lower bound computes the exact probability of no collision and bounds it with $1 - x \le e^{-x}$.
 
-1. **Upper bound.** There are $\binom q2 = q(q-1)/2$ pairs, and each pair coincides with probability $1/N$ (whatever the first value is, the second matches it with probability $1/N$). A collision means at least one pair coincides, so the union bound (Fact 5) gives $\Pr[\text{collision}] \le q(q-1)/(2N)$.
-2. **Exact value.** Draw the values one at a time. If no collision has happened yet, the first $i$ values are distinct, and the $(i+1)$-th avoids all of them with probability $1 - i/N$. Multiplying these conditional probabilities, $\Pr[\text{no collision}] = \prod_{i=0}^{q-1}(1 - i/N)$.
-3. **Lower bound.** By $1 - x \le e^{-x}$ applied to each factor, $\Pr[\text{no collision}] \le \exp\big(-\sum_{i<q} i/N\big) = e^{-q(q-1)/(2N)}$, using $\sum_{i<q} i = q(q-1)/2$. Subtracting from 1 gives the lower bound on a collision.
-4. **The 50% point.** Setting $1 - e^{-q^2/(2N)} = \frac12$ means $q^2/(2N) = \ln 2$, so $q \approx \sqrt{2N\ln 2} \approx 1.18\sqrt N$ (since $2\ln 2 = 1.386$ and $\sqrt{1.386} = 1.18$). Collisions appear after about $\sqrt N$ draws, not $N$.
+1. **Upper bound.** There are $\binom Q2 = Q(Q-1)/2$ pairs, and each pair coincides with probability $1/N$ (whatever the first value is, the second matches it with probability $1/N$). A collision means at least one pair coincides, so the union bound (Fact 5) gives $\Pr[\text{collision}] \le Q(Q-1)/(2N)$.
+2. **Exact value.** Draw the values one at a time. If no collision has happened yet, the first $i$ values are distinct, and the $(i+1)$-th avoids all of them with probability $1 - i/N$. Multiplying these conditional probabilities, $\Pr[\text{no collision}] = \prod_{i=0}^{Q-1}(1 - i/N)$.
+3. **Lower bound.** By $1 - x \le e^{-x}$ applied to each factor, $\Pr[\text{no collision}] \le \exp\big(-\sum_{i<Q} i/N\big) = e^{-Q(Q-1)/(2N)}$, using $\sum_{i<Q} i = Q(Q-1)/2$. Subtracting from 1 gives the lower bound on a collision.
+4. **The 50% point.** Setting $1 - e^{-Q^2/(2N)} = \frac12$ means $Q^2/(2N) = \ln 2$, so $Q \approx \sqrt{2N\ln 2} \approx 1.18\sqrt N$ (since $2\ln 2 = 1.386$ and $\sqrt{1.386} = 1.18$). Collisions appear after about $\sqrt N$ draws, not $N$.
 
-The two bounds are close. Write $x = q(q-1)/(2N)$, so the union bound is $x$ and the lower bound is $1 - e^{-x}$. On $[0, 1]$ the curve $1 - e^{-x}$ is concave (it bends downwards), so it lies above the straight chord joining its values at 0 and 1, which is $(1 - 1/e)x$. So when $x \le 1$, the lower bound is at least $1 - 1/e \approx 0.63$ times the union bound, and the union bound has the right order.
+The two bounds are close. Write $x = Q(Q-1)/(2N)$, so the union bound is $x$ and the lower bound is $1 - e^{-x}$. On $[0, 1]$ the curve $1 - e^{-x}$ is concave (it bends downwards), so it lies above the straight chord joining its values at 0 and 1, which is $(1 - 1/e)x$. So when $x \le 1$, the lower bound is at least $1 - 1/e \approx 0.63$ times the union bound, and the union bound has the right order.
 
-**Examples.** @tbl-crypto-birthday gives the exact probability and both bounds for three cases. The union-bound column is $q(q-1)/(2N)$; for the class, $23 \times 22/730 = 0.693$.
+**Examples.** @tbl-crypto-birthday gives the exact probability and both bounds for three cases. The union-bound column is $Q(Q-1)/(2N)$; for the class, $23 \times 22/730 = 0.693$.
 
-| Case | $q$ | $N$ | Exact | Union bound | $1 - e^{-q(q-1)/(2N)}$ |
+| Case | $Q$ | $N$ | Exact | Union bound | $1 - e^{-Q(Q-1)/(2N)}$ |
 | --- | --- | --- | --- | --- | --- |
 | Shared birthday in a class | 23 | 365 | 0.507 | 0.693 | 0.500 |
 | Hashing trick: 1,000 features into $2^{20}$ buckets | 1,000 | $2^{20}$ | 0.379 | 0.476 | 0.379 |
@@ -300,37 +300,37 @@ The two bounds are close. Write $x = q(q-1)/(2N)$, so the union bound is $x$ and
 
 With the hashing trick, 1,000 features hashed into a million buckets already collide with probability 0.379. Random 32-bit identifiers for 100,000 records are more likely than not to clash; the union bound is above 1 and says nothing.
 
-@fig-crypto-birthday checks @eq-crypto-birthday by simulation for $N = 2^{16}$. At $q = 256 = \sqrt N$ the exact probability is 0.3927, the simulation (100,000 trials) gives 0.3920, and the union bound gives 0.4980. The 50% point is $q = 301$, in line with $1.18\sqrt N = 1.18 \times 256 \approx 302$.
+@fig-crypto-birthday checks @eq-crypto-birthday by simulation for $N = 2^{16}$. At $Q = 256 = \sqrt N$ the exact probability is 0.3927, the simulation (100,000 trials) gives 0.3920, and the union bound gives 0.4980. The 50% point is $Q = 301$, in line with $1.18\sqrt N = 1.18 \times 256 \approx 302$.
 
-![Probability of a collision among $q$ uniform draws from $N = 2^{16}$ values: exact, simulated, the union bound $q(q-1)/(2N)$ and the lower bound $1 - e^{-q(q-1)/(2N)}$.](figures/crypto_basics_birthday.svg){#fig-crypto-birthday}
+![Probability of a collision among $Q$ uniform draws from $N = 2^{16}$ values: exact, simulated, the union bound $Q(Q-1)/(2N)$ and the lower bound $1 - e^{-Q(Q-1)/(2N)}$.](figures/crypto_basics_birthday.svg){#fig-crypto-birthday}
 
 ### The switching lemma
 
-A block cipher such as AES is a keyed *permutation*: different inputs never give the same output. It is modelled as a **pseudorandom permutation (PRP)**, defined by the PRF game with the random function $f$ replaced by a uniformly random permutation of $\mathcal X$ (a random one-to-one shuffle of the inputs). Most proofs, however, want a PRF. The switching lemma bridges the gap. The only visible difference between a random function and a random permutation is that the function sometimes repeats an output and the permutation never does, so an adversary can tell them apart only about as often as $q$ random values collide.
+A block cipher such as AES is a keyed *permutation*: different inputs never give the same output. It is modelled as a **pseudorandom permutation (PRP)**, defined by the PRF game with the random function $f$ replaced by a uniformly random permutation of $\mathcal X$ (a random one-to-one shuffle of the inputs). Most proofs, however, want a PRF. The switching lemma bridges the gap. The only visible difference between a random function and a random permutation is that the function sometimes repeats an output and the permutation never does, so an adversary can tell them apart only about as often as $Q$ random values collide.
 
-**Statement.** For any adversary making $q$ queries,
-$$\big|\Pr[A^{\text{random function}} = 1] - \Pr[A^{\text{random permutation}} = 1]\big| \le \frac{q(q-1)}{2|\mathcal X|} \le \frac{q^2}{2|\mathcal X|}.$$ {#eq-crypto-switching}
-Here $A^{O}$ means the adversary run with oracle $O$.
+**Statement.** For any adversary making $Q$ queries,
+$$\big|\Pr[\mathcal A^{\text{random function}} = 1] - \Pr[\mathcal A^{\text{random permutation}} = 1]\big| \le \frac{Q(Q-1)}{2|\mathcal X|} \le \frac{Q^2}{2|\mathcal X|}.$$ {#eq-crypto-switching}
+Here $\mathcal A^{O}$ means the adversary run with oracle $O$.
 
 **Derivation.** The plan is to run both oracles from the same pre-drawn list of answers, and show they behave identically unless that list contains a repeat.
 
-1. **Simplify the adversary.** Assume its $q$ queries are distinct: repeating a query teaches it nothing, since both oracles answer the same question the same way every time.
-2. **Pre-sample the answers.** The random-function oracle can be run by drawing $Y_1, \dots, Y_q$ independently and uniformly from $\mathcal X$ in advance and answering the $i$-th query with $Y_i$. On distinct queries this is exactly a random function, because a random function gives each new input a fresh uniform output.
-3. **Do the same for the permutation.** A random permutation answers the $i$-th distinct query with a value that is uniform over the $|\mathcal X| - i + 1$ values not yet used, whatever the queries are: every unused value is the image of the new query under the same number of permutations consistent with the answers so far. So the permutation oracle can be run by pre-sampling a uniformly random sequence of $q$ *distinct* values.
-4. **Compare the two.** Let $C$ be the event that the list $Y_1, \dots, Y_q$ of step 2 has a collision. Every list has probability $|\mathcal X|^{-q}$, so conditioning on no collision leaves every list of distinct values equally likely: exactly the permutation's answers. Hence $\Pr[A^{\text{RF}} = 1 \mid \neg C] = \Pr[A^{\text{RP}} = 1]$, writing $\mathrm{RF}$ for the random function and $\mathrm{RP}$ for the random permutation.
-5. **Bound the difference.** Write $\rho = \Pr[A^{\text{RP}} = 1]$. Splitting on $C$, $\Pr[A^{\text{RF}} = 1] = \Pr[C]\Pr[A^{\text{RF}} = 1 \mid C] + (1 - \Pr[C])\,\rho$. Subtracting $\rho$ gives $\Pr[A^{\text{RF}} = 1] - \rho = \Pr[C]\big(\Pr[A^{\text{RF}} = 1 \mid C] - \rho\big)$. The bracket is a difference of two probabilities, so its absolute value is at most 1, and the whole is at most $\Pr[C]$.
+1. **Simplify the adversary.** Assume its $Q$ queries are distinct: repeating a query teaches it nothing, since both oracles answer the same question the same way every time.
+2. **Pre-sample the answers.** The random-function oracle can be run by drawing $Y_1, \dots, Y_Q$ independently and uniformly from $\mathcal X$ in advance and answering the $i$-th query with $Y_i$. On distinct queries this is exactly a random function, because a random function gives each new input a fresh uniform output.
+3. **Do the same for the permutation.** A random permutation answers the $i$-th distinct query with a value that is uniform over the $|\mathcal X| - i + 1$ values not yet used, whatever the queries are: every unused value is the image of the new query under the same number of permutations consistent with the answers so far. So the permutation oracle can be run by pre-sampling a uniformly random sequence of $Q$ *distinct* values.
+4. **Compare the two.** Let $\mathrm{Col}$ be the event that the list $Y_1, \dots, Y_Q$ of step 2 has a collision. Every list has probability $|\mathcal X|^{-Q}$, so conditioning on no collision leaves every list of distinct values equally likely: exactly the permutation's answers. Hence $\Pr[\mathcal A^{\text{RF}} = 1 \mid \neg \mathrm{Col}] = \Pr[\mathcal A^{\text{RP}} = 1]$, writing $\mathrm{RF}$ for the random function and $\mathrm{RP}$ for the random permutation.
+5. **Bound the difference.** Write $\rho = \Pr[\mathcal A^{\text{RP}} = 1]$. Splitting on $\mathrm{Col}$, $\Pr[\mathcal A^{\text{RF}} = 1] = \Pr[\mathrm{Col}]\Pr[\mathcal A^{\text{RF}} = 1 \mid \mathrm{Col}] + (1 - \Pr[\mathrm{Col}])\,\rho$. Subtracting $\rho$ gives $\Pr[\mathcal A^{\text{RF}} = 1] - \rho = \Pr[\mathrm{Col}]\big(\Pr[\mathcal A^{\text{RF}} = 1 \mid \mathrm{Col}] - \rho\big)$. The bracket is a difference of two probabilities, so its absolute value is at most 1, and the whole is at most $\Pr[\mathrm{Col}]$.
 6. **Apply the birthday bound** (@eq-crypto-birthday) with $N = |\mathcal X|$.
 
-The event $C$ is defined on the pre-sampled answers, before the adversary acts, which is what makes step 4 valid for adaptive adversaries: whatever the adversary does, the answers it receives are the same list. (Bellare & Rogaway 2006 point out that a commonly given proof, which conditions on events defined through the adversary's queries, has a gap; their "identical until bad" game-playing proof is the one above.)
+The event $\mathrm{Col}$ is defined on the pre-sampled answers, before the adversary acts, which is what makes step 4 valid for adaptive adversaries: whatever the adversary does, the answers it receives are the same list. (Bellare & Rogaway 2006 point out that a commonly given proof, which conditions on events defined through the adversary's queries, has a gap; their "identical until bad" game-playing proof is the one above.)
 
-**Corollary.** If $F$ is a PRP with advantage $\varepsilon$ against $q$-query adversaries, it is a PRF with advantage at most $\varepsilon + q^2/(2|\mathcal X|)$. This is Fact 3 with three hybrids: going from $F_k$ to a random permutation costs at most $\varepsilon$, and from a random permutation to a random function at most $q^2/(2|\mathcal X|)$.
+**Corollary.** If $F$ is a PRP with advantage $\nu$ against $Q$-query adversaries, it is a PRF with advantage at most $\nu + Q^2/(2|\mathcal X|)$. This is Fact 3 with three hybrids: going from $F_k$ to a random permutation costs at most $\nu$, and from a random permutation to a random function at most $Q^2/(2|\mathcal X|)$.
 
-**The bound is tight.** The adversary "output 1 iff two answers collide" never outputs 1 against a permutation and outputs 1 against a function with probability exactly $\Pr[C]$. So @fig-crypto-birthday is also the advantage of the best adversary in the switching lemma.
+**The bound is tight.** The adversary "output 1 iff two answers collide" never outputs 1 against a permutation and outputs 1 against a function with probability exactly $\Pr[\mathrm{Col}]$. So @fig-crypto-birthday is also the advantage of the best adversary in the switching lemma.
 
 ### Check yourself
 
 - Why can the PRG distinguisher in the "never statistically secure" argument not be used against a real PRG? *(It enumerates all $2^\lambda$ seeds, which is not polynomial time.)*
-- How many outputs of a 64-bit block cipher can you safely use under one key, if you want the switching term below $2^{-20}$? *(Need $q^2/2^{65} \le 2^{-20}$, so $q^2 \le 2^{45}$ and $q \le 2^{22.5}$, about 6 million blocks: a 64-bit block is too small for bulk data.)*
+- How many outputs of a 64-bit block cipher can you safely use under one key, if you want the switching term below $2^{-20}$? *(Need $Q^2/2^{65} \le 2^{-20}$, so $Q^2 \le 2^{45}$ and $Q \le 2^{22.5}$, about 6 million blocks: a 64-bit block is too small for bulk data.)*
 
 ## Encryption: perfect secrecy and IND-CPA
 
@@ -340,7 +340,7 @@ Encryption should hide the message. Shannon's one-time pad hides it perfectly bu
 
 ### The one-time pad and perfect secrecy
 
-**Definition.** Hiding the message perfectly means that the ciphertext is no more likely to be produced by one message than by another, so seeing it tells you nothing. An encryption scheme has **perfect secrecy** if the ciphertext distribution does not depend on the message: for all messages $m, m'$ and ciphertexts $c$, $\Pr[\mathrm{Enc}_K(m) = c] = \Pr[\mathrm{Enc}_K(m') = c]$, where $K$ is the random key. Equivalently, seeing $c$ does not change the probability of any message (Shannon 1949). To see the equivalence, let the message $M$ be random with any prior, and apply Bayes' rule: $\Pr[M = m \mid C = c] = \Pr[C = c \mid M = m]\Pr[M = m]/\Pr[C = c]$. If $\Pr[C = c \mid M = m]$ is the same for every $m$, it equals its average $\Pr[C = c]$, the ratio is 1, and the posterior equals the prior.
+**Definition.** Hiding the message perfectly means that the ciphertext is no more likely to be produced by one message than by another, so seeing it tells you nothing. An encryption scheme has **perfect secrecy** if the ciphertext distribution does not depend on the message: for all messages $m, m'$ and ciphertexts $c$, $\Pr[\mathrm{Enc}_K(m) = c] = \Pr[\mathrm{Enc}_K(m') = c]$, where $K$ is the random key. Equivalently, seeing $c$ does not change the probability of any message (Shannon 1949). To see the equivalence, let the message $\mathbf m$ be random with any prior, write $\mathbf c$ for the resulting random ciphertext, and apply Bayes' rule: $\Pr[\mathbf m = m \mid \mathbf c = c] = \Pr[\mathbf c = c \mid \mathbf m = m]\Pr[\mathbf m = m]/\Pr[\mathbf c = c]$. If $\Pr[\mathbf c = c \mid \mathbf m = m]$ is the same for every $m$, it equals its average $\Pr[\mathbf c = c]$, the ratio is 1, and the posterior equals the prior.
 
 **The one-time pad.** For $n$-bit messages, the key $K$ is uniform on $\{0,1\}^n$ and $\mathrm{Enc}_K(m) = m \oplus K$, where $\oplus$ is bitwise exclusive or (XOR): each bit of the message is flipped where the key has a 1.
 
@@ -385,18 +385,18 @@ The script runs this attack against $\mathrm{Enc}_k(m) = m \oplus F_k(0)$, a det
 
 **Construction.** The fix is to use a fresh pad for every encryption. Draw a fresh uniform $r$ from a set $\mathcal R$ and use $F_k(r)$, a random-looking row of the PRF's table, as a one-time pad; send $r$ along so the receiver can recompute the pad. So $\mathrm{Enc}_k(m) = (r,\ m \oplus F_k(r))$, and to decrypt $(r, c)$ you compute $c \oplus F_k(r)$.
 
-**Statement.** The scheme can fail in only two ways: the PRF is distinguishable from random, or the challenge reuses an $r$ the adversary has already seen, so its pad is known. The bound adds the two. For an adversary $A$ making $q$ encryption queries, there is a PRF adversary $B$, with about the same running time, such that
-$$\Pr[A \text{ wins}] \le \frac12 + \mathrm{Adv}_{\mathrm{PRF}}(B) + \frac{q}{2|\mathcal R|}.$$
+**Statement.** The scheme can fail in only two ways: the PRF is distinguishable from random, or the challenge reuses an $r$ the adversary has already seen, so its pad is known. The bound adds the two. For an adversary $\mathcal A$ making $Q$ encryption queries, there is a PRF adversary $\mathcal B$, with about the same running time, such that
+$$\Pr[\mathcal A \text{ wins}] \le \frac12 + \mathrm{Adv}_{\mathrm{PRF}}(\mathcal B) + \frac{Q}{2|\mathcal R|}.$$
 
 **Derivation.**
 
 1. **Set up two hybrids.** **Hybrid 0** is the real game. **Hybrid 1** is the same game with $F_k$ replaced by a truly random function $f$.
-2. **Hybrid 0 to 1 costs the PRF advantage.** $B$ runs the whole game for $A$, using its own oracle in place of $F_k$, and outputs 1 iff $A$ wins. With oracle $F_k$, $B$ simulates hybrid 0; with oracle $f$, hybrid 1. So the winning probabilities in the two hybrids differ by at most $\mathrm{Adv}_{\mathrm{PRF}}(B)$.
-3. **Inside hybrid 1, name the bad event.** Let $E$ be the event that the challenge's $r^*$ equals one of the $q$ values $r_i$ used by the oracle. Each $r_i$ is independent of $r^*$ and equals it with probability $1/|\mathcal R|$, so by the union bound $\Pr[E] \le q/|\mathcal R|$.
-4. **If $E$ does not happen, the challenge is a one-time pad.** Then $f(r^*)$ is a value of the random function at a point never queried, so it is uniform and independent of everything else $A$ sees. So $c^* = m_b \oplus f(r^*)$ is uniform whatever $b$ is (Fact 4), and $A$ wins with probability exactly $\frac12$.
-5. **Combine.** Split the win on whether $E$ happens, and bound the win probability by 1 when it does: $\Pr[\text{win in hybrid 1}] \le \frac12\Pr[\neg E] + \Pr[E] = \frac12 + \frac12\Pr[E] \le \frac12 + \frac{q}{2|\mathcal R|}$. Add the loss from step 2.
+2. **Hybrid 0 to 1 costs the PRF advantage.** $\mathcal B$ runs the whole game for $\mathcal A$, using its own oracle in place of $F_k$, and outputs 1 iff $\mathcal A$ wins. With oracle $F_k$, $\mathcal B$ simulates hybrid 0; with oracle $f$, hybrid 1. So the winning probabilities in the two hybrids differ by at most $\mathrm{Adv}_{\mathrm{PRF}}(\mathcal B)$.
+3. **Inside hybrid 1, name the bad event.** Let $E$ be the event that the challenge's $r^*$ equals one of the $Q$ values $r_i$ used by the oracle. Each $r_i$ is independent of $r^*$ and equals it with probability $1/|\mathcal R|$, so by the union bound $\Pr[E] \le Q/|\mathcal R|$.
+4. **If $E$ does not happen, the challenge is a one-time pad.** Then $f(r^*)$ is a value of the random function at a point never queried, so it is uniform and independent of everything else $\mathcal A$ sees. So $c^* = m_b \oplus f(r^*)$ is uniform whatever $b$ is (Fact 4), and $\mathcal A$ wins with probability exactly $\frac12$.
+5. **Combine.** Split the win on whether $E$ happens, and bound the win probability by 1 when it does: $\Pr[\text{win in hybrid 1}] \le \frac12\Pr[\neg E] + \Pr[E] = \frac12 + \frac12\Pr[E] \le \frac12 + \frac{Q}{2|\mathcal R|}$. Add the loss from step 2.
 
-In advantage units, $\mathrm{Adv} = 2(\Pr[\text{win}] - \frac12)$, this is $\mathrm{Adv}_{\mathrm{CPA}} \le 2\,\mathrm{Adv}_{\mathrm{PRF}} + q/|\mathcal R|$. The term $q/|\mathcal R|$ is real, not an artefact of the proof. The script gives the adversary $q = 16$ encryptions of $m_0$ with 8-bit nonces ($|\mathcal R| = 256$); each reply $(r_i, m_0 \oplus F_k(r_i))$ reveals the pad $F_k(r_i)$. If $r^*$ matches one of them, the adversary removes the pad, reads the challenge, and is always right; otherwise it outputs 1. So it says 1 every time when $b = 1$, and when $b = 0$ it says 1 exactly when there is no match. Its advantage is $1 - (1 - \Pr[E]) = \Pr[E]$, and since $r^*$ misses each of the 16 independent nonces with probability $255/256$, $\Pr[E] = 1 - (255/256)^{16} = 0.0607$. The simulation measures 0.0605, and the bound $q/|\mathcal R|$ is 0.0625. With 128-bit nonces the same attack has advantage below $16/2^{128} = 2^{-124}$ for $q = 16$.
+In advantage units, $\mathrm{Adv} = 2(\Pr[\text{win}] - \frac12)$, this is $\mathrm{Adv}_{\mathrm{CPA}} \le 2\,\mathrm{Adv}_{\mathrm{PRF}} + Q/|\mathcal R|$. The term $Q/|\mathcal R|$ is real, not an artefact of the proof. The script gives the adversary $Q = 16$ encryptions of $m_0$ with 8-bit nonces ($|\mathcal R| = 256$); each reply $(r_i, m_0 \oplus F_k(r_i))$ reveals the pad $F_k(r_i)$. If $r^*$ matches one of them, the adversary removes the pad, reads the challenge, and is always right; otherwise it outputs 1. So it says 1 every time when $b = 1$, and when $b = 0$ it says 1 exactly when there is no match. Its advantage is $1 - (1 - \Pr[E]) = \Pr[E]$, and since $r^*$ misses each of the 16 independent nonces with probability $255/256$, $\Pr[E] = 1 - (255/256)^{16} = 0.0607$. The simulation measures 0.0605, and the bound $Q/|\mathcal R|$ is 0.0625. With 128-bit nonces the same attack has advantage below $16/2^{128} = 2^{-124}$ for $Q = 16$.
 
 ### Check yourself
 
@@ -451,7 +451,7 @@ The script repeats the count exhaustively for $h = 3$ and $p = 5$: for every sec
 
 Reducing mod $p$ is what makes step 3 a bijection: subtracting $r$ wraps around, so every value is hit once whatever $x$ is. Over the integers it fails, because nothing wraps and the range of the share moves with the secret. Take $x \in \{0, \dots, 7\}$, $r$ uniform on $\{0, \dots, R - 1\}$, and the share $x - r$ without reduction. The share is uniform on $\{x - R + 1, \dots, x\}$, an interval of $R$ values that moves with $x$. For secrets $x$ and $x'$ the two intervals overlap in $R - |x - x'|$ values, so $|x - x'|$ of the $R$ values, each with probability $1/R$, are possible under one secret and impossible under the other. Their TV distance is therefore $|x - x'|/R$, and by Fact 2 that is the best adversary's advantage.
 
-@fig-crypto-shares shows both cases. With $p = 11$, the shares of $x = 0$ and $x = 7$ have the same flat histogram; the empirical TV distance over 100,000 shares each is 0.0045, which is sampling noise around the exact value 0. Over the integers with $R = 16$, the supports visibly differ; the empirical TV distance is 0.4423, against the exact $7/16 = 0.4375$. Taking $R = 2^{3 + \sigma}$ for secrets below $2^3$ makes the TV distance at most $7/2^{3 + \sigma}$, which is below $2^{-\sigma}$: statistical rather than perfect security.
+@fig-crypto-shares shows both cases. With $p = 11$, the shares of $x = 0$ and $x = 7$ have the same flat histogram; the empirical TV distance over 100,000 shares each is 0.0045, which is sampling noise around the exact value 0. Over the integers with $R = 16$, the supports visibly differ; the empirical TV distance is 0.4423, against the exact $7/16 = 0.4375$. Taking $R = 2^{3 + u}$ for secrets below $2^3$ makes the TV distance at most $7/2^{3 + u}$, which is below $2^{-u}$: statistical rather than perfect security.
 
 ![Histograms of the second share for secrets $x = 0$ and $x = 7$. Left: reduced mod $p = 11$, both are uniform. Right: over the integers with $r < 16$, the support shifts with the secret.](figures/crypto_basics_shares.svg){#fig-crypto-shares}
 
@@ -478,14 +478,14 @@ If you can solve search, you can solve decision: find a candidate $s$, then chec
 
 ### Without noise, LWE is easy
 
-With $e = 0$, the samples are a linear system $As = b$ over $\mathbb Z_p$, where the rows of $A$ are the vectors $a$, and Gaussian elimination solves it from $d$ independent equations.
+With $e = 0$, the samples are a linear system $As = b$ over $\mathbb Z_p$, where the rows of $\mathcal A$ are the vectors $a$, and Gaussian elimination solves it from $d$ independent equations.
 
 Here it is with $d = 2$, $p = 7$ and $s = (3, 5)$. Take $a_1 = (1, 2)$ and $a_2 = (3, 1)$, so $b_1 = 3 + 10 = 13 \equiv 6$ and $b_2 = 9 + 5 = 14 \equiv 0$.
 
 1. The second equation $3s_1 + s_2 = 0$ gives $s_2 = -3s_1 = 4s_1$, since $-3 \equiv 4 \pmod 7$.
 2. Substitute into $s_1 + 2s_2 = 6$: $9s_1 \equiv 2s_1 = 6$, so $s_1 = 3$ and $s_2 = 12 \equiv 5$. Correct.
 
-Now add the error $e = (1, 0)$, so $b = (0, 0)$. The same steps give $s_2 = 4s_1$ and $2s_1 = 0$, so $\hat s = (0, 0)$, completely wrong. The reason is that elimination solves $A\hat s = b = As + e$ exactly, so in general it returns $\hat s = s + A^{-1}e$, and $A^{-1}$ has large entries mod $p$. Here $A^{-1} = \begin{pmatrix}4 & 6\\ 2 & 4\end{pmatrix}$ (check: the first row of $A$ times the first column gives $1\cdot4 + 2\cdot2 = 8 \equiv 1$), and $A^{-1}(1, 0) = (4, 2)$, which shifts $s$ to $(7, 7) \equiv (0, 0)$. A unit error is amplified into a uniformly scrambled answer.
+Now add the error $e = (1, 0)$, so $b = (0, 0)$. The same steps give $s_2 = 4s_1$ and $2s_1 = 0$, so $\hat s = (0, 0)$, completely wrong. The reason is that elimination solves $\mathcal A\hat s = b = As + e$ exactly, so in general it returns $\hat s = s + \mathcal A^{-1}e$, and $\mathcal A^{-1}$ has large entries mod $p$. Here $\mathcal A^{-1} = \begin{pmatrix}4 & 6\\ 2 & 4\end{pmatrix}$ (check: the first row of $\mathcal A$ times the first column gives $1\cdot4 + 2\cdot2 = 8 \equiv 1$), and $\mathcal A^{-1}(1, 0) = (4, 2)$, which shifts $s$ to $(7, 7) \equiv (0, 0)$. A unit error is amplified into a uniformly scrambled answer.
 
 The script does the same at $d = 16$ and $p = 4096$ with 32 samples. (Mod a power of two, elimination may only divide by odd numbers, the invertible ones, so it picks odd pivots.) Without noise it recovers all 16 coordinates of $s$. With errors in $\{-1, 0, 1\}$, it recovers 0 of 16.
 
@@ -503,7 +503,7 @@ To decrypt, compute $v = b - \langle a, s\rangle \bmod p$ and output 1 if $v$ is
 2. If $m = 0$, $v \equiv e$ with $|e| < p/4$, so $v \in [0, p/4) \cup (3p/4, p)$ (a negative $e$ wraps to just below $p$) and the output is 0.
 3. If $m = 1$, $v = e + p/2 \in (p/4, 3p/4)$ and the output is 1.
 
-**Security, in one hybrid.** Without $s$, the pair $(a, \langle a, s\rangle + e)$ looks uniform by decision LWE, so the message is added to something that looks uniform: a one-time pad. Under decision LWE, the pairs $(a, \langle a, s\rangle + e)$ in all ciphertexts can be replaced by uniform pairs $(a, u)$. Then $b = u + m\cdot\tfrac p2$ is uniform whatever $m$ is (Fact 4, with the bijection "add $m\cdot\tfrac p2$"). So an IND-CPA adversary winning with probability $\frac12 + \varepsilon$ yields a decision-LWE distinguisher with advantage $\varepsilon$: it runs the game with the given pairs and outputs 1 iff the adversary wins, by the argument of step 2 in the PRF scheme.
+**Security, in one hybrid.** Without $s$, the pair $(a, \langle a, s\rangle + e)$ looks uniform by decision LWE, so the message is added to something that looks uniform: a one-time pad. Under decision LWE, the pairs $(a, \langle a, s\rangle + e)$ in all ciphertexts can be replaced by uniform pairs $(a, u)$. Then $b = u + m\cdot\tfrac p2$ is uniform whatever $m$ is (Fact 4, with the bijection "add $m\cdot\tfrac p2$"). So an IND-CPA adversary winning with probability $\frac12 + \nu$ yields a decision-LWE distinguisher with advantage $\nu$: it runs the game with the given pairs and outputs 1 iff the adversary wins, by the argument of step 2 in the PRF scheme.
 
 **Worked example** with $d = 3$, $p = 4096$ and $s = (5, 1000, 3000)$. Here $p/2 = 2048$, and reducing mod 4096 means subtracting 4096.
 
@@ -566,10 +566,10 @@ uv run python code/part01-prerequisites/crypto_basics.py
 | --- | --- |
 | Example functions at $\lambda = 128$ | $2^{-128} = 2.9\times10^{-39}$; $\lambda^{-\log_2\lambda} = 1.8\times10^{-15}$; $2^{-\sqrt\lambda} = 3.9\times10^{-4}$; $\lambda^{-10} = 8.5\times10^{-22}$. $2^{-\sqrt\lambda} < \lambda^{-10}$ from $\lambda = 20{,}520$ |
 | Brute force at $10^{18}$ keys/s for a year | $2^{84.7}$ keys; success $9.3\times10^{-14}$ against 128 bits; $1.08\times10^{13}$ years for all $2^{128}$ |
-| Birthday, $N = 2^{16}$, $q = 256$ | Exact 0.3927; simulated 0.3920; union bound 0.4980; 50% at $q = 301$ |
-| Biased coin, $\delta = 0.01$ | $m = 1$: majority 0.008, best 0.010, hybrid 0.010. $m = 100$: 0.082, 0.080, 1.000. $m = 10{,}000$: 0.481, 0.683, 1.000 |
+| Birthday, $N = 2^{16}$, $Q = 256$ | Exact 0.3927; simulated 0.3920; union bound 0.4980; 50% at $Q = 301$ |
+| Biased coin, $\xi = 0.01$ | $m = 1$: majority 0.008, best 0.010, hybrid 0.010. $m = 100$: 0.082, 0.080, 1.000. $m = 10{,}000$: 0.481, 0.683, 1.000 |
 | IND-CPA, deterministic scheme | Advantage 1.000 |
-| IND-CPA, PRF scheme, $q = 16$, 8-bit nonce | Simulated 0.0605; exact 0.0607; bound 0.0625 |
+| IND-CPA, PRF scheme, $Q = 16$, 8-bit nonce | Simulated 0.0605; exact 0.0607; bound 0.0625 |
 | Secret shares, $x = 0$ against $x = 7$ | Mod 11: TV 0.0045 (exact 0). Integers, $R = 16$: TV 0.4423 (exact 0.4375) |
 | Gaussian elimination, $d = 16$, $p = 4096$ | 16/16 coordinates without noise; 0/16 with errors in $\{-1, 0, 1\}$ |
 | Regev sums, $p = 4096$, $B = 32$ | See @tbl-crypto-regev |
@@ -578,7 +578,7 @@ uv run python code/part01-prerequisites/crypto_basics.py
 
 [tests/test_crypto_basics.py](../../tests/test_crypto_basics.py) checks that the output still matches.
 
-**What to take from it.** Asymptotic statements need concrete numbers, because a negligible function can be large at the parameter you use: at $\lambda = 128$, $2^{-\sqrt\lambda}$ is still $3.9\times10^{-4}$. The birthday bound is the right order and nearly tight: while it is below 1, the union bound overestimates the collision probability by at most a factor of about 1.6 (that is $1/(1 - 1/e)$, from the chord argument), and the switching lemma's best adversary attains the exact collision probability. Hybrid bounds are safe but can be loose: for the biased coin they overstate the advantage by a factor up to $\sqrt m$, because the hybrid argument pays $\delta$ per flip while the true advantage grows like $\delta\sqrt m$. Determinism is fatal, and short nonces leak exactly as the proof predicts. Finally, noise is what makes LWE hard and what limits computing on its ciphertexts. Without it, elimination solves the problem; with it, every addition spends part of a finite budget.
+**What to take from it.** Asymptotic statements need concrete numbers, because a negligible function can be large at the parameter you use: at $\lambda = 128$, $2^{-\sqrt\lambda}$ is still $3.9\times10^{-4}$. The birthday bound is the right order and nearly tight: while it is below 1, the union bound overestimates the collision probability by at most a factor of about 1.6 (that is $1/(1 - 1/e)$, from the chord argument), and the switching lemma's best adversary attains the exact collision probability. Hybrid bounds are safe but can be loose: for the biased coin they overstate the advantage by a factor up to $\sqrt m$, because the hybrid argument pays $\xi$ per flip while the true advantage grows like $\xi\sqrt m$. Determinism is fatal, and short nonces leak exactly as the proof predicts. Finally, noise is what makes LWE hard and what limits computing on its ciphertexts. Without it, elimination solves the problem; with it, every addition spends part of a finite budget.
 
 ## References
 
@@ -601,15 +601,15 @@ uv run python code/part01-prerequisites/crypto_basics.py
 
 | Result | Statement |
 | --- | --- |
-| Advantage | $\mathrm{Adv} = \lvert\Pr[A(X) = 1] - \Pr[A(Y) = 1]\rvert = 2\lvert\Pr[\text{win}] - \frac12\rvert$ |
+| Advantage | $\mathrm{Adv} = \lvert\Pr[\mathcal A(X) = 1] - \Pr[\mathcal A(Y) = 1]\rvert = 2\lvert\Pr[\text{win}] - \frac12\rvert$ |
 | Best unbounded distinguisher | Advantage $= \mathrm{TV}(X, Y)$ |
 | Negligible | $\mu(\lambda) < \lambda^{-c}$ eventually, for every $c$; closed under $\times\,\mathrm{poly}$ and $+$ |
 | Hybrid lemma | $m$ samples: advantage at most $m$ times the one-sample advantage |
-| Birthday bound | $1 - e^{-q(q-1)/(2N)} \le \Pr[\text{collision}] \le q(q-1)/(2N)$; 50% at $q \approx 1.18\sqrt N$ |
-| PRP/PRF switching | Extra advantage $\le q^2/(2\lvert\mathcal X\rvert)$, and tight |
+| Birthday bound | $1 - e^{-Q(Q-1)/(2N)} \le \Pr[\text{collision}] \le Q(Q-1)/(2N)$; 50% at $Q \approx 1.18\sqrt N$ |
+| PRP/PRF switching | Extra advantage $\le Q^2/(2\lvert\mathcal X\rvert)$, and tight |
 | GGM | $\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}$ |
 | One-time pad | Perfect secrecy; needs $\lvert\mathcal K\rvert \ge \lvert\mathcal M\rvert$; never reuse the pad |
-| IND-CPA | Deterministic schemes have advantage 1; $(r, m \oplus F_k(r))$ has $\Pr[\text{win}] \le \frac12 + \mathrm{Adv}_{\mathrm{PRF}} + q/(2\lvert\mathcal R\rvert)$ |
+| IND-CPA | Deterministic schemes have advantage 1; $(r, m \oplus F_k(r))$ has $\Pr[\text{win}] \le \frac12 + \mathrm{Adv}_{\mathrm{PRF}} + Q/(2\lvert\mathcal R\rvert)$ |
 | Simulation | Secure if $S(L(x)) \equiv$ (or $\approx$) $\mathrm{View}(x)$ for all $x$ |
 | Additive sharing in $\mathbb Z_p$ | Any $h - 1$ shares uniform: perfect security |
 | LWE | $(a, \langle a, s\rangle + e)$; easy without $e$ by elimination |

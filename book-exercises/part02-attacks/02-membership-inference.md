@@ -2,7 +2,7 @@
 
 Exercises for [Membership inference](../../book-full/part02-attacks/02-membership-inference.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part02-attacks/solutions_membership_inference.py` computes every number quoted here; run it with `uv run python code/part02-attacks/solutions_membership_inference.py`.
 
-The solutions use the chapter's notation. $\phi = y\langle w, x\rangle$ is the logit of the model's confidence in the true label, IN and OUT are the distributions of a record's $\phi$ over models trained with and without it, and an attack's true positive rate (TPR) and false positive rate (FPR) are measured over (target model, pool point) pairs of the running example. The likelihood ratio attack (LiRA) is the per-example test of the chapter, and attacks are compared by their receiver operating characteristic (ROC) curves and the area under the curve (AUC). Exercises 1 and 7 reuse the chapter's experiment with seed 0, so their numbers match the chapter's tables; Exercise 6 draws a fresh pool.
+The solutions use the chapter's notation. $\phi = y\langle \theta, x\rangle$ is the logit of the model's confidence in the true label, IN and OUT are the distributions of a record's $\phi$ over models trained with and without it, and an attack's true positive rate (TPR) and false positive rate (FPR) are measured over (target model, pool point) pairs of the running example. The likelihood ratio attack (LiRA) is the per-example test of the chapter, and attacks are compared by their receiver operating characteristic (ROC) curves and the area under the curve (AUC). Exercises 1 and 7 reuse the chapter's experiment with seed 0, so their numbers match the chapter's tables; Exercise 6 draws a fresh pool.
 
 ## Accuracy with an unbalanced prior {#sec-sol-mia-1}
 
@@ -29,7 +29,7 @@ The attack has the same TPR and FPR in both cases; only the prior changed. At $\
 1. **Write the log-densities.** $\ln\mathcal N(t; s, 1) = -\frac12(t - s)^2 - \frac12\ln(2\pi)$ and $\ln\mathcal N(t; 0, 1) = -\frac12t^2 - \frac12\ln(2\pi)$.
 2. **Subtract.** The constants cancel: $\ln\Lambda(t) = -\frac12(t^2 - 2st + s^2) + \frac12t^2 = st - \frac{s^2}2$.
 3. **Spot checks** (from the script, computing both forms): at $t = 3.0902$, $s = 0.5$ gives $1.4201$ and $s = 4$ gives $4.3608$; at $t = 1$, $s = 4$ gives $-4.0000$. The same z-score is strong evidence for a record with a large separation and weak evidence for one with a small separation.
-4. **Invert.** For $s > 0$, $\ln\Lambda \ge c$ is the same as $t \ge (c + s^2/2)/s$. With $c = 1.497$:
+4. **Invert.** For $s > 0$, $\ln\Lambda \ge \tau$ is the same as $t \ge (\tau + s^2/2)/s$. With $\tau = 1.497$:
    - typical records, $s = 0.5$: $t \ge (1.497 + 0.125)/0.5 = 3.244$;
    - atypical records, $s = 4$: $t \ge (1.497 + 8)/4 = 2.374$.
 5. **FPR of each kind.** Under OUT, $t \sim \mathcal N(0, 1)$, so the FPRs are $1 - \Phi(3.244) = 5.90\times10^{-4}$ and $1 - \Phi(2.374) = 0.0088$.
@@ -40,45 +40,45 @@ The attack has the same TPR and FPR in both cases; only the prior changed. At $\
 
 ## Same AUC, different exposure {#sec-sol-mia-3}
 
-> **Exercise 3.** **Same AUC, different exposure.** Derive the AUC, best advantage and TPR at FPR $\alpha$ of attacks A and B in @sec-mia-eval, and repeat the comparison at $q = 0.01$. *Check: AUC 0.5050, $\mu = 0.0177$, TPR at $10^{-3}$ 0.01099 for A and 0.00106 for B.* *(AUC as a ranking probability, Gaussian trade-off)*
+> **Exercise 3.** **Same AUC, different exposure.** Derive the AUC, best advantage and TPR at FPR $a$ of attacks A and B in @sec-mia-eval, and repeat the comparison at $r = 0.01$. *Check: AUC 0.5050, $\mu = 0.0177$, TPR at $10^{-3}$ 0.01099 for A and 0.00106 for B.* *(AUC as a ranking probability, Gaussian trade-off)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **Attack A.**
 
-1. **AUC.** The AUC is $\Pr[\text{member's score} > \text{non-member's score}]$, with ties counted as one half. With probability $q$ the member is exposed and wins outright; otherwise its score has the same distribution as the non-member's and it wins half the time. So $\mathrm{AUC} = q + \frac12(1 - q) = \frac12 + \frac q2$.
-2. **TPR.** At a threshold with FPR $\alpha$, the exposed members always pass and the rest pass with probability $\alpha$: $\mathrm{TPR} = q + (1 - q)\alpha$.
-3. **Best advantage.** $\mathrm{TPR} - \mathrm{FPR} = q(1 - \alpha)$, largest as $\alpha \to 0$, where it tends to $q$.
+1. **AUC.** The AUC is $\Pr[\text{member's score} > \text{non-member's score}]$, with ties counted as one half. With probability $r$ the member is exposed and wins outright; otherwise its score has the same distribution as the non-member's and it wins half the time. So $\mathrm{AUC} = r + \frac12(1 - r) = \frac12 + \frac r2$.
+2. **TPR.** At a threshold with FPR $a$, the exposed members always pass and the rest pass with probability $a$: $\mathrm{TPR} = r + (1 - r)a$.
+3. **Best advantage.** $\mathrm{TPR} - \mathrm{FPR} = r(1 - a)$, largest as $a \to 0$, where it tends to $r$.
 
 **Attack B.**
 
-4. **AUC.** A member's score minus a non-member's is $\mathcal N(\mu, 2)$, positive with probability $\Phi(\mu/\sqrt2)$. Setting this equal to $\frac12 + \frac q2$ gives $\mu = \sqrt2\,\Phi^{-1}(\frac12 + \frac q2)$.
+4. **AUC.** A member's score minus a non-member's is $\mathcal N(\mu, 2)$, positive with probability $\Phi(\mu/\sqrt2)$. Setting this equal to $\frac12 + \frac r2$ gives $\mu = \sqrt2\,\Phi^{-1}(\frac12 + \frac r2)$.
 5. **TPR** is @eq-mia-gauss-tpr with $s = \mu$, and the **best advantage** is the total variation between $\mathcal N(0, 1)$ and $\mathcal N(\mu, 1)$, $2\Phi(\mu/2) - 1$.
 
-**Numbers** at $\alpha = 10^{-3}$ (@tbl-sol-mia-same-auc):
+**Numbers** at $a = 10^{-3}$ (@tbl-sol-mia-same-auc):
 
-| $q$ | AUC | A: advantage | A: TPR | B: $\mu$ | B: advantage | B: TPR |
+| $r$ | AUC | A: advantage | A: TPR | B: $\mu$ | B: advantage | B: TPR |
 | --- | --- | --- | --- | --- | --- | --- |
 | 0.05 | 0.5250 | 0.0500 | 0.05095 | 0.0887 | 0.0354 | 0.00134 |
 | 0.01 | 0.5050 | 0.0100 | 0.01099 | 0.0177 | 0.0071 | 0.00106 |
 
 : Attacks A and B with equal AUC, at two exposure levels. TPRs are at FPR $10^{-3}$. {#tbl-sol-mia-same-auc}
 
-At $q = 0.01$, the AUC is 0.505, which most papers would call "no better than chance". Yet A identifies one member in a hundred with certainty, ten times the TPR of B at FPR $10^{-3}$.
+At $r = 0.01$, the AUC is 0.505, which most papers would call "no better than chance". Yet A identifies one member in a hundred with certainty, ten times the TPR of B at FPR $10^{-3}$.
 
 *An AUC near one half says that the attack is weak on average, not that it is weak for everyone. A small exposed group barely moves the AUC and dominates the low-FPR end.*
 :::
 
 ## How many non-members? {#sec-sol-mia-4}
 
-> **Exercise 4.** **How many non-members?** You want to claim, at 95% confidence, that an attack's FPR is below $\alpha$, and you see no false positives at all. How many non-members do you need for $\alpha = 10^{-3}, 10^{-4}, 10^{-5}$? *Check: 2,995, 29,956 and 299,572.* *Hint: $(1 - \alpha)^n \le 0.05$.* *(Estimating rates from trials)*
+> **Exercise 4.** **How many non-members?** You want to claim, at 95% confidence, that an attack's FPR is below $a$, and you see no false positives at all. How many non-members do you need for $a = 10^{-3}, 10^{-4}, 10^{-5}$? *Check: 2,995, 29,956 and 299,572.* *Hint: $(1 - a)^n \le 0.05$.* *(Estimating rates from trials)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The event to rule out.** If the true FPR were $\alpha$ or more, then seeing zero false positives among $n$ independent non-members would have probability at most $(1 - \alpha)^n$.
-2. **Make it unlikely.** The one-sided 95% upper bound from zero counts ([Hypothesis testing](../../book-full/part01-prerequisites/04-hypothesis-testing.md)) is below $\alpha$ exactly when $(1 - \alpha)^n \le 0.05$.
-3. **Solve.** Take logarithms (both sides negative): $n \ge \ln 0.05/\ln(1 - \alpha) = \ln 20/(-\ln(1 - \alpha))$.
-4. **Plug in.** $\alpha = 10^{-3}$: $n \ge 2{,}994.2$, so 2,995. $\alpha = 10^{-4}$: $n \ge 29{,}955.8$, so 29,956. $\alpha = 10^{-5}$: $n \ge 299{,}571.7$, so 299,572. Each is about $3/\alpha$, the rule of three.
+1. **The event to rule out.** If the true FPR were $a$ or more, then seeing zero false positives among $n$ independent non-members would have probability at most $(1 - a)^n$.
+2. **Make it unlikely.** The one-sided 95% upper bound from zero counts ([Hypothesis testing](../../book-full/part01-prerequisites/04-hypothesis-testing.md)) is below $a$ exactly when $(1 - a)^n \le 0.05$.
+3. **Solve.** Take logarithms (both sides negative): $n \ge \ln 0.05/\ln(1 - a) = \ln 20/(-\ln(1 - a))$.
+4. **Plug in.** $a = 10^{-3}$: $n \ge 2{,}994.2$, so 2,995. $a = 10^{-4}$: $n \ge 29{,}955.8$, so 29,956. $a = 10^{-5}$: $n \ge 299{,}571.7$, so 299,572. Each is about $3/a$, the rule of three.
 
-The running example has 64,000 non-member pairs, so a threshold at FPR $10^{-3}$ leaves about 64 false positives, enough for an interval of about $\pm 25\%$ on the FPR (the chapter's $[0.00077, 0.00128]$). At FPR $10^{-5}$ the same data could not even certify a bound. The pairs are also not fully independent: the same 1,000 points recur across the 128 target models, which is one more reason the interval is optimistic.
+The running example has 64,000 non-member pairs, so a threshold at FPR $10^{-3}$ leaves about 64 false positives, enough for an interval of about $\pm 25\%$ on the FPR (the chapter's $[0.00077, 0.00128]$). At FPR $10^{-5}$ the same data could not even certify a bound. The pairs are also not fully independent: the same 1,000 points recur across the 128 target models, which is one more reason the interval is too narrow.
 
 *Every factor of ten lower in FPR costs a factor of ten more non-members. Reporting a TPR at FPR $10^{-5}$ needs hundreds of thousands of non-member evaluations.*
 :::
@@ -123,13 +123,13 @@ The simulation (@tbl-sol-mia-mean) matches the formula within its sampling error
 
 ## The shadow attack model is a threshold {#sec-sol-mia-7}
 
-> **Exercise 7.** **The shadow attack model is a threshold.** Show that if the attack model for class $c$ is $\sigma(a_c + b_c\phi)$ with $b_c > 0$, then within class $c$ it ranks pairs exactly as the loss does, and it says "member" with probability above $\frac12$ when $\phi > -a_c/b_c$. Compute these cut points for the running example. *Check: 0.751 for $y = -1$ and 0.813 for $y = +1$.* *(Shadow models, Fact 3)*
+> **Exercise 7.** **The shadow attack model is a threshold.** Show that if the attack model for class $c$ is $\sigma(\kappa_c + \lambda_c\phi)$ with $\lambda_c > 0$, then within class $c$ it ranks pairs exactly as the loss does, and it says "member" with probability above $\frac12$ when $\phi > -\kappa_c/\lambda_c$. Compute these cut points for the running example. *Check: 0.751 for $y = -1$ and 0.813 for $y = +1$.* *(Shadow models, Fact 3)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Monotone in $\phi$.** $\sigma$ is increasing and $b_c > 0$, so $\phi \mapsto \sigma(a_c + b_c\phi)$ is increasing. Within class $c$, a larger $\phi$ always gives a larger attack score.
+1. **Monotone in $\phi$.** $\sigma$ is increasing and $\lambda_c > 0$, so $\phi \mapsto \sigma(\kappa_c + \lambda_c\phi)$ is increasing. Within class $c$, a larger $\phi$ always gives a larger attack score.
 2. **Monotone in the loss.** By Fact 3 of the chapter, $\ell = \ln(1 + e^{-\phi})$ is decreasing in $\phi$. So within the class, the attack score is a decreasing function of the loss, and it orders pairs exactly as "lower loss means member" does. Any threshold on the score is a threshold on the loss, and the two attacks have the same ROC curve on the pairs of that class.
-3. **The cut point.** $\sigma(u) > \frac12$ exactly when $u > 0$, so the attack model favours "member" when $a_c + b_c\phi > 0$, that is, $\phi > -a_c/b_c$.
-4. **The running example.** The fitted models are $a_{-1} = -0.179$, $b_{-1} = 0.238$ and $a_{+1} = -0.128$, $b_{+1} = 0.158$. The cut points are $0.179/0.238 = 0.751$ and $0.128/0.158 = 0.813$ (computed from the unrounded coefficients).
+3. **The cut point.** $\sigma(u) > \frac12$ exactly when $u > 0$, so the attack model favours "member" when $\kappa_c + \lambda_c\phi > 0$, that is, $\phi > -\kappa_c/\lambda_c$.
+4. **The running example.** The fitted models are $\kappa_{-1} = -0.179$, $\lambda_{-1} = 0.238$ and $\kappa_{+1} = -0.128$, $\lambda_{+1} = 0.158$. The cut points are $0.179/0.238 = 0.751$ and $0.128/0.158 = 0.813$ (computed from the unrounded coefficients).
 5. **Across classes.** Pooling the two classes with one threshold on the attack score puts slightly different thresholds on $\phi$ in each class, so the pooled ROC differs from the loss attack's only through that offset. The chapter's @tbl-mia-attacks shows how little that buys: AUC 0.577 for both, and TPR at FPR 1% of 0.0104 against 0.0103 for the loss attack.
 
 *An attack model that sees only the record-blind output $(y, \phi)$ can do no more than choose a loss threshold per class. Its value is calibration, not power.*

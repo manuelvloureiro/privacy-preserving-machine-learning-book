@@ -896,7 +896,7 @@ def plot_erm_reduction(rng: np.random.Generator) -> Figure:
     ax.plot(0, 0, "o", color="tab:gray", markersize=9)
     ax.annotate("4 zero records", (0, 0), textcoords="offset points", xytext=(-80, -14), fontsize=8)
     ax.plot(*real_mean, "*", color="tab:blue", markersize=13, label="mean of the real records")
-    ax.plot(*w_star, "*", color="black", markersize=13, label="minimizer w* = mean of all 8 records")
+    ax.plot(*w_star, "*", color="black", markersize=13, label="minimizer θ* = mean of all 8 records")
     ax.plot(*w_priv, "o", color="tab:red", label="private output")
     ax.plot(*estimate, "D", color="tab:red", mfc="none", label="mean estimate: private output times n/m")
     ax.annotate(
@@ -911,7 +911,7 @@ def plot_erm_reduction(rng: np.random.Generator) -> Figure:
         aspect="equal",
         xlabel="coordinate 1",
         ylabel="coordinate 2",
-        title="Grey circles: excess risk, set by the distance to w*",
+        title="Grey circles: excess risk, set by the distance to θ*",
     )
     ax.legend(fontsize=8, loc="upper center", bbox_to_anchor=(0.5, -0.13), ncol=2)
     return fig
@@ -928,8 +928,8 @@ def plot_erm_sandwich(rng: np.random.Generator) -> Figure:
     j_star = objective(w_star, data, LAM_RUN)
     vals = [objective(w_star + t * u, data, LAM_RUN) - j_star for t in ts]
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.plot(ts, [beta / 2 * t * t for t in ts], "--", label=r"$\frac{\beta}{2}t^2$, smoothness (upper)")
-    ax.plot(ts, vals, "k", linewidth=2, label=r"$J(w^* + tu) - J(w^*)$")
+    ax.plot(ts, [beta / 2 * t * t for t in ts], "--", label=r"$\frac{\beta_s}{2}t^2$, smoothness (upper)")
+    ax.plot(ts, vals, "k", linewidth=2, label=r"$\mathcal{L}(\theta^* + tu) - \mathcal{L}(\theta^*)$")
     ax.plot(ts, [h / 2 * t * t for t in ts], ":", label=r"$\frac{h_u}{2}t^2$, second-order approximation")
     ax.plot(ts, [LAM_RUN / 2 * t * t for t in ts], "--", label=r"$\frac{\lambda}{2}t^2$, strong convexity (lower)")
     ax.set(
@@ -965,8 +965,8 @@ def plot_pate_terms() -> Figure:
     fig, ax = plt.subplots(figsize=(6.5, 4.2))
     ax.semilogy(gaps, [data_ind] * len(gaps), color="black", label=r"data-independent $\alpha/\sigma^2$")
     ax.semilogy(gaps, total, color="tab:red", linewidth=2, label="Theorem 6 bound")
-    ax.semilogy(gaps, part_a, color="tab:orange", ls="--", label="likely output's term, minus its value 1 - q at A = 1")
-    ax.semilogy(gaps, part_b, color="tab:purple", ls="--", label="other outputs' term, minus its value q at B = 1")
+    ax.semilogy(gaps, part_a, color="tab:orange", ls="--", label="likely output's term, minus its value 1 - β at A = 1")
+    ax.semilogy(gaps, part_b, color="tab:purple", ls="--", label="other outputs' term, minus its value β at B = 1")
     ax.semilogy(gaps, exact, color="tab:blue", ls=":", label="exact, two labels")
     ax.set(
         ylim=(1e-9, 2e-2),
@@ -989,9 +989,9 @@ def plot_pate_q() -> Figure:
         left.axvline(qt, color=color, ls=":", linewidth=1)
         left.plot([qt], [pate_value(ALPHA_PATE, qt, o)], "o", color=color)
     left.set(
-        xlabel="true failure probability q",
+        xlabel="true failure probability β",
         ylabel="bound with orders fixed",
-        title="Increasing in q up to the bound q̃ (dotted)",
+        title="Increasing in β up to the bound β̃ (dotted)",
     )
     left.legend(fontsize=8)
     q_limit = bisect(lambda q: not pate_condition(q, SIGMA_PATE), 1e-300, 0.5)
@@ -1001,12 +1001,12 @@ def plot_pate_q() -> Figure:
         qts,
         [pate_rigorous(ALPHA_PATE, q, SIGMA_PATE) if pate_valid(ALPHA_PATE, q, SIGMA_PATE) else math.nan for q in qts],
         color="tab:red",
-        label="largest value over q ≤ q̃",
+        label="largest value over β ≤ β̃",
     )
-    right.axvline(q_limit, color="gray", ls="--", label="largest q̃ the condition allows")
+    right.axvline(q_limit, color="gray", ls="--", label="largest β̃ the condition allows")
     right.set(
         ylim=(1e-12, 1e-1),
-        xlabel="bound q̃ on the failure probability",
+        xlabel="bound β̃ on the failure probability",
         ylabel="RDP cost at order 8",
         title=f"σ = {SIGMA_PATE:g}",
     )
@@ -1025,19 +1025,19 @@ def plot_tuning_terms() -> Figure:
     limit = tnb_pure_limit(0.5, 0.0, gamma, 5.0)
     end = LAM_HATS[-1]
     fig, ax = plt.subplots(figsize=(6.5, 4.2))
-    ax.semilogx(hats, [t.one_run for t in terms], label="one run, ε(λ)")
-    ax.semilogx(hats, [t.tail for t in terms], label="(1 + η)(1 - 1/λ̂) ε(λ̂)")
-    ax.semilogx(hats, [t.gamma for t in terms], label="(1 + η) ln(1/γ)/λ̂")
-    ax.semilogx(hats, [t.mean for t in terms], label="ln E[K]/(λ - 1)")
+    ax.semilogx(hats, [t.one_run for t in terms], label="one run, ε(α)")
+    ax.semilogx(hats, [t.tail for t in terms], label="(1 + ν)(1 - 1/α̂) ε(α̂)")
+    ax.semilogx(hats, [t.gamma for t in terms], label="(1 + ν) ln(1/ω)/α̂")
+    ax.semilogx(hats, [t.mean for t in terms], label="ln E[K]/(α - 1)")
     ax.semilogx(hats, [t.total for t in terms], "k", linewidth=2, label="sum, the bound")
-    ax.axhline(limit, color="gray", ls="--", linewidth=1, label=f"limit as λ̂ → ∞: {limit:.4f}")
+    ax.axhline(limit, color="gray", ls="--", linewidth=1, label=f"limit as α̂ → ∞: {limit:.4f}")
     at_end = tnb_terms(eps_of, 0.0, gamma, 5.0, end).total
     ax.plot([end], [at_end], "ko")
-    ax.annotate(f"λ̂ = {end:.2f}: {at_end:.4f}", (end, at_end), textcoords="offset points", xytext=(-30, 12))
+    ax.annotate(f"α̂ = {end:.2f}: {at_end:.4f}", (end, at_end), textcoords="offset points", xytext=(-30, 12))
     ax.set(
         ylim=(0, 4),
-        xlabel="second order λ̂ (log scale)",
-        ylabel="Rényi bound at λ = 5",
+        xlabel="second order α̂ (log scale)",
+        ylabel="Rényi bound at α = 5",
         title="Randomized response, ε = 0.5, logarithmic K with mean 10",
     )
     ax.legend(fontsize=8, loc="upper right")
@@ -1065,7 +1065,7 @@ def plot_tuning_square() -> Figure:
         grid,
         np.minimum(1, math.exp(sexp * eps_hat) * grid**sexp),
         "tab:red",
-        label="r' = exp((1 - 1/λ̂) ε̂) r^(1 - 1/λ̂), the bound kept",
+        label="r' = exp((1 - 1/α̂) ε̂) r^(1 - 1/α̂), the bound kept",
     )
     bound = math.exp((lam - 1) * sexp * eps_hat) * gamma ** (-(lam - 1) / lam_hat)
     masked = np.where(allowed, ratio, -np.inf)
@@ -1076,7 +1076,7 @@ def plot_tuning_square() -> Figure:
         xlabel="rejection probability r on D",
         ylabel="rejection probability r' on D'",
         aspect="equal",
-        title=f"λ = {lam:g}, λ̂ = {lam_hat:g}, ε̂ = {eps_hat}, γ = {gamma}",
+        title=f"α = {lam:g}, α̂ = {lam_hat:g}, ε̂ = {eps_hat}, ω = {gamma}",
     )
     ax.legend(fontsize=7.5, loc="lower right")
     return fig
@@ -1098,7 +1098,7 @@ def plot_user_angle() -> Figure:
         )
     ax.axhline(1.0, color="gray", ls=":", linewidth=1)
     ax.set(
-        xlabel="angle θ between every pair of the user's gradients (degrees)",
+        xlabel="angle between every pair of the user's gradients (degrees)",
         ylim=(0, 1.08),
         ylabel="divergence / its aligned value",
         title="k = 5 records, q = 0.05, σ = 1",
@@ -1120,7 +1120,7 @@ def plot_user_pairs() -> Figure:
             plain.append(float(b[m1] * b[m2]))
             weighted.append(float(b[m1] * b[m2]) * math.exp(m1 * m2 / sigma**2))
     x = np.arange(len(labels))
-    left.bar(x - 0.2, plain, width=0.4, label=r"$P(M_1 = m_1, M_2 = m_2)$")
+    left.bar(x - 0.2, plain, width=0.4, label=r"$\Pr[N_1 = m_1, N_2 = m_2]$")
     left.bar(x + 0.2, weighted, width=0.4, label=r"times $e^{m_1m_2/\sigma^2}$, its share of $A_2$")
     left.set(
         yscale="log", xticks=x, xlabel="(m₁, m₂)", ylabel="probability or contribution", title="k = 5, q = 0.05, σ = 1"

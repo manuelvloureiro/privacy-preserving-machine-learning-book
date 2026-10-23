@@ -21,7 +21,7 @@ Find what you know in @tbl-conc-choose.
 | The variance $\sigma^2$ | Chebyshev | $\sigma/\sqrt\beta$ |
 | A mean, with standard deviation $s$ estimated from the data | Normal approximation | $z_{1-\beta/2}\,s/\sqrt n$, smaller but not a guarantee; solve for $n$ to plan |
 | The exact noise distribution ([Probability distributions](01-distributions.md)) | Its quantile | Laplace $b\ln(1/\beta)$; normal $\sigma z_{1-\beta/2}$ |
-| A count with mean $\mu$ | Chernoff | a miss by a fraction $\delta$ has chance $\le e^{-\delta^2\mu/(2+\delta)}$ above, $e^{-\delta^2\mu/2}$ below |
+| A count with mean $\mu$ | Chernoff | a miss by a fraction $r$ has chance $\le e^{-r^2\mu/(2+r)}$ above, $e^{-r^2\mu/2}$ below |
 | The mean of $n$ values in a range of length $R$ | Hoeffding | $R\sqrt{\ln(2/\beta)/(2n)}$ |
 | A rate: $k$ errors out of $n$ | Clopper–Pearson | exact binomial bound |
 
@@ -29,7 +29,7 @@ Find what you know in @tbl-conc-choose.
 
 **Hoeffding's inequality** is the planning tool, because it needs only the range of the values. Solving its width for $n$ gives the sample size for a width $t$:
 $$n \ge \frac{R^2\ln(2/\beta)}{2t^2}.$$
-For accuracy, an average of zeros and ones, the range $R$ is 1. So measuring it to within one percentage point at 95% takes 18,445 test examples.
+For accuracy, an average of zeros and ones, the range $R$ is 1. So measuring it to within one percentage point at 95% takes 18,445 test records.
 
 For a small rate, Hoeffding is too wide: it assumes the largest variance the range allows. Take one false positive in 1,000 negatives, with one-sided 95% bounds. Hoeffding adds 0.039 to the measured rate, while **Bernstein's inequality** uses the variance $\sigma^2$ and adds only 0.0045. For values in $[0, 1]$ its width is $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2\ln(1/\beta)/(3n)$, and a variance estimated from the same data makes it a heuristic. The exact **Clopper–Pearson** bound, from the binomial distribution, gives 0.0047. With no errors it gives 0.0030, close to the "rule of three" bound $3/n$.
 

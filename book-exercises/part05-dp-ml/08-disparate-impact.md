@@ -2,7 +2,7 @@
 
 Exercises for [the chapter on disparate impact](../../book-full/part05-dp-ml/08-disparate-impact.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_disparate_impact.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_disparate_impact.py`.
 
-The solutions use the chapter's notation. Training with differential privacy (DP) runs stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, DP-SGD. $C$ is the clipping norm, $\sigma$ the noise multiplier, $q$ the Poisson sampling rate, $B = qn$ the expected batch size, $T$ the number of steps and $\eta$ the step size. A group $g$ has a share $s_g$ of the $n$ training records, and its **clipping weight** $w_g$ is the average of $\min(1, C/\|g_i\|)$ over its records. The running example uses $q = 0.01$, $C = 0.5$, $\eta = 0.5$, $T = 10{,}000$ and $\delta = 10^{-5}$; at $\varepsilon = 4$ the noise multiplier is $\sigma = 1.36$ and the noise on the averaged gradient has standard deviation $\tau = \sigma C/B = 0.0068$ per coordinate.
+The solutions use the chapter's notation. Training with differential privacy (DP) runs stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, DP-SGD. $C$ is the clipping norm, $\sigma$ the noise multiplier, $q$ the Poisson sampling rate, $B = qn$ the expected batch size, $T$ the number of steps and $\eta$ the learning rate. A group $g$ has a share $s_g$ of the $n$ training records, and its **clipping weight** $w_g$ is the average of $\min(1, C/\|g_i\|)$ over its records. The running example uses $q = 0.01$, $C = 0.5$, $\eta = 0.5$, $T = 10{,}000$ and $\delta = 10^{-5}$; at $\varepsilon = 4$ the noise multiplier is $\sigma = 1.36$ and the noise on the averaged gradient has standard deviation $\tau = \sigma C/B = 0.0068$ per coordinate.
 
 ## Upweighting does not survive clipping {#sec-sol-fair-1}
 
@@ -19,7 +19,7 @@ The solutions use the chapter's notation. Training with differential privacy (DP
 
 ## The noise floor, exactly {#sec-sol-fair-2}
 
-> **Exercise 2.** **The noise floor, exactly.** In the quadratic model of @sec-fair-noise, each of a group's $k$ weights follows $x \leftarrow (1 - a)x - \eta\tau\xi$ with $a = \eta s_g\lambda$ and $\xi$ standard normal. Derive the stationary variance of $x$ without the small-$a$ approximation, and evaluate the group's excess loss $\frac\lambda2k\operatorname{Var}x$ for $k = 51$, $\lambda = 1$, $\eta = 0.5$, $\tau = 0.0068$ and shares $0.95$ and $0.05$. Compare with the approximation $k\eta\tau^2/(4s_g)$. *Check: $4.069 \times 10^{-4}$ against $3.103 \times 10^{-4}$ for the majority, $5.970 \times 10^{-3}$ against $5.896 \times 10^{-3}$ for the minority.* *(Stationary variance of a linear recursion)*
+> **Exercise 2.** **The noise floor, exactly.** In the quadratic model of @sec-fair-noise, each of a group's $d_g$ weights follows $x \leftarrow (1 - a)x - \eta\tau\xi$ with $a = \eta s_g\lambda$ and $\xi$ standard normal. Derive the stationary variance of $x$ without the small-$a$ approximation, and evaluate the group's excess loss $\frac\lambda2d_g\operatorname{Var}x$ for $d_g = 51$, $\lambda = 1$, $\eta = 0.5$, $\tau = 0.0068$ and shares $0.95$ and $0.05$. Compare with the approximation $d_g\eta\tau^2/(4s_g)$. *Check: $4.069 \times 10^{-4}$ against $3.103 \times 10^{-4}$ for the majority, $5.970 \times 10^{-3}$ against $5.896 \times 10^{-3}$ for the minority.* *(Stationary variance of a linear recursion)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **One step of variance.** The new value is $(1 - a)$ times the old plus independent noise of variance $\eta^2\tau^2$. Variances of independent terms add, and a constant factor multiplies the variance by its square: $V_{t+1} = (1 - a)^2V_t + \eta^2\tau^2$.
@@ -73,14 +73,14 @@ The solutions use the chapter's notation. Training with differential privacy (DP
 
 ## Global scaling is a large clipping norm {#sec-sol-fair-6}
 
-> **Exercise 6.** **Global scaling is a large clipping norm.** Global scaling multiplies every per-example gradient by $C/Z$, where $Z$ is an upper bound on all gradient norms, and adds noise $\sigma C$ to the sum. Show that if no gradient exceeds $Z$, one step equals a DP-SGD step with clipping norm $Z$, noise multiplier $\sigma$ and step size $\eta C/Z$, as @eq-fair-global states. Check numerically on 200 records of the running example at initialization with $C = 0.5$, $Z = 50$ and the same noise draw. *Check: the two updates differ by at most $1.7 \times 10^{-18}$.* *(Scale invariance)*
+> **Exercise 6.** **Global scaling is a large clipping norm.** Global scaling multiplies every per-example gradient by $C/C_{\max}$, where $C_{\max}$ is an upper bound on all gradient norms, and adds noise $\sigma C$ to the sum. Show that if no gradient exceeds $C_{\max}$, one step equals a DP-SGD step with the clipping norm set to $C_{\max}$, noise multiplier $\sigma$ and learning rate $\eta C/C_{\max}$, as @eq-fair-global states. Check numerically on 200 records of the running example at initialization with $C = 0.5$, $C_{\max} = 50$ and the same noise draw. *Check: the two updates differ by at most $1.7 \times 10^{-18}$.* *(Scale invariance)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Global scaling.** Each gradient becomes $(C/Z)g_i$, of length at most $C$ because $\|g_i\| \le Z$. The step is $-\frac\eta B\big(\frac CZ\sum_ig_i + \sigma C\xi\big)$ with $\xi$ standard normal.
-2. **Factor out $C/Z$.** $\frac CZ\sum_ig_i + \sigma C\xi = \frac CZ\big(\sum_ig_i + \sigma Z\xi\big)$.
-3. **Recognize DP-SGD.** With clipping norm $Z$, no gradient is clipped, so the clipped sum is $\sum_ig_i$ and the noise is $\sigma Z\xi$. The step $-\frac{\eta C/Z}B\big(\sum_ig_i + \sigma Z\xi\big)$ is step 2's expression: DP-SGD with clipping norm $Z$ and step size $\eta C/Z$.
+1. **Global scaling.** Each gradient becomes $(C/C_{\max})g_i$, of length at most $C$ because $\|g_i\| \le C_{\max}$. The step is $-\frac\eta B\big(\frac C{C_{\max}}\sum_ig_i + \sigma C\xi\big)$ with $\xi$ standard normal.
+2. **Factor out $C/C_{\max}$.** $\frac C{C_{\max}}\sum_ig_i + \sigma C\xi = \frac C{C_{\max}}\big(\sum_ig_i + \sigma C_{\max}\xi\big)$.
+3. **Recognize DP-SGD.** With the clipping norm set to $C_{\max}$, no gradient is clipped, so the clipped sum is $\sum_ig_i$ and the noise is $\sigma C_{\max}\xi$. The step $-\frac{\eta C/C_{\max}}B\big(\sum_ig_i + \sigma C_{\max}\xi\big)$ is step 2's expression: DP-SGD with the clipping norm set to $C_{\max}$ and learning rate $\eta C/C_{\max}$.
 4. **Check.** At initialization the 200 gradient norms are well below 50, and the two computed updates agree to $1.7 \times 10^{-18}$, rounding error.
-5. **Privacy.** Both have sensitivity $C$ to noise $\sigma C$ (or $Z$ to $\sigma Z$), the same ratio $1/\sigma$, so the same accountant applies.
+5. **Privacy.** Both have sensitivity $C$ to noise $\sigma C$ (or $C_{\max}$ to $\sigma C_{\max}$), the same ratio $1/\sigma$, so the same accountant applies.
 
-*Global scaling does not escape the trade-off of the clipping norm: it is the point where nothing is clipped, so the update is unbiased in direction, and the noise is as large relative to the signal as it can be. Esipova et al.'s adaptive variant moves $Z$ during training to sit just above most gradient norms.*
+*Global scaling does not escape the trade-off of the clipping norm: it is the point where nothing is clipped, so the update is unbiased in direction, and the noise is as large relative to the signal as it can be. Esipova et al.'s adaptive variant moves $C_{\max}$ during training to sit just above most gradient norms.*
 :::

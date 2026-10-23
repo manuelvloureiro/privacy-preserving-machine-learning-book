@@ -713,7 +713,7 @@ def plot_clip(rng: np.random.Generator) -> Figure:
         xscale="log",
         yscale="log",
         ylim=(0.05, 60),
-        xlabel="clip bound C (thousands)",
+        xlabel="clipping norm C (thousands)",
         ylabel="error",
         title=f"Mean income, n = {INCOME_N}, ε = 1",
     )
@@ -727,8 +727,8 @@ def plot_clip(rng: np.random.Generator) -> Figure:
         xscale="log",
         yscale="log",
         xlabel=r"dataset size n ($\varepsilon = 1$)",
-        ylabel="clip bound (thousands)",
-        title="The best clip bound grows with n",
+        ylabel="clipping norm (thousands)",
+        title="The best clipping norm grows with n",
     )
     right.legend()
     return fig

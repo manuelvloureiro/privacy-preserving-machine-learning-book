@@ -501,7 +501,7 @@ def plot_errors(mu: float = 2.0, alpha: float = 0.05) -> Figure:
     ax.plot(xs, q, label=f"Q = N({mu:g}, 1) (alternative)")
     right = [x >= t for x in xs]
     left = [x <= t for x in xs]
-    ax.fill_between(xs, 0, p, where=right, alpha=0.35, color="C0", label=rf"type I error $\alpha$ = {alpha:g}")
+    ax.fill_between(xs, 0, p, where=right, alpha=0.35, color="C0", label=rf"type I error $a$ = {alpha:g}")
     ax.fill_between(
         xs,
         0,
@@ -509,10 +509,10 @@ def plot_errors(mu: float = 2.0, alpha: float = 0.05) -> Figure:
         where=left,
         alpha=0.35,
         color="C1",
-        label=rf"type II error $\beta$ = {gaussian_tradeoff(alpha, mu):.3f}",
+        label=rf"type II error $b$ = {gaussian_tradeoff(alpha, mu):.3f}",
     )
-    ax.axvline(t, color="k", linestyle="--", label=f"threshold t = {t:.3f}")
-    ax.set(xlabel="observation x", ylabel="density", ylim=(0, 0.5), title="Reject the null when x > t")
+    ax.axvline(t, color="k", linestyle="--", label=rf"threshold $\tau$ = {t:.3f}")
+    ax.set(xlabel="observation x", ylabel="density", ylim=(0, 0.5), title=r"Reject the null when $x > \tau$")
     ax.legend(loc="upper left", fontsize=8)
     return fig
 
@@ -539,11 +539,11 @@ def plot_discrete_tradeoff(rng: np.random.Generator) -> Figure:
         [e.alpha for e in vertices], [e.beta for e in vertices], "ko", label="deterministic LR tests (reject count ≥ k)"
     )
     np_e = discrete_errors(neyman_pearson_test(0.25, HAM, SPAM).phi, HAM, SPAM)
-    ax.plot([np_e.alpha], [np_e.beta], "C3s", label=rf"randomized, $\alpha$ = 0.25, $\beta$ = {np_e.beta:.3f}")
-    ax.plot([0, 1], [1, 0], color="gray", linestyle=":", label=r"ignore the data: $\beta = 1 - \alpha$")
+    ax.plot([np_e.alpha], [np_e.beta], "C3s", label=rf"randomized, $a$ = 0.25, $b$ = {np_e.beta:.3f}")
+    ax.plot([0, 1], [1, 0], color="gray", linestyle=":", label=r"ignore the data: $b = 1 - a$")
     ax.set(
-        xlabel=r"type I error $\alpha$",
-        ylabel=r"type II error $\beta$",
+        xlabel=r"type I error $a$",
+        ylabel=r"type II error $b$",
         xlim=(0, 1),
         ylim=(0, 1),
         title="Ham vs spam word counts: no test beats the LR curve",
@@ -561,11 +561,11 @@ def plot_gaussian_tradeoff(rng: np.random.Generator) -> Figure:
     sims = [empirical_threshold_errors(rng, "normal", "normal", 1.0, t, n=20_000) for t in thresholds]
     ax.plot([e.alpha for e in sims], [e.beta for e in sims], "kx", label=r"simulated thresholds, $\mu$ = 1")
     ax.set(
-        xlabel=r"type I error $\alpha$",
-        ylabel=r"type II error $T(\alpha)$",
+        xlabel=r"type I error $a$",
+        ylabel=r"type II error $T(a)$",
         xlim=(0, 1),
         ylim=(0, 1),
-        title=r"$T(\alpha) = \Phi(\Phi^{-1}(1-\alpha) - \mu)$",
+        title=r"$T(a) = \Phi(\Phi^{-1}(1-a) - \mu)$",
     )
     ax.legend(loc="upper right")
     return fig
@@ -575,7 +575,7 @@ def plot_laplace_tradeoff(kappa: float = 1.0) -> Figure:
     xs = [-3 + i * 0.01 for i in range(701)]
     mu_match = gaussian_mu_for_tv(laplace_tv(kappa))
     fig, (left, right) = plt.subplots(1, 2, figsize=(11, 4.5))
-    left.plot(xs, [laplace_log_lr(x, kappa) for x in xs], label=r"Laplace, $\kappa = s/b = 1$")
+    left.plot(xs, [laplace_log_lr(x, kappa) for x in xs], label=r"Laplace, $\kappa = m_1/s = 1$")
     left.plot(xs, [mu_match * x - mu_match**2 / 2 for x in xs], label=rf"Gaussian, $\mu$ = {mu_match:.2f}")
     left.axhline(kappa, color="gray", linestyle=":")
     left.axhline(-kappa, color="gray", linestyle=":")
@@ -587,24 +587,24 @@ def plot_laplace_tradeoff(kappa: float = 1.0) -> Figure:
     )
     left.legend(loc="upper left")
     alphas = [10 ** (-6 + 6 * i / 600) for i in range(601)]
-    right.plot(alphas, [1 - laplace_tradeoff(a, kappa) for a in alphas], label=r"Laplace, $\kappa = s/b = 1$")
+    right.plot(alphas, [1 - laplace_tradeoff(a, kappa) for a in alphas], label=r"Laplace, $\kappa = m_1/s = 1$")
     right.plot(alphas, [1 - gaussian_tradeoff(a, mu_match) for a in alphas], label=rf"Gaussian, $\mu$ = {mu_match:.2f}")
     right.plot(
         alphas,
         [min(1.0, math.exp(kappa) * a) for a in alphas],
         color="gray",
         linestyle=":",
-        label=r"$e^{\kappa}\alpha$",
+        label=r"$e^{\kappa}a$",
     )
-    right.plot(alphas, alphas, color="k", linestyle=":", linewidth=0.8, label=r"chance: power = $\alpha$")
+    right.plot(alphas, alphas, color="k", linestyle=":", linewidth=0.8, label=r"chance: power = $a$")
     right.set(
         xscale="log",
         yscale="log",
         xlim=(1e-6, 1),
         ylim=(1e-6, 1.5),
-        xlabel=r"type I error $\alpha$ (log scale)",
-        ylabel=r"power $1 - T(\alpha)$ (log scale)",
-        title="Same total variation, different low-α power",
+        xlabel=r"type I error $a$ (log scale)",
+        ylabel=r"power $1 - T(a)$ (log scale)",
+        title="Same total variation, different power at small a",
     )
     right.legend(loc="lower right", fontsize=8)
     return fig
@@ -615,8 +615,8 @@ def plot_tv_advantage(mu: float = 1.0) -> Figure:
     curve = [gaussian_tradeoff(a, mu) for a in alphas]
     a_star = normal_sf(mu / 2)
     fig, ax = plt.subplots(figsize=(6, 5))
-    ax.plot(alphas, curve, label=rf"$T(\alpha)$, Gaussian $\mu$ = {mu:g}")
-    ax.plot([0, 1], [1, 0], color="gray", linestyle=":", label=r"$1 - \alpha$")
+    ax.plot(alphas, curve, label=rf"$T(a)$, Gaussian $\mu$ = {mu:g}")
+    ax.plot([0, 1], [1, 0], color="gray", linestyle=":", label=r"$1 - a$")
     ax.plot(
         [a_star, a_star],
         [gaussian_tradeoff(a_star, mu), 1 - a_star],
@@ -628,10 +628,10 @@ def plot_tv_advantage(mu: float = 1.0) -> Figure:
         alphas,
         [1 - a - c for a, c in zip(alphas, curve, strict=True)],
         "C2--",
-        label=r"advantage $1 - \alpha - T(\alpha)$",
+        label=r"advantage $1 - a - T(a)$",
     )
     ax.set(
-        xlabel=r"type I error $\alpha$",
+        xlabel=r"type I error $a$",
         ylabel="error / advantage",
         xlim=(0, 1),
         ylim=(0, 1),

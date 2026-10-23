@@ -760,9 +760,9 @@ def plot_anticoncentration(rng: np.random.Generator, n: int = 1000, beta: float 
         p = float(np.mean(np.abs(values) > thr))
         bins = np.arange(values.min() - 1 / 6, values.max() + 1 / 3, 1 / 3)
         ax.hist(values, bins=bins, color="C0", alpha=0.7, density=True)
-        ax.axvspan(-thr, thr, color="C3", alpha=0.25, label=f"band |⟨q, z⟩| ≤ {thr:.2f}")
+        ax.axvspan(-thr, thr, color="C3", alpha=0.25, label=f"band |⟨f, z⟩| ≤ {thr:.2f}")
         name = "balanced: half +1/3, half −1/3" if balanced else "aligned: all +1/3"
-        ax.set(xlabel="⟨q, z⟩ for a random subset q", title=f"{name}\nescapes the band w.p. {p:.3f} (bound 0.188)")
+        ax.set(xlabel="⟨f, z⟩ for a random subset f", title=f"{name}\nescapes the band w.p. {p:.3f} (bound 0.188)")
         ax.legend(fontsize=8, loc="upper right")
     axes[0].set_ylabel("density")
     return fig

@@ -27,12 +27,12 @@ If you calibrate noise to the local sensitivity of your dataset, the *size* of t
 | --- | --- | --- |
 | Local sensitivity and its leak | Why "noise proportional to how sensitive *this* dataset is" fails | The motivation for everything below |
 | Smooth sensitivity and admissible noise | Data-dependent noise with a proof: Cauchy-like noise for $\varepsilon$-DP, Laplace for $(\varepsilon,\delta)$-DP | Private medians, quantiles and robust statistics |
-| Smooth sensitivity of the median | An exact $O(n^2)$ formula | Private quantiles; choosing clip bounds |
+| Smooth sensitivity of the median | An exact $O(n^2)$ formula | Private quantiles; choosing clipping norms |
 | Propose-test-release | Release with small noise if the data are stable, refuse otherwise | Robust statistics (Dwork & Lei 2009) |
-| Inverse sensitivity | Pure DP with no noise scale: the exponential mechanism with "changes needed" as the penalty | Private medians and quantiles; choosing clip bounds |
+| Inverse sensitivity | Pure DP with no noise scale: the exponential mechanism with "changes needed" as the penalty | Private medians and quantiles; choosing clipping norms |
 | Stability-based release | An exact answer for a discrete statistic when it is stable | The most common value; private selection on top of subsample-and-aggregate; stability-based histograms |
 | Subsample-and-aggregate | Privacy for a black-box statistic | Private model training by ensembles of teachers; estimators without known sensitivity |
-| Clipping | Bounded sensitivity for unbounded data, and the bias–variance trade-off of the clip bound | Private means and sums; per-example gradient clipping in private training |
+| Clipping | Bounded sensitivity for unbounded data, and the bias–variance trade-off of the clipping norm | Private means and sums; per-example gradient clipping in private training |
 
 : The results of this chapter, what each gives you, and where it is used. {#tbl-sens-uses}
 
@@ -154,17 +154,17 @@ then @eq-sens-smooth-mech is $(\varepsilon, \delta)$-DP. Nissim, Raskhodnikova &
 **Pure DP for Cauchy-like noise.** The plan is to write the privacy loss at an output $y$ as a sum of three pieces, one for each way the two output distributions differ (their scales differ, their centres differ, and the noise draw that explains $y$ is stretched), and to bound each piece by smoothness or by the upper-bound property.
 
 1. *Write out the privacy loss.* Stretching $Z$ by $S(D)/\alpha$ divides its density by that factor, so the density of $M(D)$ at $y$ is $\frac{\alpha}{S(D)}h\big(z\big)$, where $z = \alpha\frac{y - f(D)}{S(D)}$ is the noise draw that would produce $y$ from $D$. Likewise that of $M(D')$ is $\frac{\alpha}{S(D')}h(z')$ with $z' = \alpha\frac{y - f(D')}{S(D')}$. To compare the two draws, substitute $y = f(D) + S(D)z/\alpha$ into $z'$: $z' = \frac{S(D)}{S(D')}\big(z + \alpha\frac{f(D) - f(D')}{S(D)}\big)$. That is, $z'$ is $z$ shifted and then stretched:
-$$z' = e^{\lambda}(z + \Delta), \qquad e^\lambda = \frac{S(D)}{S(D')},\quad \Delta = \alpha\,\frac{f(D) - f(D')}{S(D)}.$$
-(Here $\Delta$ is this shift, not the global sensitivity.) The log of the ratio of the two densities splits into the ratio of the prefactors and the ratio of $h$ at $z$ and at $z'$, and inserting $h(z + \Delta)$ in the middle splits the second part into the shift and the stretch:
-$$L_{D,D'}(y) = \underbrace{\ln\frac{S(D')}{S(D)}}_{\text{scale}} + \underbrace{\ln\frac{h(z)}{h(z + \Delta)}}_{\text{sliding}} + \underbrace{\ln\frac{h(z + \Delta)}{h(e^\lambda(z + \Delta))}}_{\text{dilation}}.$$
-2. *Size of the shift and the stretch.* Smoothness says $S(D)/S(D')$ lies between $e^{-\beta}$ and $e^\beta$, so $|\lambda| \le \beta$. And one record moves $f$ by at most the local sensitivity, which is at most $S(D)$: $|f(D) - f(D')| \le \mathrm{LS}_f(D) \le S(D)$, so $|\Delta| \le \alpha$. This is the only place where "$S$ is an upper bound on the local sensitivity" enters.
+$$z' = e^{\lambda}(z + v), \qquad e^\lambda = \frac{S(D)}{S(D')},\quad v = \alpha\,\frac{f(D) - f(D')}{S(D)}.$$
+(Here $v$ is the shift of the centre, measured in noise scales.) The log of the ratio of the two densities splits into the ratio of the prefactors and the ratio of $h$ at $z$ and at $z'$, and inserting $h(z + v)$ in the middle splits the second part into the shift and the stretch:
+$$L_{D,D'}(y) = \underbrace{\ln\frac{S(D')}{S(D)}}_{\text{scale}} + \underbrace{\ln\frac{h(z)}{h(z + v)}}_{\text{sliding}} + \underbrace{\ln\frac{h(z + v)}{h(e^\lambda(z + v))}}_{\text{dilation}}.$$
+2. *Size of the shift and the stretch.* Smoothness says $S(D)/S(D')$ lies between $e^{-\beta}$ and $e^\beta$, so $|\lambda| \le \beta$. And one record moves $f$ by at most the local sensitivity, which is at most $S(D)$: $|f(D) - f(D')| \le \mathrm{LS}_f(D) \le S(D)$, so $|v| \le \alpha$. This is the only place where "$S$ is an upper bound on the local sensitivity" enters.
 3. *Scale term:* at most $\beta$, by smoothness again.
-4. *Sliding term.* The question is how fast $-\ln h$ can change when its argument shifts by $|\Delta|$. Write $\varphi(u) = \ln(1 + u^\gamma)$ for $u \ge 0$, so $-\ln h_\gamma(z) = \varphi(|z|) + \text{const}$. Its slope is $\varphi'(u) = \gamma u^{\gamma-1}/(1 + u^\gamma) \le \gamma$, because $u^{\gamma-1} \le 1 + u^\gamma$ (if $u \le 1$ the left side is at most 1; if $u > 1$ it is below $u^\gamma$). The mean value theorem says a function whose slope is at most $\gamma$ in size changes by at most $\gamma$ times the change in its argument. The argument changes from $|z|$ to $|z + \Delta|$, and these differ by at most $|\Delta|$ (the reverse triangle inequality). So $|\varphi(|z + \Delta|) - \varphi(|z|)| \le \gamma\big||z + \Delta| - |z|\big| \le \gamma|\Delta| \le \gamma\alpha$.
-5. *Dilation term.* Here the question is how much $h$ changes when its argument is stretched by $e^\lambda$. With $w = |z + \Delta|$ and $\lambda \ge 0$, $\frac{h(w)}{h(e^\lambda w)} = \frac{1 + e^{\lambda\gamma}w^\gamma}{1 + w^\gamma} \le e^{\lambda\gamma}$, since $(1 + ca)/(1 + a) \le c$ for $c \ge 1$ (multiply out: $1 + ca \le c + ca$). This bound holds for every $w$, however far in the tail, and that is what the power-law tail buys. For $\lambda < 0$ the stretch moves the argument towards 0, where $h$ is larger, so the ratio is at most 1. Either way the term is at most $\gamma|\lambda| \le \gamma\beta$.
+4. *Sliding term.* The question is how fast $-\ln h$ can change when its argument shifts by $|v|$. Write $\varphi(u) = \ln(1 + u^\gamma)$ for $u \ge 0$, so $-\ln h_\gamma(z) = \varphi(|z|) + \text{const}$. Its slope is $\varphi'(u) = \gamma u^{\gamma-1}/(1 + u^\gamma) \le \gamma$, because $u^{\gamma-1} \le 1 + u^\gamma$ (if $u \le 1$ the left side is at most 1; if $u > 1$ it is below $u^\gamma$). The mean value theorem says a function whose slope is at most $\gamma$ in size changes by at most $\gamma$ times the change in its argument. The argument changes from $|z|$ to $|z + v|$, and these differ by at most $|v|$ (the reverse triangle inequality). So $|\varphi(|z + v|) - \varphi(|z|)| \le \gamma\big||z + v| - |z|\big| \le \gamma|v| \le \gamma\alpha$.
+5. *Dilation term.* Here the question is how much $h$ changes when its argument is stretched by $e^\lambda$. With $w = |z + v|$ and $\lambda \ge 0$, $\frac{h(w)}{h(e^\lambda w)} = \frac{1 + e^{\lambda\gamma}w^\gamma}{1 + w^\gamma} \le e^{\lambda\gamma}$, since $(1 + ca)/(1 + a) \le c$ for $c \ge 1$ (multiply out: $1 + ca \le c + ca$). This bound holds for every $w$, however far in the tail, and that is what the power-law tail buys. For $\lambda < 0$ the stretch moves the argument towards 0, where $h$ is larger, so the ratio is at most 1. Either way the term is at most $\gamma|\lambda| \le \gamma\beta$.
 6. *Add up:* $L_{D,D'}(y) \le \beta + \gamma\alpha + \gamma\beta$ for **every** $y$. That is $\gamma\alpha + (\gamma + 1)\beta$, so under @eq-sens-cauchy-cond it is at most $\varepsilon$, which is pure $\varepsilon$-DP. With $\alpha = \beta = \varepsilon/6$ and $\gamma = 2$ the bound is $\gamma\alpha + (\gamma + 1)\beta = \frac{2}{6} + \frac{3}{6} = 0.8333\,\varepsilon$.
 
-**Approximate DP for Laplace noise.** Steps 1–3 are unchanged. For $h(z) = \frac12e^{-|z|}$ the log of a ratio of $h$ values is just a difference of absolute values, so the sliding and dilation terms combine into one. Using $|e^\lambda(z + \Delta)| \le e^\lambda(|z| + |\Delta|)$, then $e^\lambda \le e^\beta$ and $|\Delta| \le \alpha$ from step 2:
-$$\ln\frac{h(z)}{h(z')} = |e^\lambda(z + \Delta)| - |z| \le e^\lambda(|z| + |\Delta|) - |z| \le (e^\beta - 1)|z| + e^\beta\alpha.$$
+**Approximate DP for Laplace noise.** Steps 1–3 are unchanged. For $h(z) = \frac12e^{-|z|}$ the log of a ratio of $h$ values is just a difference of absolute values, so the sliding and dilation terms combine into one. Using $|e^\lambda(z + v)| \le e^\lambda(|z| + |v|)$, then $e^\lambda \le e^\beta$ and $|v| \le \alpha$ from step 2:
+$$\ln\frac{h(z)}{h(z')} = |e^\lambda(z + v)| - |z| \le e^\lambda(|z| + |v|) - |z| \le (e^\beta - 1)|z| + e^\beta\alpha.$$
 Adding the scale term, $L_{D,D'}(y) \le \beta + e^\beta\alpha + (e^\beta - 1)|z|$, where $z$ is the noise actually drawn, $Z \sim \mathrm{Lap}(1)$. This is **not** bounded: the stretch makes the Laplace log-density change by an amount proportional to $|z|$, so far in the tail the dilation term wins. But large draws are rare. A $\mathrm{Lap}(1)$ variable exceeds $t$ in absolute value with probability $e^{-t}$ (integrate the two tails of $\frac12e^{-|z|}$; see [Concentration inequalities](../part01-prerequisites/02-concentration.md)), so $\Pr[|Z| > \ln(1/\delta)] = \delta$. Outside that event of probability $\delta$, $|z| \le \ln(1/\delta)$ and the loss is at most the left side of @eq-sens-laplace-cond, hence at most $\varepsilon$. Fact 2 turns that into $(\varepsilon, \delta)$-DP.
 
 ### Interpretation: why heavy tails, and what admissibility means
@@ -227,7 +227,7 @@ Both smooth releases are 70 to 100 times more accurate than the global one ($69.
 ### Check yourself
 
 - Why does $S^*_\beta(D) > 0$ even when $\mathrm{LS}(D) = 0$? *(Some dataset at finite distance $k$ has positive local sensitivity, and it contributes $e^{-k\beta}$ times that. For the median, $A^{(n)} = \Lambda$ gives $S^* \ge e^{-n\beta}\Lambda > 0$, which also means the scale in @eq-sens-smooth-mech is never zero.)*
-- In the Cauchy derivation, where is "upper bound" used and where is "smooth" used? *(Upper bound bounds the shift: $|\Delta| \le \alpha$. Smoothness bounds the scale term and the stretch $|\lambda| \le \beta$.)*
+- In the Cauchy derivation, where is "upper bound" used and where is "smooth" used? *(Upper bound bounds the shift: $|v| \le \alpha$. Smoothness bounds the scale term and the stretch $|\lambda| \le \beta$.)*
 
 ## Propose-test-release {#sec-sens-ptr}
 
@@ -237,7 +237,7 @@ Smooth sensitivity needs a formula like @eq-sens-median-ak, and those are known 
 
 ### Statement
 
-Fix a proposed bound $b > 0$, a privacy parameter $\varepsilon > 0$ and a failure probability $\delta \in (0, 1)$. The quantity to test is the number of records you must change before the local sensitivity can exceed $b$, that is, how far $D$ is from the nearest dataset where the proposal would be too small:
+Fix a proposed bound $b > 0$, and privacy parameters $\varepsilon > 0$ and $\delta \in (0, 1)$. The quantity to test is the number of records you must change before the local sensitivity can exceed $b$, that is, how far $D$ is from the nearest dataset where the proposal would be too small:
 $$\operatorname{dist}_b(D) = \min\big\{d(D, D''):\ \mathrm{LS}_f(D'') > b\big\}.$$
 **Propose-test-release** adds Laplace noise to this distance and compares it with a threshold $\ln(1/\delta)/\varepsilon$, chosen so that the noise alone pushes a distance of 0 over it only with probability $\delta/2$. It outputs one of two things:
 
@@ -290,7 +290,7 @@ Smooth sensitivity and propose-test-release keep the shape "true answer plus noi
 The **inverse sensitivity** of $f$ at $D$ toward an output $t$ is the number of records you must change to make $f$ equal to $t$:
 $$\mathrm{len}_f(D, t) = \min\{d(D, D'') : f(D'') = t\}.$$
 The **inverse-sensitivity mechanism** samples $t$ from the set of possible outputs, which for the statistics of this chapter is the interval $[0, \Lambda]$, with the density
-$$p_D(t) = \frac{e^{-\varepsilon\,\mathrm{len}_f(D, t)/2}}{\int_0^\Lambda e^{-\varepsilon\,\mathrm{len}_f(D, s)/2}\,ds}.$$ {#eq-sens-inverse}
+$$p_D(t) = \frac{e^{-\varepsilon\,\mathrm{len}_f(D, t)/2}}{\int_0^\Lambda e^{-\varepsilon\,\mathrm{len}_f(D, s)/2}\,\mathrm ds}.$$ {#eq-sens-inverse}
 It is $\varepsilon$-DP whenever every possible output is the value of $f$ on some dataset, so that every count is finite.
 
 For the median the count has a closed form. Take $n$ odd, so that the median is the single value of rank $m = (n + 1)/2$, and sort and pad the data as in Fact 4, with $x_0 = 0$ and $x_{n+1} = \Lambda$. For a candidate $t$ in the open gap $(x_i, x_{i+1})$ between two consecutive sorted values, the count is the number of steps from that gap to the median:
@@ -378,7 +378,7 @@ Sometimes you cannot analyse $f$ at all: it is an estimator fitted by an optimiz
 
 ### Statement
 
-Split the $n$ records into $B$ disjoint blocks of $n/B$ records, by a partition fixed in advance (for example by position, or by a hash of a record identifier). Compute the block answers $z_j = f(\text{block } j)$, clip each to a range $[0, R]$ (replace values below 0 by 0 and above $R$ by $R$), and release their average plus Laplace noise. One record can move one clipped answer by at most $R$, so it moves the average by at most $R/B$, and that sets the noise:
+Split the $n$ records into $B$ disjoint blocks of $n/B$ records, by a partition fixed in advance (for example by position, or by a hash of a record identifier). Compute the block answers $z_j = f(\text{block } j)$, clamp each to the range $[0, R]$ (replace values below 0 by 0 and above $R$ by $R$), and release their average plus Laplace noise. One record can move one clipped answer by at most $R$, so it moves the average by at most $R/B$, and that sets the noise:
 $$M(D) = \frac1B\sum_{j=1}^B \operatorname{clip}_{[0,R]}(z_j) + \mathrm{Lap}\Big(\frac{R}{B\varepsilon}\Big).$$
 This is $\varepsilon$-DP for any $f$.
 
@@ -389,9 +389,9 @@ when the clipping is inactive and the blocks are independent samples.
 ### Derivation
 
 1. **One record touches one block.** Replacing record $i$ changes only the block that contains it, because the partition does not depend on the values. So the vector $(z_1, \dots, z_B)$ changes in at most one coordinate.
-2. **The aggregate has sensitivity $R/B$.** After clipping, that coordinate moves by at most $R$, the width of the clip range, and dividing by $B$ in the average divides that by $B$.
+2. **The aggregate has sensitivity $R/B$.** After clipping, that coordinate moves by at most $R$, the width of the clamping range, and dividing by $B$ in the average divides that by $B$.
 3. **Privacy:** Fact 1 with $\Delta = R/B$.
-4. **Error.** The released value minus $\theta$ is the sum of three pieces: $\mathbb E[z] - \theta$ (a constant, the bias), $\frac1B\sum_j(z_j - \mathbb E z)$ (mean zero; it is an average of $B$ independent terms, each with variance $\operatorname{Var}(z)$, so its variance is $\operatorname{Var}(z)/B$) and the Laplace noise (mean zero, variance $2(R/(B\varepsilon))^2$, since a $\mathrm{Lap}(s)$ variable has variance $2s^2$). Squaring the sum gives the three squares plus cross terms. Each cross term is a product involving at least one mean-zero piece that is independent of the other factor, so it averages to zero. That leaves @eq-sens-saa-error.
+4. **Error.** The released value minus $\theta$ is the sum of three pieces: $\mathbb E[z] - \theta$ (a constant, the bias), $\frac1B\sum_j(z_j - \mathbb E[z])$ (mean zero; it is an average of $B$ independent terms, each with variance $\operatorname{Var}(z)$, so its variance is $\operatorname{Var}(z)/B$) and the Laplace noise (mean zero, variance $2(R/(B\varepsilon))^2$, since a Laplace variable has variance twice the square of its scale). Squaring the sum gives the three squares plus cross terms. Each cross term is a product involving at least one mean-zero piece that is independent of the other factor, so it averages to zero. That leaves @eq-sens-saa-error.
 
 ### Interpretation
 
@@ -403,11 +403,11 @@ The range $R$ is still a global bound, on the output of $f$ rather than on the d
 
 ### Example: estimating a rate
 
-You observe $n = 10{,}000$ inter-arrival times, independent $\mathrm{Exponential}$ with rate $\theta = 1$, and want to estimate $\theta$ privately with $\varepsilon = 1$. The maximum-likelihood estimate is one over the sample mean, $1/\bar x$, whose global sensitivity is infinite: a dataset of tiny times has a huge $1/\bar x$, and one record changes it by an arbitrary amount.
+You observe $n = 10{,}000$ inter-arrival times, independent and $\mathrm{Exp}(\theta)$-distributed with rate $\theta = 1$, and want to estimate $\theta$ privately with $\varepsilon = 1$. The maximum-likelihood estimate is one over the sample mean, $1/\bar x$, whose global sensitivity is infinite: a dataset of tiny times has a huge $1/\bar x$, and one record changes it by an arbitrary amount.
 
-To fill in @eq-sens-saa-error you need the mean and variance of $1/\bar x$ on a block of $n_b = n/B$ records. The block sum $n_b\bar x$ is a sum of $n_b$ independent exponentials with rate $\theta$, which has the gamma distribution with shape $n_b$ and rate $\theta$: $n_b\bar x \sim \mathrm{Gamma}(n_b, \theta)$. The inverse moments of a gamma variable $G$ with shape $k$ are $\mathbb E[1/G] = \theta/(k - 1)$ and $\mathbb E[1/G^2] = \theta^2/((k - 1)(k - 2))$: integrate $g^{-1}$ or $g^{-2}$ against the gamma density $\theta^kg^{k-1}e^{-\theta g}/\Gamma(k)$, recognize what is left as a gamma density with shape $k - 1$ or $k - 2$, and use $\Gamma(k) = (k - 1)\Gamma(k - 1)$. Since $z = 1/\bar x = n_b/G$, multiplying by $n_b$ and $n_b^2$ gives
+To fill in @eq-sens-saa-error you need the mean and variance of $1/\bar x$ on a block of $n_b = n/B$ records. The block sum $n_b\bar x$ is a sum of $n_b$ independent exponentials with rate $\theta$, which has the gamma distribution with shape $n_b$ and rate $\theta$: $n_b\bar x \sim \mathrm{Gamma}(n_b, \theta)$. The inverse moments of a gamma variable $G$ with shape $a$ are $\mathbb E[1/G] = \theta/(a - 1)$ and $\mathbb E[1/G^2] = \theta^2/((a - 1)(a - 2))$: integrate $g^{-1}$ or $g^{-2}$ against the gamma density $\theta^ag^{a-1}e^{-\theta g}/\Gamma(a)$, recognize what is left as a gamma density with shape $a - 1$ or $a - 2$, and use $\Gamma(a) = (a - 1)\Gamma(a - 1)$. Since $z = 1/\bar x = n_b/G$, multiplying by $n_b$ and $n_b^2$ gives
 $$\mathbb E[z] = \frac{n_b\theta}{n_b - 1}, \qquad \text{bias } \frac{\theta}{n_b - 1}, \qquad \operatorname{Var}(z) = \frac{n_b^2\theta^2}{(n_b - 1)^2(n_b - 2)}.$$
-The variance is $\mathbb E[z^2] - \mathbb E[z]^2 = n_b^2\theta^2\big(\frac1{(n_b-1)(n_b-2)} - \frac1{(n_b-1)^2}\big)$, which simplifies to the form shown. With clip range $R = 5$, @tbl-sens-saa and @fig-sens-saa-blocks show the trade-off. For example, with $B = 10$ blocks the noise standard deviation is $\sqrt2\,R/(B\varepsilon) = \sqrt2 \times 0.5 = 0.7071$, and the bias on blocks of 1,000 is $1/999 = 0.0010$.
+The variance is $\mathbb E[z^2] - \mathbb E[z]^2 = n_b^2\theta^2\big(\frac1{(n_b-1)(n_b-2)} - \frac1{(n_b-1)^2}\big)$, which simplifies to the form shown. With the clamping range $[0, 5]$, so $R = 5$, @tbl-sens-saa and @fig-sens-saa-blocks show the trade-off. For example, with $B = 10$ blocks the noise standard deviation is $\sqrt2\,R/(B\varepsilon) = \sqrt2 \times 0.5 = 0.7071$, and the bias on blocks of 1,000 is $1/999 = 0.0010$.
 
 | Blocks $B$ | Block size | Bias | Sampling sd | Noise sd | Root-mean-square error | Simulated |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -447,7 +447,7 @@ $$\Pr[X > C]\Big(\mathbb E[(X - C)_+] - \frac{C - \mathbb E[\min(X, C)]}{n}\Big)
 1. **Sensitivity.** Each clipped value lies in $[0, C]$, so replacing one record changes the sum by at most $C$ and the mean by at most $C/n$. Fact 1 gives $\varepsilon$-DP.
 2. **The bias.** Clipping removes exactly the excess above $C$: $x - \min(x, C) = (x - C)_+$. Taking expectations, $\mu - \mathbb E[\min(X, C)] = \mathbb E[(X - C)_+]$: the mass that clipping cuts off.
 3. **Error decomposition.** As in the subsample-and-aggregate derivation, the error is a constant (minus the bias), a mean-zero sampling term with variance $\operatorname{Var}(\min(X, C))/n$, and independent Laplace noise with variance $2(C/(n\varepsilon))^2$. Squaring and averaging kills the cross terms, since each contains a mean-zero factor independent of the other: @eq-sens-clip-error.
-4. **Derivatives in $C$.** Raising $C$ by a small amount $h$ raises $\min(X, C)$ by $h$ exactly when $X > C$ and leaves it alone otherwise, so $\frac{d}{dC}\mathbb E[\min(X, C)] = \Pr[X > C]$. By the same reasoning $\frac{d}{dC}\mathbb E[\min(X, C)^2] = 2C\Pr[X > C]$. The bias is $\mathbb E[(X - C)_+] = \mu - \mathbb E[\min(X, C)]$, whose derivative is $-\Pr[X > C]$, so by the chain rule the bias term has derivative $-2\,\mathbb E[(X - C)_+]\Pr[X > C]$. The variance is $\mathbb E[\min(X, C)^2] - \mathbb E[\min(X, C)]^2$, so the sampling term has derivative $\frac1n\big(2C\Pr[X > C] - 2\,\mathbb E[\min(X, C)]\Pr[X > C]\big) = \frac2n\Pr[X > C]\big(C - \mathbb E[\min(X, C)]\big)$. The noise term has derivative $\frac{4C}{n^2\varepsilon^2}$.
+4. **Derivatives in $C$.** Raising $C$ by a small amount $h$ raises $\min(X, C)$ by $h$ exactly when $X > C$ and leaves it alone otherwise, so $\frac{\mathrm d}{\mathrm dC}\mathbb E[\min(X, C)] = \Pr[X > C]$. By the same reasoning $\frac{\mathrm d}{\mathrm dC}\mathbb E[\min(X, C)^2] = 2C\Pr[X > C]$. The bias is $\mathbb E[(X - C)_+] = \mu - \mathbb E[\min(X, C)]$, whose derivative is $-\Pr[X > C]$, so by the chain rule the bias term has derivative $-2\,\mathbb E[(X - C)_+]\Pr[X > C]$. The variance is $\mathbb E[\min(X, C)^2] - \mathbb E[\min(X, C)]^2$, so the sampling term has derivative $\frac1n\big(2C\Pr[X > C] - 2\,\mathbb E[\min(X, C)]\Pr[X > C]\big) = \frac2n\Pr[X > C]\big(C - \mathbb E[\min(X, C)]\big)$. The noise term has derivative $\frac{4C}{n^2\varepsilon^2}$.
 5. **Set the sum to zero** and divide by 2: @eq-sens-clip-opt.
 
 ### Interpretation
@@ -462,22 +462,22 @@ Clipping is the honest version of "bounded data". Every "assume $x \in [0, \Lamb
 
 ### Example: mean income
 
-Incomes (in thousands) follow a log-normal distribution with $\ln X \sim \mathcal N(\ln 40, 0.8^2)$: the log of an income is normal. The median is $e^{\ln 40} = 40$, because the exponential preserves the median. The mean is larger, $e^{\ln 40 + 0.32} = 55.085$, because a log-normal with $\ln X \sim \mathcal N(\eta, s^2)$ has mean $e^{\eta + s^2/2}$ and here $s^2/2 = 0.64/2 = 0.32$; the gap reflects a heavy right tail.
+Incomes (in thousands) follow a log-normal distribution with $\ln X \sim \mathcal N(\ln 40, 0.8^2)$: the log of an income is normal. The median is $e^{\ln 40} = 40$, because the exponential preserves the median. The mean is larger, $e^{\ln 40 + 0.32} = 55.085$, because a log-normal with $\ln X \sim \mathcal N(\nu, s^2)$ has mean $e^{\nu + s^2/2}$ and here $s^2/2 = 0.64/2 = 0.32$; the gap reflects a heavy right tail.
 
-Every term of @eq-sens-clip-error needs averages of $X$ and $X^2$ over the values below $C$. For a log-normal these partial moments have a closed form, $\mathbb E[X^j\mathbf 1\{X \le c\}] = e^{j\eta + j^2s^2/2}\,\Phi\big((\ln c - \eta - js^2)/s\big)$, where $\Phi$ is the standard normal cumulative distribution function and $\mathbf 1\{X \le c\}$ is 1 when $X \le c$ and 0 otherwise. To get it, write $X = e^Y$ with $Y$ normal, so the integral is $\int_{-\infty}^{\ln c}e^{jy}\varphi(y)\,dy$ with $\varphi$ the normal density of $Y$; completing the square in the exponent turns $e^{jy}\varphi(y)$ into $e^{j\eta + j^2s^2/2}$ times a normal density with mean shifted to $\eta + js^2$, whose integral up to $\ln c$ is the $\Phi$ term (as in [Probability distributions](../part01-prerequisites/01-distributions.md)). @tbl-sens-clip uses these with $n = 1000$ and $\varepsilon = 1$.
+Every term of @eq-sens-clip-error needs averages of $X$ and $X^2$ over the values below $C$. For a log-normal these partial moments have a closed form, $\mathbb E[X^j\mathbf 1[X \le c]] = e^{j\nu + j^2s^2/2}\,\Phi\big((\ln c - \nu - js^2)/s\big)$, where $\Phi$ is the standard normal cumulative distribution function and $\mathbf 1[X \le c]$ is 1 when $X \le c$ and 0 otherwise. To get it, write $X = e^Y$ with $Y$ normal, so the integral is $\int_{-\infty}^{\ln c}e^{jy}\varphi(y)\,\mathrm dy$ with $\varphi$ the normal density of $Y$; completing the square in the exponent turns $e^{jy}\varphi(y)$ into $e^{j\nu + j^2s^2/2}$ times a normal density with mean shifted to $\nu + js^2$, whose integral up to $\ln c$ is the $\Phi$ term (as in [Probability distributions](../part01-prerequisites/01-distributions.md)). @tbl-sens-clip uses these with $n = 1000$ and $\varepsilon = 1$.
 
-| Clip bound $C$ | $\Pr[X > C]$ | Bias | Sampling sd | Noise sd | Root-mean-square error | Simulated |
+| Clipping norm $C$ | $\Pr[X > C]$ | Bias | Sampling sd | Noise sd | Root-mean-square error | Simulated |
 | --- | --- | --- | --- | --- | --- | --- |
 | 40 (the median) | 0.5000 | 23.415 | 0.335 | 0.057 | 23.417 | 23.411 |
 | 257.23 (99th percentile) | 0.0100 | 0.924 | 1.462 | 0.364 | 1.767 | 1.747 |
 | 331.34 (optimal) | 0.0041 | 0.438 | 1.538 | 0.469 | 1.666 | 1.649 |
 | 1000 | 0.0000 | 0.006 | 1.645 | 1.414 | 2.169 | 2.134 |
 
-: Error of the clipped private mean of log-normal incomes, $n = 1000$, $\varepsilon = 1$, for four clip bounds: the three terms of @eq-sens-clip-error, their combination, and a simulation with 5,000 repetitions. {#tbl-sens-clip}
+: Error of the clipped private mean of log-normal incomes, $n = 1000$, $\varepsilon = 1$, for four clipping norms: the three terms of @eq-sens-clip-error, their combination, and a simulation with 5,000 repetitions. {#tbl-sens-clip}
 
 Clipping at the median is a disaster: half the incomes are cut back, and the bias of 23 dwarfs everything. The optimum, $C^* = 331.34$, cuts off only 0.4% of the population and has total error $1.666$, only 1% above the standard deviation $1.649$ of the unclipped, non-private mean (the ratio is $1.666/1.649 \approx 1.01$). The simulated error at the optimum happens to print as 1.649 too. That is a coincidence of the 5,000 repetitions, whose own standard error is about 1%, and the formula's 1.666 is the value to trust: privacy costs a little here, not nothing. Above the optimum, the noise takes over: its standard deviation $\sqrt2\,C/(n\varepsilon)$ grows linearly in $C$, reaching $1.414$ at $C = 1000$ (@fig-sens-clip-tradeoff, left). The optimum grows with $n$, as the interpretation predicted: $177.5$ at $n = 100$, $557.3$ at $n = 10{,}000$ and $876.3$ at $n = 100{,}000$ (@fig-sens-clip-tradeoff, right).
 
-![Left: root-mean-square error of the clipped private mean of log-normal incomes against the clip bound $C$, with its bias, noise and sampling components and simulated points; the dotted line marks the optimum $C^* = 331$. Right: the optimal clip bound as a function of the dataset size.](figures/sens_clip_tradeoff.svg){#fig-sens-clip-tradeoff}
+![Left: root-mean-square error of the clipped private mean of log-normal incomes against the clipping norm $C$, with its bias, noise and sampling components and simulated points; the dotted line marks the optimum $C^* = 331$. Right: the optimal clipping norm as a function of the dataset size.](figures/sens_clip_tradeoff.svg){#fig-sens-clip-tradeoff}
 
 ### Check yourself
 
@@ -510,7 +510,7 @@ uv run python code/part03-dp-foundations/sensitivity.py
 
 [tests/test_sensitivity.py](../../tests/test_sensitivity.py) checks that the output still matches this table.
 
-**What to take from it.** The first lesson is that a data-dependent noise scale can leak more than the answer: in the leak example both datasets have the same median, so the whole $\delta = 0.477$ comes from the spread of the noise. The repair for the median rests on an exact formula, and the $O(n^2)$ formula for $A^{(k)}$ matches brute force at every distance $k$, so the smooth sensitivities it produces can be trusted. With it, smooth sensitivity and propose-test-release buy about two orders of magnitude over global sensitivity for the median of a thousand points, though they lose to it on tiny datasets, where a few changes can open a gap across the whole range. Inverse sensitivity does better still, by another factor of twelve on the ages, because it never has to pay for a noise scale. Finally, every method ends in a bias–noise trade-off you can compute: the number of blocks and the clip bound both have optima you can find in closed form before touching the data.
+**What to take from it.** The first lesson is that a data-dependent noise scale can leak more than the answer: in the leak example both datasets have the same median, so the whole $\delta = 0.477$ comes from the spread of the noise. The repair for the median rests on an exact formula, and the $O(n^2)$ formula for $A^{(k)}$ matches brute force at every distance $k$, so the smooth sensitivities it produces can be trusted. With it, smooth sensitivity and propose-test-release buy about two orders of magnitude over global sensitivity for the median of a thousand points, though they lose to it on tiny datasets, where a few changes can open a gap across the whole range. Inverse sensitivity does better still, by another factor of twelve on the ages, because it never has to pay for a noise scale. Finally, every method ends in a bias–noise trade-off you can compute: the number of blocks and the clipping norm both have optima you can find in closed form before touching the data.
 
 ## References
 
@@ -551,6 +551,6 @@ uv run python code/part03-dp-foundations/sensitivity.py
 - Pure DP with a data-dependent scale needs polynomial tails; light tails need $\delta$ and a much smaller $\beta \approx \varepsilon/(2\ln(1/\delta))$.
 - Smooth sensitivity pays off once the data are dense around the statistic: for the median, once $n$ is in the hundreds. For medians and quantiles, inverse sensitivity is simpler and more accurate.
 - A discrete answer that is stable can be released exactly, at the cost of $\varepsilon$ and a refusal when the lead is below about $2\ln(1/\delta)/\varepsilon$.
-- Choose clip bounds and block counts before looking at the data, by the error formula, or with a separate slice of the privacy budget.
+- Choose clipping norms and block counts before looking at the data, by the error formula, or with a separate slice of the privacy budget.
 
 **Practice.** Exercises for this chapter, each with a worked solution, are in [the exercise book](../../book-exercises/part03-dp-foundations/07-sensitivity.md).

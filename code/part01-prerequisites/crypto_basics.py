@@ -466,12 +466,12 @@ def plot_birthday(rng: np.random.Generator, n: int = 2**16) -> Figure:
     fig, ax = plt.subplots(figsize=(6.5, 4.2))
     ax.plot(qs, [collision_exact(q, n) for q in qs], "k", linewidth=2, label="exact")
     ax.plot(qs[::4], empirical, "o", color="C3", label="simulation")
-    ax.plot(qs, [min(1.0, collision_union_bound(q, n)) for q in qs], label=r"union bound $q(q-1)/(2N)$")
-    ax.plot(qs, [collision_exp_lower(q, n) for q in qs], "--", label=r"lower bound $1 - e^{-q(q-1)/(2N)}$")
-    ax.axvline(math.sqrt(n), color="gray", linestyle=":", label=r"$q = \sqrt{N}$")
+    ax.plot(qs, [min(1.0, collision_union_bound(q, n)) for q in qs], label=r"union bound $Q(Q-1)/(2N)$")
+    ax.plot(qs, [collision_exp_lower(q, n) for q in qs], "--", label=r"lower bound $1 - e^{-Q(Q-1)/(2N)}$")
+    ax.axvline(math.sqrt(n), color="gray", linestyle=":", label=r"$Q = \sqrt{N}$")
     ax.set(
         ylim=(0, 1.05),
-        xlabel="number of draws q",
+        xlabel="number of draws Q",
         ylabel="Pr[some collision]",
         title=r"Birthday bound, $N = 2^{16}$ values",
     )
@@ -482,7 +482,7 @@ def plot_birthday(rng: np.random.Generator, n: int = 2**16) -> Figure:
 def plot_hybrid(rng: np.random.Generator, delta: float = 0.01) -> Figure:
     ms = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10_000, 20_000, 50_000, 100_000]
     fig, ax = plt.subplots(figsize=(6.5, 4.2))
-    ax.plot(ms, [coin_hybrid_bound(m, delta) for m in ms], label=r"hybrid bound $\min(1, m\delta)$")
+    ax.plot(ms, [coin_hybrid_bound(m, delta) for m in ms], label=r"hybrid bound $\min(1, m\xi)$")
     ax.plot(ms, [coin_total_variation(m, delta) for m in ms], "k", linewidth=2, label="best distinguisher (TV)")
     ax.plot(
         ms,
@@ -497,7 +497,7 @@ def plot_hybrid(rng: np.random.Generator, delta: float = 0.01) -> Figure:
         ylim=(5e-3, 1.5),
         xlabel="number of samples m",
         ylabel="distinguishing advantage",
-        title=rf"Bernoulli$(1/2 + \delta)$ against Bernoulli$(1/2)$, $\delta = {delta}$",
+        title=rf"Bern$(1/2 + \xi)$ against Bern$(1/2)$, $\xi = {delta}$",
     )
     ax.legend(loc="lower right")
     return fig

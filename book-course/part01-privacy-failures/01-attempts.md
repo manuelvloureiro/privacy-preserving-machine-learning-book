@@ -8,14 +8,16 @@ The cases share a pattern. A protection was chosen by intuition, and nobody coul
 
 In 2014, a public-records request obtained from New York City's taxi regulator the record of every taxi trip and fare in the city in 2013, about 19 gigabytes of data. A trip record holds the pickup and drop-off times, their coordinates, the distance, the duration and the number of passengers. It also holds two identifiers, the number of the cab's medallion and the number of the driver's licence. These two would reveal where each driver worked and how much they earned, so the regulator did not publish them as they were. It replaced each by a string of 32 hexadecimal digits.
 
+Replacing each identifier by a code in this way is called pseudonymization. The definition below names the one property such a code must have, that the same identifier always gets the same code, because the attack depends on exactly that.
+
 ::: {#def-att-pseudonym name="Pseudonymization"}
 Let $\mathcal U$ be a set of identifiers, such as licence numbers. A **pseudonymization** replaces each identifier $u \in \mathcal U$ in a table by $h(u)$, where $h$ is a fixed injective function, so that the same person gets the same pseudonym in every row.
 :::
 
-The pseudonyms did not hold for long. An analyst noticed that one licence pseudonym earned far more per day than any driver could. That pseudonym turned out to be the MD5 hash of the string `0`, a placeholder for a missing licence, so many drivers' trips had been pooled under it. The discovery revealed the function $h$, which was MD5 with no secret key. A hash function is hard to invert on inputs drawn from a huge set, but the identifier formats allowed only about 22 million strings, about 3 million licence numbers and 19 million medallion numbers.
+The pseudonyms did not hold for long. An analyst noticed that one licence pseudonym earned far more per day than any driver could. That pseudonym turned out to be the MD5 hash of the string `0`, a placeholder for a missing licence, so many drivers' trips had been pooled under it. The discovery revealed the function $h$, which was MD5 with no secret key. A hash function is hard to invert on inputs drawn from a huge set, but the identifier formats allowed only about 22 million strings, about 3 million licence numbers and 19 million medallion numbers. With so few possible inputs, anyone can apply the function to all of them and look each pseudonym up, as the next result says.
 
 ::: {#prp-att-dictionary name="Dictionary attack"}
-Let $\mathcal U$ be finite and let $h$ be injective and computable by anyone. Then $|\mathcal U|$ evaluations of $h$ recover the identifier behind every pseudonym in the table.
+Let the set of identifiers $\mathcal U$ be finite, and let the pseudonymization function $h$ be injective and computable by anyone. Then $|\mathcal U|$ evaluations of $h$ recover the identifier behind every pseudonym in the table.
 :::
 
 ::: {.proof}
@@ -23,7 +25,7 @@ Let $\mathcal U$ be finite and let $h$ be injective and computable by anyone. Th
 2. For each pseudonym $v$ in the released table, look up $v$. Since $h$ is injective, exactly one stored pair has first entry $v$, and its second entry is the identifier.
 :::
 
-A licence number is not yet a name. The second step joined the decoded table with a public list of licensed drivers, which gives each licence number its holder's name. Every driver's trips, home area and income were then public. This step has a name.
+A licence number is not yet a name. The second step joined the decoded table with a public list of licensed drivers, which gives each licence number its holder's name. Every driver's trips, home area and income were then public. Joining a release with a second table that names people is the step that turns every attack in this chapter into a disclosure, so it gets its own definition.
 
 ::: {#def-att-linkage name="Linkage attack"}
 Let $T$ be a released table and $T'$ an auxiliary table that names people, and let $Q$ be a set of attributes that both tables contain. A **linkage attack** joins $T$ and $T'$ on $Q$. A row of $T$ is **re-identified** when its values on $Q$ match exactly one row of $T'$ and no other row of $T$.
@@ -41,10 +43,10 @@ The lesson is that in a sparse table with many columns, almost every record is u
 
 ## Releasing a model: memorization {#sec-att-memorization}
 
-The first two releases were whole tables. Releasing only a function of the data seems safer, such as a model trained on it. Carlini and coauthors tested this in 2019 on language models, which assign a probability to every sequence of words. Such a model predicts each word from the ones before it, using a vector of parameters $\theta$ learned from a corpus of text.
+The first two releases were whole tables. Releasing only a function of the data seems safer, such as a model trained on it. Carlini and coauthors tested this in 2019 on language models, which assign a probability to every sequence of words. Such a model predicts each word from the ones before it, using a vector of parameters $\theta$ learned from a corpus of text. To test whether a model has memorized a string, the authors measured how surprised the model is by it, counted in bits. A string the model finds likely gets a small score.
 
 ::: {#def-att-perplexity name="Log-perplexity"}
-The **log-perplexity** of a sequence $x_1, \dots, x_\ell$ under a model with parameters $\theta$ is
+Write $\Pr_\theta$ for the probability that the model with parameters $\theta$ assigns to a sequence of words, or to the next word given the words before it. The **log-perplexity** of a sequence $x_1, \dots, x_\ell$ of $\ell$ words under this model is
 
 $$
 P_\theta(x_1, \dots, x_\ell) = -\log_2 \Pr_\theta[x_1, \dots, x_\ell] = \sum_{i=1}^{\ell} -\log_2 \Pr_\theta\left[x_i \mid x_1, \dots, x_{i-1}\right].
@@ -53,7 +55,7 @@ $$
 
 The second form is the chain rule of probability. Low log-perplexity means high probability. A model of English gives "the cat sat on the mat" a low score and a string of unrelated words a high one. The question is whether a rare string that appears in the training text, such as a password or an identity number, gets a much lower score than it otherwise would. If it does, the model has memorized it, and anyone who can query the model may find it.
 
-To measure this, the authors inserted a **canary** into the training text: a sentence of a fixed format with a random secret, such as "my identity number is 314-15-9265". They then compared its score with those of all the other sentences of the same format.
+To measure this, the authors inserted a **canary** into the training text: a sentence of a fixed format with a random secret, such as "my identity number is 314-15-9265". They then compared its score with those of all the other sentences of the same format. Exposure turns that comparison into a number, which is large when the model ranks the true canary above most of the alternatives.
 
 ::: {#def-att-exposure name="Exposure"}
 Let $\mathcal R$ be the finite set of candidate secrets, all sentences of the canary's format, and let $N = |\mathcal R|$. Sort $\mathcal R$ by increasing log-perplexity under the model, and let $\operatorname{rank}(r) \in \{1, \dots, N\}$ be the position of $r$, so that rank $1$ is the most likely candidate. The **exposure** of $r$ is
@@ -80,7 +82,7 @@ $$
 4. Since $\ln$ is increasing, $\ln k$ is at least the integral of $\ln x$ over $[k-1, k]$ for $k \ge 2$. Summing over $k$ gives
 
 $$
-\ln N! \ge \int_1^N \ln x\,dx = N\ln N - N + 1.
+\ln N! \ge \int_1^N \ln x\,\mathrm d x = N\ln N - N + 1.
 $$
 
 5. Steps 3 and 4 give $\mathbb E[\operatorname{exposure}(r)] \le \frac{N-1}{N\ln 2} < \frac{1}{\ln 2}$.
@@ -102,7 +104,7 @@ In the mid-1990s, the Group Insurance Commission of Massachusetts let researcher
 
 Latanya Sweeney, then a graduate student, bought the voter roll of Cambridge, Massachusetts, for $20. It lists every registered voter's name, address, ZIP code, date of birth and sex. A linkage attack on ZIP code, date of birth and sex found the governor's hospital records, and she mailed them to him. The attack works at scale. Sweeney later estimated that 87% of the population of the United States is the only person with their combination of five-digit ZIP code, sex and date of birth.
 
-Her answer, with Samarati, was a property of the released table. Its attributes fall into three kinds. **Identifiers**, such as names, are removed. **Quasi-identifiers**, such as ZIP code, age and sex, are harmless alone but identify people in combination. **Sensitive attributes**, such as the diagnosis, are what the release is for, so they stay. The quasi-identifiers are coarsened, for example by replacing a ZIP code by its first three digits or an age by a range, until no combination is rare.
+Her answer, with Samarati, was a property of the released table. Its attributes fall into three kinds. **Identifiers**, such as names, are removed. **Quasi-identifiers**, such as ZIP code, age and sex, are harmless alone but identify people in combination. **Sensitive attributes**, such as the diagnosis, are what the release is for, so they stay. The quasi-identifiers are coarsened, for example by replacing a ZIP code by its first three digits or an age by a range, until no combination is rare. The goal is that every person hides in a crowd of at least $k$ rows that look the same on the quasi-identifiers, and the definition states that goal.
 
 ::: {#def-att-kanon name="$k$-anonymity"}
 Let $k \ge 1$ be an integer. A table is **$k$-anonymous** with respect to a set of quasi-identifiers if every combination of quasi-identifier values that appears in the table appears in at least $k$ rows. The rows that share a combination form an **equivalence class**.
@@ -135,9 +137,13 @@ A $k$-anonymous table stops the attack on the governor: a linkage on the quasi-i
 
 : Hospital B's release, $3$-anonymous with respect to ZIP code and age. {#tbl-att-hospital-b}
 
+The first example uses only hospital A's table. It shows that a class whose rows all share one sensitive value hides nothing.
+
 ::: {#exm-att-homogeneity name="Homogeneity"}
 A neighbour aged 35, living in ZIP code 02139, was a patient of hospital A. In @tbl-att-hospital-a, the neighbour must be in the class with ZIP code 021\*\* and age 30–39. All three of its rows say hepatitis, so the attacker learns the diagnosis without knowing which row is the neighbour's.
 :::
+
+The second example needs classes with varied diagnoses, so homogeneity is not the problem. Instead, it combines the two hospitals' releases.
 
 ::: {#exm-att-intersection name="Intersection"}
 A colleague aged 27, living in ZIP code 02139, was treated at both hospitals for the same condition. In @tbl-att-hospital-a the colleague's class allows influenza, asthma or diabetes. In @tbl-att-hospital-b the class with age 25–34 allows diabetes, migraine or fracture. Only diabetes is in both lists, so the two releases together reveal the diagnosis, although each is $3$-anonymous.

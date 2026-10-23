@@ -540,14 +540,14 @@ def plot_neighbours(rng: np.random.Generator, n: int = 30) -> Figure:
     fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharey=True)
     for ax, lam in zip(axes, (0.01, 1.0)):
         w, w2 = fit_logistic(x, y, lam), fit_logistic(x, y2, lam)
-        ax.plot(grid[:, 0], sigmoid(grid @ w), label=f"trained on S (w = {float(w[0]):.2f})")
-        ax.plot(grid[:, 0], sigmoid(grid @ w2), "--", label=f"trained on S$^{{(i)}}$ (w = {float(w2[0]):.2f})")
+        ax.plot(grid[:, 0], sigmoid(grid @ w), label=f"trained on D (θ = {float(w[0]):.2f})")
+        ax.plot(grid[:, 0], sigmoid(grid @ w2), "--", label=f"trained on D$^{{(i)}}$ (θ = {float(w2[0]):.2f})")
         others = np.arange(n) != i
         ax.plot(x[others, 0], (y[others] + 1) / 2, "k.", alpha=0.5)
         ax.plot([x[i, 0]], [1.0], "o", color="C0", markersize=9, label="$z_i$ (label +1)")
         ax.plot([x[i, 0]], [0.0], "s", color="C1", markersize=9, label="$z_i'$ (label flipped)")
         bound = 2 / (lam * n)
-        ax.set(xlabel="x", title=f"λ = {lam:g}: |w - w'| = {float(abs(w2[0] - w[0])):.3f}, bound 2L/(λn) = {bound:.3g}")
+        ax.set(xlabel="x", title=f"λ = {lam:g}: |θ - θ'| = {float(abs(w2[0] - w[0])):.3f}, bound 2L/(λn) = {bound:.3g}")
         ax.legend(loc="upper left", fontsize=8)
     axes[0].set_ylabel("predicted P(y = +1 | x)")
     return fig
@@ -613,14 +613,14 @@ def plot_high_probability(n_max: int = 10**6, loss_max: float = 1.0, delta: floa
         ns,
         [loss_max * math.sqrt(math.log(1 / delta) / (2 * n)) for n in ns],
         "k--",
-        label=r"one fixed model: $M\sqrt{\ln(1/\delta)/(2n)}$",
+        label=r"one fixed model: $K\sqrt{\ln(1/\beta)/(2n)}$",
     )
     ax.set(
         xscale="log",
         yscale="log",
         xlabel="training set size n",
-        ylabel=f"width at δ = {delta}",
-        title="High-probability width of the McDiarmid bound (M = 1)",
+        ylabel=f"width at β = {delta}",
+        title="High-probability width of the McDiarmid bound (K = 1)",
     )
     ax.legend(fontsize=8)
     return fig
@@ -638,9 +638,9 @@ def plot_sgd_divergence(rng: np.random.Generator, n: int = 100, eta: float = 0.2
         ax.axvline(e * n, color="gray", linestyle=":", linewidth=0.6)
     ax.set(
         xlabel="SGD step t",
-        ylabel=r"$\|w_t - w_t'\|$",
+        ylabel=r"$\|\theta_t - \theta_t'\|$",
         ylim=(0, 2 * eta * epochs * 1.05),
-        title=f"Coupled SGD on S and S$^{{(1)}}$, n = {n}, η = {eta}",
+        title=f"Coupled SGD on D and D$^{{(1)}}$, n = {n}, η = {eta}",
     )
     ax.legend(loc="upper left")
     return fig
@@ -703,7 +703,7 @@ def plot_self_influence(rng: np.random.Generator, n: int = 40) -> Figure:
         )
         ax.set(xlabel=r"$y_i\, x_{i1}$ (how typical the label is)", title=f"λ = {lam:g}")
         ax.legend(fontsize=8)
-    axes[0].set_ylabel(r"self-influence $\ell(w(S^{(i)}), z_i) - \ell(w(S), z_i)$")
+    axes[0].set_ylabel(r"self-influence $\ell(\theta(D^{(i)}); z_i) - \ell(\theta(D); z_i)$")
     return fig
 
 

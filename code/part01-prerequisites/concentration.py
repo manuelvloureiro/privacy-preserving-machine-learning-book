@@ -329,7 +329,7 @@ def plot_azuma(rng: np.random.Generator, n: int = 200) -> Figure:
     ax.plot(ts, [e if e > 0 else math.nan for e in empirical], "k", linewidth=2, label="empirical")
     ax.plot(ts, [azuma_bound(t, n) for t in ts], label=r"Azuma $e^{-2t^2/n}$")
     ax.set(
-        yscale="log", ylim=(1e-6, 2), xlabel="t", ylabel=r"Pr[$M_n \geq t$]", title=f"Adaptive coin game, n = {n} flips"
+        yscale="log", ylim=(1e-6, 2), xlabel="t", ylabel=r"Pr[$W_n \geq t$]", title=f"Adaptive coin game, n = {n} flips"
     )
     ax.legend()
     return fig

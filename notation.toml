@@ -1,0 +1,273 @@
+# The checkable part of NOTATION.md, shared by the four books and the study notes.
+# tools/notation.py reads this file:
+#   make notation-check   fail on any forbidden spelling or overload below
+#   make notation         report how often each rule fires, per book
+#
+# [[rule]]      find = 'regex'  use = "what to write instead"
+#               in = "math"     the pattern is looked for inside $...$ and $$...$$
+#               in = "text"     in the prose: math, code, link targets and attributes removed
+#               in = "body"     in the prose, except headings, link text, captions and environment
+#                               names, where Markdown makes plain text and Unicode is right
+#               in = "page"     in the whole page, math and prose together, for a phrase that names a
+#                               symbol ("sampling rate $\gamma$")
+#               except = ['regex', ...]     matches of these are left alone (a paper's title, say)
+#               max_per_page = 1            allow this many on a page (a "also called" mention)
+#               outside_asymptotic = true   allow it inside O(...), Theta(...), Omega(...)
+# [[conflict]]  two meanings of one symbol that must not meet on a page: the page fails when both
+#               patterns match it (anywhere outside code).
+# Patterns are Python regular expressions in TOML literal strings, so a backslash is written once.
+
+# --- Mathematics and probability ------------------------------------------------------------
+
+[[rule]]
+in = "math"
+find = '\\epsilon(?![a-zA-Z])'
+use = '\varepsilon'
+
+[[rule]]
+in = "math"
+find = '\\mathrm\{Var\}|\\text\{Var\}|\\mathbb V\b'
+use = '\operatorname{Var}'
+
+[[rule]]
+in = "math"
+find = '\\operatorname\{(?:Var|Cov)\}\s*\['
+use = '\operatorname{Var}(X), with parentheses'
+
+[[rule]]
+in = "math"
+find = '\\mathbb\s*\{?1\}?|\\mathbb\s*\{?I\}?(?![a-zA-Z])|\\mathbf\s*\{?1\}?\s*(?:_|\\\{)'
+use = '\mathbf 1[A]'
+
+[[rule]]
+in = "math"
+find = '\\mathbb\s*\{?P\}?(?![a-zA-Z])|\\mathrm\{Pr\}|\\operatorname\{Pr\}|\\Pr\('
+use = '\Pr[A]'
+
+[[rule]]
+in = "math"
+find = '(?<!\\mathbb )(?<!\\mathbb)(?<![\\\w{])E\['
+use = '\mathbb E[X]'
+
+[[rule]]
+in = "math"
+find = '\\log(?![_a-zA-Z])'
+use = '\ln for the natural logarithm, \log_2 for bits (a bare \log only inside O(...))'
+outside_asymptotic = true
+
+[[rule]]
+in = "math"
+find = '\\mathrm\{Laplace\}|\\operatorname\{Lap\}|\\text\{Lap\}'
+use = '\mathrm{Lap}(b)'
+
+[[rule]]
+in = "math"
+find = '(?<!\\mathcal )(?<!\\mathcal)(?<![\\\w{])N\(\s*(?:0|\\mu)\s*,'
+use = '\mathcal N(\mu, \sigma^2)'
+
+[[rule]]
+in = "math"
+find = '\\mathrm\{Binomial\}'
+use = '\mathrm{Bin}'
+
+[[rule]]
+in = "math"
+find = '\\mathrm\{Bernoulli\}'
+use = '\mathrm{Bern}'
+
+[[rule]]
+in = "math"
+find = '\\lVert|\\rVert'
+use = '\|'
+
+[[rule]]
+in = "math"
+find = '(?<![\\\w])[A-Za-z]\s?:\s?\\mathcal [A-Z]'
+use = 'f\colon \mathcal X^n \to \mathbb R^d'
+
+# --- Data and differential privacy -----------------------------------------------------------
+
+[[rule]]
+in = "math"
+find = "(?<![\\w])([DXSx])\\s*\\\\sim\\s*\\1'"
+use = "D \\simeq D'"
+
+[[rule]]
+in = "math"
+find = '\\Delta_\{?[12]\}?\s*\(|\\Delta_\{?f\}?|\\operatorname\{sens\}|\\mathrm\{GS\}'
+use = '\Delta_1 f, \Delta_2 f, \Delta_2 R'
+
+[[rule]]
+in = "math"
+find = '\\varepsilon\s*,\s*\\eta\s*\)'
+use = "(\\varepsilon, \\delta)-DP, with \\delta' for a slack"
+
+[[rule]]
+in = "math"
+find = '\\perp(?![a-zA-Z])'
+use = '\bot'
+
+# --- Divergences and accounting --------------------------------------------------------------
+
+[[rule]]
+in = "math"
+find = '(?<!D_\{)\\mathrm\{KL\}|\\operatorname\{KL\}|D_\{?KL\}?|D_\{\\text\{KL'
+use = 'D_{\mathrm{KL}}(P\|Q)'
+
+[[rule]]
+in = "math"
+find = 'd_\{?\\?(?:mathrm\{)?TV|\\mathrm\{TV\}_|\\\|_\{\\mathrm\{TV\}\}'
+use = '\mathrm{TV}(P, Q)'
+
+[[rule]]
+in = "math"
+find = 'H_\{?\\(?:gamma|varepsilon)|H_\{e\^|D_\{e\^'
+use = 'E_\gamma(P\|Q), and \delta(\varepsilon) = E_{e^\varepsilon}(P\|Q)'
+
+[[rule]]
+in = "math"
+find = 'D_\{?\\lambda|\\mathrm\{D\}_|\(\\lambda,\s*\\varepsilon\)'
+use = 'D_\alpha and (\alpha, \varepsilon)-RDP'
+
+[[rule]]
+in = "math"
+find = '\\varepsilon_\{?\\alpha'
+use = '\varepsilon(\alpha)'
+
+# --- Concepts written with another symbol ---------------------------------------------------
+
+[[rule]]
+in = "page"
+find = 'sampling (?:rate|probability) \$(?!q\b)[^$]{1,12}\$'
+use = 'the sampling rate q'
+
+[[rule]]
+in = "page"
+find = 'clipping (?:norm|threshold|bound) \$(?!C\b)[^$]{1,12}\$'
+use = 'the clipping norm C'
+
+[[rule]]
+in = "page"
+find = '(?:learning rate|step size) \$(?!\\eta)[^$]{1,12}\$'
+use = 'the learning rate \eta'
+
+[[rule]]
+in = "page"
+find = 'noise multiplier \$(?!\\sigma)[a-z]\$'
+use = 'the noise multiplier \sigma'
+
+[[rule]]
+in = "page"
+find = 'failure probability \$\\(?:eta|delta|gamma)'
+use = 'the failure probability \beta'
+
+[[rule]]
+in = "page"
+find = '\$\\mu\$-strongly|\$m\$-strongly'
+use = '\lambda-strongly convex'
+
+[[rule]]
+in = "page"
+find = '(?:threshold|cutoff) \$[Tt]\$'
+use = 'the threshold \tau'
+
+[[rule]]
+in = "page"
+find = '(?:data ?set|training set|sample) \$(?:[XSx]|S_n)\$'
+use = 'the dataset D'
+
+[[rule]]
+in = "math"
+find = '\\ell\(\s*(?:\\theta|w)\s*,'
+use = '\ell(\theta; z)'
+
+# --- Words -----------------------------------------------------------------------------------
+
+[[rule]]
+in = "text"
+find = '\b(?:[Rr]andom|[Mm]inim|[Mm]axim|[Gg]eneral|[Nn]ormal|[Pp]rivat|[Pp]arameter|[Dd]iscret|[Oo]ptim)is(?:e|ed|es|er|ers|ing|ation|ations)\b'
+use = 'the -ize spelling (randomized, minimize)'
+
+[[rule]]
+in = "text"
+find = '\b[Nn]eighbor(?!u)|\b[Bb]ehavior|\b[Cc]entered\b|\b[Mm]odeling\b|\b[Aa]nalyz(?:e|ed|es|ing)\b|\b[Ll]abeled\b|\b[Ff]avor(?!u)'
+use = 'the British spelling (neighbour, behaviour, centred, modelling, analyse, labelled, favour)'
+except = ['"[^"\n]{3,200}"', '“[^”\n]{3,200}”', 'Analyze Gauss', 'Language Modeling', '[Ee]ncode[,–-] ?[Ss]huffle[,–-] ?[Aa]nalyz']  # quoted titles, venues, Prochlo's architecture
+
+[[rule]]
+in = "text"
+find = '\b[Dd]ata sets?\b'
+use = 'dataset'
+
+[[rule]]
+in = "text"
+find = '\b[Tt]radeoffs?\b'
+use = 'trade-off'
+
+[[rule]]
+in = "text"
+find = '\badjacent (?:datasets|databases|inputs)\b'
+use = 'neighbouring datasets'
+
+[[rule]]
+in = "text"
+find = '\bsampling (?:probability|ratio|fraction)\b|\bkeep probability\b'
+use = 'sampling rate'
+
+[[rule]]
+in = "text"
+find = '\bclipping (?:threshold|bound)\b'
+use = 'clipping norm'
+
+[[rule]]
+in = "text"
+find = '\bstep[- ]sizes?\b'
+use = 'learning rate (a page may say once that it is also called the step size)'
+max_per_page = 1
+
+[[rule]]
+in = "text"
+find = '\bDPSGD\b|\bDP SGD\b'
+use = 'DP-SGD'
+
+[[rule]]
+in = "text"
+find = '\bper-sample gradient'
+use = 'per-example gradient'
+
+[[rule]]
+in = "body"
+find = '[εδ]'
+use = '$\varepsilon$ and $\delta$ in math (Unicode only in headings, link text, captions)'
+
+# --- Overloads that must not meet on a page --------------------------------------------------
+
+[[conflict]]
+symbol = 'alpha'
+first = 'D_\\alpha|\\varepsilon\(\\alpha\)|\(\\alpha,\s*\\varepsilon\)-RDP|R[ée]nyi order'
+second = '\(\\alpha,\s*\\beta\)-accura'
+fix = 'write the error bound of the accuracy guarantee a'
+
+[[conflict]]
+symbol = 'beta'
+first = 'probability (?:at least )?\$1\s*-\s*\\beta|failure probability \$\\beta'
+second = '\\beta\$?-smooth'
+fix = 'write the smoothness constant \beta_s'
+
+[[conflict]]
+symbol = 'L'
+first = "L_\\{D,\\s*D'\\}|privacy loss \\$L"
+second = '\$L\$-Lipschitz'
+fix = 'write the Lipschitz constant G'
+
+[[conflict]]
+symbol = 'b'
+first = '\\mathrm\{Lap\}\(b\)|scale \$b\$'
+second = "(?:hidden )?bit \\$b\\$|\\$b' = b\\$|type II error \\$b\\$"
+fix = 'write the Laplace scale out as \Delta f/\varepsilon, or name it s'
+
+[[conflict]]
+symbol = 'q'
+first = 'sampling rate \$q\$'
+second = 'q \\in \\mathcal Q'
+fix = 'write the query f'

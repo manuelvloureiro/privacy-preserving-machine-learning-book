@@ -2,22 +2,22 @@
 
 Exercises for [Property inference](../../book-full/part02-attacks/04-property-inference.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part02-attacks/solutions_property_inference.py` computes every number quoted here; run it with `uv run python code/part02-attacks/solutions_property_inference.py`.
 
-The solutions use the chapter's notation. $\pi_t$ mixes a majority group and a subgroup of share $t$, a dataset is $n$ independent records from $\pi_t$, and the attacker must tell $t_0$ from $t_1$, with $\bar t = \frac{t_0 + t_1}2$. Its advantage is the true positive rate minus the false positive rate, its accuracy with a fair bit is $\frac12(1 + \text{advantage})$, and the best advantage is the total variation (TV) distance between the two laws of what it sees. $\Phi$ is the standard normal distribution function.
+The solutions use the chapter's notation. $\mathcal D_t$ mixes a majority group and a subgroup of share $t$, a dataset is $n$ independent records from $\mathcal D_t$, and the attacker must tell $t_0$ from $t_1$, with $\bar t = \frac{t_0 + t_1}2$. Its advantage is the true positive rate minus the false positive rate, its accuracy with a fair bit is $\frac12(1 + \text{advantage})$, and the best advantage is the total variation (TV) distance between the two laws of what it sees. $\Phi$ is the standard normal distribution function.
 
 ## Shifting a unimodal pmf {#sec-sol-property-inference-1}
 
-> **Exercise 1.** **Shifting a unimodal pmf.** Prove that $\mathrm{TV}(\mathcal L(X), \mathcal L(X + 1)) = \max_k\Pr[X = k]$ for any integer-valued $X$ whose pmf rises to a mode and then falls, and deduce @eq-prop-membership. *Check: for $X \sim \mathrm{Bin}(99, \frac12)$ both sides are 0.0796, and the membership advantage at $n = 100$ is half of that, 0.0398.* Find a pmf for which the identity fails. *(Total variation, membership)*
+> **Exercise 1.** **Shifting a unimodal pmf.** Prove that $\mathrm{TV}(\mathrm{Law}(X), \mathrm{Law}(X + 1)) = \max_k\Pr[X = k]$ for any integer-valued $X$ whose pmf rises to a mode and then falls, and deduce @eq-prop-membership. *Check: for $X \sim \mathrm{Bin}(99, \frac12)$ both sides are 0.0796, and the membership advantage at $n = 100$ is half of that, 0.0398.* Find a pmf for which the identity fails. *(Total variation, membership)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 Write $p_k = \Pr[X = k]$, and let $k^*$ be a mode: $p_k$ is non-decreasing for $k \le k^*$ and non-increasing for $k \ge k^*$.
 
 1. **TV as a sum of differences.** $X + 1$ takes the value $k$ with probability $p_{k-1}$. So
-$$\mathrm{TV}(\mathcal L(X), \mathcal L(X + 1)) = \frac12\sum_k|p_k - p_{k-1}|,$$
+$$\mathrm{TV}(\mathrm{Law}(X), \mathrm{Law}(X + 1)) = \frac12\sum_k|p_k - p_{k-1}|,$$
 with $p_k = 0$ outside the support.
 2. **The climb telescopes.** For $k \le k^*$ the differences are non-negative, so $\sum_{k \le k^*}|p_k - p_{k-1}| = \sum_{k \le k^*}(p_k - p_{k-1}) = p_{k^*}$. All terms cancel except the last, and the pmf starts from 0.
 3. **The descent telescopes.** For $k > k^*$ the differences are non-positive, so $\sum_{k > k^*}|p_k - p_{k-1}| = \sum_{k > k^*}(p_{k-1} - p_k) = p_{k^*}$, since the pmf ends at 0.
 4. **Add and halve.** The total is $2p_{k^*}$, and half of it is $p_{k^*} = \max_kp_k$.
-5. **Membership.** Step 3 of the chapter's membership derivation reduced the membership advantage to $(1 - t)\,\mathrm{TV}(\mathcal L(X + 1), \mathcal L(X))$ with $X \sim \mathrm{Bin}(n - 1, t)$. A binomial pmf is unimodal: the ratio $p_{k+1}/p_k = \frac{(n - 1 - k)t}{(k + 1)(1 - t)}$ decreases in $k$, so it crosses 1 at most once. Steps 1–4 give $(1 - t)\max_kp_k$, which is @eq-prop-membership.
+5. **Membership.** Step 3 of the chapter's membership derivation reduced the membership advantage to $(1 - t)\,\mathrm{TV}(\mathrm{Law}(X + 1), \mathrm{Law}(X))$ with $X \sim \mathrm{Bin}(n - 1, t)$. A binomial pmf is unimodal: the ratio $p_{k+1}/p_k = \frac{(n - 1 - k)t}{(k + 1)(1 - t)}$ decreases in $k$, so it crosses 1 at most once. Steps 1–4 give $(1 - t)\max_kp_k$, which is @eq-prop-membership.
 6. **Check.** For $X \sim \mathrm{Bin}(99, \frac12)$ the script finds $\mathrm{TV}(X, X + 1) = 0.0796 = \max_kp_k$. With $1 - t = \frac12$, the membership advantage at $n = 100$ is $0.0398$, which matches the game computed directly.
 
 **A pmf where it fails.** Let $X$ be uniform on $\{0, 2\}$. Then $X + 1$ is uniform on $\{1, 3\}$, the two supports are disjoint, and the TV is 1. The largest probability is $\frac12$. The pmf goes up, down, up and down again, so the climbs and descents in steps 2 and 3 add up to $4 \times \frac12 = 2$, not $2\max_kp_k = 1$.
@@ -61,8 +61,8 @@ $$k = n\,\kappa^2\,\bar t(1 - \bar t).$$
 > **Exercise 4.** **Symmetries of a tanh network.** Show that $h!\,2^h$ parameter vectors represent the same generic network, and evaluate it for $h = 8$ and $h = 100$. Verify that $\sum_ju_ju_j^\top$ is invariant and that $\sum_ju_j$ is not invariant under sign flips. *Check: $h = 8$ gives 10,321,920.* *(Symmetry)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Every $g = S\Pi$ preserves the function.** This is @eq-prop-symmetry: $\tanh(gz) = g\tanh(z)$, and $g^\top g = I$.
-2. **Count the $g$.** There are $h!$ permutations $\Pi$ and $2^h$ sign patterns $S$. Each pair gives a different matrix $g$, because $g$ sends the $j$-th basis vector to $\pm$ the $\pi(j)$-th, which determines both $\pi$ and the sign.
+1. **Every $g = F\Pi$ preserves the function.** This is @eq-prop-symmetry: $\tanh(gz) = g\tanh(z)$, and $g^\top g = I$.
+2. **Count the $g$.** There are $h!$ permutations $\Pi$ and $2^h$ sign patterns $F$. Each pair gives a different matrix $g$, because $g$ sends the $j$-th basis vector to $\pm$ the $\pi(j)$-th, which determines both $\pi$ and the sign.
 3. **Distinct $g$ give distinct parameters, for a generic network.** Suppose $g\theta = g'\theta$. Then $r = g'^{-1}g$ fixes $\theta$: it sends each unit $u_j$ to $\pm u_{\pi(j)}$ and gets $u_j$ back. If no two units are equal or opposite, this forces $\pi(j) = j$. And if no unit is 0, the sign must be $+$, since $u_j = -u_j$ would mean $u_j = 0$. So $r = I$, and $g = g'$. Generic parameters (drawn from a density) have distinct, non-opposite, non-zero units with probability 1.
 4. **Evaluate.** $h = 4$: $24 \times 16 = 384$. $h = 8$: $40{,}320 \times 256 = 10{,}321{,}920$. $h = 100$: $100! \times 2^{100} = 1.1831\times10^{188}$.
 5. **Second moments are invariant.** $\sum_j(gu)_j(gu)_j^\top$: a permutation reorders the terms of the sum, and a sign flip replaces $u_ju_j^\top$ by $(-u_j)(-u_j)^\top = u_ju_j^\top$.
@@ -74,15 +74,15 @@ $$k = n\,\kappa^2\,\bar t(1 - \bar t).$$
 
 ## Several released models {#sec-sol-property-inference-5}
 
-> **Exercise 5.** **Several released models.** The victim releases $k$ models, each trained on its own dataset of $n$ records from the same $\pi_t$. Show that the best attack sums the $k$ linear scores, and that its accuracy is $\Phi(\sqrt k\,\Delta/2)$, where $\Delta$ is the Mahalanobis distance of @eq-prop-delta for one model. Compare with one model trained on $kn$ records. *Check: for the logistic regression at $n = 200$ and gap 0.2, $\Delta = 1.827$; with $k = 4$ the predicted accuracy is 0.966.* *(Fact 3, additivity)*
+> **Exercise 5.** **Several released models.** The victim releases $k$ models, each trained on its own dataset of $n$ records from the same $\mathcal D_t$. Show that the best attack sums the $k$ linear scores, and that its accuracy is $\Phi(\sqrt k\,\gamma/2)$, where $\gamma$ is the Mahalanobis distance of @eq-prop-delta for one model. Compare with one model trained on $kn$ records. *Check: for the logistic regression at $n = 200$ and gap 0.2, $\gamma = 1.827$; with $k = 4$ the predicted accuracy is 0.966.* *(Fact 3, additivity)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The models are independent given $b$.** Each is trained on its own dataset, so under hypothesis $b$ the models $\theta_1, \dots, \theta_k$ are independent, each approximately $\mathcal N(m_b, \Sigma)$ with $m_b = \theta(t_b)$ and $\Sigma = \bar\Sigma_1/n$.
-2. **Log-likelihood ratios add.** The joint density is a product, so the joint log-likelihood ratio is $\sum_iL(\theta_i)$, with $L(\theta) = w^\top(\theta - \frac{m_0 + m_1}2)$ from Fact 3. The best attack thresholds this sum at 0: it adds the linear scores.
-3. **Its distribution.** Each $L(\theta_i)$ has mean $\pm\Delta^2/2$ and variance $\Delta^2$ (Fact 3, step 3). The sum of $k$ independent copies has mean $\pm k\Delta^2/2$ and variance $k\Delta^2$.
-4. **Accuracy.** Under hypothesis 1 the attack is right when the sum is positive, with probability $\Phi\big((k\Delta^2/2)/(\sqrt k\,\Delta)\big) = \Phi(\sqrt k\,\Delta/2)$. Hypothesis 0 is symmetric.
-5. **One model on $kn$ records.** By @eq-prop-delta, $\Delta$ grows like $\sqrt n$, so a single model trained on $kn$ records has Mahalanobis distance $\sqrt k\,\Delta$: the same accuracy.
-6. **Check.** At $n = 200$ and $t_0, t_1 = 0.4, 0.6$, @eq-prop-delta gives $\Delta = 1.827$, so one model gives $\Phi(0.913) = 0.819$. Four models give $\Delta\sqrt4 = 3.653$ and accuracy $\Phi(1.827) = 0.966$, and one model on 800 records also has $\Delta = 3.653$. Simulation, with the meta-classifier fitted on 150 shadow models per side and scores summed over groups of 4 target models: accuracy 0.817 for one model and 0.970 for four.
+2. **Log-likelihood ratios add.** The joint density is a product, so the joint log-likelihood ratio is $\sum_iL(\theta_i)$, with $L(\theta) = \omega^\top(\theta - \frac{m_0 + m_1}2)$ from Fact 3. The best attack thresholds this sum at 0: it adds the linear scores.
+3. **Its distribution.** Each $L(\theta_i)$ has mean $\pm\gamma^2/2$ and variance $\gamma^2$ (Fact 3, step 3). The sum of $k$ independent copies has mean $\pm k\gamma^2/2$ and variance $k\gamma^2$.
+4. **Accuracy.** Under hypothesis 1 the attack is right when the sum is positive, with probability $\Phi\big((k\gamma^2/2)/(\sqrt k\,\gamma)\big) = \Phi(\sqrt k\,\gamma/2)$. Hypothesis 0 is symmetric.
+5. **One model on $kn$ records.** By @eq-prop-delta, $\gamma$ grows like $\sqrt n$, so a single model trained on $kn$ records has Mahalanobis distance $\sqrt k\,\gamma$: the same accuracy.
+6. **Check.** At $n = 200$ and $t_0, t_1 = 0.4, 0.6$, @eq-prop-delta gives $\gamma = 1.827$, so one model gives $\Phi(0.913) = 0.819$. Four models give $\gamma\sqrt4 = 3.653$ and accuracy $\Phi(1.827) = 0.966$, and one model on 800 records also has $\gamma = 3.653$. Simulation, with the meta-classifier fitted on 150 shadow models per side and scores summed over groups of 4 target models: accuracy 0.817 for one model and 0.970 for four.
 
 *Every release adds evidence. A victim who retrains and republishes a model on fresh data from the same population leaks the property as if it had trained one model on all of the data.*
 :::

@@ -1,6 +1,6 @@
 # Part 5 — Differential privacy in machine learning
 
-How to train models with differential privacy: where noise can enter training, DP-SGD and its knobs, hyperparameter tuning, DP-FTRL and matrix-factorization mechanisms, private prediction with PATE and in-context learning, public pretraining and private fine-tuning, user-level privacy, disparate impact, choosing ε, auditing a trained model, and adaptive data analysis: why reusing a holdout set overfits and how DP prevents it.
+How to train models with differential privacy: where noise can enter training, DP-SGD and its knobs, hyperparameter tuning, DP-FTRL and matrix-factorization mechanisms, private prediction with PATE and in-context learning, public pretraining and private fine-tuning, user-level privacy, disparate impact, choosing $\varepsilon$, auditing a trained model, and adaptive data analysis: why reusing a holdout set overfits and how DP prevents it.
 
 Start with the [introduction](00-introduction.md), which is part of the book. It assumes the [prerequisites](../part01-prerequisites/README.md), the [attacks](../part02-attacks/README.md) part (membership inference), the [DP foundations](../part03-dp-foundations/README.md) and [privacy accounting](../part04-privacy-accounting/README.md), especially amplification by subsampling.
 
@@ -18,8 +18,8 @@ This file is the GitHub overview. It is not part of the rendered book.
 | 43 | [Public data and private fine-tuning](06-public-data.md) | Why dimension costs; linear probing; low-rank fine-tuning; caveats of public data | [public_data.py](../../code/part05-dp-ml/public_data.py) |
 | 44 | [User-level differential privacy](07-user-level.md) | The privacy unit; group privacy; user-level DP-SGD; contribution bounding | [user_level.py](../../code/part05-dp-ml/user_level.py) |
 | 45 | [Disparate impact](08-disparate-impact.md) | Clipping bias and noise by group; measuring per-group accuracy; mitigations | [disparate_impact.py](../../code/part05-dp-ml/disparate_impact.py) |
-| 46 | [Choosing ε](09-choosing-epsilon.md) | What ε bounds for an attacker; trade-off curves; deployed values; how to justify a choice | [choosing_epsilon.py](../../code/part05-dp-ml/choosing_epsilon.py) |
-| 47 | [Auditing private training](10-auditing.md) | Lower bounds on ε from attacks; canaries; tight and one-run audits; finding bugs | [auditing.py](../../code/part05-dp-ml/auditing.py) |
+| 46 | [Choosing ε](09-choosing-epsilon.md) | What $\varepsilon$ bounds for an attacker; trade-off curves; deployed values; how to justify a choice | [choosing_epsilon.py](../../code/part05-dp-ml/choosing_epsilon.py) |
+| 47 | [Auditing private training](10-auditing.md) | Lower bounds on $\varepsilon$ from attacks; canaries; tight and one-run audits; finding bugs | [auditing.py](../../code/part05-dp-ml/auditing.py) |
 | 48 | [Adaptive data analysis](11-adaptive-data-analysis.md) | Holdout reuse and leaderboard attacks; sample splitting; DP implies generalization; the √k rate; Thresholdout | [adaptive_data_analysis.py](../../code/part05-dp-ml/adaptive_data_analysis.py) |
 
 Each script prints the numbers its chapter quotes, except values the text attributes to a paper, and regenerates the chapter's figures in `_build/figures/part05-dp-ml/` (the build copies them into each book):
@@ -66,7 +66,7 @@ Each chapter ends with its own references, with what each is good for.
 
 ## Exercise
 
-Implement DP-SGD from scratch in PyTorch (per-sample clipping via `torch.func.vmap`), match Opacus on CIFAR-10 at ε = 8, then audit both models with your LiRA pipeline from Part 2 using inserted canaries.
+Implement DP-SGD from scratch in PyTorch (per-example clipping via `torch.func.vmap`), match Opacus on CIFAR-10 at $\varepsilon = 8$, then audit both models with your LiRA pipeline from Part 2 using inserted canaries.
 
 DP-SGD is implemented from scratch in NumPy, with ghost clipping, in [DP-SGD](02-dp-sgd.md), on a small network whose experiments run in seconds. The audits with inserted canaries are in [Auditing private training](10-auditing.md). The CIFAR-10 run, the comparison with Opacus and the PyTorch implementation are left to you, since PyTorch and Opacus are not dependencies of this repository.
 
@@ -75,7 +75,7 @@ DP-SGD is implemented from scratch in NumPy, with ghost clipping, in [DP-SGD](02
 You are done with this part when you can do each of these on paper, without notes:
 
 - [ ] Derive the sensitivity of the regularized ERM minimizer, and calibrate output perturbation to it.
-- [ ] Prove that objective perturbation is ε-DP by a change of variables, and say where its budget goes.
+- [ ] Prove that objective perturbation is $\varepsilon$-DP by a change of variables, and say where its budget goes.
 - [ ] Show that noisy gradient descent is private for any loss with bounded gradients, and why convexity is needed only for accuracy.
 - [ ] Write DP-SGD step by step, and name every condition of its privacy proof that an implementation can break.
 - [ ] Explain why only $\eta C$ matters when every gradient is clipped, and what clipping does to the expected update.
@@ -88,7 +88,7 @@ You are done with this part when you can do each of these on paper, without note
 - [ ] Convert an example-level guarantee into a user-level one, and describe user-level DP-SGD.
 - [ ] Explain the two reasons DP-SGD hurts small groups more.
 - [ ] Turn an $(\varepsilon, \delta)$ guarantee into a bound on a membership attacker's TPR at a given FPR.
-- [ ] Turn an audit's observed TPR and FPR into a lower bound on ε with a confidence level.
+- [ ] Turn an audit's observed TPR and FPR into a lower bound on $\varepsilon$ with a confidence level.
 - [ ] Show with one adaptive query why exact holdout answers overfit, and say what sample splitting costs.
-- [ ] Prove that a query chosen by an (ε, δ)-DP algorithm has expected empirical and population values within e^ε − 1 + δ, using the replace-one swap.
+- [ ] Prove that a query chosen by an $(\varepsilon, \delta)$-DP algorithm has expected empirical and population values within $e^\varepsilon - 1 + \delta$, using the replace-one swap.
 - [ ] Explain why Gaussian noise lets a holdout set answer about n² adaptive queries, and why Thresholdout pays only for overfitting detections.

@@ -540,7 +540,7 @@ def plot_ratio_band(eps: float = 1.0) -> Figure:
     gau_p = np.exp(-(y**2) / (2 * sigma**2)) / (sigma * math.sqrt(2 * math.pi))
     gau_q = np.exp(-((y - 1) ** 2) / (2 * sigma**2)) / (sigma * math.sqrt(2 * math.pi))
     panels = (
-        (axes[0], lap_p, lap_q, rf"count + Laplace noise, $b = 1/\varepsilon$, $\varepsilon = {eps:g}$"),
+        (axes[0], lap_p, lap_q, rf"count + Laplace noise, scale $1/\varepsilon$, $\varepsilon = {eps:g}$"),
         (axes[1], gau_p, gau_q, rf"count + Gaussian noise, $\sigma = {sigma:g}$"),
     )
     for ax, p, q, title in panels:
@@ -612,7 +612,7 @@ def plot_delta_curves(mu: float = 0.5) -> Figure:
     eps = np.linspace(0.0, 3.0, 301)
     fig, ax = plt.subplots(figsize=(7.5, 4.5))
     ax.plot(eps, [rr_delta(float(e), LN3) for e in eps], label=r"randomized response, $\varepsilon_0 = \ln 3$")
-    ax.plot(eps, [laplace_delta(float(e), 1.0) for e in eps], label="count + Laplace noise, $b = 1$")
+    ax.plot(eps, [laplace_delta(float(e), 1.0) for e in eps], label="count + Laplace noise, scale 1")
     ax.plot(eps, [gaussian_delta(float(e), mu) for e in eps], label=rf"count + Gaussian noise, $\sigma = {1 / mu:g}$")
     ax.plot(
         eps,

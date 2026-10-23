@@ -20,7 +20,7 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 
 ## The exact count in an unknown crowd {#sec-sol-threat-2}
 
-> **Exercise 2.** **The exact count in an unknown crowd.** Show that $\mathrm{TV}\big(\mathrm{Binomial}(m, \frac12), 1 + \mathrm{Binomial}(m, \frac12)\big) = \binom{m}{\lfloor m/2\rfloor}2^{-m}$, and use Stirling's formula to show it is about $\sqrt{2/(\pi m)}$. *Hint: write the sum $\sum_k(q_k - p_k)_+$ with $q_k = p_{k-1}$, and notice it telescopes.* *Check: 0.0796 for $m = 100$, against $\sqrt{2/(100\pi)} = 0.0798$.* *(TV, average case)*
+> **Exercise 2.** **The exact count in an unknown crowd.** Show that $\mathrm{TV}\big(\mathrm{Bin}(m, \frac12), 1 + \mathrm{Bin}(m, \frac12)\big) = \binom{m}{\lfloor m/2\rfloor}2^{-m}$, and use Stirling's formula to show it is about $\sqrt{2/(\pi m)}$. *Hint: write the sum $\sum_k(q_k - p_k)_+$ with $q_k = p_{k-1}$, and notice it telescopes.* *Check: 0.0796 for $m = 100$, against $\sqrt{2/(100\pi)} = 0.0798$.* *(TV, average case)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The two distributions.** Let $p_k = \binom mk2^{-m}$ for $0 \le k \le m$ and $p_k = 0$ otherwise. Without the target the count is $k$ with probability $p_k$; with it, with probability $q_k = p_{k-1}$.
@@ -38,7 +38,7 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 > **Exercise 3.** **How large a crowd?** With $\sigma = 1$ and $m$ unknown other bits, how large must $m$ be for the average-case membership advantage on the noisy count to drop to 0.05? Use the normal approximation, then check with the exact formula. *Check: about $m = 250$.* *(Mixing, normal approximation)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Normal approximation.** The unknown count $K \sim \mathrm{Binomial}(m, \frac12)$ has variance $m/4$. Treating it as normal, the release is $\mathcal N(\frac m2, s^2)$ against $\mathcal N(\frac m2 + 1, s^2)$ with $s^2 = m/4 + \sigma^2$, and the TV is $2\Phi(1/(2s)) - 1$.
+1. **Normal approximation.** The unknown count $K \sim \mathrm{Bin}(m, \frac12)$ has variance $m/4$. Treating it as normal, the release is $\mathcal N(\frac m2, s^2)$ against $\mathcal N(\frac m2 + 1, s^2)$ with $s^2 = m/4 + \sigma^2$, and the TV is $2\Phi(1/(2s)) - 1$.
 2. **Solve for $s$.** $2\Phi(1/(2s)) - 1 = 0.05$ means $\Phi(1/(2s)) = 0.525$, so $1/(2s) = \Phi^{-1}(0.525) = 0.06271$ and $s = 7.974$, $s^2 = 63.58$.
 3. **Solve for $m$.** $m = 4(s^2 - \sigma^2) = 4(63.58 - 1) = 250.3$.
 4. **Exact check.** Computing the exact average-case TV of the chapter for each $m$, the smallest $m$ with TV at most 0.05 is $m = 250$, where TV is 0.0500. The normal approximation also gives 0.0500 there.
@@ -48,7 +48,7 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 
 ## Reconstruction from one count {#sec-sol-threat-4}
 
-> **Exercise 4.** **Reconstruction from one count.** Prove that the best reconstruction of $m$ uniform bits from their exact sum recovers an expected fraction $\mathbb E[\max(K, m - K)]/m$ with $K \sim \mathrm{Binomial}(m, \frac12)$. Compute it by hand for $m = 1, 2, 3$. *Check: 1, 0.75, 0.75; and 0.6230 for $m = 10$.* *(Reconstruction game, posterior)*
+> **Exercise 4.** **Reconstruction from one count.** Prove that the best reconstruction of $m$ uniform bits from their exact sum recovers an expected fraction $\mathbb E[\max(K, m - K)]/m$ with $K \sim \mathrm{Bin}(m, \frac12)$. Compute it by hand for $m = 1, 2, 3$. *Check: 1, 0.75, 0.75; and 0.6230 for $m = 10$.* *(Reconstruction game, posterior)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Score by bits.** A reconstruction is a guess $x'_1, \dots, x'_m$ that may depend on $K$. Its expected gain is $\frac1m\sum_i\Pr[x'_i = x_i]$, so each bit can be optimized separately.
@@ -88,9 +88,9 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 > **Exercise 6.** **The inner-product attack.** For the centroid detector, the attack "say member when $\langle z, \theta\rangle$ is large" uses only the inner product. Compute the mean and variance of $\langle z, \theta\rangle$ in both worlds, approximate both by normals, and show that the best advantage is about $2\Phi\big(\frac12\sqrt{d/n}\big) - 1$. *Check: 0.2763 for $n = 100$, $d = 50$; the simulated attack gets 0.2771, and the likelihood-ratio attack of @tbl-threat-access 0.2789.* *(Gaussian approximation, access levels)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Member world.** $\theta = (z + S)/n$ with $S \sim \mathcal N(0, (n - 1)I_d)$ independent of $z \sim \mathcal N(0, I_d)$, so $\langle z, \theta\rangle = \|z\|^2/n + \langle z, S\rangle/n$.
-    - Mean: $\mathbb E\|z\|^2 = d$ and $\mathbb E\langle z, S\rangle = 0$, so the mean is $d/n$.
-    - Variance: $\operatorname{Var}\|z\|^2 = 2d$ (a chi-square with $d$ degrees of freedom). Given $z$, $\langle z, S\rangle \sim \mathcal N(0, (n-1)\|z\|^2)$, so its variance is $(n - 1)d$, and it is uncorrelated with $\|z\|^2$ because its conditional mean is 0. Total: $(2d + (n-1)d)/n^2$.
+1. **Member world.** $\theta = (z + W)/n$ with $W \sim \mathcal N(0, (n - 1)I_d)$ independent of $z \sim \mathcal N(0, I_d)$, so $\langle z, \theta\rangle = \|z\|^2/n + \langle z, W\rangle/n$.
+    - Mean: $\mathbb E\|z\|^2 = d$ and $\mathbb E\langle z, W\rangle = 0$, so the mean is $d/n$.
+    - Variance: $\operatorname{Var}\|z\|^2 = 2d$ (a chi-square with $d$ degrees of freedom). Given $z$, $\langle z, W\rangle \sim \mathcal N(0, (n-1)\|z\|^2)$, so its variance is $(n - 1)d$, and it is uncorrelated with $\|z\|^2$ because its conditional mean is 0. Total: $(2d + (n-1)d)/n^2$.
 2. **Non-member world.** $\theta \sim \mathcal N(0, I_d/n)$ independent of $z$. Given $z$, $\langle z, \theta\rangle \sim \mathcal N(0, \|z\|^2/n)$: mean 0, variance $d/n$.
 3. **Numbers.** For $n = 100$, $d = 50$: mean 0.5 against 0; standard deviations 0.7106 and 0.7071.
 4. **Normal approximation.** Both standard deviations are about $\sqrt{d/n}$ (the member variance is $(n+1)d/n^2 \approx d/n$). Two normals with equal spread $\sqrt{d/n}$ and means $d/n$ apart are a Gaussian pair with standardized shift $\mu = (d/n)/\sqrt{d/n} = \sqrt{d/n}$, whose TV is $2\Phi(\mu/2) - 1$ ([Divergences](../../book-full/part01-prerequisites/03-divergences.md)). The best threshold attack on the score reaches it.
@@ -101,11 +101,11 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 
 ## Mixing hides {#sec-sol-threat-7}
 
-> **Exercise 7.** **Mixing hides.** One other record with a uniform bit $\vartheta$; the mechanism releases the exact count $\vartheta + b$. Compute the best advantage of an adversary who knows $\vartheta$ and of one who does not, and check them against @eq-threat-mixing. *Check: 1 and 0.5.* *(Fact 3)*
+> **Exercise 7.** **Mixing hides.** One other record with a uniform bit $\omega$; the mechanism releases the exact count $\omega + b$. Compute the best advantage of an adversary who knows $\omega$ and of one who does not, and check them against @eq-threat-mixing. *Check: 1 and 0.5.* *(Fact 3)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Knowing $\vartheta$.** For each $\vartheta$, the release is $\vartheta$ when $b = 0$ and $\vartheta + 1$ when $b = 1$: two point masses at different places. $\mathrm{TV}(P_\vartheta, Q_\vartheta) = 1$, and the attack "say member when the count exceeds $\vartheta$" is always right.
-2. **Not knowing $\vartheta$.** With $b = 0$ the count is 0 or 1 with probability $\frac12$ each; with $b = 1$ it is 1 or 2.
+1. **Knowing $\omega$.** For each $\omega$, the release is $\omega$ when $b = 0$ and $\omega + 1$ when $b = 1$: two point masses at different places. $\mathrm{TV}(P_\omega, Q_\omega) = 1$, and the attack "say member when the count exceeds $\omega$" is always right.
+2. **Not knowing $\omega$.** With $b = 0$ the count is 0 or 1 with probability $\frac12$ each; with $b = 1$ it is 1 or 2.
 
 | Count | $\bar p$ ($b = 0$) | $\bar q$ ($b = 1$) | $\lvert\bar p - \bar q\rvert$ |
 | --- | --- | --- | --- |
@@ -116,7 +116,7 @@ The solutions use the chapter's notation. $b = 1$ is the world where the target 
 : The exact count with one unknown other bit. {#tbl-sol-threat-mixing}
 
 3. **TV of the mixtures.** $\frac12(\frac12 + 0 + \frac12) = \frac12$. The best attack says "member" when the count is 2: $\mathrm{TPR} = \frac12$, $\mathrm{FPR} = 0$.
-4. **Against @eq-threat-mixing.** $\mathrm{TV}(\bar P, \bar Q) = 0.5 \le \mathbb E_\vartheta\mathrm{TV}(P_\vartheta, Q_\vartheta) = 1 \le \max_\vartheta\mathrm{TV} = 1$. The script prints 0.5000 and 1.0000.
+4. **Against @eq-threat-mixing.** $\mathrm{TV}(\bar P, \bar Q) = 0.5 \le \mathbb E_\omega\mathrm{TV}(P_\omega, Q_\omega) = 1 \le \max_\omega\mathrm{TV} = 1$. The script prints 0.5000 and 1.0000.
 
 *Half the time the count is 1, which both worlds produce equally often, and the target is hidden. The other half the count gives the answer away, even to the adversary who knows nothing about the other record.*
 :::

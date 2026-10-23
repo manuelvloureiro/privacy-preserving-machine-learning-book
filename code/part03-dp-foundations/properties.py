@@ -447,9 +447,9 @@ def plot_postprocessing() -> Figure:
     ]
     right.plot(fs, eps_after, "C2", linewidth=2)
     right.axhline(EPS_RR, color="k", linestyle="--", linewidth=1, label=r"before processing: $\ln 3$")
-    right.plot([0.25], [math.log(5 / 3)], "o", color="C2", label=r"$f = 1/4$: $\ln(5/3)$")
+    right.plot([0.25], [math.log(5 / 3)], "o", color="C2", label=r"$r = 1/4$: $\ln(5/3)$")
     right.set(
-        xlabel="probability f of flipping the report",
+        xlabel="probability r of flipping the report",
         ylabel=r"$\varepsilon$ after processing",
         xlim=(0, 0.5),
         ylim=(0, 1.2),

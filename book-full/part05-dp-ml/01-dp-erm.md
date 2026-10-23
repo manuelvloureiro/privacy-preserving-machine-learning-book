@@ -2,7 +2,7 @@
 
 ## Why this matters
 
-Most of machine learning is **empirical risk minimization (ERM)**: choose the parameters $w$ that minimize the average loss on the training data, usually plus a penalty on the size of $w$. The trained weights are a function of every training record, and [Membership inference](../part02-attacks/02-membership-inference.md) showed that they give some of those records away. Differential privacy (DP) promises the opposite: the distribution of whatever you release changes by at most a factor $e^\varepsilon$, plus a slack $\delta$, when one record is replaced. To keep that promise for a trained model, randomness has to enter somewhere between the data and the released weights. This chapter asks where.
+Most of machine learning is **empirical risk minimization (ERM)**: choose the parameters $\theta$ that minimize the average loss on the training data, usually plus a penalty on the size of $\theta$. The trained weights are a function of every training record, and [Membership inference](../part02-attacks/02-membership-inference.md) showed that they give some of those records away. Differential privacy (DP) promises the opposite: the distribution of whatever you release changes by at most a factor $e^\varepsilon$, plus a slack $\delta$, when one record is replaced. To keep that promise for a trained model, randomness has to enter somewhere between the data and the released weights. This chapter asks where.
 
 Two familiar examples show how directly an exact minimizer can expose a record. The median of an odd number of values minimizes the average absolute loss, and it *is* one of the values, the middle one, released exactly. A hard-margin support vector machine (SVM) maximizes the margin between the classes, and its weight vector is a weighted sum of a few training records, the support vectors that sit closest to the boundary. Add one record just inside the margin and it becomes a support vector, so the hyperplane swings toward it, by an amount that does not shrink as the dataset grows. Neither model leaks by accident: an exact minimizer is a function of the records, and nothing stops a single record from moving it.
 
@@ -12,7 +12,7 @@ There are three natural places, and each gives a classic algorithm. **Output per
 
 Every DP mechanism in this book works the same way. Find a quantity whose change, when one record is replaced, is bounded by a known number, its **sensitivity**. Then add noise large enough to hide a change of that size. The three methods differ only in *which* quantity they bound.
 
-Output perturbation bounds the minimizer itself. Strong convexity, the curvature a ridge penalty $\frac\lambda2\|w\|^2$ adds, guarantees that replacing one of $n$ records moves the minimizer by at most $2L/(\lambda n)$, where $L$ bounds the length of each record's loss gradient ([Optimization](../part01-prerequisites/06-optimization.md)). Objective perturbation bounds the *gradient* of the objective at every point, which also moves by at most $2L/n$, and turns that into a bound on the output's density through a change of variables. Gradient perturbation bounds the gradient at the points the algorithm actually visits, one step at a time, and composes the steps.
+Output perturbation bounds the minimizer itself. Strong convexity, the curvature a ridge penalty $\frac\lambda2\|\theta\|^2$ adds, guarantees that replacing one of $n$ records moves the minimizer by at most $2L/(\lambda n)$, where $L$ bounds the length of each record's loss gradient ([Optimization](../part01-prerequisites/06-optimization.md)). Objective perturbation bounds the *gradient* of the objective at every point, which also moves by at most $2L/n$, and turns that into a bound on the output's density through a change of variables. Gradient perturbation bounds the gradient at the points the algorithm actually visits, one step at a time, and composes the steps.
 
 The order matters because each step back toward the data needs fewer assumptions. Output perturbation needs an exact, unique minimizer of a strongly convex objective. Objective perturbation needs that and a loss with bounded curvature. Gradient perturbation, for its privacy, needs only that each record's gradient is bounded: no convexity, no exact solution. That is why it is the one that survives in deep learning.
 
@@ -30,11 +30,11 @@ The order matters because each step back toward the data needs fewer assumptions
 
 : The results of this chapter and where each is used. {#tbl-dperm-overview}
 
-**Notation.** A training set $D = (z_1, \dots, z_n)$ holds $n$ records $z_i = (x_i, y_i)$ with features $x_i \in \mathbb R^d$ and labels $y_i \in \{-1, +1\}$. The loss of weights $w$ on a record is $\ell(w, z)$, and the regularized objective is
-$$J(w; D) = \frac1n\sum_{i=1}^n\ell(w, z_i) + \frac\lambda2\|w\|^2,$$
-with minimizer $w^*(D)$. Neighbouring datasets $D \simeq D'$ differ by **replacing** one record, $z$ in $D$ by $z'$ in $D'$, so both have size $n$; the next chapter switches to adding or removing one, and says why. $L$ bounds the length of every gradient $\nabla_w\ell(w, z)$, $\|\cdot\|$ is the Euclidean norm, and a released, private version of the weights is written $\tilde w$. The **excess risk** of a release is $J(\tilde w; D) - J(w^*; D)$, how much worse it fits the training objective than the exact minimizer.
+**Notation.** A training set $D = (z_1, \dots, z_n)$ holds $n$ records $z_i = (x_i, y_i)$ with features $x_i \in \mathbb R^d$ and labels $y_i \in \{-1, +1\}$. The loss of parameters $\theta$ on a record is $\ell(\theta; z)$, and the objective is the empirical risk, which in this chapter includes the ridge penalty,
+$$\mathcal L(\theta; D) = \frac1n\sum_{i=1}^n\ell(\theta; z_i) + \frac\lambda2\|\theta\|^2,$$
+with minimizer $\theta^*(D)$. Neighbouring datasets $D \simeq D'$ differ by **replacing** one record, $z$ in $D$ by $z'$ in $D'$, so both have size $n$; the next chapter switches to adding or removing one, and says why. $L$ bounds the length of every gradient $\nabla_\theta\ell(\theta; z)$, $\|\cdot\|$ is the Euclidean norm, and a released, private version of the parameters is written $\tilde\theta$. The **excess risk** of a release is $\mathcal L(\tilde\theta; D) - \mathcal L(\theta^*; D)$, how much worse it fits the training objective than the exact minimizer.
 
-**The running example.** Regularized logistic regression, with loss $\ell(w, (x, y)) = \ln(1 + e^{-y\langle w, x\rangle})$, in $d = 10$ dimensions with ridge $\lambda = 0.01$. The features are uniform on the unit sphere, $\|x\| = 1$, and the labels come from a logistic model whose true weights have length 5. The derivative of $\ln(1 + e^{-m})$ in the margin $m = y\langle w, x\rangle$ lies in $(-1, 0)$, so each gradient has length at most $\|x\| = 1$ and $L = 1$. Every method targets $\varepsilon = 1$, with $\delta = 10^{-5}$ for those that need a $\delta$, on $n$ from 1,000 to 100,000 records.
+**The running example.** Regularized logistic regression, with loss $\ell(\theta; (x, y)) = \ln(1 + e^{-y\langle \theta, x\rangle})$, in $d = 10$ dimensions with ridge $\lambda = 0.01$. The features are uniform on the unit sphere, $\|x\| = 1$, and the labels come from a logistic model whose true weights have length 5. The derivative of $\ln(1 + e^{-m})$ in the margin $m = y\langle \theta, x\rangle$ lies in $(-1, 0)$, so each gradient has length at most $\|x\| = 1$ and $L = 1$. Every method targets $\varepsilon = 1$, with $\delta = 10^{-5}$ for those that need a $\delta$, on $n$ from 1,000 to 100,000 records.
 
 **How to read this chapter.** Read the toolkit, then @sec-dperm-output, which sets the pattern. @sec-dperm-objective has the chapter's one long derivation; its one-dimensional example shows each step on numbers. @sec-dperm-gradient is the one to know well, because the next chapter builds on it. @sec-dperm-convex drops the ridge and derives the rate for convex Lipschitz losses. @sec-dperm-compare and @sec-dperm-nonconvex say which method to use when.
 
@@ -42,29 +42,29 @@ with minimizer $w^*(D)$. Neighbouring datasets $D \simeq D'$ differ by **replaci
 
 ### Fact 1 — The Gaussian mechanism, calibrated exactly
 
-To release a vector-valued function $f(D)$ whose value moves by at most $\Delta$ in Euclidean length between neighbours (its **$\ell_2$ sensitivity**), add independent normal noise $\mathcal N(0, \sigma^2)$ to each coordinate. What matters for privacy is only the ratio $\mu = \Delta/\sigma$, the shift measured in noise standard deviations: rotate so the shift lies along one axis, and the other coordinates have the same distribution under both datasets. The mechanism is then $(\varepsilon, \delta)$-DP exactly when
+To release a vector-valued function $f(D)$ whose value moves by at most $\Delta_2 f$ in Euclidean length between neighbours (its **$\ell_2$ sensitivity**), add independent normal noise $\mathcal N(0, \sigma^2)$ to each coordinate. What matters for privacy is only the ratio $\mu = \Delta_2 f/\sigma$, the shift measured in noise standard deviations: rotate so the shift lies along one axis, and the other coordinates have the same distribution under both datasets. The mechanism is then $(\varepsilon, \delta)$-DP exactly when
 $$\delta \ge \Phi\Big(\frac\mu2 - \frac\varepsilon\mu\Big) - e^\varepsilon\,\Phi\Big(-\frac\mu2 - \frac\varepsilon\mu\Big),$$ {#eq-dperm-gauss-delta}
-where $\Phi$ is the standard normal distribution function ([The Laplace and Gaussian mechanisms](../part03-dp-foundations/03-laplace-gaussian.md), Balle & Wang 2018). The right side increases with $\mu$, so for each $(\varepsilon, \delta)$ there is a largest admissible ratio $\mu(\varepsilon, \delta)$, and the smallest noise is $\sigma = \Delta/\mu(\varepsilon, \delta)$. For $\varepsilon = 1$ and $\delta = 10^{-5}$, $\mu = 0.2681$, so $\sigma = 3.7306\,\Delta$. The classic formula $\sigma = \Delta\sqrt{2\ln(1.25/\delta)}/\varepsilon$ gives $4.8448\,\Delta$, 30% more noise for the same guarantee; this chapter always uses the exact calibration.
+where $\Phi$ is the standard normal distribution function ([The Laplace and Gaussian mechanisms](../part03-dp-foundations/03-laplace-gaussian.md), Balle & Wang 2018). The right side increases with $\mu$, so for each $(\varepsilon, \delta)$ there is a largest admissible ratio $\mu(\varepsilon, \delta)$, and the smallest noise is $\sigma = \Delta_2 f/\mu(\varepsilon, \delta)$. For $\varepsilon = 1$ and $\delta = 10^{-5}$, $\mu = 0.2681$, so $\sigma = 3.7306\,\Delta_2 f$. The classic formula $\sigma = \Delta_2 f\sqrt{2\ln(1.25/\delta)}/\varepsilon$ gives $4.8448\,\Delta_2 f$, 30% more noise for the same guarantee; this chapter always uses the exact calibration.
 
 ### Fact 2 — The regularized minimizer moves by at most $2L/(\lambda n)$
 
 The ridge is the same device that stops a model from overfitting, and for the same reason. Fit a polynomial of high degree to a handful of points without a penalty and it passes through every point, so it swings wildly between them, and it swings again if you delete one point. A penalty on the size of the weights makes the fit prefer smooth curves, which change little when one point goes. Generalization and privacy both ask for that stability, and the ridge supplies a guaranteed amount of it.
 
-[Optimization](../part01-prerequisites/06-optimization.md) proves the bound, and the argument is short enough to restate. Replacing $z$ by $z'$ changes $J$ by $h(v) = \frac1n(\ell(v, z') - \ell(v, z))$, whose gradient has length at most $2L/n$: one gradient leaves, another arrives. At the new minimizer $w' = w^*(D')$, the old objective's gradient is therefore $\nabla J(w'; D) = -\nabla h(w')$, of length at most $2L/n$. The ridge makes $J(\cdot; D)$ **$\lambda$-strongly convex**: its gradient grows by at least $\lambda$ per unit of distance in every direction, so a point where the gradient has length $g$ is within $g/\lambda$ of the minimizer. Hence
-$$\|w^*(D) - w^*(D')\| \le \frac{2L}{\lambda n}.$$ {#eq-dperm-sens}
-The same argument gives a bound for any point, not only the exact minimizer: if $\|\nabla J(w; D)\| \le g$, then $\|w - w^*(D)\| \le g/\lambda$.
+[Optimization](../part01-prerequisites/06-optimization.md) proves the bound, and the argument is short enough to restate. Replacing $z$ by $z'$ changes $\mathcal L$ by $h(v) = \frac1n(\ell(v; z') - \ell(v; z))$, whose gradient has length at most $2L/n$: one gradient leaves, another arrives. At the new minimizer $\theta' = \theta^*(D')$, the old objective's gradient is therefore $\nabla \mathcal L(\theta'; D) = -\nabla h(\theta')$, of length at most $2L/n$. The ridge makes $\mathcal L(\cdot; D)$ **$\lambda$-strongly convex**: its gradient grows by at least $\lambda$ per unit of distance in every direction, so a point where the gradient has length $g$ is within $g/\lambda$ of the minimizer. Hence
+$$\|\theta^*(D) - \theta^*(D')\| \le \frac{2L}{\lambda n}.$$ {#eq-dperm-sens}
+The same argument gives a bound for any point, not only the exact minimizer: if $\|\nabla \mathcal L(\theta; D)\| \le g$, then $\|\theta - \theta^*(D)\| \le g/\lambda$.
 
 ### Fact 3 — Noise with density proportional to $e^{-\|b\|/s}$
 
-Pure $\varepsilon$-DP, with $\delta = 0$, needs noise whose density falls off no faster than exponentially in every direction. The standard choice in $d$ dimensions has density $\nu(b) \propto e^{-\|b\|/s}$: it depends on $b$ only through its length. If $f$ has $\ell_2$ sensitivity $\Delta$ and $s = \Delta/\varepsilon$, then $f(D) + b$ is $\varepsilon$-DP. At any output $y$, the ratio of the two output densities is $e^{(\|y - f(D')\| - \|y - f(D)\|)/s}$. By the triangle inequality the exponent is at most $\|f(D) - f(D')\|/s \le \Delta/s = \varepsilon$.
+Pure $\varepsilon$-DP, with $\delta = 0$, needs noise whose density falls off no faster than exponentially in every direction. The standard choice in $d$ dimensions has density $\nu(b) \propto e^{-\|b\|/s}$: it depends on $b$ only through its length. If $f$ has $\ell_2$ sensitivity $\Delta_2 f$ and $s = \Delta_2 f/\varepsilon$, then $f(D) + b$ is $\varepsilon$-DP. At any output $y$, the ratio of the two output densities is $e^{(\|y - f(D')\| - \|y - f(D)\|)/s}$. By the triangle inequality the exponent is at most $\|f(D) - f(D')\|/s \le \Delta_2 f/s = \varepsilon$.
 
 To sample it, split $b$ into a direction and a length. The density depends only on the length $r$, and the sphere of radius $r$ has surface area proportional to $r^{d - 1}$, so the length has density proportional to $r^{d-1}e^{-r/s}$. That is a **gamma distribution** with shape $d$ and scale $s$, and the direction is uniform on the sphere. Its moments are $\mathbb E\|b\| = ds$ and $\mathbb E\|b\|^2 = d(d + 1)s^2$. Compare the Gaussian, whose squared length has mean $d\sigma^2$: the pure-DP noise is longer by a factor that grows with $d$.
 
 ### Fact 4 — Change of variables for densities
 
-If a random vector $b$ has density $\nu$ and $w$ is obtained from $b$ by a smooth invertible map, write the inverse as $b = \phi(w)$. Then $w$ has density
-$$p(w) = \nu\big(\phi(w)\big)\,\big|\det\nabla\phi(w)\big|.$$ {#eq-dperm-cov}
-The determinant corrects for stretching: if $\phi$ squeezes a small box around $w$ into a box of half the volume around $b$, the probability of that box is the same, so the density at $w$ is half the density at $b$. In one dimension this is the familiar $p(w) = \nu(\phi(w))|\phi'(w)|$.
+If a random vector $b$ has density $\nu$ and $\theta$ is obtained from $b$ by a smooth invertible map, write the inverse as $b = \phi(\theta)$. Then $\theta$ has density
+$$p(\theta) = \nu\big(\phi(\theta)\big)\,\big|\det\nabla\phi(\theta)\big|.$$ {#eq-dperm-cov}
+The determinant corrects for stretching: if $\phi$ squeezes a small box around $\theta$ into a box of half the volume around $b$, the probability of that box is the same, so the density at $\theta$ is half the density at $b$. In one dimension this is the familiar $p(\theta) = \nu(\phi(\theta))|\phi'(\theta)|$.
 
 ### Fact 5 — Adaptive Gaussian steps compose into one Gaussian
 
@@ -76,35 +76,35 @@ This is composition of Gaussian differential privacy (GDP) from [f-DP and Gaussi
 
 Sometimes the weights must stay inside a closed convex set fixed in advance, written $\mathcal W$, such as the ball of all weights with length at most a radius $R$. After each step, the optimizer replaces its point by the closest point of the set, which is called **projecting** onto it. For the ball, that shrinks a point that left the ball back to the sphere of radius $R$.
 
-Projected stochastic gradient descent steps along a random vector $g_t$ instead of the true gradient of the objective $F$. [Optimization](../part01-prerequisites/06-optimization.md) proves that only two properties of $g_t$ matter. Given the points visited so far, it must be right on average,
-$$\mathbb E[g_t \mid w_1, \dots, w_t] = \nabla F(w_t),$$
+Projected stochastic gradient descent steps along a random vector $g_t$ instead of the true gradient of the objective $\mathcal L$. [Optimization](../part01-prerequisites/06-optimization.md) proves that only two properties of $g_t$ matter. Given the points visited so far, it must be right on average,
+$$\mathbb E[g_t \mid \theta_1, \dots, \theta_t] = \nabla\mathcal L(\theta_t),$$
 and its squared length must be bounded on average by a number written $G^2$,
 $$\mathbb E\|g_t\|^2 \le G^2.$$
-Suppose $F$ is convex, and its minimizer $w^*$ over $\mathcal W$ is within distance $R$ of the starting point. Run $T$ steps with the step size $\eta = R/(G\sqrt T)$, and average the points visited into $\bar w_T = \frac1T\sum_{t=1}^Tw_t$. Then
-$$\mathbb E\big[F(\bar w_T)\big] - F(w^*) \le \frac{RG}{\sqrt T}.$$ {#eq-dperm-sgd-convex}
-The proof follows the squared distance to $w^*$. Each step shrinks it by an amount that convexity ties to the current error, and grows it by at most $\eta^2\|g_t\|^2$. So the randomness of $g_t$ enters only through that second term, that is through $G^2$, and neither smoothness nor strong convexity is needed.
+Suppose $\mathcal L$ is convex, and its minimizer $\theta^*$ over $\mathcal W$ is within distance $R$ of the starting point. Run $T$ steps with the learning rate $\eta = R/(G\sqrt T)$ (also called the step size), and average the points visited into $\bar\theta_T = \frac1T\sum_{t=1}^T\theta_t$. Then
+$$\mathbb E\big[\mathcal L(\bar\theta_T)\big] - \mathcal L(\theta^*) \le \frac{RG}{\sqrt T}.$$ {#eq-dperm-sgd-convex}
+The proof follows the squared distance to $\theta^*$. Each step shrinks it by an amount that convexity ties to the current error, and grows it by at most $\eta^2\|g_t\|^2$. So the randomness of $g_t$ enters only through that second term, that is through $G^2$, and neither smoothness nor strong convexity is needed.
 
 ## Output perturbation {#sec-dperm-output}
 
 ### Context
 
-The simplest private trainer treats training as a black box: compute the exact minimizer $w^*(D)$, then add noise. Fact 2 says the minimizer is a function with $\ell_2$ sensitivity $2L/(\lambda n)$, so this is just the Gaussian mechanism (or Fact 3's mechanism) applied to it. Chaudhuri & Monteleoni (2008) introduced it for logistic regression. Two questions remain: how much accuracy does it cost, and what happens when, as always in practice, the minimizer is only computed approximately?
+The simplest private trainer treats training as a black box: compute the exact minimizer $\theta^*(D)$, then add noise. Fact 2 says the minimizer is a function with $\ell_2$ sensitivity $2L/(\lambda n)$, so this is just the Gaussian mechanism (or Fact 3's mechanism) applied to it. Chaudhuri & Monteleoni (2008) introduced it for logistic regression. Two questions remain: how much accuracy does it cost, and what happens when, as always in practice, the minimizer is only computed approximately?
 
 ### Statement
 
 Release
-$$\tilde w = w^*(D) + Z, \qquad Z \sim \mathcal N\big(0, \sigma^2I\big), \qquad \sigma = \frac{2L}{\lambda n\,\mu(\varepsilon, \delta)}.$$ {#eq-dperm-output}
-This is $(\varepsilon, \delta)$-DP for replace-one neighbours. Replacing $Z$ by noise with density $\propto e^{-\|b\|/s}$ and $s = 2L/(\lambda n\varepsilon)$ gives pure $\varepsilon$-DP. If the objective has Hessian $H$ at $w^*$, the excess risk is, to second order,
-$$\mathbb E\big[J(\tilde w) - J(w^*)\big] \approx \frac12\,\mathbb E\big[Z^\top HZ\big] = \frac{\mathbb E\|Z\|^2}{2d}\operatorname{tr}H,$$ {#eq-dperm-output-risk}
-for any noise whose direction is uniform, so $\frac{\sigma^2}{2}\operatorname{tr}H$ for the Gaussian. Without the second-order approximation, @sec-apx-learn-erm in the appendices brackets the excess risk exactly between $\frac\lambda2\mathbb E\|Z\|^2$ and $\frac\beta2\mathbb E\|Z\|^2$, where $\lambda$ and $\beta$ are the smallest and largest curvature of $J$. An approximate minimizer $w$ with $\|\nabla J(w; D)\| \le g$ has sensitivity at most
+$$\tilde\theta = \theta^*(D) + Z, \qquad Z \sim \mathcal N\big(0, \sigma^2I\big), \qquad \sigma = \frac{2L}{\lambda n\,\mu(\varepsilon, \delta)}.$$ {#eq-dperm-output}
+This is $(\varepsilon, \delta)$-DP for replace-one neighbours. Replacing $Z$ by noise with density $\propto e^{-\|b\|/s}$ and $s = 2L/(\lambda n\varepsilon)$ gives pure $\varepsilon$-DP. If the objective has Hessian $H$ at $\theta^*$, the excess risk is, to second order,
+$$\mathbb E\big[\mathcal L(\tilde\theta) - \mathcal L(\theta^*)\big] \approx \frac12\,\mathbb E\big[Z^\top HZ\big] = \frac{\mathbb E\|Z\|^2}{2d}\operatorname{tr}H,$$ {#eq-dperm-output-risk}
+for any noise whose direction is uniform, so $\frac{\sigma^2}{2}\operatorname{tr}H$ for the Gaussian. Without the second-order approximation, @sec-apx-learn-erm in the appendices brackets the excess risk exactly between $\frac\lambda2\mathbb E\|Z\|^2$ and $\frac\beta2\mathbb E\|Z\|^2$, where $\lambda$ and $\beta$ are the smallest and largest curvature of $\mathcal L$. An approximate minimizer $\theta$ with $\|\nabla \mathcal L(\theta; D)\| \le g$ has sensitivity at most
 $$\frac{2L}{\lambda n} + \frac{2g}{\lambda}.$$ {#eq-dperm-approx}
 
 ### Derivation
 
-1. **Privacy.** By Fact 2, $w^*$ moves by at most $\Delta = 2L/(\lambda n)$ between neighbours. Adding Gaussian noise with $\sigma = \Delta/\mu(\varepsilon, \delta)$ is $(\varepsilon, \delta)$-DP by Fact 1, and adding noise $\propto e^{-\|b\|/s}$ with $s = \Delta/\varepsilon$ is $\varepsilon$-DP by Fact 3. Nothing else about the data reaches the output.
-2. **Expand the objective around its minimizer.** The gradient vanishes at $w^*$, so a second-order Taylor expansion gives $J(w^* + Z) - J(w^*) \approx \frac12Z^\top HZ$, with $H = \nabla^2J(w^*)$. The noise is small next to the scale on which the curvature changes in the cases of interest; @sec-dperm-compare checks the approximation against simulation.
+1. **Privacy.** By Fact 2, $\theta^*$ moves by at most $\Delta_2\theta^* = 2L/(\lambda n)$ between neighbours. Adding Gaussian noise with $\sigma = \Delta_2\theta^*/\mu(\varepsilon, \delta)$ is $(\varepsilon, \delta)$-DP by Fact 1, and adding noise $\propto e^{-\|b\|/s}$ with $s = \Delta_2\theta^*/\varepsilon$ is $\varepsilon$-DP by Fact 3. Nothing else about the data reaches the output.
+2. **Expand the objective around its minimizer.** The gradient vanishes at $\theta^*$, so a second-order Taylor expansion gives $\mathcal L(\theta^* + Z) - \mathcal L(\theta^*) \approx \frac12Z^\top HZ$, with $H = \nabla^2\mathcal L(\theta^*)$. The noise is small next to the scale on which the curvature changes in the cases of interest; @sec-dperm-compare checks the approximation against simulation.
 3. **Average over the direction.** Write $Z = \|Z\|u$ with $u$ a unit vector. For a uniformly random direction, $\mathbb E[u_iu_j]$ is $1/d$ when $i = j$, because the $d$ squared coordinates of a unit vector add up to 1 and are exchangeable, and 0 otherwise, by symmetry under flipping one coordinate's sign. So $\mathbb E[u^\top Hu] = \sum_iH_{ii}/d = \operatorname{tr}H/d$, and if the length is independent of the direction, as for both noises here, $\mathbb E[Z^\top HZ] = \mathbb E\|Z\|^2\operatorname{tr}H/d$. For the Gaussian, $\mathbb E\|Z\|^2 = d\sigma^2$. This is @eq-dperm-output-risk.
-4. **Approximate minimizers.** Let $w$ and $w'$ be the outputs of the optimizer on $D$ and $D'$, with gradients of length at most $g$. By the last line of Fact 2, each is within $g/\lambda$ of its exact minimizer. The triangle inequality along the path $w \to w^*(D) \to w^*(D') \to w'$ gives $\|w - w'\| \le g/\lambda + 2L/(\lambda n) + g/\lambda$, which is @eq-dperm-approx. The stopping rule must be a gradient check, not a step count: only the gradient bound is guaranteed on every dataset.
+4. **Approximate minimizers.** Let $\theta$ and $\theta'$ be the outputs of the optimizer on $D$ and $D'$, with gradients of length at most $g$. By the last line of Fact 2, each is within $g/\lambda$ of its exact minimizer. The triangle inequality along the path $\theta \to \theta^*(D) \to \theta^*(D') \to \theta'$ gives $\|\theta - \theta'\| \le g/\lambda + 2L/(\lambda n) + g/\lambda$, which is @eq-dperm-approx. The stopping rule must be a gradient check, not a step count: only the gradient bound is guaranteed on every dataset.
 
 ### Interpretation
 
@@ -120,49 +120,49 @@ $$\frac{2L}{\lambda n} + \frac{2g}{\lambda}.$$ {#eq-dperm-approx}
 
 Take one feature, $n = 20$ records and $\lambda = 0.5$ (@fig-dperm-output-1d). Replacing the last record, which has $x = 1$, by the same feature with the opposite label moves the minimizer from 0.2128 to 0.1296, by 0.0832. The bound is $2/(0.5 \times 20) = 0.2$, and that is what the noise is calibrated to: $\sigma = 3.7306 \times 0.2 = 0.7461$. The two output densities overlap almost completely, as they must.
 
-In the running example ($d = 10$, $\lambda = 0.01$), $n = 10{,}000$ gives sensitivity $2/(0.01 \times 10{,}000) = 0.02$ and $\sigma = 0.07461$ per coordinate, next to a minimizer of length 2.886. The Hessian at $w^*$ has eigenvalues between 0.0263 and 0.0330, and trace 0.3129. @eq-dperm-output-risk predicts $\frac12 \times 0.07461^2 \times 0.3129 = 8.711 \times 10^{-4}$, and 20 simulated releases average $9.274 \times 10^{-4}$. The pure-DP version, with noise $\propto e^{-\|b\|/s}$ and $s = 0.02$, has $\mathbb E\|b\|^2 = 110 \times 0.02^2$; the prediction $6.885 \times 10^{-4}$ and the simulated $8.321 \times 10^{-4}$ differ by more, because the squared length of gamma noise varies a lot from draw to draw and 20 draws average it only roughly.
+In the running example ($d = 10$, $\lambda = 0.01$), $n = 10{,}000$ gives sensitivity $2/(0.01 \times 10{,}000) = 0.02$ and $\sigma = 0.07461$ per coordinate, next to a minimizer of length 2.886. The Hessian at $\theta^*$ has eigenvalues between 0.0263 and 0.0330, and trace 0.3129. @eq-dperm-output-risk predicts $\frac12 \times 0.07461^2 \times 0.3129 = 8.711 \times 10^{-4}$, and 20 simulated releases average $9.274 \times 10^{-4}$. The pure-DP version, with noise $\propto e^{-\|b\|/s}$ and $s = 0.02$, has $\mathbb E\|b\|^2 = 110 \times 0.02^2$; the prediction $6.885 \times 10^{-4}$ and the simulated $8.321 \times 10^{-4}$ differ by more, because the squared length of gamma noise varies a lot from draw to draw and 20 draws average it only roughly.
 
 Stopping early is costly. With a gradient tolerance of $g = 10^{-6}$ the sensitivity is 0.0202, essentially exact. With $g = 10^{-4}$ it doubles to 0.04, and with $g = 10^{-3}$ it is 0.22, eleven times the exact value. A tolerance that looks tight, $10^{-3}$, multiplies the noise by eleven and the excess risk by about 121.
 
 ### Check yourself
 
 - You halve the ridge $\lambda$. By what factor does the Gaussian noise grow, and roughly by what factor does the excess risk grow if the data's curvature dominates $H$? *(The noise doubles, since $\sigma \propto 1/\lambda$. With $H$ unchanged the excess risk, proportional to $\sigma^2\operatorname{tr}H$, grows fourfold.)*
-- Why must the stopping rule be "stop when $\|\nabla J\| \le g$" rather than "stop after 50 Newton steps"? *(The privacy proof needs the sensitivity bound on every pair of neighbouring datasets. A gradient check guarantees it everywhere; a step count only guarantees it on datasets where 50 steps happen to be enough.)*
+- Why must the stopping rule be "stop when $\|\nabla \mathcal L\| \le g$" rather than "stop after 50 Newton steps"? *(The privacy proof needs the sensitivity bound on every pair of neighbouring datasets. A gradient check guarantees it everywhere; a step count only guarantees it on datasets where 50 steps happen to be enough.)*
 
 ## Objective perturbation {#sec-dperm-objective}
 
 ### Context
 
-Output perturbation wastes the data's curvature: it pays for the worst case $\lambda$ and is judged on the actual $H$. Chaudhuri, Monteleoni & Sarwate (2011) put the noise inside the optimization instead. Add a random linear term $\frac1n\langle b, w\rangle$ to the objective and minimize exactly. A linear term is a constant force; the objective's curvature, all of it, resists that force. Where the data add curvature, the minimizer moves less. The price is a subtler privacy proof, because the output is no longer "something fixed plus noise".
+Output perturbation wastes the data's curvature: it pays for the worst case $\lambda$ and is judged on the actual $H$. Chaudhuri, Monteleoni & Sarwate (2011) put the noise inside the optimization instead. Add a random linear term $\frac1n\langle b, \theta\rangle$ to the objective and minimize exactly. A linear term is a constant force; the objective's curvature, all of it, resists that force. Where the data add curvature, the minimizer moves less. The price is a subtler privacy proof, because the output is no longer "something fixed plus noise".
 
 ### Statement
 
-Let the loss have the form $\ell(w, (x, y)) = g(y\langle w, x\rangle)$ with $g$ convex and twice differentiable, $|g'| \le 1$ and $0 \le g'' \le c$, and let $\|x\| \le 1$; so the gradients have length at most $L = 1$. Logistic regression qualifies with $c = \frac14$. Set
+Let the loss have the form $\ell(\theta; (x, y)) = g(y\langle \theta, x\rangle)$ with $g$ convex and twice differentiable, $|g'| \le 1$ and $0 \le g'' \le c$, and let $\|x\| \le 1$; so the gradients have length at most $L = 1$. Logistic regression qualifies with $c = \frac14$. Set
 $$\varepsilon' = \varepsilon - 2\ln\Big(1 + \frac{c}{n\lambda}\Big),$$ {#eq-dperm-eps-prime}
 draw $b$ with density $\nu(b) \propto e^{-\varepsilon'\|b\|/2}$ (Fact 3 with $s = 2/\varepsilon'$), and release
-$$\tilde w = \arg\min_w\Big[J(w; D) + \frac1n\langle b, w\rangle\Big].$$ {#eq-dperm-objective}
+$$\tilde\theta = \arg\min_\theta\Big[\mathcal L(\theta; D) + \frac1n\langle b, \theta\rangle\Big].$$ {#eq-dperm-objective}
 If $\varepsilon' > 0$, this is $\varepsilon$-DP for replace-one neighbours (Chaudhuri, Monteleoni & Sarwate 2011, Algorithm 2). If not, increase the ridge to $\lambda + \lambda_+$ with $\lambda_+ = \frac{c}{n(e^{\varepsilon/4} - 1)} - \lambda$, which makes the logarithm $\varepsilon/4$ and lets $\varepsilon' = \varepsilon/2$.
 
 The minimizer moves, to first order, by $-H^{-1}b/n$, so the excess risk is about
-$$\mathbb E\big[J(\tilde w) - J(w^*)\big] \approx \frac{1}{2n^2}\mathbb E\big[b^\top H^{-1}b\big] = \frac{\mathbb E\|b\|^2}{2dn^2}\operatorname{tr}H^{-1}.$$ {#eq-dperm-objective-risk}
+$$\mathbb E\big[\mathcal L(\tilde\theta) - \mathcal L(\theta^*)\big] \approx \frac{1}{2n^2}\mathbb E\big[b^\top H^{-1}b\big] = \frac{\mathbb E\|b\|^2}{2dn^2}\operatorname{tr}H^{-1}.$$ {#eq-dperm-objective-risk}
 Without the approximation, @sec-apx-learn-erm in the appendices brackets it between $\lambda\mathbb E\|b\|^2/(2\beta^2n^2)$ and $\mathbb E\|b\|^2/(2\lambda n^2)$.
 
 
 ### Derivation
 
-The plan is to write the density of $\tilde w$ explicitly with Fact 4, then bound the ratio of the two densities, for $D$ and $D'$, at every point. The ratio splits into a noise factor and a stretching factor, and each consumes part of $\varepsilon$.
+The plan is to write the density of $\tilde\theta$ explicitly with Fact 4, then bound the ratio of the two densities, for $D$ and $D'$, at every point. The ratio splits into a noise factor and a stretching factor, and each consumes part of $\varepsilon$.
 
-1. **From the output back to the noise.** The perturbed objective is $\lambda$-strongly convex, so it has exactly one minimizer, where its gradient is zero: $\nabla J(\tilde w; D) + b/n = 0$. Solving for $b$,
-$$b = \phi_D(\tilde w) = -n\nabla J(\tilde w; D) = -\sum_{i=1}^n\nabla\ell(\tilde w, z_i) - n\lambda\tilde w.$$
-Every $w$ is the output for exactly one $b$, namely $\phi_D(w)$, so the map from noise to output is invertible and $\phi_D$ is its inverse.
-2. **The density of the output.** By Fact 4, $p_D(w) = \nu(\phi_D(w))\,|\det\nabla\phi_D(w)|$, and the same for $D'$ with $\phi_{D'}$. The ratio at any $w$ is
-$$\frac{p_D(w)}{p_{D'}(w)} = \underbrace{\frac{\nu(\phi_D(w))}{\nu(\phi_{D'}(w))}}_{\text{noise}}\cdot\underbrace{\frac{|\det\nabla\phi_D(w)|}{|\det\nabla\phi_{D'}(w)|}}_{\text{Jacobian}}.$$
-3. **The noise factor is at most $e^{\varepsilon'}$.** The sums in $\phi_D$ and $\phi_{D'}$ share every term except the replaced record's, so $\phi_{D'}(w) - \phi_D(w) = \nabla\ell(w, z) - \nabla\ell(w, z')$, of length at most $2$. The noise factor is $e^{\varepsilon'(\|\phi_{D'}(w)\| - \|\phi_D(w)\|)/2}$, and by the triangle inequality the exponent is at most $\varepsilon'\cdot 2/2 = \varepsilon'$.
-4. **The Jacobian is the Hessian.** $\nabla\phi_D(w) = -n\nabla^2J(w; D) = -A$, with $A = \sum_ig''(m_i)x_ix_i^\top + n\lambda I$, where $m_i = y_i\langle w, x_i\rangle$ is the margin; the chain rule gives each loss's Hessian as $g''(m_i)$ times $y_i^2x_ix_i^\top = x_ix_i^\top$. Every term is positive semi-definite and $n\lambda I$ is added, so all eigenvalues of $A$ are at least $n\lambda$. For $D'$ the matrix is $A' = A + E$ with $E = g''(m')x'x'^\top - g''(m)xx^\top$: one rank-one term in, one out.
-5. **The Jacobian factor is at most $(1 + c/(n\lambda))^2$.** The ratio of determinants is $\det(A')/\det(A) = \det(I + A^{-1}E) = \det(I + M)$ with $M = A^{-1/2}EA^{-1/2}$, since $A^{-1}E$ and $M$ are similar matrices. $M$ is symmetric and is the difference of two rank-one positive semi-definite matrices, $g''(m')\tilde x'\tilde x'^\top - g''(m)\tilde x\tilde x^\top$ with $\tilde x = A^{-1/2}x$. A rank-one matrix $vv^\top$ has one nonzero eigenvalue, $\|v\|^2$, and here $\|\tilde x\|^2 = x^\top A^{-1}x \le \|x\|^2/(n\lambda) \le 1/(n\lambda)$. So $M$ has at most two nonzero eigenvalues, each between $-a$ and $a$ with $a = c/(n\lambda)$, and $\det(I + M) = (1 + \lambda_1)(1 + \lambda_2) \le (1 + a)^2$. Exchanging the roles of $D$ and $D'$ gives the same bound for the inverse ratio, because $A'$ also has all eigenvalues at least $n\lambda$.
-6. **Add the two budgets.** The log of the density ratio is at most $\varepsilon' + 2\ln(1 + c/(n\lambda)) = \varepsilon$ by @eq-dperm-eps-prime, at every $w$ and in both directions. A bound on the density ratio everywhere is pure $\varepsilon$-DP.
+1. **From the output back to the noise.** The perturbed objective is $\lambda$-strongly convex, so it has exactly one minimizer, where its gradient is zero: $\nabla \mathcal L(\tilde\theta; D) + b/n = 0$. Solving for $b$,
+$$b = \phi_D(\tilde\theta) = -n\nabla \mathcal L(\tilde\theta; D) = -\sum_{i=1}^n\nabla\ell(\tilde\theta; z_i) - n\lambda\tilde\theta.$$
+Every $\theta$ is the output for exactly one $b$, namely $\phi_D(\theta)$, so the map from noise to output is invertible and $\phi_D$ is its inverse.
+2. **The density of the output.** By Fact 4, $p_D(\theta) = \nu(\phi_D(\theta))\,|\det\nabla\phi_D(\theta)|$, and the same for $D'$ with $\phi_{D'}$. The ratio at any $\theta$ is
+$$\frac{p_D(\theta)}{p_{D'}(\theta)} = \underbrace{\frac{\nu(\phi_D(\theta))}{\nu(\phi_{D'}(\theta))}}_{\text{noise}}\cdot\underbrace{\frac{|\det\nabla\phi_D(\theta)|}{|\det\nabla\phi_{D'}(\theta)|}}_{\text{Jacobian}}.$$
+3. **The noise factor is at most $e^{\varepsilon'}$.** The sums in $\phi_D$ and $\phi_{D'}$ share every term except the replaced record's, so $\phi_{D'}(\theta) - \phi_D(\theta) = \nabla\ell(\theta; z) - \nabla\ell(\theta; z')$, of length at most $2$. The noise factor is $e^{\varepsilon'(\|\phi_{D'}(\theta)\| - \|\phi_D(\theta)\|)/2}$, and by the triangle inequality the exponent is at most $\varepsilon'\cdot 2/2 = \varepsilon'$.
+4. **The Jacobian is the Hessian.** $\nabla\phi_D(\theta) = -n\nabla^2\mathcal L(\theta; D) = -A$, with $A = \sum_ig''(m_i)x_ix_i^\top + n\lambda I$, where $m_i = y_i\langle \theta, x_i\rangle$ is the margin; the chain rule gives each loss's Hessian as $g''(m_i)$ times $y_i^2x_ix_i^\top = x_ix_i^\top$. Every term is positive semi-definite and $n\lambda I$ is added, so all eigenvalues of $A$ are at least $n\lambda$. For $D'$ the matrix is $A' = A + E$ with $E = g''(m')x'x'^\top - g''(m)xx^\top$: one rank-one term in, one out.
+5. **The Jacobian factor is at most $(1 + c/(n\lambda))^2$.** The ratio of determinants is $\det(A')/\det(A) = \det(I + A^{-1}E) = \det(I + K)$ with $K = A^{-1/2}EA^{-1/2}$, since $A^{-1}E$ and $K$ are similar matrices. $K$ is symmetric and is the difference of two rank-one positive semi-definite matrices, $g''(m')\tilde x'\tilde x'^\top - g''(m)\tilde x\tilde x^\top$ with $\tilde x = A^{-1/2}x$. A rank-one matrix $vv^\top$ has one nonzero eigenvalue, $\|v\|^2$, and here $\|\tilde x\|^2 = x^\top A^{-1}x \le \|x\|^2/(n\lambda) \le 1/(n\lambda)$. So $K$ has at most two nonzero eigenvalues, which we call $\kappa_1$ and $\kappa_2$, each between $-a$ and $a$ with $a = c/(n\lambda)$, and $\det(I + K) = (1 + \kappa_1)(1 + \kappa_2) \le (1 + a)^2$. Exchanging the roles of $D$ and $D'$ gives the same bound for the inverse ratio, because $A'$ also has all eigenvalues at least $n\lambda$.
+6. **Add the two budgets.** The log of the density ratio is at most $\varepsilon' + 2\ln(1 + c/(n\lambda)) = \varepsilon$ by @eq-dperm-eps-prime, at every $\theta$ and in both directions. A bound on the density ratio everywhere is pure $\varepsilon$-DP.
 7. **When $\varepsilon' \le 0$.** The Jacobian factor alone would exceed $\varepsilon$. A larger ridge shrinks $a$: with $\lambda + \lambda_+$ in place of $\lambda$, $c/(n(\lambda + \lambda_+)) = e^{\varepsilon/4} - 1$, so $2\ln(1 + a) = \varepsilon/2$, and the noise gets the other half.
-8. **Excess risk.** To first order in $b$, the perturbed minimizer solves $H(\tilde w - w^*) + b/n = 0$, so $\tilde w - w^* = -H^{-1}b/n$. Substituting this into the second-order expansion $J(\tilde w) - J(w^*) \approx \frac12(\tilde w - w^*)^\top H(\tilde w - w^*)$ of step 2 of @sec-dperm-output gives $\frac{1}{2n^2}b^\top H^{-1}HH^{-1}b = \frac{1}{2n^2}b^\top H^{-1}b$. Averaging over the uniform direction, as in step 3 there, replaces $b^\top H^{-1}b$ by $\mathbb E\|b\|^2\operatorname{tr}H^{-1}/d$, which is @eq-dperm-objective-risk.
+8. **Excess risk.** To first order in $b$, the perturbed minimizer solves $H(\tilde\theta - \theta^*) + b/n = 0$, so $\tilde\theta - \theta^* = -H^{-1}b/n$. Substituting this into the second-order expansion $\mathcal L(\tilde\theta) - \mathcal L(\theta^*) \approx \frac12(\tilde\theta - \theta^*)^\top H(\tilde\theta - \theta^*)$ of step 2 of @sec-dperm-output gives $\frac{1}{2n^2}b^\top H^{-1}HH^{-1}b = \frac{1}{2n^2}b^\top H^{-1}b$. Averaging over the uniform direction, as in step 3 there, replaces $b^\top H^{-1}b$ by $\mathbb E\|b\|^2\operatorname{tr}H^{-1}/d$, which is @eq-dperm-objective-risk.
 
 **Walk-through in one dimension.** With $d = 1$ everything in steps 1–5 is a number, and the script computes both densities exactly on a grid of outputs. Take $n = 5$ records with features in $[-1, 1]$, $\lambda = 0.1$ and $\varepsilon = 1$. Then $c/(n\lambda) = 0.25/0.5 = 0.5$, the Jacobian budget is $2\ln 1.5 = 0.8109$, and the noise gets $\varepsilon' = 0.1891$. @fig-dperm-objective-density shows one dataset: the two densities, and their log ratio, which stays inside $\pm\varepsilon$. Over 500 random datasets and replacements, the largest log ratio anywhere on the grid is 0.3779. Its noise part never exceeds 0.0992, about half its budget of 0.1891, and its Jacobian part never exceeds 0.3395, well under its budget of 0.8109, and under even $\ln 1.5 = 0.4055$, half of it.
 
@@ -170,11 +170,11 @@ $$\frac{p_D(w)}{p_{D'}(w)} = \underbrace{\frac{\nu(\phi_D(w))}{\nu(\phi_{D'}(w))
 
 ### Interpretation
 
-**Where the slack is.** Both factors in step 2 are bounded by worst cases that cannot happen together, and mostly cannot happen at all for logistic regression. The noise factor reaches $e^{\varepsilon'}$ only if the old and new record have full-length gradients pointing in opposite directions. A logistic gradient has full length only when its margin is very negative, and two records whose gradients point in opposite directions have opposite margins, so at most one of them can be saturated: the difference has length at most about 1, not 2, which is why the noise part stops at half its budget. The Jacobian bound charges both the record that leaves and the one that arrives the full curvature $c$, while their eigenvalues $\lambda_1 \ge 0 \ge \lambda_2$ have opposite signs, so the product $(1 + \lambda_1)(1 + \lambda_2)$ is at most $1 + a$: the Jacobian needs only half its budget ([Exercise 6](../../book-exercises/part05-dp-ml/01-dp-erm.md#sec-sol-dperm-6)). The analysis is safe, not tight.
+**Where the slack is.** Both factors in step 2 are bounded by worst cases that cannot happen together, and mostly cannot happen at all for logistic regression. The noise factor reaches $e^{\varepsilon'}$ only if the old and new record have full-length gradients pointing in opposite directions. A logistic gradient has full length only when its margin is very negative, and two records whose gradients point in opposite directions have opposite margins, so at most one of them can be saturated: the difference has length at most about 1, not 2, which is why the noise part stops at half its budget. The Jacobian bound charges both the record that leaves and the one that arrives the full curvature $c$, while their eigenvalues $\kappa_1 \ge 0 \ge \kappa_2$ have opposite signs, so the product $(1 + \kappa_1)(1 + \kappa_2)$ is at most $1 + a$: the Jacobian needs only half its budget ([Exercise 6](../../book-exercises/part05-dp-ml/01-dp-erm.md#sec-sol-dperm-6)). The analysis is safe, not tight.
 
 **Curvature helps.** Compare @eq-dperm-objective-risk with @eq-dperm-output-risk. In output perturbation the noise has length about $1/(\lambda n)$ and the damage is weighted by $H$; in objective perturbation the noise has length about 1, is divided by $n$, and the damage is weighted by $H^{-1}$. If every eigenvalue of $H$ is close to $h$, the ratio of the two excess risks is about $(h/\lambda)^2$ (with $\varepsilon' \approx \varepsilon$). When the ridge supplies all the curvature, $h = \lambda$ and the two are equivalent. When the data supply more, objective perturbation wins quadratically.
 
-**What it needs.** It needs exact minimization, which no computer delivers. An iterative solver stops early, and floating-point arithmetic rounds every number. Rounding can itself leak, as Mironov (2012) showed for a textbook implementation of Laplace noise ([Discrete mechanisms](../part03-dp-foundations/08-discrete-mechanisms.md)). Beyond that, it needs twice-differentiable losses (the hinge loss of a support vector machine must be smoothed first), a bound $c$ on the curvature, and a loss that depends on $w$ through one inner product, which makes each record's Hessian rank one. Kifer, Smith & Thakurta (2012) extend it to Gaussian noise with $(\varepsilon, \delta)$-DP and to constrained problems, and Iyengar et al. (2019) give a version that tolerates approximate minimization by adding a little output noise on top.
+**What it needs.** It needs exact minimization, which no computer delivers. An iterative solver stops early, and floating-point arithmetic rounds every number. Rounding can itself leak, as Mironov (2012) showed for a textbook implementation of Laplace noise ([Discrete mechanisms](../part03-dp-foundations/08-discrete-mechanisms.md)). Beyond that, it needs twice-differentiable losses (the hinge loss of a support vector machine must be smoothed first), a bound $c$ on the curvature, and a loss that depends on $\theta$ through one inner product, which makes each record's Hessian rank one. Kifer, Smith & Thakurta (2012) extend it to Gaussian noise with $(\varepsilon, \delta)$-DP and to constrained problems, and Iyengar et al. (2019) give a version that tolerates approximate minimization by adding a little output noise on top.
 
 ### Example: the running example at $n = 10{,}000$
 
@@ -193,27 +193,27 @@ The first two methods release one point and need the exact minimizer. Real train
 
 ### Statement
 
-Start from $w_0 = 0$ and run $T$ steps of
-$$w_{t+1} = w_t - \eta\big(\nabla J(w_t; D) + \xi_t\big), \qquad \xi_t \sim \mathcal N(0, \sigma^2I)\ \text{independent}, \qquad \sigma = \frac{2L}{n}\cdot\frac{\sqrt T}{\mu(\varepsilon, \delta)}.$$ {#eq-dperm-noisy-gd}
-Releasing all the iterates $w_1, \dots, w_T$ is $(\varepsilon, \delta)$-DP for replace-one neighbours, for any loss whose per-record gradients have length at most $L$, convex or not.
+Start from $\theta_0 = 0$ and run $T$ steps of
+$$\theta_{t+1} = \theta_t - \eta\big(\nabla \mathcal L(\theta_t; D) + \xi_t\big), \qquad \xi_t \sim \mathcal N(0, \sigma^2I)\ \text{independent}, \qquad \sigma = \frac{2L}{n}\cdot\frac{\sqrt T}{\mu(\varepsilon, \delta)}.$$ {#eq-dperm-noisy-gd}
+Releasing all the iterates $\theta_1, \dots, \theta_T$ is $(\varepsilon, \delta)$-DP for replace-one neighbours, for any loss whose per-record gradients have length at most $L$, convex or not.
 
-For a $\lambda$-strongly convex, $\beta$-smooth objective (curvature between $\lambda$ and $\beta$ everywhere) and step $\eta = 1/\beta$, the excess risk of the last iterate is approximately
-$$\mathbb E\big[J(w_T) - J(w^*)\big] \approx \Big(1 - \frac\lambda\beta\Big)^T\big(J(w_0) - J(w^*)\big) + \frac{d\sigma^2}{4\beta},$$ {#eq-dperm-gd-risk}
+For a $\lambda$-strongly convex, $\beta$-smooth objective (curvature between $\lambda$ and $\beta$ everywhere) and learning rate $\eta = 1/\beta$, the excess risk of the last iterate is approximately
+$$\mathbb E\big[\mathcal L(\theta_T) - \mathcal L(\theta^*)\big] \approx \Big(1 - \frac\lambda\beta\Big)^T\big(\mathcal L(\theta_0) - \mathcal L(\theta^*)\big) + \frac{d\sigma^2}{4\beta},$$ {#eq-dperm-gd-risk}
 an optimization error that shrinks with $T$ plus a noise floor that grows with $T$, because $\sigma^2 \propto T$.
 
 ### Derivation
 
-1. **One step is a Gaussian mechanism.** Given $w_t$, the step releases $\nabla J(w_t; D) + \xi_t$. The ridge term $\lambda w_t$ is the same on both datasets, and the averages differ only in the replaced record, so the gradient moves by $\frac1n\|\nabla\ell(w_t, z) - \nabla\ell(w_t, z')\| \le 2L/n$. Its ratio is $\mu_{\text{step}} = 2L/(n\sigma)$. The point $w_t$ was itself computed from earlier noisy gradients, but it is public at that moment, which is what adaptive composition allows.
-2. **Compose.** By Fact 5, $T$ such steps are exactly as private as one Gaussian with $\mu = \sqrt T\cdot 2L/(n\sigma)$. Setting this to $\mu(\varepsilon, \delta)$ gives the $\sigma$ of @eq-dperm-noisy-gd. The iterates are computed from the noisy gradients and $w_0$ alone, so releasing them is post-processing.
-3. **Where convexity was not used.** Steps 1 and 2 bounded the gradient's change by $2L/n$ at the point $w_t$, whatever $w_t$ is. Nothing required a minimizer, convexity or smoothness.
-4. **Optimization error.** Without noise, gradient descent with step $1/\beta$ on a $\lambda$-strongly convex, $\beta$-smooth function shrinks $J(w_t) - J(w^*)$ by at least a factor $1 - \lambda/\beta$ per step ([Optimization](../part01-prerequisites/06-optimization.md)), which gives the first term.
-5. **The noise floor.** Near the minimizer, the gradient is about $H(w_t - w^*)$, so the error $e_t = w_t - w^*$ evolves as $e_{t+1} \approx (I - \eta H)e_t - \eta\xi_t$. Along an eigenvector of $H$ with curvature $h$, the error's variance $v$ settles where one step leaves it unchanged: $v = (1 - \eta h)^2v + \eta^2\sigma^2$, so $v = \eta^2\sigma^2/(1 - (1 - \eta h)^2) = \eta\sigma^2/(h(2 - \eta h))$. Its cost is $\frac12hv = \eta\sigma^2/(2(2 - \eta h))$, about $\eta\sigma^2/4$ when $\eta h$ is small. Summing over the $d$ directions with $\eta = 1/\beta$ gives $d\sigma^2/(4\beta)$, and the curvature $h$ has cancelled: directions with little curvature wander farther but cost less per unit of wandering.
+1. **One step is a Gaussian mechanism.** Given $\theta_t$, the step releases $\nabla \mathcal L(\theta_t; D) + \xi_t$. The ridge term $\lambda \theta_t$ is the same on both datasets, and the averages differ only in the replaced record, so the gradient moves by $\frac1n\|\nabla\ell(\theta_t; z) - \nabla\ell(\theta_t; z')\| \le 2L/n$. Its ratio is $\mu_{\text{step}} = 2L/(n\sigma)$. The point $\theta_t$ was itself computed from earlier noisy gradients, but it is public at that moment, which is what adaptive composition allows.
+2. **Compose.** By Fact 5, $T$ such steps are exactly as private as one Gaussian with $\mu = \sqrt T\cdot 2L/(n\sigma)$. Setting this to $\mu(\varepsilon, \delta)$ gives the $\sigma$ of @eq-dperm-noisy-gd. The iterates are computed from the noisy gradients and $\theta_0$ alone, so releasing them is post-processing.
+3. **Where convexity was not used.** Steps 1 and 2 bounded the gradient's change by $2L/n$ at the point $\theta_t$, whatever $\theta_t$ is. Nothing required a minimizer, convexity or smoothness.
+4. **Optimization error.** Without noise, gradient descent with learning rate $\eta = 1/\beta$ on a $\lambda$-strongly convex, $\beta$-smooth function shrinks $\mathcal L(\theta_t) - \mathcal L(\theta^*)$ by at least a factor $1 - \lambda/\beta$ per step ([Optimization](../part01-prerequisites/06-optimization.md)), which gives the first term.
+5. **The noise floor.** Near the minimizer, the gradient is about $H(\theta_t - \theta^*)$, so the error $e_t = \theta_t - \theta^*$ evolves as $e_{t+1} \approx (I - \eta H)e_t - \eta\xi_t$. Along an eigenvector of $H$ with curvature $h$, the error's variance $v$ settles where one step leaves it unchanged: $v = (1 - \eta h)^2v + \eta^2\sigma^2$, so $v = \eta^2\sigma^2/(1 - (1 - \eta h)^2) = \eta\sigma^2/(h(2 - \eta h))$. Its cost is $\frac12hv = \eta\sigma^2/(2(2 - \eta h))$, about $\eta\sigma^2/4$ when $\eta h$ is small. Summing over the $d$ directions with $\eta = 1/\beta$ gives $d\sigma^2/(4\beta)$, and the curvature $h$ has cancelled: directions with little curvature wander farther but cost less per unit of wandering.
 
 ### Interpretation
 
 **The step count is a privacy parameter.** Every step spends budget, so the noise per step grows like $\sqrt T$ and the noise floor like $T$. Too few steps leave optimization error, too many drown the solution in noise. @fig-dperm-noisy-gd-steps shows the trade-off on the running example. And you cannot pick the best $T$ by trying several and keeping the one with the best validation score without paying for it: that selection is itself a computation on the data, the subject of [Hyperparameter tuning](03-hyperparameter-tuning.md).
 
-**A public rule for $T$.** @eq-dperm-gd-risk can be evaluated without looking at the data, using only public quantities: $\lambda$, the curvature bound $\beta = \frac14 + \lambda$ for logistic loss with unit features, $J(w_0) = \ln 2$ for $w_0 = 0$ (each loss is $\ln 2$ at $w = 0$, and $J(w^*) \ge 0$), $d$, $n$ and the budget. The rule picks the $T$ that minimizes it. It is pessimistic, because it only knows that the curvature is at least $\lambda$.
+**A public rule for $T$.** @eq-dperm-gd-risk can be evaluated without looking at the data, using only public quantities: $\lambda$, the curvature bound $\beta = \frac14 + \lambda$ for logistic loss with unit features, $\mathcal L(\theta_0) = \ln 2$ for $\theta_0 = 0$ (each loss is $\ln 2$ at $\theta = 0$, and $\mathcal L(\theta^*) \ge 0$), $d$, $n$ and the budget. The rule picks the $T$ that minimizes it. It is pessimistic, because it only knows that the curvature is at least $\lambda$.
 
 **Why it is the one that generalizes.** Gradient perturbation needs a gradient bound, not a minimizer. For a neural network no such bound holds, because gradients can be arbitrarily long, but you can force one by **clipping**: rescale each record's gradient to length at most $C$ before averaging, exactly as [Beyond global sensitivity](../part03-dp-foundations/07-sensitivity.md#sec-sens-clip) clips a value before averaging it. That, with minibatches instead of full batches, is DP-SGD.
 
@@ -240,7 +240,7 @@ The step count grows slowly with $n$, like $\ln n$, because the optimization err
 ### Check yourself
 
 - Noisy gradient descent with $T = 100$ steps is $(1, 10^{-5})$-DP. You run it for $T = 400$ steps with the same per-step noise. What is $\mu$ now? *(Twice as large: $\mu = \sqrt T\,\mu_{\text{step}}$, and $\sqrt{400/100} = 2$. So $\mu = 2 \times 0.2681 = 0.5362$, a weaker guarantee.)*
-- In step 1 of the derivation, why is it allowed that the point $w_t$ at which the gradient is evaluated depends on the data? *(Because $w_t$ is computed from earlier released outputs only. Adaptive composition covers mechanisms chosen based on earlier outputs, so the bound holds conditionally on the past, at whatever $w_t$ it produced.)*
+- In step 1 of the derivation, why is it allowed that the point $\theta_t$ at which the gradient is evaluated depends on the data? *(Because $\theta_t$ is computed from earlier released outputs only. Adaptive composition covers mechanisms chosen based on earlier outputs, so the bound holds conditionally on the past, at whatever $\theta_t$ it produced.)*
 
 ## Noisy projected gradient descent without a ridge {#sec-dperm-convex}
 
@@ -250,22 +250,22 @@ Every method so far leaned on the ridge. Output and objective perturbation need 
 
 ### Statement
 
-Keep the weights in the ball $\mathcal W = \{\|w\| \le R\}$, fixed in advance. Let the loss be convex in $w$ with per-record gradients of length at most $L$, and minimize the plain average $J(w; D) = \frac1n\sum_i\ell(w, z_i)$, with no ridge. Start from $w_1 = 0$ and run $T$ steps of
-$$w_{t+1} = \Pi_{\mathcal W}\Big(w_t - \eta\big(\nabla J(w_t; D) + \xi_t\big)\Big), \qquad \xi_t \sim \mathcal N(0, \sigma^2I), \qquad \sigma = \frac{2L}{n}\cdot\frac{\sqrt T}{\mu(\varepsilon, \delta)},$$ {#eq-dperm-projected-gd}
-where $\Pi_{\mathcal W}$ is the projection onto the ball and $\mu(\varepsilon, \delta)$ is, as in Fact 1, the largest ratio of sensitivity to noise at which one Gaussian release is $(\varepsilon, \delta)$-DP. Use the step $\eta = R/(G\sqrt T)$ with $G^2 = L^2 + d\sigma^2$, and release the average of the iterates, $\bar w = \frac1T\sum_{t=1}^Tw_t$. The release is $(\varepsilon, \delta)$-DP for replace-one neighbours, and its excess risk over the best weights in the ball is at most
-$$\mathbb E\big[J(\bar w; D)\big] - \min_{w\in\mathcal W}J(w; D) \le RL\sqrt{\frac1T + \frac{4d}{n^2\mu(\varepsilon, \delta)^2}}.$$ {#eq-dperm-convex-bound}
+Keep the weights in the ball $\mathcal W = \{\|\theta\| \le R\}$, fixed in advance. Let the loss be convex in $\theta$ with per-record gradients of length at most $L$, and minimize the plain average $\mathcal L(\theta; D) = \frac1n\sum_i\ell(\theta; z_i)$, with no ridge. Start from $\theta_1 = 0$ and run $T$ steps of
+$$\theta_{t+1} = \Pi_{\mathcal W}\Big(\theta_t - \eta\big(\nabla \mathcal L(\theta_t; D) + \xi_t\big)\Big), \qquad \xi_t \sim \mathcal N(0, \sigma^2I), \qquad \sigma = \frac{2L}{n}\cdot\frac{\sqrt T}{\mu(\varepsilon, \delta)},$$ {#eq-dperm-projected-gd}
+where $\Pi_{\mathcal W}$ is the projection onto the ball and $\mu(\varepsilon, \delta)$ is, as in Fact 1, the largest ratio of sensitivity to noise at which one Gaussian release is $(\varepsilon, \delta)$-DP. Use the learning rate $\eta = R/(G\sqrt T)$ with $G^2 = L^2 + d\sigma^2$, and release the average of the iterates, $\bar\theta = \frac1T\sum_{t=1}^T\theta_t$. The release is $(\varepsilon, \delta)$-DP for replace-one neighbours, and its excess risk over the best weights in the ball is at most
+$$\mathbb E\big[\mathcal L(\bar\theta; D)\big] - \min_{\theta\in\mathcal W}\mathcal L(\theta; D) \le RL\sqrt{\frac1T + \frac{4d}{n^2\mu(\varepsilon, \delta)^2}}.$$ {#eq-dperm-convex-bound}
 Once $T \ge n^2\mu^2/(4d)$, this is at most $2\sqrt2\,RL\sqrt d/(n\mu)$. For $\varepsilon < 1$ the exact ratio is at least the classic one, $\mu \ge \varepsilon/\sqrt{2\ln(1.25/\delta)}$, so
-$$\mathbb E\big[J(\bar w; D)\big] - \min_{w\in\mathcal W}J(w; D) \le \frac{4RL\sqrt{d\ln(1.25/\delta)}}{n\varepsilon}.$$ {#eq-dperm-convex-rate}
+$$\mathbb E\big[\mathcal L(\bar\theta; D)\big] - \min_{\theta\in\mathcal W}\mathcal L(\theta; D) \le \frac{4RL\sqrt{d\ln(1.25/\delta)}}{n\varepsilon}.$$ {#eq-dperm-convex-rate}
 
 ### Derivation
 
-1. **Privacy.** Each step releases the noisy gradient $\nabla J(w_t; D) + \xi_t$, whose noiseless part moves by at most $2L/n$ when one record is replaced, as in step 1 of @sec-dperm-gradient. Fact 5 composes the $T$ steps into one Gaussian with ratio $\sqrt T\cdot 2L/(n\sigma) = \mu(\varepsilon, \delta)$. The projection uses only the public ball, and the average uses only the iterates, so both are post-processing.
-2. **The noisy gradient is unbiased.** Write $g_t = \nabla J(w_t; D) + \xi_t$. Given the past, $\xi_t$ is fresh noise with mean zero, so $\mathbb E[g_t] = \nabla J(w_t; D)$, the first condition of Fact 6.
-3. **Its second moment is $L^2 + d\sigma^2$.** Expand the square: $\mathbb E\|g_t\|^2 = \|\nabla J\|^2 + 2\,\mathbb E\langle\nabla J, \xi_t\rangle + \mathbb E\|\xi_t\|^2$. The gradient of $J$ is an average of vectors of length at most $L$, so its length is at most $L$. The cross term is zero, because $\xi_t$ has mean zero and is independent of $w_t$. The last term is $d\sigma^2$, one $\sigma^2$ per coordinate. So $G^2 = L^2 + d\sigma^2$ satisfies the second condition of Fact 6.
-4. **Apply Fact 6.** The minimizer over the ball and the start $w_1 = 0$ both lie in the ball, so they are at most $R$ apart. With the step $\eta = R/(G\sqrt T)$, @eq-dperm-sgd-convex bounds the excess risk of $\bar w$ by $RG/\sqrt T = R\sqrt{(L^2 + d\sigma^2)/T}$.
+1. **Privacy.** Each step releases the noisy gradient $\nabla \mathcal L(\theta_t; D) + \xi_t$, whose noiseless part moves by at most $2L/n$ when one record is replaced, as in step 1 of @sec-dperm-gradient. Fact 5 composes the $T$ steps into one Gaussian with ratio $\sqrt T\cdot 2L/(n\sigma) = \mu(\varepsilon, \delta)$. The projection uses only the public ball, and the average uses only the iterates, so both are post-processing.
+2. **The noisy gradient is unbiased.** Write $g_t = \nabla \mathcal L(\theta_t; D) + \xi_t$. Given the past, $\xi_t$ is fresh noise with mean zero, so $\mathbb E[g_t] = \nabla \mathcal L(\theta_t; D)$, the first condition of Fact 6.
+3. **Its second moment is $L^2 + d\sigma^2$.** Expand the square: $\mathbb E\|g_t\|^2 = \|\nabla \mathcal L\|^2 + 2\,\mathbb E\langle\nabla \mathcal L, \xi_t\rangle + \mathbb E\|\xi_t\|^2$. The gradient of $\mathcal L$ is an average of vectors of length at most $L$, so its length is at most $L$. The cross term is zero, because $\xi_t$ has mean zero and is independent of $\theta_t$. The last term is $d\sigma^2$, one $\sigma^2$ per coordinate. So $G^2 = L^2 + d\sigma^2$ satisfies the second condition of Fact 6.
+4. **Apply Fact 6.** The minimizer over the ball and the start $\theta_1 = 0$ both lie in the ball, so they are at most $R$ apart. With the learning rate $\eta = R/(G\sqrt T)$, @eq-dperm-sgd-convex bounds the excess risk of $\bar\theta$ by $RG/\sqrt T = R\sqrt{(L^2 + d\sigma^2)/T}$.
 5. **The step count cancels from the noise term.** By @eq-dperm-projected-gd, $\sigma^2 = 4L^2T/(n^2\mu^2)$, so $d\sigma^2/T = 4L^2d/(n^2\mu^2)$, whatever $T$ is. Factoring out $L^2$ gives @eq-dperm-convex-bound.
 6. **Choose $T$.** The first term under the root falls with $T$ and the second does not. When $T \ge n^2\mu^2/(4d)$, the first is at most the second, and the root is at most $\sqrt{8d/(n^2\mu^2)} = 2\sqrt2\,\sqrt d/(n\mu)$.
-7. **In terms of $\varepsilon$.** The classic calibration of Fact 1 adds noise $\Delta\sqrt{2\ln(1.25/\delta)}/\varepsilon$, and it is $(\varepsilon, \delta)$-DP for $\varepsilon < 1$. The exact calibration uses the least noise that is $(\varepsilon, \delta)$-DP, so it adds no more noise than the classic one, and its ratio $\mu$ is at least the classic ratio,
+7. **In terms of $\varepsilon$.** The classic calibration of Fact 1 adds noise $\Delta_2 f\sqrt{2\ln(1.25/\delta)}/\varepsilon$, and it is $(\varepsilon, \delta)$-DP for $\varepsilon < 1$. The exact calibration uses the least noise that is $(\varepsilon, \delta)$-DP, so it adds no more noise than the classic one, and its ratio $\mu$ is at least the classic ratio,
 $$\frac1\mu \le \frac{\sqrt{2\ln(1.25/\delta)}}{\varepsilon}.$$
    Substituting this into step 6 gives $2\sqrt2 \cdot \sqrt2 = 4$ in front, which is @eq-dperm-convex-rate.
 
@@ -273,7 +273,7 @@ $$\frac1\mu \le \frac{\sqrt{2\ln(1.25/\delta)}}{\varepsilon}.$$
 
 **Privacy noise is just more gradient variance.** The convergence guarantee of Fact 6 does not care where the randomness of $g_t$ comes from, only how large its second moment is. Sampling one record instead of averaging all of them raises $G^2$, and so does Gaussian noise for privacy, by $d\sigma^2$. That is where the dimension enters the cost of privacy: one $\sigma^2$ for every coordinate the optimizer moves. [Public data and private fine-tuning](06-public-data.md) builds on this, by training fewer coordinates.
 
-**More steps never hurt here.** In @sec-dperm-gradient the noise floor grew with $T$, because the step size $1/\beta$ was fixed while the noise per step grew like $\sqrt T$. Here the step shrinks like $1/\sqrt T$ and the iterates are averaged, and step 5 shows the two effects cancel exactly. The noise term is fixed by $n$, $d$ and the budget, and extra steps only remove optimization error. So the step count needs no tuning. It only has to reach the public threshold $n^2\mu^2/(4d)$.
+**More steps never hurt here.** In @sec-dperm-gradient the noise floor grew with $T$, because the learning rate $\eta = 1/\beta$ was fixed while the noise per step grew like $\sqrt T$. Here the learning rate shrinks like $1/\sqrt T$ and the iterates are averaged, and step 5 shows the two effects cancel exactly. The noise term is fixed by $n$, $d$ and the budget, and extra steps only remove optimization error. So the step count needs no tuning. It only has to reach the public threshold $n^2\mu^2/(4d)$.
 
 **The rate cannot be beaten.** For convex losses with $L$-bounded gradients over a ball of radius $R$, Bassily, Smith & Thakurta (2014) prove that, as long as $\sqrt d \le n\varepsilon$, every $(\varepsilon, \delta)$-DP algorithm has excess risk of order $RL\sqrt d/(n\varepsilon)$ on some dataset, by the fingerprinting argument of [Lower bounds](../part03-dp-foundations/10-lower-bounds.md). @sec-apx-learn-erm in the appendices derives this lower bound step by step, with explicit but loose constants. @eq-dperm-convex-rate matches it up to the factor $\sqrt{\ln(1/\delta)}$ and constants. Compare the strongly convex rate @eq-dperm-rate-strong of @sec-dperm-compare, which is of order $d/(\lambda n^2\varepsilon^2)$: a guaranteed curvature $\lambda$ turns $\sqrt d/(n\varepsilon)$ into its square, divided by $\lambda$.
 
@@ -285,7 +285,7 @@ $$\frac1\mu \le \frac{\sqrt{2\ln(1.25/\delta)}}{\varepsilon}.$$
 
 ### Example: logistic regression in a ball
 
-Take the running example's data, with $d = 10$ features and gradients of length at most $L = 1$, drop the ridge, and keep the weights in the ball of radius $R = 5$. The budget is $\varepsilon = 1$ and $\delta = 10^{-5}$, for which the exact ratio is $\mu = 0.2681$. The classic ratio $\varepsilon/\sqrt{2\ln(1.25/\delta)}$ is smaller, 0.2064, as step 7 requires. With a thousand records the rule $T = \lceil n^2\mu^2/(4d)\rceil$ gives 1,797 steps, and the noise on the mean gradient is $\sigma = 0.3163$. The noise adds $d\sigma^2 = 10 \times 0.3163^2$ to the second moment, so $G^2 = 2.0004$, about twice the noiseless $L^2 = 1$. The step is then 0.0834, and @eq-dperm-convex-bound evaluates to 0.1668.
+Take the running example's data, with $d = 10$ features and gradients of length at most $L = 1$, drop the ridge, and keep the weights in the ball of radius $R = 5$. The budget is $\varepsilon = 1$ and $\delta = 10^{-5}$, for which the exact ratio is $\mu = 0.2681$. The classic ratio $\varepsilon/\sqrt{2\ln(1.25/\delta)}$ is smaller, 0.2064, as step 7 requires. With a thousand records the rule $T = \lceil n^2\mu^2/(4d)\rceil$ gives 1,797 steps, and the noise on the mean gradient is $\sigma = 0.3163$. The noise adds $d\sigma^2 = 10 \times 0.3163^2$ to the second moment, so $G^2 = 2.0004$, about twice the noiseless $L^2 = 1$. The learning rate is then 0.0834, and @eq-dperm-convex-bound evaluates to 0.1668.
 
 The bound falls with the number of steps but levels off at its limit, $2RL\sqrt d/(n\mu) = 0.1180$. It is 0.5137 after 100 steps and 0.1973 after 1,000. After 10,000 steps it is 0.1281, and after 100,000 it is 0.1190, within 1% of the limit.
 
@@ -305,7 +305,7 @@ The dimension enters as $\sqrt d$. At $n = 10{,}000$ the limit $2RL\sqrt d/(n\mu
 
 ### Check yourself
 
-- Noisy gradient descent with a ridge has a noise floor that grows with the number of steps, but here extra steps never raise the bound. What is different? *(Here the step size shrinks like $1/\sqrt T$ and the iterates are averaged, so the noise contributes $d\sigma^2/T$, which does not depend on $T$. With a fixed step $1/\beta$ and the last iterate, the floor is $d\sigma^2/(4\beta)$, which grows with $\sigma^2 \propto T$.)*
+- Noisy gradient descent with a ridge has a noise floor that grows with the number of steps, but here extra steps never raise the bound. What is different? *(Here the learning rate shrinks like $1/\sqrt T$ and the iterates are averaged, so the noise contributes $d\sigma^2/T$, which does not depend on $T$. With a fixed learning rate $\eta = 1/\beta$ and the last iterate, the floor is $d\sigma^2/(4\beta)$, which grows with $\sigma^2 \propto T$.)*
 - You double the dimension and keep everything else. By what factor does the limit of the bound grow, and what happens to the number of steps the rule asks for? *(The limit grows by $\sqrt2$, since it is proportional to $\sqrt d$. The rule's $T = n^2\mu^2/(4d)$ halves.)*
 
 ## How the three compare {#sec-dperm-compare}
@@ -329,9 +329,9 @@ On the running example, @tbl-dperm-compare gives the measured excess risk of the
 | 10,000 | $9.274 \times 10^{-4}$ | $8.321 \times 10^{-4}$ | $8.156 \times 10^{-5}$ | $1.384 \times 10^{-3}$ |
 | 30,000 | $9.973 \times 10^{-5}$ | $8.943 \times 10^{-5}$ | $7.135 \times 10^{-6}$ | $1.538 \times 10^{-4}$ |
 | 100,000 | $8.543 \times 10^{-6}$ | $6.379 \times 10^{-6}$ | $8.798 \times 10^{-7}$ | $1.621 \times 10^{-5}$ |
-| Slope in $\log n$ | $-2.01$ | $-2.00$ | $-2.01$ | $-1.79$ |
+| Slope in $\ln n$ | $-2.01$ | $-2.00$ | $-2.01$ | $-1.79$ |
 
-: Mean excess risk $J(\tilde w) - J(w^*)$ over 20 datasets of the running example ($d = 10$, $\lambda = 0.01$, $\varepsilon = 1$, $\delta = 10^{-5}$ for the Gaussian methods), and the slope of a straight-line fit of $\log$ excess risk against $\log n$. {#tbl-dperm-compare}
+: Mean excess risk $\mathcal L(\tilde\theta) - \mathcal L(\theta^*)$ over 20 datasets of the running example ($d = 10$, $\lambda = 0.01$, $\varepsilon = 1$, $\delta = 10^{-5}$ for the Gaussian methods), and the slope of a straight-line fit of $\ln$ excess risk against $\ln n$. {#tbl-dperm-compare}
 
 ### Derivation
 
@@ -341,7 +341,7 @@ The upper bounds for output and objective perturbation are @eq-dperm-output-risk
 
 **The rate is the same; the constants are not.** All three methods fall like $1/n^2$, and noisy gradient descent a little slower, $-1.79$, because its step count grows with $\ln n$. On this problem objective perturbation is about ten times better than output perturbation at every $n$, the $(h/\lambda)^2$ of @sec-dperm-objective, and noisy gradient descent with the public step rule is the worst of the three for $n \ge 10{,}000$. Tuned privately to $T \approx 50$, it would sit between the two perturbation methods.
 
-**Pure against approximate DP.** At $d = 10$ the pure-DP noise of Fact 3 and the Gaussian are close: their mean squared lengths are $d(d+1)s^2 = 110\,\Delta^2$ at $\varepsilon = 1$ and $d\sigma^2 = 10 \times 3.7306^2\,\Delta^2 = 139.2\,\Delta^2$, which is why the pure-DP column is slightly better here. At $d = 100$ they are $10{,}100\,\Delta^2$ against $1{,}392\,\Delta^2$: pure DP costs a factor that grows like $d$, the price of $\delta = 0$ that [Lower bounds](../part03-dp-foundations/10-lower-bounds.md) proves unavoidable.
+**Pure against approximate DP.** At $d = 10$ the pure-DP noise of Fact 3 and the Gaussian are close: their mean squared lengths are $d(d+1)s^2 = 110\,(\Delta_2 f)^2$ at $\varepsilon = 1$ and $d\sigma^2 = 10 \times 3.7306^2\,(\Delta_2 f)^2 = 139.2\,(\Delta_2 f)^2$, which is why the pure-DP column is slightly better here. At $d = 100$ they are $10{,}100\,(\Delta_2 f)^2$ against $1{,}392\,(\Delta_2 f)^2$: pure DP costs a factor that grows like $d$, the price of $\delta = 0$ that [Lower bounds](../part03-dp-foundations/10-lower-bounds.md) proves unavoidable.
 
 **Accuracy is forgiving.** Excess risk is a fine measure, but you care about predictions. On held-out data the non-private model has accuracy 0.747 at $n = 1{,}000$; output perturbation drops it to 0.681, noisy gradient descent to 0.695 and objective perturbation only to 0.736. By $n = 10{,}000$ all four are within 0.002 of the non-private 0.753. A low-dimensional convex model on ten thousand records can be made private almost for free.
 
@@ -364,7 +364,7 @@ The first term is what any learner pays for seeing only $n$ samples, private or 
 
 ### Context
 
-A neural network's loss is not convex in its weights. What survives of the three methods?
+A neural network's loss is not convex in its parameters. What survives of the three methods?
 
 ### Statement
 
@@ -372,14 +372,14 @@ The privacy proofs of @sec-dperm-output and @sec-dperm-objective do not carry ov
 
 ### Derivation
 
-1. **The minimizer can jump.** [Optimization](../part01-prerequisites/06-optimization.md) gives a one-dimensional loss with two wells, $\frac14(w^2 - 1)^2 - yw$ with labels $y = \pm1$, whose empirical minimizer sits in the well favoured by the majority label. With 501 labels $+1$ and 500 labels $-1$, changing one label flips the majority and moves the minimizer by 2.0010. No $1/n$ appears: the sensitivity of the minimizer is a constant, so output perturbation would need noise with $\sigma = 3.7306 \times 2.0010 = 7.465$ at $\varepsilon = 1$, more than three times the distance between the wells, whatever the dataset size.
+1. **The minimizer can jump.** [Optimization](../part01-prerequisites/06-optimization.md) gives a one-dimensional loss with two wells, $\frac14(\theta^2 - 1)^2 - y\theta$ with labels $y = \pm1$, whose empirical minimizer sits in the well favoured by the majority label. With 501 labels $+1$ and 500 labels $-1$, changing one label flips the majority and moves the minimizer by 2.0010. No $1/n$ appears: the sensitivity of the minimizer is a constant, so output perturbation would need noise with $\sigma = 3.7306 \times 2.0010 = 7.465$ at $\varepsilon = 1$, more than three times the distance between the wells, whatever the dataset size.
 2. **The objective-perturbation proof breaks at step 1.** Without strong convexity the perturbed objective can have several minimizers, the map from noise to output is no longer invertible, and Fact 4 cannot be applied. Neel et al. (2020) replace the change of variables with a different argument. It shows that a variant of objective perturbation is private for bounded, Lipschitz losses, convex or not, when the perturbed objective is handed to an oracle that returns its global minimizer, or a point provably close to it. The guarantee is therefore about that minimizer, and it holds only for an optimizer that is certain to find it. Gradient descent on a neural network finds a local minimum that depends on the starting point, and the guarantee says nothing about that.
 3. **Gradient perturbation survives.** Its derivation in @sec-dperm-gradient used only the gradient bound at the visited points (step 3 there).
-4. **Clipping supplies the bound.** Replace each per-record gradient $\nabla\ell(w, z_i)$ by $\nabla\ell(w, z_i)\min(1, C/\|\nabla\ell(w, z_i)\|)$, which has length at most $C$ and is unchanged when it is already shorter. The average of clipped gradients changes by at most $2C/n$ when one record is replaced, and the derivation goes through with $L = C$.
+4. **Clipping supplies the bound.** Replace each per-record gradient $\nabla\ell(\theta; z_i)$ by $\nabla\ell(\theta; z_i)\min(1, C/\|\nabla\ell(\theta; z_i)\|)$, which has length at most $C$ and is unchanged when it is already shorter. The average of clipped gradients changes by at most $2C/n$ when one record is replaced, and the derivation goes through with $L = C$.
 
 ### Interpretation
 
-What the non-convex case loses is the guarantee of accuracy, not of privacy. Noisy gradient descent on a neural network is private whatever the network does; whether it learns anything is an empirical question, and the answer depends on the clipping norm, the noise and the number of steps, which the [next chapter](02-dp-sgd.md) studies. Clipping also changes what is being optimized: the average of clipped gradients is not the gradient of $J$, so the algorithm no longer minimizes $J$, a bias that the next chapter measures.
+What the non-convex case loses is the guarantee of accuracy, not of privacy. Noisy gradient descent on a neural network is private whatever the network does; whether it learns anything is an empirical question, and the answer depends on the clipping norm, the noise and the number of steps, which the [next chapter](02-dp-sgd.md) studies. Clipping also changes what is being optimized: the average of clipped gradients is not the gradient of $\mathcal L$, so the algorithm no longer minimizes $\mathcal L$, a bias that the next chapter measures.
 
 Full-batch gradient descent is also too slow for large datasets: each step touches every record. Using a random minibatch at each step makes each step cheaper and, by [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md), more private per step, because each record is used only with probability $q$. Clipping, noise, minibatches and a subsampled-Gaussian accountant together are DP-SGD.
 
@@ -406,7 +406,7 @@ Its public functions are used by later chapters of this part: `make_logistic_dat
 
 | Experiment | Result |
 | --- | --- |
-| Gaussian calibration, $\varepsilon = 1$, $\delta = 10^{-5}$ | $\mu = 0.2681$; exact $\sigma = 3.7306\,\Delta$ against classic $4.8448\,\Delta$ |
+| Gaussian calibration, $\varepsilon = 1$, $\delta = 10^{-5}$ | $\mu = 0.2681$; exact $\sigma = 3.7306\,\Delta_2 f$ against classic $4.8448\,\Delta_2 f$ |
 | Output perturbation, one dimension | Minimizers 0.0832 apart, bound 0.2 |
 | Output perturbation, $n = 10{,}000$ | Predicted excess risk $8.711 \times 10^{-4}$, measured $9.274 \times 10^{-4}$ |
 | Approximate minimizer, $g = 10^{-3}$ | Sensitivity 0.22 against 0.02 exact |
@@ -414,7 +414,7 @@ Its public functions are used by later chapters of this part: `make_logistic_dat
 | Objective perturbation, $n = 10{,}000$ | Predicted $7.127 \times 10^{-5}$, measured $8.156 \times 10^{-5}$ |
 | Noisy gradient descent, $n = 10{,}000$ | Public rule $T = 218$, measured $1.384 \times 10^{-3}$; best $T \approx 50$ gives $2.875 \times 10^{-4}$ |
 | Noisy projected gradient descent, no ridge, $n = 1{,}000$ | $T = 1{,}797$, bound 0.1668, measured $3.028 \times 10^{-2}$ |
-| Slopes in $\log n$ | $-2.01$, $-2.00$, $-2.01$, $-1.79$ with a ridge; $-1.18$ measured and $-1.00$ for the bound without |
+| Slopes in $\ln n$ | $-2.01$, $-2.00$, $-2.01$, $-1.79$ with a ridge; $-1.18$ measured and $-1.00$ for the bound without |
 
 : The script's output with the default seed. {#tbl-dperm-code}
 
@@ -445,16 +445,16 @@ $n$ records, ridge $\lambda$, per-record gradients of length at most $L$, replac
 | Result | Formula | Needs | Guarantee |
 | --- | --- | --- | --- |
 | Sensitivity of the minimizer | $2L/(\lambda n)$ | $\lambda$-strong convexity, exact minimizer | — |
-| Approximate minimizer | $2L/(\lambda n) + 2g/\lambda$ | $\|\nabla J\| \le g$ checked at stopping | — |
-| Output perturbation | $w^* + \mathcal N(0, \sigma^2I)$, $\sigma = 2L/(\lambda n\mu)$ | As above | $(\varepsilon, \delta)$-DP |
-| Output, pure | $w^* + b$, $\nu(b) \propto e^{-\|b\|\lambda n\varepsilon/(2L)}$ | As above | $\varepsilon$-DP |
+| Approximate minimizer | $2L/(\lambda n) + 2g/\lambda$ | $\|\nabla \mathcal L\| \le g$ checked at stopping | — |
+| Output perturbation | $\theta^* + \mathcal N(0, \sigma^2I)$, $\sigma = 2L/(\lambda n\mu)$ | As above | $(\varepsilon, \delta)$-DP |
+| Output, pure | $\theta^* + b$, $\nu(b) \propto e^{-\|b\|\lambda n\varepsilon/(2L)}$ | As above | $\varepsilon$-DP |
 | Excess risk, output | $\approx\mathbb E\|Z\|^2\operatorname{tr}H/(2d)$ | Second order | — |
-| Objective perturbation | $\arg\min J + \langle b, w\rangle/n$, $\nu(b) \propto e^{-\varepsilon'\|b\|/2}$, $\varepsilon' = \varepsilon - 2\ln(1 + c/(n\lambda))$ | Loss $g(y\langle w, x\rangle)$, $|g'| \le 1$, $0 \le g'' \le c$, $\|x\| \le 1$, exact minimizer | $\varepsilon$-DP |
+| Objective perturbation | $\arg\min \mathcal L + \langle b, \theta\rangle/n$, $\nu(b) \propto e^{-\varepsilon'\|b\|/2}$, $\varepsilon' = \varepsilon - 2\ln(1 + c/(n\lambda))$ | Loss $g(y\langle \theta, x\rangle)$, $|g'| \le 1$, $0 \le g'' \le c$, $\|x\| \le 1$, exact minimizer | $\varepsilon$-DP |
 | Excess risk, objective | $\approx\mathbb E\|b\|^2\operatorname{tr}H^{-1}/(2dn^2)$ | Second order | — |
 | Noisy gradient descent | $\sigma = (2L/n)\sqrt T/\mu$ on the mean gradient | Per-record gradients $\le L$ (or clipped) | $(\varepsilon, \delta)$-DP, all iterates |
-| Excess risk, noisy gradient descent | $\approx(1 - \lambda/\beta)^T(J(w_0) - J^*) + d\sigma^2/(4\beta)$ | Strong convexity, smoothness, $\eta = 1/\beta$ | — |
+| Excess risk, noisy gradient descent | $\approx(1 - \lambda/\beta)^T(\mathcal L(\theta_0) - \mathcal L(\theta^*)) + d\sigma^2/(4\beta)$ | Strong convexity, smoothness, $\eta = 1/\beta$ | — |
 | Optimal rate, strongly convex | $L^2d/(\lambda n^2\varepsilon^2)$, up to logarithms in $n$ and $1/\delta$ | $\lambda$-strong convexity | Bassily, Smith & Thakurta (2014) |
-| Noisy projected gradient descent, no ridge | $\sigma = (2L/n)\sqrt T/\mu$, step $R/(G\sqrt T)$, $G^2 = L^2 + d\sigma^2$, averaged iterate | Convex, gradients $\le L$, ball of radius $R$ | $(\varepsilon, \delta)$-DP |
+| Noisy projected gradient descent, no ridge | $\sigma = (2L/n)\sqrt T/\mu$, learning rate $\eta = R/(G\sqrt T)$, $G^2 = L^2 + d\sigma^2$, averaged iterate | Convex, gradients $\le L$, ball of radius $R$ | $(\varepsilon, \delta)$-DP |
 | Excess risk, no ridge | $\le RL\sqrt{1/T + 4d/(n^2\mu^2)} \le 4RL\sqrt{d\ln(1.25/\delta)}/(n\varepsilon)$ | $T \ge n^2\mu^2/(4d)$, $\varepsilon < 1$ | Optimal up to logarithms |
 
 : Every result of the chapter. {#tbl-dperm-cheat}

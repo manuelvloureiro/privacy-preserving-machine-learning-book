@@ -48,7 +48,7 @@ Rotation invariance has a different reason. The joint density of $X$ depends on 
 
 ### Derivation
 
-1. **Why @eq-apx-prob-conv holds.** Fix a small interval of width $\Delta$ around $s$. The sum lands in it when $X$ is near some value $x$ and $Y$ lands within $\Delta$ of $s - x$. Given $X = x$, that has chance about $g(s - x)\Delta$, because $Y$ is independent of $X$ and so its density does not change. Averaging over $x$ with the density $f$ gives $\Delta\int f(x)g(s - x)\,dx$, and dividing by $\Delta$ gives the density. For counts the same step reads $\Pr[X + Y = k] = \sum_j\Pr[X = j]\Pr[Y = k - j]$, as in the dice.
+1. **Why @eq-apx-prob-conv holds.** Fix a small width $\kappa > 0$ and the interval of that width around $s$. The sum lands in it when $X$ is near some value $x$ and $Y$ lands within $\kappa$ of $s - x$. Given $X = x$, that has chance about $g(s - x)\kappa$, because $Y$ is independent of $X$ and so its density does not change. Averaging over $x$ with the density $f$ gives $\kappa\int f(x)g(s - x)\,dx$, and dividing by $\kappa$ gives the density. For counts the same step reads $\Pr[X + Y = k] = \sum_j\Pr[X = j]\Pr[Y = k - j]$, as in the dice.
 
 2. **Poisson.** Take independent $N_1 \sim \mathrm{Poisson}(\mu_1)$ and $N_2 \sim \mathrm{Poisson}(\mu_2)$. The sum of step 1, with $\Pr[N = j] = e^{-\mu}\mu^j/j!$, is
 $$\Pr[N_1 + N_2 = k] = \sum_{j=0}^k e^{-\mu_1}\frac{\mu_1^j}{j!}\,e^{-\mu_2}\frac{\mu_2^{k-j}}{(k-j)!} = \frac{e^{-(\mu_1+\mu_2)}}{k!}\sum_{j=0}^k\binom kj\mu_1^j\mu_2^{k-j}.$$
@@ -68,7 +68,7 @@ which you can check by expanding both forms. The first term is the exponent of a
 
 6. **Rotation invariance.** The coordinates of $X \sim \mathcal N(0, \sigma^2I_d)$ are independent, so its joint density is the product of $d$ normal densities. The exponents add up to the squared length $\|x\|^2 = x_1^2 + \dots + x_d^2$:
 $$p(x) = \prod_{i=1}^d\frac{e^{-x_i^2/(2\sigma^2)}}{\sigma\sqrt{2\pi}} = (2\pi\sigma^2)^{-d/2}e^{-\|x\|^2/(2\sigma^2)}.$$ {#eq-apx-prob-joint}
-In this appendix a **rotation** means any square matrix $O$ whose rows are perpendicular unit vectors, which is also called an orthogonal matrix (it includes reflections). It keeps every length, $\|Ox\| = \|x\|$, because the coordinates of $Ox$ are the components of $x$ along the rows of $O$. It also keeps every volume, because the factor by which a matrix scales volumes is $|\det O|$, and $\det O = \pm1$ since $O^\top O = I$. In two dimensions, for example, $O$ turns the plane by an angle $\theta$, and $\cos^2\theta + \sin^2\theta = 1$ is the reason lengths are kept. Now let $Y = OX$. For any region $A$, $Y$ lands in $A$ exactly when $X$ lands in the region $O^{-1}A$ that $O$ maps onto $A$. Substituting $x = O^{-1}y$, which keeps volume, gives $\Pr[Y \in A] = \int_A p(O^{-1}y)\,dy$. By @eq-apx-prob-joint, $p(O^{-1}y)$ depends only on $\|O^{-1}y\| = \|y\|$, so it equals $p(y)$. So $Y$ has the same density as $X$.
+In this appendix a **rotation** means any square matrix $O$ whose rows are perpendicular unit vectors, which is also called an orthogonal matrix (it includes reflections). It keeps every length, $\|Ox\| = \|x\|$, because the coordinates of $Ox$ are the components of $x$ along the rows of $O$. It also keeps every volume, because the factor by which a matrix scales volumes is $|\det O|$, and $\det O = \pm1$ since $O^\top O = I$. In two dimensions, for example, $O$ turns the plane by an angle $\phi$, and $\cos^2\phi + \sin^2\phi = 1$ is the reason lengths are kept. Now let $Y = OX$. For any region $A$, $Y$ lands in $A$ exactly when $X$ lands in the region $O^{-1}A$ that $O$ maps onto $A$. Substituting $x = O^{-1}y$, which keeps volume, gives $\Pr[Y \in A] = \int_A p(O^{-1}y)\,dy$. By @eq-apx-prob-joint, $p(O^{-1}y)$ depends only on $\|O^{-1}y\| = \|y\|$, so it equals $p(y)$. So $Y$ has the same density as $X$.
 
 7. **Perpendicular projections are independent.** Let $u$ and $v$ be perpendicular unit vectors. Choose a rotation $O$ whose first row is $u$ and whose second row is $v$; the other rows are any unit vectors that complete a perpendicular set. The first two coordinates of $Y = OX$ are then $\langle u, X\rangle$ and $\langle v, X\rangle$. By step 6, $Y \sim \mathcal N(0, \sigma^2I_d)$, so these two coordinates are independent $\mathcal N(0, \sigma^2)$ variables. This also proves the chapter's general remark, if "jointly normal" means "linear functions of one vector of independent standard normals". Two such variables $A = \langle a, G\rangle$ and $B = \langle b, G\rangle$, with $G \sim \mathcal N(0, I_d)$, have covariance $\mathbb E[AB] = \sum_{i,j}a_ib_j\,\mathbb E[G_iG_j] = \sum_ia_ib_i = \langle a, b\rangle$, because $\mathbb E[G_iG_j]$ is 1 when $i = j$ and 0 otherwise. When that is 0, $a/\|a\|$ and $b/\|b\|$ are perpendicular unit vectors, so $A$ and $B$ are multiples of two independent normals, and adding constant means keeps them independent.
 
@@ -84,7 +84,7 @@ The script of this appendix (see the Code section at the end) evaluates each con
 
 ![The density of $Y_1 - Y_2$ for independent $\mathrm{Exp}(1)$ variables at $x = -1$, 0 and 1.5, as the area under $f(y)f(y - x)$ (green), next to the $\mathrm{Lap}(1)$ density with those three areas marked.](figures/apx_prob_convolution.svg){#fig-apx-prob-convolution}
 
-For rotation invariance, the script draws a million points from $\mathcal N(0, I_2)$ and projects them onto $u = (\cos\theta, \sin\theta)$ and the perpendicular $v$, with $\theta = \pi/6$. The two projections have variances 0.9983 and 1.0010 and correlation $-0.0005$. Independence is a stronger claim than zero correlation, so the script also checks a joint probability. The chance that both projections exceed 1 is 0.0251, and the product of the two separate chances is $(1 - \Phi(1))^2 = 0.0252$, where $\Phi$ is the standard normal cumulative distribution function (CDF). @fig-apx-prob-rotation shows the circular contours and the two matching histograms.
+For rotation invariance, the script draws a million points from $\mathcal N(0, I_2)$ and projects them onto $u = (\cos\phi, \sin\phi)$ and the perpendicular $v$, with $\phi = \pi/6$. The two projections have variances 0.9983 and 1.0010 and correlation $-0.0005$. Independence is a stronger claim than zero correlation, so the script also checks a joint probability. The chance that both projections exceed 1 is 0.0251, and the product of the two separate chances is $(1 - \Phi(1))^2 = 0.0252$, where $\Phi$ is the standard normal cumulative distribution function (CDF). @fig-apx-prob-rotation shows the circular contours and the two matching histograms.
 
 ![Left: contours of the $\mathcal N(0, I_2)$ density, which are circles, with 400 sample points and two perpendicular unit vectors $u$ and $v$. Right: histograms of the projections $\langle u, X\rangle$ and $\langle v, X\rangle$ over 200,000 draws, against the $\mathcal N(0, 1)$ density.](figures/apx_prob_rotation.svg){#fig-apx-prob-rotation}
 
@@ -96,11 +96,11 @@ The derivations identify each sum that the book needs, one at a time. They do no
 
 ### What the chapter uses
 
-Four sections in the attacks part count with binomial probabilities. Write $X \sim \mathrm{Bin}(n, p)$ for the number of successes in $n$ independent trials with success probability $p$. Write $q = 1 - p$ and $p_k = \Pr[X = k] = \binom nkp^kq^{n-k}$.
+Four sections in the attacks part count with binomial probabilities. Write $X \sim \mathrm{Bin}(n, p)$ for the number of successes in $n$ independent trials with success probability $p$. Write $\bar p = 1 - p$ and $p_k = \Pr[X = k] = \binom nkp^k\bar p^{n-k}$.
 
 - @sec-threat-average (@eq-threat-avg-worst) says that the binomial weights "rise up to the middle value and fall after it". From that it shows that shifting $\mathrm{Bin}(m, \frac12)$ by one has total variation (TV) distance equal to the largest weight, $\binom{m}{\lfloor m/2\rfloor}2^{-m}$. It then says that this is about $\sqrt{2/(\pi m)}$ and leaves the proof to an exercise that takes Stirling's formula as given.
 - @sec-threat-games releases the exact sum $K$ of $m$ fair secret bits. Given $K$, the best guess sets every bit to the majority value, which gets $\max(K, m - K)$ bits right, so the expected fraction recovered is $\frac12 + \mathbb E|K - \frac m2|/m$. It approximates the fraction by $\frac12 + 1/\sqrt{2\pi m}$ through the central limit theorem and the mean absolute value $\sigma\sqrt{2/\pi}$ of a normal variable. That step assumes that the average distance $\mathbb E|K - \frac m2|$ follows the normal one, which the CLT alone does not give, because the CLT is a statement about probabilities, not averages.
-- @sec-prop-scaling (@eq-prop-membership) states that a binomial is unimodal. It then argues that the probability of the most likely count is close to the height $1/\sqrt{2\pi npq}$ of the normal curve, because "the density is nearly flat over a unit interval at the top".
+- @sec-prop-scaling (@eq-prop-membership) states that a binomial is unimodal. It then argues that the probability of the most likely count is close to the height $1/\sqrt{2\pi np\bar p}$ of the normal curve, because "the density is nearly flat over a unit interval at the top".
 - @sec-memo-exposure (@eq-memo-null-mean) uses $\ln N! = N\ln N - N + O(\ln N)$, "Stirling's approximation of the factorial", without proof.
 
 This section proves all of these. First, the binomial probabilities rise and then fall, with the most likely count at $\lfloor(n+1)p\rfloor$. Second, Stirling's formula holds with an explicit error $r_n$:
@@ -109,8 +109,8 @@ Third, the fraction of bits recovered from the sum of $m$ fair bits is exactly
 $$\frac12 + \frac12\binom{2j}{j}4^{-j}, \qquad j = \lfloor m/2\rfloor,$$ {#eq-apx-prob-recon}
 and $\binom{2j}{j}4^{-j}\sqrt{\pi j} \to 1$, so the fraction is $\frac12 + 1/\sqrt{2\pi m}$ up to a relative error that vanishes.
 
-Fourth, the height of the mode is close to the peak $1/\sqrt{2\pi npq}$ of the normal curve with the same mean and variance. The proof needs the count to have some spread, so it assumes $npq \ge 4$, and then
-$$\Big|\ln\big(\max_kp_k\cdot\sqrt{2\pi npq}\big)\Big| \le \frac{3.5}{npq}.$$ {#eq-apx-prob-peak}
+Fourth, the height of the mode is close to the peak $1/\sqrt{2\pi np\bar p}$ of the normal curve with the same mean and variance. The proof needs the count to have some spread, so it assumes $np\bar p \ge 4$, and then
+$$\Big|\ln\big(\max_kp_k\cdot\sqrt{2\pi np\bar p}\big)\Big| \le \frac{3.5}{np\bar p}.$$ {#eq-apx-prob-peak}
 
 ### The idea
 
@@ -121,8 +121,8 @@ For the factorial, compare a sum with an integral. The logarithm $\ln n! = \ln 1
 ### Derivation
 
 1. **The ratio of neighbours.** Dividing the binomial formula at $k + 1$ by the one at $k$, most factors cancel:
-$$\frac{p_{k+1}}{p_k} = \frac{n - k}{k + 1}\cdot\frac pq.$$
-As $k$ grows the numerator $n - k$ falls and the denominator $k + 1$ rises, so the ratio decreases. It is above 1 exactly when $(n - k)p > (k + 1)q$, which rearranges to $k < (n + 1)p - 1$. So the probabilities rise while $k + 1 < (n + 1)p$ and do not rise after. The last count reached by a rise is the largest whole number not above $(n + 1)p$, so the largest probability is at $k^* = \lfloor(n + 1)p\rfloor$. When $(n + 1)p$ is a whole number the ratio there is exactly 1, and $k^* - 1$ ties with $k^*$.
+$$\frac{p_{k+1}}{p_k} = \frac{n - k}{k + 1}\cdot\frac p{\bar p}.$$
+As $k$ grows the numerator $n - k$ falls and the denominator $k + 1$ rises, so the ratio decreases. It is above 1 exactly when $(n - k)p > (k + 1)\bar p$, which rearranges to $k < (n + 1)p - 1$. So the probabilities rise while $k + 1 < (n + 1)p$ and do not rise after. The last count reached by a rise is the largest whole number not above $(n + 1)p$, so the largest probability is at $k^* = \lfloor(n + 1)p\rfloor$. When $(n + 1)p$ is a whole number the ratio there is exactly 1, and $k^* - 1$ ties with $k^*$.
 
 2. **Shifting by one costs the height of the peak.** This is the argument of @sec-threat-average, which step 1 completes. The shifted list is the distribution of $X + 1$, with $\Pr[X + 1 = k] = p_{k-1}$, and the TV distance is the total of $p_{k-1} - p_k$ over the $k$ where it is positive. By step 1 those are exactly the $k$ after the peak, $k = k^* + 1, \dots, n + 1$, with $p_{n+1} = 0$. In the sum $(p_{k^*} - p_{k^*+1}) + (p_{k^*+1} - p_{k^*+2}) + \dots + (p_n - p_{n+1})$, each negative part cancels the positive part of the next difference, and only $p_{k^*}$ survives. So the TV distance equals $\max_kp_k$.
 
@@ -135,7 +135,7 @@ $$\ln n! = n\ln n - n + O(\ln n).$$
 $$d_n - d_{n+1} = \Big(n + \frac12\Big)\ln\frac{n + 1}{n} - 1.$$
 Write $u = 1/(2n + 1)$. Then $\frac{n + 1}{n} = \frac{1 + u}{1 - u}$ and $n + \frac12 = \frac1{2u}$. The power series $\ln\frac{1 + u}{1 - u} = 2(u + \frac{u^3}3 + \frac{u^5}5 + \cdots)$ comes from subtracting the series of $\ln(1 - u)$ from that of $\ln(1 + u)$, where the even powers cancel. Multiplying by $\frac1{2u}$ and subtracting 1 gives
 $$d_n - d_{n+1} = \frac{u^2}{3} + \frac{u^4}{5} + \frac{u^6}{7} + \cdots.$$
-Every term is positive, so $d_n$ decreases. The denominators 5, 7, … are larger than 3, so the sum is at most $\frac{u^2}3(1 + u^2 + u^4 + \cdots) = \frac{u^2}{3(1 - u^2)}$. Since $1 - u^2 = \frac{4n(n+1)}{(2n+1)^2}$, this equals $\frac{1}{12n(n + 1)}$, which is $\frac1{12}\big(\frac1n - \frac1{n+1}\big)$. Adding these steps from $n$ onwards, the right sides telescope, so $d_n - d_{n+k} < \frac1{12n}$ for every $k$. A decreasing sequence that never drops more than a fixed amount has a limit, so $d_n$ tends to a constant $C$, with $0 < d_n - C \le \frac1{12n}$. This is @eq-apx-prob-stirling with $r_n = d_n - C$, once $C = \ln\sqrt{2\pi}$.
+Every term is positive, so $d_n$ decreases. The denominators 5, 7, … are larger than 3, so the sum is at most $\frac{u^2}3(1 + u^2 + u^4 + \cdots) = \frac{u^2}{3(1 - u^2)}$. Since $1 - u^2 = \frac{4n(n+1)}{(2n+1)^2}$, this equals $\frac{1}{12n(n + 1)}$, which is $\frac1{12}\big(\frac1n - \frac1{n+1}\big)$. Adding these steps from $n$ onwards, the right sides telescope, so $d_n - d_{n+k} < \frac1{12n}$ for every $k$. A decreasing sequence that never drops more than a fixed amount has a limit, so $d_n$ tends to a constant $d_\infty$, with $0 < d_n - d_\infty \le \frac1{12n}$. This is @eq-apx-prob-stirling with $r_n = d_n - d_\infty$, once $d_\infty = \ln\sqrt{2\pi}$.
 
 5. **Wallis's integrals.** Let $I_n = \int_0^{\pi/2}\sin^nx\,dx$, so $I_0 = \pi/2$ and $I_1 = 1$. Integrating by parts, with $\sin^nx = \sin^{n-1}x\cdot\sin x$, gives $I_n = (n - 1)\int_0^{\pi/2}\sin^{n-2}x\cos^2x\,dx$. Writing $\cos^2x = 1 - \sin^2x$ turns this into $(n - 1)(I_{n-2} - I_n)$, so $I_n = \frac{n-1}{n}I_{n-2}$. Running this down to $I_0$ or $I_1$ gives products of fractions such as $\frac{1\cdot3\cdots(2j-1)}{2\cdot4\cdots2j}$, which equals $\binom{2j}j4^{-j}$. So
 $$I_{2j} = \frac\pi2\binom{2j}{j}4^{-j}, \qquad I_{2j+1} = \frac{1}{(2j + 1)\binom{2j}{j}4^{-j}}.$$
@@ -145,21 +145,21 @@ where $o(1)$ is a quantity that tends to 0 as $j$ grows.
 
 6. **The constant.** Write $\ln\binom{2j}{j} = \ln(2j)! - 2\ln j!$ and replace each $\ln n!$ by $d_n + (n + \frac12)\ln n - n$, which is the definition of step 4 solved for $\ln n!$. Writing $\ln(2j) = \ln 2 + \ln j$, the terms in $j\ln j$ and $j$ cancel, and what is left is
 $$\ln\Big(\binom{2j}{j}4^{-j}\Big) = d_{2j} - 2d_j + \tfrac12\ln 2 - \tfrac12\ln j.$$
-As $j$ grows, $d_{2j} - 2d_j \to -C$. By @eq-apx-prob-central the left side is $-\frac12\ln(\pi j) + o(1)$. Matching the two gives $-C + \frac12\ln 2 = -\frac12\ln\pi$, so $C = \frac12\ln(2\pi) = \ln\sqrt{2\pi}$.
+As $j$ grows, $d_{2j} - 2d_j \to -d_\infty$. By @eq-apx-prob-central the left side is $-\frac12\ln(\pi j) + o(1)$. Matching the two gives $-d_\infty + \frac12\ln 2 = -\frac12\ln\pi$, so $d_\infty = \frac12\ln(2\pi) = \ln\sqrt{2\pi}$.
 
 7. **The fraction recovered, exactly.** For $K \sim \mathrm{Bin}(m, \frac12)$ one identity does all the work:
 $$\Big(k - \frac m2\Big)\binom mk = \frac m2\Big[\binom{m-1}{k-1} - \binom{m-1}{k}\Big].$$
 It holds because $\binom{m-1}{k-1} = \frac km\binom mk$ and $\binom{m-1}{k} = \frac{m-k}m\binom mk$. By symmetry about $\frac m2$, $\mathbb E|K - \frac m2|$ is twice the sum of $(k - \frac m2)\binom mk2^{-m}$ over $k > \frac m2$. Let $k_0$ be the first whole number above $\frac m2$. Replacing each term by the identity, the sum from $k_0$ to $m$ telescopes as in step 2, because the second binomial of each term cancels the first binomial of the next, and only $\frac m2\binom{m-1}{k_0-1}2^{-m}$ is left. So $\mathbb E|K - \frac m2|/m = \binom{m-1}{k_0-1}2^{-m}$. Now write $j = \lfloor m/2\rfloor$. When $m = 2j$ is even, $k_0 = j + 1$ and $\binom{2j-1}{j} = \frac12\binom{2j}{j}$. When $m = 2j + 1$ is odd, $k_0 = j + 1$ again and $\binom{2j}{j}2^{-2j-1}$ appears directly. Either way $\mathbb E|K - \frac m2|/m = \frac12\binom{2j}{j}4^{-j}$, which is @eq-apx-prob-recon. For $m = 10$ the fraction recovered is $\frac12 + \frac12 \cdot 252/1024 = 0.62305$. By @eq-apx-prob-central and $j \approx m/2$, the excess over $\frac12$ is $\frac{1 + o(1)}{2\sqrt{\pi m/2}} = \frac{1 + o(1)}{\sqrt{2\pi m}}$, which is the chapter's approximation, now proved.
 
-8. **The height of the peak for any $p$.** Write $k = k^*$ for the mode and $a = k/n$ for the fraction of successes there. Replace each of $n!$, $k!$ and $(n - k)!$ in $p_k$ by @eq-apx-prob-stirling. The square roots give $\sqrt{n/(2\pi k(n - k))}$, and the powers $n^n$, $k^k$, $(n-k)^{n-k}$, $p^k$ and $q^{n-k}$ combine into $\exp\big(-k\ln\frac{k}{np} - (n - k)\ln\frac{n-k}{nq}\big)$. Multiplying by $\sqrt{2\pi npq}$ and grouping gives three factors:
-$$p_k\sqrt{2\pi npq} = \underbrace{\sqrt{\frac{pq}{a(1 - a)}}}_{A}\cdot\underbrace{e^{-nD(a\|p)}}_{B}\cdot\underbrace{e^{r_n - r_k - r_{n-k}}}_{R},$$
-where $D(a\|p) = a\ln\frac ap + (1 - a)\ln\frac{1-a}q$ is the Kullback–Leibler (KL) divergence between coins with success probabilities $a$ and $p$, which is never negative. The mode is within one count of the mean. By step 1, $k^*$ lies between $(n + 1)p - 1$ and $(n + 1)p$, so $k^* = np + \theta$ with $|\theta| < 1$. Each factor is then close to 1.
+8. **The height of the peak for any $p$.** Write $k = k^*$ for the mode and $a = k/n$ for the fraction of successes there. Replace each of $n!$, $k!$ and $(n - k)!$ in $p_k$ by @eq-apx-prob-stirling. The square roots give $\sqrt{n/(2\pi k(n - k))}$, and the powers $n^n$, $k^k$, $(n-k)^{n-k}$, $p^k$ and $\bar p^{n-k}$ combine into $\exp\big(-k\ln\frac{k}{np} - (n - k)\ln\frac{n-k}{n\bar p}\big)$. Multiplying by $\sqrt{2\pi np\bar p}$ and grouping gives three factors:
+$$p_k\sqrt{2\pi np\bar p} = \underbrace{\sqrt{\frac{p\bar p}{a(1 - a)}}}_{A}\cdot\underbrace{e^{-n\,\mathrm{kl}(a\|p)}}_{B}\cdot\underbrace{e^{r_n - r_k - r_{n-k}}}_{R},$$
+where $\mathrm{kl}(a\|p) = a\ln\frac ap + (1 - a)\ln\frac{1-a}{\bar p}$ is the Kullback–Leibler (KL) divergence between coins with success probabilities $a$ and $p$, which is never negative. The mode is within one count of the mean. By step 1, $k^*$ lies between $(n + 1)p - 1$ and $(n + 1)p$, so the offset $\xi = k^* - np$ satisfies $|\xi| < 1$. Each factor is then close to 1.
 
-    - *Factor $B$.* The logarithm is concave, so by Jensen's inequality $D(a\|p) \le \ln\big(\frac{a^2}p + \frac{(1-a)^2}q\big) = \ln\big(1 + \frac{(a-p)^2}{pq}\big) \le \frac{(a-p)^2}{pq}$. With $a - p = \theta/n$, this gives $0 \le -\ln B = nD(a\|p) \le \theta^2/(npq) < 1/(npq)$.
-    - *Factor $R$.* By @eq-apx-prob-stirling, $|\ln R| \le \frac1{12}\big(\frac1n + \frac1k + \frac1{n-k}\big)$. When $npq \ge 4$, $k > np - 1 \ge np/2$ and $n - k > nq - 1 \ge nq/2$, so $|\ln R| \le \frac{1}{12}\cdot\frac{5}{npq}$, using $\frac1n, \frac1{np}, \frac1{nq} \le \frac1{npq}$.
-    - *Factor $A$.* With $a = p + \theta/n$ and $1 - a = q - \theta/n$, multiplying out gives $a(1 - a) = pq(1 + x)$ with $x = \frac{\theta(q - p)}{npq} - \frac{\theta^2}{n^2pq}$, so $|x| \le \frac{2}{npq} \le \frac12$. For $|x| \le \frac12$, $|\ln(1 + x)| \le 2|x|$, so $|\ln A| = \frac12|\ln(1 + x)| \le \frac{2}{npq}$.
+    - *Factor $B$.* The logarithm is concave, so by Jensen's inequality $\mathrm{kl}(a\|p) \le \ln\big(\frac{a^2}p + \frac{(1-a)^2}{\bar p}\big) = \ln\big(1 + \frac{(a-p)^2}{p\bar p}\big) \le \frac{(a-p)^2}{p\bar p}$. With $a - p = \xi/n$, this gives $0 \le -\ln B = n\,\mathrm{kl}(a\|p) \le \xi^2/(np\bar p) < 1/(np\bar p)$.
+    - *Factor $R$.* By @eq-apx-prob-stirling, $|\ln R| \le \frac1{12}\big(\frac1n + \frac1k + \frac1{n-k}\big)$. When $np\bar p \ge 4$, $k > np - 1 \ge np/2$ and $n - k > n\bar p - 1 \ge n\bar p/2$, so $|\ln R| \le \frac{1}{12}\cdot\frac{5}{np\bar p}$, using $\frac1n, \frac1{np}, \frac1{n\bar p} \le \frac1{np\bar p}$.
+    - *Factor $A$.* With $a = p + \xi/n$ and $1 - a = \bar p - \xi/n$, multiplying out gives $a(1 - a) = p\bar p(1 + x)$ with $x = \frac{\xi(\bar p - p)}{np\bar p} - \frac{\xi^2}{n^2p\bar p}$, so $|x| \le \frac{2}{np\bar p} \le \frac12$. For $|x| \le \frac12$, $|\ln(1 + x)| \le 2|x|$, so $|\ln A| = \frac12|\ln(1 + x)| \le \frac{2}{np\bar p}$.
 
-    Adding the three logarithms gives $(2 + 1 + \frac5{12})/(npq) < 3.5/(npq)$, which is @eq-apx-prob-peak. With $n - 1$ trials and the chapter's subgroup share $t$ as the success probability, it gives @eq-prop-membership, and for $p = \frac12$ the height $\sqrt{2/(\pi m)}$ of @sec-threat-average.
+    Adding the three logarithms gives $(2 + 1 + \frac5{12})/(np\bar p) < 3.5/(np\bar p)$, which is @eq-apx-prob-peak. With $n - 1$ trials and the chapter's subgroup share $t$ as the success probability, it gives @eq-prop-membership, and for $p = \frac12$ the height $\sqrt{2/(\pi m)}$ of @sec-threat-average.
 
 ### Checking it
 
@@ -173,9 +173,9 @@ Stirling's error is close to its bound everywhere (@fig-apx-prob-stirling). At $
 
 For the fraction of bits recovered, @eq-apx-prob-recon gives 0.62305, 0.53979 and 0.51261 for $m = 10$, 100 and 1000, matching the sums over the binomial table to the digits shown. The approximation $\frac12 + 1/\sqrt{2\pi m}$ gives 0.62616, 0.53989 and 0.51262. The script also confirms that $m = 11$ recovers the same fraction as $m = 10$, as @eq-apx-prob-recon says. The ratio $\binom{2j}{j}4^{-j}\sqrt{\pi j}$ is 0.97535 at $j = 5$ and 0.99750 at $j = 50$, so it approaches 1 with an error close to $1/(8j)$.
 
-@fig-apx-prob-peak shows @eq-apx-prob-peak. The ratio of the mode height to $1/\sqrt{2\pi npq}$ approaches 1 for $p = 0.5$, 0.2 and 0.05. At $n = 100$ it is 0.9975, 0.9956 and 0.9834. The right panel shows that the error falls like $1/(npq)$. The constant 3.5 of the proof is loose: over every $n \le 20{,}000$ and six values of $p$ with $npq \ge 4$, the script finds $npq\,|\ln(\text{ratio})|$ at most 0.187.
+@fig-apx-prob-peak shows @eq-apx-prob-peak. The ratio of the mode height to $1/\sqrt{2\pi np\bar p}$ approaches 1 for $p = 0.5$, 0.2 and 0.05. At $n = 100$ it is 0.9975, 0.9956 and 0.9834. The right panel shows that the error falls like $1/(np\bar p)$. The constant 3.5 of the proof is loose: over every $n \le 20{,}000$ and six values of $p$ with $np\bar p \ge 4$, the script finds $np\bar p\,|\ln(\text{ratio})|$ at most 0.187.
 
-![Left: the height of the binomial mode divided by the normal peak height $1/\sqrt{2\pi npq}$, against $n$, for three values of $p$. Right: the absolute logarithm of that ratio against $npq$, with the proved bound $3.5/(npq)$.](figures/apx_prob_peak.svg){#fig-apx-prob-peak}
+![Left: the height of the binomial mode divided by the normal peak height $1/\sqrt{2\pi np\bar p}$, against $n$, for three values of $p$. Right: the absolute logarithm of that ratio against $np\bar p$, with the proved bound $3.5/(np\bar p)$.](figures/apx_prob_peak.svg){#fig-apx-prob-peak}
 
 ## The central limit theorem, by swapping one term at a time {#sec-apx-prob-clt}
 
@@ -204,22 +204,22 @@ Then $H_n = S$, and $H_0 = (G_1 + \dots + G_n)/s$ is exactly $\mathcal N(0, 1)$ 
 2. **Telescoping.** For any test function $h$, the change from $Z$ to $S$ is a sum of single swaps, because the middle terms cancel in pairs:
 $$\mathbb E h(S) - \mathbb E h(Z) = \sum_{k=1}^n\big(\mathbb E h(H_k) - \mathbb E h(H_{k-1})\big).$$
 
-3. **One swap.** The hybrids $H_k$ and $H_{k-1}$ differ only in term $k$. So if $W$ stands for the other terms divided by $s$, then $H_k = W + Y_k/s$ while $H_{k-1} = W + G_k/s$. The rest $W$ is independent of both $Y_k$ and $G_k$. Now suppose that $h$ has two derivatives, and that its second derivative $h''$ changes by at most $M|a - b|$ between any two points $a$ and $b$, for a constant $M$. Taylor's theorem with this condition says that, for every $w$ and $y$,
-$$\Big|h(w + y) - h(w) - h'(w)y - \tfrac12h''(w)y^2\Big| \le \frac M6|y|^3.$$
+3. **One swap.** The hybrids $H_k$ and $H_{k-1}$ differ only in term $k$. So if $W$ stands for the other terms divided by $s$, then $H_k = W + Y_k/s$ while $H_{k-1} = W + G_k/s$. The rest $W$ is independent of both $Y_k$ and $G_k$. Now suppose that $h$ has two derivatives, and that its second derivative $h''$ changes by at most $\gamma|a - b|$ between any two points $a$ and $b$, for a constant $\gamma$. Taylor's theorem with this condition says that, for every $w$ and $y$,
+$$\Big|h(w + y) - h(w) - h'(w)y - \tfrac12h''(w)y^2\Big| \le \frac\gamma6|y|^3.$$
 Apply it with $y = Y_k/s$, take expectations, and do the same with $G_k$. The term $h(W)$ is common to both. The first-order term averages to 0 for both, because $W$ is independent of $Y_k$ and $Y_k$ has mean 0, so $\mathbb E[h'(W)Y_k] = \mathbb E[h'(W)]\,\mathbb E[Y_k] = 0$, and likewise for $G_k$. The second-order term averages to $\frac12\mathbb E[h''(W)]\,\sigma_k^2$ for both, because $Y_k$ and $G_k$ have the same variance. So these terms cancel and
-$$\big|\mathbb E h(H_k) - \mathbb E h(H_{k-1})\big| \le \frac{M}{6s^3}\big(\mathbb E|Y_k|^3 + \mathbb E|G_k|^3\big).$$
+$$\big|\mathbb E h(H_k) - \mathbb E h(H_{k-1})\big| \le \frac{\gamma}{6s^3}\big(\mathbb E|Y_k|^3 + \mathbb E|G_k|^3\big).$$
 
-4. **Sum the swaps.** For a normal variable, $\mathbb E|G_k|^3 = 2\sqrt{2/\pi}\,\sigma_k^3 \approx 1.596\,\sigma_k^3$, which you get by integrating $|x|^3$ against the normal density. And $\sigma_k^3 = (\mathbb E Y_k^2)^{3/2} \le \mathbb E|Y_k|^3$ by Jensen's inequality, because $x \mapsto x^{3/2}$ is convex. So each swap costs at most $\frac{M}{6s^3}(1 + 2\sqrt{2/\pi})\mathbb E|Y_k|^3$. By step 2, with $c = (1 + 2\sqrt{2/\pi})/6 \approx 0.433$,
-$$\big|\mathbb E h(S) - \mathbb E h(Z)\big| \le c\,M\,L.$$ {#eq-apx-prob-smooth}
+4. **Sum the swaps.** For a normal variable, $\mathbb E|G_k|^3 = 2\sqrt{2/\pi}\,\sigma_k^3 \approx 1.596\,\sigma_k^3$, which you get by integrating $|x|^3$ against the normal density. And $\sigma_k^3 = (\mathbb E Y_k^2)^{3/2} \le \mathbb E|Y_k|^3$ by Jensen's inequality, because $x \mapsto x^{3/2}$ is convex. So each swap costs at most $\frac{\gamma}{6s^3}(1 + 2\sqrt{2/\pi})\mathbb E|Y_k|^3$. By step 2, with $c = (1 + 2\sqrt{2/\pi})/6 \approx 0.433$,
+$$\big|\mathbb E h(S) - \mathbb E h(Z)\big| \le c\,\gamma\,L.$$ {#eq-apx-prob-smooth}
 
-5. **A smooth ramp.** The function $\rho(u) = 6u^5 - 15u^4 + 10u^3$ rises from $\rho(0) = 0$ to $\rho(1) = 1$. Its first two derivatives are 0 at both ends, and its third derivative is at most 60 in size on $[0, 1]$. Set $\rho = 0$ below 0 and $\rho = 1$ above 1. For a width $\varepsilon > 0$ and a point $z$, the upper ramp $h^+(x) = 1 - \rho((x - z)/\varepsilon)$ is 1 up to $z$ and 0 beyond $z + \varepsilon$. Its second derivative changes by at most $M = 60/\varepsilon^3$ per unit, so @eq-apx-prob-smooth applies with that $M$. The lower ramp $h^-(x) = h^+(x + \varepsilon)$ is the same ramp moved left by $\varepsilon$.
+5. **A smooth ramp.** The function $\rho(u) = 6u^5 - 15u^4 + 10u^3$ rises from $\rho(0) = 0$ to $\rho(1) = 1$. Its first two derivatives are 0 at both ends, and its third derivative is at most 60 in size on $[0, 1]$. Set $\rho = 0$ below 0 and $\rho = 1$ above 1. For a width $\kappa > 0$ and a point $z$, the upper ramp $h^+(x) = 1 - \rho((x - z)/\kappa)$ is 1 up to $z$ and 0 beyond $z + \kappa$. Its second derivative changes by at most $\gamma = 60/\kappa^3$ per unit, so @eq-apx-prob-smooth applies with that $\gamma$. The lower ramp $h^-(x) = h^+(x + \kappa)$ is the same ramp moved left by $\kappa$.
 
 6. **Sandwich the indicator.** At every point, $h^-(x) \le \mathbf 1[x \le z] \le h^+(x)$. Averaging keeps the order, so
-$$\Pr[S \le z] \le \mathbb E h^+(S) \le \mathbb E h^+(Z) + cML \le \Phi(z + \varepsilon) + cML.$$
-The last step uses $h^+ \le \mathbf 1[x \le z + \varepsilon]$. The normal density is at most $1/\sqrt{2\pi}$, so $\Phi(z + \varepsilon) \le \Phi(z) + \varepsilon/\sqrt{2\pi}$. The lower ramp gives the matching bound from below, so
-$$\big|\Pr[S \le z] - \Phi(z)\big| \le \frac{\varepsilon}{\sqrt{2\pi}} + \frac{60\,c\,L}{\varepsilon^3}.$$
+$$\Pr[S \le z] \le \mathbb E h^+(S) \le \mathbb E h^+(Z) + c\gamma L \le \Phi(z + \kappa) + c\gamma L.$$
+The last step uses $h^+ \le \mathbf 1[x \le z + \kappa]$. The normal density is at most $1/\sqrt{2\pi}$, so $\Phi(z + \kappa) \le \Phi(z) + \kappa/\sqrt{2\pi}$. The lower ramp gives the matching bound from below, so
+$$\big|\Pr[S \le z] - \Phi(z)\big| \le \frac{\kappa}{\sqrt{2\pi}} + \frac{60\,c\,L}{\kappa^3}.$$
 
-7. **Choose the width.** A narrow ramp fits the indicator closely but has a large third derivative. The best balance sets the derivative in $\varepsilon$ to zero, which gives $\varepsilon^4 = 180\,c\,L\sqrt{2\pi}$. At that width the second term is a third of the first, and the bound is $\frac43\varepsilon/\sqrt{2\pi} = 1.99\,L^{1/4}$. That proves @eq-apx-prob-clt.
+7. **Choose the width.** A narrow ramp fits the indicator closely but has a large third derivative. The best balance sets the derivative in $\kappa$ to zero, which gives $\kappa^4 = 180\,c\,L\sqrt{2\pi}$. At that width the second term is a third of the first, and the bound is $\frac43\kappa/\sqrt{2\pi} = 1.99\,L^{1/4}$. That proves @eq-apx-prob-clt.
 
 **Many dimensions.** @sec-apx-opt-mest and other sections use the CLT for random vectors. It follows from the one-dimensional theorem by the Cramér–Wold device: a sequence of random vectors converges in distribution to a normal vector if and only if every fixed linear combination of the coordinates converges to the matching normal variable. Each linear combination is a sum of independent scalar terms, so the theorem above applies to it. The Cramér–Wold device itself rests on a uniqueness theorem for the Fourier transform of a distribution, a relative of the MGF, so it stays cited (Billingsley, 1995).
 
@@ -229,15 +229,15 @@ $$\big|\Pr[S \le z] - \Phi(z)\big| \le \frac{\varepsilon}{\sqrt{2\pi}} + \frac{6
 
 ![The error $|\mathbb E\,h(H_k) - \mathbb E\,h(Z)|$ after swapping $k$ of $n = 30$ normal terms for centred $\mathrm{Exp}(1)$ terms, with $h = \sin$, computed exactly, against the sum of the per-swap bounds of step 3.](figures/apx_prob_lindeberg.svg){#fig-apx-prob-lindeberg}
 
-@fig-apx-prob-smoothing draws the sandwich of step 6 at $z = 0$. The ramps lie on either side of the indicator, and the shaded area under the normal density is the price $\Phi(\varepsilon) - \Phi(0)$ of a ramp of width $\varepsilon = 0.5$.
+@fig-apx-prob-smoothing draws the sandwich of step 6 at $z = 0$. The ramps lie on either side of the indicator, and the shaded area under the normal density is the price $\Phi(\kappa) - \Phi(0)$ of a ramp of width $\kappa = 0.5$.
 
-![The indicator $\mathbf 1[x \le 0]$ between the upper and lower smooth ramps of widths $\varepsilon = 0.5$ and $0.2$, over the $\mathcal N(0, 1)$ density. The shaded area is $\Phi(0.5) - \Phi(0)$.](figures/apx_prob_smoothing.svg){#fig-apx-prob-smoothing}
+![The indicator $\mathbf 1[x \le 0]$ between the upper and lower smooth ramps of widths $\kappa = 0.5$ and $0.2$, over the $\mathcal N(0, 1)$ density. The shaded area is $\Phi(0.5) - \Phi(0)$.](figures/apx_prob_smoothing.svg){#fig-apx-prob-smoothing}
 
 The CDF bound is valid but slow. For 30 $\mathrm{Exp}(1)$ terms the Lyapunov ratio is $L = 0.4408$, and @eq-apx-prob-clt gives 1.6201, which says nothing, while the true largest gap is 0.0243. Even at $n = 10^8$ the bound is still 0.2478. The Berry–Esseen bound $0.48L$ gives 0.2116 at $n = 30$. The proof gets the right answer in the limit, but not the right rate.
 
 ### What it does not cover
 
-The proof assumes finite third moments, but the CLT holds with finite variance alone. Lindeberg's original argument handles that case by cutting each term into a bounded part and a small remainder. The rate the proof gives is also weak. The Berry–Esseen theorem improves $L^{1/4}$ to $C\,L$, with $C < 0.48$ for identical terms (Shevtsova, 2011) and a constant of the same size for terms that are not identical. Its proof uses Fourier analysis, so it stays cited. The sandwich loses the rate because a smooth ramp of width $\varepsilon$ must pay $\varepsilon^{-3}$ in its third derivative.
+The proof assumes finite third moments, but the CLT holds with finite variance alone. Lindeberg's original argument handles that case by cutting each term into a bounded part and a small remainder. The rate the proof gives is also weak. The Berry–Esseen theorem improves $L^{1/4}$ to a constant times $L$, with a constant below 0.48 for identical terms (Shevtsova, 2011) and a constant of the same size for terms that are not identical. Its proof uses Fourier analysis, so it stays cited. The sandwich loses the rate because a smooth ramp of width $\kappa$ must pay $\kappa^{-3}$ in its third derivative.
 
 ## The length of a normal vector stays near $\sqrt d$ {#sec-apx-prob-gauss-norm}
 
@@ -291,40 +291,40 @@ The bound holds in every dimension, and over $d$ up to 10,000 and $t$ up to 6 th
 
 ### What the chapter uses
 
-@sec-pate-stable compares a Laplace noise $\nu \sim \mathrm{Lap}(b_1)$ with another, independent noise $\rho \sim \mathrm{Lap}(b_2)$, where $b_1 = 4/\varepsilon_0$ and $b_2 = 2/\varepsilon_0$ for a budget $\varepsilon_0$. It runs a test on each of $P$ queries and wants the chance that any test wrongly passes to be at most a small number $\delta_{\text{bad}}$. So it sets a threshold $t$ with $P\cdot\Pr[\nu - \rho > t] \le \delta_{\text{bad}}$, using the tail of the difference given by @eq-pate-stable-threshold:
-$$\Pr[\nu - \rho > t] = \frac{b_1^2e^{-t/b_1} - b_2^2e^{-t/b_2}}{2(b_1^2 - b_2^2)}, \qquad t \ge 0,\ b_1 \ne b_2.$$ {#eq-apx-prob-lapdiff}
+@sec-pate-stable compares a Laplace noise $\nu \sim \mathrm{Lap}(b_1)$ with another, independent noise $\rho \sim \mathrm{Lap}(b_2)$, where $b_1 = 4/\varepsilon_0$ and $b_2 = 2/\varepsilon_0$ for a budget $\varepsilon_0$. It runs a test on each of $P$ queries and wants the chance that any test wrongly passes to be at most a small number $\delta_{\text{bad}}$. So it sets a threshold $\tau$ with $P\cdot\Pr[\nu - \rho > \tau] \le \delta_{\text{bad}}$, using the tail of the difference given by @eq-pate-stable-threshold:
+$$\Pr[\nu - \rho > \tau] = \frac{b_1^2e^{-\tau/b_1} - b_2^2e^{-\tau/b_2}}{2(b_1^2 - b_2^2)}, \qquad \tau \ge 0,\ b_1 \ne b_2.$$ {#eq-apx-prob-lapdiff}
 The chapter says that the formula "comes from integrating the density of a sum of two Laplace variables, and the script checks it by simulation". @sec-lower-packing uses the case of equal scales, $b_1 = b_2 = 1/\varepsilon$, where the difference has density $\frac\varepsilon4(1 + \varepsilon|z|)e^{-\varepsilon|z|}$. This section does the integral.
 
 ### The idea
 
-A Laplace variable is symmetric, so $-\rho$ is again $\mathrm{Lap}(b_2)$, and the difference $\nu - \rho$ is a sum $\nu + \rho'$ of two independent Laplace variables, with $\rho' = -\rho \sim \mathrm{Lap}(b_2)$. Its density at $s$ is the convolution @eq-apx-prob-conv. Each Laplace density has a corner at 0, so the integral splits into three ranges of the first variable $y$: below 0, between 0 and $s$, and above $s$. On each range both absolute values have a fixed sign, the integrand is a single exponential, and its integral is one line. Integrating the density from $t$ outwards then gives the tail.
+A Laplace variable is symmetric, so $-\rho$ is again $\mathrm{Lap}(b_2)$, and the difference $\nu - \rho$ is a sum $\nu + \rho'$ of two independent Laplace variables, with $\rho' = -\rho \sim \mathrm{Lap}(b_2)$. Its density at $s$ is the convolution @eq-apx-prob-conv. Each Laplace density has a corner at 0, so the integral splits into three ranges of the first variable $y$: below 0, between 0 and $s$, and above $s$. On each range both absolute values have a fixed sign, the integrand is a single exponential, and its integral is one line. Integrating the density from $\tau$ outwards then gives the tail.
 
 ### Derivation
 
-1. **Three pieces.** Fix $s \ge 0$, and write the density of $\nu + \rho'$ at $s$ as $\frac{1}{4b_1b_2}\int e^{-|y|/b_1 - |s - y|/b_2}\,dy$. Write $\beta = b_1b_2$ for short.
-    - For $y < 0$, the exponent is $y/b_1 - (s - y)/b_2$. Its integral over $y < 0$ is $e^{-s/b_2}\cdot\frac{\beta}{b_1 + b_2}$, because $\int_{-\infty}^0e^{y(1/b_1 + 1/b_2)}\,dy = \frac{1}{1/b_1 + 1/b_2}$.
-    - For $y > s$, the exponent is $-y/b_1 - (y - s)/b_2$, and the same computation gives $e^{-s/b_1}\cdot\frac{\beta}{b_1 + b_2}$.
-    - For $0 \le y \le s$, the exponent is $-y/b_1 - (s - y)/b_2 = -s/b_2 + y(1/b_2 - 1/b_1)$. With $b_1 \ne b_2$ its integral is $\frac{\beta}{b_1 - b_2}\big(e^{-s/b_1} - e^{-s/b_2}\big)$.
+1. **Three pieces.** Fix $s \ge 0$, and write the density of $\nu + \rho'$ at $s$ as $\frac{1}{4b_1b_2}\int e^{-|y|/b_1 - |s - y|/b_2}\,dy$.
+    - For $y < 0$, the exponent is $y/b_1 - (s - y)/b_2$. Its integral over $y < 0$ is $e^{-s/b_2}\cdot\frac{b_1b_2}{b_1 + b_2}$, because $\int_{-\infty}^0e^{y(1/b_1 + 1/b_2)}\,dy = \frac{1}{1/b_1 + 1/b_2}$.
+    - For $y > s$, the exponent is $-y/b_1 - (y - s)/b_2$, and the same computation gives $e^{-s/b_1}\cdot\frac{b_1b_2}{b_1 + b_2}$.
+    - For $0 \le y \le s$, the exponent is $-y/b_1 - (s - y)/b_2 = -s/b_2 + y(1/b_2 - 1/b_1)$. With $b_1 \ne b_2$ its integral is $\frac{b_1b_2}{b_1 - b_2}\big(e^{-s/b_1} - e^{-s/b_2}\big)$.
 
-2. **The density.** Dividing the three pieces by $4\beta$ and collecting the two exponentials, the coefficient of $e^{-s/b_1}$ is $\frac14\big(\frac1{b_1 + b_2} + \frac1{b_1 - b_2}\big) = \frac{b_1}{2(b_1^2 - b_2^2)}$, and that of $e^{-s/b_2}$ is $-\frac{b_2}{2(b_1^2 - b_2^2)}$. By symmetry, for every $s$,
+2. **The density.** Dividing the three pieces by $4b_1b_2$ and collecting the two exponentials, the coefficient of $e^{-s/b_1}$ is $\frac14\big(\frac1{b_1 + b_2} + \frac1{b_1 - b_2}\big) = \frac{b_1}{2(b_1^2 - b_2^2)}$, and that of $e^{-s/b_2}$ is $-\frac{b_2}{2(b_1^2 - b_2^2)}$. By symmetry, for every $s$,
 $$f(s) = \frac{b_1e^{-|s|/b_1} - b_2e^{-|s|/b_2}}{2(b_1^2 - b_2^2)}.$$
 As a check, at $s = 0$ this is $\frac{1}{2(b_1 + b_2)}$, which is positive.
 
-3. **The tail.** For $t \ge 0$, integrate $f$ from $t$ to infinity, using $\int_t^\infty b\,e^{-s/b}\,ds = b^2e^{-t/b}$. This gives @eq-apx-prob-lapdiff. At $t = 0$ it gives $\frac12$, as symmetry requires.
+3. **The tail.** For $\tau \ge 0$, integrate $f$ from $\tau$ to infinity, using $\int_\tau^\infty b\,e^{-s/b}\,ds = b^2e^{-\tau/b}$. This gives @eq-apx-prob-lapdiff. At $\tau = 0$ it gives $\frac12$, as symmetry requires.
 
-4. **Far out, the wider noise wins.** For large $t$ the term with the larger scale $b_1$ dominates, and the tail is about $\frac{b_1^2}{2(b_1^2 - b_2^2)}e^{-t/b_1}$. With $b_1 = 2b_2$ that is $\frac23e^{-t/b_1}$, which is $\frac43$ times the tail $\frac12e^{-t/b_1}$ of $\nu$ alone. So the narrower noise $\rho$ adds only a constant factor. To make $P\cdot\Pr[\nu - \rho > t] \le \delta_{\text{bad}}$ for $P$ queries, the threshold must be about $b_1\ln\big(2P/(3\delta_{\text{bad}})\big)$, which is the $4\ln(P/\delta_{\text{bad}})/\varepsilon_0$ growth the chapter describes.
+4. **Far out, the wider noise wins.** For large $\tau$ the term with the larger scale $b_1$ dominates, and the tail is about $\frac{b_1^2}{2(b_1^2 - b_2^2)}e^{-\tau/b_1}$. With $b_1 = 2b_2$ that is $\frac23e^{-\tau/b_1}$, which is $\frac43$ times the tail $\frac12e^{-\tau/b_1}$ of $\nu$ alone. So the narrower noise $\rho$ adds only a constant factor. To make $P\cdot\Pr[\nu - \rho > \tau] \le \delta_{\text{bad}}$ for $P$ queries, the threshold must be about $b_1\ln\big(2P/(3\delta_{\text{bad}})\big)$, which is the $4\ln(P/\delta_{\text{bad}})/\varepsilon_0$ growth the chapter describes.
 
 5. **Equal scales.** When $b_1 = b_2 = b$, the middle piece of step 1 has the constant integrand $e^{-s/b}$ over an interval of length $s$, so it is $s\,e^{-s/b}$. The other two pieces are $\frac b2e^{-s/b}$ each. Dividing by $4b^2$,
 $$f(s) = \frac{1}{4b}\Big(1 + \frac{|s|}{b}\Big)e^{-|s|/b}.$$
-With $b = 1/\varepsilon$ this is the density $\frac\varepsilon4(1 + \varepsilon|z|)e^{-\varepsilon|z|}$ that @sec-lower-packing uses. Integrating from $t$ gives the tail $\frac14(2 + t/b)e^{-t/b}$. It is also the limit of @eq-apx-prob-lapdiff as $b_1 \to b_2$. At $t = 3$ and $b = 1$, for example, it is 0.0622, and @eq-apx-prob-lapdiff with $b_1 = 1.001$ gives 0.0623. The factor $1 + |s|/b$ is why this density is not a Laplace density, as @sec-apx-prob-convolution noted.
+With $b = 1/\varepsilon$ this is the density $\frac\varepsilon4(1 + \varepsilon|z|)e^{-\varepsilon|z|}$ that @sec-lower-packing uses. Integrating from $\tau$ gives the tail $\frac14(2 + \tau/b)e^{-\tau/b}$. It is also the limit of @eq-apx-prob-lapdiff as $b_1 \to b_2$. At $\tau = 3$ and $b = 1$, for example, it is 0.0622, and @eq-apx-prob-lapdiff with $b_1 = 1.001$ gives 0.0623. The factor $1 + |s|/b$ is why this density is not a Laplace density, as @sec-apx-prob-convolution noted.
 
 ### Checking it
 
-At the chapter's budget $\varepsilon_0 = 1$, so $b_1 = 4$ and $b_2 = 2$, and at $t = 8$, @eq-apx-prob-lapdiff gives 0.0872. Numerical integration of the density of step 2 also gives 0.0872, and a million simulated pairs give 0.0867. Solving $P\cdot\Pr[\nu - \rho > t] = 5 \times 10^{-6}$ by bisection gives the chapter's thresholds, $t = 74.8$ for a pool of $P = 1{,}000$ queries and $t = 84.0$ for $P = 10{,}000$. The equal-scale density of step 5 matches a numerical convolution to $7.5 \times 10^{-9}$.
+At the chapter's budget $\varepsilon_0 = 1$, so $b_1 = 4$ and $b_2 = 2$, and at $\tau = 8$, @eq-apx-prob-lapdiff gives 0.0872. Numerical integration of the density of step 2 also gives 0.0872, and a million simulated pairs give 0.0867. Solving $P\cdot\Pr[\nu - \rho > \tau] = 5 \times 10^{-6}$ by bisection gives the chapter's thresholds, $\tau = 74.8$ for a pool of $P = 1{,}000$ queries and $\tau = 84.0$ for $P = 10{,}000$. The equal-scale density of step 5 matches a numerical convolution to $7.5 \times 10^{-9}$.
 
 @fig-apx-prob-laplace-diff shows the tail on a log scale. It runs parallel to the tail of $\nu$ alone and slightly above it, as step 4 says, while the tail of $\rho$ alone falls away. The threshold sits where the tail reaches $\delta_{\text{bad}}/P = 5 \times 10^{-10}$, far beyond the reach of a simulation. That is why the closed form matters: it is the only way to set the threshold accurately.
 
-![The tail $\Pr[\nu - \rho > t]$ for $\nu \sim \mathrm{Lap}(4)$ and $\rho \sim \mathrm{Lap}(2)$ on a log scale: the formula (line), one million simulated pairs (dots), and the tails of $\nu$ and $\rho$ alone (dashed). The dotted lines mark the threshold for a pool of 10,000 queries and the level $5 \times 10^{-10}$.](figures/apx_prob_laplace_diff.svg){#fig-apx-prob-laplace-diff}
+![The tail $\Pr[\nu - \rho > \tau]$ for $\nu \sim \mathrm{Lap}(4)$ and $\rho \sim \mathrm{Lap}(2)$ on a log scale: the formula (line), one million simulated pairs (dots), and the tails of $\nu$ and $\rho$ alone (dashed). The dotted lines mark the threshold for a pool of 10,000 queries and the level $5 \times 10^{-10}$.](figures/apx_prob_laplace_diff.svg){#fig-apx-prob-laplace-diff}
 
 ## Code
 
@@ -339,16 +339,16 @@ uv run python code/appendix-derivations/apx_probability.py
 | Check | Result |
 | --- | --- |
 | Poisson, exponential, Gamma and normal sums against their closed forms | largest gaps $3.3 \times 10^{-16}$, $7.2 \times 10^{-5}$, $1.1 \times 10^{-3}$, $1.2 \times 10^{-12}$ |
-| Projections of $\mathcal N(0, I_2)$ at $\theta = \pi/6$ | variances 0.9983 and 1.0010, correlation $-0.0005$ |
+| Projections of $\mathcal N(0, I_2)$ at $\phi = \pi/6$ | variances 0.9983 and 1.0010, correlation $-0.0005$ |
 | Mode at $\lfloor(n + 1)p\rfloor$ | 480 of 480 cases |
 | Stirling error at $n = 10$ against $1/(12n)$ | $8.331 \times 10^{-3}$ against $8.333 \times 10^{-3}$ |
 | Fraction recovered, $m = 10$, 100, 1000 | 0.62305, 0.53979, 0.51261 |
 | Shift TV of $\mathrm{Bin}(100, \frac12)$ and its mode height | both 0.0796 |
-| Largest $npq\,|\ln(\text{ratio})|$ for $npq \ge 4$ | 0.187 (proved: at most 3.5) |
+| Largest $np\bar p\,|\ln(\text{ratio})|$ for $np\bar p \ge 4$ | 0.187 (proved: at most 3.5) |
 | Swapping 30 $\mathrm{Exp}(1)$ terms, $h = \sin$ | error 0.0365, bound 0.1220 |
 | CDF gap for 30 $\mathrm{Exp}(1)$ terms | exact 0.0243; bound 1.6201; Berry–Esseen 0.2116 |
 | Normal length tail, largest ratio to $e^{-t^2/2}$ | 0.498 |
-| Laplace difference tail at $t = 8$ | formula 0.0872, integral 0.0872, simulation 0.0867 |
+| Laplace difference tail at $\tau = 8$ | formula 0.0872, integral 0.0872, simulation 0.0867 |
 | Thresholds for $P = 1{,}000$ and $10{,}000$ | 74.8 and 84.0 |
 
 : The numbers printed by the appendix's script. {#tbl-apx-prob-code}

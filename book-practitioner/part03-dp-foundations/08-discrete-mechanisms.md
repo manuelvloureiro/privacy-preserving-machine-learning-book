@@ -18,9 +18,9 @@ In private training, Opacus adds continuous Gaussian noise in floating point, so
 
 ## How to use it {#sec-discrete-laplace}
 
-Use a library on integer data. Its **discrete Laplace** noise gives each integer $z$ a probability proportional to $e^{-|z|/b}$, and you calibrate it like continuous noise. For an integer query that moves by at most $\Delta$ between neighbours, it gives pure $\varepsilon$-DP with $\varepsilon = \Delta/b$. For example, at $b = 1$ a count comes out exact with probability 0.4621.
+Use a library on integer data. Its **discrete Laplace** noise gives each integer $z$ a probability proportional to $e^{-|z|/b}$, and you calibrate it like continuous noise. For an integer query that moves by at most $\Delta f$ between neighbours, it gives pure $\varepsilon$-DP with $\varepsilon = \Delta f/b$. For example, at $b = 1$ a count comes out exact with probability 0.4621.
 
-The **discrete Gaussian** gives each integer $x$ a probability proportional to $e^{-x^2/(2\sigma^2)}$, for a width $\sigma$. Its exact privacy curve differs slightly: for a sensitivity of 1 at $\sigma = 1$, its $\delta$ at $\varepsilon = 1$ is 0.1414, where the continuous formula gives 0.1269. So either report the discrete curve, or account in [zero-concentrated DP](../part04-privacy-accounting/03-concentrated-dp.md). There the discrete Gaussian has the continuous Gaussian's privacy parameter $\rho = \Delta^2/(2\sigma^2)$, and OpenDP accounts this way. Here `map(1)` gives the guarantee at sensitivity 1.
+The **discrete Gaussian** gives each integer $x$ a probability proportional to $e^{-x^2/(2\sigma^2)}$, for a width $\sigma$. Its exact privacy curve differs slightly: for a sensitivity of 1 at $\sigma = 1$, its $\delta$ at $\varepsilon = 1$ is 0.1414, where the continuous formula gives 0.1269. So either report the discrete curve, or account in [zero-concentrated DP](../part04-privacy-accounting/03-concentrated-dp.md). There the discrete Gaussian has the continuous Gaussian's privacy parameter $\rho = (\Delta f)^2/(2\sigma^2)$, and OpenDP accounts this way. Here `map(1)` gives the guarantee at sensitivity 1.
 
 ```python
 import opendp.prelude as dp

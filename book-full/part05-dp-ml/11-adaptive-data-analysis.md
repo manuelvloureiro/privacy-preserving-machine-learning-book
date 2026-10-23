@@ -23,9 +23,9 @@ Overfitting a holdout set means choosing questions that fit its particular recor
 
 : The results of this chapter and where each is used. {#tbl-ada-uses}
 
-**Notation.** This chapter follows the notation of the stability chapter in Part 1 rather than the part's $D$, which would clash with the distribution. The data are a sample of $n$ records, written $S = (x_1, \dots, x_n)$. The records are drawn independently from a distribution $\mathcal D$, and each record $x_i$ holds features and label together. A **statistical query** is a function $q$ from one record to $[0, 1]$, such as "does this classifier get this record right?". Its **empirical value** is its average over the sample, $q(S) = \frac1n\sum_iq(x_i)$, and its **population value** is its average over the distribution, $q(\mathcal D) = \mathbb E_{x\sim\mathcal D}\,q(x)$.
+**Notation.** The data are a sample of $n$ records, the dataset $D = (x_1, \dots, x_n)$. The records are drawn independently from a distribution $\mathcal D$, the population, and each record $x_i$ holds features and label together. A **statistical query** is a function $q$ from one record to $[0, 1]$, such as "does this classifier get this record right?". Its **empirical value** is its average over the sample, $q(D) = \frac1n\sum_iq(x_i)$, and its **population value** is its average over the distribution, $q(\mathcal D) = \mathbb E_{x\sim\mathcal D}\,q(x)$.
 
-An **analyst** asks $k$ queries, $q_1$ to $q_k$, one at a time. A mechanism $M$ answers each of them, giving the number $a_j$ for query $q_j$. Because the analyst may choose each query from the earlier answers, the analysis is **adaptive**. Write $S^{(i)}$ for the sample with $x_i$ replaced by an independent fresh draw $x_i'$. Samples that differ in one record, such as $S$ and $S^{(i)}$, are neighbours under the **replace relation**. Under this relation, every statistical query has sensitivity $1/n$, since one record moves an average of $n$ values in $[0, 1]$ by at most $1/n$. The goal is **accuracy against the population**. The largest error $\max_j|a_j - q_j(\mathcal D)|$ should be at most a target accuracy $\alpha$, either on average or with probability at least $1 - \beta$ for a small failure probability $\beta$.
+An **analyst** asks $k$ queries, $q_1$ to $q_k$, one at a time. A mechanism $M$ answers each of them, giving the number $a_j$ for query $q_j$. Because the analyst may choose each query from the earlier answers, the analysis is **adaptive**. Write $D^{(i)}$ for the sample with $x_i$ replaced by an independent fresh draw $x_i'$. Samples that differ in one record, such as $D$ and $D^{(i)}$, are neighbours under the **replace-one relation**. Under this relation, every statistical query has sensitivity $1/n$, since one record moves an average of $n$ values in $[0, 1]$ by at most $1/n$. The goal is **accuracy against the population**. The largest error $\max_j|a_j - q_j(\mathcal D)|$ should be at most a target accuracy $\alpha$, either on average or with probability at least $1 - \beta$ for a small failure probability $\beta$.
 
 **How to read this chapter.** @sec-ada-overfit shows the problem and @sec-ada-split the simple fix. @sec-ada-transfer is the key result, and its proof is short. @sec-ada-gauss turns it into a rate, @sec-ada-thresholdout into the reusable holdout, and @sec-ada-practice into advice for machine-learning practice.
 
@@ -33,32 +33,32 @@ An **analyst** asks $k$ queries, $q_1$ to $q_k$, one at a time. A mechanism $M$ 
 
 ### Fact 1 — The largest of many averages: the maximal inequality
 
-Each empirical value is an average of $n$ independent values in $[0, 1]$, so its error, written $Z = q(S) - q(\mathcal D)$, is rarely large. Hoeffding's lemma ([Concentration inequalities](../part01-prerequisites/02-concentration.md)) makes this precise through the moment generating function. For a query fixed before the sample is drawn, and for every real $\lambda$,
+Each empirical value is an average of $n$ independent values in $[0, 1]$, so its error, written $Z = q(D) - q(\mathcal D)$, is rarely large. Hoeffding's lemma ([Concentration inequalities](../part01-prerequisites/02-concentration.md)) makes this precise through the moment generating function. For a query fixed before the sample is drawn, and for every real $\lambda$,
 $$\mathbb E\,e^{\lambda Z} \le e^{\lambda^2v/2}, \qquad v = \frac{1}{4n}.$$
 The value of $v$ comes from applying the lemma to each of the $n$ centred terms, each scaled by $1/n$ and so lying in a range of length $1/n$, which gives $e^{\lambda^2/(8n^2)}$ per term. Independence multiplies the $n$ bounds to $e^{\lambda^2/(8n)}$.
 A variable with this property is called **sub-Gaussian with variance proxy $v$**, because a Gaussian variable with variance $\sigma^2$ has the property with $v = \sigma^2$, as an equality.
 
 The fact this chapter uses is about the largest of many such variables. If $Z_1, \dots, Z_m$ are each sub-Gaussian with variance proxy $v$, whatever their dependence, then
 $$\mathbb E\Big[\max_{j\le m}Z_j\Big] \le \sqrt{2v\ln m}.$$ {#eq-ada-max}
-The reason is that the exponential of a maximum is at most the sum of the exponentials. For $\lambda > 0$, Jensen's inequality for the convex function $e^x$ gives $e^{\lambda\,\mathbb E\max_jZ_j} \le \mathbb E\,e^{\lambda\max_jZ_j}$. The exponential of the maximum is at most the sum of all $m$ exponentials, and each has expectation at most $e^{\lambda^2v/2}$, so the right side is at most $m\,e^{\lambda^2v/2}$. Taking logarithms and dividing by $\lambda$ gives $\mathbb E\max_jZ_j \le \ln m/\lambda + \lambda v/2$, and the choice $\lambda = \sqrt{2\ln m/v}$ gives @eq-ada-max. For $k$ queries, write $Z_j = q_j(S) - q_j(\mathcal D)$ for the error of query $j$. Applied to the $2k$ variables $\pm Z_j$, the inequality bounds the largest error in absolute value, with $m = 2k$.
+The reason is that the exponential of a maximum is at most the sum of the exponentials. For $\lambda > 0$, Jensen's inequality for the convex function $e^x$ gives $e^{\lambda\,\mathbb E\max_jZ_j} \le \mathbb E\,e^{\lambda\max_jZ_j}$. The exponential of the maximum is at most the sum of all $m$ exponentials, and each has expectation at most $e^{\lambda^2v/2}$, so the right side is at most $m\,e^{\lambda^2v/2}$. Taking logarithms and dividing by $\lambda$ gives $\mathbb E\max_jZ_j \le \ln m/\lambda + \lambda v/2$, and the choice $\lambda = \sqrt{2\ln m/v}$ gives @eq-ada-max. For $k$ queries, write $Z_j = q_j(D) - q_j(\mathcal D)$ for the error of query $j$. Applied to the $2k$ variables $\pm Z_j$, the inequality bounds the largest error in absolute value, with $m = 2k$.
 
 ### Fact 2 — Renaming a record and a fresh draw
 
-The stability chapter's main identity rests on one observation. Suppose $x_i$ and the fresh draw $x_i'$ are independent and have the same distribution, and both are independent of the other records and of an algorithm's own coins. Then swapping them does not change the joint distribution of all these random quantities. So any expectation computed from $(S, x_i')$ equals the same expectation computed after the swap, from $(S^{(i)}, x_i)$. Write $q_{W(S)}$ for the query that a randomized algorithm $W$ outputs on the sample $S$ (the chapter shortens it to $q_W$ when the sample is clear). Then
-$$\mathbb E\big[q_{W(S)}(x_i')\big] = \mathbb E\big[q_{W(S^{(i)})}(x_i)\big].$$
-The left side is the population value of the chosen query, because $x_i'$ is a new record that $W$ never saw. Averaging over $x_i'$ alone, with $S$ and $W$'s coins fixed, gives $q_{W(S)}(\mathcal D)$. The right side is the value of a query chosen *without* $x_i$ on the record $x_i$. The stability chapter walks through the swap on a table of every outcome.
+The stability chapter's main identity rests on one observation. Suppose $x_i$ and the fresh draw $x_i'$ are independent and have the same distribution, and both are independent of the other records and of an algorithm's own coins. Then swapping them does not change the joint distribution of all these random quantities. So any expectation computed from $(D, x_i')$ equals the same expectation computed after the swap, from $(D^{(i)}, x_i)$. Write $q_{W(D)}$ for the query that a randomized algorithm $W$ outputs on the dataset $D$ (the chapter shortens it to $q_W$ when the sample is clear). Then
+$$\mathbb E\big[q_{W(D)}(x_i')\big] = \mathbb E\big[q_{W(D^{(i)})}(x_i)\big].$$
+The left side is the population value of the chosen query, because $x_i'$ is a new record that $W$ never saw. Averaging over $x_i'$ alone, with $D$ and $W$'s coins fixed, gives $q_{W(D)}(\mathcal D)$. The right side is the value of a query chosen *without* $x_i$ on the record $x_i$. The stability chapter walks through the swap on a table of every outcome.
 
 ### Fact 3 — DP bounds the average of any bounded function of the output
 
-Differential privacy has two parameters, a privacy level $\varepsilon$ and a slack $\delta$. A mechanism $M$ is $(\varepsilon, \delta)$-DP when replacing a sample $S$ by a neighbour $S'$ multiplies the probability of every set of outputs $E$ by at most $e^\varepsilon$, up to the slack $\delta$ ([The definition](../part03-dp-foundations/01-definition.md)):
-$$\Pr[M(S) \in E] \le e^\varepsilon\Pr[M(S') \in E] + \delta.$$
+Differential privacy has two parameters, a privacy level $\varepsilon$ and a slack $\delta$. A mechanism $M$ is $(\varepsilon, \delta)$-DP when replacing a dataset $D$ by a neighbour $D'$ multiplies the probability of every set of outputs $S$ by at most $e^\varepsilon$, up to the slack $\delta$ ([The definition](../part03-dp-foundations/01-definition.md)):
+$$\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta.$$
 The derivations need the same bound for averages. For every function $f$ of the output with values in $[0, 1]$,
-$$\mathbb E\big[f(M(S))\big] \le e^\varepsilon\,\mathbb E\big[f(M(S'))\big] + \delta.$$ {#eq-ada-avg}
+$$\mathbb E\big[f(M(D))\big] \le e^\varepsilon\,\mathbb E\big[f(M(D'))\big] + \delta.$$ {#eq-ada-avg}
 To see this, write the average of a quantity between 0 and 1 as the integral of its tail. For a random output $Y$, the average of $f(Y)$ is the integral, over thresholds $t$ from 0 to 1, of the chance that $f(Y)$ exceeds $t$:
 $$\mathbb E[f(Y)] = \int_0^1\Pr[f(Y) > t]\,dt.$$
-Each tail is the probability of an event, so DP bounds it by $e^\varepsilon$ times the tail for $S'$, plus $\delta$. Integrating over $t$ from 0 to 1 gives @eq-ada-avg, because the $\delta$ integrates to $\delta$.
+Each tail is the probability of an event, so DP bounds it by $e^\varepsilon$ times the tail for $D'$, plus $\delta$. Integrating over $t$ from 0 to 1 gives @eq-ada-avg, because the $\delta$ integrates to $\delta$.
 
-Two properties of DP make this useful against an analyst ([Post-processing, group privacy and composition](../part03-dp-foundations/02-properties.md)). **Post-processing**: any computation on the output that does not touch the data is as private as the output. **Adaptive composition**: a sequence of mechanisms, each chosen from the earlier outputs, is private with parameters that add up, or that grow more slowly under the accountants of [Composition](../part03-dp-foundations/04-composition.md). The analyst's choice of each query is post-processing of the earlier answers, and the answers to those chosen queries compose adaptively. So the whole transcript of queries and answers inherits the guarantee of the answering mechanism, however clever the analyst. The derivations swap one record for a fresh one, so the guarantees here are for the replace relation. A mechanism that is $\varepsilon$-DP for adding or removing a record is $2\varepsilon$-DP for replacing one. An $(\varepsilon, \delta)$-DP mechanism becomes $(2\varepsilon, (1 + e^\varepsilon)\delta)$-DP.
+Two properties of DP make this useful against an analyst ([Post-processing, group privacy and composition](../part03-dp-foundations/02-properties.md)). **Post-processing**: any computation on the output that does not touch the data is as private as the output. **Adaptive composition**: a sequence of mechanisms, each chosen from the earlier outputs, is private with parameters that add up, or that grow more slowly under the accountants of [Composition](../part03-dp-foundations/04-composition.md). The analyst's choice of each query is post-processing of the earlier answers, and the answers to those chosen queries compose adaptively. So the whole transcript of queries and answers inherits the guarantee of the answering mechanism, however clever the analyst. The derivations swap one record for a fresh one, so the guarantees here are for the replace-one relation. A mechanism that is $\varepsilon$-DP for adding or removing a record is $2\varepsilon$-DP for replacing one. An $(\varepsilon, \delta)$-DP mechanism becomes $(2\varepsilon, (1 + e^\varepsilon)\delta)$-DP.
 
 ### Fact 4 — The Gaussian mechanism in zero-concentrated DP
 
@@ -75,18 +75,18 @@ A holdout set gives an unbiased verdict on a model that was fixed before the hol
 ### Statement
 
 **Fixed queries.** If the $k$ queries are chosen before the sample is drawn, their empirical values are accurate, and the number of queries enters only through its logarithm. On average,
-$$\mathbb E\Big[\max_{j\le k}\big|q_j(S) - q_j(\mathcal D)\big|\Big] \le \sqrt{\frac{\ln(2k)}{2n}},$$ {#eq-ada-fixed}
+$$\mathbb E\Big[\max_{j\le k}\big|q_j(D) - q_j(\mathcal D)\big|\Big] \le \sqrt{\frac{\ln(2k)}{2n}},$$ {#eq-ada-fixed}
 and all $k$ errors are below $\alpha$ with probability at least $1 - \beta$ once
 $$n \ge \frac{\ln(2k/\beta)}{2\alpha^2}.$$
 At $\alpha = \beta = 0.05$, ten queries need 1,199 records. A thousand queries need 2,120, and a million need only 3,501.
 
 **One adaptive query, after many fixed ones, is enough to break this.** Let the records be uniform on $N$ values, labelled $1, \dots, N$. The analyst asks the $N$ point queries $q_v(x) = \mathbf 1[x = v]$, one per value, which are fixed in advance. Their empirical values say exactly which values occur in the sample. Then the analyst asks one more query, chosen from those answers: "is this record's value one of those that occur in the sample?". Its empirical value is 1, while its population value is the fraction of the $N$ values that the sample covers, at most $n/N$. So with $k = N + 1$ queries the largest error is
-$$\max_j\big|q_j(S) - q_j(\mathcal D)\big| \ge 1 - \frac nN = 1 - \frac{n}{k - 1}.$$ {#eq-ada-point}
+$$\max_j\big|q_j(D) - q_j(\mathcal D)\big| \ge 1 - \frac nN = 1 - \frac{n}{k - 1}.$$ {#eq-ada-point}
 With exact empirical answers, $n$ must therefore grow linearly in $k$ to keep the error below $\frac12$, against $\ln k$ for fixed queries.
 
 ### Derivation
 
-1. **Fixed queries, on average.** For a query fixed in advance, Fact 1 says the error $q_j(S) - q_j(\mathcal D)$ is sub-Gaussian with variance proxy $1/(4n)$, and so is its negative. The maximal inequality @eq-ada-max over these $2k$ variables, with $v = 1/(4n)$, gives $\sqrt{2\ln(2k)/(4n)}$, which is @eq-ada-fixed.
+1. **Fixed queries, on average.** For a query fixed in advance, Fact 1 says the error $q_j(D) - q_j(\mathcal D)$ is sub-Gaussian with variance proxy $1/(4n)$, and so is its negative. The maximal inequality @eq-ada-max over these $2k$ variables, with $v = 1/(4n)$, gives $\sqrt{2\ln(2k)/(4n)}$, which is @eq-ada-fixed.
 2. **Fixed queries, with high probability.** Hoeffding's inequality bounds the chance that one error exceeds $\alpha$ by $2e^{-2n\alpha^2}$, so the union bound over $k$ queries bounds the chance that any of them does by $2ke^{-2n\alpha^2}$. Setting this equal to $\beta$ and solving for $n$ gives the sample size of the statement.
 3. **Where adaptivity enters.** Step 1 needs $q_j$ fixed while the records are drawn, so that $q_j(x_1), \dots, q_j(x_n)$ are independent draws with mean $q_j(\mathcal D)$. The final query of the attack is built from the sample, so its values on the sample's records are all 1, whatever $\mathcal D$ is.
 4. **The attack's population value.** The final query is 1 exactly on the distinct values in the sample, of which there are at most $n$. Each value has probability $1/N$, so the population value is at most $n/N$. Averaged over samples, the population value is exactly $1 - (1 - 1/N)^n$, because a given value is missed by all $n$ draws with probability $(1 - 1/N)^n$.
@@ -135,14 +135,14 @@ The attack works because a query can depend on the records that answer it. The o
 
 ### Statement
 
-Split the sample into $k$ parts $S_1, \dots, S_k$ of $n/k$ records each, and answer query $j$ with its empirical value on part $j$ only, $a_j = q_j(S_j)$. Then, however the queries are chosen,
-$$\mathbb E\Big[\max_{j\le k}\big|q_j(S_j) - q_j(\mathcal D)\big|\Big] \le \sqrt{\frac{k\ln(2k)}{2n}},$$ {#eq-ada-split}
+Split the sample into $k$ parts $D_1, \dots, D_k$ of $n/k$ records each, and answer query $j$ with its empirical value on part $j$ only, $a_j = q_j(D_j)$. Then, however the queries are chosen,
+$$\mathbb E\Big[\max_{j\le k}\big|q_j(D_j) - q_j(\mathcal D)\big|\Big] \le \sqrt{\frac{k\ln(2k)}{2n}},$$ {#eq-ada-split}
 and all errors are below $\alpha$ with probability $1 - \beta$ once $n \ge k\ln(2k/\beta)/(2\alpha^2)$. The data needed grows linearly in $k$.
 
 ### Derivation
 
-1. **Condition on the past.** Fix the parts $S_1, \dots, S_{j-1}$ and the analyst's own randomness. Query $q_j$ depends only on the answers from those parts, so it is now fixed. Part $S_j$ is independent of them, so its $n/k$ records are fresh draws from $\mathcal D$ as far as $q_j$ is concerned.
-2. **One query.** Given the past, Fact 1 applies to $q_j(S_j) - q_j(\mathcal D)$ with $n/k$ records, so its moment generating function is at most $e^{\lambda^2k/(8n)}$. A bound that holds for every value of the past also holds on average over it, so the same bound holds without conditioning.
+1. **Condition on the past.** Fix the parts $D_1, \dots, D_{j-1}$ and the analyst's own randomness. Query $q_j$ depends only on the answers from those parts, so it is now fixed. Part $D_j$ is independent of them, so its $n/k$ records are fresh draws from $\mathcal D$ as far as $q_j$ is concerned.
+2. **One query.** Given the past, Fact 1 applies to $q_j(D_j) - q_j(\mathcal D)$ with $n/k$ records, so its moment generating function is at most $e^{\lambda^2k/(8n)}$. A bound that holds for every value of the past also holds on average over it, so the same bound holds without conditioning.
 3. **All queries.** The maximal inequality @eq-ada-max needs only the bound of step 2 for each variable, not independence between them. With $v = k/(4n)$ and $m = 2k$ it gives @eq-ada-split. The high-probability version follows in the same way from Hoeffding's inequality and the union bound.
 
 ### Interpretation
@@ -168,12 +168,12 @@ The attack learns individual records from the answers and then asks a query that
 
 ### Statement
 
-**Transfer lemma.** Let $W$ be an $(\varepsilon, \delta)$-DP algorithm, under the replace relation, that takes a sample and outputs a statistical query $q_W$. Then the chosen query's empirical value and its population value have nearly the same expectation:
-$$\Big|\mathbb E\big[q_W(S)\big] - \mathbb E\big[q_W(\mathcal D)\big]\Big| \le e^\varepsilon - 1 + \delta.$$ {#eq-ada-lemma}
+**Transfer lemma.** Let $W$ be an $(\varepsilon, \delta)$-DP algorithm, under the replace-one relation, that takes a sample and outputs a statistical query $q_W$. Then the chosen query's empirical value and its population value have nearly the same expectation:
+$$\Big|\mathbb E\big[q_W(D)\big] - \mathbb E\big[q_W(\mathcal D)\big]\Big| \le e^\varepsilon - 1 + \delta.$$ {#eq-ada-lemma}
 The proof gives two one-sided bounds, which are sharper than @eq-ada-lemma when the expectations are small:
-$$\mathbb E[q_W(S)] \le e^\varepsilon\,\mathbb E[q_W(\mathcal D)] + \delta, \qquad \mathbb E[q_W(\mathcal D)] \le e^\varepsilon\,\mathbb E[q_W(S)] + \delta.$$
+$$\mathbb E[q_W(D)] \le e^\varepsilon\,\mathbb E[q_W(\mathcal D)] + \delta, \qquad \mathbb E[q_W(\mathcal D)] \le e^\varepsilon\,\mathbb E[q_W(D)] + \delta.$$
 
-**Transfer theorem.** Let $M$ answer $k$ adaptively chosen statistical queries, and let the whole interaction be $(\varepsilon, \delta)$-DP in the sample. Suppose its answers are accurate on the sample on average, $\mathbb E[\max_j|a_j - q_j(S)|] \le \alpha$. Then they are accurate on the population, up to the lemma's term:
+**Transfer theorem.** Let $M$ answer $k$ adaptively chosen statistical queries, and let the whole interaction be $(\varepsilon, \delta)$-DP in the sample. Suppose its answers are accurate on the sample on average, $\mathbb E[\max_j|a_j - q_j(D)|] \le \alpha$. Then they are accurate on the population, up to the lemma's term:
 $$\mathbb E\Big[\max_{j\le k}\big|a_j - q_j(\mathcal D)\big|\Big] \le \alpha + e^\varepsilon - 1 + \delta.$$ {#eq-ada-transfer}
 For small $\varepsilon$, $e^\varepsilon - 1 \approx \varepsilon$, so privacy at level $\varepsilon$ costs about $\varepsilon$ in accuracy.
 
@@ -181,19 +181,19 @@ For small $\varepsilon$, $e^\varepsilon - 1 \approx \varepsilon$, so privacy at 
 
 The lemma first, in five steps.
 
-1. **The empirical value is an average over records.** By definition, $q_W(S) = \frac1n\sum_iq_W(x_i)$, so $\mathbb E[q_W(S)] = \frac1n\sum_i\mathbb E[q_{W(S)}(x_i)]$, by linearity of expectation.
-2. **The population value is the same average after a swap.** By Fact 2, $\mathbb E[q_{W(S)}(\mathcal D)] = \mathbb E[q_{W(S)}(x_i')] = \mathbb E[q_{W(S^{(i)})}(x_i)]$ for every $i$. In words, the population value of a query chosen from $S$ equals the value on $x_i$ of a query chosen without $x_i$.
-3. **DP compares the two choices.** Hold $S$ and $x_i'$ fixed. Then $S$ and $S^{(i)}$ are neighbours, and $f(q) = q(x_i)$ is a function of $W$'s output with values in $[0, 1]$. Fact 3 gives $\mathbb E_W[q_{W(S)}(x_i)] \le e^\varepsilon\,\mathbb E_W[q_{W(S^{(i)})}(x_i)] + \delta$, where $\mathbb E_W$ averages over $W$'s coins. Averaging over $S$ and $x_i'$ keeps the inequality.
-4. **Combine.** Average step 3 over $i$, then use step 1 on the left and step 2 on the right: $\mathbb E[q_W(S)] \le e^\varepsilon\,\mathbb E[q_W(\mathcal D)] + \delta$. Subtracting $\mathbb E[q_W(\mathcal D)]$ from both sides leaves $(e^\varepsilon - 1)\,\mathbb E[q_W(\mathcal D)] + \delta$, which is at most $e^\varepsilon - 1 + \delta$ because a query's value is at most 1.
-5. **The other direction.** The replace relation is symmetric, so step 3 also holds from $S^{(i)}$ to $S$: $\mathbb E_W[q_{W(S^{(i)})}(x_i)] \le e^\varepsilon\,\mathbb E_W[q_{W(S)}(x_i)] + \delta$. The same averaging gives $\mathbb E[q_W(\mathcal D)] \le e^\varepsilon\,\mathbb E[q_W(S)] + \delta$, and the two directions together give @eq-ada-lemma.
+1. **The empirical value is an average over records.** By definition, $q_W(D) = \frac1n\sum_iq_W(x_i)$, so $\mathbb E[q_W(D)] = \frac1n\sum_i\mathbb E[q_{W(D)}(x_i)]$, by linearity of expectation.
+2. **The population value is the same average after a swap.** By Fact 2, $\mathbb E[q_{W(D)}(\mathcal D)] = \mathbb E[q_{W(D)}(x_i')] = \mathbb E[q_{W(D^{(i)})}(x_i)]$ for every $i$. In words, the population value of a query chosen from $D$ equals the value on $x_i$ of a query chosen without $x_i$.
+3. **DP compares the two choices.** Hold $D$ and $x_i'$ fixed. Then $D$ and $D^{(i)}$ are neighbours, and $f(q) = q(x_i)$ is a function of $W$'s output with values in $[0, 1]$. Fact 3 gives $\mathbb E_W[q_{W(D)}(x_i)] \le e^\varepsilon\,\mathbb E_W[q_{W(D^{(i)})}(x_i)] + \delta$, where $\mathbb E_W$ averages over $W$'s coins. Averaging over $D$ and $x_i'$ keeps the inequality.
+4. **Combine.** Average step 3 over $i$, then use step 1 on the left and step 2 on the right: $\mathbb E[q_W(D)] \le e^\varepsilon\,\mathbb E[q_W(\mathcal D)] + \delta$. Subtracting $\mathbb E[q_W(\mathcal D)]$ from both sides leaves $(e^\varepsilon - 1)\,\mathbb E[q_W(\mathcal D)] + \delta$, which is at most $e^\varepsilon - 1 + \delta$ because a query's value is at most 1.
+5. **The other direction.** The replace-one relation is symmetric, so step 3 also holds from $D^{(i)}$ to $D$: $\mathbb E_W[q_{W(D^{(i)})}(x_i)] \le e^\varepsilon\,\mathbb E_W[q_{W(D)}(x_i)] + \delta$. The same averaging gives $\mathbb E[q_W(\mathcal D)] \le e^\varepsilon\,\mathbb E[q_W(D)] + \delta$, and the two directions together give @eq-ada-lemma.
 
 The theorem then follows by choosing the worst query privately.
 
 1. **Add the complements.** For each query $q_j$, also consider $1 - q_j$, answered by $1 - a_j$. These answers are computed from the original ones, so they cost nothing (post-processing, Fact 3). Their errors are the original errors with the sign flipped, $(1 - q_j(\mathcal D)) - (1 - a_j) = -(q_j(\mathcal D) - a_j)$. Over the $2k$ queries, the largest signed error $q(\mathcal D) - a$ is therefore the largest absolute error of the original $k$.
 2. **Pick the worst query privately.** Let $W$ read the transcript of queries and answers and output the query, among the $2k$, with the largest $q(\mathcal D) - a$. $W$ uses the distribution $\mathcal D$, which is fixed and is not data, and the transcript, which is $(\varepsilon, \delta)$-DP. So $W$ is post-processing, and it is $(\varepsilon, \delta)$-DP.
 3. **Split the worst error.** Writing $a_W$ for the answer to the chosen query, add and subtract its empirical value:
-$$\mathbb E\Big[\max_j\big|a_j - q_j(\mathcal D)\big|\Big] = \mathbb E\big[q_W(\mathcal D) - a_W\big] = \mathbb E\big[q_W(\mathcal D) - q_W(S)\big] + \mathbb E\big[q_W(S) - a_W\big].$$
-4. **Bound each part.** The first part is at most $e^\varepsilon - 1 + \delta$ by the lemma, since $W$ is DP. The second is at most $\mathbb E[\max_j|q_j(S) - a_j|] \le \alpha$, by the assumed accuracy on the sample. Adding them gives @eq-ada-transfer.
+$$\mathbb E\Big[\max_j\big|a_j - q_j(\mathcal D)\big|\Big] = \mathbb E\big[q_W(\mathcal D) - a_W\big] = \mathbb E\big[q_W(\mathcal D) - q_W(D)\big] + \mathbb E\big[q_W(D) - a_W\big].$$
+4. **Bound each part.** The first part is at most $e^\varepsilon - 1 + \delta$ by the lemma, since $W$ is DP. The second is at most $\mathbb E[\max_j|q_j(D) - a_j|] \le \alpha$, by the assumed accuracy on the sample. Adding them gives @eq-ada-transfer.
 
 **Step 1 on a small case.** The complements turn a largest absolute error into a largest signed one, so that a single query $W$ can carry it. @tbl-ada-complement takes two queries, one answered too high and one too low.
 
@@ -211,7 +211,7 @@ The largest absolute error is 0.12, on $q_1$, whose answer is too high. Its sign
 ### Interpretation
 
 **It is Part 1's identity with a different bound on each term.** Steps 1 and 2 of the lemma together say that
-$$\mathbb E\big[q_W(S)\big] - \mathbb E\big[q_W(\mathcal D)\big] = \frac1n\sum_{i=1}^n\mathbb E\Big[q_{W(S)}(x_i) - q_{W(S^{(i)})}(x_i)\Big].$$
+$$\mathbb E\big[q_W(D)\big] - \mathbb E\big[q_W(\mathcal D)\big] = \frac1n\sum_{i=1}^n\mathbb E\Big[q_{W(D)}(x_i) - q_{W(D^{(i)})}(x_i)\Big].$$
 This is the stability chapter's identity for the expected gap ([Algorithmic stability and generalization](../part01-prerequisites/07-stability-generalization.md)), with the chosen query as the model and $q(x)$ as the loss. That chapter bounded each term by the uniform stability of a fixed algorithm, the largest change in the loss when one record is replaced. Here each term's expectation is bounded through the distribution of $W$'s output. Step 3 bounds one expectation by $e^\varepsilon$ times the other plus $\delta$, and since the values lie in $[0, 1]$ their difference is at most $e^\varepsilon - 1 + \delta$. DP is a form of stability: a bound on how much one record can change the *distribution* of an output.
 
 **Why this form of stability survives the analyst.** Uniform stability is a property of one algorithm, and it does not survive what the analyst does next. Keeping the query with the largest of several values is a discontinuous choice. When two values are nearly tied, one record can change which query wins, and the chosen query's value on that record can jump by a large amount. Part 1 showed the same instability in the 1-nearest-neighbour rule. DP survives post-processing and adaptive composition (Fact 3), so every query the analyst can build from private answers is chosen privately. That is the property the lemma needs.
@@ -222,9 +222,9 @@ This is the stability chapter's identity for the expected gap ([Algorithmic stab
 
 Take $k = 1{,}000$ queries that are all pure noise, each the rate at which a random feature agrees with a random label on $n = 1{,}000$ records. Every population value is $\frac12$, and the empirical values are independent with standard deviation $1/(2\sqrt n) = 0.0158$. Choosing the query with the largest empirical value, with no privacy, overstates it by 0.0509 on average over 2,000 runs. That is close to the maximal inequality's bound, 0.0616, which @eq-ada-fixed gives for 1,000 queries.
 
-Now choose with the exponential mechanism of [Selection](../part03-dp-foundations/05-selection.md#sec-sel-exp), which picks query $j$ with probability proportional to $e^{\varepsilon nq_j(S)/2}$. Its score has sensitivity $1/n$, so it is $\varepsilon$-DP. The script computes its selection bias exactly for each sample, as the probability-weighted average of the empirical values, and @tbl-ada-selection compares it with the lemma.
+Now choose with the exponential mechanism of [Selection](../part03-dp-foundations/05-selection.md#sec-sel-exp), which picks query $j$ with probability proportional to $e^{\varepsilon nq_j(D)/2}$. Its score has sensitivity $1/n$, so it is $\varepsilon$-DP. The script computes its selection bias exactly for each sample, as the probability-weighted average of the empirical values, and @tbl-ada-selection compares it with the lemma.
 
-| $\varepsilon$ | Measured bias $\mathbb E[q_W(S)] - \frac12$ | Lemma $e^\varepsilon - 1$ | Sharper $(e^\varepsilon - 1)\cdot\frac12$ |
+| $\varepsilon$ | Measured bias $\mathbb E[q_W(D)] - \frac12$ | Lemma $e^\varepsilon - 1$ | Sharper $(e^\varepsilon - 1)\cdot\frac12$ |
 | --- | --- | --- | --- |
 | 0.01 | 0.00124 | 0.01005 | 0.00503 |
 | 0.1 | 0.01245 | 0.10517 | 0.05259 |
@@ -233,14 +233,14 @@ Now choose with the exponential mechanism of [Selection](../part03-dp-foundation
 
 : Selection bias of the exponential mechanism over 1,000 null queries on 1,000 records, averaged over 2,000 runs, against the transfer lemma. {#tbl-ada-selection}
 
-For small $\varepsilon$ the measured bias is $\varepsilon/8$, a quarter of the sharper bound and half the $\varepsilon/4$ of the one-record example above. A short calculation explains it. The mechanism weights the empirical values by $e^{tq_j(S)}$ with $t = \varepsilon n/2$. The derivative in $t$ of an average with these weights is the weighted variance of the values, so for small $t$ the weighted average exceeds the plain average by about $t$ times their variance, which is about $1/(4n)$. The product is $\varepsilon n/2 \cdot 1/(4n) = \varepsilon/8$. At $\varepsilon = 1$ the mechanism behaves like the argmax, and the lemma's bound, 1.72, says nothing (@fig-ada-selection).
+For small $\varepsilon$ the measured bias is $\varepsilon/8$, a quarter of the sharper bound and half the $\varepsilon/4$ of the one-record example above. A short calculation explains it. The mechanism weights the empirical values by $e^{tq_j(D)}$ with $t = \varepsilon n/2$. The derivative in $t$ of an average with these weights is the weighted variance of the values, so for small $t$ the weighted average exceeds the plain average by about $t$ times their variance, which is about $1/(4n)$. The product is $\varepsilon n/2 \cdot 1/(4n) = \varepsilon/8$. At $\varepsilon = 1$ the mechanism behaves like the argmax, and the lemma's bound, 1.72, says nothing (@fig-ada-selection).
 
 ![Selection bias of the exponential mechanism choosing among 1,000 noise queries on 1,000 records, against the $\varepsilon$ of the choice, with the transfer lemma's bound $e^\varepsilon - 1$ and the bias of the non-private argmax.](figures/ada_selection_bias.svg){#fig-ada-selection}
 
 ### Check yourself
 
 - In step 2 of the theorem, $W$ uses $\mathcal D$, which nobody knows. Is that a problem? *(No. The selector $W$ exists only inside the proof, so no one has to run it. It only has to be a DP function of the transcript, and using $\mathcal D$ costs no privacy because the distribution is fixed, not data.)*
-- Why does the lemma need the replace relation rather than add or remove? *(The swap in step 2 replaces $x_i$ by $x_i'$ and keeps $n$ records, so step 3 compares two samples that differ by one replacement. An add-or-remove guarantee at $(\varepsilon, \delta)$ gives $(2\varepsilon, (1 + e^\varepsilon)\delta)$ for a replacement.)*
+- Why does the lemma need the replace-one relation rather than add or remove? *(The swap in step 2 replaces $x_i$ by $x_i'$ and keeps $n$ records, so step 3 compares two samples that differ by one replacement. An add-or-remove guarantee at $(\varepsilon, \delta)$ gives $(2\varepsilon, (1 + e^\varepsilon)\delta)$ for a replacement.)*
 
 ## Answering with Gaussian noise: the $\sqrt k$ rate {#sec-ada-gauss}
 
@@ -250,7 +250,7 @@ The transfer theorem turns any private mechanism that is accurate on the sample 
 
 ### Statement
 
-Answer each query with $a_j = q_j(S) + \xi_j$, where the $\xi_j$ are independent Gaussian noises of standard deviation $\sigma$. For every $\delta > 0$,
+Answer each query with $a_j = q_j(D) + \xi_j$, where the $\xi_j$ are independent Gaussian noises of standard deviation $\sigma$. For every $\delta > 0$,
 $$\mathbb E\Big[\max_j\big|a_j - q_j(\mathcal D)\big|\Big] \le \sigma\sqrt{2\ln(2k)} + e^\varepsilon - 1 + \delta, \qquad \varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}, \quad \rho = \frac{k}{2n^2\sigma^2}.$$ {#eq-ada-gauss}
 Choosing $\sigma$ and $\delta$ to minimize the bound makes the error at most $\alpha$. Step 4 below explains why $\delta$ should then be of order $\alpha$. With that choice, the number of records grows like the square root of $k$:
 $$n = O\Big(\frac{\sqrt{k\,\ln k\,\ln(1/\alpha)}}{\alpha^2}\Big).$$ {#eq-ada-gauss-n}
@@ -312,30 +312,30 @@ In machine learning the analyst usually has two sets: a training set to explore 
 
 ### Statement
 
-Thresholdout holds a training set $S_t$ and a holdout set $S_h$ of $n$ records, a threshold $T$ and a noise scale $\sigma$. It starts with a noisy threshold $\hat T = T + \gamma$, where $\gamma$ is Laplace noise of scale $2\sigma$, and answers each query $q$ in two steps.
+Thresholdout holds a training set $D_t$ and a holdout set $D_h$ of $n$ records, a threshold $\tau$ and a noise scale $b$. It starts with a noisy threshold $\hat\tau = \tau + \zeta$, where $\zeta$ is Laplace noise of scale $2b$, and answers each query $q$ in two steps.
 
-1. Draw Laplace noise $\nu$ of scale $4\sigma$, and compare the gap between the two sets with the noisy threshold: is $|q(S_h) - q(S_t)| + \nu > \hat T$?
-2. If not, answer with the training value $q(S_t)$. If so, count one **overfitting detection**, answer with $q(S_h) + \xi$, where $\xi$ is Laplace noise of scale $\sigma$, and redraw the threshold noise $\gamma$.
+1. Draw Laplace noise $\nu$ of scale $4b$, and compare the gap between the two sets with the noisy threshold: is $|q(D_h) - q(D_t)| + \nu > \hat\tau$?
+2. If not, answer with the training value $q(D_t)$. If so, count one **overfitting detection**, answer with $q(D_h) + \xi$, where $\xi$ is Laplace noise of scale $b$, and redraw the threshold noise $\zeta$.
 
 The holdout set is protected by the detections alone. If a query changes by at most $\Delta$ when one holdout record is replaced, then a run that stops at its $B$-th detection is $\varepsilon$-DP in the holdout records with
-$$\varepsilon = \frac{2B\Delta}{\sigma},$$ {#eq-ada-tho}
-however many queries were answered below the threshold. For statistical queries $\Delta = 1/n$. Every answer is close to the holdout value, within the threshold plus noise for an answer below and within the noise $\xi$ for an answer above. So the transfer theorem applies with the holdout set as the sample. The answers are accurate on the population to within their accuracy on the holdout set, about $T$ plus noise, plus $e^\varepsilon - 1$.
+$$\varepsilon = \frac{2B\Delta}{b},$$ {#eq-ada-tho}
+however many queries were answered below the threshold. For statistical queries $\Delta = 1/n$. Every answer is close to the holdout value, within the threshold plus noise for an answer below and within the noise $\xi$ for an answer above. So the transfer theorem applies with the holdout set as the sample. The answers are accurate on the population to within their accuracy on the holdout set, about $\tau$ plus noise, plus $e^\varepsilon - 1$.
 
 ### Derivation
 
-1. **One detection is one run of AboveThreshold.** Between two detections, Thresholdout compares a stream of queries $|q(S_h) - q(S_t)|$ with one noisy threshold and stops at the first that exceeds it. That is AboveThreshold from [Selection](../part03-dp-foundations/05-selection.md#sec-sel-svt). It is $(\varepsilon_1 + \varepsilon_2)$-DP when its threshold noise has scale $\Delta/\varepsilon_1$ and its query noise scale $2\Delta/\varepsilon_2$, for any number of answers below the threshold. The reason is that all the answers below are explained by one shift of the threshold noise.
-2. **The sensitivity of the compared quantity.** The training set does not depend on the holdout set, so hold it fixed. Replacing one holdout record moves $q(S_h)$ by at most $\Delta$, so it moves $|q(S_h) - q(S_t)|$ by at most $\Delta$ too.
-3. **The cost of one detection.** The threshold noise has scale $2\sigma = \Delta/\varepsilon_1$, so $\varepsilon_1 = \Delta/(2\sigma)$. The query noise has scale $4\sigma = 2\Delta/\varepsilon_2$, so $\varepsilon_2 = \Delta/(2\sigma)$. The noisy answer is the Laplace mechanism with scale $\sigma$, which costs $\Delta/\sigma$. The total is $\Delta/(2\sigma) + \Delta/(2\sigma) + \Delta/\sigma = 2\Delta/\sigma$.
+1. **One detection is one run of AboveThreshold.** Between two detections, Thresholdout compares a stream of queries $|q(D_h) - q(D_t)|$ with one noisy threshold and stops at the first that exceeds it. That is AboveThreshold from [Selection](../part03-dp-foundations/05-selection.md#sec-sel-svt). It is $(\varepsilon_1 + \varepsilon_2)$-DP when its threshold noise has scale $\Delta/\varepsilon_1$ and its query noise scale $2\Delta/\varepsilon_2$, for any number of answers below the threshold. The reason is that all the answers below are explained by one shift of the threshold noise.
+2. **The sensitivity of the compared quantity.** The training set does not depend on the holdout set, so hold it fixed. Replacing one holdout record moves $q(D_h)$ by at most $\Delta$, so it moves $|q(D_h) - q(D_t)|$ by at most $\Delta$ too.
+3. **The cost of one detection.** The threshold noise has scale $2b = \Delta/\varepsilon_1$, so $\varepsilon_1 = \Delta/(2b)$. The query noise has scale $4b = 2\Delta/\varepsilon_2$, so $\varepsilon_2 = \Delta/(2b)$. The noisy answer is the Laplace mechanism with scale $b$, which costs $\Delta/b$. The total is $\Delta/(2b) + \Delta/(2b) + \Delta/b = 2\Delta/b$.
 4. **The answers below the threshold.** They are training values, which do not depend on the holdout set. Their only link to it is the comparison, which step 1 already paid for.
-5. **All detections.** Each detection closes one run, and the next run starts with fresh threshold noise. Basic composition over the $B$ closed runs gives @eq-ada-tho. Queries after the last detection would form an unfinished run, which costs the threshold term $\Delta/(2\sigma)$ of step 3. That is why the holdout set stops at the $B$-th detection. If the analysis ends earlier, the unfinished run fits within the unused budget. Advanced composition would make the cost grow like $\sqrt B$ rather than $B$, at the price of a $\delta$.
+5. **All detections.** Each detection closes one run, and the next run starts with fresh threshold noise. Basic composition over the $B$ closed runs gives @eq-ada-tho. Queries after the last detection would form an unfinished run, which costs the threshold term $\Delta/(2b)$ of step 3. That is why the holdout set stops at the $B$-th detection. If the analysis ends earlier, the unfinished run fits within the unused budget. Advanced composition would make the cost grow like $\sqrt B$ rather than $B$, at the price of a $\delta$.
 
 ### Interpretation
 
 **Only overfitting is charged.** A query whose training and holdout values agree costs nothing, however many such queries there are. An analyst who overfits the training set triggers detections, and each detection spends a fixed amount of privacy. When the budget is spent, the holdout set must stop answering. This is the right accounting for confirmatory analysis, where most hypotheses either hold on both sets or fail on the training set first.
 
-**Accuracy means accuracy to within the threshold.** Below the threshold, the answer is the training value, which can differ from the holdout value by about $T$. So $T$ sets the resolution of every answer. A smaller $T$ gives sharper answers but more detections. Dwork et al. (2015) prove a high-probability guarantee for Thresholdout directly, in which the number of queries can grow exponentially with $n$ as long as the number of detections stays small.
+**Accuracy means accuracy to within the threshold.** Below the threshold, the answer is the training value, which can differ from the holdout value by about $\tau$. So $\tau$ sets the resolution of every answer. A smaller $\tau$ gives sharper answers but more detections. Dwork et al. (2015) prove a high-probability guarantee for Thresholdout directly, in which the number of queries can grow exponentially with $n$ as long as the number of detections stays small.
 
-**The formal guarantee needs large holdout sets.** For the transfer term to be below the accuracy $\alpha$ you want, $\varepsilon = 2B/(n\sigma)$ must be at most about $\alpha$, so $B$ detections need $n$ of order $B/(\sigma\alpha)$ records. The experiment below runs far outside that regime and still works, because its analyst is not trying to attack the holdout set.
+**The formal guarantee needs large holdout sets.** For the transfer term to be below the accuracy $\alpha$ you want, $\varepsilon = 2B/(nb)$ must be at most about $\alpha$, so $B$ detections need $n$ of order $B/(b\alpha)$ records. The experiment below runs far outside that regime and still works, because its analyst is not trying to attack the holdout set.
 
 ### Example: selecting features on a training set and confirming them on a holdout set
 
@@ -345,7 +345,7 @@ This is the experiment of Dwork et al. (2015), scaled down. A training set and a
 2. Ask the holdout set for the correlations of those features, and keep the ones whose holdout correlation also exceeds $1/\sqrt n$ in size, with the same sign.
 3. Rank them by training correlation. For each $m$ from 10 to 200, build the classifier $\mathrm{sign}(\sum_j s_jx_j)$ over the top $m$, where $s_j$ is the sign of feature $j$'s correlation, and ask the holdout set for its accuracy.
 
-The holdout queries are answered in three ways: exactly, with Gaussian noise of standard deviation $1/\sqrt n$ (the sampling error of one correlation), or by Thresholdout with $T = 4/\sqrt n$ and $\sigma = 1/\sqrt n$. The script computes each classifier's true accuracy exactly, from the distribution of the features. @tbl-ada-reuse averages 10 repetitions for $m = 200$.
+The holdout queries are answered in three ways: exactly, with Gaussian noise of standard deviation $1/\sqrt n$ (the sampling error of one correlation), or by Thresholdout with $\tau = 4/\sqrt n$ and $b = 1/\sqrt n$. The script computes each classifier's true accuracy exactly, from the distribution of the features. @tbl-ada-reuse averages 10 repetitions for $m = 200$.
 
 | Setting | Holdout answered | Training accuracy | Reported holdout accuracy | True accuracy |
 | --- | --- | --- | --- | --- |
@@ -358,16 +358,16 @@ The holdout queries are answered in three ways: exactly, with Gaussian noise of 
 
 : The reusable-holdout experiment with 200 selected features, averaged over 10 repetitions. The true accuracy is computed exactly. {#tbl-ada-reuse}
 
-Answered exactly, the holdout set reports 68% for a classifier that cannot beat 50%. Gaussian noise of the size of the sampling error removes only part of the bias, because the selection still sees the holdout correlations through modest noise. Thresholdout reports 52%, within its threshold of the truth. That threshold is $T = 4/\sqrt n$ on a correlation, and since an accuracy is (1 + correlation)/2, it is $2/\sqrt n = 0.045$ on an accuracy. Thresholdout works in two ways. Most holdout correlations in step 2 come back as training values, so nearly every feature that passed on the training set is confirmed, and the selection barely depends on the holdout set. Then the accuracy queries of step 3 have training accuracies far above their holdout accuracies, so they trigger detections and come back as noisy holdout values. The training accuracy differs between the three rows because each way of answering confirms a different set of features. With 20 informative features, Thresholdout's report, 0.5471, is close to the true accuracy of 0.5312, and its selection is about as good as the others (@fig-ada-reuse).
+Answered exactly, the holdout set reports 68% for a classifier that cannot beat 50%. Gaussian noise of the size of the sampling error removes only part of the bias, because the selection still sees the holdout correlations through modest noise. Thresholdout reports 52%, within its threshold of the truth. That threshold is $\tau = 4/\sqrt n$ on a correlation, and since an accuracy is (1 + correlation)/2, it is $2/\sqrt n = 0.045$ on an accuracy. Thresholdout works in two ways. Most holdout correlations in step 2 come back as training values, so nearly every feature that passed on the training set is confirmed, and the selection barely depends on the holdout set. Then the accuracy queries of step 3 have training accuracies far above their holdout accuracies, so they trigger detections and come back as noisy holdout values. The training accuracy differs between the three rows because each way of answering confirms a different set of features. With 20 informative features, Thresholdout's report, 0.5471, is close to the true accuracy of 0.5312, and its selection is about as good as the others (@fig-ada-reuse).
 
-The privacy accounting tells the other half of the story. Each repetition asks about 1,587 holdout queries, and Thresholdout records 325.8 detections on average. A correlation moves by at most $\Delta = 2/n$ when one record changes, and each detection costs $2\Delta/\sigma = 0.0894$ by @eq-ada-tho. The 325.8 detections of an average repetition therefore cost $\varepsilon = 29.1$, plus $\Delta/(2\sigma) = 0.022$ for the run left open at the end. The Gaussian answers cost $\rho = \Delta^2/(2\sigma^2) = 2/n$ each, so all of them together have $\rho = 1.59$, which is $\varepsilon = 10.1$ at $\delta = 10^{-5}$. Neither is anywhere near the small $\varepsilon$ the transfer theorem needs. The guarantee is a worst case. This analyst only screens features, and does not attack the holdout set the way the boosting attack does.
+The privacy accounting tells the other half of the story. Each repetition asks about 1,587 holdout queries, and Thresholdout records 325.8 detections on average. A correlation moves by at most $\Delta = 2/n$ when one record changes, and each detection costs $2\Delta/b = 0.0894$ by @eq-ada-tho. The 325.8 detections of an average repetition therefore cost $\varepsilon = 29.1$, plus $\Delta/(2b) = 0.022$ for the run left open at the end. The Gaussian answers, of standard deviation $\sigma = 1/\sqrt n$, cost $\rho = \Delta^2/(2\sigma^2) = 2/n$ each, so all of them together have $\rho = 1.59$, which is $\varepsilon = 10.1$ at $\delta = 10^{-5}$. Neither is anywhere near the small $\varepsilon$ the transfer theorem needs. The guarantee is a worst case. This analyst only screens features, and does not attack the holdout set the way the boosting attack does.
 
 ![Accuracy of a classifier built from the top $m$ features against $m$: on the training set, as reported by a holdout set reused as is, with Gaussian noise and through Thresholdout, and the true accuracy. Left: every feature is noise. Right: 20 features carry signal.](figures/ada_reuse.svg){#fig-ada-reuse}
 
 ### Check yourself
 
 - Why may Thresholdout use the training set without any noise? *(The guarantee protects the holdout records. The training set is independent of them, so answering from it reveals nothing about the holdout set.)*
-- What happens if an analyst keeps asking queries after the budget of detections is spent? *(The holdout set must stop answering, or answer only from the training set. Every further detection would add $2\Delta/\sigma$ to $\varepsilon$.)*
+- What happens if an analyst keeps asking queries after the budget of detections is spent? *(The holdout set must stop answering, or answer only from the training set. Every further detection would add $2\Delta/b$ to $\varepsilon$.)*
 
 ## What it means for machine-learning practice {#sec-ada-practice}
 
@@ -454,15 +454,15 @@ It takes about three minutes, most of it in the boosting attack and the holdout 
 | Result | Statement | Conditions |
 | --- | --- | --- |
 | Maximal inequality | $\mathbb E\max_{j\le m}Z_j \le \sqrt{2v\ln m}$ | Each $Z_j$ sub-Gaussian with proxy $v$ |
-| Fixed queries | $\mathbb E\max_j\lvert q_j(S) - q_j(\mathcal D)\rvert \le \sqrt{\ln(2k)/(2n)}$ | Queries chosen before the sample is drawn |
+| Fixed queries | $\mathbb E\max_j\lvert q_j(D) - q_j(\mathcal D)\rvert \le \sqrt{\ln(2k)/(2n)}$ | Queries chosen before the sample is drawn |
 | Point-query attack | Error $\ge 1 - n/(k - 1)$ with $k$ queries | Exact empirical answers, one adaptive query |
 | Boosting attack | Overfitting $\approx \sqrt{k/(2n)}/\pi$ | Exact leaderboard, random submissions |
-| Sample splitting | $\mathbb E\max_j\lvert q_j(S_j) - q_j(\mathcal D)\rvert \le \sqrt{k\ln(2k)/(2n)}$ | Query $j$ answered on its own part |
-| Transfer lemma | $\lvert\mathbb E q_W(S) - \mathbb E q_W(\mathcal D)\rvert \le e^\varepsilon - 1 + \delta$ | $W$ is $(\varepsilon, \delta)$-DP under replace |
+| Sample splitting | $\mathbb E\max_j\lvert q_j(D_j) - q_j(\mathcal D)\rvert \le \sqrt{k\ln(2k)/(2n)}$ | Query $j$ answered on its own part |
+| Transfer lemma | $\lvert\mathbb E q_W(D) - \mathbb E q_W(\mathcal D)\rvert \le e^\varepsilon - 1 + \delta$ | $W$ is $(\varepsilon, \delta)$-DP under replace-one |
 | Transfer theorem | Population error $\le \alpha + e^\varepsilon - 1 + \delta$ | Sample error $\le \alpha$ on average; interaction DP |
 | Gaussian noise | $\sigma\sqrt{2\ln 2k} + e^\varepsilon - 1 + \delta$, $\rho = k/(2n^2\sigma^2)$; $n = \tilde O(\sqrt k/\alpha^2)$ | Noise of standard deviation $\sigma$ per answer |
 | High probability (Bassily et al.) | $(\alpha, \beta)$ on the sample gives $(O(\alpha), O(\beta))$ on the population | $\varepsilon = O(\alpha)$, $\delta = O(\alpha\beta)$ |
-| Thresholdout | $\varepsilon = 2B\Delta/\sigma$ for $B$ detections | Answers below the threshold are free |
+| Thresholdout | $\varepsilon = 2B\Delta/b$ for $B$ detections | Answers below the threshold are free |
 | Lower bound (Hardt–Ullman, Steinke–Ullman) | About $n^2$ adaptive queries at most | Efficient mechanisms, high-dimensional records, one-way functions exist |
 
 : Every result of the chapter. {#tbl-ada-cheat}

@@ -529,7 +529,7 @@ def plot_bsc() -> Figure:
     left.set(
         xlim=(0, 1),
         ylim=(0, 1.05),
-        xlabel=r"input prior $q = \Pr[X = 1]$",
+        xlabel=r"input prior $\pi_1 = \Pr[X = 1]$",
         ylabel=r"$I(X; Y)$ (bits)",
         title="BSC: information is maximal at q = 1/2",
     )
@@ -600,8 +600,8 @@ def plot_fano(m: int = 8) -> Figure:
         hcs = [conditional_entropy(jj) for jj in joints]
         ax.plot(epss, [map_error(jj) for jj in joints], "k", linewidth=2, label="MAP error (exact)")
         ax.plot(epss, [fano_bound(h, m) for h in hcs], "--", label="Fano bound")
-        ax.plot(epss, [weak_fano_bound(h, m) for h in hcs], ":", label=r"$(H(X|Y) - 1)/\log_2 M$")
-        ax.set(xlim=(0, 0.8), ylim=(0, 0.85), xlabel=r"noise level $\varepsilon$", title=f"{name}, M = {m}")
+        ax.plot(epss, [weak_fano_bound(h, m) for h in hcs], ":", label=r"$(H(X|Y) - 1)/\log_2 k$")
+        ax.set(xlim=(0, 0.8), ylim=(0, 0.85), xlabel=r"noise level $p$", title=f"{name}, k = {m}")
         ax.legend(loc="upper left", fontsize="small")
     axes[0].set_ylabel("probability of a wrong guess")
     return fig

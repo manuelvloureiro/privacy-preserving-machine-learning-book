@@ -25,7 +25,7 @@ There are two ways to get a guarantee for a person. The first keeps the record a
 
 : The results of this chapter and where each is used. {#tbl-ulvl-overview}
 
-**Notation.** The training set has $n$ records belonging to $U$ users; user $u$ owns $n_u$ records. Two datasets are **example-level neighbours** if they differ by adding or removing one record, and **user-level neighbours** if they differ by adding or removing all the records of one user. $k$ is the number of records a user contributes, or the cap on it. In a batch drawn by Poisson sampling at rate $q$, $M$ is the number of a given user's records that are drawn. As in [DP-SGD](02-dp-sgd.md), $C$ is the clipping norm, $\sigma$ the noise multiplier, $T$ the number of steps and $B$ the expected batch size, now counted in whichever unit is sampled.
+**Notation.** The training set has $n$ records belonging to $U$ users; user $u$ owns $n_u$ records. Two datasets are **example-level neighbours** if they differ by adding or removing one record, and **user-level neighbours** if they differ by adding or removing all the records of one user. $k$ is the number of records a user contributes, or the cap on it. In a batch drawn by Poisson sampling at rate $q$, $H$ is the number of a given user's records that are drawn. As in [DP-SGD](02-dp-sgd.md), $C$ is the clipping norm, $\sigma$ the noise multiplier, $T$ the number of steps and $B$ the expected batch size, now counted in whichever unit is sampled.
 
 **The running example.** The part's network (one hidden layer of 64 tanh units, 3,329 weights) learns labels produced by a fixed teacher network from 10,000 training records of 50 features, and is tested on 20,000 more. This chapter assigns the 10,000 records to $U = 1{,}000$ users. Each user gets one record, and the other 9,000 are spread over users with probabilities proportional to log-normal weights, so user sizes are very uneven: the mean is 10 records, the median 4, and the largest user holds 348 (@fig-ulvl-population). A user's records are a nearest-neighbour cluster around a random record, so they resemble each other the way one person's messages do: the label balance $|\bar y|$ is 0.21 on average in the ten largest users, against 0.06 in the whole set. The population is fixed, like the dataset.
 
@@ -97,37 +97,37 @@ Group privacy treats DP-SGD as a black box. It is not one: we know exactly how a
 
 ### Statement
 
-Let $M \sim \mathrm{Binomial}(k, q)$ be the number of the user's records in a Poisson batch, and $b_m = \binom km q^m(1 - q)^{k - m}$ its probabilities. In units of $C$, one step of example-level DP-SGD compares
+Let $H \sim \mathrm{Bin}(k, q)$ be the number of the user's records in a Poisson batch, and $b_m = \binom km q^m(1 - q)^{k - m}$ its probabilities. In units of $C$, one step of example-level DP-SGD compares
 $$P_0 = \mathcal N(0, \sigma^2) \qquad\text{and}\qquad P_{(k)} = \sum_{m=0}^k b_m\,\mathcal N(m, \sigma^2),$$ {#eq-ulvl-mixture}
 the output without the user and with the user, whose drawn records all push the sum by the full $C$ in the same direction. Charles et al. (2024, Theorem 3) prove that this pair, composed over the $T$ steps, bounds the user's privacy loss, and that the bound is attained by a loss for which the user's gradients are aligned. The user's RDP curve is therefore $\varepsilon_{k}(\alpha) = \max\{D_\alpha(P_{(k)}\|P_0), D_\alpha(P_0\|P_{(k)})\}$. The first divergence is $\frac{1}{\alpha - 1}\ln A_\alpha$ with
-$$A_\alpha = \mathbb E\Big[\exp\Big(\frac{1}{\sigma^2}\sum_{1\le i<j\le\alpha}M_iM_j\Big)\Big], \qquad M_1, \dots, M_\alpha \text{ independent copies of } M,$$ {#eq-ulvl-pair}
+$$A_\alpha = \mathbb E\Big[\exp\Big(\frac{1}{\sigma^2}\sum_{1\le i<j\le\alpha}H_iH_j\Big)\Big], \qquad H_1, \dots, H_\alpha \text{ independent copies of } H,$$ {#eq-ulvl-pair}
 for integer $\alpha$. For small $kq$ the curve is close to that of a single record sampled at rate $kq$:
 $$\varepsilon_k(\alpha) \approx \frac\alpha2(kq)^2\big(e^{1/\sigma^2} - 1\big).$$ {#eq-ulvl-rate}
 The user's $(\varepsilon, \delta)$ after $T$ steps is @eq-ulvl-convert applied to $T\varepsilon_k(\alpha)$.
 
 ### Derivation
 
-The derivation follows the one for a single record: find the distribution of one step's output with and without the user, write the Rényi divergence as an average of a power of the likelihood ratio, and evaluate the average. The new ingredient is that the power of a mixture over $m$ becomes a product of independent copies of $M$, which makes the average computable by Fact 3.
+The derivation follows the one for a single record: find the distribution of one step's output with and without the user, write the Rényi divergence as an average of a power of the likelihood ratio, and evaluate the average. The new ingredient is that the power of a mixture over $m$ becomes a product of independent copies of $H$, which makes the average computable by Fact 3.
 
-1. **How many of the user's records are drawn.** Poisson sampling draws each record independently with probability $q$, so the number of the user's $k$ records in the batch is a sum of $k$ independent coins: $M \sim \mathrm{Binomial}(k, q)$, independent of which other records are drawn.
-2. **What they do to the sum.** Fix the other records' contribution, which is the same with and without the user. Given $M = m$, the user adds $m$ clipped gradients, each of length at most $C$, so their sum has length at most $mC$, with equality when they all point the same way. In units of $C$ and along that direction, the output is $\mathcal N(m, \sigma^2)$ with probability $b_m$: the mixture of @eq-ulvl-mixture. That the aligned case is the worst over all configurations of the user's gradients, and that the reduction to one dimension is valid, is the content of Charles et al.'s Theorem 3, which @sec-apx-learn-user in the appendices proves for $D_\alpha(P_{(k)}\|P_0)$ at integer orders; the intuition is that gradients pointing in different directions add in squares rather than in length, and spread the user's influence over several coordinates where it is harder to detect.
+1. **How many of the user's records are drawn.** Poisson sampling draws each record independently with probability $q$, so the number of the user's $k$ records in the batch is a sum of $k$ independent coins: $H \sim \mathrm{Bin}(k, q)$, independent of which other records are drawn.
+2. **What they do to the sum.** Fix the other records' contribution, which is the same with and without the user. Given $H = m$, the user adds $m$ clipped gradients, each of length at most $C$, so their sum has length at most $mC$, with equality when they all point the same way. In units of $C$ and along that direction, the output is $\mathcal N(m, \sigma^2)$ with probability $b_m$: the mixture of @eq-ulvl-mixture. That the aligned case is the worst over all configurations of the user's gradients, and that the reduction to one dimension is valid, is the content of Charles et al.'s Theorem 3, which @sec-apx-learn-user in the appendices proves for $D_\alpha(P_{(k)}\|P_0)$ at integer orders; the intuition is that gradients pointing in different directions add in squares rather than in length, and spread the user's influence over several coordinates where it is harder to detect.
 3. **The divergence as an average.** By the definition of the Rényi divergence, $e^{(\alpha-1)D_\alpha(P_{(k)}\|P_0)} = \mathbb E_{y\sim P_0}\big[(P_{(k)}(y)/P_0(y))^\alpha\big]$. Dividing the mixture by $P_0$ term by term with @eq-ulvl-ratio,
-$$\frac{P_{(k)}(y)}{P_0(y)} = \sum_m b_m\exp\Big(\frac{2my - m^2}{2\sigma^2}\Big) = \mathbb E_M\Big[\exp\Big(\frac{2My - M^2}{2\sigma^2}\Big)\Big],$$
+$$\frac{P_{(k)}(y)}{P_0(y)} = \sum_m b_m\exp\Big(\frac{2my - m^2}{2\sigma^2}\Big) = \mathbb E_H\Big[\exp\Big(\frac{2Hy - H^2}{2\sigma^2}\Big)\Big],$$
 an average over the number of drawn records.
-4. **The power of an average is an average over independent copies.** For integer $\alpha$, $(\mathbb E_M[f(M)])^\alpha = \mathbb E[f(M_1)f(M_2)\cdots f(M_\alpha)]$ with $M_1, \dots, M_\alpha$ independent copies of $M$: multiplying out $\alpha$ copies of the sum $\sum_mb_mf(m)$ gives one term for every choice $(m_1, \dots, m_\alpha)$, with weight $b_{m_1}\cdots b_{m_\alpha}$, which is the joint distribution of independent copies. The product of exponentials is the exponential of the sum, so with $S = M_1 + \dots + M_\alpha$,
-$$\Big(\frac{P_{(k)}(y)}{P_0(y)}\Big)^\alpha = \mathbb E\Big[\exp\Big(\frac{2Sy - \sum_iM_i^2}{2\sigma^2}\Big)\Big].$$
-5. **Average over $y$.** Exchange the two averages, which is allowed because everything is positive. For fixed copies, Fact 3 with $s = S/\sigma^2$ gives $\mathbb E_{y\sim P_0}[e^{Sy/\sigma^2}] = e^{S^2/(2\sigma^2)}$, so
-$$A_\alpha = \mathbb E\Big[\exp\Big(\frac{S^2 - \sum_iM_i^2}{2\sigma^2}\Big)\Big].$$
-Expanding the square, $S^2 = \sum_iM_i^2 + 2\sum_{i<j}M_iM_j$, and the squares cancel: this is @eq-ulvl-pair. Only products of *different* copies remain.
-6. **Check against one record.** For $k = 1$, each $M_i$ is a coin, 0 or 1. If $J$ of the $\alpha$ coins are 1, the sum $\sum_{i<j}M_iM_j$ counts the pairs among them, $\binom J2 = (J^2 - J)/2$, and $J \sim \mathrm{Binomial}(\alpha, q)$. The average of $e^{(J^2 - J)/(2\sigma^2)}$ over $J$ is @eq-ulvl-binomial.
-7. **Small $kq$.** When $kq$ is small, most copies are 0. The terms of @eq-ulvl-pair with at most one non-zero copy have $\sum_{i<j}M_iM_j = 0$ and contribute their probability times 1. The first term that costs privacy has exactly two copies equal to 1, the most likely way for a product to be non-zero: there are $\binom\alpha2$ pairs of copies, each copy is 1 with probability about $kq$, and the factor is $e^{1/\sigma^2}$. So $A_\alpha \approx 1 + \binom\alpha2(kq)^2(e^{1/\sigma^2} - 1)$, the same as @eq-ulvl-binomial's first three terms with $q$ replaced by $kq$. Taking $\ln(1 + x) \approx x$ and dividing by $\alpha - 1$ gives @eq-ulvl-rate.
+4. **The power of an average is an average over independent copies.** For integer $\alpha$, $(\mathbb E_H[f(H)])^\alpha = \mathbb E[f(H_1)f(H_2)\cdots f(H_\alpha)]$ with $H_1, \dots, H_\alpha$ independent copies of $H$: multiplying out $\alpha$ copies of the sum $\sum_mb_mf(m)$ gives one term for every choice $(m_1, \dots, m_\alpha)$, with weight $b_{m_1}\cdots b_{m_\alpha}$, which is the joint distribution of independent copies. The product of exponentials is the exponential of the sum, so with $V = H_1 + \dots + H_\alpha$, the total over the copies,
+$$\Big(\frac{P_{(k)}(y)}{P_0(y)}\Big)^\alpha = \mathbb E\Big[\exp\Big(\frac{2Vy - \sum_iH_i^2}{2\sigma^2}\Big)\Big].$$
+5. **Average over $y$.** Exchange the two averages, which is allowed because everything is positive. For fixed copies, Fact 3 with $s = V/\sigma^2$ gives $\mathbb E_{y\sim P_0}[e^{Vy/\sigma^2}] = e^{V^2/(2\sigma^2)}$, so
+$$A_\alpha = \mathbb E\Big[\exp\Big(\frac{V^2 - \sum_iH_i^2}{2\sigma^2}\Big)\Big].$$
+Expanding the square, $V^2 = \sum_iH_i^2 + 2\sum_{i<j}H_iH_j$, and the squares cancel: this is @eq-ulvl-pair. Only products of *different* copies remain.
+6. **Check against one record.** For $k = 1$, each $H_i$ is a coin, 0 or 1. If $J$ of the $\alpha$ coins are 1, the sum $\sum_{i<j}H_iH_j$ counts the pairs among them, $\binom J2 = (J^2 - J)/2$, and $J \sim \mathrm{Bin}(\alpha, q)$. The average of $e^{(J^2 - J)/(2\sigma^2)}$ over $J$ is @eq-ulvl-binomial.
+7. **Small $kq$.** When $kq$ is small, most copies are 0. The terms of @eq-ulvl-pair with at most one non-zero copy have $\sum_{i<j}H_iH_j = 0$ and contribute their probability times 1. The first term that costs privacy has exactly two copies equal to 1, the most likely way for a product to be non-zero: there are $\binom\alpha2$ pairs of copies, each copy is 1 with probability about $kq$, and the factor is $e^{1/\sigma^2}$. So $A_\alpha \approx 1 + \binom\alpha2(kq)^2(e^{1/\sigma^2} - 1)$, the same as @eq-ulvl-binomial's first three terms with $q$ replaced by $kq$. Taking $\ln(1 + x) \approx x$ and dividing by $\alpha - 1$ gives @eq-ulvl-rate.
 8. **Other orders and the other direction.** For non-integer $\alpha$, and for $D_\alpha(P_0\|P_{(k)})$, there is no finite expansion. Compute both as one-dimensional integrals of $P_0(y)$ times a power of the mixture ratio of step 3, on a grid of step $\sigma/10$ wide enough to contain the bump near $y = \alpha k$ that large orders create, with log-sum-exp to avoid overflow, exactly as for one record.
 
 ### Interpretation
 
 **A user with $k$ records looks like one record sampled $k$ times as often.** @eq-ulvl-rate says that, in the regime where amplification works well, the only thing that matters is the probability that some record of the user is in the batch, about $kq$. Halving the sampling rate exactly compensates doubling the user's records. Since the per-step RDP grows like $(kq)^2$, and $\varepsilon$ after conversion grows roughly like the square root of the RDP slope, the user's $\varepsilon$ grows roughly linearly in $k$ while $kq$ is small.
 
-**Beyond that regime it grows faster.** Two things break the approximation. First, $kq$ is no longer small: for $k = 50$ and $q = 0.01$, half of all steps include one of the user's records, and subsampling, which helps only because the unit is usually absent, stops helping. Second, the higher terms of @eq-ulvl-pair grow like $e^{M_iM_j/\sigma^2}$, and $M_iM_j$ can be as large as $k^2$. A step that draws all $k$ records shifts the sum by $kC$, a mechanism with noise multiplier $\sigma/k$, whose privacy loss has a tail that no amount of rarity can hide at high orders. The accountant then uses orders close to 1, where the conversion is expensive.
+**Beyond that regime it grows faster.** Two things break the approximation. First, $kq$ is no longer small: for $k = 50$ and $q = 0.01$, half of all steps include one of the user's records, and subsampling, which helps only because the unit is usually absent, stops helping. Second, the higher terms of @eq-ulvl-pair grow like $e^{H_iH_j/\sigma^2}$, and $H_iH_j$ can be as large as $k^2$. A step that draws all $k$ records shifts the sum by $kC$, a mechanism with noise multiplier $\sigma/k$, whose privacy loss has a tail that no amount of rarity can hide at high orders. The accountant then uses orders close to 1, where the conversion is expensive.
 
 **Group privacy is the wrong tool for DP-SGD.** It ignores both the structure of the mechanism and the fact that the RDP curve is known. The direct accountant gives a smaller $\varepsilon$ for every $k$ and a finite one for every $k$.
 
@@ -148,14 +148,14 @@ Expanding the square, $S^2 = \sum_iM_i^2 + 2\sum_{i<j}M_iM_j$, and the squares c
 
 : The user-level $\varepsilon$ at $\delta = 10^{-5}$ of the running example's example-level DP-SGD, for a user with $k$ records. "None" means that group privacy gives no $(\varepsilon, 10^{-5})$ guarantee. {#tbl-ulvl-k}
 
-The first column checks the accountant: with one record it is the DP-SGD accountant, 6.72 against 6.71, the difference coming from the coarser grid of orders this chapter's script uses (its best order is 4, against 4.1 on the finer grid). At $\alpha = 4.1$ the two curves agree to all printed digits, $3.733633 \times 10^{-4}$. For $k = 2$ and 5 at $\alpha = 2$, the numerical integral and the exact formula @eq-ulvl-pair, $A_2 = \mathbb E[e^{M_1M_2/\sigma^2}]$, agree to seven digits ($6.992273 \times 10^{-4}$ and $4.626224 \times 10^{-3}$), and the reverse direction is smaller ($6.119238 \times 10^{-4}$ and $3.412123 \times 10^{-3}$).
+The first column checks the accountant: with one record it is the DP-SGD accountant, 6.72 against 6.71, the difference coming from the coarser grid of orders this chapter's script uses (its best order is 4, against 4.1 on the finer grid). At $\alpha = 4.1$ the two curves agree to all printed digits, $3.733633 \times 10^{-4}$. For $k = 2$ and 5 at $\alpha = 2$, the numerical integral and the exact formula @eq-ulvl-pair, $A_2 = \mathbb E[e^{H_1H_2/\sigma^2}]$, agree to seven digits ($6.992273 \times 10^{-4}$ and $4.626224 \times 10^{-3}$), and the reverse direction is smaller ($6.119238 \times 10^{-4}$ and $3.412123 \times 10^{-3}$).
 
 Already at two records, the person behind them is protected at $\varepsilon = 15.54$, more than twice the record's 6.71. At ten, $\varepsilon = 146.20$ means no protection at all. The rate-$kq$ approximation is within 1.5% at $k = 2$ (15.32 against 15.54) and 8% at $k = 10$ (134.50 against 146.20), so it is a quick estimate of the user's exposure: rerun the record-level accountant with $q$ replaced by $kq$. In every row it errs on the low side, because it drops the terms in which several of the user's records are drawn together.
 
 ### Check yourself
 
 - Your model was trained with example-level DP-SGD at $q = 0.001$, and its heaviest user has 20 records. Which single-record accountant run gives a quick estimate of that user's $\varepsilon$, and in which direction is it off? *(The run with $q = 0.02$ and the same $\sigma$ and $T$. It underestimates slightly, because it ignores steps that draw several of the user's records at once.)*
-- In @eq-ulvl-pair, why do only products of different copies appear? *(Because the $\sum_iM_i^2$ in the exponent of the likelihood ratio cancels the squares in $S^2$ after the Gaussian average. Each copy alone averages to a ratio whose expectation under $P_0$ is 1, as for one record.)*
+- In @eq-ulvl-pair, why do only products of different copies appear? *(Because the $\sum_iH_i^2$ in the exponent of the likelihood ratio cancels the squares in $V^2$ after the Gaussian average. Each copy alone averages to a ratio whose expectation under $P_0$ is 1, as for one record.)*
 
 ## User-level DP-SGD {#sec-ulvl-dpsgd}
 
@@ -165,15 +165,15 @@ Accounting for users after the fact charges a heavy user for every one of their 
 
 ### Statement
 
-Start from weights $w_0$ chosen independently of the data. For $t = 0, \dots, T - 1$:
+Start from weights $\theta_0$ chosen independently of the data. For $t = 0, \dots, T - 1$:
 
 1. **Sample users.** Put each user in the set $S_t$ independently with probability $q$.
-2. **Per-user update.** For each $u \in S_t$, compute one vector from user $u$'s records alone, for example the average gradient $\bar g_u = \frac1{n_u}\sum_{i \in u}\nabla_w\ell(w_t, z_i)$, or the change in weights after a few local steps of SGD on those records.
+2. **Per-user update.** For each $u \in S_t$, compute one vector from user $u$'s records alone, for example the average gradient $\bar g_u = \frac1{n_u}\sum_{i \in u}\nabla_\theta\ell(\theta_t; z_i)$, or the change in weights after a few local steps of SGD on those records.
 3. **Clip per user.** $\tilde g_u = \bar g_u\min(1, C/\|\bar g_u\|)$.
 4. **Noisy sum.** $G_t = \sum_{u\in S_t}\tilde g_u + \xi_t$ with $\xi_t \sim \mathcal N(0, \sigma^2C^2I)$.
-5. **Step.** $w_{t+1} = w_t - \eta\,G_t/(qU)$.
+5. **Step.** $\theta_{t+1} = \theta_t - \eta\,G_t/(qU)$.
 
-Releasing $w_1, \dots, w_T$ is user-level $(\varepsilon, \delta)$-DP with $\varepsilon$ given by @eq-ulvl-convert for the curve $T\varepsilon_{q,\sigma}(\alpha)$ of Fact 2: exactly the accountant of example-level DP-SGD, with users in place of records and $q$ the user sampling rate.
+Releasing $\theta_1, \dots, \theta_T$ is user-level $(\varepsilon, \delta)$-DP with $\varepsilon$ given by @eq-ulvl-convert for the curve $T\varepsilon_{q,\sigma}(\alpha)$ of Fact 2: exactly the accountant of example-level DP-SGD, with users in place of records and $q$ the user sampling rate.
 
 A common variant replaces steps 2 and 3 by **per-record clipping and a cap**: keep at most $k$ records per user, clip each record's gradient to $C$, and sum them. One user then moves the sum by at most $kC$, and the guarantee is that of noise multiplier $\sigma/k$:
 $$A_\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^j\exp\Big(\frac{k^2(j^2 - j)}{2\sigma^2}\Big),$$ {#eq-ulvl-together}
@@ -183,7 +183,7 @@ $$A_\alpha = \sum_{j=0}^\alpha\binom\alpha j(1 - q)^{\alpha - j}q^j\exp\Big(\fra
 
 The proof of [DP-SGD](02-dp-sgd.md) used four properties of the clipped sum. Each holds with users in place of records.
 
-1. **One user moves the clipped sum by at most $C$.** Fix the weights $w_t$ and the other sampled users. Each $\tilde g_v$ is computed from user $v$'s records alone, so adding user $u$ to the dataset leaves every other term unchanged and adds $\tilde g_u$, of length at most $C$ by step 3. However many records $u$ has, they enter only through $\tilde g_u$.
+1. **One user moves the clipped sum by at most $C$.** Fix the weights $\theta_t$ and the other sampled users. Each $\tilde g_v$ is computed from user $v$'s records alone, so adding user $u$ to the dataset leaves every other term unchanged and adds $\tilde g_u$, of length at most $C$ by step 3. However many records $u$ has, they enter only through $\tilde g_u$.
 2. **One step is a subsampled Gaussian mechanism over users.** User $u$ enters $S_t$ with probability $q$, independently of the other users. So the step's output with $u$ is a mixture: with probability $1 - q$ the same as without $u$, with probability $q$ shifted by $\tilde g_u$. After rescaling by $C$ and rotating the shift onto one axis, the worst case is the pair of Fact 2, and the step's RDP curve is $\varepsilon_{q,\sigma}(\alpha)$.
 3. **Dividing by $qU$ is post-processing**, since the number of users $U$ is treated as public, as $n$ is in example-level DP-SGD.
 4. **Compose and convert.** RDP composition over the $T$ adaptive steps and @eq-ulvl-convert finish the proof, as before.
@@ -290,7 +290,7 @@ a sum in which each user has weight at most $1/U$ whatever their number of recor
 
 ### Interpretation
 
-**User-level training changes the objective, not only the noise.** With averaged per-user gradients, the model minimizes (a clipped version of) the average over users of each user's average loss, $\frac1U\sum_u\frac1{n_u}\sum_{i\in u}\ell(w, z_i)$, rather than the average over records. Whether that is what you want depends on the application. For a keyboard model, weighting people equally keeps a few very active users from defining everyone's suggestions. For a model meant to fit the overall distribution of records, it under-weights heavy users' content, and the bias can matter when heavy users differ from light ones, for example by language, topic or device.
+**User-level training changes the objective, not only the noise.** With averaged per-user gradients, the model minimizes (a clipped version of) the average over users of each user's average loss, $\frac1U\sum_u\frac1{n_u}\sum_{i\in u}\ell(\theta; z_i)$, rather than the average over records. Whether that is what you want depends on the application. For a keyboard model, weighting people equally keeps a few very active users from defining everyone's suggestions. For a model meant to fit the overall distribution of records, it under-weights heavy users' content, and the bias can matter when heavy users differ from light ones, for example by language, topic or device.
 
 **Clipping caps heavy users twice.** A heavy user's average gradient is a good estimate, typically short when the model already fits their data, and is rarely clipped. But if the user's data are unusual, their gradient is long and is clipped to $C$, so their influence is capped at that of any other user. This is the user-level analogue of what clipping does to records with large gradients ([Disparate impact](08-disparate-impact.md)).
 
@@ -396,8 +396,8 @@ $U$ users, user $u$ with $n_u$ records, cap $k$, sampling rate $q$, noise multip
 | --- | --- | --- |
 | Group privacy | $(k\varepsilon, \delta\frac{e^{k\varepsilon} - 1}{e^\varepsilon - 1})$ | Any example-level $(\varepsilon, \delta)$ mechanism |
 | User with $k$ records, example-level DP-SGD | $\mathcal N(0, \sigma^2)$ against $\sum_m\binom km q^m(1 - q)^{k-m}\mathcal N(m, \sigma^2)$ | Tight (Charles et al. 2024, Theorem 3) |
-| Its moments | $A_\alpha = \mathbb E[\exp(\sigma^{-2}\sum_{i<j}M_iM_j)]$, $M_i \sim \mathrm{Binomial}(k, q)$ | Integer $\alpha$ |
-| Quick estimate | Record-level accountant at rate $kq$ | Small $kq$; slightly optimistic |
+| Its moments | $A_\alpha = \mathbb E[\exp(\sigma^{-2}\sum_{i<j}H_iH_j)]$, $H_i \sim \mathrm{Bin}(k, q)$ | Integer $\alpha$ |
+| Quick estimate | Record-level accountant at rate $kq$ | Small $kq$; errs slightly low |
 | User-level DP-SGD | DP-SGD's accountant with users as units, $q$ = user sampling rate | One clipped vector per user, from that user's data alone |
 | Capped sum per user | Noise multiplier $\sigma/k$ | Per-record clipping, at most $k$ records, users sampled whole |
 | Contribution bounding | Accountant for $k$ records on $n_k = \sum_u\min(n_u, k)$ records | Cap chosen per user, independently of others |

@@ -2,7 +2,7 @@
 
 Exercises for the chapter on differential privacy (DP) as a trade-off curve, [f-DP and Gaussian differential privacy](../../book-full/part04-privacy-accounting/04-gaussian-dp.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part04-privacy-accounting/solutions_gaussian_dp.py` computes every number quoted here; run it with `uv run python code/part04-privacy-accounting/solutions_gaussian_dp.py`.
 
-The solutions use the chapter's notation. $\mu$-Gaussian differential privacy (GDP) means the trade-off curve $G_\mu(a) = \Phi(\Phi^{-1}(1 - a) - \mu)$. A test has type I error $a$ and type II error $b$, and $\alpha$ is reserved for Rényi orders. $P = M(D)$ and $Q = M(D')$, the privacy loss is $L = \ln(p/q)$, and Dong, Roth & Su (2022) is cited as Dong et al. Three more acronyms appear: the total variation (TV) distance, the central limit theorem (CLT) for composition, and differentially private stochastic gradient descent (SGD), written DP-SGD.
+The solutions use the chapter's notation. $\mu$-Gaussian differential privacy (GDP) means the trade-off curve $G_\mu(a) = \Phi(\Phi^{-1}(1 - a) - \mu)$. A test has type I error $a$ and type II error $b$, and $\alpha$ is reserved for Rényi orders. $P = M(D)$ and $Q = M(D')$, the privacy loss is $L = \ln(P/Q)$, and Dong, Roth & Su (2022) is cited as Dong et al. Three more acronyms appear: the total variation (TV) distance, the central limit theorem (CLT) for composition, and differentially private stochastic gradient descent (SGD), written DP-SGD.
 
 ## The Laplace mechanism is GDP {#sec-sol-gdp-1}
 
@@ -58,8 +58,8 @@ The point route pays twice (@tbl-sol-gdp-group): $\delta_k$ is 1.7 times the cur
 ::: {.callout-tip collapse="true" title="Solution"}
 Let $\pi = e^\varepsilon/(1 + e^\varepsilon)$, so randomized response reports the true bit with probability $\pi$, and note $2\pi - 1 = \tanh(\varepsilon/2)$ and $\pi/(1 - \pi) = e^\varepsilon$.
 
-1. **The product pair.** As in @tbl-gdp-rr2, the output pairs 11, 01 or 10, and 00 have likelihood ratios $q/p = e^{2\varepsilon}$, $1$ and $e^{-2\varepsilon}$, and $P$-probabilities $(1 - \pi)^2$, $2\pi(1 - \pi)$ and $\pi^2$.
-2. **The corners.** Adding outcomes in decreasing order of $q/p$ gives the corners $(0, 1)$, $\big((1 - \pi)^2, 1 - \pi^2\big)$, $\big(1 - \pi^2, (1 - \pi)^2\big)$ and $(1, 0)$. At $\varepsilon = 1$ these are $(0.0723, 0.4656)$ and $(0.4656, 0.0723)$.
+1. **The product pair.** As in @tbl-gdp-rr2, the output pairs 11, 01 or 10, and 00 have likelihood ratios $Q/P = e^{2\varepsilon}$, $1$ and $e^{-2\varepsilon}$, and $P$-probabilities $(1 - \pi)^2$, $2\pi(1 - \pi)$ and $\pi^2$.
+2. **The corners.** Adding outcomes in decreasing order of $Q/P$ gives the corners $(0, 1)$, $\big((1 - \pi)^2, 1 - \pi^2\big)$, $\big(1 - \pi^2, (1 - \pi)^2\big)$ and $(1, 0)$. At $\varepsilon = 1$ these are $(0.0723, 0.4656)$ and $(0.4656, 0.0723)$.
 3. **First segment.** It has slope $-e^{2\varepsilon}$ and starts at $(0, 1)$: $b = 1 - e^{2\varepsilon}a$. It ends at the second corner because $e^{2\varepsilon}(1 - \pi)^2 = \pi^2$.
 4. **Middle segment.** Slope $-1$ through $\big((1 - \pi)^2, 1 - \pi^2\big)$: $b = 1 - \pi^2 + (1 - \pi)^2 - a = 1 - (2\pi - 1) - a = 1 - \tanh(\varepsilon/2) - a$.
 5. **Last segment.** Slope $-e^{-2\varepsilon}$ through $(1, 0)$: $b = e^{-2\varepsilon}(1 - a)$.
@@ -87,10 +87,10 @@ At $\varepsilon' = 0$ all three points give $2\pi - 1 = \tanh(1/2)$, the total v
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **$\delta(\varepsilon)$ grows with $\mu$.** A larger $\mu$ gives a lower curve, so every supporting line moves down and $\delta(\varepsilon) = 1 + G_\mu^*(-e^\varepsilon)$ goes up. So the set of $\mu$ that satisfy $\delta_\mu(1) \le 10^{-5}$ is an interval $[0, \mu^*]$, found by bisection on @eq-gdp-delta: $\mu^* = 0.2681$, where $\delta_{\mu^*}(1) = 1.00\times10^{-5}$.
-2. **Full batch.** $k$ Gaussian steps with $\sigma = 20$ compose to $\sqrt k/20$-GDP (@eq-gdp-compose). The budget allows $\sqrt k/20 \le 0.2681$, so $k \le (20 \times 0.2681)^2$, and the largest integer is $k = 28$.
-3. **DP-SGD by the CLT.** With $\mu = q\sqrt{k(e^{1/\sigma^2} - 1)}$ the budget allows $k \le (\mu^*/q)^2/(e^{1/\sigma^2} - 1)$. With $q = 0.01$ and $\sigma = 1$:
+2. **Full batch.** $T$ Gaussian steps with $\sigma = 20$ compose to $\sqrt T/20$-GDP (@eq-gdp-compose). The budget allows $\sqrt T/20 \le 0.2681$, so $T \le (20 \times 0.2681)^2$, and the largest integer is $T = 28$.
+3. **DP-SGD by the CLT.** With $\mu = q\sqrt{T(e^{1/\sigma^2} - 1)}$ the budget allows $T \le (\mu^*/q)^2/(e^{1/\sigma^2} - 1)$. With $q = 0.01$ and $\sigma = 1$:
 
-| Budget $\varepsilon$ at $\delta = 10^{-5}$ | $\mu^*$ | Largest $k$ | CLT $\varepsilon$ at that $k$ |
+| Budget $\varepsilon$ at $\delta = 10^{-5}$ | $\mu^*$ | Largest $T$ | CLT $\varepsilon$ at that $T$ |
 | --- | --- | --- | --- |
 | 1 | 0.2681 | 418 | 0.9998 |
 | 2 | 0.5016 | 1463 | 1.9992 |
@@ -98,14 +98,14 @@ At $\varepsilon' = 0$ all three points give $2\pi - 1 = \tanh(1/2)$, the total v
 
 : How many DP-SGD steps fit in a budget, according to the CLT. {#tbl-sol-gdp-steps}
 
-$\mu^*$ grows more slowly than $\varepsilon$, and $k$ grows like $\mu^{*2}$, so doubling the budget from 2 to 4 multiplies the number of steps by 3.40 (@tbl-sol-gdp-steps). Subsampling is what makes these numbers large: full batch with $\sigma = 1$ would allow only $k \le \mu^{*2}$, less than one step for $\varepsilon = 1$.
+$\mu^*$ grows more slowly than $\varepsilon$, and $T$ grows like $\mu^{*2}$, so doubling the budget from 2 to 4 multiplies the number of steps by 3.40 (@tbl-sol-gdp-steps). Subsampling is what makes these numbers large: full batch with $\sigma = 1$ would allow only $T \le \mu^{*2}$, less than one step for $\varepsilon = 1$.
 
 *Remember that these step counts inherit the CLT's optimism: the chapter showed that for this example the CLT under-reports $\varepsilon$, so a certified accountant would allow fewer steps.*
 :::
 
 ## Berry–Esseen for randomized response {#sec-sol-gdp-5}
 
-> **Exercise 5.** **Berry–Esseen for randomized response.** Compute $\mathrm{kl}$, $\kappa_2$ and $\bar\kappa_3$ for $f_{\varepsilon_0,0}$, and show that @eq-gdp-clt-mu gives $\mu = 2\sqrt k\sinh(\varepsilon_0/2)$ for $k$ copies. *Check: $\mathrm{kl} = \varepsilon_0\tanh(\varepsilon_0/2) = 0.004996$ at $\varepsilon_0 = 0.1$; at $k = 100$, $\mu = 1.0004$ and $\gamma = 0.0562$.* *(CLT functionals)*
+> **Exercise 5.** **Berry–Esseen for randomized response.** Compute $\mathrm{kl}$, $\kappa_2$ and $\bar\kappa_3$ for $f_{\varepsilon_0,0}$, and show that @eq-gdp-clt-mu gives $\mu = 2\sqrt k\sinh(\varepsilon_0/2)$ for $k$ copies. *Check: $\mathrm{kl} = \varepsilon_0\tanh(\varepsilon_0/2) = 0.004996$ at $\varepsilon_0 = 0.1$; at $k = 100$, $\mu = 1.0004$ and $\xi = 0.0562$.* *(CLT functionals)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 Let $t = \tanh(\varepsilon_0/2) = 2\pi - 1$ with $\pi = e^{\varepsilon_0}/(1 + e^{\varepsilon_0})$.
@@ -118,10 +118,10 @@ Let $t = \tanh(\varepsilon_0/2) = 2\pi - 1$ with $\pi = e^{\varepsilon_0}/(1 + e
 3. **The variance.** $\kappa_2 - \mathrm{kl}^2 = \varepsilon_0^2(1 - t^2) = \varepsilon_0^2/\cosh^2(\varepsilon_0/2)$, using $1 - \tanh^2 = 1/\cosh^2$.
 4. **$\mu$ for $k$ copies.** @eq-gdp-clt-mu gives
 $$\mu = \frac{2k\varepsilon_0t}{\sqrt{k\,\varepsilon_0^2/\cosh^2(\varepsilon_0/2)}} = 2\sqrt k\,\tanh(\varepsilon_0/2)\cosh(\varepsilon_0/2) = 2\sqrt k\,\sinh(\varepsilon_0/2).$$
-5. **$\gamma$ for $k$ copies.** $\gamma = \frac{0.56\,k\varepsilon_0^3(1 - t^2)(1 + t^2)}{\big(k\varepsilon_0^2(1 - t^2)\big)^{3/2}} = \frac{0.56\,(1 + t^2)\cosh(\varepsilon_0/2)}{\sqrt k}$.
-6. **Check.** At $\varepsilon_0 = 0.1$: $\mathrm{kl} = 0.1\tanh(0.05) = 0.004996$. At $k = 100$: $\mu = 20\sinh(0.05) = 1.0004$ and $\gamma = 0.0562$, from the closed form and from the general formula alike.
+5. **$\xi$ for $k$ copies.** $\xi = \frac{0.56\,k\varepsilon_0^3(1 - t^2)(1 + t^2)}{\big(k\varepsilon_0^2(1 - t^2)\big)^{3/2}} = \frac{0.56\,(1 + t^2)\cosh(\varepsilon_0/2)}{\sqrt k}$.
+6. **Check.** At $\varepsilon_0 = 0.1$: $\mathrm{kl} = 0.1\tanh(0.05) = 0.004996$. At $k = 100$: $\mu = 20\sinh(0.05) = 1.0004$ and $\xi = 0.0562$, from the closed form and from the general formula alike.
 
-| $k$ | $\varepsilon_0$ | $\mathrm{kl}$ | $\mu = 2\sqrt k\sinh(\varepsilon_0/2)$ | $\gamma$ |
+| $k$ | $\varepsilon_0$ | $\mathrm{kl}$ | $\mu = 2\sqrt k\sinh(\varepsilon_0/2)$ | $\xi$ |
 | --- | --- | --- | --- | --- |
 | 10 | 0.3162 | 0.049587 | 1.0042 | 0.1837 |
 | 100 | 0.1000 | 0.004996 | 1.0004 | 0.0562 |
@@ -129,20 +129,20 @@ $$\mu = \frac{2k\varepsilon_0t}{\sqrt{k\,\varepsilon_0^2/\cosh^2(\varepsilon_0/2
 
 : The CLT parameters for $k$-fold randomized response with $k\varepsilon_0^2 = 1$. {#tbl-sol-gdp-be}
 
-Since $\sinh x \ge x$, $\mu \ge \sqrt k\,\varepsilon_0$: at finite $k$ the CLT centre sits slightly above the limit $\sqrt{\sum\varepsilon_i^2}$. The band $\gamma$ shrinks only like $0.56/\sqrt k$ (@tbl-sol-gdp-be): quadrupling $k$ from 100 to 400 halves it.
+Since $\sinh x \ge x$, $\mu \ge \sqrt k\,\varepsilon_0$: at finite $k$ the CLT centre sits slightly above the limit $\sqrt{\sum\varepsilon_i^2}$. The band $\xi$ shrinks only like $0.56/\sqrt k$ (@tbl-sol-gdp-be): quadrupling $k$ from 100 to 400 halves it.
 
 *The Berry–Esseen band is honest but wide: at $k = 100$ it allows the true curve anywhere within 0.0562 of $G_\mu$, while the actual error in $\delta(1)$ was 0.0014 (0.1271 from the CLT against the exact 0.1257).*
 :::
 
 ## A sanity limit for the subsampled CLT {#sec-sol-gdp-6}
 
-> **Exercise 6.** **A sanity limit for the subsampled CLT.** Put $q = 1$ in @eq-gdp-sgd-mu and compare with the exact $\sqrt k/\sigma$. Which way is it off, and why does the derivation not apply? *Check: the ratio, the same for every $k$, is 1.3108 for $\sigma = 1$, 1.0659 for $\sigma = 2$ and 1.0101 for $\sigma = 5$.* *(Subsampled CLT, expansions)*
+> **Exercise 6.** **A sanity limit for the subsampled CLT.** Put $q = 1$ in @eq-gdp-sgd-mu and compare with the exact $\sqrt T/\sigma$. Which way is it off, and why does the derivation not apply? *Check: the ratio, the same for every $T$, is 1.3108 for $\sigma = 1$, 1.0659 for $\sigma = 2$ and 1.0101 for $\sigma = 5$.* *(Subsampled CLT, expansions)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The formula at $q = 1$.** $\mu_{\mathrm{CLT}} = \sqrt{k(e^{1/\sigma^2} - 1)}$, while full-batch training is exactly $\sqrt k/\sigma$-GDP. Their ratio is $\sigma\sqrt{e^{1/\sigma^2} - 1}$, independent of $k$.
+1. **The formula at $q = 1$.** $\mu_{\mathrm{CLT}} = \sqrt{T(e^{1/\sigma^2} - 1)}$, while full-batch training is exactly $\sqrt T/\sigma$-GDP. Their ratio is $\sigma\sqrt{e^{1/\sigma^2} - 1}$, independent of $T$.
 2. **Which way.** $e^x - 1 \ge x$ for all $x$, so $\sigma^2(e^{1/\sigma^2} - 1) \ge 1$: the formula over-states $\mu$ at $q = 1$. As $\sigma$ grows, $e^{1/\sigma^2} - 1 \approx 1/\sigma^2$ and the ratio tends to 1.
 
-| $\sigma$ | CLT $\mu$ ($k = 100$) | Exact $\mu = \sqrt k/\sigma$ | Ratio |
+| $\sigma$ | CLT $\mu$ ($T = 100$) | Exact $\mu = \sqrt T/\sigma$ | Ratio |
 | --- | --- | --- | --- |
 | 1 | 13.1083 | 10.0000 | 1.3108 |
 | 2 | 5.3294 | 5.0000 | 1.0659 |
@@ -151,7 +151,7 @@ Since $\sinh x \ge x$, $\mu \ge \sqrt k\,\varepsilon_0$: at finite $k$ the CLT c
 : The subsampled CLT formula at $q = 1$ against the exact full-batch $\mu$. {#tbl-sol-gdp-q1}
 
 3. **Why the derivation fails.** Step 3 of the derivation expanded $\ln(1 + qW)$ to second order, which needs $qW$ small. At $q = 1$, $\ln(1 + W) = (y - \frac12)/\sigma^2$ exactly: the loss is Gaussian with variance $1/\sigma^2$, not $e^{1/\sigma^2} - 1$. The expansion replaced the variance of $\ln(1 + W)$ by the variance of $W$, which is larger, and the gap grows as $\sigma$ shrinks (@tbl-sol-gdp-q1).
-4. **The regime.** The CLT formula is meant for $q \to 0$ with $q\sqrt k$ fixed. There $qW$ is small with high probability and the expansion is accurate, although for small $\sigma$ the heavy right tail of $W$ is exactly where it is least accurate.
+4. **The regime.** The CLT formula is meant for $q \to 0$ with $q\sqrt T$ fixed. There $qW$ is small with high probability and the expansion is accurate, although for small $\sigma$ the heavy right tail of $W$ is exactly where it is least accurate.
 
 *Formulas derived for a limit regime should be checked at the edges of that regime; here the edge $q = 1$ is known exactly and shows the formula's bias.*
 :::

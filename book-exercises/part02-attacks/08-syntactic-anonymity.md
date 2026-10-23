@@ -9,9 +9,9 @@ The notation is the chapter's: $n$ records, classes $E$, $P_E$ a class's distrib
 > **Exercise 1.** **Bits for 10-anonymity.** For a population of $n = 10^6$ in uniform cells, how many bits of quasi-identifier can a release keep if at most 1% of records may fall in classes smaller than 10? Compute $\lambda_k/k$ for $k = 2$, 10 and 100, and explain why it tends to 1. *Check: $\lambda_{10} = 17.40$, 15.81 bits.* *(Poisson tails)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The condition.** By @eq-anon-k-violate, the fraction of records in classes smaller than 10 is $\Pr[\mathrm{Poisson}(\lambda) \le 8]$ with $\lambda = n/M$. It falls as $\lambda$ grows.
+1. **The condition.** By @eq-anon-k-violate, the fraction of records in classes smaller than 10 is $\Pr[\mathrm{Poisson}(\lambda) \le 8]$ with $\lambda = n/K$. It falls as $\lambda$ grows.
 2. **Solve for $\lambda$.** Bisection on $\Pr[\mathrm{Poisson}(\lambda) \le 8] = 0.01$ gives $\lambda_{10} = 17.40$. It does not depend on $n$.
-3. **Convert to bits.** $M = n/\lambda_{10}$, so $b = \log_2 n - \log_2\lambda_{10} = 19.93 - 4.12 = 15.81$ bits.
+3. **Convert to bits.** $K = n/\lambda_{10}$, so $b = \log_2 n - \log_2\lambda_{10} = 19.93 - 4.12 = 15.81$ bits.
 4. **The ratio.** $\lambda_2 = 4.61$, $\lambda_{10} = 17.40$ and $\lambda_{100} = 123.61$, so $\lambda_k/k = 2.30$, 1.74 and 1.24.
 5. **Why it tends to 1.** A Poisson variable with mean $\lambda$ has standard deviation $\sqrt\lambda$, and for large $\lambda$ it is close to normal. Its lower 1% point is about $\lambda - 2.33\sqrt\lambda$. Setting this equal to $k - 2$ gives $\lambda_k \approx k + 2.33\sqrt k$, up to lower-order terms, so $\lambda_k/k \approx 1 + 2.33/\sqrt k \to 1$. The approximation gives 1.74 at $k = 10$ and 1.23 at $k = 100$. It is poor at $k = 2$ (2.65 against 2.30), where the Poisson distribution is far from normal.
 
@@ -20,13 +20,13 @@ The notation is the chapter's: $n$ records, classes $E$, $P_E$ a class's distrib
 
 ## Entropy diversity and the top value {#sec-sol-anon-2}
 
-> **Exercise 2.** **Entropy diversity and the top value.** A class has one value with share $q$ and the rest spread evenly over the other 7 of 8 values. Find the largest $q$ for which the class is entropy 3-diverse, and compare it with the bound that recursive $(c, 3)$-diversity would impose. *Check: $q = 0.733$.* *(Entropy)*
+> **Exercise 2.** **Entropy diversity and the top value.** A class has one value with share $\rho$ and the rest spread evenly over the other 7 of 8 values. Find the largest $\rho$ for which the class is entropy 3-diverse, and compare it with the bound that recursive $(c, 3)$-diversity would impose. *Check: $\rho = 0.733$.* *(Entropy)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The entropy.** The class has $H(q) = -q\log_2q - (1 - q)\log_2\frac{1 - q}{7}$ bits. At $q = \frac18$ this is $\log_2 8 = 3$ bits, and it falls to 0 as $q \to 1$.
-2. **Solve $H(q) = \log_2 3 = 1.5850$.** $H$ decreases in $q$ on $[\frac18, 1)$, so bisection gives the largest share, $q = 0.733$.
-3. **Recursive diversity.** The tail beyond the two most common values is the 6 smallest counts, a share $6(1 - q)/7$. Recursive $(c, 3)$-diversity requires $q < c \cdot 6(1 - q)/7$. With $c = 2$ this is $7q < 12(1 - q)$, that is $q < 12/19 = 0.632$.
-4. **The comparison.** The entropy 3-diverse class with $q = 0.733$ is recursive $(c, 3)$-diverse only for $c > 7q/(6(1 - q)) = 3.21$, where the bound of @eq-anon-recursive is $c/(1 + c) = 0.762$.
+1. **The entropy.** The class has $H(\rho) = -\rho\log_2\rho - (1 - \rho)\log_2\frac{1 - \rho}{7}$ bits. At $\rho = \frac18$ this is $\log_2 8 = 3$ bits, and it falls to 0 as $\rho \to 1$.
+2. **Solve $H(\rho) = \log_2 3 = 1.5850$.** $H$ decreases in $\rho$ on $[\frac18, 1)$, so bisection gives the largest share, $\rho = 0.733$.
+3. **Recursive diversity.** The tail beyond the two most common values is the 6 smallest counts, a share $6(1 - \rho)/7$. Recursive $(c, 3)$-diversity requires $\rho < c \cdot 6(1 - \rho)/7$. With $c = 2$ this is $7\rho < 12(1 - \rho)$, that is $\rho < 12/19 = 0.632$.
+4. **The comparison.** The entropy 3-diverse class with $\rho = 0.733$ is recursive $(c, 3)$-diverse only for $c > 7\rho/(6(1 - \rho)) = 3.21$, where the bound of @eq-anon-recursive is $c/(1 + c) = 0.762$.
 
 *Entropy 3-diversity sounds like "about as uncertain as three equally likely values", yet it allows one value in almost three quarters of the class. The entropy counts the spread of the rare values, which the adversary does not care about.*
 :::

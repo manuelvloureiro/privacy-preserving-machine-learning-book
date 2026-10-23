@@ -1,6 +1,6 @@
 # AGENTS.md
 
-How to write content for the full edition (`book-full/`) and its exercise book (`book-exercises/`). Every page of every book must also pass the prose process in [PROSE.md](PROSE.md): its rules, its checks (`make prose`) and its reviews. For how the book is built (Quarto, `.md` vs `.qmd`, cross-reference syntax, checks), see [CLAUDE.md](CLAUDE.md). The reference chapters are [01-distributions.md](book-full/part01-prerequisites/01-distributions.md) and [02-concentration.md](book-full/part01-prerequisites/02-concentration.md): when in doubt, do what they do.
+How to write content for the full edition (`book-full/`) and its exercise book (`book-exercises/`). Every page of every book must also pass the prose process in [PROSE.md](PROSE.md): its rules, its checks (`make prose`) and its reviews. Every page of every book, and every note, writes its symbols, names and spelling as [NOTATION.md](NOTATION.md) fixes them, checked by `make notation-check`. For how the book is built (Quarto, `.md` vs `.qmd`, cross-reference syntax, checks), see [CLAUDE.md](CLAUDE.md). The reference chapters are [01-distributions.md](book-full/part01-prerequisites/01-distributions.md) and [02-concentration.md](book-full/part01-prerequisites/02-concentration.md): when in doubt, do what they do.
 
 ## What the book is
 

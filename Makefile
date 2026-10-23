@@ -228,6 +228,12 @@ index-candidates: ## Suggest index terms (bold phrases) not yet in terms.toml (B
 prose: ## Report hard-to-read prose, worst paragraphs first (BOOK=book-practitioner, PAGE=part../NN-x.md); see PROSE.md
 	uv run python tools/prose.py report --book $(or $(BOOK),book-practitioner) $(if $(PAGE),--page $(PAGE)) --worst $(or $(WORST),5)
 
+notation-check: ## Fail on notation that NOTATION.md forbids, in every book and note (notation.toml)
+	uv run python tools/notation.py check
+
+notation: ## Report how often each notation rule fires, per book
+	uv run python tools/notation.py report
+
 prose-check: ## Fail if a page's prose is past its book's limits in tools/prose.toml (BOOK=book-practitioner)
 	uv run python tools/prose.py check --book $(or $(BOOK),book-practitioner)
 
@@ -244,7 +250,7 @@ test-fast: ## Run the tests without the practitioner libraries' (no torch, Opacu
 typecheck: ## Run strict pyright
 	uv run pyright
 
-check: test typecheck terms-check prose-check website ## Tests, type checks, the acronym and prose checks and a clean render of every website
+check: test typecheck terms-check notation-check prose-check website ## Tests, type checks, the acronym, notation and prose checks and a clean render of every website
 
 all: check pdf ## Check everything, then build the PDFs too
 

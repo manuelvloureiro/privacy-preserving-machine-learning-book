@@ -22,7 +22,7 @@ DP-SGD caps each record's pull on the update at $C$, then adds noise whose size 
 
 : The results of this chapter and where each is used. {#tbl-fair-overview}
 
-**Notation.** As in [DP-SGD](02-dp-sgd.md), $n$ records $z_i = (x_i, y_i)$ train a model with weights $w$, $g_i$ is record $i$'s gradient, $C$ the clipping norm, $\sigma$ the noise multiplier, $q$ the sampling rate, $B = qn$ the expected batch size, $T$ the number of steps and $\eta$ the step size. The records are split into **groups** $g = 1, \dots, K$; group $g$ has $n_g$ records and **share** $s_g = n_g/n$. A record's **clipping weight** is $\min(1, C/\|g_i\|)$, the factor clipping multiplies its gradient by, and a group's clipping weight $w_g$ is its average over the group's records. $\mathrm{acc}_g$ is a model's accuracy on test records of group $g$. A subscript $i$ always names a record and a subscript $g$ or $h$ a group, so $g_i$ is a record's gradient and $\bar g_g$, defined below, a group's average gradient.
+**Notation.** As in [DP-SGD](02-dp-sgd.md), $n$ records $z_i = (x_i, y_i)$ train a model with weights $\theta$, $g_i$ is record $i$'s gradient, $C$ the clipping norm, $\sigma$ the noise multiplier, $q$ the sampling rate, $B = qn$ the expected batch size, $T$ the number of steps and $\eta$ the learning rate. The records are split into **groups** $g = 1, \dots, K$; group $g$ has $n_g$ records and **share** $s_g = n_g/n$. A record's **clipping weight** is $\min(1, C/\|g_i\|)$, the factor clipping multiplies its gradient by, and a group's clipping weight $w_g$ is its average over the group's records. $\mathrm{acc}_g$ is a model's accuracy on test records of group $g$. A subscript $i$ always names a record and a subscript $g$ or $h$ a group, so $g_i$ is a record's gradient and $\bar g_g$, defined below, a group's average gradient.
 
 **The running example.** The part's running example classifies 50-dimensional inputs with a two-layer network ([DP-SGD](02-dp-sgd.md)). This chapter adds a minority group. Of the $n = 10{,}000$ training records, 9,500 are the first records of the running example's fixed training set: standard normal inputs, labelled by the random teacher network. The other 500, a share of 5%, come from a different region and follow a different rule. Their inputs are $x = 8u + z$, where $u$ is a fixed unit vector and $z$ is standard normal in a fixed 15-dimensional subspace orthogonal to $u$, and their label is the sign of one coordinate of $z$. So the minority's records lie far from the majority's, have larger inputs (average length 8.89 against 7.04), and need a rule that the majority does not teach. The non-private model learns both: it reaches 0.9529 on the majority and 0.9411 on the minority. Each group is tested on 20,000 fresh records of its own, so that the test error is small compared with the effects being measured. DP-SGD runs with the running example's settings: $q = 0.01$, $C = 0.5$, $\eta = 0.5$, $T = 10{,}000$ steps and $\delta = 10^{-5}$.
 
@@ -38,9 +38,9 @@ the average gradient with each record weighted by its clipping weight ([DP-SGD](
 
 ### Fact 2 — A drift beats a random walk after (noise/signal)² steps
 
-Suppose each step moves the weights by a signal of length $\ell_{\text{sig}}$ that keeps pointing the same way, plus independent noise of length $\ell_{\text{noise}}$. After $k$ steps the signals add up to length $k\ell_{\text{sig}}$. The noise vectors are independent with mean zero, so their squared lengths add, and their sum has length about $\ell_{\text{noise}}\sqrt k$. The signal is longer once $k\ell_{\text{sig}} > \ell_{\text{noise}}\sqrt k$, that is after
-$$k > \Big(\frac{\ell_{\text{noise}}}{\ell_{\text{sig}}}\Big)^2$$
-steps. [DP-SGD](02-dp-sgd.md#sec-dpsgd-algorithm) uses this to explain why training works when every step's noise is ten times longer than its signal: at $\varepsilon = 4$ the noise on the averaged gradient has length $\tau\sqrt p$ for $p = 3{,}329$ weights, and the signal emerges after a few hundred steps.
+Suppose each step moves the weights by a signal of length $\ell_{\text{sig}}$ that keeps pointing the same way, plus independent noise of length $\ell_{\text{noise}}$. After a number $t$ of steps the signals add up to length $t\ell_{\text{sig}}$. The noise vectors are independent with mean zero, so their squared lengths add, and their sum has length about $\ell_{\text{noise}}\sqrt t$. The signal is longer once $t\ell_{\text{sig}} > \ell_{\text{noise}}\sqrt t$, that is after
+$$t > \Big(\frac{\ell_{\text{noise}}}{\ell_{\text{sig}}}\Big)^2$$
+steps. [DP-SGD](02-dp-sgd.md#sec-dpsgd-algorithm) uses this to explain why training works when every step's noise is ten times longer than its signal: at $\varepsilon = 4$ the noise on the averaged gradient has length $\tau\sqrt{3{,}329}$ for the network's 3,329 weights, and the signal emerges after a few hundred steps.
 
 ### Fact 3 — A shrinking recursion with noise settles at a fixed variance
 
@@ -81,7 +81,7 @@ On the running example with a 5% minority, @tbl-fair-eps gives each group's accu
 
 This statement is a definition and a measurement, so its "derivation" is the experiment's design, and each choice in it is there to make the comparison fair.
 
-1. **Same data, same recipe.** Every row trains on the same 10,000 records with the same sampling rate, step size and number of steps. The only differences are the clipping (absent in the non-private row) and the noise multiplier, which the accountant of [DP-SGD](02-dp-sgd.md) sets for each $\varepsilon$.
+1. **Same data, same recipe.** Every row trains on the same 10,000 records with the same sampling rate, learning rate and number of steps. The only differences are the clipping (absent in the non-private row) and the noise multiplier, which the accountant of [DP-SGD](02-dp-sgd.md) sets for each $\varepsilon$.
 2. **Large test sets.** Each group is tested on 20,000 records, so by Fact 4 a measured accuracy near 0.9 has a standard deviation of $\sqrt{0.9 \times 0.1/20{,}000} = 0.0021$. The differences in the table are much larger than that.
 3. **Several runs.** Private training is random, and its spread differs between groups. Each row averages three runs and reports their standard deviation; the privacy cost subtracts the average private accuracy from the average non-private accuracy.
 4. **A non-private model that serves both groups.** The minority's non-private accuracy, 0.9411, is within 1.2 points of the majority's, 0.9529. Any large gap in the private rows is therefore caused by privacy, not inherited from the data.
@@ -131,7 +131,7 @@ where $c_g = \|m_g\|/\|\bar g_g\|$ is the fraction of the group's average gradie
 
 ### Interpretation
 
-**Two errors: length and direction.** @eq-fair-effective separates what clipping does into two parts. The factor $\sum_hs_hc_h$ shortens the update, which a larger step size can undo. The effective shares change *which* mixture of the groups is being descended, and no step size undoes that. Esipova et al. (2023) make this distinction for a whole batch: they compare training with the clipped batch gradient's length but the true direction against the true length but the clipped direction, and find the direction error far more harmful, especially to the under-represented class (their Table 1). In @fig-fair-clipping-toy, clipping shortens the update and also turns it toward the majority.
+**Two errors: length and direction.** @eq-fair-effective separates what clipping does into two parts. The factor $\sum_hs_hc_h$ shortens the update, which a larger learning rate can undo. The effective shares change *which* mixture of the groups is being descended, and no learning rate undoes that. Esipova et al. (2023) make this distinction for a whole batch: they compare training with the clipped batch gradient's length but the true direction against the true length but the clipped direction, and find the direction error far more harmful, especially to the under-represented class (their Table 1). In @fig-fair-clipping-toy, clipping shortens the update and also turns it toward the majority.
 
 **Which groups are cut back.** A group's effective share falls when its clipping weight falls, that is when its gradients are long compared with $C$. Gradients are long for two reasons. The model fits the group badly: for the logistic loss, the derivative with respect to the output is $-y\,\mathrm{sigmoid}(-yf)$, close to 1 in size for a misclassified record and close to 0 for a record classified with a wide margin. And the group's inputs are large: a dense layer's per-example gradient is the outer product of the back-propagated error and the layer's input, whose norm is the product of the two norms ([DP-SGD](02-dp-sgd.md#sec-dpsgd-ghost)), so at the same error a record with a longer input has a longer gradient. Tran, Dinh & Fioretto (2021) identify both factors, gradient norms and the input norms behind them, as the source of the clipping part of disparate impact. A small group the model has not yet learned has both.
 
@@ -143,7 +143,7 @@ where $c_g = \|m_g\|/\|\bar g_g\|$ is the fraction of the group's average gradie
 
 ### Example: two dimensions, then the running example
 
-Take 95 majority records whose gradient is $(0.2, 0)$, already short, and 5 minority records whose gradient is $(0, 4)$, long because the model fits them badly. Without clipping the average gradient is $(0.95 \times 0.2, 0.05 \times 4) = (0.19, 0.2)$, of length 0.2759: the five minority records pull as hard as the ninety-five others, and the minority's component is a fraction $0.2/0.39 = 0.513$ of the sum of the two components. Clip at $C = 0.5$. The majority's gradients are untouched; the minority's shrink to length 0.5. The average becomes $(0.19, 0.05 \times 0.5) = (0.19, 0.025)$, of length 0.1916, and the minority's fraction falls to 0.116. The update has turned by 39.0 degrees toward the majority. Here $c_{\text{maj}} = 1$ and $c_{\text{min}} = 0.5/4 = 0.125$, and @eq-fair-effective gives the minority an effective share of $0.05 \times 0.125/(0.05 \times 0.125 + 0.95) = 0.0065$ instead of 0.05. Scaling every gradient by $C/Z$ with $Z = 4$, the largest norm, instead gives $(0.0238, 0.0250)$: eight times shorter, but at an angle of 0.0 degrees to the true average.
+Take 95 majority records whose gradient is $(0.2, 0)$, already short, and 5 minority records whose gradient is $(0, 4)$, long because the model fits them badly. Without clipping the average gradient is $(0.95 \times 0.2, 0.05 \times 4) = (0.19, 0.2)$, of length 0.2759: the five minority records pull as hard as the ninety-five others, and the minority's component is a fraction $0.2/0.39 = 0.513$ of the sum of the two components. Clip at $C = 0.5$. The majority's gradients are untouched; the minority's shrink to length 0.5. The average becomes $(0.19, 0.05 \times 0.5) = (0.19, 0.025)$, of length 0.1916, and the minority's fraction falls to 0.116. The update has turned by 39.0 degrees toward the majority. Here $c_{\text{maj}} = 1$ and $c_{\text{min}} = 0.5/4 = 0.125$, and @eq-fair-effective gives the minority an effective share of $0.05 \times 0.125/(0.05 \times 0.125 + 0.95) = 0.0065$ instead of 0.05. Scaling every gradient by $C/C_{\max}$ with $C_{\max} = 4$, the largest norm, instead gives $(0.0238, 0.0250)$: eight times shorter, but at an angle of 0.0 degrees to the true average.
 
 In the running example, @tbl-fair-weights follows each group's gradients during training with clipping and no noise, on 1,000 majority and the 500 minority training records.
 
@@ -175,19 +175,19 @@ Noise is added to the sum, the same for everyone. Why should it hurt a small gro
 ### Statement
 
 **A drift that is a fraction of the population's.** If the part of the expected update that serves group $g$ is a fraction $s_g$ of what the whole population's signal would be, and the noise is unchanged, Fact 2 says that group's signal emerges from the noise only after
-$$k_g = \frac1{s_g^2}\Big(\frac{\ell_{\text{noise}}}{\ell_{\text{sig}}}\Big)^2$$ {#eq-fair-breakeven}
+$$t_g = \frac1{s_g^2}\Big(\frac{\ell_{\text{noise}}}{\ell_{\text{sig}}}\Big)^2$$ {#eq-fair-breakeven}
 steps, $1/s_g^2$ times as many as for a signal the whole population shares.
 
-**A quadratic model of the noise floor.** Suppose group $g$'s loss depends on its own block of $k$ weights, which the other groups' losses do not touch, as $L_g = \frac\lambda2\|w_g - w_g^*\|^2$, and the training objective is the share-weighted average $\sum_gs_gL_g$. Run gradient descent with noise of standard deviation $\tau$ per coordinate on the averaged gradient, as DP-SGD adds. Then group $g$'s excess loss settles at
-$$\mathbb E[L_g] = \frac{k\,\eta\,\tau^2}{2\,s_g\,(2 - \eta s_g\lambda)} \approx \frac{k\,\eta\,\tau^2}{4\,s_g},$$ {#eq-fair-floor}
+**A quadratic model of the noise floor.** Suppose group $g$'s loss depends on its own block $\theta_g$ of $d_g$ weights, which the other groups' losses do not touch, as $L_g = \frac\lambda2\|\theta_g - \theta_g^*\|^2$, and the training objective is the share-weighted average $\sum_gs_gL_g$. Run gradient descent with noise of standard deviation $\tau$ per coordinate on the averaged gradient, as DP-SGD adds. Then group $g$'s excess loss settles at
+$$\mathbb E[L_g] = \frac{d_g\,\eta\,\tau^2}{2\,s_g\,(2 - \eta s_g\lambda)} \approx \frac{d_g\,\eta\,\tau^2}{4\,s_g},$$ {#eq-fair-floor}
 and it takes about $1/(\eta s_g\lambda)$ steps to get there. With clipping, $s_g$ is replaced by $s_gc_g$, the group's share times the fraction of its gradient that survives clipping; when the majority is hardly clipped, this is close to the effective share $\tilde s_g$ of @eq-fair-effective.
 
 ### Derivation
 
-1. **The group's gradient.** The objective's gradient with respect to $w_g$ is $s_g\lambda(w_g - w_g^*)$: only group $g$'s loss depends on these weights, and it enters with weight $s_g$.
-2. **One step.** With $x = w_g - w_g^*$ and noise $\tau\xi$ on the averaged gradient, $\xi$ standard normal, the update $w_g \leftarrow w_g - \eta(s_g\lambda x + \tau\xi)$ gives $x \leftarrow (1 - \eta s_g\lambda)x - \eta\tau\xi$, coordinate by coordinate.
+1. **The group's gradient.** The objective's gradient with respect to $\theta_g$ is $s_g\lambda(\theta_g - \theta_g^*)$: only group $g$'s loss depends on these weights, and it enters with weight $s_g$.
+2. **One step.** With $x = \theta_g - \theta_g^*$ and noise $\tau\xi$ on the averaged gradient, $\xi$ standard normal, the update $\theta_g \leftarrow \theta_g - \eta(s_g\lambda x + \tau\xi)$ gives $x \leftarrow (1 - \eta s_g\lambda)x - \eta\tau\xi$, coordinate by coordinate.
 3. **Stationary variance.** This is Fact 3 with $a = \eta s_g\lambda$ and $v = \eta^2\tau^2$: each coordinate settles at variance $\eta^2\tau^2/(a(2 - a)) = \eta\tau^2/(s_g\lambda(2 - \eta s_g\lambda))$.
-4. **Excess loss.** $L_g = \frac\lambda2\sum_jx_j^2$ over the $k$ coordinates, so its expectation is $\frac\lambda2k$ times the variance, which is @eq-fair-floor. For a small group $\eta s_g\lambda$ is small and $2 - \eta s_g\lambda \approx 2$.
+4. **Excess loss.** $L_g = \frac\lambda2\sum_jx_j^2$ over the $d_g$ coordinates, so its expectation is $\frac\lambda2d_g$ times the variance, which is @eq-fair-floor. For a small group $\eta s_g\lambda$ is small and $2 - \eta s_g\lambda \approx 2$.
 5. **Time scale.** By Fact 3 the starting point is forgotten after about $1/a = 1/(\eta s_g\lambda)$ steps.
 6. **The break-even law.** If the population's signal has length $\ell_{\text{sig}}$ per step, the part that serves group $g$ has length $s_g\ell_{\text{sig}}$ and the noise length is still $\ell_{\text{noise}}$; Fact 2 with $s_g\ell_{\text{sig}}$ in place of $\ell_{\text{sig}}$ gives @eq-fair-breakeven.
 7. **With clipping.** By @eq-fair-effective, with parallel gradients within the group, group $g$'s term in the expected update is $s_gc_g\bar g_g$ instead of $s_g\bar g_g$, while the noise is unchanged. Treating $c_g$ as constant over the steps considered, steps 1 to 6 apply with $s_gc_g$ in place of $s_g$. If the majority's $c$ is close to 1, then $\sum_hs_hc_h$ is close to 1 and $s_gc_g$ is close to $\tilde s_g$.
@@ -206,7 +206,7 @@ and it takes about $1/(\eta s_g\lambda)$ steps to get there. With clipping, $s_g
 
 ### Example: the model, then the running example
 
-At $\varepsilon = 4$ the noise on the averaged gradient has $\tau = 0.0068$ per coordinate. Take $k = 51$ weights per group, $\lambda = 1$ and $\eta = 0.5$. @tbl-fair-floor compares @eq-fair-floor with a simulation of 40,000 noisy steps, averaged over the second half.
+At $\varepsilon = 4$ the noise on the averaged gradient has $\tau = 0.0068$ per coordinate. Take $d_g = 51$ weights per group, $\lambda = 1$ and $\eta = 0.5$. @tbl-fair-floor compares @eq-fair-floor with a simulation of 40,000 noisy steps, averaged over the second half.
 
 | Share $s_g$ | Excess loss, @eq-fair-floor | Simulated | Steps to settle, $1/(\eta s_g)$ |
 | --- | --- | --- | --- |
@@ -215,7 +215,7 @@ At $\varepsilon = 4$ the noise on the averaged gradient has $\tau = 0.0068$ per 
 | 0.05 | $5.97 \times 10^{-3}$ | $5.99 \times 10^{-3}$ | 40 |
 | 0.01 | $2.96 \times 10^{-2}$ | $2.97 \times 10^{-2}$ | 200 |
 
-: The noise floor of a group in the quadratic model with $\varepsilon = 4$ noise ($\tau = 0.0068$, $k = 51$, $\lambda = 1$, $\eta = 0.5$). {#tbl-fair-floor}
+: The noise floor of a group in the quadratic model with $\varepsilon = 4$ noise ($\tau = 0.0068$, $d_g = 51$, $\lambda = 1$, $\eta = 0.5$). {#tbl-fair-floor}
 
 The formula and the simulation agree to within 1%, and the floor grows from $4.07 \times 10^{-4}$ for a group with 95% of the data to $2.96 \times 10^{-2}$ for a group with 1%, a factor of 73. The approximate form of @eq-fair-floor would say 95, the ratio of the shares; the exact form is lower because the factor $2 - \eta s_g\lambda$ is 1.525 for the large group rather than 2. The break-even law is harsher. In [DP-SGD](02-dp-sgd.md) the averaged clipped gradient of the running example has length about 0.026 during training, and at $\varepsilon = 4$ the noise has length $\tau\sqrt{3{,}329} = 0.392$. A signal shared by the whole population emerges after $(0.392/0.026)^2 = 228$ steps. A signal that is 20% of it needs 5,693 steps, 5% needs 91,085, nine times the entire run, and 1% needs 2,277,115. A group whose rule the rest of the data does not teach is in this position.
 
@@ -292,8 +292,8 @@ Both mechanisms come from DP-SGD's two knobs. Can you choose the knobs, or chang
 
 ### Statement
 
-**Global scaling is a large clipping norm.** Scaling every per-example gradient by $C/Z$, where no gradient is longer than $Z$, and adding noise $\sigma C$, is the same algorithm as DP-SGD with clipping norm $Z$, the same noise multiplier and step size $\eta C/Z$:
-$$\frac\eta B\Big(\frac CZ\sum_{i\in S_t}g_i + \sigma C\xi\Big) = \frac{\eta C/Z}B\Big(\sum_{i\in S_t}g_i + \sigma Z\xi\Big).$$ {#eq-fair-global}
+**Global scaling is a large clipping norm.** Scaling every per-example gradient by $C/C_{\max}$, where $C_{\max}$ is a bound that no gradient's norm exceeds, and adding noise $\sigma C$, is the same algorithm as DP-SGD with the clipping norm set to $C_{\max}$, the same noise multiplier and learning rate $\eta C/C_{\max}$:
+$$\frac\eta B\Big(\frac C{C_{\max}}\sum_{i\in S_t}g_i + \sigma C\xi\Big) = \frac{\eta C/C_{\max}}B\Big(\sum_{i\in S_t}g_i + \sigma C_{\max}\xi\Big).$$ {#eq-fair-global}
 
 **Oversampling a group costs that group's privacy.** If group $g$'s records are sampled at rate $vq$ instead of $q$, its pull on the update grows by the factor $v$, and each of its records has the privacy of the subsampled Gaussian at rate $vq$:
 $$\varepsilon_g = \varepsilon_{\text{acct}}(vq, \sigma, T, \delta) \;>\; \varepsilon_{\text{acct}}(q, \sigma, T, \delta),$$ {#eq-fair-oversample}
@@ -301,16 +301,16 @@ where $\varepsilon_{\text{acct}}$ is the accountant of [DP-SGD](02-dp-sgd.md). T
 
 ### Derivation
 
-1. **Global scaling.** Factor $C/Z$ out of the left-hand side: $\frac CZ\sum_ig_i + \sigma C\xi = \frac CZ(\sum_ig_i + \sigma Z\xi)$. With clipping norm $Z$ and no gradient longer than $Z$, DP-SGD's clipped sum is $\sum_ig_i$ and its noise $\sigma Z\xi$, which is the right-hand side. Both have sensitivity-to-noise ratio $1/\sigma$, so the same accountant applies ([Exercise 6](../../book-exercises/part05-dp-ml/08-disparate-impact.md#sec-sol-fair-6)).
+1. **Global scaling.** Factor $C/C_{\max}$ out of the left-hand side: $\frac C{C_{\max}}\sum_ig_i + \sigma C\xi = \frac C{C_{\max}}(\sum_ig_i + \sigma C_{\max}\xi)$. With the clipping norm set to $C_{\max}$ and no gradient longer than $C_{\max}$, DP-SGD's clipped sum is $\sum_ig_i$ and its noise $\sigma C_{\max}\xi$, which is the right-hand side. Both have sensitivity-to-noise ratio $1/\sigma$, so the same accountant applies ([Exercise 6](../../book-exercises/part05-dp-ml/08-disparate-impact.md#sec-sol-fair-6)).
 2. **Oversampling: the pull.** The expected clipped sum is $\sum_iq_i\min(1, C/\|g_i\|)g_i$, with $q_i$ record $i$'s sampling rate. With $q_i = vq$ for group $g$ and division by the public $B = qn$, group $g$'s term becomes $vs_gm_g$.
 3. **Oversampling: the privacy.** The add/remove analysis of record $x$ in [DP-SGD](02-dp-sgd.md#sec-dpsgd-algorithm) compares the output with and without $x$; the mixture depends only on $x$'s own inclusion probability, because the other records' terms are the same in both. A record sampled at rate $vq$ therefore has the privacy of the subsampled Gaussian at rate $vq$. The sampling rate may depend on the record's own group, which is part of the record, but the rule must be fixed in advance, not chosen by looking at the data.
 4. **The guarantee.** $(\varepsilon, \delta)$-DP must hold for every record, so it is the largest of the per-record values, which is @eq-fair-oversample's.
 
 ### Interpretation
 
-**Global scaling trades direction for noise.** By @eq-fair-global, scaling all gradients by the same factor is the large-$C$ end of the clipping-norm curve of [DP-SGD](02-dp-sgd.md#sec-dpsgd-clipping) with $\eta C$ fixed: nothing is clipped, so the update points in the true direction (the blue arrow of @fig-fair-clipping-toy), but the noise $\sigma Z$ is as large as possible relative to the gradients. Esipova et al. (2023) propose a version that clips the rare gradients above $Z$ instead of discarding them and adapts $Z$ during training from a privately estimated count of how many gradients exceed it; they report that it reduces the privacy cost gap and improves accuracy compared with DP-SGD and with earlier mitigations on MNIST, CelebA and two tabular datasets. Because it treats every record alike, it needs no group labels.
+**Global scaling trades direction for noise.** By @eq-fair-global, scaling all gradients by the same factor is the large-$C$ end of the clipping-norm curve of [DP-SGD](02-dp-sgd.md#sec-dpsgd-clipping) with $\eta C$ fixed: nothing is clipped, so the update points in the true direction (the blue arrow of @fig-fair-clipping-toy), but the noise $\sigma C_{\max}$ is as large as possible relative to the gradients. Esipova et al. (2023) propose a version that clips the rare gradients above $C_{\max}$ instead of discarding them and adapts $C_{\max}$ during training from a privately estimated count of how many gradients exceed it; they report that it reduces the privacy cost gap and improves accuracy compared with DP-SGD and with earlier mitigations on MNIST, CelebA and two tabular datasets. Because it treats every record alike, it needs no group labels.
 
-**Group-aware methods need group labels.** Xu, Du & Wu (2021) adjust each group's contribution according to how much that group is being clipped, giving groups that are clipped more a larger clipping bound, so that the groups' clipping biases are equalized. Tran, Dinh & Fioretto (2021) add to the training objective penalties on the differences between groups in the quantities their decomposition identifies. Both need each training record's group, which is itself sensitive and may not be available or lawful to collect, and the per-group statistics they use must be computed privately.
+**Group-aware methods need group labels.** Xu, Du & Wu (2021) adjust each group's contribution according to how much that group is being clipped, giving groups that are clipped more a larger clipping norm, so that the groups' clipping biases are equalized. Tran, Dinh & Fioretto (2021) add to the training objective penalties on the differences between groups in the quantities their decomposition identifies. Both need each training record's group, which is itself sensitive and may not be available or lawful to collect, and the per-group statistics they use must be computed privately.
 
 **Oversampling buys little at a fixed budget.** Fixed at $\varepsilon = 4$ for every record, sampling the minority four times as often requires $\sigma = 4.71$ instead of 1.36: the minority's pull grows by 4 and the noise by $4.71/1.36 = 3.46$. Its signal-to-noise ratio improves by only $4/3.46 = 1.16$, while the majority's falls by 3.46, and the majority's records are then far more private than the target, $\varepsilon = 0.86$, which is wasted budget ([Exercise 5](../../book-exercises/part05-dp-ml/08-disparate-impact.md#sec-sol-fair-5)). Oversampling without changing $\sigma$ would silently give the minority $\varepsilon = 20.96$: the group that is already disadvantaged in accuracy would also get the weakest privacy.
 
@@ -383,9 +383,9 @@ Group $g$ has share $s_g$, average gradient $\bar g_g$ and clipping weight $w_g$
 | A group's pull | $s_gm_g$, of length at most $s_gC$ | Any gradients |
 | Effective share | $\tilde s_g = s_gc_g/\sum_hs_hc_h$, with $c_g = w_g$ for equal norms | Parallel gradients within each group |
 | Break-even steps | $(\ell_{\text{noise}}/\ell_{\text{sig}})^2/s_g^2$ | Group's signal a fraction $s_g$ of the population's |
-| Noise floor | $\mathbb E[L_g] = k\eta\tau^2/(2s_g(2 - \eta s_g\lambda)) \approx k\eta\tau^2/(4s_g)$ | Quadratic loss on the group's own $k$ weights |
+| Noise floor | $\mathbb E[L_g] = d_g\eta\tau^2/(2s_g(2 - \eta s_g\lambda)) \approx d_g\eta\tau^2/(4s_g)$ | Quadratic loss on the group's own $d_g$ weights |
 | Accuracy gap interval | $\hat p_a - \hat p_b \pm 1.96\sqrt{\sum_g\hat p_g(1 - \hat p_g)/m_g}$ | Disjoint test records, large counts |
-| Global scaling | Same as clipping norm $Z$, step $\eta C/Z$ | No gradient above $Z$ |
+| Global scaling | Same as DP-SGD with the clipping norm set to $C_{\max}$ and learning rate $\eta C/C_{\max}$ | No gradient above $C_{\max}$ |
 | Oversampling at $v q$ | Those records' $\varepsilon$ is the accountant's at rate $vq$ | Rate fixed in advance per group |
 
 : Every result of the chapter. {#tbl-fair-cheat}

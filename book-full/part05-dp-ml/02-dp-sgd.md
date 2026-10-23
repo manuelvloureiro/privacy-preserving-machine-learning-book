@@ -4,13 +4,13 @@
 
 [Private empirical risk minimization](01-dp-erm.md) ended with one method left standing for non-convex models: gradient descent with Gaussian noise on every step. Its privacy proof needs only that one record moves each step's gradient by a bounded amount, and clipping each record's gradient supplies that bound for any model. Two more changes make it practical for differential privacy (DP). Each step uses a random minibatch instead of the full dataset, which makes steps cheap and, by amplification, more private. And an accountant composes thousands of such steps into one $(\varepsilon, \delta)$. The result is stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, DP-SGD, introduced by Abadi et al. (2016). Nearly every private deep-learning system runs it, through libraries such as Opacus, TensorFlow Privacy and JAX Privacy.
 
-Part 4 computed the privacy of DP-SGD without running it: [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md) and [Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md) report $\varepsilon = 6.71$ at $\delta = 10^{-5}$ for sampling rate $q = 0.01$, noise multiplier $\sigma = 1$ and 10,000 steps. This chapter runs that configuration on a neural network, and asks what the noise and the clipping cost and how to choose the knobs that control them.
+Part 4 computed the privacy of DP-SGD without running it. [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md) and [Choosing an accountant](../part04-privacy-accounting/09-choosing-an-accountant.md) report $\varepsilon = 6.71$ at $\delta = 10^{-5}$ for a sampling rate $q$ of 0.01, a noise multiplier $\sigma$ of 1 and 10,000 steps. This chapter runs that configuration on a neural network, and asks what the noise and the clipping cost and how to choose the knobs that control them.
 
 ### The one idea: the analysis never looks inside the model
 
-Each step of DP-SGD releases a noisy **sum of clipped per-example gradients**. Clipping rescales each record's gradient to length at most $C$, so adding or removing one record changes the sum by at most $C$, whatever the network, the loss or the current weights. The privacy proof stops there. Everything else, the architecture, the data, whether training converges, affects only accuracy.
+Each step of DP-SGD releases a noisy **sum of clipped per-example gradients**. Clipping rescales each record's gradient to length at most $C$, so adding or removing one record changes the sum by at most $C$, whatever the network, the loss or the current parameters. The privacy proof stops there. Everything else, the architecture, the data, whether training converges, affects only accuracy.
 
-That split organizes the chapter. The knobs divide into two groups. The noise multiplier $\sigma$, the sampling rate $q$ and the number of steps $T$ determine $\varepsilon$ through the accountant, and nothing else does. The clipping norm $C$ and the step size $\eta$ do not change $\varepsilon$ at all; they change how much of the gradient survives clipping and how much the noise moves the weights. The cost of privacy comes in two forms: a **bias** from clipping, which changes the direction of the average gradient, and a **variance** from the noise, which makes each step partly random.
+That split organizes the chapter. The knobs divide into two groups. The noise multiplier $\sigma$, the sampling rate $q$ and the number of steps $T$ determine $\varepsilon$ through the accountant, and nothing else does. The clipping norm $C$ and the learning rate $\eta$ do not change $\varepsilon$ at all; they change how much of the gradient survives clipping and how much the noise moves the weights. The cost of privacy comes in two forms: a **bias** from clipping, which changes the direction of the average gradient, and a **variance** from the noise, which makes each step partly random.
 
 @tbl-dpsgd-overview lists the results and where each is used.
 
@@ -25,9 +25,9 @@ That split organizes the chapter. The knobs divide into two groups. The noise mu
 
 : The results of this chapter and where each is used. {#tbl-dpsgd-overview}
 
-**Notation.** A training set $D$ has $n$ records $z_i = (x_i, y_i)$. The model has $p$ weights $w$, and $g_i = \nabla_w\ell(w, z_i)$ is the gradient of record $i$'s loss, its **per-example gradient**. $C$ is the clipping norm, $\sigma$ the noise multiplier (the noise standard deviation in units of $C$), $q$ the sampling rate, $B = qn$ the expected batch size, $T$ the number of steps and $\eta$ the step size. Neighbouring datasets now differ by **adding or removing** one record, $D' = D \cup \{x\}$, because Poisson sampling pairs with that relation ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)); the previous chapter used replacement.
+**Notation.** A training set $D$ has $n$ records $z_i = (x_i, y_i)$. The model has $d$ parameters, written $\theta \in \mathbb R^d$, and $g_i = \nabla_\theta\ell(\theta; z_i)$ is the gradient of record $i$'s loss, its **per-example gradient**. $C$ is the clipping norm, $\sigma$ the noise multiplier (the noise standard deviation in units of $C$), $q$ the sampling rate, $B = qn$ the expected batch size, $T$ the number of steps and $\eta$ the learning rate. The learning rate is also called the step size. Neighbouring datasets now differ by **adding or removing** one record, $D' = D \cup \{z\}$, because Poisson sampling pairs with that relation ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)); the previous chapter used replacement.
 
-**The running example.** Inputs are 50-dimensional standard normal vectors, and labels are the sign of the output of a fixed random **teacher** network with 8 hidden tanh units, so a perfect classifier exists. The **student** is a network with one hidden layer of 64 tanh units and a logistic loss, $p = 3{,}329$ weights including biases, trained on $n = 10{,}000$ records and tested on 20,000 more. DP-SGD runs with $q = 0.01$ (expected batch $B = 100$), $C = 0.5$, $\eta = 0.5$, $\sigma = 1$ and $T = 10{,}000$ steps, 100 epochs: exactly Part 4's running example. The dataset is fixed; only the training randomness changes between runs.
+**The running example.** Inputs are 50-dimensional standard normal vectors, and labels are the sign of the output of a fixed random **teacher** network with 8 hidden tanh units, so a perfect classifier exists. The **student** is a network with one hidden layer of 64 tanh units and a logistic loss, $d = 3{,}329$ parameters including biases, trained on $n = 10{,}000$ records and tested on 20,000 more. DP-SGD runs with $q = 0.01$ (expected batch $B = 100$), $C = 0.5$, $\eta = 0.5$, $\sigma = 1$ and $T = 10{,}000$ steps, 100 epochs: exactly Part 4's running example. The dataset is fixed; only the training randomness changes between runs.
 
 **How to read this chapter.** Read the toolkit and @sec-dpsgd-algorithm, which states what the guarantee covers and what it assumes. @sec-dpsgd-clipping and @sec-dpsgd-batch say how to set the knobs. @sec-dpsgd-ghost and @sec-dpsgd-microbatch are about implementation and can be skipped on a first reading, except for the warning about microbatches. @sec-dpsgd-run puts the pieces together.
 
@@ -51,7 +51,7 @@ Any computation on a private output, which does not touch the data again, is as 
 
 ### Fact 4 — A dense layer's gradient is an outer product
 
-For a dense layer that maps an input $a \in \mathbb R^{p_{\text{in}}}$ to $Wa$, the gradient of a loss with respect to $W$ is $\delta a^\top$, where $\delta$ is the gradient with respect to the layer's output, the **back-propagated error**. Each entry is $\partial\ell/\partial W_{jk} = \delta_ja_k$, because $W_{jk}$ multiplies $a_k$ and contributes to output $j$ only. [Gradient inversion](../part02-attacks/06-gradient-inversion.md) uses the same fact to reconstruct inputs from gradients; here it makes per-example gradient norms cheap.
+For a dense layer that maps an input $a \in \mathbb R^{d_{\text{in}}}$ to $Wa$, the gradient of a loss with respect to $W$ is $va^\top$, where $v$ is the gradient with respect to the layer's output, the **back-propagated error**. Each entry is $\partial\ell/\partial W_{jk} = v_ja_k$, because $W_{jk}$ multiplies $a_k$ and contributes to output $j$ only. [Gradient inversion](../part02-attacks/06-gradient-inversion.md) uses the same fact to reconstruct inputs from gradients; here it makes per-example gradient norms cheap.
 
 ## The algorithm and its guarantee {#sec-dpsgd-algorithm}
 
@@ -61,22 +61,22 @@ What exactly does DP-SGD compute, and which $(\varepsilon, \delta)$ does it sati
 
 ### Statement
 
-Start from weights $w_0$ chosen independently of the data. For $t = 0, \dots, T - 1$:
+Start from parameters $\theta_0$ chosen independently of the data. For $t = 0, \dots, T - 1$:
 
 1. **Sample.** Put each record in the batch $S_t$ independently with probability $q$.
-2. **Per-example gradients.** For each $i \in S_t$, compute $g_i = \nabla_w\ell(w_t, z_i)$.
+2. **Per-example gradients.** For each $i \in S_t$, compute $g_i = \nabla_\theta\ell(\theta_t; z_i)$.
 3. **Clip.** Rescale each to length at most $C$: $\bar g_i = g_i\min(1, C/\|g_i\|)$.
 4. **Noisy sum.** $G_t = \sum_{i\in S_t}\bar g_i + \xi_t$ with $\xi_t \sim \mathcal N(0, \sigma^2C^2I)$.
-5. **Step.** $w_{t+1} = w_t - \eta\,G_t/B$, with $B = qn$ the expected batch size.
+5. **Step.** $\theta_{t+1} = \theta_t - \eta\,G_t/B$, with $B = qn$ the expected batch size.
 
-Releasing all of $w_1, \dots, w_T$ is $(\varepsilon, \delta)$-DP for add/remove neighbours, with $\varepsilon$ given by @eq-dpsgd-convert. @sec-apx-sgd-accounting in the appendices derives this from scratch, from clipping to the final $\varepsilon$, with worked numbers. The guarantee does not depend on the loss, the model, $C$ or $\eta$.
+Releasing all of $\theta_1, \dots, \theta_T$ is $(\varepsilon, \delta)$-DP for add/remove neighbours, with $\varepsilon$ given by @eq-dpsgd-convert. @sec-apx-sgd-accounting in the appendices derives this from scratch, from clipping to the final $\varepsilon$, with worked numbers. The guarantee does not depend on the loss, the model, $C$ or $\eta$.
 
 ### Derivation
 
-1. **One record moves the clipped sum by at most $C$.** Fix the weights $w_t$ and the batch of the other records. If the record $x$ is in the batch, the sum contains one extra term $\bar g_x$, of length at most $C$; every other term is the same for $D$ and $D'$, because each is computed from its own record alone.
-2. **One step is a subsampled Gaussian mechanism.** With noise $\sigma C$, Fact 1 gives the ratio $1/\sigma$ for a step on which $x$ is drawn. Under Poisson sampling, $x$ is drawn with probability $q$ independently of the other records, so the step's output on $D'$ is the mixture of Fact 2. Rescaling by $C$ and rotating, the worst case over the direction and length of $\bar g_x$ is the one-dimensional pair of Fact 2, a shift of exactly $C$ along one axis; a shorter shift is the same pair with extra noise, which cannot be less private.
-3. **Dividing by $B$ is post-processing.** $B = qn$ is a fixed public number, so $w_{t+1}$ is computed from $w_t$ and $G_t$ alone (Fact 3).
-4. **Compose.** Step $t$ is evaluated at $w_t$, which depends on the earlier noisy sums. RDP composition holds for such adaptive sequences, so the $T$ steps together have RDP curve $T\varepsilon_{q,\sigma}(\alpha)$.
+1. **One record moves the clipped sum by at most $C$.** Fix the parameters $\theta_t$ and the batch of the other records. If the record $z$ is in the batch, the sum contains one extra term $\bar g_z$, of length at most $C$; every other term is the same for $D$ and $D'$, because each is computed from its own record alone.
+2. **One step is a subsampled Gaussian mechanism.** With noise $\sigma C$, Fact 1 gives the ratio $1/\sigma$ for a step on which $z$ is drawn. Under Poisson sampling, $z$ is drawn with probability $q$ independently of the other records, so the step's output on $D'$ is the mixture of Fact 2. Rescaling by $C$ and rotating, the worst case over the direction and length of $\bar g_z$ is the one-dimensional pair of Fact 2, a shift of exactly $C$ along one axis; a shorter shift is the same pair with extra noise, which cannot be less private.
+3. **Dividing by $B$ is post-processing.** $B = qn$ is a fixed public number, so $\theta_{t+1}$ is computed from $\theta_t$ and $G_t$ alone (Fact 3).
+4. **Compose.** Step $t$ is evaluated at $\theta_t$, which depends on the earlier noisy sums. RDP composition holds for such adaptive sequences, so the $T$ steps together have RDP curve $T\varepsilon_{q,\sigma}(\alpha)$.
 5. **Convert.** @eq-dpsgd-convert turns the composed curve into $(\varepsilon, \delta)$. Every iterate is a function of the released noisy sums, so releasing all of them, or only the last, is covered.
 
 ### Interpretation
@@ -86,7 +86,7 @@ Releasing all of $w_1, \dots, w_T$ is $(\varepsilon, \delta)$-DP for add/remove 
 - *Step 1 needs per-example independence.* Batch normalization computes means and variances over the batch, so one record changes every other record's activations and gradients, and the sum can move by much more than $C$. Private models use normalizations that act on one example at a time, such as group or layer normalization.
 - *Step 1 needs a fixed $C$.* Choosing $C$ as, say, the median gradient norm of the current batch makes the noise scale depend on the data. Choose $C$ in advance, from public data or a private estimate.
 - *Step 2 needs Poisson sampling.* Shuffling the data and cutting it into fixed batches is a different mechanism, which [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-schemes) shows can be much less private than the Poisson accountant reports.
-- *Step 3 needs a public denominator.* Dividing by the actual batch size $|S_t|$, which reveals how many records were drawn and changes when $x$ is added, is not post-processing of $G_t$. Divide by $B$, or release a noisy count and spend budget on it.
+- *Step 3 needs a public denominator.* Dividing by the actual batch size $|S_t|$, which reveals how many records were drawn and changes when $z$ is added, is not post-processing of $G_t$. Divide by $B$, or release a noisy count and spend budget on it.
 - *Step 4 needs the accountant to see every step*, including the steps of runs that were discarded during tuning: that is the subject of [Hyperparameter tuning](03-hyperparameter-tuning.md).
 
 **What it does not cover.** The guarantee is for one record. A person with many records needs [user-level privacy](07-user-level.md). Preprocessing that uses the data, such as normalizing features by their mean, must itself be private or use public statistics.
@@ -101,9 +101,9 @@ With $q = 0.01$, $\sigma = 1$, $T = 10{,}000$ and $\delta = 10^{-5}$, the accoun
 
 : The noise multiplier that DP-SGD with $q = 0.01$ and $T = 10{,}000$ steps needs for each budget, from the RDP accountant. {#tbl-dpsgd-sigma}
 
-How large is the noise? The averaged update $G_t/B$ carries noise with standard deviation $\sigma C/B = 1 \times 0.5/100 = 0.005$ on each of the 3,329 coordinates. A Gaussian vector with $p$ independent coordinates of standard deviation $s$ has length close to $s\sqrt p$, so the noise has length about $0.005 \times \sqrt{3{,}329} = 0.288$. The averaged clipped gradient has length at most $C = 0.5$, and in the run it is 0.070 at the first step and between 0.015 and 0.027 from step 1,000 on. The noise in every step is about ten times longer than the signal.
+How large is the noise? The averaged update $G_t/B$ carries noise with standard deviation $\sigma C/B = 1 \times 0.5/100 = 0.005$ on each of the 3,329 coordinates. A Gaussian vector with $d$ independent coordinates of standard deviation $s$ has length close to $s\sqrt d$, so the noise has length about $0.005 \times \sqrt{3{,}329} = 0.288$. The averaged clipped gradient has length at most $C = 0.5$, and in the run it is 0.070 at the first step and between 0.015 and 0.027 from step 1,000 on. The noise in every step is about ten times longer than the signal.
 
-Training works anyway, because the signal points in roughly the same direction from one step to the next, while the noise is independent. Over $k$ steps, the signals add up to about $k$ times their length, and the noise to about $\sqrt k$ times its length, since independent vectors add in squares. Signal overtakes noise when $k \cdot 0.026 > \sqrt k \cdot 0.288$, that is after $k > (0.288/0.026)^2 \approx 123$ steps. The final model reaches test accuracy 0.9589, against 0.9627 for non-private SGD.
+Training works anyway, because the signal points in roughly the same direction from one step to the next, while the noise is independent. Over $t$ steps, the signals add up to about $t$ times their length, and the noise to about $\sqrt t$ times its length, since independent vectors add in squares. Signal overtakes noise when $t \cdot 0.026 > \sqrt t \cdot 0.288$, that is after $t > (0.288/0.026)^2 \approx 123$ steps. The final model reaches test accuracy 0.9589, against 0.9627 for non-private SGD.
 
 ### Check yourself
 
@@ -123,7 +123,7 @@ $$\mathbb E\Big[\frac{G_t}{B}\Big] = \frac1n\sum_{i=1}^n\min\Big(1, \frac{C}{\|g
 the true average gradient $\frac1n\sum_ig_i$ with each record weighted by $\min(1, C/\|g_i\|)$. Its noise has standard deviation $\sigma C/B$ per coordinate.
 
 **Scale invariance.** If every per-example gradient in a run is clipped, that is $\|g_i\| \ge C$ at every step, then the update is
-$$w_{t+1} = w_t - \frac{\eta C}{B}\Big(\sum_{i\in S_t}\frac{g_i}{\|g_i\|} + \sigma\zeta_t\Big), \qquad \zeta_t \sim \mathcal N(0, I),$$ {#eq-dpsgd-normalized}
+$$\theta_{t+1} = \theta_t - \frac{\eta C}{B}\Big(\sum_{i\in S_t}\frac{g_i}{\|g_i\|} + \sigma\zeta_t\Big), \qquad \zeta_t \sim \mathcal N(0, I),$$ {#eq-dpsgd-normalized}
 which depends on $\eta$ and $C$ only through their product $\eta C$.
 
 ### Derivation
@@ -131,11 +131,11 @@ which depends on $\eta$ and $C$ only through their product $\eta C$.
 1. **Average over the sampling.** Each record is in the batch with probability $q$, so $\mathbb E\sum_{i\in S_t}\bar g_i = \sum_{i=1}^n q\,\bar g_i$. The noise has mean zero.
 2. **Divide by $B = qn$.** The $q$ cancels and leaves $\frac1n\sum_i\bar g_i$, which is @eq-dpsgd-expected by the definition of $\bar g_i$. This is why the denominator is the expected batch size: with it, the update is an unbiased estimate of the average clipped gradient.
 3. **The noise.** $\xi_t/B$ has standard deviation $\sigma C/B$ per coordinate.
-4. **Scale invariance.** If $\|g_i\| \ge C$, then $\bar g_i = Cg_i/\|g_i\|$. Write the noise as $\sigma C\zeta_t$ with $\zeta_t$ standard normal. Then $G_t = C(\sum_ig_i/\|g_i\| + \sigma\zeta_t)$, and $\eta G_t/B$ is @eq-dpsgd-normalized. Two runs with the same $\eta C$, the same seed and every gradient clipped produce the same weights.
+4. **Scale invariance.** If $\|g_i\| \ge C$, then $\bar g_i = Cg_i/\|g_i\|$. Write the noise as $\sigma C\zeta_t$ with $\zeta_t$ standard normal. Then $G_t = C(\sum_ig_i/\|g_i\| + \sigma\zeta_t)$, and $\eta G_t/B$ is @eq-dpsgd-normalized. Two runs with the same $\eta C$, the same seed and every gradient clipped produce the same parameters.
 
 ### Interpretation
 
-**Below the gradient norms, only $\eta C$ matters.** When $C$ is smaller than every per-example gradient, DP-SGD is normalized SGD, which averages unit vectors, plus noise, and its behaviour depends on the product $\eta C$. Lowering $C$ further changes nothing once $\eta$ is scaled up to match. This is why practitioners often clip aggressively and tune only the step size; De et al. (2022) report that small clipping norms work well, which this explains.
+**Below the gradient norms, only $\eta C$ matters.** When $C$ is smaller than every per-example gradient, DP-SGD is normalized SGD, which averages unit vectors, plus noise, and its behaviour depends on the product $\eta C$. Lowering $C$ further changes nothing once $\eta$ is scaled up to match. This is why practitioners often clip aggressively and tune only the learning rate; De et al. (2022) report that small clipping norms work well, which this explains.
 
 **Above them, noise grows and signal does not.** Once $C$ exceeds most gradient norms, the clipped average stops growing with $C$, but the noise $\sigma C/B$ keeps growing in proportion. The signal-to-noise ratio falls like $1/C$. A large $C$ is never better than the smallest $C$ that clips almost nothing.
 
@@ -143,11 +143,11 @@ which depends on $\eta$ and $C$ only through their product $\eta C$.
 
 **Gradient norms change during training.** In the DP-SGD run of the running example the median per-example gradient norm is 3.592 at the first step, 0.006 at step 1,000, and rounds to 0.000 from step 3,000 on; non-private training behaves the same way (@fig-dpsgd-clipping, right). The logistic loss flattens on records that are classified with a wide margin, so their gradients vanish. With $C = 0.5$, every gradient is clipped at the start, and between 9% and 25% of the batch later: the few records still near the decision boundary. A fixed $C$ is in the scale-invariant regime early and in the unbiased regime late.
 
-![Left: test accuracy of the running example at $\sigma = 1$ ($\varepsilon = 6.71$) against the clipping norm, with the step size fixed at $\eta = 0.5$ (circles) and with $\eta C$ fixed at 0.25 (squares). Right: the median per-example gradient norm during non-private training, on a log scale; it falls by about five orders of magnitude.](figures/dpsgd_clipping.svg){#fig-dpsgd-clipping}
+![Left: test accuracy of the running example at $\sigma = 1$ ($\varepsilon = 6.71$) against the clipping norm, with the learning rate fixed at $\eta = 0.5$ (circles) and with $\eta C$ fixed at 0.25 (squares). Right: the median per-example gradient norm during non-private training, on a log scale; it falls by about five orders of magnitude.](figures/dpsgd_clipping.svg){#fig-dpsgd-clipping}
 
 ### Example: sweeping C
 
-@tbl-dpsgd-clip trains the running example at $\varepsilon = 6.71$ with seven clipping norms, once with the step size fixed at 0.5 and once with $\eta C$ fixed at $0.5 \times 0.5 = 0.25$.
+@tbl-dpsgd-clip trains the running example at $\varepsilon = 6.71$ with seven clipping norms, once with the learning rate fixed at 0.5 and once with $\eta C$ fixed at $0.5 \times 0.5 = 0.25$.
 
 | $C$ | 0.01 | 0.03 | 0.1 | 0.3 | 1 | 3 | 10 |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -156,7 +156,7 @@ which depends on $\eta$ and $C$ only through their product $\eta C$.
 
 : Test accuracy of the running example at $\sigma = 1$ for seven clipping norms, one run each. With $\eta C$ fixed, small clipping norms all give the same accuracy. {#tbl-dpsgd-clip}
 
-With the step size fixed, a small $C$ is too slow (0.9244 at $C = 0.01$: every step has length proportional to $\eta C = 0.005$) and a large one too noisy (0.8347 at $C = 10$). With $\eta C$ fixed, accuracy is flat for $C \le 0.3$, as scale invariance predicts, and falls slowly for large $C$, where the noise grows while the clipped gradients do not. The best accuracy, 0.9627 at $C = 0.01$, equals the non-private model's.
+With the learning rate fixed, a small $C$ is too slow (0.9244 at $C = 0.01$: every step has length proportional to $\eta C = 0.005$) and a large one too noisy (0.8347 at $C = 10$). With $\eta C$ fixed, accuracy is flat for $C \le 0.3$, as scale invariance predicts, and falls slowly for large $C$, where the noise grows while the clipped gradients do not. The best accuracy, 0.9627 at $C = 0.01$, equals the non-private model's.
 
 ### Check yourself
 
@@ -186,7 +186,7 @@ the noise on the averaged gradient falls like $1/\sqrt B$. Outside that regime, 
 
 **Amplification is most efficient at large $\sigma$.** The ratio $\sigma/\sqrt q$, which @eq-dpsgd-batch says is constant, falls from 22.3 at $B = 10$ to 10.8 at $B = 10{,}000$ in @tbl-dpsgd-batch. The factor $\sigma^2(e^{1/\sigma^2} - 1)$ explains most of it: 3.23 at $\sigma = 0.704$, 1.33 at $\sigma = 1.36$ and 1.04 at $\sigma = 3.78$. Steps with little noise are expensive per unit of signal, because in the tail of the privacy loss, the high orders that the conversion uses, sampling buys little ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md#sec-sub-rdp-gaussian)).
 
-**Large batches help, but not for free.** For a fixed number of epochs, large batches give less noise per step and fewer steps. Fewer steps means less progress if the step size cannot grow in proportion, and the best step size grows with the batch: in @tbl-dpsgd-batch-train the best step size goes from 0.25 at $B = 30$ to between 1 and 2 at $B = 100$ to $B = 1{,}000$. De et al. (2022) and Anil et al. (2022) train with batches of thousands to hundreds of thousands, and report that large batches are a main ingredient of accurate private models. Large batches also parallelize well, which matters more on accelerators than in this small example.
+**Large batches help, but not for free.** For a fixed number of epochs, large batches give less noise per step and fewer steps. Fewer steps means less progress if the learning rate cannot grow in proportion, and the best learning rate grows with the batch: in @tbl-dpsgd-batch-train the best learning rate goes from 0.25 at $B = 30$ to between 1 and 2 at $B = 100$ to $B = 1{,}000$. De et al. (2022) and Anil et al. (2022) train with batches of thousands to hundreds of thousands, and report that large batches are a main ingredient of accurate private models. Large batches also parallelize well, which matters more on accelerators than in this small example.
 
 ![DP-SGD at $\varepsilon = 4$, $\delta = 10^{-5}$, for 100 epochs on $n = 10{,}000$ records, as a function of the expected batch size. Left: the noise multiplier the accountant requires, against the $\sqrt B$ law of @eq-dpsgd-batch. Right: the noise standard deviation on the averaged gradient, in units of $C$, against the $1/\sqrt B$ law. Small batches need more noise than the law predicts.](figures/dpsgd_batch_size.svg){#fig-dpsgd-batch}
 
@@ -206,18 +206,18 @@ the noise on the averaged gradient falls like $1/\sqrt B$. Outside that regime, 
 
 : Noise needed for $\varepsilon = 4$ at $\delta = 10^{-5}$ over 100 epochs, for seven sampling rates. The noise on the averaged gradient, in units of $C$, falls faster than $1/\sqrt B$. {#tbl-dpsgd-batch}
 
-From $B = 10$ to $B = 1{,}000$, a hundredfold increase, the noise per averaged gradient falls from 0.0704 to 0.00378, a factor of 18.6, against the factor of 10 that $1/\sqrt B$ predicts. @tbl-dpsgd-batch-train trains four of these configurations with three step sizes each.
+From $B = 10$ to $B = 1{,}000$, a hundredfold increase, the noise per averaged gradient falls from 0.0704 to 0.00378, a factor of 18.6, against the factor of 10 that $1/\sqrt B$ predicts. @tbl-dpsgd-batch-train trains four of these configurations with three learning rates each.
 
-| $B$ | Step sizes and test accuracy |
+| $B$ | Learning rates and test accuracy |
 | --- | --- |
 | 30 | $\eta = 0.25$: 0.9544; 0.5: 0.9487; 1: 0.9453 |
 | 100 | $\eta = 0.5$: 0.9522; 1: 0.9569; 2: 0.9465 |
 | 300 | $\eta = 1$: 0.9591; 2: 0.9565; 4: 0.9577 |
 | 1,000 | $\eta = 2$: 0.9589; 4: 0.9565; 8: 0.9576 |
 
-: Test accuracy of the running example at $\varepsilon = 4$ and 100 epochs, for four batch sizes and three step sizes each, one run each. {#tbl-dpsgd-batch-train}
+: Test accuracy of the running example at $\varepsilon = 4$ and 100 epochs, for four batch sizes and three learning rates each, one run each. {#tbl-dpsgd-batch-train}
 
-At its best step size, each batch size reaches between 0.9544 and 0.9591, and the two largest batches do best, with 100 and 30 times fewer steps than $B = 10$ would take. (Choosing the best of three step sizes after looking at test accuracy is itself a leak; it is done here to compare batch sizes, and [Hyperparameter tuning](03-hyperparameter-tuning.md) shows how to do it privately.)
+At its best learning rate, each batch size reaches between 0.9544 and 0.9591, and the two largest batches do best, with 100 and 30 times fewer steps than $B = 10$ would take. (Choosing the best of three learning rates after looking at test accuracy is itself a leak; it is done here to compare batch sizes, and [Hyperparameter tuning](03-hyperparameter-tuning.md) shows how to do it privately.)
 
 ### Check yourself
 
@@ -232,29 +232,29 @@ Ordinary backpropagation computes the gradient of the *sum* of the batch's losse
 
 ### Statement
 
-For a dense layer with inputs $a_i$ and back-propagated errors $\delta_i$, record $i$'s gradient is $\delta_ia_i^\top$ (Fact 4), and
-$$\big\|\delta_ia_i^\top\big\|_F = \|\delta_i\|\,\|a_i\|.$$ {#eq-dpsgd-ghost}
-The whole network's per-example gradient norm is the square root of the sum of these squared norms over layers. The clipped sum is $\sum_ic_i\delta_ia_i^\top = (c \circ \Delta)^\top A$, where $c_i = \min(1, C/\|g_i\|)$, $\Delta$ and $A$ stack the errors and inputs as rows, and $c \circ \Delta$ multiplies row $i$ of $\Delta$ by $c_i$. For a layer applied to a sequence of $T$ tokens, record $i$'s gradient is $\sum_t\delta_{it}a_{it}^\top$, and
-$$\Big\|\sum_t\delta_{it}a_{it}^\top\Big\|_F^2 = \sum_{t, s}(a_{it}\cdot a_{is})(\delta_{it}\cdot\delta_{is}).$$ {#eq-dpsgd-ghost-seq}
+For a dense layer with inputs $a_i$ and back-propagated errors $v_i$, record $i$'s gradient is $v_ia_i^\top$ (Fact 4), and
+$$\big\|v_ia_i^\top\big\|_F = \|v_i\|\,\|a_i\|.$$ {#eq-dpsgd-ghost}
+The whole network's per-example gradient norm is the square root of the sum of these squared norms over layers. The clipped sum is $\sum_ic_iv_ia_i^\top = (c \circ V)^\top A$, where $c_i = \min(1, C/\|g_i\|)$, $V$ and $A$ stack the errors and inputs as rows, and $c \circ V$ multiplies row $i$ of $V$ by $c_i$. For a layer applied to a sequence of length $N$, the number of tokens, record $i$'s gradient is $\sum_tv_{it}a_{it}^\top$, where $t$ now indexes the tokens, and
+$$\Big\|\sum_tv_{it}a_{it}^\top\Big\|_F^2 = \sum_{t, s}(a_{it}\cdot a_{is})(v_{it}\cdot v_{is}).$$ {#eq-dpsgd-ghost-seq}
 
 ### Derivation
 
-1. **One token.** The squared Frobenius norm is the sum of squared entries: $\sum_{j,k}\delta_j^2a_k^2 = (\sum_j\delta_j^2)(\sum_ka_k^2) = \|\delta\|^2\|a\|^2$.
+1. **One token.** The squared Frobenius norm is the sum of squared entries: $\sum_{j,k}v_j^2a_k^2 = (\sum_jv_j^2)(\sum_ka_k^2) = \|v\|^2\|a\|^2$.
 2. **Layers.** The full gradient is the concatenation of the layers' gradients, so its squared length is the sum of theirs.
-3. **The clipped sum.** $\sum_ic_i\delta_ia_i^\top$ is linear in the errors: scale each record's error by $c_i$ and do the usual batch product of errors and inputs. One backward pass computes the errors, the norms come from @eq-dpsgd-ghost, and one more matrix product per layer gives the clipped sum.
-4. **Sequences.** Expand the square: $\|\sum_t\delta_ta_t^\top\|_F^2 = \sum_{t,s}\operatorname{tr}(a_t\delta_t^\top\delta_sa_s^\top) = \sum_{t,s}(\delta_t\cdot\delta_s)(a_s\cdot a_t)$, using $\operatorname{tr}(uv^\top) = v\cdot u$. This is the entrywise product of two $T \times T$ Gram matrices, summed.
+3. **The clipped sum.** $\sum_ic_iv_ia_i^\top$ is linear in the errors: scale each record's error by $c_i$ and do the usual batch product of errors and inputs. One backward pass computes the errors, the norms come from @eq-dpsgd-ghost, and one more matrix product per layer gives the clipped sum.
+4. **Sequences.** Expand the square: $\|\sum_tv_ta_t^\top\|_F^2 = \sum_{t,s}\operatorname{tr}(a_tv_t^\top v_sa_s^\top) = \sum_{t,s}(v_t\cdot v_s)(a_s\cdot a_t)$, using $\operatorname{tr}(uv^\top) = v\cdot u$. This is the entrywise product of two $N \times N$ Gram matrices, summed.
 
 ### Interpretation
 
-This is **ghost clipping** (Goodfellow 2015 for the norms of single inputs; Lee & Kifer 2021 for clipping with them; Li et al. 2022 for sequences): the per-example gradients are "ghosts" that are never formed. For one token per record it stores $B(p_{\text{in}} + p_{\text{out}})$ numbers per layer instead of $Bp_{\text{in}}p_{\text{out}}$. For sequences the Gram matrices cost $2BT^2$, which beats the explicit $Bp_{\text{in}}p_{\text{out}}$ only when $2T^2 < p_{\text{in}}p_{\text{out}}$, so long sequences in narrow layers favour forming the gradients. Bu, Mao & Xu (2022) choose per layer. Either way, privacy is untouched: these are exact computations of the same quantities.
+This is **ghost clipping** (Goodfellow 2015 for the norms of single inputs; Lee & Kifer 2021 for clipping with them; Li et al. 2022 for sequences): the per-example gradients are "ghosts" that are never formed. For one token per record it stores $B(d_{\text{in}} + d_{\text{out}})$ numbers per layer instead of $Bd_{\text{in}}d_{\text{out}}$. For sequences the Gram matrices cost $2BN^2$, which beats the explicit $Bd_{\text{in}}d_{\text{out}}$ only when $2N^2 < d_{\text{in}}d_{\text{out}}$, so long sequences in narrow layers favour forming the gradients. Bu, Mao & Xu (2022) choose per layer. Either way, privacy is untouched: these are exact computations of the same quantities.
 
 ### Example: the running example and a transformer layer
 
 For the 256 records of a test batch, the norms from @eq-dpsgd-ghost agree with explicitly formed per-example gradients to a relative difference of $2.2 \times 10^{-16}$, rounding error. For a random 16-token sequence, @eq-dpsgd-ghost-seq gives 33.144228 and the explicit gradient's norm is the same. @tbl-dpsgd-ghost compares the memory for several layers.
 
-| Layer | Explicit $Bp_{\text{in}}p_{\text{out}}$ | Ghost | Ratio |
+| Layer | Explicit $Bd_{\text{in}}d_{\text{out}}$ | Ghost | Ratio |
 | --- | --- | --- | --- |
-| Running example, first layer: $B = 100$, $p = 51 \to 64$ | 326,400 | 11,500 | 28.4 |
+| Running example, first layer: $B = 100$, $d = 51 \to 64$ | 326,400 | 11,500 | 28.4 |
 | $B = 32$, one token, $768 \to 768$ | 18,874,368 | 49,152 | 384.0 |
 | $B = 32$, 512 tokens, $768 \to 768$ | 18,874,368 | 16,777,216 | 1.1 |
 | $B = 32$, 512 tokens, $768 \to 3{,}072$ | 75,497,472 | 16,777,216 | 4.5 |
@@ -281,8 +281,8 @@ per coordinate, $2m$ times that of per-example clipping.
 
 ### Derivation
 
-1. **One record touches one microbatch.** The assignment of records to groups is fixed before training and does not depend on which other records are present. A position in the dataset would not do, because adding a record shifts the positions of the records after it. So adding or removing record $x$ changes only the microbatch of $x$'s group. Every other microbatch, and its clipped mean, is the same on both datasets.
-2. **That microbatch's clipped mean moves by up to $2C$.** If the group had other sampled records, its clipped mean changes from one vector of length at most $C$ to another, and the two can point in opposite directions, so they differ by up to $2C$. Only when $x$ is alone in its group does the change shrink to $C$, the per-example case. A worst-case bound must take $2C$.
+1. **One record touches one microbatch.** The assignment of records to groups is fixed before training and does not depend on which other records are present. A position in the dataset would not do, because adding a record shifts the positions of the records after it. So adding or removing record $z$ changes only the microbatch of $z$'s group. Every other microbatch, and its clipped mean, is the same on both datasets.
+2. **That microbatch's clipped mean moves by up to $2C$.** If the group had other sampled records, its clipped mean changes from one vector of length at most $C$ to another, and the two can point in opposite directions, so they differ by up to $2C$. Only when $z$ is alone in its group does the change shrink to $C$, the per-example case. A worst-case bound must take $2C$.
 3. **The accountant.** Step 2 of @sec-dpsgd-algorithm needs the noise to be $\sigma$ times the sensitivity, so the noise must be $\sigma \cdot 2C$. The rest of the derivation is unchanged.
 4. **Per coordinate.** The update divides the noisy sum by a public number, the expected number of microbatches $B/m$. Dividing $2\sigma C$ by it gives @eq-dpsgd-microbatch.
 
@@ -327,7 +327,7 @@ Put the pieces together: for the running example, how much accuracy does each bu
 
 ### Derivation
 
-Each row runs the algorithm of @sec-dpsgd-algorithm from a fresh random initialization, with the noise multiplier from the accountant (Fact 2). The non-private baseline uses the same sampling and step size with neither clipping nor noise; its accuracy is already at its best after 1,000 steps (0.9627) and stays there (0.9617 after 10,000).
+Each row runs the algorithm of @sec-dpsgd-algorithm from a fresh random initialization, with the noise multiplier from the accountant (Fact 2). The non-private baseline uses the same sampling and learning rate with neither clipping nor noise; its accuracy is already at its best after 1,000 steps (0.9627) and stays there (0.9617 after 10,000).
 
 ### Interpretation
 
@@ -337,7 +337,7 @@ Each row runs the algorithm of @sec-dpsgd-algorithm from a fresh random initiali
 
 **Run-to-run variation grows with the noise.** The standard deviation over runs is 0.0019 at $\varepsilon = 8$ and 0.018 at $\varepsilon = 0.5$. A single private run is a sample from a wide distribution, and comparing two configurations by one run each, as @tbl-dpsgd-clip does, is reliable only for differences well above that spread.
 
-**Architecture choices change under privacy.** The running example uses tanh units, and that is deliberate. Papernot, Thakurta, Song, Chien & Erlingsson (2021) find that bounded activations such as tanh train better than ReLU under DP-SGD. With the same privacy guarantee, $(2.93, 10^{-5})$ on the handwritten digits of MNIST, their tanh network reaches 98.1% test accuracy against 96.6% for ReLU. On the CIFAR-10 images at $(7.53, 10^{-5})$ it reaches 66.2% against 61.6%. Model size changes too. The noise vector has length about $\sigma C\sqrt p/B$, growing with the number of weights $p$, while the clipped signal cannot exceed $C$. So the best private model is often smaller than the best non-private one, unless pretraining on public data has already done most of the work ([Public data and private fine-tuning](06-public-data.md)).
+**Architecture choices change under privacy.** The running example uses tanh units, and that is deliberate. Papernot, Thakurta, Song, Chien & Erlingsson (2021) find that bounded activations such as tanh train better than ReLU under DP-SGD. With the same privacy guarantee, $(2.93, 10^{-5})$ on the handwritten digits of MNIST, their tanh network reaches 98.1% test accuracy against 96.6% for ReLU. On the CIFAR-10 images at $(7.53, 10^{-5})$ it reaches 66.2% against 61.6%. Model size changes too. The noise vector has length about $\sigma C\sqrt d/B$, growing with the number of parameters $d$, while the clipped signal cannot exceed $C$. So the best private model is often smaller than the best non-private one, unless pretraining on public data has already done most of the work ([Public data and private fine-tuning](06-public-data.md)).
 
 **What the papers report.** Larger models can still win when the other knobs scale with them. De, Berrada, Hayes, Smith & Balle (2022) train a 40-layer wide residual network from scratch on CIFAR-10 to 81.4% test accuracy at $(8, 10^{-5})$, with very large batches and small clipping norms, the two practices that @sec-dpsgd-clipping and @sec-dpsgd-batch explain, among several others. These numbers come from the papers, not from this chapter's script.
 
@@ -401,18 +401,18 @@ Later chapters import its model and accountant: `make_task()`, `train_dpsgd(rng,
 
 ## Cheat sheet
 
-$n$ records, $p$ weights, clipping norm $C$, noise multiplier $\sigma$, sampling rate $q$, expected batch $B = qn$, $T$ steps, step size $\eta$, add/remove neighbours. @tbl-dpsgd-cheat collects the results.
+$n$ records, $d$ parameters, clipping norm $C$, noise multiplier $\sigma$, sampling rate $q$, expected batch $B = qn$, $T$ steps, learning rate $\eta$, add/remove neighbours. @tbl-dpsgd-cheat collects the results.
 
 | Result | Formula | Conditions |
 | --- | --- | --- |
-| Update | $w_{t+1} = w_t - \frac\eta B\big(\sum_{i\in S_t}g_i\min(1, \frac C{\|g_i\|}) + \mathcal N(0, \sigma^2C^2I)\big)$ | Poisson batches, per-example clipping |
+| Update | $\theta_{t+1} = \theta_t - \frac\eta B\big(\sum_{i\in S_t}g_i\min(1, \frac C{\|g_i\|}) + \mathcal N(0, \sigma^2C^2I)\big)$ | Poisson batches, per-example clipping |
 | Privacy | RDP $T\varepsilon_{q,\sigma}(\alpha)$, converted by @eq-dpsgd-convert | Fixed $C$, public $B$, no batch statistics |
 | Running example | $\varepsilon = 6.71$ at $\delta = 10^{-5}$ | $q = 0.01$, $\sigma = 1$, $T = 10{,}000$ |
 | Expected update | $\frac1n\sum_i\min(1, C/\|g_i\|)g_i$ | Divide by $B$, not $|S_t|$ |
-| Noise | $\sigma C/B$ per coordinate, length about $\sigma C\sqrt p/B$ | — |
+| Noise | $\sigma C/B$ per coordinate, length about $\sigma C\sqrt d/B$ | — |
 | Scale invariance | Depends on $\eta C$ only | Every gradient clipped |
 | Batch size | $\sigma \propto \sqrt q$, noise $\propto 1/\sqrt B$ | Fixed $\varepsilon$ and epochs, small $q$, $\sigma \gtrsim 1$ |
-| Ghost norms | $\|\delta_ia_i^\top\|_F = \|\delta_i\|\|a_i\|$; sequences: $\langle AA^\top, \Delta\Delta^\top\rangle$ | Dense layers |
+| Ghost norms | $\|v_ia_i^\top\|_F = \|v_i\|\|a_i\|$; sequences: $\langle AA^\top, VV^\top\rangle$ | Dense layers |
 | Microbatches of $m$ | Sensitivity $2C$; noise per coordinate $2m\sigma C/B$ at the same $\varepsilon$ | Groups fixed in advance, add/remove |
 | Signal against noise | Signal overtakes noise after about $(\text{noise length}/\text{signal length})^2$ steps | Signal roughly constant in direction |
 
@@ -422,7 +422,7 @@ $n$ records, $p$ weights, clipping norm $C$, noise multiplier $\sigma$, sampling
 
 - Only $\sigma$, $q$ and $T$ set $\varepsilon$. $C$ and $\eta$ are free for accuracy.
 - Clip small, tune $\eta C$. Below the typical gradient norm, the clipping norm stops mattering.
-- Prefer large batches at a fixed number of epochs; scale the step size up with them.
+- Prefer large batches at a fixed number of epochs; scale the learning rate up with them.
 - Check the implementation against @sec-dpsgd-algorithm: Poisson sampling, per-example gradients, no batch statistics, a public denominator, a fixed $C$.
 - Speed up per-example clipping by vectorizing or by ghost norms, not by microbatches, which multiply the noise by $2m$.
 - Expect accuracy to be close to non-private at large $\varepsilon$ and to collapse below some threshold; locate that threshold for your task before promising a budget.

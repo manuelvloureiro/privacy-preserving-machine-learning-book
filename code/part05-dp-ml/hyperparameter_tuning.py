@@ -662,8 +662,8 @@ def plot_overhead() -> Figure:
         ("composition (fixed number)", "black", "o"),
         ("Poisson", "tab:blue", "s"),
         ("geometric", "tab:orange", "^"),
-        (r"negative binomial, $\eta = 0.5$", "tab:purple", "v"),
-        (r"logarithmic ($\eta = 0$)", "tab:green", "D"),
+        (r"negative binomial, $\nu = 0.5$", "tab:purple", "v"),
+        (r"logarithmic ($\nu = 0$)", "tab:green", "D"),
     )
     curves = [
         [epsilon_from_rdp(tuned_rdp(base, s), DELTA)[0] for m in means for s in [_strategies_for(m)[i]]]
@@ -726,13 +726,13 @@ def plot_accuracy(rng: np.random.Generator, at_table: TuningResult) -> Figure:
                 )
             continue
         color, marker = styles[name]
-        ax.plot(totals, accs, color=color, marker=marker, label=name)
+        ax.plot(totals, accs, color=color, marker=marker, label=name.replace("step size", "learning rate"))
     ax.set_xscale("log")
     ticks = [1, 2, 4, 8]
     ax.set_xticks(ticks, [f"{t:g}" for t in ticks])
     ax.set_xlabel(r"total $\varepsilon$ at $\delta = 10^{-5}$ (log scale)")
     ax.set_ylabel("test accuracy of the released model")
-    ax.set_title("Tuning the step size of the running example (1,000 steps per run)")
+    ax.set_title("Tuning the learning rate of the running example (1,000 steps per run)")
     ax.legend(fontsize=7.5, loc="lower right")
     return fig
 

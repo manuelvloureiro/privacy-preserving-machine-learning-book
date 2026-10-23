@@ -2,9 +2,9 @@
 
 ## Why this matters
 
-Nearly every deep-learning system that satisfies differential privacy (DP) runs one algorithm. It is stochastic gradient descent (SGD) with each example's gradient clipped to a fixed length and Gaussian noise added at every step, called DP-SGD (Abadi et al. 2016). Clipping limits how far one record moves each step, whatever the model, and the noise hides that move ([Private empirical risk minimization](01-dp-erm.md)). An **accountant** then adds up the cost of every step into one privacy level, the $\varepsilon$ of the guarantee. It comes with $\delta$, a small additive slack that the guarantee allows on top of $\varepsilon$.
+Nearly every deep-learning system that satisfies differential privacy (DP) runs one algorithm. It is stochastic gradient descent (SGD) with each record's gradient clipped to a fixed length and Gaussian noise added at every step, called DP-SGD (Abadi et al. 2016). Clipping limits how far one record moves each step, whatever the model, and the noise hides that move ([Private empirical risk minimization](01-dp-erm.md)). An **accountant** then adds up the cost of every step into one privacy level, the $\varepsilon$ of the guarantee. It comes with $\delta$, a small additive slack that the guarantee allows on top of $\varepsilon$.
 
-The accountant sees only the noise, the sampling rate (the chance that a record joins a batch) and the number of steps, never the model. So those three decide $\varepsilon$, and the clipping norm and the step size are free to be tuned for accuracy. Most failures come from code that breaks an assumption of the privacy proof, so the checks matter as much as the settings. [Train a model with DP-SGD](13-train-dp-sgd.md) does the whole job in Opacus.
+The accountant sees only the noise, the sampling rate (the chance that a record joins a batch) and the number of steps, never the model. So those three decide $\varepsilon$, and the clipping norm and the learning rate are free to be tuned for accuracy. Most failures come from code that breaks an assumption of the privacy proof, so the checks matter as much as the settings. [Train a model with DP-SGD](13-train-dp-sgd.md) does the whole job in Opacus.
 
 ## The algorithm and its guarantee {#sec-dpsgd-algorithm}
 
@@ -14,10 +14,10 @@ A training set holds $n$ records. The gradient of one record's loss is its **per
 2. Compute the per-example gradient of each record in the batch.
 3. Clip each gradient longer than the **clipping norm** $C$ to length $C$.
 4. Sum the clipped gradients, and add Gaussian noise with standard deviation $\sigma C$ to each coordinate of the sum, where the **noise multiplier** $\sigma$ measures the noise in units of $C$.
-5. Divide the noisy sum by the expected batch size $B = qn$, a fixed public number, and take a step of size $\eta$ in the opposite direction.
+5. Divide the noisy sum by the expected batch size $B = qn$, a fixed public number, and take a step in the opposite direction, scaled by the **learning rate** $\eta$.
 
-Write $w_t$ for the weights at step $t$ and $S_t$ for its batch. The Gaussian noise $\xi_t$ is drawn afresh, independently on each coordinate, and the update is
-$$w_{t+1} = w_t - \frac{\eta}{B}\Big(\sum_{i\in S_t}g_i\min\Big(1, \frac{C}{\|g_i\|}\Big) + \xi_t\Big), \qquad \xi_t \sim \mathcal N(0, \sigma^2C^2I).$$
+Write $\theta_t$ for the weights at step $t$ and $S_t$ for its batch. The Gaussian noise $\xi_t$ is drawn afresh, independently on each coordinate, and the update is
+$$\theta_{t+1} = \theta_t - \frac{\eta}{B}\Big(\sum_{i\in S_t}g_i\min\Big(1, \frac{C}{\|g_i\|}\Big) + \xi_t\Big), \qquad \xi_t \sim \mathcal N(0, \sigma^2C^2I).$$
 Releasing every intermediate set of weights then satisfies $(\varepsilon, \delta)$-DP for **add/remove neighbours**, datasets that differ because one has a record the other lacks ([Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md)).
 
 This part's running example trains a small network on 10,000 synthetic records (@sec-dpsgd-run). It runs 10,000 steps with $\sigma = 1$, and each record joins a batch with probability 0.01. The Rényi differential privacy (RDP) accountant, a standard upper bound that is slightly loose, gives it $\varepsilon = 6.71$ at $\delta = 10^{-5}$. To pick $\sigma$ for a target $\varepsilon$ instead, let the accountant you will report solve for it. [Train a model with DP-SGD](13-train-dp-sgd.md#sec-trainwf-calibrate) does this in one Opacus call ([Calibrate and account a DP-SGD run](../part04-privacy-accounting/10-calibrate-dp-sgd.md)).
@@ -28,7 +28,7 @@ Choose $\delta$ by the book's default, $\delta \le 1/n^{1.1}$ rounded down to a 
 
 The guarantee rests on four properties of your code, and code that breaks one still trains and reports as before.
 
-First, one record must move the clipped sum by at most $C$. Batch normalization breaks this, because its statistics let one record change every other record's gradient. So private models use group or layer normalization, which normalize each example on its own. With `strict=False`, Opacus's validator lists the layers to replace instead of raising an error.
+First, one record must move the clipped sum by at most $C$. Batch normalization breaks this, because its statistics let one record change every other record's gradient. So private models use group or layer normalization, which normalize each record on its own. With `strict=False`, Opacus's validator lists the layers to replace instead of raising an error.
 
 ```python
 from opacus.validators import ModuleValidator
@@ -52,13 +52,13 @@ Fourth, the accountant must count every step that touched the data, including th
 
 Beyond the proof, state the neighbouring relation next to every $\varepsilon$, and make data-dependent preprocessing private too. The guarantee covers one record, so a person with many records needs [user-level privacy](07-user-level.md). And the proof assumes exact Gaussian noise, which ordinary floating-point sampling does not produce, so turn on Opacus's `secure_mode=True` for a model you release ([Discrete and floating-point-safe mechanisms](../part03-dp-foundations/08-discrete-mechanisms.md)).
 
-## Clipping and the step size {#sec-dpsgd-clipping}
+## Clipping and the learning rate {#sec-dpsgd-clipping}
 
-Clipping must happen per example. PyTorch's `torch.nn.utils.clip_grad_norm_` clips the gradient of a whole batch, which bounds nothing about any single example, so it gives no privacy at any threshold.
+Clipping must happen per record. PyTorch's `torch.nn.utils.clip_grad_norm_` clips the gradient of a whole batch, which bounds nothing about any single record, so it gives no privacy at any threshold.
 
-The clipping norm does not change $\varepsilon$, but it sets the two ways clipping costs accuracy. A small $C$ clips more gradients, so records with large gradients count for less, and they are often rare examples ([Disparate impact](08-disparate-impact.md)). A large $C$ instead means more noise, since the noise is $\sigma C$. When every gradient is clipped, each has length exactly $C$, and the noise is proportional to $C$ too. So only the product $\eta C$ of the step size and the clipping norm matters. The practical recipe is to clip hard and tune that one number. On the running example at $\sigma = 1$, holding $\eta C$ at 0.25 keeps test accuracy at 0.9599 or above for every $C$ up to 0.3. With the step size held at 0.5 instead, $C = 10$ drops it to 0.8347.
+The clipping norm does not change $\varepsilon$, but it sets the two ways clipping costs accuracy. A small $C$ clips more gradients, so records with large gradients count for less, and they are often rare records ([Disparate impact](08-disparate-impact.md)). A large $C$ instead means more noise, since the noise is $\sigma C$. When every gradient is clipped, each has length exactly $C$, and the noise is proportional to $C$ too. So only the product $\eta C$ of the learning rate and the clipping norm matters. The practical recipe is to clip hard and tune that one number. On the running example at $\sigma = 1$, holding $\eta C$ at 0.25 keeps test accuracy at 0.9599 or above for every $C$ up to 0.3. With the learning rate held at 0.5 instead, $C = 10$ drops it to 0.8347.
 
-Noise also changes the best step size. On the logistic problem of [Optimization](../part01-prerequisites/06-optimization.md), adding noise moves the best step on a grid down from 0.178 to 0.056. Clipping pulls the other way, because clipped gradients are shorter, which is why private runs often start from a step several times the non-private one. The two effects do not cancel predictably. So search the step again whenever $\sigma$ or $C$ changes, and count the search's runs in $\varepsilon$.
+Noise also changes the best learning rate. On the logistic problem of [Optimization](../part01-prerequisites/06-optimization.md), adding noise moves the best learning rate on a grid down from 0.178 to 0.056. Clipping pulls the other way, because clipped gradients are shorter, which is why private runs often start from a step several times the non-private one. The two effects do not cancel predictably. So search the step again whenever $\sigma$ or $C$ changes, and count the search's runs in $\varepsilon$.
 
 Gradient norms also drift. The running example's median per-example norm falls from 3.592 to 0.006 in a thousand steps, so a $C$ that clips everything early clips only a minority later. Adaptive clipping is the private estimate that the checklist allows, since it moves $C$ toward a quantile of the norms measured by a small private count. Opacus offers it with `clipping="adaptive"`, but this is not a drop-in switch. It takes five more parameters, such as `target_unclipped_quantile`, the share of gradients to leave unclipped. And because part of the noise budget goes to the count, the gradient gets more noise at the same $\sigma$.
 
@@ -68,11 +68,11 @@ Averaging the noisy sum over $B$ records divides the added noise by $B$, so larg
 $$\sigma \propto \sqrt{\frac Bn}, \qquad \frac{\sigma C}{B} \propto \frac{C}{\sqrt{Bn}}.$$ {#eq-dpsgd-batch}
 Small batches are worse still, because they need a noise multiplier near or below 1, where subsampling saves much less.
 
-So choose the largest batch your hardware allows, with a larger step size for the fewer steps. When the batch does not fit in memory, Opacus's `BatchMemoryManager` splits the logical batch, the one the sampler draws, into physical batches that fit. It still steps once per logical batch, so the sampling rate and the accounting stay the same.
+So choose the largest batch your hardware allows, with a larger learning rate for the fewer steps. When the batch does not fit in memory, Opacus's `BatchMemoryManager` splits the logical batch, the one the sampler draws, into physical batches that fit. It still steps once per logical batch, so the sampling rate and the accounting stay the same.
 
 ## Making it fast {#sec-dpsgd-ghost}
 
-Computed one record at a time, DP-SGD can run tens or hundreds of times slower than ordinary training. Of three fixes, the first two are free. Vectorized per-example gradients, from `torch.func.vmap` or Opacus's hooks, compute the same clipped sum in parallel. **Ghost clipping** also saves memory, because it gets each example's gradient norm from each layer's inputs and back-propagated errors without forming the gradient. Opacus turns it on with `grad_sample_mode="ghost"`, and `make_private` then also returns a loss function to train with.
+Computed one record at a time, DP-SGD can run tens or hundreds of times slower than ordinary training. Of three fixes, the first two are free. Vectorized per-example gradients, from `torch.func.vmap` or Opacus's hooks, compute the same clipped sum in parallel. **Ghost clipping** also saves memory, because it gets each record's gradient norm from each layer's inputs and back-propagated errors without forming the gradient. Opacus turns it on with `grad_sample_mode="ghost"`, and `make_private` then also returns a loss function to train with.
 
 Microbatching is the costly fix. It clips the average gradient of each fixed group of $m$ records instead of each record's gradient. One record can then change its group's clipped average by up to $2C$, so the noise must double. And since the update divides it by the $B/m$ groups rather than by $B$ records, the noise on each coordinate of the averaged update becomes
 $$2m\cdot\frac{\sigma C}{B}.$$ {#eq-dpsgd-microbatch}
@@ -103,8 +103,8 @@ Clipping without noise scores slightly above non-private SGD here, so the whole 
 | Batch size | 256 to 4,096, as large as fits | Noise on the average is $\sigma C/B$ |
 | Epochs | Fixed before calibrating; Adult uses 10 | $\sigma$ recomputed if they change |
 | Noise multiplier | From the accountant you report | A second accountant gives the same $\varepsilon$ |
-| Clipping norm | 1, or the median norm on public data | Per example, never `clip_grad_norm_` |
-| Optimizer, step size | SGD with momentum 0.9; several times the non-private step (ten on Adult), chosen on public data | Retuned when $\sigma$ or $C$ changes |
+| Clipping norm | 1, or the median norm on public data | Per record, never `clip_grad_norm_` |
+| Optimizer, learning rate | SGD with momentum 0.9; several times the non-private learning rate (ten on Adult), chosen on public data | Retuned when $\sigma$ or $C$ changes |
 | Sampler | Poisson | Fixed-size batches: account at $\sigma/2$ (add/remove only) |
 | Report | $\varepsilon$, $\delta$, neighbours, accountant | Every run counted |
 
@@ -112,7 +112,7 @@ Clipping without noise scores slightly above non-private SGD here, so the whole 
 
 **Rules of thumb**
 
-- Fix $\varepsilon$, $\delta$ and the number of epochs first, since they are the contract. Then choose the batch, let the accountant set $\sigma$, and tune the step size last.
+- Fix $\varepsilon$, $\delta$ and the number of epochs first, since they are the contract. Then choose the batch, let the accountant set $\sigma$, and tune the learning rate last.
 - Find the $\varepsilon$ below which accuracy collapses on your task before you promise a budget.
 
 ## Further reading

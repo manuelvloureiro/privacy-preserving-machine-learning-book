@@ -495,7 +495,7 @@ def plot_eps_vs_k(q: float = Q_RUN, sigma: float = SIGMA_RUN, delta: float = DEL
     ax.set(
         xscale="log",
         yscale="log",
-        xlabel=r"number of steps $k$",
+        xlabel=r"number of steps $T$",
         ylabel=r"$\varepsilon$ at $\delta = 10^{-5}$",
         title=rf"DP-SGD, $q = {q:g}$, $\sigma = {sigma:g}$",
     )
@@ -512,7 +512,7 @@ def plot_eps_vs_k(q: float = Q_RUN, sigma: float = SIGMA_RUN, delta: float = DEL
     ax_r.set(
         xscale="log",
         ylim=(0, 7.5),
-        xlabel=r"number of steps $k$",
+        xlabel=r"number of steps $T$",
         ylabel=r"$\varepsilon$ / PLD upper bound",
         title="Ratio to the certified upper bound",
     )
@@ -545,7 +545,7 @@ def plot_noise_ratio(q: float = Q_RUN, steps: int = 10_000, delta: float = DELTA
         xlim=(0.85, 1.3),
         ylim=(-0.6, 4.6),
         xlabel=r"$\sigma$ required / $\sigma$ required by the PLD upper bound",
-        title=rf"Noise for a target $\varepsilon$ at $\delta = 10^{{-5}}$, $k = {steps:,}$, $q = {q:g}$",
+        title=rf"Noise for a target $\varepsilon$ at $\delta = 10^{{-5}}$, $T = {steps:,}$, $q = {q:g}$",
     )
     ax.legend(fontsize=8, frameon=False, loc="upper right")
     return fig

@@ -8,14 +8,14 @@ The answers are quantitative. Exact statistics give the data away, as a census e
 
 A census collects **microdata**, one record per person with fields such as age, sex and race, and publishes tables of aggregates for each small area, such as a city block. The tables give counts, medians and means for groups of residents. Cells about fewer than three people are suppressed, but suppression alone does not protect anyone, because tables overlap. Suppose a block has four residents of some group, and three of them are women. Then the group has exactly one man, and a published median age for the group's men would be his age.
 
-Every published number is a constraint on the unknown microdata, and enough constraints leave only one possibility. The next example applies a single statistic.
+Every published number is a constraint on the unknown microdata, and enough constraints leave only one possibility. The next example counts how many age combinations remain possible for three people after one line of a census table, which gives only their median and mean ages.
 
 ::: {#exm-rec-ages name="One line of a census table"}
-A block's table says that it has three men, with median age $35$ and mean age $47$. Call the youngest man's age $A$, the middle one's $B$ and the oldest one's $C$, so that $A \le B \le C$. Ages are whole numbers between $0$ and $125$.
+A block's table says that it has three men, with median age $35$ and mean age $47$. Call the youngest man's age $u_1$, the middle one's $u_2$ and the oldest one's $u_3$, so that $u_1 \le u_2 \le u_3$. Ages are whole numbers between $0$ and $125$.
 
 1. Without the statistics, the number of such triples is the number of multisets of size $3$ from $126$ values, $\binom{128}{3} = 341{,}376$.
-2. The median of three numbers is the middle one, so $B = 35$. Then $A$ has $36$ values and $C$ has $91$, which leaves $36 \times 91 = 3{,}276$ triples.
-3. The mean gives $A + B + C = 141$, so $C = 106 - A$. Each $A$ from $0$ to $35$ gives a $C$ between $71$ and $106$, and every such $C$ lies between $B$ and $125$. So exactly $36$ triples remain, from $(0, 35, 106)$ to $(35, 35, 71)$.
+2. The median of three numbers is the middle one, so $u_2 = 35$. Then $u_1$ has $36$ values and $u_3$ has $91$, which leaves $36 \times 91 = 3{,}276$ triples.
+3. The mean gives $u_1 + u_2 + u_3 = 141$, so $u_3 = 106 - u_1$. Each $u_1$ from $0$ to $35$ gives a $u_3$ between $71$ and $106$, and every such $u_3$ lies between $u_2$ and $125$. So exactly $36$ triples remain, from $(0, 35, 106)$ to $(35, 35, 71)$.
 :::
 
 One line of the table has cut the possibilities by a factor of almost $10{,}000$. The other lines, about the same people grouped differently, add further constraints. A reconstruction attack writes all of them down and searches for microdata that satisfies every one. This search is an integer program, which is hard to solve in the worst case. In practice, though, solvers for integer programs and for Boolean satisfiability handle such instances quickly. For a fictional block of seven people, Garfinkel, Abowd and Martindale found that the constraints of its full table have exactly one solution, which a solver finds in a fraction of a second.
@@ -24,44 +24,50 @@ The attack scales. The United States Census Bureau ran it on its own published t
 
 ## Subset queries and blatant non-privacy {#sec-rec-model}
 
-To analyse such attacks, strip the setting to its core. There are $n$ people. Each has public identifying attributes, such as a name and a postal code, and one secret bit, such as whether they have a disease. The secret bits form the vector $d = (d_1, \dots, d_n) \in \{0,1\}^n$. An analyst may ask how many of the people who satisfy a condition on the identifiers have secret bit $1$. A condition such as "the name is Alice, Bob or Eve" can single out any set of people. So a query is a subset $S \subseteq [n] = \{1, \dots, n\}$, which we identify with its indicator vector $S \in \{0,1\}^n$.
+To analyse such attacks, strip the setting to its core. There are $n$ people. Each has public identifying attributes, such as a name and a postal code, and one secret bit, such as whether they have a disease. The secret bits form the vector $d = (d_1, \dots, d_n) \in \{0,1\}^n$. An analyst may ask how many of the people who satisfy a condition on the identifiers have secret bit $1$. A condition such as "the name is Alice, Bob or Eve" can single out any set of people. So a query is a subset $S \subseteq [n] = \{1, \dots, n\}$, which we identify with its indicator vector $S \in \{0,1\}^n$. Its entry $i$ is $1$ when person $i$ is in the set and $0$ otherwise.
+
+A curator holds the secret bits and answers such queries. The definition assumes only one thing about it, a bound $E$ on how far each answer may be from the truth.
 
 ::: {#def-rec-curator name="Subset queries and a curator with error $E$"}
-The true answer to a **subset query** $S \in \{0,1\}^n$ is
+Let $d \in \{0,1\}^n$ be the vector of secret bits. The true answer to a **subset query** $S \in \{0,1\}^n$ is the number of people in $S$ whose bit is $1$,
 
 $$
-a(S) = \sum_{i \in S} d_i = \langle S, d \rangle .
+a(S) = \sum_{i \in S} d_i = \langle S, d \rangle ,
 $$
+
+where $\langle S, d \rangle = \sum_i S_i d_i$ is the inner product of the indicator vector $S$ with $d$.
 
 A **curator with error $E$** answers each query $S$ with a response $r(S)$, a number within $E$ of the truth, $|r(S) - a(S)| \le E$. Within that bound, the curator may choose its answers in any way, depending on $d$ and on all the queries.
 :::
 
 The error is not assumed to be random. The curator may pick the most misleading answer within the allowed range, so every attack below works against random noise too. Some error is needed, since for each person $i$ the exact answer to the query $S = \{i\}$ is that person's secret bit.
 
-To measure how much an attacker learns, count the bits it gets wrong. The **Hamming distance** between $c, d \in \{0,1\}^n$ is $\operatorname{dist}(c, d) = |\{i : c_i \ne d_i\}|$.
+To measure how much an attacker learns, count the bits it gets wrong. The attacker outputs a guess $c \in \{0,1\}^n$ of the secret vector $d$. The **Hamming distance** $\operatorname{dist}(c, d) = |\{i : c_i \ne d_i\}|$ is the number of positions where the guess is wrong.
+
+The next definition names the clearest possible failure of privacy. Some attacker gets all but a vanishing fraction of the bits right, for every secret vector, except with a vanishing probability.
 
 ::: {#def-rec-blatant name="Blatant non-privacy"}
-Consider a family of curators, one for each number of people $n$. The family is **blatantly non-private** if there is an attacker that interacts with the curator and outputs $c \in \{0,1\}^n$, together with functions $g$ and $\beta$ with $g(n)/n \to 0$ and $\beta(n) \to 0$, such that for every $n$ and every $d \in \{0,1\}^n$,
+Consider a family of curators, one for each number of people $n$. The family is **blatantly non-private** if three things exist. The first is an attacker that interacts with the curator and outputs a guess $c \in \{0,1\}^n$. The second is a bound $g(n)$ on the number of wrong bits, with $g(n)/n \to 0$. The third is a failure probability $\beta(n)$, with $\beta(n) \to 0$. They must satisfy, for every $n$ and every secret vector $d \in \{0,1\}^n$,
 
 $$
 \Pr\left[\operatorname{dist}(c, d) \le g(n)\right] \ge 1 - \beta(n).
 $$
 :::
 
-An attacker that gets all but $o(n)$ bits right has learned the secret of almost everyone. Whatever privacy means, this is a violation of it.
+An attacker that gets all but a vanishing fraction of the bits right, written $o(n)$ wrong bits, has learned the secret of almost everyone. Whatever privacy means, this is a violation of it.
 
 ## Asking every query {#sec-rec-exponential}
 
 The first attack ignores cost. It asks all $2^n$ subset queries and then outputs any candidate that agrees with every answer.
 
 ::: {#thm-rec-exponential name="Reconstruction from all subset queries"}
-Let $E \ge 0$, and let a curator with error $E$ answer all $2^n$ subset queries. An attacker that outputs any $c \in \{0,1\}^n$ satisfying
+Let $E \ge 0$, and let a curator with error $E$ answer all $2^n$ subset queries, giving the answer $r(S)$ to the query $S$. An attacker that outputs any $c \in \{0,1\}^n$ satisfying
 
 $$
 \left|\langle S, c \rangle - r(S)\right| \le E \quad \text{for every } S \subseteq [n]
 $$ {#eq-rec-consistent}
 
-finds such a $c$, and every such $c$ has $\operatorname{dist}(c, d) \le 4E$.
+finds such a $c$, and every such $c$ differs from the secret vector $d$ in at most $4E$ positions, $\operatorname{dist}(c, d) \le 4E$.
 :::
 
 ::: {.proof}
@@ -71,7 +77,7 @@ finds such a $c$, and every such $c$ has $\operatorname{dist}(c, d) \le 4E$.
 4. The sets $I_0$ and $I_1$ partition $[n]$, so $\operatorname{dist}(c, d) \le 4E$.
 :::
 
-The attacker does not know $I_0$ and $I_1$, which is why it asks every query. The bound is already strong for large errors.
+The attacker does not know $I_0$ and $I_1$, which is why it asks every query. The bound is already strong for large errors, and with errors that are a vanishing fraction of $n$ it meets @def-rec-blatant.
 
 ::: {#cor-rec-exponential}
 If $E = n/401$, the attacker of @thm-rec-exponential recovers more than 99% of the bits. If $E = E(n)$ with $E(n)/n \to 0$, the curator is blatantly non-private, with $g(n) = 4E(n)$ and $\beta(n) = 0$.
@@ -103,7 +109,7 @@ The second attack asks about $n$ queries, each a uniformly random subset of the 
 The idea is to fix a wrong candidate $c$ and show that a random query is likely to expose it. If $c$ differs from $d$ in $k$ positions, the answers $\langle S, c \rangle$ and $\langle S, d \rangle$ differ by a sum of about $k/2$ random signs, which is typically of size $\sqrt k$. A curator with error $E$ can hide a difference of at most $2E$. So when $\sqrt k$ is much larger than $E$, a random query rules $c$ out with constant probability. To make "typically" precise, we need a lower bound on the size of a random sum, the opposite of a concentration inequality.
 
 ::: {#lem-rec-anticoncentration name="A random subset sees a fixed vector"}
-Let $w \in \mathbb R^n$, and let $S$ be a uniformly random subset of $[n]$, so that each $i$ is in $S$ independently with probability $1/2$. Then
+Let $w \in \mathbb R^n$, with Euclidean length $\|w\|_2 = (\sum_i w_i^2)^{1/2}$. Let $S$ be a uniformly random subset of $[n]$, so that each $i$ is in $S$ independently with probability $1/2$. Then the sum $\langle S, w\rangle$ of the entries of $w$ in $S$ satisfies
 
 $$
 \Pr\left[\,|\langle S, w \rangle| \ge \tfrac14 \|w\|_2\,\right] \ge \frac{3}{32}.
@@ -111,22 +117,22 @@ $$
 :::
 
 ::: {.proof}
-1. If $w = 0$ the event always holds, so let $w \ne 0$. Write $S_i = (1 + \sigma_i)/2$, where the signs $\sigma_i \in \{-1, +1\}$ are independent and uniform. Then $\langle S, w\rangle = \tfrac12(a + Z)$, with the constant $a = \sum_i w_i$ and the random sum $Z = \sum_i \sigma_i w_i$.
-2. *Moments of $Z$.* Expand the powers and use independence. A product of the $\sigma_i$ has mean $0$ unless each index appears an even number of times. So $\mathbb E[Z^2] = \sum_i w_i^2 = \|w\|_2^2$, and
+1. If $w = 0$ the event always holds, so let $w \ne 0$. Write $S_i = (1 + \xi_i)/2$, where the signs $\xi_i \in \{-1, +1\}$ are independent and uniform. Then $\langle S, w\rangle = \tfrac12(a + Z)$, with the constant $a = \sum_i w_i$ and the random sum $Z = \sum_i \xi_i w_i$.
+2. *Moments of $Z$.* Expand the powers and use independence. A product of the $\xi_i$ has mean $0$ unless each index appears an even number of times. So $\mathbb E[Z^2] = \sum_i w_i^2 = \|w\|_2^2$, and
 
 $$
 \mathbb E[Z^4] = \sum_i w_i^4 + 3\sum_{i \ne j} w_i^2 w_j^2 = 3\|w\|_2^4 - 2\sum_i w_i^4 \le 3\|w\|_2^4 .
 $$
 
-3. *Paley–Zygmund inequality.* Let $Y \ge 0$ have $\mathbb E[Y] > 0$, and let $\theta \in [0,1]$. Split $\mathbb E[Y]$ according to whether $Y > \theta\,\mathbb E[Y]$, and apply the Cauchy–Schwarz inequality to the second part:
+3. *Paley–Zygmund inequality.* Let $Y \ge 0$ have $\mathbb E[Y] > 0$, and let $s \in [0,1]$. Split $\mathbb E[Y]$ according to whether $Y > s\,\mathbb E[Y]$, and apply the Cauchy–Schwarz inequality to the second part:
 
 $$
-\mathbb E[Y] \le \theta\,\mathbb E[Y] + \mathbb E\left[Y \mathbf 1\{Y > \theta\,\mathbb E[Y]\}\right] \le \theta\,\mathbb E[Y] + \sqrt{\mathbb E[Y^2]\,\Pr[Y > \theta\,\mathbb E[Y]]}.
+\mathbb E[Y] \le s\,\mathbb E[Y] + \mathbb E\left[Y \mathbf 1[Y > s\,\mathbb E[Y]]\right] \le s\,\mathbb E[Y] + \sqrt{\mathbb E[Y^2]\,\Pr[Y > s\,\mathbb E[Y]]}.
 $$
 
-Rearranging gives $\Pr[Y > \theta\,\mathbb E[Y]] \ge (1-\theta)^2\,\mathbb E[Y]^2/\mathbb E[Y^2]$.
+Rearranging gives $\Pr[Y > s\,\mathbb E[Y]] \ge (1-s)^2\,\mathbb E[Y]^2/\mathbb E[Y^2]$.
 
-4. Apply step 3 to $Y = Z^2$ with $\theta = 1/4$, using step 2. The event $|Z| > \|w\|_2/2$ has probability at least $(3/4)^2/3 = 3/16$.
+4. Apply step 3 to $Y = Z^2$ with $s = 1/4$, using step 2. The event $|Z| > \|w\|_2/2$ has probability at least $(3/4)^2/3 = 3/16$.
 5. *Removing the constant $a$.* For every $z$, $|a + z| + |a - z| \ge 2|z|$, so $|a + Z| \ge |Z|$ or $|a - Z| \ge |Z|$. Flipping all signs maps $Z$ to $-Z$ and preserves the distribution and the event of step 4. Hence the events $\{|Z| > \|w\|_2/2,\ |a+Z| \ge |Z|\}$ and $\{|Z| > \|w\|_2/2,\ |a-Z| \ge |Z|\}$ have the same probability. Together they cover the event of step 4, so each has probability at least $3/32$.
 6. On the first of these events, $|\langle S, w\rangle| = \tfrac12|a + Z| \ge \tfrac12|Z| > \tfrac14\|w\|_2$.
 :::
@@ -197,7 +203,7 @@ For $1 \le E \le n$, the factor $\ln(2K+1)$ is at most $\ln(n+3)$, so the attack
 A sharper analysis removes the logarithm. It bounds the smallest singular value of the random query matrix, which shows directly that every fractional $z$ with small answers on all $m$ queries is short. Then $O(n)$ queries suffice for the linear program too (Dwork and Roth, 2014, Section 8.1). A linear program that minimizes the total error instead of bounding each error even tolerates a constant fraction of answers with arbitrary error (Dwork, McSherry and Talwar, 2007). That proof needs bounds on random matrices that this book does not develop. The simpler, inefficient version of the tolerance to arbitrary answers follows from the argument above.
 
 ::: {#prp-rec-robust name="Tolerating some arbitrary answers"}
-Let $E \ge 0$, $\beta \in (0,1)$, $\rho \in [0, 3/128)$, and
+Let $E \ge 0$, let $\beta \in (0,1)$ be a failure probability, let $\rho \in [0, 3/128)$ be the fraction of answers that may be arbitrary, and let
 
 $$
 m \ge \frac{2048}{9}\left(n\ln 2 + \ln\frac1\beta\right).
@@ -208,12 +214,12 @@ The attacker draws $m$ random subsets as in @thm-rec-random. The curator answers
 
 ::: {.proof}
 1. The true vector $d$ meets the condition, so a candidate exists.
-2. Fix $c$ with $\operatorname{dist}(c,d) > 64E^2$ and let $D_j = \mathbf 1\{|\langle S_j, c - d\rangle| > 2E\}$. As in step 2 of @thm-rec-random, the $D_j$ are independent with mean at least $3/32$. Hoeffding's inequality gives $\Pr\left[\sum_j D_j < 3m/64\right] \le \exp(-2m(3/64)^2) = e^{-9m/2048}$.
-3. A union bound over at most $2^n$ candidates shows that, with probability at least $1 - 2^n e^{-9m/2048} \ge 1-\beta$, every far candidate has $\sum_j D_j \ge 3m/64$.
-4. Suppose this holds, and let $c$ be an output. The queries where $c$ is consistent and those answered with error at most $E$ each number at least $(1-\rho)m$, so at least $(1-2\rho)m$ queries are of both kinds. On each of them, the triangle inequality gives $|\langle S_j, c - d\rangle| \le 2E$, so $D_j = 0$. Hence $\sum_j D_j \le 2\rho m < 3m/64$, and $c$ is not far.
+2. Fix $c$ with $\operatorname{dist}(c,d) > 64E^2$ and let $V_j = \mathbf 1[|\langle S_j, c - d\rangle| > 2E]$ indicate that query $j$ exposes $c$. As in step 2 of @thm-rec-random, the $V_j$ are independent with mean at least $3/32$. Hoeffding's inequality gives $\Pr\left[\sum_j V_j < 3m/64\right] \le \exp(-2m(3/64)^2) = e^{-9m/2048}$.
+3. A union bound over at most $2^n$ candidates shows that, with probability at least $1 - 2^n e^{-9m/2048} \ge 1-\beta$, every far candidate has $\sum_j V_j \ge 3m/64$.
+4. Suppose this holds, and let $c$ be an output. The queries where $c$ is consistent and those answered with error at most $E$ each number at least $(1-\rho)m$, so at least $(1-2\rho)m$ queries are of both kinds. On each of them, the triangle inequality gives $|\langle S_j, c - d\rangle| \le 2E$, so $V_j = 0$. Hence $\sum_j V_j \le 2\rho m < 3m/64$, and $c$ is not far.
 :::
 
-These attacks are nearly tight. The chapters on [approximate differential privacy](../part02-dp-basics/03-approximate-dp.md) and [advanced composition](../part02-dp-basics/04-advanced-composition.md) show that a curator can answer about $n$ subset queries with error of order $\sqrt n$, up to logarithmic factors and factors that depend on the privacy parameters, and still meet the definition of differential privacy. With $m$ queries, error of order $\sqrt m$ suffices. So the line between blatant non-privacy and a formal guarantee runs at error $\sqrt n$ for $n$ queries.
+These attacks are nearly tight. The chapters on [approximate differential privacy](../part02-dp-basics/03-approximate-dp.md) and [advanced composition](../part02-dp-basics/04-advanced-composition.md) show that a curator can answer about $n$ subset queries with error of order $\sqrt n$ and still meet the definition of differential privacy. The bound holds up to logarithmic factors and factors that depend on the privacy parameters. With $m$ queries, error of order $\sqrt m$ suffices. So the line between blatant non-privacy and a formal guarantee runs at error $\sqrt n$ for $n$ queries.
 
 ## Reconstruction in practice {#sec-rec-practice}
 
@@ -241,7 +247,7 @@ The theorems of this chapter do not apply to these queries as stated, because a 
 | @def-rec-blatant | an attacker recovers all but $o(n)$ secret bits with probability tending to $1$ |
 | @thm-rec-exponential | all $2^n$ queries with error $E$ reveal all but $4E$ bits |
 | @prp-rec-limit | error $E$ can hide $E/2$ bits from any attacker |
-| @lem-rec-anticoncentration | a random subset has $\lvert\langle S, w\rangle\rvert \ge \lVert w\rVert_2/4$ with probability at least $3/32$ |
+| @lem-rec-anticoncentration | a random subset has $\lvert\langle S, w\rangle\rvert \ge \|w\|_2/4$ with probability at least $3/32$ |
 | @thm-rec-random | $\frac{32}{3}(n\ln 2 + \ln\frac1\beta)$ random queries with error $E$ reveal all but $64E^2$ bits |
 | @thm-rec-lp | a linear program does the same in polynomial time with $O(n\log n)$ queries, all but $676E^2$ bits |
 | @prp-rec-robust | a fraction below $3/128$ of arbitrary answers does not stop the attack |

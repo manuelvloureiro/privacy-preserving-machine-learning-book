@@ -31,7 +31,7 @@ The script evaluates it in log space, so large orders do not overflow.
 
 ## Calibrating σ for many steps {#sec-sol-cdp-2}
 
-> **Exercise 2.** **Calibrating $\sigma$ for many steps.** Derive @eq-cdp-inverse. Then find the noise multiplier that makes $k = 100$ Gaussian steps $(1, 10^{-5})$-DP by the simple conversion, and the $\varepsilon$ that the improved conversion and the exact Gaussian profile give for that $\sigma$. *Check: $\sigma = 49.01$.* *(Optimizing over α, inverting a conversion)*
+> **Exercise 2.** **Calibrating $\sigma$ for many steps.** Derive @eq-cdp-inverse. Then find the noise multiplier that makes $k = 100$ Gaussian steps $(1, 10^{-5})$-DP by the simple conversion, and the $\varepsilon$ that the improved conversion and the exact Gaussian profile give for that $\sigma$. *Check: $\sigma = 49.01$.* *(Optimizing over $\alpha$, inverting a conversion)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Inversion.** The simple conversion @eq-cdp-simple is $\varepsilon = \rho + 2\sqrt{\rho\ell}$, increasing in $\rho$. Put $x = \sqrt\rho \ge 0$: $x^2 + 2\sqrt\ell\,x = \varepsilon$. Add $\ell$ to both sides: $(x + \sqrt\ell)^2 = \varepsilon + \ell$. So $x = \sqrt{\varepsilon + \ell} - \sqrt\ell$ (the other root is negative), and every $\rho \le x^2$ meets the target. That is @eq-cdp-inverse.
@@ -60,7 +60,7 @@ The Hölder exponents are $u = \frac{m\alpha - 1}{\alpha(m - 1)} = \frac32$ and 
 : The triangle-like inequality for $m = 2$, $\alpha = 2$, $P = \mathrm{Bern}(0.2)$, $Q = \mathrm{Bern}(0.8)$. {#tbl-sol-cdp-holder}
 
 3. **When equality holds.** Hölder's inequality $\mathbb E[XY] \le (\mathbb E X^u)^{1/u}(\mathbb E Y^v)^{1/v}$ is an equality when $X^u$ and $Y^v$ are proportional. Here $X = (P/R)^\alpha$ and $Y = (R/Q)^{\alpha - 1}$, ratios of the densities at an output drawn from $R$, so $X^u = (P/R)^3$ and $Y^v = (R/Q)^3$: equality needs $\ln(P/R) - \ln(R/Q)$ to be the same for every outcome. For Bernoulli distributions that means the log-odds of $R$ sit exactly halfway between those of $P$ and $Q$. The log-odds of $0.2$, $0.4$, $0.5$, $0.8$ are $-1.3863$, $-0.4055$, $0.0000$, $1.3863$, so $\mathrm{Bern}(0.5)$ is the midpoint and $\mathrm{Bern}(0.4)$ is not.
-4. **The link to the Gaussian.** A chain of Gaussians $\mathcal N(0, \sigma^2)$, $\mathcal N(1, \sigma^2)$, $\mathcal N(2, \sigma^2)$ has the same structure: both log-ratios are linear in $y$ with the same slope, so they differ by a constant. That is why group privacy $k^2\rho$ is exact for the Gaussian mechanism.
+4. **The link to the Gaussian.** A chain of Gaussians $\mathcal N(0, \sigma^2)$, $\mathcal N(1, \sigma^2)$, $\mathcal N(2, \sigma^2)$ has the same structure: both log-ratios are linear in $y$ with the same slope, so they differ by a constant. That is why group privacy $m^2\rho$ is exact for the Gaussian mechanism.
 
 *The inequality loses nothing when the middle dataset is "halfway" in the sense of the privacy loss. For the Gaussian mechanism every chain of neighbours is like that.*
 :::
@@ -95,7 +95,7 @@ The Hölder exponents are $u = \frac{m\alpha - 1}{\alpha(m - 1)} = \frac32$ and 
 
 ## The tCDP conversion {#sec-sol-cdp-6}
 
-> **Exercise 6.** **The tCDP conversion.** Derive @eq-cdp-tcdp-conv and apply it to $10{,}000$ steps of the running example with $\omega = 4$ and $\omega = 8$, saying which branch applies. *Check: $7.469$ and $8.289$.* *(Constrained optimization over α)*
+> **Exercise 6.** **The tCDP conversion.** Derive @eq-cdp-tcdp-conv and apply it to $10{,}000$ steps of the running example with $\omega = 4$ and $\omega = 8$, saying which branch applies. *Check: $7.469$ and $8.289$.* *(Constrained optimization over $\alpha$)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Admissible orders.** $(\rho, \omega)$-truncated concentrated DP (tCDP) bounds $D_\alpha$ by $\rho\alpha$ for $\alpha \in (1, \omega)$, and at $\alpha = \omega$ too, because $D_\alpha$ is non-decreasing and lower semicontinuous in $\alpha$, so $D_\omega \le \lim_{\alpha \uparrow \omega}D_\alpha \le \rho\omega$. Mironov's conversion at any such order gives $g(\alpha) = \rho\alpha + \ell/(\alpha - 1)$.

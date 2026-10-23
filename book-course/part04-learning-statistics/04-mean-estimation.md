@@ -12,13 +12,13 @@ $$
 \Pr[|Z| > t] = e^{-t/b} \qquad (t \ge 0).
 $$
 
-The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) privatizes a function $f$ of the dataset with values in $\mathbb R^m$. Its **sensitivity** is the largest change that replacing one record can cause,
+The [Laplace mechanism](../part02-dp-basics/02-laplace-mechanism.md) privatizes a function $f$ of the dataset with values in $\mathbb R^d$. Its **sensitivity** $\Delta_1 f$ is the largest change that replacing one record can cause,
 
 $$
-\Delta = \max_{X \sim X'} \|f(X) - f(X')\|_1 .
+\Delta_1 f = \max_{D \simeq D'} \|f(D) - f(D')\|_1 .
 $$
 
-If $\Delta$ is finite, releasing $f(X)$ plus independent $\mathrm{Lap}(\Delta/\varepsilon)$ noise in each coordinate is $\varepsilon$-DP.
+If $\Delta_1 f$ is finite, releasing $f(D)$ plus independent $\mathrm{Lap}(\Delta_1 f/\varepsilon)$ noise in each coordinate is $\varepsilon$-DP.
 
 Start with bits. Each of the $n$ records is a bit $X_i \in \{0,1\}$, and their empirical mean is $\tilde p = \frac1n \sum_i X_i$. Replacing one bit moves $\tilde p$ by at most $1/n$, so the Laplace mechanism releases
 
@@ -26,10 +26,10 @@ $$
 \hat p = \tilde p + \mathrm{Lap}\!\left(\frac{1}{\varepsilon n}\right).
 $$ {#eq-mean-bernoulli}
 
-For the dataset itself, the error $|\hat p - \tilde p|$ is the size of the noise, at most $\ln(1/\beta)/(\varepsilon n)$ with probability $1 - \beta$. Now suppose the bits are a sample, $X_1, \dots, X_n$ independent draws from $\mathrm{Bernoulli}(p)$, and the target is the unknown $p$.
+For the dataset itself, the error $|\hat p - \tilde p|$ is the size of the noise, at most $\ln(1/\beta)/(\varepsilon n)$ with probability $1 - \beta$. Now suppose the bits are a sample, $X_1, \dots, X_n$ independent draws from $\mathrm{Bern}(p)$, and the target is the unknown $p$.
 
 ::: {#thm-mean-bernoulli name="Private Bernoulli mean"}
-The estimator @eq-mean-bernoulli is $\varepsilon$-DP. If $X_1, \dots, X_n$ are independent $\mathrm{Bernoulli}(p)$ variables, then for every $\beta \in (0,1)$, with probability at least $1 - \beta$,
+The estimator @eq-mean-bernoulli is $\varepsilon$-DP. If $X_1, \dots, X_n$ are independent $\mathrm{Bern}(p)$ variables, then for every $\beta \in (0,1)$, with probability at least $1 - \beta$,
 
 $$
 |\hat p - p| \le \sqrt{\frac{\ln(4/\beta)}{2n}} + \frac{\ln(2/\beta)}{\varepsilon n}.
@@ -56,57 +56,59 @@ The proof split the error into two parts, and that split recurs in the chapter. 
 
 ## Unbounded data {#sec-mean-unbounded}
 
-The Bernoulli case was easy because each record lies in $[0,1]$. Take instead real records, such as heights in centimetres. Replacing one height of $160$ by a recorded $10^5$ moves the empirical mean by about $10^5/n$, and nothing bounds the move. So the empirical mean has infinite sensitivity, and no private algorithm can fix that, as the next result shows. It uses **group privacy**. If a mechanism $M$ is $\varepsilon$-DP and two datasets $X, X'$ differ in $k$ entries, then for every event $T$,
+The Bernoulli case was easy because each record lies in $[0,1]$. Take instead real records, such as heights in centimetres. Replacing one height of $160$ by a recorded $10^5$ moves the empirical mean by about $10^5/n$, and nothing bounds the move. So the empirical mean has infinite sensitivity, and no private algorithm can fix that, as the next result shows. It uses **group privacy**. If a mechanism $M$ is $\varepsilon$-DP and two datasets $D, D'$ differ in $k$ entries, then for every event $S$,
 
 $$
-\Pr[M(X)\in T] \le e^{k\varepsilon}\Pr[M(X')\in T],
+\Pr[M(D)\in S] \le e^{k\varepsilon}\Pr[M(D')\in S],
 $$
 
-by applying the definition along a path of $k$ neighbours.
+by applying the definition along a path of $k$ neighbours. The next result uses this to show that every $\varepsilon$-DP algorithm is far from the empirical mean on some real dataset, however large the error $\alpha$ it is allowed.
 
 ::: {#prp-mean-impossible}
-Let $M \colon \mathbb R^n \to \mathbb R$ be $\varepsilon$-DP and $\alpha > 0$. Some dataset $X \in \mathbb R^n$ has $\Pr[|M(X) - \bar X| \le \alpha] < 1/2$, where $\bar X$ is its empirical mean.
+Let $M \colon \mathbb R^n \to \mathbb R$ be $\varepsilon$-DP and $\alpha > 0$. Some dataset $D \in \mathbb R^n$ has $\Pr[|M(D) - \bar X| \le \alpha] < 1/2$, where $\bar X$ is its empirical mean.
 :::
 
 ::: {.proof}
-1. Suppose instead that $\Pr[|M(X) - \bar X| \le \alpha] \ge 1/2$ for every $X$. Take an integer $m > 2e^{\varepsilon n}$ and, for $j = 0, \dots, m-1$, the dataset $X^{(j)}$ whose $n$ entries all equal $3\alpha j$, so that $\bar X^{(j)} = 3\alpha j$.
-2. The intervals $I_j = [3\alpha j - \alpha, 3\alpha j + \alpha]$ are disjoint, and $\Pr[M(X^{(j)}) \in I_j] \ge 1/2$ by assumption.
-3. The datasets $X^{(0)}$ and $X^{(j)}$ differ in $n$ entries, so group privacy gives $\Pr[M(X^{(0)}) \in I_j] \ge e^{-\varepsilon n}/2$.
+1. Suppose instead that $\Pr[|M(D) - \bar X| \le \alpha] \ge 1/2$ for every $D$. Take an integer $m > 2e^{\varepsilon n}$ and, for $j = 0, \dots, m-1$, the dataset $D^{(j)}$ whose $n$ entries all equal $3\alpha j$, so that its empirical mean is $3\alpha j$.
+2. The intervals $I_j = [3\alpha j - \alpha, 3\alpha j + \alpha]$ are disjoint, and $\Pr[M(D^{(j)}) \in I_j] \ge 1/2$ by assumption.
+3. The datasets $D^{(0)}$ and $D^{(j)}$ differ in $n$ entries, so group privacy gives $\Pr[M(D^{(0)}) \in I_j] \ge e^{-\varepsilon n}/2$.
 4. Summing over the disjoint intervals gives $1 \ge m e^{-\varepsilon n}/2 > 1$, a contradiction.
 :::
 
 The way out is prior knowledge that does not come from the data. No human is taller than $300$ cm, so a height can be forced into $[0, 300]$ before averaging.
 
 ::: {#def-mean-clip name="Clipping"}
-For $a \le b$, the **clipping** map onto $[a,b]$ is $f_{[a,b]}(x) = \min(\max(x, a), b)$. It leaves points of $[a,b]$ unchanged and moves every other point to the nearer endpoint.
+For $u \le v$, the **clipping** map onto $[u,v]$ is $g_{[u,v]}(x) = \min(\max(x, u), v)$. It leaves points of $[u,v]$ unchanged and moves every other point to the nearer endpoint.
 :::
 
+Clipping to a range fixed in advance bounds how far one record can move the mean, so the Laplace mechanism applies to the clipped mean. When the data already lies in the range, clipping changes nothing and the only error is the noise.
+
 ::: {#lem-mean-clipped}
-Let $a < b$ be fixed before seeing the data. The estimator
+Let $u < v$ be fixed before seeing the data, and let $g_{[u,v]}$ be the clipping map of @def-mean-clip. The estimator
 
 $$
-M(X) = \frac1n \sum_{i=1}^n f_{[a,b]}(X_i) + \mathrm{Lap}\!\left(\frac{b-a}{\varepsilon n}\right)
+M(D) = \frac1n \sum_{i=1}^n g_{[u,v]}(X_i) + \mathrm{Lap}\!\left(\frac{v-u}{\varepsilon n}\right)
 $$
 
-is $\varepsilon$-DP. If every $X_i$ lies in $[a,b]$, then $|M(X) - \bar X| \le (b-a)\ln(1/\beta)/(\varepsilon n)$ with probability at least $1-\beta$.
+is $\varepsilon$-DP. If every $X_i$ lies in $[u,v]$, then $|M(D) - \bar X| \le (v-u)\ln(1/\beta)/(\varepsilon n)$ with probability at least $1-\beta$.
 :::
 
 ::: {.proof}
-1. Each clipped value lies in $[a,b]$, so replacing one record moves the clipped mean by at most $(b-a)/n$. The Laplace mechanism gives privacy.
-2. If every $X_i$ lies in $[a,b]$, clipping changes nothing, and $M(X) - \bar X$ is the Laplace noise, whose tail gives the bound.
+1. Each clipped value lies in $[u,v]$, so replacing one record moves the clipped mean by at most $(v-u)/n$. The Laplace mechanism gives privacy.
+2. If every $X_i$ lies in $[u,v]$, clipping changes nothing, and $M(D) - \bar X$ is the Laplace noise, whose tail gives the bound.
 :::
 
 With heights in $[0, 300]$, $n = 1{,}000$ and $\varepsilon = 1$, the noise scale is $300/1{,}000 = 0.3$ cm. The range must be fixed before the data is seen. Choosing it after looking, for instance to exclude one absurd record, makes the range depend on that record and voids the guarantee.
 
 ## Estimating a parameter of a distribution {#sec-mean-setting}
 
-The problem for the rest of the chapter has two requirements of different kinds.
+From here on the data is a sample from an unknown distribution, and the target is the mean of that distribution. An estimator for this problem must meet two requirements of different kinds. It must be private on every dataset, and it must be accurate on samples from the distribution.
 
 ::: {#def-mean-estimation name="Private estimation"}
 Let $\mathcal P$ be a class of distributions on $\mathbb R$, each with a mean $\mu(P)$. An algorithm $M \colon \mathbb R^n \to \mathbb R$ is an **$\varepsilon$-DP $(\alpha, \beta)$-estimator** for $\mathcal P$ if
 
 1. $M$ is $\varepsilon$-DP, as a map on all datasets in $\mathbb R^n$, and
-2. for every $P \in \mathcal P$, if $X_1, \dots, X_n$ are independent draws from $P$, then $\Pr[|M(X) - \mu(P)| \le \alpha] \ge 1 - \beta$.
+2. for every $P \in \mathcal P$, if $X_1, \dots, X_n$ are independent draws from $P$, then $\Pr[|M(D) - \mu(P)| \le \alpha] \ge 1 - \beta$.
 
 The smallest such $n$ is the **sample complexity** of the class.
 :::
@@ -118,7 +120,7 @@ Accuracy, in contrast, is an average over samples from $P$, and it needs assumpt
 The main class is the Gaussians with unit variance and a bounded mean,
 
 $$
-\mathcal G_R = \{\, N(\mu, 1) : |\mu| \le R \,\}.
+\mathcal G_R = \{\, \mathcal N(\mu, 1) : |\mu| \le R \,\}.
 $$
 
 A bound on the mean is the analogue of the range of heights, and some bound is necessary, as the next result shows by the argument of @prp-mean-impossible.
@@ -135,8 +137,8 @@ samples. Without a bound on $|\mu|$ ($R = \infty$), no finite $n$ suffices.
 
 ::: {.proof}
 1. The means $\mu_j = -R + 3\alpha j$, for $j = 0, \dots, m-1$, lie in $[-R, R]$, and the intervals $I_j = [\mu_j - \alpha, \mu_j + \alpha]$ are disjoint.
-2. Let $X$ be a sample from $N(\mu_0, 1)$ and set $X^{(j)} = X + (\mu_j - \mu_0)$, shifting every entry. Then $X^{(j)}$ is a sample from $N(\mu_j, 1)$, and it differs from $X$ in all $n$ entries.
-3. For each fixed $X$, group privacy gives $\Pr_M[M(X) \in I_j] \ge e^{-\varepsilon n}\Pr_M[M(X^{(j)}) \in I_j]$. Averaging over $X$ and using accuracy for $N(\mu_j, 1)$ gives $\Pr[M(X) \in I_j] \ge e^{-\varepsilon n}(1-\beta)$.
+2. Let $D$ be a sample from $\mathcal N(\mu_0, 1)$ and set $D^{(j)} = D + (\mu_j - \mu_0)$, shifting every entry. Then $D^{(j)}$ is a sample from $\mathcal N(\mu_j, 1)$, and it differs from $D$ in all $n$ entries.
+3. For each fixed $D$, group privacy gives $\Pr_M[M(D) \in I_j] \ge e^{-\varepsilon n}\Pr_M[M(D^{(j)}) \in I_j]$. Averaging over $D$ and using accuracy for $\mathcal N(\mu_j, 1)$ gives $\Pr[M(D) \in I_j] \ge e^{-\varepsilon n}(1-\beta)$.
 4. The intervals are disjoint, so summing over $j$ gives $1 \ge m e^{-\varepsilon n}(1-\beta)$. Solving for $n$ gives the bound, and $m = \infty$ when $R = \infty$.
 :::
 
@@ -147,7 +149,7 @@ So a term of order $\ln(R/\alpha)/\varepsilon$ is unavoidable. The rest of the c
 A bound on the mean is not a bound on the records. Combined with the Gaussian's light tails, though, it gives one with high probability.
 
 ::: {#lem-mean-gauss-tail name="Gaussian tail"}
-If $Y \sim N(0,1)$ and $t \ge 0$, then $\Pr[|Y| \ge t] \le 2e^{-t^2/2}$.
+If $Y \sim \mathcal N(0,1)$ and $t \ge 0$, then $\Pr[|Y| \ge t] \le 2e^{-t^2/2}$.
 :::
 
 ::: {.proof}
@@ -161,42 +163,42 @@ $$
 \tau = \sqrt{2\ln(2n/\beta)} .
 $$ {#eq-mean-tau}
 
-For a sample from $N(\mu,1)$, each point leaves $[\mu - \tau, \mu + \tau]$ with probability at most $2e^{-\tau^2/2} = \beta/n$, so by a union bound all $n$ points stay inside with probability at least $1 - \beta$. The width $\tau$ grows only like $\sqrt{\ln n}$, and the interval $\mu \pm 3$ already holds $99.7\%$ of a Gaussian's mass.
+For a sample from $\mathcal N(\mu,1)$, each point leaves $[\mu - \tau, \mu + \tau]$ with probability at most $2e^{-\tau^2/2} = \beta/n$, so by a union bound all $n$ points stay inside with probability at least $1 - \beta$. The width $\tau$ grows only like $\sqrt{\ln n}$, and the interval $\mu \pm 3$ already holds $99.7\%$ of a Gaussian's mass.
 
 The first estimator clips to an interval known to contain the mean, widened by $\tau$. It is stated for any public centre $c$ and radius $r$, because the later algorithms call it with a centre they computed privately.
 
 ::: {#thm-mean-naive name="Clipped Laplace estimator"}
-Let $c \in \mathbb R$ and $r \ge 0$ be public, $\beta \in (0,1)$, and $\tau$ as in @eq-mean-tau. The estimator
+Let $c \in \mathbb R$ and $r \ge 0$ be public, $\beta \in (0,1)$, and $\tau$ as in @eq-mean-tau. With $g_{[u,v]}$ the clipping map of @def-mean-clip, the estimator
 
 $$
-M_{c,r}(X) = \frac1n\sum_{i=1}^n f_{[c-r-\tau,\; c+r+\tau]}(X_i) + Z, \qquad Z \sim \mathrm{Lap}\!\left(\frac{2(r+\tau)}{\varepsilon n}\right),
+M_{c,r}(D) = \frac1n\sum_{i=1}^n g_{[c-r-\tau,\; c+r+\tau]}(X_i) + Z, \qquad Z \sim \mathrm{Lap}\!\left(\frac{2(r+\tau)}{\varepsilon n}\right),
 $$
 
-is $\varepsilon$-DP. Let $X_1, \dots, X_n$ be independent $N(\mu,1)$ draws. With probability at least $1 - 2\beta$ over the sample, an event $E$ holds on which every $M_{c,r}$ with $|\mu - c| \le r$ satisfies
+is $\varepsilon$-DP. Let $X_1, \dots, X_n$ be independent $\mathcal N(\mu,1)$ draws. With probability at least $1 - 2\beta$ over the sample, an event $E$ holds on which every $M_{c,r}$ with $|\mu - c| \le r$ satisfies
 
 $$
-|M_{c,r}(X) - \mu| \le \sqrt{\frac{2\ln(2/\beta)}{n}} + |Z| .
+|M_{c,r}(D) - \mu| \le \sqrt{\frac{2\ln(2/\beta)}{n}} + |Z| .
 $$
 
 In particular, if $|\mu - c| \le r$, then with probability at least $1 - 3\beta$,
 
 $$
-|M_{c,r}(X) - \mu| \le s_\varepsilon(r) = \sqrt{\frac{2\ln(2/\beta)}{n}} + \frac{2(r+\tau)\ln(1/\beta)}{\varepsilon n} .
+|M_{c,r}(D) - \mu| \le s_\varepsilon(r) = \sqrt{\frac{2\ln(2/\beta)}{n}} + \frac{2(r+\tau)\ln(1/\beta)}{\varepsilon n} .
 $$ {#eq-mean-naive}
 :::
 
 ::: {.proof}
 1. *Privacy.* The clipping interval has length $2(r+\tau)$, so the clipped mean has sensitivity $2(r+\tau)/n$, and the Laplace mechanism applies.
-2. *The event.* Let $G$ be the event that every $X_i$ lies in $[\mu - \tau, \mu + \tau]$, with probability at least $1 - \beta$ by the union bound above. Let $S$ be the event that the empirical mean $\tilde\mu = \frac1n\sum_i X_i$ satisfies $|\tilde\mu - \mu| \le \sqrt{2\ln(2/\beta)/n}$. Since $\tilde\mu - \mu \sim N(0, 1/n)$, @lem-mean-gauss-tail with $t = \sqrt{2\ln(2/\beta)}$ gives $\Pr[S] \ge 1 - \beta$. Set $E = G \cap S$.
-3. *No clipping on $E$.* If $|\mu - c| \le r$, the interval $[\mu-\tau, \mu+\tau]$ lies inside $[c-r-\tau, c+r+\tau]$. So on $G$ clipping changes no point, and $M_{c,r}(X) = \tilde\mu + Z$.
-4. *Error on $E$.* By the triangle inequality, $|M_{c,r}(X) - \mu| \le |\tilde\mu - \mu| + |Z|$, and $S$ bounds the first term.
+2. *The event.* Let $G$ be the event that every $X_i$ lies in $[\mu - \tau, \mu + \tau]$, with probability at least $1 - \beta$ by the union bound above. Let $S$ be the event that the empirical mean $\tilde\mu = \frac1n\sum_i X_i$ satisfies $|\tilde\mu - \mu| \le \sqrt{2\ln(2/\beta)/n}$. Since $\tilde\mu - \mu \sim \mathcal N(0, 1/n)$, @lem-mean-gauss-tail with $t = \sqrt{2\ln(2/\beta)}$ gives $\Pr[S] \ge 1 - \beta$. Set $E = G \cap S$.
+3. *No clipping on $E$.* If $|\mu - c| \le r$, the interval $[\mu-\tau, \mu+\tau]$ lies inside $[c-r-\tau, c+r+\tau]$. So on $G$ clipping changes no point, and $M_{c,r}(D) = \tilde\mu + Z$.
+4. *Error on $E$.* By the triangle inequality, $|M_{c,r}(D) - \mu| \le |\tilde\mu - \mu| + |Z|$, and $S$ bounds the first term.
 5. *Noise.* The Laplace tail gives $|Z| \le 2(r+\tau)\ln(1/\beta)/(\varepsilon n)$ with probability $1 - \beta$. A union bound with $E$ gives @eq-mean-naive.
 :::
 
-The proof is an instance of a three-way split. For any clipping map $f$ with clipped mean $\bar f = \frac1n\sum_i f(X_i)$ and noise $Z$,
+The proof is an instance of a three-way split. Take any clipping map $g$, write $\bar g = \frac1n\sum_i g(X_i)$ for the clipped mean and $\tilde\mu$ for the empirical mean, and let the estimate be $\hat\mu = \bar g + Z$ with noise $Z$. Then
 
 $$
-\hat\mu - \mu = \underbrace{(\tilde\mu - \mu)}_{\text{sampling}} + \underbrace{(\bar f - \tilde\mu)}_{\text{clipping bias}} + \underbrace{Z}_{\text{noise}} .
+\hat\mu - \mu = \underbrace{(\tilde\mu - \mu)}_{\text{sampling}} + \underbrace{(\bar g - \tilde\mu)}_{\text{clipping bias}} + \underbrace{Z}_{\text{noise}} .
 $$ {#eq-mean-three-terms}
 
 Here the clipping interval was chosen wide enough that the bias term is zero with high probability. That choice holds until @sec-mean-heavy, where the bias must be traded against the noise.
@@ -214,7 +216,7 @@ that is, $n = \tilde O\big(1/\alpha^2 + R/(\alpha\varepsilon)\big)$, where $\til
 The first improvement locates the data before averaging it. Cut the range into bins of width $2\tau$. The whole sample fits in an interval of that width, so one or two bins hold all the points, and a private histogram can find one of them at a cost logarithmic in the number of bins.
 
 ::: {#lem-mean-coarse name="Coarse estimate"}
-Let $\tau$ be as in @eq-mean-tau, $m = \lfloor R/\tau \rfloor + 2$, and $a_j = -R - \tau + 2\tau j$ for $j = 0, \dots, m-1$. Let $h_j$ count the records in the bin $B_j = [a_j, a_j + 2\tau)$. The algorithm outputs $c = a_{\hat\jmath} + \tau$, where $\hat\jmath$ maximizes $h_j + Z_j$ over $j$, with independent $Z_j \sim \mathrm{Lap}(2/\varepsilon)$. It is $\varepsilon$-DP. If $X_1, \dots, X_n$ are independent $N(\mu,1)$ draws with $|\mu| \le R$ and
+Let $\tau$ be as in @eq-mean-tau, $m = \lfloor R/\tau \rfloor + 2$, and $a_j = -R - \tau + 2\tau j$ for $j = 0, \dots, m-1$. Let $h_j$ count the records in the bin $B_j = [a_j, a_j + 2\tau)$. The algorithm outputs $c = a_{\hat\jmath} + \tau$, where $\hat\jmath$ maximizes $h_j + Z_j$ over $j$, with independent $Z_j \sim \mathrm{Lap}(2/\varepsilon)$. It is $\varepsilon$-DP. If $X_1, \dots, X_n$ are independent $\mathcal N(\mu,1)$ draws with $|\mu| \le R$ and
 
 $$
 n > \frac{8}{\varepsilon}\ln\frac{m}{\beta},
@@ -231,10 +233,10 @@ then $|\mu - c| \le 2\tau$ with probability at least $1 - 2\beta$.
 5. *The winner is near the mean.* On $G$, the bin $B_{\hat\jmath}$ holds a record $x$ with $|x - \mu| \le \tau$ and $a_{\hat\jmath} \le x < a_{\hat\jmath} + 2\tau$. So $\mu \in [a_{\hat\jmath} - \tau, a_{\hat\jmath} + 3\tau] = [c - 2\tau, c + 2\tau]$. The two failures have total probability at most $2\beta$.
 :::
 
-After the coarse step, the mean is known to within $2\tau = O(\sqrt{\log(n/\beta)})$ instead of $R$. The fine step is @thm-mean-naive on that short interval. Basic composition, from [the Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md), says that running an $\varepsilon_1$-DP algorithm and then an $\varepsilon_2$-DP algorithm that may depend on the first output is $(\varepsilon_1+\varepsilon_2)$-DP. So each step gets half the budget.
+After the coarse step, the mean is known to within $2\tau = O(\sqrt{\ln(n/\beta)})$ instead of $R$. The fine step is @thm-mean-naive on that short interval. Basic composition, from [the Laplace mechanism chapter](../part02-dp-basics/02-laplace-mechanism.md), says that running an $\varepsilon_1$-DP algorithm and then an $\varepsilon_2$-DP algorithm that may depend on the first output is $(\varepsilon_1+\varepsilon_2)$-DP. So each step gets half the budget.
 
 ::: {#thm-mean-histogram name="Histogram, then clipping"}
-Run @lem-mean-coarse with $\varepsilon/2$ (noise $\mathrm{Lap}(4/\varepsilon)$) to get $c$, then output $\hat\mu = M_{c,2\tau}(X)$ from @thm-mean-naive with $\varepsilon/2$. The result is $\varepsilon$-DP. If $X_1, \dots, X_n$ are independent $N(\mu, 1)$ draws with $|\mu| \le R$ and $n > (16/\varepsilon)\ln(m/\beta)$, then with probability at least $1 - 4\beta$,
+Let $m$ be the number of bins in @lem-mean-coarse. Run that algorithm with $\varepsilon/2$ (noise $\mathrm{Lap}(4/\varepsilon)$) to get $c$, then output $\hat\mu = M_{c,2\tau}(D)$ from @thm-mean-naive with $\varepsilon/2$. The result is $\varepsilon$-DP. If $X_1, \dots, X_n$ are independent $\mathcal N(\mu, 1)$ draws with $|\mu| \le R$ and $n > (16/\varepsilon)\ln(m/\beta)$, then with probability at least $1 - 4\beta$,
 
 $$
 |\hat\mu - \mu| \le \sqrt{\frac{2\ln(2/\beta)}{n}} + \frac{12\,\tau\ln(1/\beta)}{\varepsilon n} .
@@ -251,7 +253,7 @@ $$
 The error is at most $\alpha$ once $n \ge 8\ln(2/\beta)/\alpha^2 + 24\tau\ln(1/\beta)/(\alpha\varepsilon)$, and the coarse step needs $n > (16/\varepsilon)\ln(m/\beta)$ with $m \le R/\tau + 2$. So
 
 $$
-n = \tilde O\!\left(\frac{1}{\alpha^2} + \frac{1}{\alpha\varepsilon} + \frac{\log R}{\varepsilon}\right).
+n = \tilde O\!\left(\frac{1}{\alpha^2} + \frac{1}{\alpha\varepsilon} + \frac{\ln R}{\varepsilon}\right).
 $$ {#eq-mean-rate}
 
 The dependence on $R$ fell from linear to logarithmic. The first term is needed without privacy, @prp-mean-lower shows that the last is needed, and the middle one is needed too, up to logarithmic factors. The exponential mechanism over the bins can replace the noisy histogram in the coarse step with the same guarantee.
@@ -260,10 +262,10 @@ The dependence on $R$ fell from linear to logarithmic. The first term is needed 
 
 The histogram finds the data in one shot, but a histogram over a region of $\mathbb R^d$ needs a number of bins exponential in $d$. A second route uses only the clipped Laplace estimator, applied repeatedly. Each call returns a confidence interval instead of a point. The interval is a constant factor shorter than the one it started from, and with high probability it still contains $\mu$.
 
-One step takes an interval $[c - r, c + r]$ and a budget $\varepsilon'$, computes the estimate $c' = M_{c,r}(X)$ with $\varepsilon'$, and returns the interval $[c' - s, c' + s]$ with $s = s_{\varepsilon'}(r)$ from @eq-mean-naive. The radius $s$ depends only on $r$ and on public parameters, not on the data.
+One step takes an interval $[c - r, c + r]$ and a budget $\varepsilon'$, computes the estimate $c' = M_{c,r}(D)$ with $\varepsilon'$, and returns the interval $[c' - s, c' + s]$ with $s = s_{\varepsilon'}(r)$ from @eq-mean-naive. The radius $s$ depends only on $r$ and on public parameters, not on the data.
 
 ::: {#lem-mean-step name="One step"}
-Let $\tau$ be as in @eq-mean-tau, $n \ge 16$ and $n \ge 16\ln(1/\beta)/\varepsilon'$. Then
+Let $\tau$ be as in @eq-mean-tau, $n \ge 16$ and $n \ge 16\ln(1/\beta)/\varepsilon'$. Consider one step, as described above, from the interval $[c - r, c + r]$ to the interval $[c' - s, c' + s]$. Then
 
 $$
 s_{\varepsilon'}(r) \le \tfrac12 \max(r, \tau).
@@ -282,7 +284,7 @@ Moreover, on the event $E$ of @thm-mean-naive, if $|\mu - c| \le r$, then $\mu \
 The first claim is deterministic, and the second needs the data to be Gaussian. Iterating halves the radius until it reaches the floor $\tau$, where the tails of the data stop the clipping from doing better.
 
 ::: {#thm-mean-shrinking name="Shrinking intervals, then clipping"}
-Let $T = \lceil \log_2(R/\tau) \rceil$ (or $T = 0$ if $R \le \tau$), $\varepsilon' = \varepsilon/(2T)$, $r_0 = R$, $c_0 = 0$, and $r_t = s_{\varepsilon'}(r_{t-1})$. For $t = 1, \dots, T$, let $c_t = M_{c_{t-1}, r_{t-1}}(X)$ computed with $\varepsilon'$. Output $\hat\mu = M_{c_T, r_T}(X)$ computed with $\varepsilon/2$. The result is $\varepsilon$-DP. Suppose $X_1, \dots, X_n$ are independent $N(\mu,1)$ draws with $|\mu| \le R$,
+Let $T = \lceil \log_2(R/\tau) \rceil$ (or $T = 0$ if $R \le \tau$), $\varepsilon' = \varepsilon/(2T)$, $r_0 = R$, $c_0 = 0$, and $r_t = s_{\varepsilon'}(r_{t-1})$. For $t = 1, \dots, T$, let $c_t = M_{c_{t-1}, r_{t-1}}(D)$ computed with $\varepsilon'$. Output $\hat\mu = M_{c_T, r_T}(D)$ computed with $\varepsilon/2$. The result is $\varepsilon$-DP. Suppose $X_1, \dots, X_n$ are independent $\mathcal N(\mu,1)$ draws with $|\mu| \le R$,
 
 $$
 n \ge 16 \qquad\text{and}\qquad n \ge \frac{32\,T\ln(1/\beta)}{\varepsilon} .
@@ -303,7 +305,7 @@ $$
 5. The failures are $E$ ($2\beta$), the $T$ steps ($T\beta$) and the final noise ($\beta$).
 :::
 
-The steps need $n = O(\log(R)\log(1/\beta)/\varepsilon)$, and the final step needs $n = \tilde O(1/\alpha^2 + 1/(\alpha\varepsilon))$ for error $\alpha$. So shrinking intervals achieve the same rate @eq-mean-rate as the histogram, with only the Laplace mechanism.
+The steps need $n = O(\ln(R)\ln(1/\beta)/\varepsilon)$, and the final step needs $n = \tilde O(1/\alpha^2 + 1/(\alpha\varepsilon))$ for error $\alpha$. So shrinking intervals achieve the same rate @eq-mean-rate as the histogram, with only the Laplace mechanism. The example below puts numbers on the three bounds when the prior bound $R$ is large.
 
 ::: {#exm-mean-numbers}
 Take $n = 4{,}000$, $\varepsilon = 1$, $R = 10^6$ and $\beta = 0.002$, so that $\tau = 5.51$. Then $T = \lceil \log_2(10^6/5.51) \rceil = 18$ steps, which need $n \ge 32 \cdot 18 \ln 500 = 3{,}580$, and all $T + 3 = 21$ events hold with probability at least $1 - 21 \cdot 0.002 = 0.958$. The radius reached by the recursion gives the error bound $0.098$. The coarse step of @thm-mean-histogram uses $m = 181{,}360$ bins, needs $n > 293$, and gives the bound $0.162$. The clipped estimator on $[-R, R]$ alone has the bound $3{,}107$.
@@ -311,7 +313,7 @@ Take $n = 4{,}000$, $\varepsilon = 1$, $R = 10^6$ and $\beta = 0.002$, so that $
 
 The bounds are conservative. @fig-mean-gaussian compares the simulated errors with each other.
 
-![Error of three $\varepsilon$-DP estimators of the mean of $N(\mu, 1)$ with $\mu = R/3$, as the a priori bound $R$ grows, for $n = 4{,}000$, $\varepsilon = 1$ and $\beta = 0.002$. Each point is the 90th percentile of $|\hat\mu - \mu|$ over 100 runs. The clipped estimator on $[-R, R]$ degrades linearly in $R$. The two estimators that first locate the data stay within a factor of about two of the non-private empirical mean for every $R$ up to $10^6$. At $R = 10^6$, over 300 runs, the 90th percentiles are $0.0250$ without privacy, $0.0461$ for the histogram and $0.0295$ for shrinking intervals.](figures/mean-gaussian.svg){#fig-mean-gaussian}
+![Error of three $\varepsilon$-DP estimators of the mean of $\mathcal N(\mu, 1)$ with $\mu = R/3$, as the a priori bound $R$ grows, for $n = 4{,}000$, $\varepsilon = 1$ and $\beta = 0.002$. Each point is the 90th percentile of $|\hat\mu - \mu|$ over 100 runs. The clipped estimator on $[-R, R]$ degrades linearly in $R$. The two estimators that first locate the data stay within a factor of about two of the non-private empirical mean for every $R$ up to $10^6$. At $R = 10^6$, over 300 runs, the 90th percentiles are $0.0250$ without privacy, $0.0461$ for the histogram and $0.0295$ for shrinking intervals.](figures/mean-gaussian.svg){#fig-mean-gaussian}
 
 ## Many dimensions {#sec-mean-multivariate}
 
@@ -321,7 +323,7 @@ The shrinking argument used three ingredients, and each has an analogue beyond o
 2. Compute the empirical estimate of the parameter, and add noise scaled to its sensitivity, which the clipping bounds.
 3. Replace the confidence set by one centred at the noisy estimate, whose size accounts for the sampling error and the noise.
 
-For a Gaussian $N(\mu, I_d)$ in $\mathbb R^d$ with $\|\mu\|_2 \le R$, the confidence set is a Euclidean ball, and the noise is Gaussian. Two facts replace those used above. The [Gaussian mechanism](../part02-dp-basics/03-approximate-dp.md) adds $N(0, \sigma^2 I_d)$ to a function of $\ell_2$ sensitivity $\Delta_2$, and for every $\varepsilon > 0$ and $\delta \in (0,1)$ it is $(\varepsilon, \delta)$-DP with $\sigma = \Delta_2\sqrt{2\ln(1/\delta) + \varepsilon}/\varepsilon$. Approximate DP also composes by adding the $\varepsilon$'s and the $\delta$'s. Second, a standard Gaussian vector $Y \sim N(0, I_d)$ has norm about $\sqrt d$, with
+For a Gaussian $\mathcal N(\mu, I_d)$ in $\mathbb R^d$ with $\|\mu\|_2 \le R$, the confidence set is a Euclidean ball, and the noise is Gaussian. Two facts replace those used above. The [Gaussian mechanism](../part02-dp-basics/03-approximate-dp.md) adds $\mathcal N(0, \sigma^2 I_d)$ to a function $f$ whose $\ell_2$ sensitivity is $\Delta_2 f$. For every $\varepsilon > 0$ and $\delta \in (0,1)$ it is $(\varepsilon, \delta)$-DP with $\sigma = \Delta_2 f\sqrt{2\ln(1/\delta) + \varepsilon}/\varepsilon$. Approximate DP also composes by adding the $\varepsilon$'s and the $\delta$'s. Second, a standard Gaussian vector $Y \sim \mathcal N(0, I_d)$ has norm about $\sqrt d$, with
 
 $$
 \Pr\big[\|Y\|_2 \ge \sqrt d + t\big] \le e^{-t^2/2} \qquad (t \ge 0).
@@ -329,16 +331,24 @@ $$ {#eq-mean-norm-tail}
 
 This follows from the Gaussian concentration inequality for $1$-Lipschitz functions (Boucheron, Lugosi and Massart, 2013, Theorem 5.6), applied to the norm, together with $\mathbb E\|Y\|_2 \le \sqrt{\mathbb E\|Y\|_2^2} = \sqrt d$. So a Gaussian sample sits on a shell at distance about $\sqrt d$ from its mean, even though the density is largest at the mean.
 
-Clipping to the ball of centre $c$ and radius $\rho$ maps $x$ to $c + (x - c)\min(1, \rho/\|x - c\|_2)$, which moves no point already inside the ball. Write $\tau_d = \sqrt d + \sqrt{2\ln(n/\beta)}$ for the widening, and $L = \sqrt d + \sqrt{2\ln(1/\beta)}$ for the error radius.
+Clipping to the ball of centre $c$ and radius $\rho$ maps $x$ to $c + (x - c)\min(1, \rho/\|x - c\|_2)$, which moves no point already inside the ball. Two radii play the roles that $\tau$ played in one dimension. They are
+
+$$
+\tau_d = \sqrt d + \sqrt{2\ln(n/\beta)}, \qquad L = \sqrt d + \sqrt{2\ln(1/\beta)} .
+$$
+
+The first is the amount by which each ball is widened before clipping. By @eq-mean-norm-tail and a union bound, every record lies within $\tau_d$ of $\mu$ with probability at least $1 - \beta$. The second is a radius that a single standard Gaussian vector stays within with probability at least $1 - \beta$, and it bounds both the sampling error and the noise.
+
+The theorem runs the shrinking recipe with balls in place of intervals and the Gaussian mechanism in place of the Laplace mechanism.
 
 ::: {#thm-mean-multivariate name="Multivariate Gaussian mean"}
-Let $\varepsilon > 0$ and $\delta \in (0,1)$. A step on the ball $B(c, r)$ with budget $(\varepsilon', \delta')$ clips every record to $B(c, r + \tau_d)$, averages, and adds $N(0, \sigma^2 I_d)$ with $\sigma = 2(r+\tau_d)\sqrt{2\ln(1/\delta') + \varepsilon'}/(\varepsilon' n)$. Its new radius is
+Let $\varepsilon > 0$ and $\delta \in (0,1)$. A step on the ball $B(c, r)$ with budget $(\varepsilon', \delta')$ clips every record to $B(c, r + \tau_d)$, averages, and adds $\mathcal N(0, \sigma^2 I_d)$ with $\sigma = 2(r+\tau_d)\sqrt{2\ln(1/\delta') + \varepsilon'}/(\varepsilon' n)$. Its new radius is
 
 $$
 s(r) = \frac{L}{\sqrt n} + \sigma L .
 $$
 
-Run $T = \lceil \log_2(R/\tau_d)\rceil$ steps with $(\varepsilon/(2T), \delta/(2T))$ from $B(0, R)$, then one more with $(\varepsilon/2, \delta/2)$, and output its noisy mean $\hat\mu$. This is $(\varepsilon, \delta)$-DP. If $X_1, \dots, X_n$ are independent $N(\mu, I_d)$ draws with $\|\mu\|_2 \le R$, and
+Run $T = \lceil \log_2(R/\tau_d)\rceil$ steps with $(\varepsilon/(2T), \delta/(2T))$ from $B(0, R)$, then one more with $(\varepsilon/2, \delta/2)$, and output its noisy mean $\hat\mu$. This is $(\varepsilon, \delta)$-DP. If $X_1, \dots, X_n$ are independent $\mathcal N(\mu, I_d)$ draws with $\|\mu\|_2 \le R$, and
 
 $$
 n \ge 16, \qquad n \ge \frac{32\,T L\sqrt{2\ln(2T/\delta) + \varepsilon}}{\varepsilon},
@@ -356,8 +366,8 @@ The proof follows that of @thm-mean-shrinking, with these changes.
 
 1. *Privacy.* The clipped mean has $\ell_2$ sensitivity $2(r+\tau_d)/n$, so each step is the Gaussian mechanism. The radii are public, and composition adds the budgets to $(\varepsilon, \delta)$.
 2. *No clipping.* By @eq-mean-norm-tail with $t = \sqrt{2\ln(n/\beta)}$ and a union bound, every $\|X_i - \mu\|_2 \le \tau_d$ with probability at least $1 - \beta$. If $\|\mu - c\|_2 \le r$, the ball $B(c, r+\tau_d)$ then contains every record.
-3. *Sampling.* The empirical mean satisfies $\tilde\mu - \mu = Y/\sqrt n$ with $Y \sim N(0, I_d)$, so @eq-mean-norm-tail gives $\|\tilde\mu - \mu\|_2 \le L/\sqrt n$ with probability $1 - \beta$.
-4. *Noise.* The noise is $\sigma Y'$ with $Y' \sim N(0, I_d)$, so its norm is at most $\sigma L$ with probability $1 - \beta$. With steps 2 and 3, the new ball has radius $s(r)$ and contains $\mu$.
+3. *Sampling.* The empirical mean satisfies $\tilde\mu - \mu = Y/\sqrt n$ with $Y \sim \mathcal N(0, I_d)$, so @eq-mean-norm-tail gives $\|\tilde\mu - \mu\|_2 \le L/\sqrt n$ with probability $1 - \beta$.
+4. *Noise.* The noise is $\sigma Y'$ with $Y' \sim \mathcal N(0, I_d)$, so its norm is at most $\sigma L$ with probability $1 - \beta$. With steps 2 and 3, the new ball has radius $s(r)$ and contains $\mu$.
 5. *Halving.* Since $L \le \tau_d$ and $n \ge 16$, the first term of $s(r)$ is at most $\tau_d/4$. With $\varepsilon' = \varepsilon/(2T)$ and $\delta' = \delta/(2T)$, we have $2\ln(1/\delta') + \varepsilon' \le 2\ln(2T/\delta) + \varepsilon$, so $\sigma L \le 4T(r+\tau_d)L\sqrt{2\ln(2T/\delta) + \varepsilon}/(\varepsilon n)$, and the condition on $n$ makes this at most $(r + \tau_d)/8$. So $s(r) \le \max(r, \tau_d)/2$, and after $T$ steps the radius is at most $\tau_d$.
 6. *Final step.* With $r_T \le \tau_d$, the final noise, with budget $(\varepsilon/2, \delta/2)$, has $\sigma = 4(r_T + \tau_d)\sqrt{2\ln(2/\delta) + \varepsilon/2}/(\varepsilon n) \le 8\tau_d\sqrt{2\ln(2/\delta) + \varepsilon}/(\varepsilon n)$, and steps 3 and 4 give the bound. The failures add up as before.
 :::
@@ -365,22 +375,22 @@ The proof follows that of @thm-mean-shrinking, with these changes.
 Since $L$ and $\tau_d$ are $\sqrt d$ up to logarithmic terms, error $\alpha$ with $\varepsilon \le 1$ needs
 
 $$
-n = \tilde O\!\left(\frac{d}{\alpha^2} + \frac{d\sqrt{\log(1/\delta)}}{\alpha\varepsilon} + \frac{\sqrt{d}\,\log R\,\sqrt{\log(1/\delta)}}{\varepsilon}\right).
+n = \tilde O\!\left(\frac{d}{\alpha^2} + \frac{d\sqrt{\ln(1/\delta)}}{\alpha\varepsilon} + \frac{\sqrt{d}\,\ln R\,\sqrt{\ln(1/\delta)}}{\varepsilon}\right).
 $$
 
-The first two terms are $d$ times the one-dimensional ones. The cost of locating the data grows only like $\sqrt d$, because each step's noise is compared with a radius that already includes the $\sqrt d$ spread of the data. The move to approximate DP is natural here, because clipping to a ball bounds the $\ell_2$ sensitivity, which the Gaussian mechanism uses. The composition over the $T$ steps can use [advanced composition](../part02-dp-basics/04-advanced-composition.md) instead, which replaces the factor $T$ in the condition on $n$ by roughly $\sqrt{T \log(1/\delta)}$. The same recipe also estimates the covariance matrix of a Gaussian, with confidence sets of matrices.
+The first two terms are $d$ times the one-dimensional ones. The cost of locating the data grows only like $\sqrt d$, because each step's noise is compared with a radius that already includes the $\sqrt d$ spread of the data. The move to approximate DP is natural here, because clipping to a ball bounds the $\ell_2$ sensitivity, which the Gaussian mechanism uses. The composition over the $T$ steps can use [advanced composition](../part02-dp-basics/04-advanced-composition.md) instead, which replaces the factor $T$ in the condition on $n$ by roughly $\sqrt{T \ln(1/\delta)}$. The same recipe also estimates the covariance matrix of a Gaussian, with confidence sets of matrices.
 
 ## Heavy-tailed data {#sec-mean-heavy}
 
 Everything so far used only that the data has light tails. The arguments therefore hold for **sub-Gaussian** distributions, whose tails decay at least as fast as a Gaussian's, with $\tau$ multiplied by the scale of the tails. Real data is often heavier tailed, and then only a few moments may be bounded. Take the class of distributions on $\mathbb R$ with
 
 $$
-\mu = \mathbb E[X] \in [-1, 1], \qquad \operatorname{Var}[X] \le 1 .
+\mu = \mathbb E[X] \in [-1, 1], \qquad \operatorname{Var}(X) \le 1 .
 $$
 
 The narrow range for $\mu$ keeps the example simple, and the problem is to estimate $\mu$ to a precision $\alpha$ well below $1$.
 
-The previous strategy clips only where no point lands. Chebyshev's inequality gives $\Pr[|X - \mu| \ge \sqrt{n/\beta}] \le \beta/n$, so the clipping interval $[-1 - \tau, 1 + \tau]$ with $\tau = \sqrt{n/\beta}$ clips no point with probability $1 - \beta$. But the noise scale is then $2(1 + \tau)/(\varepsilon n)$, which is more than $2/(\varepsilon\sqrt{\beta n})$. The tail bound on the noise error is this scale times $\ln(1/\beta)$, and it is at most $\alpha$ only if
+The previous strategy clips only where no point lands. Chebyshev's inequality gives $\Pr[|X - \mu| \ge \sqrt{n/\beta}] \le \beta/n$, so clipping to the interval $[-1 - C, 1 + C]$, with the clipping norm $C$ set to $\sqrt{n/\beta}$, clips no point with probability $1 - \beta$. But the noise scale is then $2(1 + C)/(\varepsilon n)$, which is more than $2/(\varepsilon\sqrt{\beta n})$. The tail bound on the noise error is this scale times $\ln(1/\beta)$, and it is at most $\alpha$ only if
 
 $$
 n \ge \frac{4\ln^2(1/\beta)}{\beta\,\alpha^2\varepsilon^2},
@@ -389,46 +399,48 @@ $$
 which is worse than the Gaussian rate in both $\alpha$ and $\varepsilon$. The remedy is to clip more aggressively and accept a bias. The clipping bias of @eq-mean-three-terms is no longer zero, but it can be bounded.
 
 ::: {#lem-mean-bias name="Clipping bias"}
-Let $X$ have mean $\mu$ and variance at most $\sigma^2$, and let $[a,b] \supseteq [\mu - \tau, \mu + \tau]$ with $\tau > 0$. Then $f = f_{[a,b]}$ satisfies
+Let $X$ have mean $\mu$ and variance at most $\sigma_X^2$, and let $[u,v] \supseteq [\mu - C, \mu + C]$ with $C > 0$. Then $g = g_{[u,v]}$ satisfies
 
 $$
-\big|\mathbb E[f(X)] - \mu\big| \le \frac{\sigma^2}{\tau}, \qquad \operatorname{Var}[f(X)] \le \sigma^2 .
+\big|\mathbb E[g(X)] - \mu\big| \le \frac{\sigma_X^2}{C}, \qquad \operatorname{Var}(g(X)) \le \sigma_X^2 .
 $$
 :::
 
 ::: {.proof}
-1. Since $\mu = \mathbb E[X]$, $|\mathbb E[f(X)] - \mu| = |\mathbb E[f(X) - X]| \le \mathbb E|f(X) - X|$.
-2. If $|X - \mu| \le \tau$, then $X \in [a,b]$ and $f(X) = X$. Otherwise $X$ moves towards $\mu$ and does not pass it, because $\mu \in [a,b]$, so $|f(X) - X| \le |X - \mu|$.
-3. So $|f(X) - X| \le |X - \mu|\,\mathbf 1\{|X - \mu| > \tau\} \le (X - \mu)^2/\tau$, and taking expectations gives the first bound.
-4. Clipping is $1$-Lipschitz. With $X'$ an independent copy of $X$, $\operatorname{Var}[f(X)] = \tfrac12\mathbb E[(f(X) - f(X'))^2] \le \tfrac12\mathbb E[(X - X')^2] = \operatorname{Var}[X]$.
+1. Since $\mu = \mathbb E[X]$, $|\mathbb E[g(X)] - \mu| = |\mathbb E[g(X) - X]| \le \mathbb E|g(X) - X|$.
+2. If $|X - \mu| \le C$, then $X \in [u,v]$ and $g(X) = X$. Otherwise $X$ moves towards $\mu$ and does not pass it, because $\mu \in [u,v]$, so $|g(X) - X| \le |X - \mu|$.
+3. So $|g(X) - X| \le |X - \mu|\,\mathbf 1[|X - \mu| > C] \le (X - \mu)^2/C$, and taking expectations gives the first bound.
+4. Clipping is $1$-Lipschitz. With $X'$ an independent copy of $X$, $\operatorname{Var}(g(X)) = \tfrac12\mathbb E[(g(X) - g(X'))^2] \le \tfrac12\mathbb E[(X - X')^2] = \operatorname{Var}(X)$.
 :::
 
+With the bias bounded, the clipping interval no longer has to catch every point. The next estimator clips at a distance $C$ from the range of possible means and lets the three terms of @eq-mean-three-terms decide how large $C$ should be.
+
 ::: {#thm-mean-heavy name="Heavy-tailed mean"}
-For $\tau > 0$, the estimator
+For $C > 0$, the estimator
 
 $$
-\hat\mu = \frac1n\sum_{i=1}^n f_{[-1-\tau,\, 1+\tau]}(X_i) + \mathrm{Lap}\!\left(\frac{2(1+\tau)}{\varepsilon n}\right)
+\hat\mu = \frac1n\sum_{i=1}^n g_{[-1-C,\, 1+C]}(X_i) + \mathrm{Lap}\!\left(\frac{2(1+C)}{\varepsilon n}\right)
 $$
 
 is $\varepsilon$-DP. If $X_1, \dots, X_n$ are independent draws from a distribution with mean $\mu \in [-1,1]$ and variance at most $1$, then with probability at least $1 - 2\beta$,
 
 $$
-|\hat\mu - \mu| \le \frac{1}{\tau} + \frac{1}{\sqrt{\beta n}} + \frac{2(1+\tau)\ln(1/\beta)}{\varepsilon n} .
+|\hat\mu - \mu| \le \frac{1}{C} + \frac{1}{\sqrt{\beta n}} + \frac{2(1+C)\ln(1/\beta)}{\varepsilon n} .
 $$ {#eq-mean-heavy}
 :::
 
 ::: {.proof}
-1. Privacy is @lem-mean-clipped with an interval of length $2(1+\tau)$.
-2. Since $|\mu| \le 1$, the interval $[-1-\tau, 1+\tau]$ contains $[\mu - \tau, \mu + \tau]$. Write $\nu = \mathbb E[f(X_1)]$ and $\bar f$ for the clipped mean. Then $\hat\mu - \mu = (\nu - \mu) + (\bar f - \nu) + Z$, with $Z$ the noise.
-3. *Bias.* @lem-mean-bias with $\sigma^2 = 1$ gives $|\nu - \mu| \le 1/\tau$.
-4. *Sampling.* By @lem-mean-bias, $\operatorname{Var}[\bar f] \le 1/n$, so Chebyshev's inequality gives $|\bar f - \nu| \le 1/\sqrt{\beta n}$ with probability at least $1 - \beta$.
-5. *Noise.* The Laplace tail gives $|Z| \le 2(1+\tau)\ln(1/\beta)/(\varepsilon n)$ with probability $1 - \beta$. A union bound finishes the proof.
+1. Privacy is @lem-mean-clipped with an interval of length $2(1+C)$.
+2. Since $|\mu| \le 1$, the interval $[-1-C, 1+C]$ contains $[\mu - C, \mu + C]$. Write $\nu = \mathbb E[g(X_1)]$ and $\bar g$ for the clipped mean. Then $\hat\mu - \mu = (\nu - \mu) + (\bar g - \nu) + Z$, with $Z$ the noise.
+3. *Bias.* @lem-mean-bias with $\sigma_X^2 = 1$ gives $|\nu - \mu| \le 1/C$.
+4. *Sampling.* By @lem-mean-bias, $\operatorname{Var}(\bar g) \le 1/n$, so Chebyshev's inequality gives $|\bar g - \nu| \le 1/\sqrt{\beta n}$ with probability at least $1 - \beta$.
+5. *Noise.* The Laplace tail gives $|Z| \le 2(1+C)\ln(1/\beta)/(\varepsilon n)$ with probability $1 - \beta$. A union bound finishes the proof.
 :::
 
-The bias falls as $\tau$ grows and the noise rises, so there is a best threshold. Setting each of the three terms of @eq-mean-heavy to at most $\alpha/3$ gives a clean sample complexity.
+The bias falls as $C$ grows and the noise rises, so there is a best clipping norm. Setting each of the three terms of @eq-mean-heavy to at most $\alpha/3$ gives a clean sample complexity.
 
 ::: {#cor-mean-heavy}
-Let $\alpha \in (0, 1]$ and $\tau = 3/\alpha$. If
+Let $\alpha \in (0, 1]$, and let $\hat\mu$ be the estimator of @thm-mean-heavy with $C = 3/\alpha$. If
 
 $$
 n \ge \frac{9}{\beta\alpha^2} \qquad\text{and}\qquad n \ge \frac{24\ln(1/\beta)}{\alpha^2\varepsilon},
@@ -438,19 +450,19 @@ then $|\hat\mu - \mu| \le \alpha$ with probability at least $1 - 2\beta$.
 :::
 
 ::: {.proof}
-1. The bias term is $1/\tau = \alpha/3$, and the first condition makes the sampling term at most $\alpha/3$.
-2. Since $\alpha \le 1$, $1 + \tau \le 4/\alpha$, so the noise term is at most $8\ln(1/\beta)/(\alpha\varepsilon n)$, which the second condition makes at most $\alpha/3$.
+1. The bias term is $1/C = \alpha/3$, and the first condition makes the sampling term at most $\alpha/3$.
+2. Since $\alpha \le 1$, $1 + C \le 4/\alpha$, so the noise term is at most $8\ln(1/\beta)/(\alpha\varepsilon n)$, which the second condition makes at most $\alpha/3$.
 :::
 
-So the clipping threshold should be about $1/\alpha$, and $n = O(1/(\alpha^2\varepsilon))$ samples suffice for a fixed $\beta$ and $\varepsilon \le 1$. This is more than the $O(1/\alpha^2 + 1/(\alpha\varepsilon))$ of the Gaussian case, because the two terms now multiply instead of adding. The increase is necessary. For distributions with only a bounded variance, no $\varepsilon$-DP estimator does better than error of order $1/\sqrt{\varepsilon n}$, by a lower bound of Barber and Duchi (2014). Knowing less about the distribution costs more samples. In terms of $n$, the threshold that minimizes $1/\tau + 2\tau\ln(1/\beta)/(\varepsilon n)$ is
+So the clipping norm should be about $1/\alpha$, and $n = O(1/(\alpha^2\varepsilon))$ samples suffice for a fixed $\beta$ and $\varepsilon \le 1$. This is more than the $O(1/\alpha^2 + 1/(\alpha\varepsilon))$ of the Gaussian case, because the two terms now multiply instead of adding. The increase is necessary. For distributions with only a bounded variance, no $\varepsilon$-DP estimator does better than error of order $1/\sqrt{\varepsilon n}$, by a lower bound of Barber and Duchi (2014). Knowing less about the distribution costs more samples. In terms of $n$, the clipping norm that minimizes $1/C + 2C\ln(1/\beta)/(\varepsilon n)$ is
 
 $$
-\tau^\ast = \sqrt{\frac{\varepsilon n}{2\ln(1/\beta)}},
+C^\ast = \sqrt{\frac{\varepsilon n}{2\ln(1/\beta)}},
 $$
 
-and with $n = 4{,}000$, $\varepsilon = 1$ and $\beta = 0.05$ it is $\tau^\ast = 25.8$, where @eq-mean-heavy equals $0.150$. @fig-mean-heavy shows the trade-off.
+and with $n = 4{,}000$, $\varepsilon = 1$ and $\beta = 0.05$ it is $C^\ast = 25.8$, where @eq-mean-heavy equals $0.150$. @fig-mean-heavy shows the trade-off.
 
-![Error of the clipped estimator of @thm-mean-heavy on a Student $t$ distribution with 3 degrees of freedom, scaled to variance $1$, with $\mu = 0.5$, $n = 4{,}000$ and $\varepsilon = 1$, as the clipping threshold $\tau$ varies. The solid line is the 90th percentile of $|\hat\mu - \mu|$ over 300 runs, and the dashed line is the bound @eq-mean-heavy with $\beta = 0.05$. Both rise steeply at large $\tau$, where the noise dominates. The simulated error is smallest at a smaller $\tau$ than the bound's, because this distribution's clipping bias is far below the worst case $1/\tau$ over all distributions with variance $1$.](figures/mean-heavy.svg){#fig-mean-heavy}
+![Error of the clipped estimator of @thm-mean-heavy on a Student $t$ distribution with 3 degrees of freedom, scaled to variance $1$, with $\mu = 0.5$, $n = 4{,}000$ and $\varepsilon = 1$, as the clipping norm $C$ varies. The solid line is the 90th percentile of $|\hat\mu - \mu|$ over 300 runs, and the dashed line is the bound @eq-mean-heavy with $\beta = 0.05$. Both rise steeply at large $C$, where the noise dominates. The simulated error is smallest at a smaller $C$ than the bound's, because this distribution's clipping bias is far below the worst case $1/C$ over all distributions with variance $1$.](figures/mean-heavy.svg){#fig-mean-heavy}
 
 ## Summary {#sec-mean-summary}
 
@@ -458,16 +470,16 @@ and with $n = 4{,}000$, $\varepsilon = 1$ and $\beta = 0.05$ it is $\tau^\ast = 
 | --- | --- |
 | @thm-mean-bernoulli | Bernoulli mean with error $\sqrt{\ln(4/\beta)/(2n)} + \ln(2/\beta)/(\varepsilon n)$ |
 | @prp-mean-impossible | no $\varepsilon$-DP algorithm estimates the mean of every real dataset to finite accuracy |
-| @lem-mean-clipped | clipping to a public $[a,b]$ gives sensitivity $(b-a)/n$ |
+| @lem-mean-clipped | clipping to a public $[u,v]$ gives sensitivity $(v-u)/n$ |
 | @prp-mean-lower | estimating a Gaussian mean with $|\mu| \le R$ needs $n \ge \ln((1-\beta)m)/\varepsilon$, with $m$ about $2R/(3\alpha)$ |
 | @thm-mean-naive | clipping to $[-R-\tau, R+\tau]$ needs $n = \tilde O(1/\alpha^2 + R/(\alpha\varepsilon))$ |
 | @lem-mean-coarse | a noisy histogram locates $\mu$ within $2\tau$ once $n > (8/\varepsilon)\ln(m/\beta)$ |
-| @thm-mean-histogram | histogram, then clipping, needs $n = \tilde O(1/\alpha^2 + 1/(\alpha\varepsilon) + \log R/\varepsilon)$ |
+| @thm-mean-histogram | histogram, then clipping, needs $n = \tilde O(1/\alpha^2 + 1/(\alpha\varepsilon) + \ln R/\varepsilon)$ |
 | @lem-mean-step | one clipped step halves the confidence interval down to the floor $\tau$ |
 | @thm-mean-shrinking | $T = \lceil\log_2(R/\tau)\rceil$ shrinking steps, then clipping, reach the same rate |
-| @thm-mean-multivariate | in $\mathbb R^d$, $n = \tilde O(d/\alpha^2 + d/(\alpha\varepsilon) + \sqrt d\log R/\varepsilon)$ under $(\varepsilon,\delta)$-DP, up to factors in $\log(1/\delta)$ |
-| @lem-mean-bias | clipping at distance $\tau$ from the mean biases it by at most $\sigma^2/\tau$ |
-| @cor-mean-heavy | with variance $1$ and $\tau = 3/\alpha$, $n = O(1/(\alpha^2\varepsilon))$ samples suffice |
+| @thm-mean-multivariate | in $\mathbb R^d$, $n = \tilde O(d/\alpha^2 + d/(\alpha\varepsilon) + \sqrt d\ln R/\varepsilon)$ under $(\varepsilon,\delta)$-DP, up to factors in $\ln(1/\delta)$ |
+| @lem-mean-bias | clipping at distance $C$ from the mean biases it by at most $\sigma_X^2/C$ |
+| @cor-mean-heavy | with variance $1$ and $C = 3/\alpha$, $n = O(1/(\alpha^2\varepsilon))$ samples suffice |
 
 : The chapter's results. {#tbl-mean-summary}
 

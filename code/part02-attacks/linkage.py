@@ -737,7 +737,7 @@ def plot_eccentricity_roc(rng: np.random.Generator) -> Figure:
         ylim=(-0.02, 1.02),
         xlabel="outsiders wrongly matched (false positive rate)",
         ylabel="insiders correctly re-identified",
-        title="Eccentricity threshold φ swept; dots at φ = 1.5",
+        title="Eccentricity threshold τ swept; dots at τ = 1.5",
     )
     ax.legend(fontsize=9, loc="lower right")
     return fig
@@ -765,7 +765,7 @@ def plot_sampling(rng: np.random.Generator) -> Figure:
         )
     left.set(
         xscale="log",
-        xlabel="sampling fraction π",
+        xlabel="sampling fraction q",
         ylabel="P(population unique | sample unique)",
         ylim=(-0.02, 1.02),
         title=f"Sample uniques that are real uniques, n = {BIG_POPULATION:,}",

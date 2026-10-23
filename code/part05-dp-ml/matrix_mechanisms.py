@@ -700,7 +700,7 @@ def plot_accuracy(rng: np.random.Generator) -> Figure:
     ax.set_xticks(eps_list, [f"{e:g}" for e in eps_list])
     ax.set_xlabel(r"$\varepsilon$ at $\delta = 10^{-5}$")
     ax.set_ylabel("test accuracy")
-    ax.set_title("5 epochs, batch 100, step size 1")
+    ax.set_title("5 epochs, batch 100, learning rate 1")
     ax.legend(fontsize=8)
     return fig
 

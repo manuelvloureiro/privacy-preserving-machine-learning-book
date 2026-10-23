@@ -6,16 +6,16 @@ The solutions use the chapter's notation. $\mathrm{Lap}_{\mathbb Z}(b)$ is the d
 
 ## The cost of Algorithm 1 {#sec-sol-discrete-1}
 
-> **Exercise 1.** **The cost of Algorithm 1.** Show that the expected number of uniform draws for $\mathrm{Bernoulli}(e^{-\gamma})$ is $e\sum_{j=0}^{n-1}e^{-j} + e^{-n}e^{\gamma - n}$ with $n = \lfloor\gamma\rfloor$, and that it is below $\frac{e}{1 - e^{-1}} + 1$ for every $\gamma$. *Check: 3.9414 for $\gamma = 5/2$.* *(Algorithm 1, @eq-bern-exp)*
+> **Exercise 1.** **The cost of Algorithm 1.** Show that the expected number of uniform draws for $\mathrm{Bern}(e^{-\lambda})$ is $e\sum_{j=0}^{n-1}e^{-j} + e^{-n}e^{\lambda - n}$ with $n = \lfloor\lambda\rfloor$, and that it is below $\frac{e}{1 - e^{-1}} + 1$ for every $\lambda$. *Check: 3.9414 for $\lambda = 5/2$.* *(Algorithm 1, @eq-bern-exp)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **One unit coin.** For $\gamma' \le 1$, the loop draws one uniform integer per coin $A_1, A_2, \dots, A_K$, so it costs $K$ draws, and $\mathbb E[K] = e^{\gamma'}$ by @eq-bern-exp. A coin with $\gamma' = 1$ costs $e$ on average.
-2. **Which coins run.** Write $\gamma = n + \phi$ with $n = \lfloor\gamma\rfloor$ and $0 \le \phi < 1$. The $(j + 1)$-th of the $n$ coins with probability $e^{-1}$ runs only if the first $j$ all came up 1, which has probability $e^{-j}$. The final coin, with probability $e^{-\phi}$, runs only if all $n$ came up 1, with probability $e^{-n}$.
+1. **One unit coin.** For $\lambda' \le 1$, the loop draws one uniform integer per coin $A_1, A_2, \dots, A_K$, so it costs $K$ draws, and $\mathbb E[K] = e^{\lambda'}$ by @eq-bern-exp. A coin with $\lambda' = 1$ costs $e$ on average.
+2. **Which coins run.** Write $\lambda = n + \phi$ with $n = \lfloor\lambda\rfloor$ and $0 \le \phi < 1$. The $(j + 1)$-th of the $n$ coins with probability $e^{-1}$ runs only if the first $j$ all came up 1, which has probability $e^{-j}$. The final coin, with probability $e^{-\phi}$, runs only if all $n$ came up 1, with probability $e^{-n}$.
 3. **Add the expected costs.** A coin that runs costs on average what step 1 says, so by linearity of expectation
 $$\mathbb E[\text{draws}] = \sum_{j=0}^{n-1}e^{-j}\cdot e + e^{-n}\cdot e^{\phi},$$
-which is the claimed formula since $\phi = \gamma - n$.
-4. **The bound.** The first sum is below the full geometric series $e\sum_{j \ge 0}e^{-j} = \frac{e}{1 - e^{-1}} = 4.3003$. For $n \ge 1$ the last term is $e^{\phi - n} \le e^{1 - 1} = 1$. For $n = 0$ the whole cost is $e^\gamma < e$. Either way the total is below $4.3003 + 1 = 5.3003$.
-5. **Check.** For $\gamma = 5/2$: $n = 2$, $\phi = \frac12$, so the cost is $e(1 + e^{-1}) + e^{-2}e^{1/2} = 3.7183 + 0.2231 = 3.9414$. Over 20,000 coins the script counts 3.9233 draws per coin. At $\gamma = \frac12$ the formula gives $e^{1/2} = 1.6487$ (simulated 1.6597) and at $\gamma = 1$ it gives $e + e^{-1} = 3.0862$ (simulated 3.0854).
+which is the claimed formula since $\phi = \lambda - n$.
+4. **The bound.** The first sum is below the full geometric series $e\sum_{j \ge 0}e^{-j} = \frac{e}{1 - e^{-1}} = 4.3003$. For $n \ge 1$ the last term is $e^{\phi - n} \le e^{1 - 1} = 1$. For $n = 0$ the whole cost is $e^\lambda < e$. Either way the total is below $4.3003 + 1 = 5.3003$.
+5. **Check.** For $\lambda = 5/2$: $n = 2$, $\phi = \frac12$, so the cost is $e(1 + e^{-1}) + e^{-2}e^{1/2} = 3.7183 + 0.2231 = 3.9414$. Over 20,000 coins the script counts 3.9233 draws per coin. At $\lambda = \frac12$ the formula gives $e^{1/2} = 1.6487$ (simulated 1.6597) and at $\lambda = 1$ it gives $e + e^{-1} = 3.0862$ (simulated 3.0854).
 
 *The cost jumps at each integer: just below 1 it is $e = 2.7183$, at 1 it is 3.0862, because the split always runs a final coin, even for $\phi = 0$, where that coin costs exactly one draw.*
 :::
@@ -36,7 +36,7 @@ $$\Pr[G_1 - G_2 = z] = \sum_{g \ge 0}(1 - r)r^{g + z}\cdot(1 - r)r^g = (1 - r)^2
 
 ## Variance of the discrete Laplace {#sec-sol-discrete-3}
 
-> **Exercise 3.** **Variance of the discrete Laplace.** Show $\frac{2r}{(1 - r)^2} = \frac{1}{2\sinh^2(1/(2b))}$, deduce that it is below $2b^2$, and show that $2b^2 - \operatorname{Var}Z \to \frac16$ as $b \to \infty$. *Check: 1.8413 at $b = 1$ and 199.8334 at $b = 10$.* *Hint: $\sinh x \ge x$ and $\sinh^2x = x^2 + x^4/3 + O(x^6)$.* *(Discrete Laplace)*
+> **Exercise 3.** **Variance of the discrete Laplace.** Show $\frac{2r}{(1 - r)^2} = \frac{1}{2\sinh^2(1/(2b))}$, deduce that it is below $2b^2$, and show that $2b^2 - \operatorname{Var}(Z) \to \frac16$ as $b \to \infty$. *Check: 1.8413 at $b = 1$ and 199.8334 at $b = 10$.* *Hint: $\sinh x \ge x$ and $\sinh^2x = x^2 + x^4/3 + O(x^6)$.* *(Discrete Laplace)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 Let $x = \frac{1}{2b}$, so $r = e^{-2x}$.
@@ -99,7 +99,7 @@ which is @eq-dgauss-accept.
 
 ## Sums of discrete Gaussians {#sec-sol-discrete-6}
 
-> **Exercise 6.** **Sums of discrete Gaussians.** Compute the PMF of the sum of two independent $\mathcal N_{\mathbb Z}(0, \sigma^2)$ variables and compare it with $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ for $\sigma^2 = \frac14$, 1 and 4. Show that the sum's variance is $2\operatorname{Var}X$, and explain why it differs from the variance of $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ at small $\sigma$. *Check: at $\sigma^2 = \frac14$, $\Pr[\text{sum} = 0] = 0.6414$ against 0.5641.* *(Discrete Gaussian, @eq-dgauss-var)*
+> **Exercise 6.** **Sums of discrete Gaussians.** Compute the PMF of the sum of two independent $\mathcal N_{\mathbb Z}(0, \sigma^2)$ variables and compare it with $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ for $\sigma^2 = \frac14$, 1 and 4. Show that the sum's variance is $2\operatorname{Var}(X)$, and explain why it differs from the variance of $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ at small $\sigma$. *Check: at $\sigma^2 = \frac14$, $\Pr[\text{sum} = 0] = 0.6414$ against 0.5641.* *(Discrete Gaussian, @eq-dgauss-var)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The convolution.** $\Pr[X_1 + X_2 = z] = \frac{1}{Z^2}\sum_xe^{-x^2/(2\sigma^2)}e^{-(z - x)^2/(2\sigma^2)}$, with $Z$ the discrete Gaussian normalizer.
@@ -107,7 +107,7 @@ which is @eq-dgauss-accept.
 $$\Pr[X_1 + X_2 = z] = \frac{e^{-z^2/(4\sigma^2)}}{Z^2}\sum_xe^{-(x - z/2)^2/\sigma^2}.$$
 The factor $e^{-z^2/(4\sigma^2)}$ is the $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ shape. The sum over $x$ is the lattice sum of @eq-poisson-theta with variance $\sigma^2/2$ and shift $c = z/2$: an integer for even $z$, a half-integer for odd $z$.
 3. **Why it is not a discrete Gaussian.** By the lemma, the lattice sum is larger at integer shifts. So even $z$ get a little more weight than $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ gives them, and odd $z$ a little less. By @eq-poisson-theta, the ratio of the two values is $\frac{1 + 2e^{-\pi^2\sigma^2} + \cdots}{1 - 2e^{-\pi^2\sigma^2} + \cdots}$, because $2\pi^2(\sigma^2/2)k^2 = \pi^2\sigma^2k^2$ and $\cos(2\pi k\cdot\frac12) = (-1)^k$.
-4. **Variance.** Variances of independent variables add, so $\operatorname{Var}(X_1 + X_2) = 2\operatorname{Var}X$, which is $2\sigma^2$ minus twice the deficit of @eq-dgauss-var. $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ has its own, much smaller deficit, because the deficit decays like $e^{-2\pi^2\sigma^2}$ and $\sigma^2$ has doubled.
+4. **Variance.** Variances of independent variables add, so $\operatorname{Var}(X_1 + X_2) = 2\operatorname{Var}(X)$, which is $2\sigma^2$ minus twice the deficit of @eq-dgauss-var. $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ has its own, much smaller deficit, because the deficit decays like $e^{-2\pi^2\sigma^2}$ and $\sigma^2$ has doubled.
 5. **Check** (@tbl-sol-discrete-sum).
 
 | $\sigma^2$ each | $\Pr[\text{sum} = 0]$ | $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ at 0 | Variance of the sum | Variance of $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ | TV |
@@ -118,7 +118,7 @@ The factor $e^{-z^2/(4\sigma^2)}$ is the $\mathcal N_{\mathbb Z}(0, 2\sigma^2)$ 
 
 : The sum of two independent discrete Gaussians against a single discrete Gaussian with twice the parameter. {#tbl-sol-discrete-sum}
 
-At $\sigma^2 = \frac14$, $\operatorname{Var}X = 0.2150$ (from the chapter's script), so the sum has variance 0.4300, while $\mathcal N_{\mathbb Z}(0, \frac12)$ has 0.4990. At $\sigma = 1$ the TV distance is $5.17\times10^{-5}$, of the order of $e^{-\pi^2} = 5.2\times10^{-5}$, as step 3 predicts.
+At $\sigma^2 = \frac14$, $\operatorname{Var}(X) = 0.2150$ (from the chapter's script), so the sum has variance 0.4300, while $\mathcal N_{\mathbb Z}(0, \frac12)$ has 0.4990. At $\sigma = 1$ the TV distance is $5.17\times10^{-5}$, of the order of $e^{-\pi^2} = 5.2\times10^{-5}$, as step 3 predicts.
 
 *When clients each add discrete Gaussian noise before secure aggregation, the total is not exactly a discrete Gaussian. For $\sigma \ge 1$ per client the difference is far below anything that matters, and Kairouz, Liu and Steinke (2021) bound it.*
 :::
@@ -128,8 +128,8 @@ At $\sigma^2 = \frac14$, $\operatorname{Var}X = 0.2150$ (from the chapter's scri
 > **Exercise 7.** **The support argument as a test.** In the 12-bit toy, the test "say $D$ when $y \notin \mathcal Y_{D'}$, and $D'$ otherwise" never says $D$ when the data are $D'$, so its false negative rate is 0. Using the hypothesis-testing form of $(\varepsilon, \delta)$-DP, show that the toy sampler is not $(\varepsilon, \delta)$-DP for any $\varepsilon$ when $\delta < 0.4791$, and find the bound the reverse test gives. Then show that after snapping to $\Lambda = 1$ and clamping to $[-10, 10]$, every integer in $[-10, 10]$ is reachable from both inputs. *Check: the reverse test gives $\delta \ge 0.2033$.* *(Support argument, snapping)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The test.** Say "$D$" when $y \in S = \mathcal Y_D \setminus \mathcal Y_{D'}$, and "$D'$" otherwise. With the convention of [The definition of differential privacy](../../book-full/part03-dp-foundations/01-definition.md), the false positive rate $\alpha$ is the chance of saying "$D'$" when the data are $D$, and the false negative rate $\beta$ the chance of saying "$D$" when they are $D'$. Here $\beta = \Pr[M(D') \in S] = 0$, because $M(D')$ never lands in $S$, and $\alpha = 1 - \Pr[M(D) \in S] = 1 - 0.4791$ (@tbl-discrete-float).
-2. **The constraint.** $(\varepsilon, \delta)$-DP makes every test satisfy $\alpha + e^\varepsilon\beta \ge 1 - \delta$; this is the hypothesis-testing form in [The definition of differential privacy](../../book-full/part03-dp-foundations/01-definition.md), and also the definition applied to the event $S$ on which the test says "$D$". With $\beta = 0$ the factor $e^\varepsilon$ multiplies nothing, and the inequality reads $1 - 0.4791 \ge 1 - \delta$, that is, $0.4791 \le \delta$. So for $\delta < 0.4791$ no $\varepsilon$ works.
+1. **The test.** Say "$D$" when $y \in S = \mathcal Y_D \setminus \mathcal Y_{D'}$, and "$D'$" otherwise. With the convention of [The definition of differential privacy](../../book-full/part03-dp-foundations/01-definition.md), the false positive rate (FPR) is the chance of saying "$D'$" when the data are $D$, and the false negative rate (FNR) the chance of saying "$D$" when they are $D'$. Here $\mathrm{FNR} = \Pr[M(D') \in S] = 0$, because $M(D')$ never lands in $S$, and $\mathrm{FPR} = 1 - \Pr[M(D) \in S] = 1 - 0.4791$ (@tbl-discrete-float).
+2. **The constraint.** $(\varepsilon, \delta)$-DP makes every test satisfy $\mathrm{FPR} + e^\varepsilon\,\mathrm{FNR} \ge 1 - \delta$; this is the hypothesis-testing form in [The definition of differential privacy](../../book-full/part03-dp-foundations/01-definition.md), and also the definition applied to the event $S$ on which the test says "$D$". With $\mathrm{FNR} = 0$ the factor $e^\varepsilon$ multiplies nothing, and the inequality reads $1 - 0.4791 \ge 1 - \delta$, that is, $0.4791 \le \delta$. So for $\delta < 0.4791$ no $\varepsilon$ works.
 3. **The reverse test.** Swap the roles: say "$D'$" when $y \in S' = \mathcal Y_{D'} \setminus \mathcal Y_D$, and "$D$" otherwise. Its false positive rate is $\Pr[M(D) \in S'] = 0$ and its true positive rate is $\Pr[M(D') \in S'] = 0.2033$. DP must hold in both directions, and the other inequality of the hypothesis-testing form, $\mathrm{TPR} \le e^\varepsilon\cdot\mathrm{FPR} + \delta$, then gives $\delta \ge 0.2033$. The direction from $D$ gives the stronger bound.
 4. **Snapping.** With $b = 1$, an output $k \in \{-9, \dots, 9\}$ arises from input $f \in \{0, 1\}$ when the rounded noise lands in an interval of width 1 around $k - f$, which lies in $[-10.5, 9.5]$. The noise magnitudes $\mathrm{round}(\ln(1/u))$ run from about $2^{-12}$ up to $40\ln2 \approx 27.7$, and consecutive ones differ by at most about $2^{-11}$ of their size (consecutive $u$ differ by a relative step of at most $2^{-11}$, and $\ln$ turns a relative step into an additive one). So every interval of width 1 below 27.7 contains noise values, with either sign. The clamp sends everything beyond $\pm9.5$ to $\pm10$, which both inputs reach. So all 21 integers in $[-10, 10]$ are reachable from both inputs, and the script confirms both supports have exactly 21 points with $\Pr[M(D) \in S] = 0$.
 

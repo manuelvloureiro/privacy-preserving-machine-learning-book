@@ -20,7 +20,7 @@ Start from the worksheet of [Threat models and privacy games](01-threat-models.m
 
 Then write the blocking rules into the plan, as in @tbl-risk-thresholds. The membership rule uses two rates. The true positive rate (TPR) is the share of members an attack flags, and the false positive rate (FPR) the share of non-members it wrongly flags. At an FPR of $10^{-3}$, the rule blocks when the lower end of the TPR's 95% confidence interval exceeds ten times the FPR, so a lucky run cannot trigger it. The factor of ten is a policy choice: an attack may beat chance, but not tenfold.
 
-Several remedies in the table use differential privacy (DP), [Part 3](../part03-dp-foundations/01-definition.md)'s guarantee that caps what any attack can learn about one person by a privacy level $\varepsilon$. One is stochastic gradient descent (SGD) with each example's gradient clipped and noise added, called [DP-SGD](../part05-dp-ml/02-dp-sgd.md).
+Several remedies in the table use differential privacy (DP), [Part 3](../part03-dp-foundations/01-definition.md)'s guarantee that caps what any attack can learn about one person by a privacy level $\varepsilon$. One is stochastic gradient descent (SGD) with each record's gradient clipped and noise added, called [DP-SGD](../part05-dp-ml/02-dp-sgd.md).
 
 | Artefact | The adversary sees | Attack | Blocks the release when | Then |
 | --- | --- | --- | --- | --- |

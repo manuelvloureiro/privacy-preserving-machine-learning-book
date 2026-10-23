@@ -13,7 +13,7 @@ The organizing idea of this chapter is that **differential privacy (DP) is a pro
 | The support argument (@eq-support-delta) | Outputs reachable from $D$ but not from $D'$ force $\delta \ge \Pr[M(D) \in S]$ | Auditing any implementation; counterexample tests |
 | Floating-point Laplace | The textbook sampler's outputs depend on $f(D)$ through their low-order bits | Why libraries don't ship it |
 | The snapping mechanism | Rounding to a grid $\Lambda \ge b$ and clamping restores a bounded privacy loss | Laplace noise when the output must be a float |
-| Exact $\mathrm{Bernoulli}(e^{-\gamma})$ | A coin with probability $e^{-\gamma}$ from uniform integers, for rational $\gamma$ | The building block of both samplers below |
+| Exact $\mathrm{Bern}(e^{-\lambda})$ | A coin with probability $e^{-\lambda}$ from uniform integers, for rational $\lambda$ | The building block of both samplers below |
 | The discrete Laplace mechanism | $\varepsilon = \Delta_1 f/b$ for integer-valued $f$, sampled exactly | Counts and histograms |
 | The discrete Gaussian mechanism | Same privacy loss as the continuous Gaussian at integer points; $\delta(\varepsilon)$ close to it; variance below $\sigma^2$ | Census releases; noise added before secure aggregation |
 | The exact discrete Gaussian sampler | Rejection from the discrete Laplace, at most about 2 proposals per draw | Any deployment of the discrete Gaussian |
@@ -32,7 +32,7 @@ The exact samplers below need only one primitive: a uniform integer in $\{0, 1, 
 
 To make a coin that comes up 1 with probability $n/d$, draw a uniform integer below $d$ and call it a success when it is one of the first $n$ values. For integers $0 \le n \le d$, let $U$ be uniform on $\{0, \dots, d - 1\}$. Then
 $$\Pr[U < n] = \frac{n}{d},$$
-because there are $n$ favourable values out of $d$ equally likely ones. So $\mathbf 1[U < n]$, the indicator that is 1 when $U < n$ and 0 otherwise, is an exact $\mathrm{Bernoulli}(n/d)$ draw, with no rounding anywhere. A coin with an *irrational* bias such as $e^{-1}$ can't be made this way, because no fraction $n/d$ equals it, which is why Algorithm 1 below exists.
+because there are $n$ favourable values out of $d$ equally likely ones. So $\mathbf 1[U < n]$, the indicator that is 1 when $U < n$ and 0 otherwise, is an exact $\mathrm{Bern}(n/d)$ draw, with no rounding anywhere. A coin with an *irrational* bias such as $e^{-1}$ can't be made this way, because no fraction $n/d$ equals it, which is why Algorithm 1 below exists.
 
 ### Fact 2: rejection sampling {#sec-discrete-fact-rejection}
 
@@ -65,7 +65,7 @@ In particular, if $\Pr[M(D) \in S] > 0$, then $M$ is not $\varepsilon$-DP for an
 ### Derivation
 
 1. **Apply the definition to the event $S$.** $(\varepsilon, \delta)$-DP says $\Pr[M(D) \in S] \le e^\varepsilon\Pr[M(D') \in S] + \delta$ for every event. Here $\Pr[M(D') \in S] = 0$ by the choice of $S$, so the multiplicative term is $e^\varepsilon \cdot 0 = 0$ however large $e^\varepsilon$ is, and what remains is $\Pr[M(D) \in S] \le \delta$. That is @eq-support-delta.
-2. **Read it as an attack.** Use the convention of [The definition of differential privacy](01-definition.md): a test decides between "the data were $D$" and "the data were $D'$", its false positive rate $\alpha$ is the chance of saying "$D'$" when the data were $D$, and its false negative rate $\beta$ is the chance of saying "$D$" when the data were $D'$. Consider the test "say $D$ when $y \in S$, and $D'$ otherwise". Under $D'$ the output never lands in $S$, so the test never says "$D$" and $\beta = 0$. Under $D$ it says "$D'$" whenever $y$ misses $S$, so $\alpha = 1 - \Pr[M(D) \in S]$. The hypothesis-testing form of DP in that chapter says that every test has $\alpha + e^\varepsilon\beta \ge 1 - \delta$; this is the definition applied to the event on which the test says "$D$". With $\beta = 0$ the factor $e^\varepsilon$ multiplies nothing, and the inequality reads $1 - \Pr[M(D) \in S] \ge 1 - \delta$, which is again $\Pr[M(D) \in S] \le \delta$. And whenever this test says "$D$", it is right.
+2. **Read it as an attack.** Use the convention of [The definition of differential privacy](01-definition.md): a test decides between "the data were $D$" and "the data were $D'$", its false positive rate (FPR) is the chance of saying "$D'$" when the data were $D$, and its false negative rate (FNR) is the chance of saying "$D$" when the data were $D'$. Consider the test "say $D$ when $y \in S$, and $D'$ otherwise". Under $D'$ the output never lands in $S$, so the test never says "$D$" and $\mathrm{FNR} = 0$. Under $D$ it says "$D'$" whenever $y$ misses $S$, so $\mathrm{FPR} = 1 - \Pr[M(D) \in S]$. The hypothesis-testing form of DP in that chapter says that every test has $\mathrm{FPR} + e^\varepsilon\,\mathrm{FNR} \ge 1 - \delta$; this is the definition applied to the event on which the test says "$D$". With $\mathrm{FNR} = 0$ the factor $e^\varepsilon$ multiplies nothing, and the inequality reads $1 - \Pr[M(D) \in S] \ge 1 - \delta$, which is again $\Pr[M(D) \in S] \le \delta$. And whenever this test says "$D$", it is right.
 3. **Floating-point outputs form a finite set that depends on $f(D)$.** A float with a $p$-bit significand (IEEE 754 doubles have $p = 53$) is $m\cdot2^e$ with an integer $m < 2^p$ and an integer exponent $e$. Between $2^e$ and $2^{e+1}$ the floats are spaced $2^{e - p + 1}$ apart, so they are dense near 0 and sparse far from it. The sampler computes $\mathrm{round}(f(D) + \xi\cdot\mathrm{round}(b\ln(1/U)))$. Its outputs are the rounded sums of $f(D)$ with a fixed, finite set of noise values. Shifting by $f(D') \ne f(D)$ before rounding lands on a different set of floats.
 4. **Why the two sets differ.** Near 0 the noise values are fine-grained: the floats there are spaced far more closely than near 1. $M(D)$ with $f(D) = 0$ outputs those noise values as they are. $M(D')$ with $f(D') = 1$ must produce an output near 0 as $1 - (\text{noise near } 1)$, which is a multiple of the coarser spacing of the noise near 1. So most of the fine-grained outputs of $M(D)$ near 0 are impossible under $M(D')$. Away from the inputs the two grids interleave and coincide only in part. @fig-discrete-float-support (left) shows a narrow window: 3 of the 9 outputs of $M(D)$ there can't come from $M(D')$, and 4 of the 10 outputs of $M(D')$ can't come from $M(D)$.
 
@@ -110,56 +110,56 @@ If the output must be a float, the low-order bits have to go. The snapping mecha
 
 ### Statement
 
-In words: clamp the true answer into $[-B, B]$, add Laplace noise computed in floating point, round the result to the nearest multiple of a power of 2 at least as large as the noise scale, and clamp again. Let $f$ have sensitivity 1, let $\lambda$ be the noise scale, let $\Lambda$ be the smallest power of 2 with $\Lambda \ge \lambda$, and let $B$ be a clamping bound. The **snapping mechanism** outputs
-$$M(D) = \mathrm{clamp}_B\Big(\big\lfloor \mathrm{clamp}_B(f(D)) \oplus \xi\otimes\lambda\otimes\mathrm{LN}(U^*)\big\rceil_\Lambda\Big),$$
+In words: clamp the true answer into $[-B, B]$, add Laplace noise computed in floating point, round the result to the nearest multiple of a power of 2 at least as large as the noise scale, and clamp again. Let $f$ have sensitivity 1, let $b$ be the noise scale, let $\Lambda$ be the smallest power of 2 with $\Lambda \ge b$, and let $[-B, B]$ be the clamping range. The **snapping mechanism** outputs
+$$M(D) = \mathrm{clamp}_B\Big(\big\lfloor \mathrm{clamp}_B(f(D)) \oplus \xi\otimes b\otimes\mathrm{LN}(U^*)\big\rceil_\Lambda\Big),$$
 where $\oplus$, $\otimes$ and $\mathrm{LN}$ are floating-point addition, multiplication and logarithm, $\xi$ is a fair sign, $U^*$ is an ideal uniform double, $\lfloor\cdot\rceil_\Lambda$ rounds to the nearest multiple of $\Lambda$, and $\mathrm{clamp}_B$ maps to $[-B, B]$. ($\mathrm{LN}(U^*)$ is negative, and the fair sign $\xi$ makes the sign of the noise irrelevant.)
 
-Its guarantee is the exact Laplace mechanism's $\varepsilon = 1/\lambda$ plus two small terms that pay for floating-point error. The error of one floating-point operation is at most a fraction $\eta = 2^{-53}$ of the number it produces, and clamping keeps every number below $B$ in size, so the terms grow with $B\eta$. Mironov (2012, Theorem 1) proves that for $\lambda < B < 2^{46}\lambda$ the mechanism is $\varepsilon$-DP with
-$$\varepsilon = \frac{1 + 12B\eta}{\lambda} + \frac{2^{-49}B}{\lambda}, \qquad \eta = 2^{-53}.$$
+Its guarantee is the exact Laplace mechanism's $\varepsilon = 1/b$ plus two small terms that pay for floating-point error. The error of one floating-point operation is at most a fixed fraction of the number it produces, the unit roundoff of doubles, written $\omega = 2^{-53}$. Clamping keeps every number below $B$ in size, so the terms grow with $B\omega$. Mironov (2012, Theorem 1) proves that for $b < B < 2^{46}b$ the mechanism is $\varepsilon$-DP with
+$$\varepsilon = \frac{1 + 12B\omega}{b} + \frac{2^{-49}B}{b}, \qquad \omega = 2^{-53}.$$
 
 ### Derivation (outline)
 
-1. **Clamping the input** bounds $|f(D)| \le B$, so every sum is computed at magnitudes where the float spacing is at most about $B\eta$.
-2. **Rounding to a multiple of $\Lambda \ge \lambda$** discards every bit finer than $\Lambda$. The output is one of the multiples of $\Lambda$ in $[-B, B]$, the same finite set for every input, so the support argument of @sec-discrete-float has nothing to bite on: no output is reachable from one input only.
-3. **Each grid point collects an interval of noise values** of width $\Lambda$: all noise values that round to that point. In exact arithmetic, its probability under $D$ and under $D'$ is the probability that a Laplace variable lands in one of two intervals shifted by $|f(D) - f(D')| \le 1$. The Laplace density changes by at most a factor $e^{1/\lambda}$ under a shift of 1, because $e^{-|z|/\lambda}$ and $e^{-|z - 1|/\lambda}$ differ in the exponent by at most $1/\lambda$, so the ratio of the two interval probabilities is at most $e^{1/\lambda}$. In other words, rounding exact Laplace noise is post-processing of the exact Laplace mechanism, and post-processing never increases the privacy loss.
-4. **Floating-point error moves each interval's endpoints** by a relative amount of order $\eta$, measured against magnitudes up to $B$. Bounding the effect of those moves on the interval probabilities gives the extra terms proportional to $B\eta/\lambda$. Mironov (2012, §5) does this bookkeeping.
+1. **Clamping the input** bounds $|f(D)| \le B$, so every sum is computed at magnitudes where the float spacing is at most about $B\omega$.
+2. **Rounding to a multiple of $\Lambda \ge b$** discards every bit finer than $\Lambda$. The output is one of the multiples of $\Lambda$ in $[-B, B]$, the same finite set for every input, so the support argument of @sec-discrete-float has nothing to bite on: no output is reachable from one input only.
+3. **Each grid point collects an interval of noise values** of width $\Lambda$: all noise values that round to that point. In exact arithmetic, its probability under $D$ and under $D'$ is the probability that a Laplace variable lands in one of two intervals shifted by $|f(D) - f(D')| \le 1$. The Laplace density changes by at most a factor $e^{1/b}$ under a shift of 1, because $e^{-|z|/b}$ and $e^{-|z - 1|/b}$ differ in the exponent by at most $1/b$, so the ratio of the two interval probabilities is at most $e^{1/b}$. In other words, rounding exact Laplace noise is post-processing of the exact Laplace mechanism, and post-processing never increases the privacy loss.
+4. **Floating-point error moves each interval's endpoints** by a relative amount of order $\omega$, measured against magnitudes up to $B$. Bounding the effect of those moves on the interval probabilities gives the extra terms proportional to $B\omega/b$. Mironov (2012, §5) does this bookkeeping.
 
 ### Interpretation
 
-The price is accuracy: rounding to $\Lambda$ adds up to $\Lambda/2 \le \lambda$ of error (since $\Lambda$ is the smallest power of 2 at or above $\lambda$, it is below $2\lambda$), and clamping biases answers near $\pm B$. The extra terms in $\varepsilon$ are tiny for doubles. With $\lambda = 1$ and $B = 10$, the first term exceeds $1/\lambda$ by $12B\eta = 120\cdot2^{-53}$ and the second is $10\cdot2^{-49}$, so the excess is $120\cdot2^{-53} + 10\cdot2^{-49} \approx 3.1\times10^{-14}$. The guarantee also assumes a correctly behaved logarithm and an ideal uniform $U^*$, which a library has to supply.
+The price is accuracy: rounding to $\Lambda$ adds up to $\Lambda/2 \le b$ of error (since $\Lambda$ is the smallest power of 2 at or above $b$, it is below $2b$), and clamping biases answers near $\pm B$. The extra terms in $\varepsilon$ are tiny for doubles. With $b = 1$ and $B = 10$, the first term exceeds $1/b$ by $12B\omega = 120\cdot2^{-53}$ and the second is $10\cdot2^{-49}$, so the excess is $120\cdot2^{-53} + 10\cdot2^{-49} \approx 3.1\times10^{-14}$. The guarantee also assumes a correctly behaved logarithm and an ideal uniform $U^*$, which a library has to supply.
 
 ### Example: the toy, snapped
 
-Snap the toy sampler to integers ($\Lambda = 1$ for $b = 1$) and clamp to $[-10, 10]$. Both inputs now reach the same 21 outputs, the integers from $-10$ to 10, so $\Pr[M(D) \in S] = 0$ at every precision (@fig-discrete-float-support, right). The largest privacy loss over those outputs, the largest log-ratio of an output's probabilities under the two inputs, is $\max_y|L_{D,D'}(y)| = 1.0010$ at $p = 12$ and 1.0002 at $p = 14$, against $\varepsilon = 1$ for the exact mechanism. The excess shrinks with precision, as the $\eta$ terms predict.
+Snap the toy sampler to integers ($\Lambda = 1$ for $b = 1$) and clamp to $[-10, 10]$. Both inputs now reach the same 21 outputs, the integers from $-10$ to 10, so $\Pr[M(D) \in S] = 0$ at every precision (@fig-discrete-float-support, right). The largest privacy loss over those outputs, the largest log-ratio of an output's probabilities under the two inputs, is $\max_y|L_{D,D'}(y)| = 1.0010$ at $p = 12$ and 1.0002 at $p = 14$, against $\varepsilon = 1$ for the exact mechanism. The excess shrinks with precision, as the $\omega$ terms predict.
 
 ### Check yourself
 
-- Why must the grid be at least as coarse as $\lambda$? *(Finer grids keep bits whose pattern still depends on $f(D)$. The proof needs each grid cell to collect a whole interval of noise values, wide enough that floating-point errors at its edges move only a tiny fraction of its probability.)*
+- Why must the grid be at least as coarse as $b$? *(Finer grids keep bits whose pattern still depends on $f(D)$. The proof needs each grid cell to collect a whole interval of noise values, wide enough that floating-point errors at its edges move only a tiny fraction of its probability.)*
 - Is snapping post-processing of the floating-point Laplace mechanism? *(It is post-processing, but post-processing of a mechanism that isn't DP proves nothing. The proof compares the snapped output with snapped exact Laplace noise and bounds the difference.)*
 
-## Exact $\mathrm{Bernoulli}(e^{-\gamma})$ {#sec-discrete-bernoulli-exp}
+## Exact $\mathrm{Bern}(e^{-\lambda})$ {#sec-discrete-bernoulli-exp}
 
 ### Context
 
-Both exact samplers below need a coin that comes up 1 with probability $e^{-\gamma}$ for a rational $\gamma \ge 0$. The obvious code, `random() < exp(-gamma)`, is inexact twice over: `exp` rounds, and `random()` has only 53 bits. Algorithm 1 of Canonne, Kamath and Steinke (2020), based on a method of von Neumann (1951), makes the coin from rational coins alone.
+Both exact samplers below need a coin that comes up 1 with probability $e^{-\lambda}$ for a rational $\lambda \ge 0$. The obvious code, `random() < exp(-gamma)`, is inexact twice over: `exp` rounds, and `random()` has only 53 bits. Algorithm 1 of Canonne, Kamath and Steinke (2020), based on a method of von Neumann (1951), makes the coin from rational coins alone.
 
 ### Statement
 
-The idea is to build $e^{-\gamma}$ from its power series $e^{-\gamma} = 1 - \gamma + \frac{\gamma^2}{2!} - \frac{\gamma^3}{3!} + \cdots$, whose terms are probabilities you can produce with rational coins. Flip coins whose success probabilities shrink as $\gamma, \gamma/2, \gamma/3, \dots$ until one fails. The chance of surviving $k$ flips is then $\gamma \cdot \frac\gamma2 \cdots \frac\gamma k = \gamma^k/k!$, the $k$-th term of the series. The series alternates in sign, and the parity of the stopping time produces exactly that alternation.
+The idea is to build $e^{-\lambda}$ from its power series $e^{-\lambda} = 1 - \lambda + \frac{\lambda^2}{2!} - \frac{\lambda^3}{3!} + \cdots$, whose terms are probabilities you can produce with rational coins. Flip coins whose success probabilities shrink as $\lambda, \lambda/2, \lambda/3, \dots$ until one fails. The chance of surviving $k$ flips is then $\lambda \cdot \frac\lambda2 \cdots \frac\lambda k = \lambda^k/k!$, the $k$-th term of the series. The series alternates in sign, and the parity of the stopping time produces exactly that alternation.
 
-For $0 \le \gamma \le 1$: draw $A_k \sim \mathrm{Bernoulli}(\gamma/k)$ for $k = 1, 2, \dots$, and stop at the first $A_K = 0$, so $K$ is the index of the first failure. Output 1 if $K$ is odd and 0 if $K$ is even. Then the survival probability, the output probability and the mean number of flips are
-$$\Pr[K > k] = \frac{\gamma^k}{k!}, \qquad \Pr[K\ \text{odd}] = e^{-\gamma}, \qquad \mathbb E[K] = e^\gamma.$$ {#eq-bern-exp}
-For $\gamma > 1$ the first coin would need a probability above 1, so split $\gamma$ into its integer part $\lfloor\gamma\rfloor$ and a remainder below 1: draw $\lfloor\gamma\rfloor$ coins with probability $e^{-1}$, stopping at the first 0, and then one coin with probability $e^{-(\gamma - \lfloor\gamma\rfloor)}$. Output 1 only if all of them are 1.
+For $0 \le \lambda \le 1$: draw $A_k \sim \mathrm{Bern}(\lambda/k)$ for $k = 1, 2, \dots$, and stop at the first $A_K = 0$, so $K$ is the index of the first failure. Output 1 if $K$ is odd and 0 if $K$ is even. Then the survival probability, the output probability and the mean number of flips are
+$$\Pr[K > k] = \frac{\lambda^k}{k!}, \qquad \Pr[K\ \text{odd}] = e^{-\lambda}, \qquad \mathbb E[K] = e^\lambda.$$ {#eq-bern-exp}
+For $\lambda > 1$ the first coin would need a probability above 1, so split $\lambda$ into its integer part $\lfloor\lambda\rfloor$ and a remainder below 1: draw $\lfloor\lambda\rfloor$ coins with probability $e^{-1}$, stopping at the first 0, and then one coin with probability $e^{-(\lambda - \lfloor\lambda\rfloor)}$. Output 1 only if all of them are 1.
 
 ### Derivation
 
-1. **The survival probabilities.** $K > k$ means the first $k$ coins all came up 1. They are independent with probabilities $\gamma/1, \gamma/2, \dots, \gamma/k$, so $\Pr[K > k]$ is their product, $\gamma^k/k!$. For $\gamma = n/d$, each $\gamma/j = n/(dj)$ is a ratio of integers, at most 1 since $\gamma \le 1$, so each coin is exact by Fact 1.
-2. **The point probabilities.** $K = k$ means the coins survived $k - 1$ flips but not $k$, so $\Pr[K = k] = \Pr[K > k - 1] - \Pr[K > k] = \frac{\gamma^{k-1}}{(k-1)!} - \frac{\gamma^k}{k!}$.
-3. **Add over odd $k$.** With $k = 1, 3, 5, \dots$ the terms are $(1 - \gamma) + (\frac{\gamma^2}{2!} - \frac{\gamma^3}{3!}) + (\frac{\gamma^4}{4!} - \frac{\gamma^5}{5!}) + \cdots$. Every power $\gamma^j$ appears exactly once: with a plus sign when $j = k - 1$ is even and a minus sign when $j = k$ is odd. So the sum is the series $\sum_{j \ge 0}(-\gamma)^j/j! = e^{-\gamma}$.
-4. **The mean.** A variable $K$ on $\{1, 2, \dots\}$ can be written as a count, $K = \sum_{k \ge 0}\mathbf 1[K > k]$, since exactly $K$ of the indicators $\mathbf 1[K > 0], \mathbf 1[K > 1], \dots$ are 1. Taking expectations, $\mathbb E[K] = \sum_{k \ge 0}\Pr[K > k] = \sum_k\gamma^k/k! = e^\gamma$. Each round uses one uniform integer, so a coin costs $e^\gamma \le e$ uniform draws on average.
-5. **Large $\gamma$.** $e^{-\gamma} = (e^{-1})^{\lfloor\gamma\rfloor}\,e^{-(\gamma - \lfloor\gamma\rfloor)}$, and a product of probabilities is the probability that independent coins all come up 1. Each coin has an exponent of at most 1, so steps 1–3 cover it. Stopping at the first 0 doesn't change the output, which is 0 as soon as one coin is 0.
+1. **The survival probabilities.** $K > k$ means the first $k$ coins all came up 1. They are independent with probabilities $\lambda/1, \lambda/2, \dots, \lambda/k$, so $\Pr[K > k]$ is their product, $\lambda^k/k!$. For $\lambda = n/d$, each $\lambda/j = n/(dj)$ is a ratio of integers, at most 1 since $\lambda \le 1$, so each coin is exact by Fact 1.
+2. **The point probabilities.** $K = k$ means the coins survived $k - 1$ flips but not $k$, so $\Pr[K = k] = \Pr[K > k - 1] - \Pr[K > k] = \frac{\lambda^{k-1}}{(k-1)!} - \frac{\lambda^k}{k!}$.
+3. **Add over odd $k$.** With $k = 1, 3, 5, \dots$ the terms are $(1 - \lambda) + (\frac{\lambda^2}{2!} - \frac{\lambda^3}{3!}) + (\frac{\lambda^4}{4!} - \frac{\lambda^5}{5!}) + \cdots$. Every power $\lambda^j$ appears exactly once: with a plus sign when $j = k - 1$ is even and a minus sign when $j = k$ is odd. So the sum is the series $\sum_{j \ge 0}(-\lambda)^j/j! = e^{-\lambda}$.
+4. **The mean.** A variable $K$ on $\{1, 2, \dots\}$ can be written as a count, $K = \sum_{k \ge 0}\mathbf 1[K > k]$, since exactly $K$ of the indicators $\mathbf 1[K > 0], \mathbf 1[K > 1], \dots$ are 1. Taking expectations, $\mathbb E[K] = \sum_{k \ge 0}\Pr[K > k] = \sum_k\lambda^k/k! = e^\lambda$. Each round uses one uniform integer, so a coin costs $e^\lambda \le e$ uniform draws on average.
+5. **Large $\lambda$.** $e^{-\lambda} = (e^{-1})^{\lfloor\lambda\rfloor}\,e^{-(\lambda - \lfloor\lambda\rfloor)}$, and a product of probabilities is the probability that independent coins all come up 1. Each coin has an exponent of at most 1, so steps 1–3 cover it. Stopping at the first 0 doesn't change the output, which is 0 as soon as one coin is 0.
 
-**Concretely, for $\gamma = 0.7$** (@tbl-discrete-bern-k). The odd rows add up to $0.3000 + 0.1878 + 0.0086 + \cdots = 0.4966 = e^{-0.7}$.
+**Concretely, for $\lambda = 0.7$** (@tbl-discrete-bern-k). The odd rows add up to $0.3000 + 0.1878 + 0.0086 + \cdots = 0.4966 = e^{-0.7}$.
 
 | $K$ | Coins seen | $\Pr[K = k]$ | Output |
 | --- | --- | --- | --- |
@@ -169,24 +169,24 @@ For $\gamma > 1$ the first coin would need a probability above 1, so split $\gam
 | 4 | three 1s, then 0 | $0.0472$ | 0 |
 | 5 | four 1s, then 0 | $0.0086$ | 1 |
 
-: Algorithm 1 for $\gamma = 0.7$, outcome by outcome. The output is the parity of the index of the first 0. {#tbl-discrete-bern-k}
+: Algorithm 1 for $\lambda = 0.7$, outcome by outcome. The output is the parity of the index of the first 0. {#tbl-discrete-bern-k}
 
 In row 3, $0.245 = 0.7^2/2!$ is the chance of surviving two flips and $0.0572 = 0.7^3/3!$ the chance of surviving three; the difference is the chance of stopping at exactly the third.
 
-![Left: the distribution of $K$ for $\gamma = 0.7$, exact and from 5,000 runs, with odd $K$ (output 1) and even $K$ (output 0) coloured. Right: the frequency of 1s from Algorithm 1 against $e^{-\gamma}$, with the expected number of uniform draws per coin on the right axis.](figures/discrete_bernoulli_exp.svg){#fig-discrete-bernoulli-exp}
+![Left: the distribution of $K$ for $\lambda = 0.7$, exact and from 5,000 runs, with odd $K$ (output 1) and even $K$ (output 0) coloured. Right: the frequency of 1s from Algorithm 1 against $e^{-\lambda}$, with the expected number of uniform draws per coin on the right axis.](figures/discrete_bernoulli_exp.svg){#fig-discrete-bernoulli-exp}
 
 ### Interpretation
 
-The coin is exact: no step rounds, and the only randomness is uniform integers. The cost is small and bounded: at most $e$ draws for $\gamma \le 1$, and below $\frac{e}{1 - e^{-1}} + 1 \approx 5.3$ for any $\gamma$ ([Exercise 1](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-1)). The cost curve in @fig-discrete-bernoulli-exp jumps at each integer. At $\gamma = 1$ the algorithm runs one full $e^{-1}$ coin and then a coin for the fractional part 0, which costs one extra draw when the first coin comes up 1 (probability $e^{-1}$), so the cost goes from $e = 2.7183$ just below 1 to $e + e^{-1} = 3.0862$ at 1. Splitting $\gamma$ differently would smooth this out; it doesn't matter for exactness.
+The coin is exact: no step rounds, and the only randomness is uniform integers. The cost is small and bounded: at most $e$ draws for $\lambda \le 1$, and below $\frac{e}{1 - e^{-1}} + 1 \approx 5.3$ for any $\lambda$ ([Exercise 1](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-1)). The cost curve in @fig-discrete-bernoulli-exp jumps at each integer. At $\lambda = 1$ the algorithm runs one full $e^{-1}$ coin and then a coin for the fractional part 0, which costs one extra draw when the first coin comes up 1 (probability $e^{-1}$), so the cost goes from $e = 2.7183$ just below 1 to $e + e^{-1} = 3.0862$ at 1. Splitting $\lambda$ differently would smooth this out; it doesn't matter for exactness.
 
 ### Example: one coin per proposal
 
-Algorithm 3 below accepts a proposal $y$ with probability $e^{-\gamma}$ for a rational $\gamma = (|y| - \sigma^2/t)^2/(2\sigma^2)$, where $\sigma^2$ is the target variance and $t$ an integer scale. With $\sigma^2 = 4$, $t = 3$ and $y = 4$, that is $\gamma = (4 - 4/3)^2/8 = (8/3)^2/8 = 8/9$, so the coin is 1 with probability $e^{-8/9} = 0.4111$ and costs $e^{8/9} \approx 2.43$ draws on average. Everything stays a fraction: $\gamma$ is computed with `fractions.Fraction`, and each $\gamma/k$ is a ratio of integers.
+Algorithm 3 below accepts a proposal $y$ with probability $e^{-\lambda}$ for a rational $\lambda = (|y| - \sigma^2/t)^2/(2\sigma^2)$, where $\sigma^2$ is the target variance and $t$ an integer scale. With $\sigma^2 = 4$, $t = 3$ and $y = 4$, that is $\lambda = (4 - 4/3)^2/8 = (8/3)^2/8 = 8/9$, so the coin is 1 with probability $e^{-8/9} = 0.4111$ and costs $e^{8/9} \approx 2.43$ draws on average. Everything stays a fraction: $\lambda$ is computed with `fractions.Fraction`, and each $\lambda/k$ is a ratio of integers.
 
 ### Check yourself
 
-- Why does the algorithm use $\gamma/k$ rather than a fixed probability $\gamma$ at every step? *(The decreasing probabilities make $\Pr[K > k] = \gamma^k/k!$, the terms of the exponential series. A fixed $\gamma$ would give $\gamma^k$, a geometric series, and the alternating sum would be $1/(1 + \gamma)$.)*
-- What does the algorithm output for $\gamma = 0$? *(The first coin is $\mathrm{Bernoulli}(0)$, so $K = 1$, which is odd, and the output is 1 = $e^0$.)*
+- Why does the algorithm use $\lambda/k$ rather than a fixed probability $\lambda$ at every step? *(The decreasing probabilities make $\Pr[K > k] = \lambda^k/k!$, the terms of the exponential series. A fixed $\lambda$ would give $\lambda^k$, a geometric series, and the alternating sum would be $1/(1 + \lambda)$.)*
+- What does the algorithm output for $\lambda = 0$? *(The first coin is $\mathrm{Bern}(0)$, so $K = 1$, which is odd, and the output is 1 = $e^0$.)*
 
 ## The discrete Laplace mechanism {#sec-discrete-laplace}
 
@@ -207,7 +207,7 @@ For rational $b = t/s$, Algorithm 2 of Canonne, Kamath and Steinke (2020) sample
 **The PMF and variance.** Both come from sums of geometric series.
 
 1. **Normalize.** The weights $r^{|z|}$ are 1 at $z = 0$ and appear twice, at $\pm z$, for each $z \ge 1$. So $\sum_{z \in \mathbb Z}r^{|z|} = 1 + 2\sum_{z \ge 1}r^z = 1 + \frac{2r}{1 - r} = \frac{1 + r}{1 - r}$, and dividing by it gives the constant in @eq-dlap-pmf.
-2. **Variance.** The PMF gives $z$ and $-z$ the same probability, so their contributions $z\Pr[Z = z]$ and $-z\Pr[Z = -z]$ cancel and the mean is 0. The variance is then $\mathbb E Z^2$. Differentiating $\sum_{z \ge 0}r^z = \frac1{1 - r}$ and multiplying by $r$ gives $\sum_{z \ge 1}zr^z = \frac{r}{(1 - r)^2}$; doing it once more gives $\sum_{z \ge 1}z^2r^z = \frac{r(1 + r)}{(1 - r)^3}$. Counting $\pm z$ twice, $\mathbb E Z^2 = \frac{1 - r}{1 + r}\cdot2\cdot\frac{r(1 + r)}{(1 - r)^3} = \frac{2r}{(1 - r)^2}$.
+2. **Variance.** The PMF gives $z$ and $-z$ the same probability, so their contributions $z\Pr[Z = z]$ and $-z\Pr[Z = -z]$ cancel and the mean is 0. The variance is then $\mathbb E[Z^2]$. Differentiating $\sum_{z \ge 0}r^z = \frac1{1 - r}$ and multiplying by $r$ gives $\sum_{z \ge 1}zr^z = \frac{r}{(1 - r)^2}$; doing it once more gives $\sum_{z \ge 1}z^2r^z = \frac{r(1 + r)}{(1 - r)^3}$. Counting $\pm z$ twice, $\mathbb E[Z^2] = \frac{1 - r}{1 + r}\cdot2\cdot\frac{r(1 + r)}{(1 - r)^3} = \frac{2r}{(1 - r)^2}$.
 
 **Privacy.** The plan is to compute the privacy loss of each output and bound it by $\varepsilon$, which is pure $\varepsilon$-DP.
 
@@ -222,9 +222,9 @@ Step 1 is where integers matter. The constant cancels because $\sum_z r^{|z - a|
 **The exact sampler (Algorithm 2).** The plan is to build a one-sided geometric variable with ratio $e^{-1/b}$ out of exact pieces, then attach a random sign. A geometric with ratio $e^{-1/t}$ is assembled from a remainder $U$ below $t$ and a quotient $V$, the way an integer $x$ is $u + tv$; dividing by $s$ then turns ratio $e^{-1/t}$ into $e^{-s/t} = e^{-1/b}$. Input integers $s, t \ge 1$, so $b = t/s$. Repeat until a value is returned:
 
 1. Draw $U$ uniform on $\{0, \dots, t - 1\}$ and accept it with probability $e^{-U/t}$ (Algorithm 1); on rejection, start over.
-2. Count the successes $V$ of independent $e^{-1}$ coins before the first failure (Algorithm 1 with $\gamma = 1$).
+2. Count the successes $V$ of independent $e^{-1}$ coins before the first failure (Algorithm 1 with $\lambda = 1$).
 3. Set $X = U + tV$ and $Y = \lfloor X/s\rfloor$.
-4. Draw a fair sign bit $B$. If $B = 1$ and $Y = 0$, start over. Otherwise return $(1 - 2B)Y$.
+4. Draw a fair bit $J$. If $J = 1$ and $Y = 0$, start over. Otherwise return $(1 - 2J)Y$.
 
 Five steps show that the output is exactly $\mathrm{Lap}_{\mathbb Z}(b)$, following the algorithm's own order.
 
@@ -232,7 +232,7 @@ Five steps show that the output is exactly $\mathrm{Lap}_{\mathbb Z}(b)$, follow
 2. **$V$ is geometric** with $\Pr[V = v] = (1 - e^{-1})e^{-v}$, by Fact 3 with $r = e^{-1}$.
 3. **$X = U + tV$ is geometric with ratio $e^{-1/t}$.** Each $x \ge 0$ is $u + tv$ for exactly one pair ($u = x \bmod t$, $v = \lfloor x/t\rfloor$), and the independent weights multiply to $e^{-u/t}e^{-v} = e^{-(u + tv)/t} = e^{-x/t}$. So $\Pr[X = x] \propto e^{-x/t}$.
 4. **$Y = \lfloor X/s\rfloor$ is geometric with ratio $e^{-s/t} = e^{-1/b}$.** $Y = y$ collects $x = sy, \dots, sy + s - 1$, with total weight $e^{-sy/t}(1 + e^{-1/t} + \dots + e^{-(s-1)/t})$. The bracket does not depend on $y$, so the weight is $\propto e^{-sy/t} = r^y$.
-5. **The sign.** $\pm Y$ with a fair sign gives $\pm y$ with probability $\frac12\Pr[Y = y]$ each, but 0 would get both halves, since $+0$ and $-0$ are the same output. Rejecting $(B = 1, Y = 0)$ leaves $\frac12\Pr[Y = y]$ for every $z = \pm y$, including 0. After renormalizing (Fact 2), $\Pr[Z = z] \propto r^{|z|}$.
+5. **The sign.** $\pm Y$ with a fair sign gives $\pm y$ with probability $\frac12\Pr[Y = y]$ each, but 0 would get both halves, since $+0$ and $-0$ are the same output. Rejecting $(J = 1, Y = 0)$ leaves $\frac12\Pr[Y = y]$ for every $z = \pm y$, including 0. After renormalizing (Fact 2), $\Pr[Z = z] \propto r^{|z|}$.
 
 **Concretely, for $t = 3$ and $s = 2$** ($b = 1.5$). @tbl-discrete-dlap-walk follows steps 3 and 4.
 
@@ -257,7 +257,7 @@ The discrete Laplace gives the same guarantee with less noise. It has the same $
 
 It is also the best possible mechanism for one count. Ghosh, Roughgarden and Sundararajan (2009) show that for a single count, the geometric mechanism is universally utility-maximizing: every user, whatever their loss function and prior, can post-process its output to do as well as with any other $\varepsilon$-DP mechanism.
 
-The cost follows from Fact 2. A pass of Algorithm 2 survives step 1 with probability $A_U = \frac1t\sum_{u < t}e^{-u/t}$, the average acceptance over the $t$ uniform values. It then survives step 4 unless $B = 1$ and $Y = 0$; since $Y$ is geometric with ratio $e^{-s/t}$, $\Pr[Y = 0] = 1 - e^{-s/t}$, so that happens with probability $\frac12(1 - e^{-s/t})$. The mean number of passes is one over the product of the two survival probabilities, $1/\big(A_U(1 - \frac12(1 - e^{-s/t}))\big)$. That is 1.462 passes at $b = 1$, and about 10 to 12 uniform draws per sample over the scales in @tbl-discrete-code.
+The cost follows from Fact 2. A pass of Algorithm 2 survives step 1 with probability $A_U = \frac1t\sum_{u < t}e^{-u/t}$, the average acceptance over the $t$ uniform values. It then survives step 4 unless $J = 1$ and $Y = 0$; since $Y$ is geometric with ratio $e^{-s/t}$, $\Pr[Y = 0] = 1 - e^{-s/t}$, so that happens with probability $\frac12(1 - e^{-s/t})$. The mean number of passes is one over the product of the two survival probabilities, $1/\big(A_U(1 - \frac12(1 - e^{-s/t}))\big)$. That is 1.462 passes at $b = 1$, and about 10 to 12 uniform draws per sample over the scales in @tbl-discrete-code.
 
 ### Example: a count with $\varepsilon = 1$
 
@@ -266,7 +266,7 @@ Release a count with sensitivity 1 at $\varepsilon = 1$, so $b = \Delta_1 f/\var
 ### Check yourself
 
 - Why is the bound in step 2 of the privacy proof reached for $y \ge \max(a, a')$? *(There both $|y - a|$ and $|y - a'|$ are $y$ minus the input, so their difference is exactly $|a - a'|$.)*
-- In Algorithm 2, why can't you skip the rejection of $(B = 1, Y = 0)$? *(Then $\Pr[Z = 0] = \Pr[Y = 0]$ while $\Pr[Z = \pm y] = \frac12\Pr[Y = y]$: zero would get double weight, and the PMF would not be @eq-dlap-pmf.)*
+- In Algorithm 2, why can't you skip the rejection of $(J = 1, Y = 0)$? *(Then $\Pr[Z = 0] = \Pr[Y = 0]$ while $\Pr[Z = \pm y] = \frac12\Pr[Y = y]$: zero would get double weight, and the PMF would not be @eq-dlap-pmf.)*
 
 ## The discrete Gaussian mechanism {#sec-discrete-gaussian}
 
@@ -292,7 +292,7 @@ $$D_\alpha\big(\mathcal N_{\mathbb Z}(\mu, \sigma^2)\,\|\,\mathcal N_{\mathbb Z}
 with equality for integer $\alpha$.
 
 Fourth, **the variance is below $\sigma^2$**. Restricting the bell curve to integers pulls a little mass towards 0, by an amount that the Poisson summation lemma in the derivation computes exactly:
-$$\operatorname{Var}X = \sigma^2 - \frac{\sum_{k \ne 0}4\pi^2\sigma^4k^2e^{-2\pi^2\sigma^2k^2}}{1 + \sum_{k \ne 0}e^{-2\pi^2\sigma^2k^2}} < \sigma^2.$$ {#eq-dgauss-var}
+$$\operatorname{Var}(X) = \sigma^2 - \frac{\sum_{k \ne 0}4\pi^2\sigma^4k^2e^{-2\pi^2\sigma^2k^2}}{1 + \sum_{k \ne 0}e^{-2\pi^2\sigma^2k^2}} < \sigma^2.$$ {#eq-dgauss-var}
 
 ### Derivation
 
@@ -305,7 +305,7 @@ the formula of the continuous Gaussian, now only at integers $y$.
 3. **The first sum.** $\sum_{y < \Delta/2 - \varepsilon\sigma^2/\Delta}p(y) = \Pr[X < \frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}]$. The PMF of $X$ gives $x$ and $-x$ the same probability, so $X$ and $-X$ have the same distribution, and $\Pr[X < c] = \Pr[-X < c] = \Pr[X > -c]$. With $c = \frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}$ this is $\Pr[X > \frac{\varepsilon\sigma^2}{\Delta} - \frac\Delta2]$.
 4. **The second sum.** Under $D'$ the output is $X + \Delta$, so $q(y) = p(y - \Delta)$ and $\sum_{y < \Delta/2 - \varepsilon\sigma^2/\Delta}q(y) = \Pr[X + \Delta < \frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}] = \Pr[X < -\frac\Delta2 - \frac{\varepsilon\sigma^2}{\Delta}] = \Pr[X > \frac{\varepsilon\sigma^2}{\Delta} + \frac\Delta2]$, by the same symmetry. Subtracting $e^\varepsilon$ times step 4 from step 3 gives @eq-dgauss-delta.
 
-**A lemma from Poisson summation.** The remaining two claims rest on one question: if you sum a Gaussian bump over the integers, how does the sum depend on where the bump is centred? The answer is that it is largest when the centre is an integer. The tool is the Poisson summation formula, which turns a sum of a function over the integers into a sum of its Fourier transform over the integers: $\sum_{x \in \mathbb Z}g(x) = \sum_{k \in \mathbb Z}\hat g(k)$ for a smooth, fast-decaying $g$ with Fourier transform $\hat g(k) = \int g(x)e^{-2\pi ikx}dx$ (Stein & Shakarchi 2003, ch. 5). The Fourier transform of a Gaussian is again a Gaussian, and shifting $g$ by $c$ multiplies the transform by the phase $e^{-2\pi ikc}$: for $g(x) = e^{-(x - c)^2/(2\sigma^2)}$, $\hat g(k) = \sqrt{2\pi}\sigma e^{-2\pi^2\sigma^2k^2}e^{-2\pi ikc}$. Pairing $k$ with $-k$ adds $e^{-2\pi ikc} + e^{2\pi ikc} = 2\cos(2\pi kc)$, which gives
+**A lemma from Poisson summation.** The remaining two claims rest on one question: if you sum a Gaussian bump over the integers, how does the sum depend on where the bump is centred? The answer is that it is largest when the centre is an integer. The tool is the Poisson summation formula, which turns a sum of a function over the integers into a sum of its Fourier transform over the integers: $\sum_{x \in \mathbb Z}g(x) = \sum_{k \in \mathbb Z}\hat g(k)$ for a smooth, fast-decaying $g$ with Fourier transform $\hat g(k) = \int g(x)e^{-2\pi ikx}\,\mathrm dx$ (Stein & Shakarchi 2003, ch. 5). The Fourier transform of a Gaussian is again a Gaussian, and shifting $g$ by $c$ multiplies the transform by the phase $e^{-2\pi ikc}$: for $g(x) = e^{-(x - c)^2/(2\sigma^2)}$, $\hat g(k) = \sqrt{2\pi}\sigma e^{-2\pi^2\sigma^2k^2}e^{-2\pi ikc}$. Pairing $k$ with $-k$ adds $e^{-2\pi ikc} + e^{2\pi ikc} = 2\cos(2\pi kc)$, which gives
 $$\sum_{x \in \mathbb Z}e^{-(x - c)^2/(2\sigma^2)} = \sqrt{2\pi}\,\sigma\sum_{k \in \mathbb Z}e^{-2\pi^2\sigma^2k^2}\cos(2\pi kc).$$ {#eq-poisson-theta}
 Every coefficient is positive and $\cos \le 1$, with $\cos(2\pi kc) = 1$ for all $k$ exactly when $c$ is an integer. So the left side is largest at integer $c$: **shifting the lattice off the integers can only lower the sum.** At $\sigma = 0.5$ the script finds 1.271342 at $c = 0$ and 1.235287 at $c = 0.5$. At $\sigma = 1$ both are 2.506628, which is $\sqrt{2\pi}$ to six decimals: the $k \ne 0$ terms are below $10^{-8}$.
 
@@ -318,24 +318,24 @@ Every coefficient is positive and $\cos \le 1$, with $\cos(2\pi kc) = 1$ for all
 
 **Variance.** The idea is that the normalizer, seen as a function of $1/(2\sigma^2)$, encodes the variance in its derivative, and the lemma gives the normalizer in closed form. Let $\tau = 1/(2\sigma^2)$ and $Z(\tau) = \sum_xe^{-\tau x^2}$.
 
-1. **Variance from the normalizer.** The mean is 0 because $x$ and $-x$ have the same probability, so $\operatorname{Var}X = \mathbb E X^2 = \sum_xx^2e^{-\tau x^2}/Z$. Differentiating $e^{-\tau x^2}$ in $\tau$ brings down a factor $-x^2$, so $\frac{d}{d\tau}Z = -\sum_xx^2e^{-\tau x^2}$, and $\mathbb E X^2 = -\frac{Z'(\tau)}{Z(\tau)} = -\frac{d}{d\tau}\ln Z(\tau)$.
+1. **Variance from the normalizer.** The mean is 0 because $x$ and $-x$ have the same probability, so $\operatorname{Var}(X) = \mathbb E[X^2] = \sum_xx^2e^{-\tau x^2}/Z$. Differentiating $e^{-\tau x^2}$ in $\tau$ brings down a factor $-x^2$, so $\frac{\mathrm d}{\mathrm d\tau}Z = -\sum_xx^2e^{-\tau x^2}$, and $\mathbb E[X^2] = -\frac{Z'(\tau)}{Z(\tau)} = -\frac{\mathrm d}{\mathrm d\tau}\ln Z(\tau)$.
 2. **Poisson summation at $c = 0$.** @eq-poisson-theta, with $\sigma = 1/\sqrt{2\tau}$, gives $Z(\tau) = \sqrt{\pi/\tau}\,(1 + \theta(\tau))$ with $\theta(\tau) = \sum_{k \ne 0}e^{-\pi^2k^2/\tau}$.
-3. **Differentiate.** The log splits into $\frac12\ln\pi - \frac12\ln\tau + \ln(1 + \theta(\tau))$, so $-\frac{d}{d\tau}\ln Z = \frac{1}{2\tau} - \frac{\theta'(\tau)}{1 + \theta(\tau)}$, where $\theta'(\tau) = \sum_{k \ne 0}\frac{\pi^2k^2}{\tau^2}e^{-\pi^2k^2/\tau} > 0$.
-4. **Substitute $\tau = 1/(2\sigma^2)$:** $\frac{1}{2\tau} = \sigma^2$, $\frac{\pi^2k^2}{\tau} = 2\pi^2\sigma^2k^2$ and $\frac{\pi^2k^2}{\tau^2} = 4\pi^2\sigma^4k^2$. This is @eq-dgauss-var. The correction is positive, so $\operatorname{Var}X < \sigma^2$, and its leading term, from $k = \pm1$ with the denominator close to 1, is $8\pi^2\sigma^4e^{-2\pi^2\sigma^2}$.
+3. **Differentiate.** The log splits into $\frac12\ln\pi - \frac12\ln\tau + \ln(1 + \theta(\tau))$, so $-\frac{\mathrm d}{\mathrm d\tau}\ln Z = \frac{1}{2\tau} - \frac{\theta'(\tau)}{1 + \theta(\tau)}$, where $\theta'(\tau) = \sum_{k \ne 0}\frac{\pi^2k^2}{\tau^2}e^{-\pi^2k^2/\tau} > 0$.
+4. **Substitute $\tau = 1/(2\sigma^2)$:** $\frac{1}{2\tau} = \sigma^2$, $\frac{\pi^2k^2}{\tau} = 2\pi^2\sigma^2k^2$ and $\frac{\pi^2k^2}{\tau^2} = 4\pi^2\sigma^4k^2$. This is @eq-dgauss-var. The correction is positive, so $\operatorname{Var}(X) < \sigma^2$, and its leading term, from $k = \pm1$ with the denominator close to 1, is $8\pi^2\sigma^4e^{-2\pi^2\sigma^2}$.
 
 ### Interpretation
 
-The privacy proof is the continuous one. The privacy loss is the same linear function, so every statement about it carries over, restricted to integer points. The only new ingredient is that integer shifts don't change the normalizer. That is why the query must be integer-valued. To use the discrete Gaussian for a real-valued query, scale it by $1/\gamma$ for a small step $\gamma$ and round it to an integer first. Randomized rounding, which rounds up with probability equal to the fractional part, keeps it unbiased. Then account for the sensitivity of the rounded query, which can be slightly larger than the scaled original.
+The privacy proof is the continuous one. The privacy loss is the same linear function, so every statement about it carries over, restricted to integer points. The only new ingredient is that integer shifts don't change the normalizer. That is why the query must be integer-valued. To use the discrete Gaussian for a real-valued query, scale it by $1/h$ for a small step $h$ and round it to an integer first. Randomized rounding, which rounds up with probability equal to the fractional part, keeps it unbiased. Then account for the sensitivity of the rounded query, which can be slightly larger than the scaled original.
 
 $\delta(\varepsilon)$ is close to the continuous curve, not equal to it. The privacy loss takes only the values $(\Delta^2 - 2\Delta y)/(2\sigma^2)$ for integer $y$; moving $y$ by one changes the loss by $2\Delta/(2\sigma^2) = \Delta/\sigma^2$, so these values form a lattice with spacing $\Delta/\sigma^2$ ($1/\sigma^2$ for $\Delta = 1$). As $\varepsilon$ crosses one of these values, a whole output enters or leaves the sum for $\delta$, so $\delta(\varepsilon)$ has a kink at each lattice value and oscillates around the continuous curve (@fig-discrete-gaussian-delta). At $\varepsilon = 1$ and $\Delta = 1$ the script finds $\delta = 0.6032$ against 0.5099 at $\sigma = 0.5$, 0.1414 against 0.1269 at $\sigma = 1$, and 0.0072 against 0.0068 at $\sigma = 2$. At other $\varepsilon$, such as just past a kink, the discrete curve is below. Neither dominates, and the gap closes as $\sigma$ grows. In Rényi divergence, by contrast, the discrete Gaussian is never worse: at $\sigma = 0.5$, $D_{2.5} = 4.9808$ against 5.
 
-The variance deficit is invisible in practice. Its relative size $1 - \operatorname{Var}X/\sigma^2$ has leading term $8\pi^2\sigma^2e^{-2\pi^2\sigma^2}$, the leading term of @eq-dgauss-var divided by $\sigma^2$. At $\sigma = 1$ that is $8\pi^2e^{-2\pi^2} = 78.96 \times 2.67\times10^{-9}$, so $1 - \operatorname{Var}X/\sigma^2 = 2.11\times10^{-7}$; at $\sigma = 2$ it is at the level of rounding error. Only below $\sigma \approx 0.6$ does the discrete Gaussian concentrate visibly more than $\sigma^2$ suggests: at $\sigma = 0.5$, $\operatorname{Var}X = 0.8601\,\sigma^2$, and at $\sigma = 0.25$ almost all the mass is at 0 (@fig-discrete-gaussian-variance).
+The variance deficit is invisible in practice. Its relative size $1 - \operatorname{Var}(X)/\sigma^2$ has leading term $8\pi^2\sigma^2e^{-2\pi^2\sigma^2}$, the leading term of @eq-dgauss-var divided by $\sigma^2$. At $\sigma = 1$ that is $8\pi^2e^{-2\pi^2} = 78.96 \times 2.67\times10^{-9}$, so $1 - \operatorname{Var}(X)/\sigma^2 = 2.11\times10^{-7}$; at $\sigma = 2$ it is at the level of rounding error. Only below $\sigma \approx 0.6$ does the discrete Gaussian concentrate visibly more than $\sigma^2$ suggests: at $\sigma = 0.5$, $\operatorname{Var}(X) = 0.8601\,\sigma^2$, and at $\sigma = 0.25$ almost all the mass is at 0 (@fig-discrete-gaussian-variance).
 
 Sums are not discrete Gaussians. Unlike the continuous case, the sum of two independent discrete Gaussians is not exactly a discrete Gaussian. For $\sigma \ge 1$ it is very close ([Exercise 6](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-6)), which is what distributed noise addition, where each client adds its own share of the noise, relies on.
 
 ![Discrete against continuous Gaussian for sensitivity 1: $\delta(\varepsilon)$ from @eq-dgauss-delta (solid) and the analytic curve of the continuous Gaussian (dashed), for $\sigma = 0.5$, 1 and 2. The discrete curve has a kink at each value of the lattice-valued privacy loss.](figures/discrete_gaussian_delta.svg){#fig-discrete-gaussian-delta}
 
-![Left: $\operatorname{Var}X/\sigma^2$ for $X \sim \mathcal N_{\mathbb Z}(0, \sigma^2)$, by direct summation and from @eq-dgauss-var, against 1 for the continuous Gaussian. Right: the relative deficit $1 - \operatorname{Var}X/\sigma^2$ on a log scale, with its leading term $8\pi^2\sigma^2e^{-2\pi^2\sigma^2}$.](figures/discrete_gaussian_variance.svg){#fig-discrete-gaussian-variance}
+![Left: $\operatorname{Var}(X)/\sigma^2$ for $X \sim \mathcal N_{\mathbb Z}(0, \sigma^2)$, by direct summation and from @eq-dgauss-var, against 1 for the continuous Gaussian. Right: the relative deficit $1 - \operatorname{Var}(X)/\sigma^2$ on a log scale, with its leading term $8\pi^2\sigma^2e^{-2\pi^2\sigma^2}$.](figures/discrete_gaussian_variance.svg){#fig-discrete-gaussian-variance}
 
 ### Example: the Rényi divergence, computed
 
@@ -358,7 +358,7 @@ The script sums the PMFs directly to get $D_\alpha(\mathcal N_{\mathbb Z}(0, \si
 
 ### Context
 
-The privacy analysis is only as good as the sampler. Inverse-CDF sampling of $\mathcal N_{\mathbb Z}(0, \sigma^2)$ needs the normalizer, which is irrational, and a floating-point uniform, which brings back the problems of @sec-discrete-float. Algorithm 3 of Canonne, Kamath and Steinke (2020) instead proposes from the discrete Laplace and thins with an exact $e^{-\gamma}$ coin.
+The privacy analysis is only as good as the sampler. Inverse-CDF sampling of $\mathcal N_{\mathbb Z}(0, \sigma^2)$ needs the normalizer, which is irrational, and a floating-point uniform, which brings back the problems of @sec-discrete-float. Algorithm 3 of Canonne, Kamath and Steinke (2020) instead proposes from the discrete Laplace and thins with an exact $e^{-\lambda}$ coin.
 
 ### Statement
 
@@ -376,12 +376,12 @@ which tends to $\sqrt{\pi/2}\,e^{-1/2} = 0.7602$ as $\sigma$ grows.
 $$-\frac{|y|}{t} - \frac{(|y| - \sigma^2/t)^2}{2\sigma^2} = -\frac{|y|}{t} - \frac{y^2}{2\sigma^2} + \frac{|y|}{t} - \frac{\sigma^2}{2t^2} = -\frac{y^2}{2\sigma^2} - \frac{\sigma^2}{2t^2}.$$
 The $|y|/t$ terms cancel, and what is left is $e^{-y^2/(2\sigma^2)}$ times a constant. By Fact 2 the output is $\mathcal N_{\mathbb Z}(0, \sigma^2)$.
 2. **The acceptance probability is valid.** The exponent $-(|y| - \sigma^2/t)^2/(2\sigma^2)$ is at most 0, so its exponential is at most 1 and is a probability.
-3. **Everything is rational.** $t$ is an integer, computed as $\lfloor\sqrt{\lfloor\sigma^2\rfloor}\rfloor + 1$ with integer square roots (an integer $n$ has $n^2 \le \sigma^2$ exactly when $n^2 \le \lfloor\sigma^2\rfloor$, so this equals $\lfloor\sigma\rfloor + 1$ without computing $\sigma$). So $\gamma = (|y| - \sigma^2/t)^2/(2\sigma^2)$ is a ratio of integers, and Algorithm 1 applies.
+3. **Everything is rational.** $t$ is an integer, computed as $\lfloor\sqrt{\lfloor\sigma^2\rfloor}\rfloor + 1$ with integer square roots (an integer $n$ has $n^2 \le \sigma^2$ exactly when $n^2 \le \lfloor\sigma^2\rfloor$, so this equals $\lfloor\sigma\rfloor + 1$ without computing $\sigma$). So $\lambda = (|y| - \sigma^2/t)^2/(2\sigma^2)$ is a ratio of integers, and Algorithm 1 applies.
 4. **The acceptance rate.** $A = \sum_y\Pr[Y = y]\,e^{-(|y| - \sigma^2/t)^2/(2\sigma^2)}$, the average acceptance over proposals. With $\Pr[Y = y] = \frac{1 - r}{1 + r}r^{|y|}$, step 1 turns each term into $\frac{1 - r}{1 + r}e^{-\sigma^2/(2t^2)}e^{-y^2/(2\sigma^2)}$, and summing over $y$ gives @eq-dgauss-accept. [Exercise 5](../../book-exercises/part03-dp-foundations/08-discrete-mechanisms.md#sec-sol-discrete-5) derives the limit.
 
 **Concretely, for $\sigma^2 = 4$** ($t = \lfloor 2\rfloor + 1 = 3$, $r = e^{-1/3}$, $\frac{1 - r}{1 + r} = 0.1651$). @tbl-discrete-dgauss-walk computes a few rows by hand.
 
-| $y$ | Proposal $0.1651\,r^{\lvert y\rvert}$ | $\gamma = (\lvert y\rvert - 4/3)^2/8$ | Acceptance $e^{-\gamma}$ | Product |
+| $y$ | Proposal $0.1651\,r^{\lvert y\rvert}$ | $\lambda = (\lvert y\rvert - 4/3)^2/8$ | Acceptance $e^{-\lambda}$ | Product |
 | --- | --- | --- | --- | --- |
 | 0 | 0.1651 | 2/9 | 0.8007 | 0.1322 |
 | 1 | 0.1183 | 1/72 | 0.9862 | 0.1167 |
@@ -423,7 +423,7 @@ uv run python code/part03-dp-foundations/discrete_mechanisms.py
 | Experiment | Result |
 | --- | --- |
 | Float Laplace, $p = 12$ | $\Pr[M(D) \in S] = 0.4791$; snapped to integers: 0, with $\max\lvert L\rvert = 1.0010$ |
-| Algorithm 1, $\gamma = \frac12, 1, \frac52, 4$ | Frequencies 0.6024, 0.3709, 0.0869, 0.0168 against 0.6065, 0.3679, 0.0821, 0.0183; draws per coin 1.662, 3.096, 3.976, 4.218 against 1.649, 3.086, 3.941, 4.240 |
+| Algorithm 1, $\lambda = \frac12, 1, \frac52, 4$ | Frequencies 0.6024, 0.3709, 0.0869, 0.0168 against 0.6065, 0.3679, 0.0821, 0.0183; draws per coin 1.662, 3.096, 3.976, 4.218 against 1.649, 3.086, 3.941, 4.240 |
 | Algorithm 2, $b = 1$ | Variance 1.8305 (exact 1.8413); TV to exact 0.0114 (noise floor 0.0074); 11.49 draws per sample |
 | Algorithm 2, $b = 3/2$ | Variance 4.3834 (exact 4.3370); TV 0.0119 (noise floor 0.0243); 12.08 draws per sample |
 | Algorithm 2, $b = 10$ | Variance 195.2985 (exact 199.8334); TV 0.0339 (noise floor 0.0331); 10.25 draws per sample |
@@ -441,7 +441,7 @@ uv run python code/part03-dp-foundations/discrete_mechanisms.py
 
 The samplers are exact, up to sampling noise. Every TV distance is within about a factor 2 of the noise floor, sometimes below it, and every frequency and variance is within a few standard errors of its exact value. To see what a few standard errors means for a variance: a variance estimated from $n$ draws has a relative standard error of about $\sqrt{(\kappa - 1)/n}$, where $\kappa$ is the kurtosis, the fourth moment divided by the squared variance. The Gaussian has $\kappa = 3$, which gives $\sqrt{2/10{,}000} \approx$ 1.4%; the Laplace has $\kappa = 6$, which gives $\sqrt{5/10{,}000} \approx$ 2.2%. The largest deviation, at $b = 10$, is $(199.8334 - 195.2985)/199.8334 \approx$ 2.3% low, about one standard error. The noise floor varies a lot between runs, so only the order of magnitude matters.
 
-The costs match the formulas. Algorithm 1's draws per coin match @eq-bern-exp and its extension to $\gamma > 1$ to within 1%.
+The costs match the formulas. Algorithm 1's draws per coin match @eq-bern-exp and its extension to $\lambda > 1$ to within 1%.
 
 The float leak doesn't shrink with precision, and snapping removes it: the first row reproduces @tbl-discrete-float and the snapped example.
 
@@ -466,8 +466,8 @@ $r = e^{-1/b}$ for the discrete Laplace; $X \sim \mathcal N_{\mathbb Z}(0, \sigm
 | --- | --- | --- |
 | Support argument | $\delta \ge \Pr[M(D) \in \mathcal Y_D \setminus \mathcal Y_{D'}]$ | Outputs reachable from one input only rule out every $\varepsilon$ |
 | Floating-point Laplace | $\mathrm{round}(f(D) + \xi\,\mathrm{round}(b\ln(1/U)))$ | Not DP: about 48% of the mass identifies $f(D)$ in the toy, at every precision |
-| Snapping | $\mathrm{clamp}_B(\lfloor\mathrm{clamp}_B(f) \oplus \xi\otimes\lambda\otimes\mathrm{LN}(U^*)\rceil_\Lambda)$ | $\varepsilon = \frac{1 + 12B\eta}{\lambda} + \frac{2^{-49}B}{\lambda}$ for sensitivity 1 |
-| $\mathrm{Bernoulli}(e^{-\gamma})$, $\gamma \le 1$ | Parity of the first 0 among $\mathrm{Bernoulli}(\gamma/k)$ | $\Pr[K > k] = \gamma^k/k!$; $e^\gamma$ draws on average |
+| Snapping | $\mathrm{clamp}_B(\lfloor\mathrm{clamp}_B(f) \oplus \xi\otimes b\otimes\mathrm{LN}(U^*)\rceil_\Lambda)$ | $\varepsilon = \frac{1 + 12B\omega}{b} + \frac{2^{-49}B}{b}$ for sensitivity 1 |
+| $\mathrm{Bern}(e^{-\lambda})$, $\lambda \le 1$ | Parity of the first 0 among $\mathrm{Bern}(\lambda/k)$ | $\Pr[K > k] = \lambda^k/k!$; $e^\lambda$ draws on average |
 | $\mathrm{Lap}_{\mathbb Z}(b)$ | $\frac{1 - r}{1 + r}r^{\lvert z\rvert}$ | Variance $\frac{2r}{(1 - r)^2} \approx 2b^2 - \frac16$ |
 | Geometric mechanism | $f(D) + \mathrm{Lap}_{\mathbb Z}(b)$ | $\varepsilon = \Delta_1 f/b$, pure DP |
 | $\mathcal N_{\mathbb Z}(0, \sigma^2)$ | $\propto e^{-x^2/(2\sigma^2)}$ on $\mathbb Z$ | $\operatorname{Var} = \sigma^2 - O(\sigma^4e^{-2\pi^2\sigma^2})$ |

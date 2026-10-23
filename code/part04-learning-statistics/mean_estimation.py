@@ -7,7 +7,7 @@ Prints the numbers quoted in book-course/part04-learning-statistics/04-mean-esti
 saves the chapter's two figures. Three ε-DP estimators of the mean of N(μ, 1) with |μ| ≤ R: the
 clipped Laplace estimator, a histogram coarse step followed by it, and shrinking confidence
 intervals followed by it. Then the clipped estimator on heavy-tailed data, as the clipping
-threshold τ varies.
+norm C varies.
 """
 
 import argparse
@@ -228,7 +228,7 @@ def plot_heavy(rng: np.random.Generator) -> Figure:
     ax.plot(taus, bound, "--", color="C1", label=r"bound, $\beta = 0.05$")
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xlabel(r"clipping threshold $\tau$")
+    ax.set_xlabel(r"clipping norm $C$")
     ax.set_ylabel(r"error $|\hat\mu - \mu|$")
     ax.legend(fontsize=8)
     ax.grid(True, which="both", alpha=0.3)

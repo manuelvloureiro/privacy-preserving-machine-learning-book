@@ -58,12 +58,12 @@ With the $\tanh$ mean term, the same steps give $k > 2\ln(1/\delta')/(1 - \tanh(
 
 ## The per-step δ {#sec-sol-composition-4}
 
-> **Exercise 4.** **The per-step $\delta$.** Prove the identity $1 - (1 - \delta)^k \le k\delta$ used for advanced composition with $\delta > 0$, and show that @eq-comp-kov is non-trivial only for a target $\delta_{\text{total}} > 1 - (1 - \delta)^k$. *Check: with $\varepsilon = 0.1$, $\delta = 5\times10^{-8}$, $k = 100$ and $\delta_{\text{total}} = 10^{-5}$, the optimal $\varepsilon'$ is 4.4469 and advanced composition gives 5.9926.* *(Optimal composition)*
+> **Exercise 4.** **The per-step $\delta$.** Prove the identity $1 - (1 - \delta)^k \le k\delta$ used for advanced composition with $\delta > 0$, and show that @eq-comp-kov is non-trivial only for a target $\delta_{\mathrm{total}} > 1 - (1 - \delta)^k$. *Check: with $\varepsilon = 0.1$, $\delta = 5\times10^{-8}$, $k = 100$ and $\delta_{\mathrm{total}} = 10^{-5}$, the optimal $\varepsilon'$ is 4.4469 and advanced composition gives 5.9926.* *(Optimal composition)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **The inequality is a union bound.** $1 - (1 - \delta)^k$ is the probability that at least one of $k$ independent events of probability $\delta$ happens: some step shows its flag. The union bound gives at most $k\delta$. (Or by induction: $(1 - \delta)^{k} \ge (1 - \delta)^{k-1} - \delta \ge 1 - (k - 1)\delta - \delta$.)
 2. **The floor of @eq-comp-kov.** $\delta_{\mathrm{RR}}(\varepsilon') \ge 0$, so the right side of @eq-comp-kov is at least $1 - (1 - \delta)^k$ for every $\varepsilon'$. This floor is attained by the composed four-point pair: the flags have infinite loss. So no finite $\varepsilon'$ achieves a smaller total $\delta$, and the script returns $\varepsilon' = \infty$ for a target of $4\times10^{-6}$.
-3. **Above the floor.** For a target $\delta_{\text{total}} > 1 - (1 - \delta)^k$, solve $\delta_{\mathrm{RR}}(\varepsilon') = \frac{\delta_{\text{total}} - (1 - (1 - \delta)^k)}{(1 - \delta)^k}$, a pure randomized-response problem.
+3. **Above the floor.** For a target $\delta_{\mathrm{total}} > 1 - (1 - \delta)^k$, solve $\delta_{\mathrm{RR}}(\varepsilon') = \frac{\delta_{\mathrm{total}} - (1 - (1 - \delta)^k)}{(1 - \delta)^k}$, a pure randomized-response problem.
 4. **Check.** $1 - (1 - 5\times10^{-8})^{100} = 4.999988\times10^{-6}$, just below $k\delta = 5\times10^{-6}$. That leaves about $5\times10^{-6}$ for the randomized-response part, and the optimal $\varepsilon'$ is 4.4469. Advanced composition with $\delta' = 10^{-5} - 100 \times 5\times10^{-8} = 5\times10^{-6}$ gives 5.9926, and its $\tanh$ form 5.4404.
 
 *The per-step $\delta$ is spent outright, step by step; only what is left can be traded against $\varepsilon'$.*

@@ -62,7 +62,7 @@ The guarantee then covers the private text given the pretrained model, and nothi
 
 ## Choose what to train {#sec-llmwf-lora}
 
-DP-SGD adds noise to every weight it trains. So the noise on the averaged gradient grows with the square root of the number of trainable weights, while the clipped signal does not ([Public data and private fine-tuning](06-public-data.md#sec-pub-dimension)). That makes the choice of trainable weights one of the two main levers on accuracy, with the step size. LoRA freezes each pretrained matrix and learns a correction to it, the product of two thin factors whose width is the rank.
+DP-SGD adds noise to every weight it trains. So the noise on the averaged gradient grows with the square root of the number of trainable weights, while the clipped signal does not ([Public data and private fine-tuning](06-public-data.md#sec-pub-dimension)). That makes the choice of trainable weights one of the two main levers on accuracy, with the learning rate. LoRA freezes each pretrained matrix and learns a correction to it, the product of two thin factors whose width is the rank.
 
 ```{.python excerpt="lora-config"}
 attention_and_mlp = ["query_key_value", "dense", "dense_h_to_4h", "dense_4h_to_h"]  # every linear layer
@@ -84,7 +84,7 @@ Where the adapters go matters too. Adapters on the attention layers alone left t
 
 ## Make the model Opacus-compatible {#sec-llmwf-opacus}
 
-Opacus needs one gradient per sequence, and some layers make that impossible. Batch normalization is the usual culprit, because it mixes the examples of a batch. Opacus's `ModuleValidator.validate` lists such layers before you train, and the script prints how many it found.
+Opacus needs one gradient per sequence, and some layers make that impossible. Batch normalization is the usual culprit, because it mixes the records of a batch. Opacus's `ModuleValidator.validate` lists such layers before you train, and the script prints how many it found.
 
 ```text
 validator errors: 0

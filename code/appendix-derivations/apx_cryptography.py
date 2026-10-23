@@ -505,7 +505,7 @@ def plot_ggm_hybrids() -> Figure:
     ]
     fig.legend(handles, labels, loc="lower center", ncol=2, frameon=False, fontsize=10)
     fig.suptitle(
-        r"Queries 000, 001, 100. A red $y_c$ marks the node at depth $j-1$ that $B_j$ gives challenge string $c$"
+        r"Queries 000, 001, 100. A red $y_c$ marks the node at depth $j-1$ that $\mathcal{B}_j$ gives challenge string $c$"
     )
     fig.subplots_adjust(left=0.02, right=0.98, top=0.88, bottom=0.13, hspace=0.25, wspace=0.05)
     return fig
@@ -523,7 +523,7 @@ def plot_ggm_check(rng: np.random.Generator, trials: int = 50_000) -> Figure:
         "^",
         color="#b03030",
         markersize=7,
-        label="$B_j$ on $q$ PRG outputs",
+        label=r"$\mathcal{B}_j$ on $Q$ PRG outputs",
     )
     ax.plot(
         range(1, N_BITS + 1),
@@ -531,7 +531,7 @@ def plot_ggm_check(rng: np.random.Generator, trials: int = 50_000) -> Figure:
         "s",
         color=COLORS["uniform"],
         markersize=6,
-        label="$B_j$ on $q$ uniform strings",
+        label=r"$\mathcal{B}_j$ on $Q$ uniform strings",
     )
     ax.set(
         xticks=js,
@@ -539,7 +539,7 @@ def plot_ggm_check(rng: np.random.Generator, trials: int = 50_000) -> Figure:
         ylim=(-0.05, 1.08),
         xlabel="hybrid",
         ylabel='Pr[adversary says "random"]',
-        title="Each $B_j$ reproduces $H_{j-1}$ or $H_j$ exactly",
+        title=r"Each $\mathcal{B}_j$ reproduces $H_{j-1}$ or $H_j$ exactly",
     )
     ax.legend(loc="upper left", fontsize=9)
     return fig
@@ -589,7 +589,7 @@ def plot_lwe_search(rng: np.random.Generator) -> Figure:
     axes[0].set(ylabel=f"acceptance rate ({runs:,} runs)", ylim=(0.40, 0.55))
     handles, labels = axes[0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=3, frameon=False, fontsize=9)
-    fig.suptitle(r"Only the correct guess leaves the shaded band, $\pm\varepsilon/2$ around the uniform rate")
+    fig.suptitle(r"Only the correct guess leaves the shaded band, $\pm\nu/2$ around the uniform rate")
     fig.tight_layout(rect=(0, 0.08, 1, 1))
     return fig
 

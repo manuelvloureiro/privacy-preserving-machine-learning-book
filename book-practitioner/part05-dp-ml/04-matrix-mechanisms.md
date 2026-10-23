@@ -41,7 +41,7 @@ The training loop draws each batch from `plan.batch_selection_strategy` and sums
 
 ## What goes wrong {#sec-mfac-wrong}
 
-The pitfalls come from records that take part more than once. Over $k$ epochs a record enters through $k$ columns of the encoder. The square root's columns for nearby steps are nonzero in the same rows, so they add up and the sensitivity grows faster than $\sqrt k$. **Banding** keeps a number $b$ of the encoder's diagonals, the main one and those just below it. It needs every two participations of a record to be at least $b$ steps apart, a condition called **$b$-min-separation**. The record's columns then share no rows, so the sensitivity is at most $\sqrt k$ times the longest column, as for independent noise.
+The pitfalls come from records that take part more than once. Over $E$ epochs a record enters through $E$ columns of the encoder. The square root's columns for nearby steps are nonzero in the same rows, so they add up and the sensitivity grows faster than $\sqrt E$. **Banding** keeps a number $b$ of the encoder's diagonals, the main one and those just below it. It needs every two participations of a record to be at least $b$ steps apart, a condition called **$b$-min-separation**. The record's columns then share no rows, so the sensitivity is at most $\sqrt E$ times the longest column, as for independent noise.
 
 The data order is therefore part of the mechanism. Fix it before training, independently of the data, and keep the same permutation every epoch. Reshuffling each epoch can put a record at the end of one epoch and the start of the next, one step apart, which breaks the banded bound.
 

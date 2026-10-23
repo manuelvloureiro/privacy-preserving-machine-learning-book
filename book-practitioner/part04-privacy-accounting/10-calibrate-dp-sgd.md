@@ -17,7 +17,7 @@ uv run python code/part04-privacy-accounting/practitioner_calibrate.py --n 60000
 
 The first decision is what one record is, because the guarantee protects exactly that. In Adult each row is one person, so protecting a row protects a person. If one person could own many rows, the number of records $n$ would have to count people, not rows, and training would need the user-level methods of [User-level differential privacy](../part05-dp-ml/07-user-level.md).
 
-The failure probability $\delta$ is roughly the small chance that the guarantee does not hold. The book's rule sets it from $n$ as $\delta \le 1/n^{1.1}$, rounded down to a power of ten, which keeps it well below $1/n$ ([Choosing δ](09-choosing-an-accountant.md#sec-choose-delta)).
+The slack $\delta$ is roughly the small chance that the guarantee does not hold. The book's rule sets it from $n$ as $\delta \le 1/n^{1.1}$, rounded down to a power of ten, which keeps it well below $1/n$ ([Choosing δ](09-choosing-an-accountant.md#sec-choose-delta)).
 
 ```{.python excerpt="calibrate-delta"}
 def delta_for(n: int) -> float:
@@ -48,7 +48,7 @@ The second line is what training will do. Opacus replaces your loader with a Poi
 
 ## Plan the noise {#sec-calib-plan}
 
-Next come the batch size, the epochs and the noise multiplier $\sigma$. Training clips each example's gradient to a length of at most $C$, the clipping norm, and $\sigma$ is the noise's standard deviation as a multiple of $C$. With the target and the sampler fixed, an accountant finds the smallest $\sigma$ that meets them, so calibrate with the accountant you will report ([The inverse problem](09-choosing-an-accountant.md#sec-choose-inverse)). The script uses two libraries that check each other, both with tight accountants ([Numerical accounting](06-numerical-accounting.md)). Opacus's `get_noise_multiplier`, from `opacus.accountants.utils`, searches with its privacy loss random variable (PRV) accountant and stops within 0.01 of the target $\varepsilon$. Google's `dp_accounting` searches with its privacy loss distribution (PLD) accountant and stops within 0.01 in $\sigma$.
+Next come the batch size, the epochs and the noise multiplier $\sigma$. Training clips each record's gradient to a length of at most $C$, the clipping norm, and $\sigma$ is the noise's standard deviation as a multiple of $C$. With the target and the sampler fixed, an accountant finds the smallest $\sigma$ that meets them, so calibrate with the accountant you will report ([The inverse problem](09-choosing-an-accountant.md#sec-choose-inverse)). The script uses two libraries that check each other, both with tight accountants ([Numerical accounting](06-numerical-accounting.md)). Opacus's `get_noise_multiplier`, from `opacus.accountants.utils`, searches with its privacy loss random variable (PRV) accountant and stops within 0.01 of the target $\varepsilon$. Google's `dp_accounting` searches with its privacy loss distribution (PLD) accountant and stops within 0.01 in $\sigma$.
 
 ```{.python excerpt="calibrate-sigma"}
 def sigma_opacus(epsilon: float, delta: float, q: float, epochs: int) -> float:
@@ -83,7 +83,7 @@ Adult           30000  1e-05  1000  10    8    300       0.72       0.73        
 Adult           30000  1e-05  1000  20    4    600       1.16       1.16           1.16
 ```
 
-The block shows 5 of the script's 18 Adult cells. Read it along the batch size first. At $\varepsilon = 4$ and ten epochs, $\sigma$ grows from 0.62 at a batch of 100 to 0.97 at 1,000. Yet the noise on the averaged gradient falls from 6.16 to 0.97, because a larger batch divides the noise among more examples. At that batch, twenty epochs raise $\sigma$ from 0.97 to 1.16.
+The block shows 5 of the script's 18 Adult cells. Read it along the batch size first. At $\varepsilon = 4$ and ten epochs, $\sigma$ grows from 0.62 at a batch of 100 to 0.97 at 1,000. Yet the noise on the averaged gradient falls from 6.16 to 0.97, because a larger batch divides the noise among more records. At that batch, twenty epochs raise $\sigma$ from 0.97 to 1.16.
 
 The table cannot choose the batch, because the noise on the average keeps falling as the batch grows, and so does the number of steps. So learn the epochs and steps your model needs from a non-private run or public data. Then take the largest batch that leaves those steps and fits in memory ([Batch size at a fixed budget](../part05-dp-ml/02-dp-sgd.md#sec-dpsgd-batch)). Compare cells by $\sigma/B$, never by $\sigma$ alone, since a smaller batch has the smaller $\sigma$ but the noisier average. The run takes the largest batch with ten epochs at $\varepsilon = 4$, which is the cell Part 5 trains.
 

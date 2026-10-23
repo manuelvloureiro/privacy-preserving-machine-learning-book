@@ -546,11 +546,15 @@ def plot_peak_height() -> Figure:
             [n * p * (1 - p) for n in ns], [abs(math.log(r)) for r in ratios], "o-", markersize=3, label=f"p = {p}"
         )
     left.axhline(1.0, color="k", linestyle="--", linewidth=1)
-    left.set(xscale="log", xlabel="n", ylabel="mode height × √(2πnpq)", title="Mode height over normal peak height")
+    left.set(
+        xscale="log", xlabel="n", ylabel="mode height × √(2πnp(1 − p))", title="Mode height over normal peak height"
+    )
     left.legend()
     npq = np.logspace(math.log10(4), 3.5, 50)
-    right.plot(npq, 3.5 / npq, "k--", label="proved bound 3.5/(npq), npq ≥ 4")
-    right.set(xscale="log", yscale="log", xlabel="npq", ylabel="|ln ratio|", title="The error falls like 1/(npq)")
+    right.plot(npq, 3.5 / npq, "k--", label="proved bound 3.5/(np(1 − p)), np(1 − p) ≥ 4")
+    right.set(
+        xscale="log", yscale="log", xlabel="np(1 − p)", ylabel="|ln ratio|", title="The error falls like 1/(np(1 − p))"
+    )
     right.legend(fontsize=8)
     return fig
 
@@ -621,12 +625,12 @@ def plot_smoothing() -> Figure:
         where=(x >= 0) & (x <= 0.5),
         color="C1",
         alpha=0.25,
-        label="Φ(ε) − Φ(0), ε = 0.5",
+        label="Φ(κ) − Φ(0), κ = 0.5",
     )
     ax.step(x, (x <= 0).astype(float), where="post", color="k", lw=2, label="1[x ≤ 0]")
     for eps, color in ((0.5, "C1"), (0.2, "C0")):
-        ax.plot(x, 1 - smoothstep(x / eps), color=color, label=f"upper ramp, ε = {eps}")
-        ax.plot(x, 1 - smoothstep((x + eps) / eps), color=color, linestyle="--", label=f"lower ramp, ε = {eps}")
+        ax.plot(x, 1 - smoothstep(x / eps), color=color, label=f"upper ramp, κ = {eps}")
+        ax.plot(x, 1 - smoothstep((x + eps) / eps), color=color, linestyle="--", label=f"lower ramp, κ = {eps}")
     ax.set(xlabel="x", ylim=(-0.05, 1.1), title="Smooth ramps sandwich the indicator")
     ax.legend(fontsize=8, loc="upper right")
     return fig
@@ -667,20 +671,20 @@ def plot_laplace_difference(rng: np.random.Generator, eps0: float = 1.0) -> Figu
     threshold = stable_threshold(10_000, 5e-6, b1, b2)
     fig, ax = plt.subplots(figsize=(7, 4.2))
     ax.plot(
-        ts, [laplace_difference_tail(float(t), b1, b2) for t in ts], color="k", lw=2, label="formula, Pr[ν − ρ > t]"
+        ts, [laplace_difference_tail(float(t), b1, b2) for t in ts], color="k", lw=2, label="formula, Pr[ν − ρ > τ]"
     )
     points = np.arange(0.0, 56.0, 4.0)
     sim = [float(np.mean(samples > t)) for t in points]
     ax.plot(points, [s if s > 0 else math.nan for s in sim], "o", color="C3", label="simulation, 10⁶ pairs")
-    ax.plot(ts, 0.5 * np.exp(-ts / b1), "--", color="C0", label=f"Pr[ν > t], ν ~ Lap({b1:g})")
-    ax.plot(ts, 0.5 * np.exp(-ts / b2), "--", color="C1", label=f"Pr[ρ > t], ρ ~ Lap({b2:g})")
+    ax.plot(ts, 0.5 * np.exp(-ts / b1), "--", color="C0", label=f"Pr[ν > τ], ν ~ Lap({b1:g})")
+    ax.plot(ts, 0.5 * np.exp(-ts / b2), "--", color="C1", label=f"Pr[ρ > τ], ρ ~ Lap({b2:g})")
     ax.axvline(threshold, color="gray", linestyle=":")
     ax.axhline(5e-6 / 10_000, color="gray", linestyle=":")
-    ax.text(threshold - 1, 2e-8, f"t = {threshold:.1f}\n(P = 10,000)", ha="right", fontsize=8)
+    ax.text(threshold - 1, 2e-8, f"τ = {threshold:.1f}\n(P = 10,000)", ha="right", fontsize=8)
     ax.set(
         yscale="log",
         ylim=(1e-11, 1),
-        xlabel="t",
+        xlabel="τ",
         ylabel="tail probability",
         title=f"Difference of Laplace noises, ε₀ = {eps0:g}",
     )

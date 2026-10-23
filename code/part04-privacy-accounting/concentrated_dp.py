@@ -538,17 +538,17 @@ def plot_privacy_loss(rng: np.random.Generator, sigma: float = SIGMA_RUN) -> Fig
     )
     left.legend(fontsize=9, loc="upper left")
     lams = [i / 20 for i in range(1, 161)]
-    right.plot(lams, [gaussian_loss_tail(lam, rho) for lam in lams], "k", label=r"exact $P[L > \rho + \lambda]$")
+    right.plot(lams, [gaussian_loss_tail(lam, rho) for lam in lams], "k", label=r"exact $\Pr[L > \rho + t]$")
     right.plot(
         lams,
         [zcdp_tail_bound(lam, rho) for lam in lams],
         "C1",
         linestyle="--",
-        label=r"zCDP bound $e^{-\lambda^2/(4\rho)}$",
+        label=r"zCDP bound $e^{-t^2/(4\rho)}$",
     )
     right.set(
         yscale="log",
-        xlabel=r"excess $\lambda$ over the mean",
+        xlabel=r"excess $t$ over the mean",
         ylabel="tail probability",
         ylim=(1e-8, 1.5),
         xlim=(0, 6.5),

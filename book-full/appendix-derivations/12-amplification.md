@@ -52,7 +52,7 @@ The appendix's script (see @sec-apx-amp-code) gives $\ln A' = 0.010803$ and $\ln
 
 ### Derivation
 
-1. **Name the two-point distributions.** For a real number $\theta$, let $\pi_\theta$ put probability $e^{\theta}/(2\cosh\theta)$ on "+" and $e^{-\theta}/(2\cosh\theta)$ on "−". It is randomized response whose privacy loss is $\pm2\theta$, since the two probabilities differ by the factor $e^{2\theta}$, and $\pi_{-\theta}$ is the same coin reversed. The probability of "+" is $(1 + \tanh\theta)/2$, so $\tanh\theta$ is how strongly the coin leans to "+". In @tbl-apx-amp-rr, $P_0 = \pi_{0.5}$ and $P_1 = \pi_{-0.5}$.
+1. **Name the two-point distributions.** For a real number $u$, let $\pi_u$ put probability $e^{u}/(2\cosh u)$ on "+" and $e^{-u}/(2\cosh u)$ on "−". It is randomized response whose privacy loss is $\pm2u$, since the two probabilities differ by the factor $e^{2u}$, and $\pi_{-u}$ is the same coin reversed. The probability of "+" is $(1 + \tanh u)/2$, so $\tanh u$ is how strongly the coin leans to "+". In @tbl-apx-amp-rr, $P_0 = \pi_{0.5}$ and $P_1 = \pi_{-0.5}$.
 
 2. **Split the Gaussian pair into mirrored pairs.** Fix $z > 0$ and compare the two points $\frac12 \mp z$. The Gaussian density is $e^{-y^2/(2\sigma^2)}$ up to a constant, so
 $$\frac{P_0(\frac12 - z)}{P_0(\frac12 + z)} = \exp\Big(\frac{(\frac12 + z)^2 - (\frac12 - z)^2}{2\sigma^2}\Big) = e^{z/\sigma^2}.$$
@@ -66,7 +66,7 @@ where $A'(a)$ and $B'(a)$ are the two moments of the randomized-response pair $(
 $$\tanh b = (1 - q)\tanh a + q\tanh(-a) = (1 - 2q)\tanh a.$$
 Since $|1 - 2q| \le 1$ and $\tanh$ is increasing, $-a \le b \le a$. In the example, $a = 0.5$ and $b = 0.3881$.
 
-5. **Compute the two moments.** On "+" the term $\pi_b^\alpha\pi_a^{1-\alpha}$ is $e^{\alpha b + (1 - \alpha)a}$ divided by $(2\cosh b)^\alpha(2\cosh a)^{1-\alpha}$, and on "−" the exponent changes sign. So the two exponentials add up to a hyperbolic cosine. Writing $\ell(\theta)$ for $\ln\cosh\theta$, the logarithms of the two moments are
+5. **Compute the two moments.** On "+" the term $\pi_b^\alpha\pi_a^{1-\alpha}$ is $e^{\alpha b + (1 - \alpha)a}$ divided by $(2\cosh b)^\alpha(2\cosh a)^{1-\alpha}$, and on "−" the exponent changes sign. So the two exponentials add up to a hyperbolic cosine. Writing $\ell(u)$ for $\ln\cosh u$, the logarithms of the two moments are
 $$\ln A' = \ell\big(\alpha b + (1 - \alpha)a\big) - \alpha\,\ell(b) - (1 - \alpha)\,\ell(a), \qquad \ln B' = \ell\big(\alpha a + (1 - \alpha)b\big) - \alpha\,\ell(a) - (1 - \alpha)\,\ell(b).$$
 
 6. **Turn the gap into two averages of tanh.** Let $d = a - b \ge 0$. Then $\alpha b + (1 - \alpha)a = a - \alpha d$ and $\alpha a + (1 - \alpha)b = a + (\alpha - 1)d$. Subtracting the two lines of step 5 and collecting the terms in $\ell(a)$ and $\ell(b)$ gives
@@ -113,8 +113,8 @@ The proof uses only the mirror that swaps $P_0$ and $P_1$. So it covers every pa
 
 Take add/remove neighbours, and write $D' = D \cup \{x\}$ for the dataset that holds your record $x$. A guarantee for a mechanism $M$ must cover both orders of the pair, so there are two directions. The **remove** direction compares $M(D')$ against $M(D)$, with the dataset that holds the record first. The **add** direction compares $M(D)$ against $M(D')$.
 
-One DP-SGD step draws a Poisson sample $S$ of the data, keeping each record with probability $q$ by its own coin. Write $g(u)$ for the clipped gradient of record $u$, divided by the clipping norm so that $\|g(u)\| \le 1$. The step outputs the noisy sum
-$$M(D) = \sum_{u \in S} g(u) + \mathcal N(0, \sigma^2 I).$$
+One DP-SGD step draws a Poisson sample $K$ of the data, keeping each record with probability $q$ by its own coin. Write $g(u)$ for the clipped gradient of record $u$, divided by the clipping norm so that $\|g(u)\| \le 1$. The step outputs the noisy sum
+$$M(D) = \sum_{u \in K} g(u) + \mathcal N(0, \sigma^2 I).$$
 The gradients may depend on earlier steps, but they are fixed when the step runs.
 
 The **hockey-stick divergence** at level $\gamma$ is the largest amount by which $P$ exceeds $\gamma$ times $Q$ on any event, $E_\gamma(P\|Q) = \max_A\big[P(A) - \gamma Q(A)\big]$. At $\gamma = e^\varepsilon$ it is the $\delta(\varepsilon)$ of the pair. The definition makes sense for every real $\gamma$, and for $\gamma \le 0$ the best event is the whole space, so $E_\gamma = 1 - \gamma$. A pair **dominates** one direction if its $E_\gamma$ is at least the mechanism's $E_\gamma$ in that direction, for every $\gamma \ge 0$ and all datasets. With $P_0 = \mathcal N(0, \sigma^2)$, $P_1 = \mathcal N(1, \sigma^2)$ and $P_q = (1 - q)P_0 + qP_1$ as in @sec-apx-amp-direction, the claim is that, for every $\gamma \ge 0$,
@@ -124,7 +124,7 @@ $$E_\gamma\big(M(D')\,\|\,M(D)\big) \le E_\gamma(P_q\|P_0), \qquad E_\gamma\big(
 
 ### The idea
 
-Two exact identities do the work, one for each order. Take a mixture $(1 - q)R + qP$ and one of its components, $R$. On any event, the mixture's excess over $\gamma R$ is $q$ times the excess of $P$ over $\gamma' R$, at the stretched level $\gamma' = 1 + (\gamma - 1)/q$. The add direction, with the mixture second, has a similar identity. So the $\delta$ curve of the mixture against $R$ is the $\delta$ curve of $P$ against $R$, scaled by $q$ and read at a different level. A larger base curve then gives a larger mixture curve, at every level.
+Two exact identities do the work, one for each order. Take a mixture $(1 - q)Q + qP$ and one of its components, $Q$. On any event, the mixture's excess over $\gamma Q$ is $q$ times the excess of $P$ over $\gamma' Q$, at the stretched level $\gamma' = 1 + (\gamma - 1)/q$. The add direction, with the mixture second, has a similar identity. So the $\delta$ curve of the mixture against $Q$ is the $\delta$ curve of $P$ against $Q$, scaled by $q$ and read at a different level. A larger base curve then gives a larger mixture curve, at every level.
 
 The rest is bookkeeping. Fix everything except your record's coin, and the step is exactly such a mixture, with a Gaussian base pair whose shift is your clipped gradient. Of all such base pairs, the one with shift exactly 1 along one axis has the largest curve. Finally, averaging over the other records' coins cannot raise the curve.
 
@@ -132,26 +132,26 @@ For a feel of the stretch, take $q = 0.01$ and $\gamma = 1.5$. The remove identi
 
 ### Derivation
 
-1. **Fix the other records' coins.** Let $T$ be the Poisson sample of $D$. Your record has its own coin, independent of $T$, so the sample of $D'$ is $T$ with probability $1 - q$ and $T \cup \{x\}$ otherwise. Given $T$, $M(D)$ is $R_T = \mathcal N(f_T, \sigma^2I)$, with $f_T$ the sum of the gradients in $T$. And $M(D')$ is $(1 - q)R_T + qP_T$, with $P_T = \mathcal N(f_T + v, \sigma^2I)$ and $v = g(x)$, so $\|v\| \le 1$.
+1. **Fix the other records' coins.** Let $K$ be the Poisson sample of $D$. Your record has its own coin, independent of $K$, so the sample of $D'$ is $K$ with probability $1 - q$ and $K \cup \{x\}$ otherwise. Given $K$, $M(D)$ is $Q_K = \mathcal N(f_K, \sigma^2I)$, with $f_K$ the sum of the gradients in $K$. And $M(D')$ is $(1 - q)Q_K + qP_K$, with $P_K = \mathcal N(f_K + v, \sigma^2I)$ and $v = g(x)$, so $\|v\| \le 1$.
 
-2. **Averaging over $T$ cannot raise $E_\gamma$.** Both runs are averages over $T$ with the same weights $w_T$. Write $U_T$ and $V_T$ for the two conditional outputs given $T$, in either order. For every event, $\sum_T w_TU_T(A) - \gamma\sum_Tw_TV_T(A)$ is the weighted average of the excesses $U_T(A) - \gamma V_T(A)$, and an average is at most the largest term. So $E_\gamma(\sum_Tw_TU_T\|\sum_Tw_TV_T) \le \max_TE_\gamma(U_T\|V_T)$, for every real $\gamma$. This is Fact 1 of [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md). It reduces both claims to one fixed $T$.
+2. **Averaging over $K$ cannot raise $E_\gamma$.** Both runs are averages over $K$ with the same weights $w_K$. Write $U_K$ and $V_K$ for the two conditional outputs given $K$, in either order. For every event, $\sum_K w_KU_K(A) - \gamma\sum_Kw_KV_K(A)$ is the weighted average of the excesses $U_K(A) - \gamma V_K(A)$, and an average is at most the largest term. So $E_\gamma(\sum_Kw_KU_K\|\sum_Kw_KV_K) \le \max_KE_\gamma(U_K\|V_K)$, for every real $\gamma$. This is Fact 1 of [Amplification by subsampling](../part04-privacy-accounting/05-subsampling.md). It reduces both claims to one fixed $K$.
 
-3. **The remove identity.** For any event $A$, collect the terms in $R(A)$: $(1 - q)R(A) + qP(A) - \gamma R(A) = q\big[P(A) - \gamma' R(A)\big]$, where $q\gamma' = \gamma - 1 + q$. Taking the maximum over $A$ on both sides gives
-$$E_\gamma\big((1 - q)R + qP\,\big\|\,R\big) = q\,E_{\gamma'}(P\|R), \qquad \gamma' = 1 + \frac{\gamma - 1}{q}.$$ {#eq-apx-amp-remove-identity}
+3. **The remove identity.** For any event $A$, collect the terms in $Q(A)$: $(1 - q)Q(A) + qP(A) - \gamma Q(A) = q\big[P(A) - \gamma' Q(A)\big]$, where $q\gamma' = \gamma - 1 + q$. Taking the maximum over $A$ on both sides gives
+$$E_\gamma\big((1 - q)Q + qP\,\big\|\,Q\big) = q\,E_{\gamma'}(P\|Q), \qquad \gamma' = 1 + \frac{\gamma - 1}{q}.$$ {#eq-apx-amp-remove-identity}
 This holds for every $\gamma$. When $\gamma < 1 - q$, the level $\gamma'$ is negative and both sides equal $1 - \gamma$, since $q(1 - \gamma') = 1 - \gamma$.
 
-4. **The add identity.** Now the mixture is second. Collect the terms in $R(A)$ again: $R(A) - \gamma(1 - q)R(A) - \gamma qP(A) = c\,R(A) - \gamma q\,P(A)$, with $c = 1 - \gamma(1 - q)$. If $c > 0$, factor it out. If $c \le 0$, every event gives at most 0, because $\gamma \ge 0$ makes the last term non-positive, and the empty event gives exactly 0. So
-$$E_\gamma\big(R\,\big\|\,(1 - q)R + qP\big) = \begin{cases} c\,E_{\gamma q/c}(R\|P), & c = 1 - \gamma(1 - q) > 0,\\ 0, & c \le 0.\end{cases}$$ {#eq-apx-amp-add-identity}
+4. **The add identity.** Now the mixture is second. Collect the terms in $Q(A)$ again: $Q(A) - \gamma(1 - q)Q(A) - \gamma qP(A) = c\,Q(A) - \gamma q\,P(A)$, with $c = 1 - \gamma(1 - q)$. If $c > 0$, factor it out. If $c \le 0$, every event gives at most 0, because $\gamma \ge 0$ makes the last term non-positive, and the empty event gives exactly 0. So
+$$E_\gamma\big(Q\,\big\|\,(1 - q)Q + qP\big) = \begin{cases} c\,E_{\gamma q/c}(Q\|P), & c = 1 - \gamma(1 - q) > 0,\\ 0, & c \le 0.\end{cases}$$ {#eq-apx-amp-add-identity}
 
-5. **The base pair with shift 1 is the worst.** Compare $(P_T, R_T)$ with $(P_1, P_0)$ at every level and in both orders. Shifting both distributions by $-f_T$ and rotating $v$ onto the first axis is an invertible map, the same for both, so it changes no $E_\gamma$. The other coordinates are then independent and identical in both, so dropping them and adding them back are both post-processing, and they change nothing either. What is left is $\mathcal N(\|v\|, \sigma^2)$ against $\mathcal N(0, \sigma^2)$. If $\|v\| < 1$, this pair is a post-processing of $(P_1, P_0)$. The map $y \mapsto \|v\|\,y + \mathcal N\big(0, (1 - \|v\|^2)\sigma^2\big)$ turns $P_1$ into $\mathcal N(\|v\|, \sigma^2)$ and $P_0$ into $P_0$. **Data processing** says no such map raises $E_\gamma$. The reason is that a test on the output pulls back to a test on the input with acceptance probability between 0 and 1, and the best such test is an event. So $E_\gamma(P_T\|R_T) \le E_\gamma(P_1\|P_0)$ and $E_\gamma(R_T\|P_T) \le E_\gamma(P_0\|P_1)$.
+5. **The base pair with shift 1 is the worst.** Compare $(P_K, Q_K)$ with $(P_1, P_0)$ at every level and in both orders. Shifting both distributions by $-f_K$ and rotating $v$ onto the first axis is an invertible map, the same for both, so it changes no $E_\gamma$. The other coordinates are then independent and identical in both, so dropping them and adding them back are both post-processing, and they change nothing either. What is left is $\mathcal N(\|v\|, \sigma^2)$ against $\mathcal N(0, \sigma^2)$. If $\|v\| < 1$, this pair is a post-processing of $(P_1, P_0)$. The map $y \mapsto \|v\|\,y + \mathcal N\big(0, (1 - \|v\|^2)\sigma^2\big)$ turns $P_1$ into $\mathcal N(\|v\|, \sigma^2)$ and $P_0$ into $P_0$. **Data processing** says no such map raises $E_\gamma$. The reason is that a test on the output pulls back to a test on the input with acceptance probability between 0 and 1, and the best such test is an event. So $E_\gamma(P_K\|Q_K) \le E_\gamma(P_1\|P_0)$ and $E_\gamma(Q_K\|P_K) \le E_\gamma(P_0\|P_1)$.
 
 6. **Put the pieces together.** Both identities are increasing in the base divergence, because $q > 0$ and $c > 0$ where it matters. For the remove direction, steps 2, 3 and 5 give
-$$E_\gamma\big(M(D')\|M(D)\big) \le \max_T\,q\,E_{\gamma'}(P_T\|R_T) \le q\,E_{\gamma'}(P_1\|P_0) = E_\gamma(P_q\|P_0),$$
+$$E_\gamma\big(M(D')\|M(D)\big) \le \max_K\,q\,E_{\gamma'}(P_K\|Q_K) \le q\,E_{\gamma'}(P_1\|P_0) = E_\gamma(P_q\|P_0),$$
 where the last equality is @eq-apx-amp-remove-identity read backwards for the Gaussian pair. The add direction is the same with @eq-apx-amp-add-identity, and both sides are 0 when $c \le 0$. This is @eq-apx-amp-dominate.
 
 7. **One base curve for both directions.** The mirror $y \mapsto 1 - y$ swaps $P_0$ and $P_1$ and is invertible, so $E_\gamma(P_0\|P_1) = E_\gamma(P_1\|P_0)$ for every $\gamma$. Both identities therefore read the same curve, the Gaussian $\delta$ curve @eq-num-gauss with $\mu = 1/\sigma$, at different levels.
 
-**A bonus: amplification for any mechanism.** The identity in step 3 used nothing about Gaussians. Let $M$ be any $(\varepsilon, \delta)$-DP mechanism, and in step 1 let $R_T = M(T)$ and $P_T = M(T \cup \{x\})$ be its outputs on two neighbouring samples. Set $e^{\varepsilon'} = 1 + q(e^\varepsilon - 1)$. Then the stretched level is $\gamma' = 1 + (e^{\varepsilon'} - 1)/q = e^\varepsilon$, and @eq-apx-amp-remove-identity gives $E_{e^{\varepsilon'}}\big((1 - q)R_T + qP_T\|R_T\big) = q\,E_{e^\varepsilon}(P_T\|R_T) \le q\delta$. With step 2, that is the remove half of @eq-sub-amplify in one line.
+**A bonus: amplification for any mechanism.** The identity in step 3 used nothing about Gaussians. Let $M$ be any $(\varepsilon, \delta)$-DP mechanism, and in step 1 let $Q_K = M(K)$ and $P_K = M(K \cup \{x\})$ be its outputs on two neighbouring samples. Set $e^{\varepsilon'} = 1 + q(e^\varepsilon - 1)$. Then the stretched level is $\gamma' = 1 + (e^{\varepsilon'} - 1)/q = e^\varepsilon$, and @eq-apx-amp-remove-identity gives $E_{e^{\varepsilon'}}\big((1 - q)Q_K + qP_K\|Q_K\big) = q\,E_{e^\varepsilon}(P_K\|Q_K) \le q\delta$. With step 2, that is the remove half of @eq-sub-amplify in one line.
 
 ### Checking it
 
@@ -235,9 +235,9 @@ So the privacy loss, the logarithm of this ratio, grows with the distance $t$ ab
 $$\Pr\Big[A - \frac c2 \ge s\Big] \le e^{-2s^2/c}.$$
 Choosing $s = \sqrt{c\ln(2/\delta)/2}$ makes this probability $\delta/2$.
 
-11. **Chernoff on $C$.** The clone count has mean $\mu = (n - 1)e^{-\varepsilon_0}$. The lower Chernoff bound of the same chapter says that it falls a fraction $\eta$ below its mean only rarely:
-$$\Pr[C \le (1 - \eta)\mu] \le e^{-\eta^2\mu/2}.$$
-Choosing $\eta = \sqrt{2\ln(2/\delta)/\mu}$ makes this probability $\delta/2$, at the level $c_{\min} = (1 - \eta)\mu = \mu - \sqrt{2\mu\ln(2/\delta)}$.
+11. **Chernoff on $C$.** The clone count has mean $\mu = (n - 1)e^{-\varepsilon_0}$. The lower Chernoff bound of the same chapter says that it falls a fraction $\kappa$ below its mean only rarely:
+$$\Pr[C \le (1 - \kappa)\mu] \le e^{-\kappa^2\mu/2}.$$
+Choosing $\kappa = \sqrt{2\ln(2/\delta)/\mu}$ makes this probability $\delta/2$, at the level $c_{\min} = (1 - \kappa)\mu = \mu - \sqrt{2\mu\ln(2/\delta)}$.
 
 12. **Combine the two tails.** By the union bound, the two failures of steps 10 and 11 together have $\tilde P$-probability at most $\delta$. Outside them, $C > c_{\min}$ and, with $c$ the value of $C$, $t \le s + \frac12$. Write the ratio @eq-apx-amp-clone-ratio as $(1 + u)/(1 - u)$ with $u = b\,t/\frac{c+1}2$, which increases in $u$. The bound on $t$ gives $u \le h(c)$, where $h(c) = b\big(\sqrt{2c\ln(2/\delta)} + 1\big)/(c + 1)$. Since the actual $c$ is above $c_{\min}$, we want $h$ to decrease, and it does for $c \ge 1$: its derivative has the sign of $\sqrt{2\ln(2/\delta)}\,\frac{1 - c}{2\sqrt c} - 1$, which is negative there. So $u \le h(c_{\min})$. The other direction, $E_{e^\varepsilon}(\tilde Q\|\tilde P)$, is the same, because swapping the two counts and replacing $A$ by $C - A$ turns $\tilde P$ into $\tilde Q$. So the pair, and with it the shuffled output, is $(\varepsilon, \delta)$-DP with
 $$\varepsilon = \ln\frac{1 + x}{1 - x}, \qquad x = b\,\frac{\sqrt{2c_{\min}\ln(2/\delta)} + 1}{c_{\min} + 1}, \qquad c_{\min} = \mu - \sqrt{2\mu\ln(2/\delta)},$$ {#eq-apx-amp-clone-closed}
@@ -304,16 +304,16 @@ Take $X$ equal to 0 or 1 with probability $\frac12$ each, and $X' = 1$. Moving e
 
 **Contraction.**
 
-1. **Pick a cheap nearby $Y$.** Fix $\eta > 0$. By the definition of the infimum, there is a $Y$ and a coupling with $\|X - Y\| \le z$ and $D_\alpha(Y\|X') \le D_\alpha^{(z)}(X\|X') + \eta$.
+1. **Pick a cheap nearby $Y$.** Fix $\xi > 0$. By the definition of the infimum, there is a $Y$ and a coupling with $\|X - Y\| \le z$ and $D_\alpha(Y\|X') \le D_\alpha^{(z)}(X\|X') + \xi$.
 2. **Carry the coupling through the maps.** Use the same coupling for $\psi(X)$ and $\psi'(Y)$. By the triangle inequality, $\|\psi(X) - \psi'(Y)\| \le \|\psi(X) - \psi'(X)\| + \|\psi'(X) - \psi'(Y)\| \le s + z$. The first term is at most $s$ by the assumption on the two maps, and the second at most $z$ because $\psi'$ is a contraction.
 3. **Apply the same map to both.** $D_\alpha\big(\psi'(Y)\|\psi'(X')\big) \le D_\alpha(Y\|X')$ by data processing: one map, applied to both, cannot raise a divergence.
-4. **Conclude.** $\psi'(Y)$ is within $z + s$ of $\psi(X)$, so it is allowed in the infimum that defines $D_\alpha^{(z + s)}\big(\psi(X)\|\psi'(X')\big)$. That divergence is therefore at most $D_\alpha^{(z)}(X\|X') + \eta$, for every $\eta > 0$.
+4. **Conclude.** $\psi'(Y)$ is within $z + s$ of $\psi(X)$, so it is allowed in the infimum that defines $D_\alpha^{(z + s)}\big(\psi(X)\|\psi'(X')\big)$. That divergence is therefore at most $D_\alpha^{(z)}(X\|X') + \xi$, for every $\xi > 0$.
 
 Only $\psi'$ needs to be a contraction. The chapter assumes both maps are, which is more than enough.
 
 **Shift reduction.**
 
-1. **Pick a cheap nearby $Y$.** Fix $\eta > 0$ and take $Y$ coupled to $X$ with $\|X - Y\| \le z + a$ and $D_\alpha(Y\|X') \le D_\alpha^{(z + a)}(X\|X') + \eta$. Let the noise $Z$ be independent of $X$, $Y$ and $X'$.
+1. **Pick a cheap nearby $Y$.** Fix $\xi > 0$ and take $Y$ coupled to $X$ with $\|X - Y\| \le z + a$ and $D_\alpha(Y\|X') \le D_\alpha^{(z + a)}(X\|X') + \xi$. Let the noise $Z$ be independent of $X$, $Y$ and $X'$.
 2. **Split each move.** Let $W = X - Y$, and shorten it to length at most $a$:
 $$W_2 = \min\Big(1, \frac{a}{\|W\|}\Big)W, \qquad W_1 = W - W_2,$$
 with $W_2 = 0$ when $W = 0$. Both parts point along $W$. So $\|W_2\| \le a$ and $\|W_1\| = \max(\|W\| - a, 0) \le z$.
@@ -326,7 +326,7 @@ $$D_\alpha\big((Y,\ W_2 + Z)\,\big\|\,(X',\ Z)\big) \le D_\alpha(Y\|X') + \sup_y
 6. **Bound the noise with a random shift.** The noise is independent of $Y$ and $W_2$. So given $Y = y$, the sum $W_2 + Z$ is a mixture of shifted Gaussians $\mathcal N(w, \sigma^2I)$, one for each value $w$ of the paid part, and each such $w$ has length at most $a$. The moment of a Rényi divergence is an average of a convex function of the ratio,
 $$e^{(\alpha - 1)D_\alpha(P\|Q)} = \int Q\Big(\frac PQ\Big)^\alpha,$$
 and $u \mapsto u^\alpha$ is convex for $\alpha > 1$, so the moment is convex in $P$ for a fixed $Q$. The moment of a mixture is therefore at most the largest moment of its components. So the divergence in step 5 is at most the largest $D_\alpha(Z + w\|Z)$ over $\|w\| \le a$, which is $R_\alpha(a)$.
-7. **Conclude.** Steps 3 to 6 give $D_\alpha^{(z)}(X + Z\|X' + Z) \le D_\alpha^{(z + a)}(X\|X') + \eta + R_\alpha(a)$, for every $\eta > 0$. This is @eq-shuf-shift-reduction.
+7. **Conclude.** Steps 3 to 6 give $D_\alpha^{(z)}(X + Z\|X' + Z) \le D_\alpha^{(z + a)}(X\|X') + \xi + R_\alpha(a)$, for every $\xi > 0$. This is @eq-shuf-shift-reduction.
 
 ### Checking it
 
@@ -350,7 +350,7 @@ All the slack in this example comes from step 6. The paid shift is $a$ only half
 
 ### What the chapter uses
 
-Projected noisy SGD makes one pass over $n$ records, projecting each iterate back onto a convex set. The neighbouring relation is replace-one: the two datasets differ in the value of one record. Its losses are convex and $\beta$-smooth, the step size is at most $2/\beta$ so that each step is a contraction, and they are $L$-Lipschitz, which means each gradient has length at most $L$. It adds Gaussian noise of standard deviation $\sigma$ to each gradient and releases only the last iterate. The chapter writes $L_f$ for the Lipschitz constant, and this section writes $L$ to keep formulas short. Theorem 23 in @sec-shuf-iteration gives the record used at step $t$ of a run of $T$ steps the curve
+Projected noisy SGD makes one pass over $n$ records, projecting each iterate back onto a convex set. The neighbouring relation is replace-one: the two datasets differ in the value of one record. Its losses are convex and $\beta$-smooth, the learning rate is at most $2/\beta$ so that each step is a contraction, and they are $L$-Lipschitz, which means each gradient has length at most $L$. It adds Gaussian noise of standard deviation $\sigma$ to each gradient and releases only the last iterate. The chapter writes $L_f$ for the Lipschitz constant, and this section writes $L$ to keep formulas short. Theorem 23 in @sec-shuf-iteration gives the record used at step $t$ of a run of $T$ steps the curve
 $$D_\alpha \le \frac{2\alpha L^2}{\sigma^2(T - t + 1)}.$$
 The last record is protected by only one step. A random stopping time fixes this. The chapter states Theorem 26 of Feldman, Mironov, Talwar & Thakurta (2018) without proof. Let the number of steps $T$ be uniform on $\{1, \dots, n\}$ and independent of the data, and let the noise satisfy $\sigma \ge L\sqrt{2(\alpha - 1)\alpha}$. Then every record gets
 $$\varepsilon(\alpha) = \frac{4\alpha L^2\ln n}{n\sigma^2}.$$

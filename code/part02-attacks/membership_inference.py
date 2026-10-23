@@ -688,7 +688,7 @@ def plot_loss_distributions(exp: Experiment) -> Figure:
         label=rf"Yeom threshold: loss $\leq$ mean training loss {tau:.2f}",
     )
     ax.set(
-        xlabel=r"$\phi = y\langle w, x\rangle$, the logit of the target model's confidence in the true label",
+        xlabel=r"$\phi = y\langle \theta, x\rangle$, the logit of the target model's confidence in the true label",
         ylabel="density",
         xlim=(-6, 8),
         ylim=(0, 0.62),

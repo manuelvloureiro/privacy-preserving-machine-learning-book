@@ -70,7 +70,7 @@ At $\varepsilon = 1$ the classic formula adds 30% more noise than needed, and us
 
 A Gaussian mechanism satisfies a whole curve of guarantees, one $\delta$ for each $\varepsilon$, and the accountants of [Part 4](../part04-privacy-accounting/00-introduction.md) compose whole curves. So report $\sigma/\Delta_2f$ with every Gaussian release, as well as the pair you chose.
 
-Return to the diabetes count, at the Laplace example's $\varepsilon = 0.1$ and with $\delta = 10^{-5}$. Its 95% error bar is 1.96 standard deviations, or 60.27. Laplace noise gave 29.96 with no $\delta$ at all, so for a single count it wins on both error and guarantee.
+Return to the diabetes count, at the Laplace record's $\varepsilon = 0.1$ and with $\delta = 10^{-5}$. Its 95% error bar is 1.96 standard deviations, or 60.27. Laplace noise gave 29.96 with no $\delta$ at all, so for a single count it wins on both error and guarantee.
 
 ## Laplace or Gaussian? {#sec-lg-choose}
 
@@ -81,7 +81,7 @@ In a sparse query, such as a histogram under add/remove, one record moves one co
 $$d < \frac{(\varepsilon\sigma_1)^2}2.$$
 At $\varepsilon = 1$ and the default $\delta$, the unit noise level is 3.7306, so for threshold counts Gaussian noise wins from 7 counts on.
 
-Gaussian noise also wins when releases are composed many times, because several Gaussian releases compose exactly into one Gaussian mechanism, whose $\ell_2$ sensitivity is the square root of the sum of the squared sensitivities. Private training needs both, since one example's gradient moves every coordinate of a model at every step. So it clips each gradient's $\ell_2$ norm and calibrates Gaussian noise to that clip.
+Gaussian noise also wins when releases are composed many times, because several Gaussian releases compose exactly into one Gaussian mechanism, whose $\ell_2$ sensitivity is the square root of the sum of the squared sensitivities. Private training needs both, since one record's gradient moves every coordinate of a model at every step. So it clips each gradient's $\ell_2$ norm and calibrates Gaussian noise to that clip.
 
 ## Calibrating a release {#sec-lg-recipe}
 

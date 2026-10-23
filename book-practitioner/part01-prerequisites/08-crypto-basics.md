@@ -2,9 +2,9 @@
 
 ## What it is {#sec-crypto-what}
 
-A security claim is a statement about a guessing game. A challenger secretly picks one of two worlds, such as encrypting one of two messages, and an adversary sees the result and guesses. Write $X$ and $Y$ for what it sees in each world. If an adversary $A$ answers 1 for the second, its **advantage** is the gap between how often it says 1 in each:
-$$\mathrm{Adv}_A(X, Y) = \big|\Pr[A(X) = 1] - \Pr[A(Y) = 1]\big|.$$
-If each world is equally likely, it wins with probability $\frac12 + \frac12\mathrm{Adv}_A$, and no advantage exceeds the total variation distance between $X$ and $Y$ ([Divergences](03-divergences.md)).
+A security claim is a statement about a guessing game. A challenger secretly picks one of two worlds, such as encrypting one of two messages, and an adversary sees the result and guesses. Write $X$ and $Y$ for what it sees in each world. If an adversary, written $\mathcal A$, answers 1 for the second, its **advantage** is the gap between how often it says 1 in each:
+$$\mathrm{Adv}_{\mathcal A}(X, Y) = \big|\Pr[\mathcal A(X) = 1] - \Pr[\mathcal A(Y) = 1]\big|.$$
+If each world is equally likely, it wins with probability $\frac12 + \frac12\mathrm{Adv}_{\mathcal A}$, and no advantage exceeds the total variation distance between $X$ and $Y$ ([Divergences](03-divergences.md)).
 
 A scheme has **$\kappa$-bit security** when no attack beats trying keys. An attacker who tries $t$ keys then gets an advantage of at most about $t/2^\kappa$. For example, testing $10^{18}$ keys per second for a year breaks a 128-bit key with probability $9.3\times10^{-14}$.
 
@@ -24,8 +24,8 @@ You meet these tools whenever a pipeline pseudonymizes identifiers, generates ke
 
 ## How to use it {#sec-crypto-use}
 
-The **birthday bound** says that when a number $q$ of values are drawn uniformly from a number $N$ of possible values, the chance of a repeat is at most
-$$\Pr[\text{collision}] \le \frac{q(q-1)}{2N}.$$ {#eq-crypto-birthday}
+The **birthday bound** says that when a number $m$ of values are drawn uniformly from a number $N$ of possible values, the chance of a repeat is at most
+$$\Pr[\text{collision}] \le \frac{m(m-1)}{2N}.$$ {#eq-crypto-birthday}
 A repeat becomes as likely as not after about $1.18\sqrt N$ draws, so random $\kappa$-bit values start to collide after about $2^{\kappa/2}$. For example, 1,000 features hashed into $2^{20}$ buckets collide with exact probability 0.379.
 
 To split a secret among several holders, draw all shares but one uniformly modulo a prime $p$, and choose the last so that they add up to the secret. Adding two secrets' shares holder by holder gives shares of their sum. The snippet shares 42 and 100 and adds them. For 10 million identifiers, its birthday bounds show why a pseudonym keeps 128 bits of the HMAC. At 64 bits the bound is $2.7\times10^{-6}$.

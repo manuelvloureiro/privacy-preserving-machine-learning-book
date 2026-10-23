@@ -177,7 +177,7 @@ def plot_losses() -> Figure:
     left.set_xlim(-2.0, 2.0)
     left.set_ylim(0.0, 0.62)
     left.set_title("Laplace mechanism, $\\varepsilon = 1$", fontsize=10)
-    left.set_xlabel("privacy loss $\\ell$")
+    left.set_xlabel("privacy loss $L$")
     left.legend(fontsize=8, loc="upper left")
     # Gaussian mechanism with σ = Δ₂ and ‖f(X) - f(X')‖₂ = Δ₂: the loss is N(1/2, 1), unbounded.
     s_ratio = 1.0
@@ -191,8 +191,8 @@ def plot_losses() -> Figure:
     )
     right.axvline(eps, color="0.4", linestyle="--", linewidth=1)
     right.set_xlim(-3.0, 4.0)
-    right.set_title("Gaussian mechanism, $\\sigma = \\Delta_2$", fontsize=10)
-    right.set_xlabel("privacy loss $\\ell$")
+    right.set_title("Gaussian mechanism, $\\sigma = \\Delta_2 f$", fontsize=10)
+    right.set_xlabel("privacy loss $L$")
     right.legend(fontsize=8, loc="upper left")
     for ax in (left, right):
         ax.grid(True, alpha=0.3)

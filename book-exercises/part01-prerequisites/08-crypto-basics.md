@@ -32,30 +32,30 @@ It is negligible only barely. Against $\lambda^{-10}$ it needs $\lambda > 2^{102
 
 ## Hybrids for TV {#sec-sol-crypto-basics-2}
 
-> **Exercise 2.** **Hybrids for TV.** Prove $\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \le m\,\mathrm{TV}(P, Q)$ directly with the chain $H_i$ and Fact 3. Then show that for two coins the true value grows like $\sqrt m$ when $\mathrm{TV}(P, Q)$ is small. *(Hybrid argument)*
+> **Exercise 2.** **Hybrids for TV.** Prove $\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)$ directly with the chain $H_i$ and Fact 3. Then show that for two coins the true value grows like $\sqrt m$ when $\mathrm{TV}(P_0, P_1)$ is small. *(Hybrid argument)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **The bound.** $\mathrm{TV}$ is the TV distance of Fact 2.
 
-1. **Hybrids.** Let $H_i = (Q_1, \dots, Q_i, P_{i+1}, \dots, P_m)$: $m$ independent entries, the first $i$ drawn from $Q$ and the rest from $P$. Then $H_0 = P^{\otimes m}$ and $H_m = Q^{\otimes m}$.
-2. **Fix a distinguisher.** Let $A$ be any distinguisher on $m$-tuples, randomized or not, with no limit on its running time.
-3. **One step changes one entry.** $H_{i-1}$ and $H_i$ differ only in entry $i$: $P$ in $H_{i-1}$, $Q$ in $H_i$. The other $m - 1$ entries have the same distribution in both, and are independent of entry $i$. Condition on their values $w$. Then $A(\dots)$ becomes a distinguisher $A_w$ that sees only entry $i$, so by Fact 2
-$$\big|\Pr[A(H_{i-1}) = 1 \mid w] - \Pr[A(H_i) = 1 \mid w]\big| = \mathrm{Adv}_{A_w}(P, Q) \le \mathrm{TV}(P, Q).$$
-4. **Average over $w$.** The two conditional probabilities are averaged with the same weights in both hybrids, so the triangle inequality gives $\mathrm{Adv}_A(H_{i-1}, H_i) \le \mathrm{TV}(P, Q)$.
-5. **Chain.** By Fact 3, $\mathrm{Adv}_A(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}_A(H_{i-1}, H_i) \le m\,\mathrm{TV}(P, Q)$.
-6. **Take the best $A$.** By Fact 2 the best unbounded distinguisher attains $\mathrm{TV}(H_0, H_m)$. Step 5 holds for it too, so $\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \le m\,\mathrm{TV}(P, Q)$.
+1. **Hybrids.** Let $H_i = (V_1, \dots, V_i, U_{i+1}, \dots, U_m)$: $m$ independent entries, the first $i$ drawn from $P_1$ and the rest from $P_0$. Then $H_0 = P_0^{\otimes m}$ and $H_m = P_1^{\otimes m}$.
+2. **Fix a distinguisher.** Let $\mathcal A$ be any distinguisher on $m$-tuples, randomized or not, with no limit on its running time.
+3. **One step changes one entry.** $H_{i-1}$ and $H_i$ differ only in entry $i$: $P_0$ in $H_{i-1}$, $P_1$ in $H_i$. The other $m - 1$ entries have the same distribution in both, and are independent of entry $i$. Condition on their values $w$. Then $\mathcal A(\dots)$ becomes a distinguisher $\mathcal \mathcal A_w$ that sees only entry $i$, so by Fact 2
+$$\big|\Pr[\mathcal A(H_{i-1}) = 1 \mid w] - \Pr[\mathcal A(H_i) = 1 \mid w]\big| = \mathrm{Adv}_{\mathcal \mathcal A_w}(P_0, P_1) \le \mathrm{TV}(P_0, P_1).$$
+4. **Average over $w$.** The two conditional probabilities are averaged with the same weights in both hybrids, so the triangle inequality gives $\mathrm{Adv}_\mathcal A(H_{i-1}, H_i) \le \mathrm{TV}(P_0, P_1)$.
+5. **Chain.** By Fact 3, $\mathrm{Adv}_\mathcal A(H_0, H_m) \le \sum_{i=1}^m\mathrm{Adv}_\mathcal A(H_{i-1}, H_i) \le m\,\mathrm{TV}(P_0, P_1)$.
+6. **Take the best $\mathcal A$.** By Fact 2 the best unbounded distinguisher attains $\mathrm{TV}(H_0, H_m)$. Step 5 holds for it too, so $\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)$.
 
-**The true growth for two coins.** Let $P$ be a coin with heads probability $\frac12 + \delta$ and $Q$ a fair coin, so $\mathrm{TV}(P, Q) = \delta$.
+**The true growth for two coins.** Let $P_0$ be a coin with heads probability $\frac12 + \xi$ and $P_1$ a fair coin, so $\mathrm{TV}(P_0, P_1) = \xi$.
 
-1. **Only the count matters.** A sequence $\omega$ with $k$ heads has $P^{\otimes m}(\omega) = (\frac12 + \delta)^k(\frac12 - \delta)^{m - k}$ and $Q^{\otimes m}(\omega) = 2^{-m}$, which depend on $\omega$ only through $k$. In $\mathrm{TV} = \frac12\sum_\omega|P^{\otimes m}(\omega) - Q^{\otimes m}(\omega)|$ (@eq-tv), group the $\binom mk$ sequences with $k$ heads. Each group contributes $\frac12|\mathrm{Bin}(m, \frac12 + \delta)(k) - \mathrm{Bin}(m, \frac12)(k)|$, so the TV distance between the tuples equals the TV distance between the two head counts.
-2. **Normal approximation.** The biased count has mean $\frac m2 + m\delta$ and variance $m(\frac14 - \delta^2) \approx \frac m4$. The fair count has mean $\frac m2$ and variance $\frac m4$. For large $m$ both are close to normal with standard deviation $\sigma = \sqrt m/2$.
-3. **TV between two normals.** In [Divergences](../../book-full/part01-prerequisites/03-divergences.md), two normals with the same $\sigma$ and means $s$ apart have $\mathrm{TV} = 2\Phi(\mu/2) - 1$ with $\mu = s/\sigma$. Here $s = m\delta$, so $\mu/2 = m\delta/\sqrt m = \delta\sqrt m$ and
-$$\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \approx 2\Phi(\delta\sqrt m) - 1.$$
-4. **Small argument.** Near 0, $\Phi(x) \approx \frac12 + x\varphi(0)$ with $\varphi(0) = 1/\sqrt{2\pi}$. So while $\delta\sqrt m$ is small, $\mathrm{TV} \approx \sqrt{2/\pi}\,\delta\sqrt m \approx 0.80\,\delta\sqrt m$: it grows like $\sqrt m$, not like $m$.
+1. **Only the count matters.** A sequence $\omega$ with $k$ heads has $P_0^{\otimes m}(\omega) = (\frac12 + \xi)^k(\frac12 - \xi)^{m - k}$ and $P_1^{\otimes m}(\omega) = 2^{-m}$, which depend on $\omega$ only through $k$. In $\mathrm{TV} = \frac12\sum_\omega|P_0^{\otimes m}(\omega) - P_1^{\otimes m}(\omega)|$ (@eq-tv), group the $\binom mk$ sequences with $k$ heads. Each group contributes $\frac12|\mathrm{Bin}(m, \frac12 + \xi)(k) - \mathrm{Bin}(m, \frac12)(k)|$, so the TV distance between the tuples equals the TV distance between the two head counts.
+2. **Normal approximation.** The biased count has mean $\frac m2 + m\xi$ and variance $m(\frac14 - \xi^2) \approx \frac m4$. The fair count has mean $\frac m2$ and variance $\frac m4$. For large $m$ both are close to normal with standard deviation $\sigma = \sqrt m/2$.
+3. **TV between two normals.** In [Divergences](../../book-full/part01-prerequisites/03-divergences.md), two normals with the same $\sigma$ and means $s$ apart have $\mathrm{TV} = 2\Phi(\mu/2) - 1$ with $\mu = s/\sigma$. Here $s = m\xi$, so $\mu/2 = m\xi/\sqrt m = \xi\sqrt m$ and
+$$\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \approx 2\Phi(\xi\sqrt m) - 1.$$
+4. **Small argument.** Near 0, $\Phi(x) \approx \frac12 + x\varphi(0)$ with $\varphi(0) = 1/\sqrt{2\pi}$. So while $\xi\sqrt m$ is small, $\mathrm{TV} \approx \sqrt{2/\pi}\,\xi\sqrt m \approx 0.80\,\xi\sqrt m$: it grows like $\sqrt m$, not like $m$.
 
-@tbl-sol-crypto-basics-tv compares the exact TV distance with both approximations and with the hybrid bound, for $\delta = 0.01$.
+@tbl-sol-crypto-basics-tv compares the exact TV distance with both approximations and with the hybrid bound, for $\xi = 0.01$.
 
-| Flips $m$ | Exact TV | $2\Phi(\delta\sqrt m) - 1$ | $\sqrt{2/\pi}\,\delta\sqrt m$ | Hybrid bound $\min(1, m\delta)$ |
+| Flips $m$ | Exact TV | $2\Phi(\xi\sqrt m) - 1$ | $\sqrt{2/\pi}\,\xi\sqrt m$ | Hybrid bound $\min(1, m\xi)$ |
 | --- | --- | --- | --- | --- |
 | 1 | 0.0100 | 0.0080 | 0.0080 | 0.0100 |
 | 100 | 0.0799 | 0.0797 | 0.0798 | 1.0000 |
@@ -65,27 +65,27 @@ $$\mathrm{TV}(P^{\otimes m}, Q^{\otimes m}) \approx 2\Phi(\delta\sqrt m) - 1.$$
 
 : TV distance between $m$ flips of a $0.51$-coin and $m$ fair flips: exact, the normal approximation, its small-argument form, and the hybrid bound. {#tbl-sol-crypto-basics-tv}
 
-Each fourfold increase in $m$ (100 to 400) doubles the TV distance, as $\sqrt m$ predicts. The normal approximation is poor only at $m = 1$, where the count is a single coin flip and the bound $m\delta$ is exact. The linear form overshoots once $\delta\sqrt m$ is no longer small, because $2\Phi(x) - 1$ bends over towards 1.
+Each fourfold increase in $m$ (100 to 400) doubles the TV distance, as $\sqrt m$ predicts. The normal approximation is poor only at $m = 1$, where the count is a single coin flip and the bound $m\xi$ is exact. The linear form overshoots once $\xi\sqrt m$ is no longer small, because $2\Phi(x) - 1$ bends over towards 1.
 
 *The hybrid bound is tight for one sample and loose by a factor of order $\sqrt m$ afterwards, because the per-step losses in Fact 3 do not add up in the same direction.*
 :::
 
 ## The best threshold {#sec-sol-crypto-basics-3}
 
-> **Exercise 3.** **The best threshold.** For $m$ flips of a $(\frac12 + \delta)$-coin against a fair coin, show that the likelihood ratio is increasing in the number of heads, so the best test is a threshold, and find where the two binomial probabilities cross. *Check: about $m/2 + m\delta/2$; for $m = 10{,}000$ and $\delta = 0.01$ the best advantage is 0.683.* *(Distinguishers and TV)*
+> **Exercise 3.** **The best threshold.** For $m$ flips of a $(\frac12 + \xi)$-coin against a fair coin, show that the likelihood ratio is increasing in the number of heads, so the best test is a threshold, and find where the two binomial probabilities cross. *Check: about $m/2 + m\xi/2$; for $m = 10{,}000$ and $\xi = 0.01$ the best advantage is 0.683.* *(Distinguishers and TV)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Likelihood ratio.** For a sequence with $k$ heads, divide the two probabilities from Exercise 2:
-$$L(k) = \frac{(\frac12 + \delta)^k(\frac12 - \delta)^{m - k}}{2^{-m}} = (1 + 2\delta)^k(1 - 2\delta)^{m - k}.$$
-2. **It increases in $k$.** One more head multiplies it by $L(k + 1)/L(k) = (1 + 2\delta)/(1 - 2\delta) > 1$ for $\delta > 0$.
+$$L(k) = \frac{(\frac12 + \xi)^k(\frac12 - \xi)^{m - k}}{2^{-m}} = (1 + 2\xi)^k(1 - 2\xi)^{m - k}.$$
+2. **It increases in $k$.** One more head multiplies it by $L(k + 1)/L(k) = (1 + 2\xi)/(1 - 2\xi) > 1$ for $\xi > 0$.
 3. **The best test is a threshold.** By Fact 2, the best distinguisher outputs 1 exactly where the biased coin's probability is larger, that is where $L(k) > 1$. Since $L$ increases, this set is $\{k > k^*\}$ for the $k^*$ with $L(k^*) = 1$.
 4. **Where the binomials cross.** The binomial probabilities are $\binom mk$ times the sequence probabilities. The factor $\binom mk$ is the same for both, so they cross at the same $k^*$. Take logarithms of $L(k^*) = 1$:
-$$k^*\ln(1 + 2\delta) + (m - k^*)\ln(1 - 2\delta) = 0 \quad\Longrightarrow\quad k^* = m\,\frac{-\ln(1 - 2\delta)}{\ln(1 + 2\delta) - \ln(1 - 2\delta)}.$$
-5. **Expand for small $\delta$.** With $u = 2\delta$, $-\ln(1 - u) = u + \frac{u^2}2 + \frac{u^3}3 + \dots$ and $\ln(1 + u) - \ln(1 - u) = 2u + \frac{2u^3}3 + \dots$. The ratio is
-$$\frac{1 + \frac u2 + \frac{u^2}3}{2(1 + \frac{u^2}3)} = \frac12 + \frac u4 + O(u^3) = \frac12 + \frac\delta2 + O(\delta^3).$$
-So $k^* = \frac m2 + \frac{m\delta}2 + O(m\delta^3)$: halfway between the fair mean $\frac m2$ and the biased mean $\frac m2 + m\delta$.
-6. **The numbers.** For $m = 10{,}000$ and $\delta = 0.01$, the exact crossing is $k^* = 5050.0033$, against $m/2 + m\delta/2 = 5050$. The test "output 1 iff $k > k^*$" has advantage 0.6827, equal to the exact TV distance 0.6827, which rounds to the check value 0.683.
-7. **Normal check.** The threshold sits $\frac{m\delta}2 = 50 = 1\cdot\sigma$ from each mean ($\sigma = \sqrt m/2 = 50$). So the advantage is about $\Phi(1) - (1 - \Phi(1)) = 2\Phi(1) - 1 = 0.6827$.
+$$k^*\ln(1 + 2\xi) + (m - k^*)\ln(1 - 2\xi) = 0 \quad\Longrightarrow\quad k^* = m\,\frac{-\ln(1 - 2\xi)}{\ln(1 + 2\xi) - \ln(1 - 2\xi)}.$$
+5. **Expand for small $\xi$.** With $u = 2\xi$, $-\ln(1 - u) = u + \frac{u^2}2 + \frac{u^3}3 + \dots$ and $\ln(1 + u) - \ln(1 - u) = 2u + \frac{2u^3}3 + \dots$. The ratio is
+$$\frac{1 + \frac u2 + \frac{u^2}3}{2(1 + \frac{u^2}3)} = \frac12 + \frac u4 + O(u^3) = \frac12 + \frac\xi2 + O(\xi^3).$$
+So $k^* = \frac m2 + \frac{m\xi}2 + O(m\xi^3)$: halfway between the fair mean $\frac m2$ and the biased mean $\frac m2 + m\xi$.
+6. **The numbers.** For $m = 10{,}000$ and $\xi = 0.01$, the exact crossing is $k^* = 5050.0033$, against $m/2 + m\xi/2 = 5050$. The test "output 1 iff $k > k^*$" has advantage 0.6827, equal to the exact TV distance 0.6827, which rounds to the check value 0.683.
+7. **Normal check.** The threshold sits $\frac{m\xi}2 = 50 = 1\cdot\sigma$ from each mean ($\sigma = \sqrt m/2 = 50$). So the advantage is about $\Phi(1) - (1 - \Phi(1)) = 2\Phi(1) - 1 = 0.6827$.
 
 Majority vote is the threshold at $\frac m2$ instead of $k^*$. Its exact advantage is 0.4807, which matches the 0.481 simulated in @tbl-crypto-coin-hybrid. The fair count lands above $\frac m2$ almost half the time, so moving the threshold up by one standard deviation gains a lot.
 
@@ -97,12 +97,12 @@ Majority vote is the threshold at $\frac m2$ instead of $k^*$. Its exact advanta
 > **Exercise 4.** **Birthday for 32 bits.** How many random 32-bit identifiers can you draw before a collision has probability $\frac12$? *Check: $\sqrt{2\cdot2^{32}\ln 2} \approx 77{,}000$.* *(Birthday bound)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Set up.** $N = 2^{32}$ possible identifiers, $q$ independent uniform draws.
-2. **Use the lower bound as an approximation.** By @eq-crypto-birthday, $\Pr[\text{collision}] \ge 1 - e^{-q(q-1)/(2N)}$. For $q \ll N$ this is close to exact: the only step that lost anything was $1 - i/N \le e^{-i/N}$, and $i/N$ is tiny here.
-3. **Solve for $\frac12$.** $1 - e^{-q^2/(2N)} = \frac12$ gives $q^2/(2N) = \ln 2$, so
-$$q = \sqrt{2N\ln 2} = \sqrt{2\cdot 2^{32}\cdot 0.6931} = 77{,}162.7.$$
+1. **Set up.** $N = 2^{32}$ possible identifiers, $Q$ independent uniform draws.
+2. **Use the lower bound as an approximation.** By @eq-crypto-birthday, $\Pr[\text{collision}] \ge 1 - e^{-Q(Q-1)/(2N)}$. For $Q \ll N$ this is close to exact: the only step that lost anything was $1 - i/N \le e^{-i/N}$, and $i/N$ is tiny here.
+3. **Solve for $\frac12$.** $1 - e^{-Q^2/(2N)} = \frac12$ gives $Q^2/(2N) = \ln 2$, so
+$$Q = \sqrt{2N\ln 2} = \sqrt{2\cdot 2^{32}\cdot 0.6931} = 77{,}162.7.$$
 This is $1.18\sqrt N$ with $\sqrt N = 65{,}536$.
-4. **Exact check.** The script evaluates the exact product $1 - \prod_{i<q}(1 - i/N)$ and finds that it first reaches $\frac12$ at $q = 77{,}164$.
+4. **Exact check.** The script evaluates the exact product $1 - \prod_{i<Q}(1 - i/N)$ and finds that it first reaches $\frac12$ at $Q = 77{,}164$.
 
 So about 77,000 identifiers, in agreement with the check. A table of 100,000 records with random 32-bit keys is already past this point, which is why @tbl-crypto-birthday finds a collision probability of 0.688.
 
@@ -161,10 +161,10 @@ def ggm_eval(gen: CountingGenerator, key: bytes, bits: list[int]) -> bytes:
 **What the proof loses.** Follow the proof sketch in the chapter:
 
 1. There are $n + 1$ hybrids $H_0, \dots, H_n$, where $H_j$ makes every node at depth $j$ uniform. $H_0$ is $F_k$ and $H_n$ is a random function.
-2. A $q$-query adversary touches at most $q$ nodes at each depth. Telling $H_{j-1}$ from $H_j$ is telling $q$ outputs of $G$ from $q$ uniform strings, which by the hybrid lemma costs at most $q\cdot\mathrm{Adv}_{\mathrm{PRG}}$.
+2. A $Q$-query adversary touches at most $Q$ nodes at each depth. Telling $H_{j-1}$ from $H_j$ is telling $Q$ outputs of $G$ from $Q$ uniform strings, which by the hybrid lemma costs at most $Q\cdot\mathrm{Adv}_{\mathrm{PRG}}$.
 3. Summing the $n$ steps with Fact 3 gives $\mathrm{Adv}_{\mathrm{PRF}} \le nq\cdot\mathrm{Adv}_{\mathrm{PRG}}$: a loss factor $nq$.
 
-Concretely, with $n = 128$ input bits and $q = 2^{40}$ queries, $nq = 2^7\cdot2^{40} = 2^{47}$. For a PRF advantage of at most $2^{-64}$ the generator must have advantage at most $2^{-111}$: the reduction costs 47 bits of security.
+Concretely, with $n = 128$ input bits and $Q = 2^{40}$ queries, $nq = 2^7\cdot2^{40} = 2^{47}$. For a PRF advantage of at most $2^{-64}$ the generator must have advantage at most $2^{-111}$: the reduction costs 47 bits of security.
 
 *The GGM tree turns any length-doubling generator into a PRF at $n$ generator calls per input, but the reduction is loose by $nq$, so the generator needs a large security margin.*
 :::
@@ -243,16 +243,16 @@ There is no worst-case analogue of @eq-crypto-regev-budget for a rounded normal,
 ::: {.callout-tip collapse="true" title="Solution"}
 **Prediction.**
 
-1. **Write $p = 2\Delta + 1$**, so the encoding is $\Delta = \lfloor p/2\rfloor$ and $2\Delta = p - 1 \equiv -1$.
-2. **The sum.** As in the derivation of @eq-crypto-regev-budget, the summed ciphertext decrypts to $v = \sum_i e_i + w\Delta \bmod p$, where $w = \sum_i m_i$ is the number of 1-bits.
+1. **Write $p = 2t + 1$**, so the encoding is $t = \lfloor p/2\rfloor$ and $2t = p - 1 \equiv -1$.
+2. **The sum.** As in the derivation of @eq-crypto-regev-budget, the summed ciphertext decrypts to $v = \sum_i e_i + wt \bmod p$, where $w = \sum_i m_i$ is the number of 1-bits.
 3. **Split $w$.** $w = (w \bmod 2) + 2\lfloor w/2\rfloor$, so
-$$w\Delta = (w \bmod 2)\,\Delta + \lfloor w/2\rfloor\cdot 2\Delta \equiv (w \bmod 2)\,\Delta - \lfloor w/2\rfloor.$$
+$$wt = (w \bmod 2)\,t + \lfloor w/2\rfloor\cdot 2t \equiv (w \bmod 2)\,t - \lfloor w/2\rfloor.$$
 The first term is the correct encoding of the parity. The second is an extra error of $-\lfloor w/2\rfloor$: every pair of 1-bits adds $-1$.
 4. **Its mean.** For random bits, $w \sim \mathrm{Bin}(k, \frac12)$, with $\mathbb E w = k/2$. Also $\Pr[w \text{ even}] - \Pr[w \text{ odd}] = \mathbb E(-1)^w = (\frac12 - \frac12)^k = 0$ for $k \ge 1$, so $\Pr[w \text{ odd}] = \frac12$. Hence
 $$\mathbb E\lfloor w/2\rfloor = \frac{\mathbb E w - \Pr[w \text{ odd}]}{2} = \frac{k - 1}4, \qquad \text{drift} = -\frac{k - 1}4.$$
 This is the "about $-k/4$" of the exercise, exact up to the $\frac14$.
 
-**Measurement.** The script repeats the addition experiment with the prime $p = 4093$ (the largest prime below 4096), errors uniform on $\{-32, \dots, 32\}$, $d = 4$ and 20,000 trials. It computes the drift as $v - \sum_i e_i - (w \bmod 2)\Delta$, centred in $(-p/2, p/2]$, and also reruns $p = 4096$ for comparison. The normal approximation for the odd modulus shifts the mean of the summed error by the predicted drift. @tbl-sol-crypto-basics-odd has the results.
+**Measurement.** The script repeats the addition experiment with the prime $p = 4093$ (the largest prime below 4096), errors uniform on $\{-32, \dots, 32\}$, $d = 4$ and 20,000 trials. It computes the drift as $v - \sum_i e_i - (w \bmod 2)t$, centred in $(-p/2, p/2]$, and also reruns $p = 4096$ for comparison. The normal approximation for the odd modulus shifts the mean of the summed error by the predicted drift. @tbl-sol-crypto-basics-odd has the results.
 
 | $k$ | Drift, $p = 4093$ | Predicted $-(k-1)/4$ | Failure, $p = 4093$ | Normal approximation with drift | Failure, $p = 4096$ |
 | --- | --- | --- | --- | --- | --- |

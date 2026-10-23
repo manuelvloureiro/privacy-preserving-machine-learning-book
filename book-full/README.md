@@ -69,7 +69,7 @@ Each folder is a part, and each file in it is a chapter, numbered across the who
 
 The appendices derive the book's mathematics in plain words, with worked numbers and figures, and the chapters point to them where they use a result. Appendix letters follow the rendered book.
 
-The first four derive the core formulas from scratch: how much Laplace or Gaussian noise to add, what repeated releases cost, how DP-SGD's ε is computed, and what ε means.
+The first four derive the core formulas from scratch: how much Laplace or Gaussian noise to add, what repeated releases cost, how DP-SGD's $\varepsilon$ is computed, and what $\varepsilon$ means.
 
 - A. [How much noise to add](appendix-derivations/01-calibration.md) · [code](../code/appendix-derivations/apx_core_calibration.py)
 - B. [Composing private releases](appendix-derivations/02-composition.md) · [code](../code/appendix-derivations/apx_core_composition.py)

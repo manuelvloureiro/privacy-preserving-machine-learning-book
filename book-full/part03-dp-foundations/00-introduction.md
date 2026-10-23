@@ -38,7 +38,7 @@ A randomized algorithm is differentially private when changing one person's reco
 
 **Structure of a chapter.** Every chapter has the same shape as in the earlier parts: why it matters, a toolkit, one section per result with a statement, derivation, interpretation, worked example and two *check yourself* questions, then code, references and a cheat sheet. Exercises with worked solutions are collected in the exercise book, a companion website, with a link at the end of each chapter.
 
-**Proofs you can check by computer.** Most privacy claims in this part are checked numerically as well as proved: the exact privacy curve of a mechanism is computed and compared with its bound, a composition formula is compared with brute-force enumeration, and a buggy mechanism is shown to leak by computing its privacy loss. Running the scripts is the fastest way to see how loose each bound is. From the repository root, for example,
+**Proofs you can check by computer.** Most privacy claims in this part are checked numerically as well as proved: the exact privacy profile of a mechanism is computed and compared with its bound, a composition formula is compared with brute-force enumeration, and a buggy mechanism is shown to leak by computing its privacy loss. Running the scripts is the fastest way to see how loose each bound is. From the repository root, for example,
 
 ```bash
 uv run python code/part03-dp-foundations/laplace_gaussian.py
@@ -46,18 +46,25 @@ uv run python code/part03-dp-foundations/laplace_gaussian.py
 
 ## Notation
 
-The chapters share the conventions in @tbl-dp-notation, set in [The definition of differential privacy](01-definition.md). The next part uses the same notation, except that $\sigma$ there is the noise multiplier (the noise standard deviation per unit of sensitivity) and an attacker's two error rates are written $a$ and $b$.
+The chapters share the conventions in @tbl-dp-notation, set in [The definition of differential privacy](01-definition.md) and fixed for the whole book. The next part uses the same notation. There the noise multiplier, the noise standard deviation per unit of sensitivity, is usually written $\sigma$; it equals the standard deviation when the sensitivity is 1.
 
 | Symbol | Meaning |
 | --- | --- |
-| $M$ | A randomized mechanism, mapping a dataset to a random output |
+| $D = (x_1, \dots, x_n)$, $\mathcal X$ | A dataset of $n$ records, each from the data universe $\mathcal X$, so $D \in \mathcal X^n$ |
+| $M$; $M_1, \dots, M_k$ | A mechanism, a randomized algorithm whose privacy is analysed; $k$ mechanisms in a composition |
+| $y \in \mathcal Y$, $S \subseteq \mathcal Y$ | An output, the output space and an event; $Y = M(D)$ is the random output |
 | $D \simeq D'$ | Neighbouring datasets: by default one is the other with one record added or removed; "replace one record" is named explicitly when used |
 | $D' = D \cup \{x\}$ | Under add/remove, $D'$ is the dataset that contains the record $x$ and $D$ the one without it. A membership test says "$D'$" when it guesses that the record is in; its false positive rate is the chance of saying "$D'$" when the data were $D$, and its true positive rate the chance of saying "$D'$" when they were $D'$ |
-| $\varepsilon$, $\delta$ | The privacy parameters of $(\varepsilon, \delta)$-DP; pure DP is $\delta = 0$ |
-| $\Delta_1 f$, $\Delta_2 f$ | The $\ell_1$ and $\ell_2$ sensitivities of a query $f$ |
-| $L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}$ | The privacy loss of output $y$; $L_{D,D'}(Y)$ with $Y \sim M(D)$ is the privacy loss random variable |
-| $E_{e^\varepsilon}(P \,\|\, Q)$ | The hockey-stick divergence; $(\varepsilon,\delta)$-DP means $E_{e^\varepsilon}(M(D) \,\|\, M(D')) \le \delta$ for all $D \simeq D'$ |
-| $\mathrm{Lap}(b)$, $\mathcal N(0, \sigma^2)$ | Laplace noise with scale $b$; normal noise with variance $\sigma^2$ |
+| $\varepsilon$, $\delta$ | The privacy parameters: $\varepsilon$-DP is pure DP, $(\varepsilon, \delta)$-DP approximate DP |
+| $f$; $\Delta_1 f$, $\Delta_2 f$ | A query $f\colon \mathcal X^n \to \mathbb R^d$ with output dimension $d$; its $\ell_1$ and $\ell_2$ sensitivities, written $\Delta f$ when the norm is clear |
+| $L_{D,D'}(y) = \ln\frac{p_{M(D)}(y)}{p_{M(D')}(y)}$ | The privacy loss of output $y$; $L = L_{D,D'}(Y)$ with $Y \sim M(D)$ is the privacy loss random variable |
+| $E_\gamma(P \,\|\, Q)$, $\delta(\varepsilon)$ | The hockey-stick divergence at level $\gamma \ge 1$; $(\varepsilon,\delta)$-DP means $E_{e^\varepsilon}(M(D) \,\|\, M(D')) \le \delta$ for all $D \simeq D'$, and the privacy profile $\delta(\varepsilon)$ is the smallest such $\delta$ |
+| $\mathrm{Lap}(b)$, $\mathcal N(0, \sigma^2)$ | Laplace noise with scale $b = \Delta_1 f/\varepsilon$; normal noise with standard deviation $\sigma$ |
+| $r \in \mathcal R$, $u(D, r)$, $\Delta u$ | The exponential mechanism's candidates, its score function and the score's sensitivity |
+| $\mathcal Q$, $\tau$, $\bot$, $\top$ | A workload of counting queries; the sparse vector technique's threshold and its answers "below" and "above" |
+| $(\alpha, \beta)$ | An $(\alpha, \beta)$-accurate mechanism errs by at most $\alpha$ with probability at least $1 - \beta$; $\beta$ is a failure probability |
+| $a$, $b$ | The type I and type II errors of a test, its false positive and false negative rates |
+| $R\colon \mathcal X \to \mathcal Y$, $\varepsilon_0$ | A local randomizer and its privacy parameter |
 
 : Notation shared by the chapters of this part and the next. {#tbl-dp-notation}
 
@@ -69,7 +76,7 @@ By the end of this part you should be able to:
 - prove post-processing, group privacy and basic composition, and say what does not compose;
 - calibrate the Laplace and Gaussian mechanisms, including the exact (analytic) Gaussian calibration;
 - derive advanced composition and compute optimal composition exactly;
-- prove the exponential mechanism, report-noisy-max and the sparse vector technique private, and recognise the common broken variants of the last;
+- prove the exponential mechanism, report-noisy-max and the sparse vector technique private, and recognize the common broken variants of the last;
 - handle data-dependent sensitivity with smooth sensitivity, propose-test-release, subsample-and-aggregate and clipping;
 - implement discrete Laplace and discrete Gaussian samplers exactly, and explain why naive floating-point noise is not private;
 - design frequency estimation in the local model and explain what shuffling and secure aggregation buy;

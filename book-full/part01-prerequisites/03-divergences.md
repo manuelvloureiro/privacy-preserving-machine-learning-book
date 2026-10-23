@@ -8,9 +8,9 @@ Someone hands you a die. It is either fair, or loaded so that a six comes up hal
 - **In the worst case,** how strongly can a single roll point the wrong way?
 - **With one roll,** how often can the best possible guess be right?
 
-Each question has its own answer, and each answer is a **divergence**: a number $D(P\|Q)$ that is zero when two distributions $P$ and $Q$ are equal and grows as they become easier to tell apart. The same questions come up all over machine learning. When you fit a model $q_\theta$ to data from $p$, you need to know how far the fit is from the truth. When you run an A/B test or watch a feature drift in production, you need to know how many samples it takes to see the change. When you perturb the data a little, you need to know how much any downstream statistic can move. Later parts ask the same questions about the outputs of an algorithm run on two different inputs.
+Each question has its own answer, and each answer is a **divergence**: a number that is zero when two distributions $P$ and $Q$ are equal and grows as they become easier to tell apart. The same questions come up all over machine learning. When you fit a model $q_\theta$ to data from $p$, you need to know how far the fit is from the truth. When you run an A/B test or watch a feature drift in production, you need to know how many samples it takes to see the change. When you perturb the data a little, you need to know how much any downstream statistic can move. Later parts ask the same questions about the outputs of an algorithm run on two different inputs.
 
-A divergence is not a distance in general. Asking "how fast do rolls of the loaded die expose it?" is a different question from "how fast do rolls of the fair die clear it?", so a divergence can be asymmetric, $D(P\|Q) \ne D(Q\|P)$, and it can fail the triangle inequality.
+A divergence is not a distance in general. Asking "how fast do rolls of the loaded die expose it?" is a different question from "how fast do rolls of the fair die clear it?", so a divergence can be asymmetric, giving $P$ against $Q$ a different value from $Q$ against $P$, and it can fail the triangle inequality.
 
 ### The one idea: the likelihood ratio
 
@@ -76,7 +76,7 @@ Some divergences are averages over outcomes drawn from $P$, others over outcomes
 $$\mathbb E_P[g(X)] = \sum_x p(x)g(x) = \sum_x q(x)\frac{p(x)}{q(x)}g(x) = \mathbb E_Q[r(X)\,g(X)].$$
 The middle step only multiplies and divides by $q(x)$.
 
-Two special cases come up again and again. With $g = 1$ the left side is 1, so $\mathbb E_Q[r] = 1$: the likelihood ratio always averages to 1 under $Q$. On the die, $\frac16(5\times0.6 + 3) = 1$. In words, if the data really come from $Q$, the outcomes that favour $P$ are rare enough to balance how strongly they favour it. With $g = \mathbf 1_A$, the indicator that is 1 on an event $A$ and 0 elsewhere, the fact reads $P(A) = \mathbb E_Q[r\,\mathbf 1_A]$. For the event "roll is 6" this gives $\frac16 \times 3 = 0.5$, the loaded die's probability of a six.
+Two special cases come up again and again. With $g = 1$ the left side is 1, so $\mathbb E_Q[r] = 1$: the likelihood ratio always averages to 1 under $Q$. On the die, $\frac16(5\times0.6 + 3) = 1$. In words, if the data really come from $Q$, the outcomes that favour $P$ are rare enough to balance how strongly they favour it. With $g = \mathbf 1[A]$, the indicator that is 1 on an event $A$ and 0 elsewhere, the fact reads $\Pr_P[A] = \mathbb E_Q[r\,\mathbf 1[A]]$. For the event "roll is 6" this gives $\frac16 \times 3 = 0.5$, the loaded die's probability of a six.
 
 ### Fact 2 — Jensen's inequality
 
@@ -90,11 +90,11 @@ A small case shows the gap. Let $X$ be 0.6 or 3 with probability $\frac12$ each,
 
 ### Fact 3 — The best event is $\{r > \gamma\}$
 
-Several divergences ask for the event $A$ that makes $P(A) - \gamma Q(A)$ as large as possible, for some weight $\gamma \ge 0$. The answer is to collect every outcome where $p$ beats $\gamma q$ and nothing else. Writing $(y)_+ = \max(y, 0)$,
-$$\max_A\big[P(A) - \gamma Q(A)\big] = \sum_x\big(p(x) - \gamma q(x)\big)_+,$$
+Several divergences ask for the event $A$ that makes $\Pr_P[A] - \gamma \Pr_Q[A]$ as large as possible, for some weight $\gamma \ge 0$. The answer is to collect every outcome where $p$ beats $\gamma q$ and nothing else. Writing $(y)_+ = \max(y, 0)$,
+$$\max_A\big[\Pr_P[A] - \gamma \Pr_Q[A]\big] = \sum_x\big(p(x) - \gamma q(x)\big)_+,$$
 attained at $A^* = \{x : p(x) > \gamma q(x)\} = \{r > \gamma\}$.
 
-The reason is that the quantity is a sum over the outcomes in $A$: $P(A) - \gamma Q(A) = \sum_{x\in A}(p(x) - \gamma q(x))$. An outcome adds a positive term exactly when $p(x) > \gamma q(x)$, and a negative or zero term otherwise. So the sum is largest when $A$ contains all the outcomes with positive terms and none of the others, and its value is then the sum of the positive parts.
+The reason is that the quantity is a sum over the outcomes in $A$: $\Pr_P[A] - \gamma \Pr_Q[A] = \sum_{x\in A}(p(x) - \gamma q(x))$. An outcome adds a positive term exactly when $p(x) > \gamma q(x)$, and a negative or zero term otherwise. So the sum is largest when $A$ contains all the outcomes with positive terms and none of the others, and its value is then the sum of the positive parts.
 
 Randomized choices do no better. Instead of a set, you could include each outcome with some probability $\phi(x) \in [0, 1]$, and get $\sum_x\phi(x)(p(x) - \gamma q(x))$. Each term is a number between 0 and the bracket, so the sum is largest when $\phi(x) = 1$ where the bracket is positive and $\phi(x) = 0$ elsewhere: that is the indicator of $A^*$ again.
 
@@ -144,7 +144,7 @@ So minimizing KL over $\theta$ is the same as maximizing the expected log-likeli
 
 ### Interpretation
 
-**Signal against noise.** After $n$ rolls of the loaded die, the total evidence is a sum of $n$ independent per-roll terms, so its mean is $n$ times the per-roll mean and its variance is $n$ times the per-roll variance. That gives a mean of $0.2939\,n$ (the drift) and a standard deviation of $0.8047\sqrt n$ (the spread of $\ln r$ is $0.8047$ per roll, from the script). The drift grows like $n$ and the noise like $\sqrt n$, so the drift overtakes the noise once $0.2939\,n > 0.8047\sqrt n$, that is once $n > (0.8047/0.2939)^2 = 7.50$ rolls. The same argument with any pair says that the number of observations you need scales like $1/\mathrm{KL}$. The total variation and Pinsker sections make this precise.
+**Signal against noise.** After $n$ rolls of the loaded die, the total evidence is a sum of $n$ independent per-roll terms, so its mean is $n$ times the per-roll mean and its variance is $n$ times the per-roll variance. That gives a mean of $0.2939\,n$ (the drift) and a standard deviation of $0.8047\sqrt n$ (the spread of $\ln r$ is $0.8047$ per roll, from the script). The drift grows like $n$ and the noise like $\sqrt n$, so the drift overtakes the noise once $0.2939\,n > 0.8047\sqrt n$, that is once $n > (0.8047/0.2939)^2 = 7.50$ rolls. The same argument with any pair says that the number of observations you need scales like $1/D_{\mathrm{KL}}(P\|Q)$. The total variation and Pinsker sections make this precise.
 
 **Which direction you minimize matters.** KL is an average under its *first* argument, so the two directions punish different mistakes. There are two options when you fit a model $q_\theta$ to a target $p$:
 
@@ -178,7 +178,7 @@ The two directions differ. Rolls of the loaded die produce sixes, where the evid
 
 ### Context
 
-KL is the average of $\ln r$ under $P$. Exponentiating an average of logarithms gives a **geometric mean**, so $e^{D_{\mathrm{KL}}}$ is the geometric mean of the likelihood ratio. Nothing forces you to use the geometric mean. Other means of the same numbers weight large values more, or less. All the usual ones belong to one family, the **power mean** with exponent $s$, $M_s = \big(\mathbb E_P[r^s]\big)^{1/s}$: raise each value to the power $s$, average, and undo the power. The harmonic mean is $s = -1$, the arithmetic mean is $s = 1$, the geometric mean is the limit $s \to 0$, and $s \to \infty$ picks out the largest value. On the die, under $P$ the ratio is 0.6 or 3, each with probability $\frac12$ (@tbl-div-die). Its means are in @tbl-div-power-means.
+KL is the average of $\ln r$ under $P$. Exponentiating an average of logarithms gives a **geometric mean**, so $e^{D_{\mathrm{KL}}}$ is the geometric mean of the likelihood ratio. Nothing forces you to use the geometric mean. Other means of the same numbers weight large values more, or less. All the usual ones belong to one family, the **power mean** with exponent $s$, $m_s = \big(\mathbb E_P[r^s]\big)^{1/s}$: raise each value to the power $s$, average, and undo the power. The harmonic mean is $s = -1$, the arithmetic mean is $s = 1$, the geometric mean is the limit $s \to 0$, and $s \to \infty$ picks out the largest value. On the die, under $P$ the ratio is 0.6 or 3, each with probability $\frac12$ (@tbl-div-die). Its means are in @tbl-div-power-means.
 
 | Mean of $r$ under $P$ | Value | Its logarithm | Divergence |
 | --- | --- | --- | --- |
@@ -195,15 +195,15 @@ The **Rényi divergence of order $\alpha$** is the logarithm of one of these mea
 
 Written out, the log of the power mean with exponent $\alpha - 1$ is the log of $\mathbb E_P[r^{\alpha - 1}]$ divided by $\alpha - 1$. Because averaging under $P$ is averaging under $Q$ with an extra factor $r$ (Fact 1), the same number can be written as an average under $Q$ or as a plain sum. For $\alpha \in (0, 1)\cup(1, \infty)$,
 $$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\sum_x p(x)^\alpha q(x)^{1-\alpha} = \frac{1}{\alpha - 1}\ln\mathbb E_Q\big[r^\alpha\big] = \frac{1}{\alpha - 1}\ln\mathbb E_P\big[r^{\alpha - 1}\big].$$
-Two equivalent forms do most of the work. The first is the power-mean form of the context. With $M_s = \big(\mathbb E_P[r^s]\big)^{1/s}$ and, for $s = 0$, the geometric mean $M_0 = e^{\mathbb E_P[\ln r]}$,
-$$D_\alpha(P\|Q) = \ln M_{\alpha - 1}.$$ {#eq-renyi-power}
+Two equivalent forms do most of the work. The first is the power-mean form of the context. With $m_s = \big(\mathbb E_P[r^s]\big)^{1/s}$ and, for $s = 0$, the geometric mean $m_0 = e^{\mathbb E_P[\ln r]}$,
+$$D_\alpha(P\|Q) = \ln m_{\alpha - 1}.$$ {#eq-renyi-power}
 The second connects Rényi divergence to the Chernoff method of [Concentration inequalities](02-concentration.md). The **moment generating function** of a random variable $Y$ is $\lambda \mapsto \mathbb E[e^{\lambda Y}]$, and its logarithm is the quantity the Chernoff method optimizes to bound tails. Apply it to the evidence $L = \ln r$ under $P$, and call the result $\psi(\lambda) = \ln\mathbb E_P\big[e^{\lambda L}\big]$. Since $e^{\lambda L} = r^\lambda$, $\psi(\alpha - 1)$ is exactly the logarithm inside the definition, so
 $$D_\alpha(P\|Q) = \frac{\psi(\alpha - 1)}{\alpha - 1}.$$ {#eq-renyi-psi}
 The family has five properties, each derived below.
 
 1. **Limit $\alpha \to 1$:** $D_\alpha \to D_{\mathrm{KL}}$, because the power mean tends to the geometric mean. So we set $D_1 = D_{\mathrm{KL}}$.
 2. **Limit $\alpha \to \infty$:** a power mean with a huge exponent is dominated by the largest value, so $D_\alpha \to D_\infty(P\|Q) = \ln\max_x r(x)$, the **max-divergence**. (For densities, the maximum is an essential supremum: the largest value that $r$ exceeds with positive probability.) The same number is the largest ratio of probabilities that $P$ and $Q$ give to any event:
-$$D_\infty(P\|Q) = \ln\max_{A:\,Q(A) > 0}\frac{P(A)}{Q(A)}.$$
+$$D_\infty(P\|Q) = \ln\max_{A:\,\Pr_Q[A] > 0}\frac{P(A)}{Q(A)}.$$
 3. **Monotone:** $D_\alpha$ is non-decreasing in $\alpha$, because power means grow with their exponent.
 4. **Additive over independent coordinates:** $D_\alpha(P_1\times P_2\|Q_1\times Q_2) = D_\alpha(P_1\|Q_1) + D_\alpha(P_2\|Q_2)$ for every $\alpha$, as for KL.
 5. **Skew symmetry:** for $0 < \alpha < 1$, $D_\alpha(P\|Q) = \frac{\alpha}{1 - \alpha}D_{1-\alpha}(Q\|P)$. In particular $D_{1/2}$ is symmetric, since then $\frac{\alpha}{1 - \alpha} = 1$.
@@ -212,7 +212,7 @@ $$D_\infty(P\|Q) = \ln\max_{A:\,Q(A) > 0}\frac{P(A)}{Q(A)}.$$
 
 | Order | $D_\alpha(P\Vert Q)$ | What it measures |
 | --- | --- | --- |
-| $\alpha \to 0$ | $-\ln Q(p > 0)$ | Only whether $Q$ puts mass outside the support of $P$ |
+| $\alpha \to 0$ | $-\ln \Pr_Q[p(X) > 0]$ | Only whether $Q$ puts mass outside the support of $P$ |
 | $\alpha = \frac12$ | $-2\ln\sum_x\sqrt{p(x)q(x)}$ | Symmetric; the sum is the Bhattacharyya coefficient, the overlap of $\sqrt p$ and $\sqrt q$ |
 | $\alpha = 1$ | $\mathbb E_P[\ln r]$ | KL: the average evidence |
 | $\alpha = 2$ | $\ln\mathbb E_Q[r^2] = \ln\big(1 + \chi^2(P\Vert Q)\big)$ | The second moment of $r$, with $\chi^2 = \mathbb E_Q[(r - 1)^2]$ |
@@ -222,13 +222,13 @@ $$D_\infty(P\|Q) = \ln\max_{A:\,Q(A) > 0}\frac{P(A)}{Q(A)}.$$
 
 ### Derivation
 
-**The forms agree.** Fact 1 says an average under $Q$ of $r$ times something equals the average under $P$ of that something. With "something" $= r^{\alpha - 1}$, $\mathbb E_Q[r^\alpha] = \mathbb E_Q[r \cdot r^{\alpha - 1}] = \mathbb E_P[r^{\alpha - 1}]$, and writing either average as a sum gives $\sum_x p^\alpha q^{1-\alpha}$. Dividing $\ln\mathbb E_P[r^{\alpha-1}]$ by $\alpha - 1$ is the same as taking the logarithm of $\big(\mathbb E_P[r^{\alpha-1}]\big)^{1/(\alpha-1)} = M_{\alpha-1}$, which gives @eq-renyi-power. And $r^{\alpha-1} = e^{(\alpha-1)L}$, so $\ln\mathbb E_P[r^{\alpha-1}] = \psi(\alpha - 1)$, which gives @eq-renyi-psi.
+**The forms agree.** Fact 1 says an average under $Q$ of $r$ times something equals the average under $P$ of that something. With "something" $= r^{\alpha - 1}$, $\mathbb E_Q[r^\alpha] = \mathbb E_Q[r \cdot r^{\alpha - 1}] = \mathbb E_P[r^{\alpha - 1}]$, and writing either average as a sum gives $\sum_x p^\alpha q^{1-\alpha}$. Dividing $\ln\mathbb E_P[r^{\alpha-1}]$ by $\alpha - 1$ is the same as taking the logarithm of $\big(\mathbb E_P[r^{\alpha-1}]\big)^{1/(\alpha-1)} = m_{\alpha-1}$, which gives @eq-renyi-power. And $r^{\alpha-1} = e^{(\alpha-1)L}$, so $\ln\mathbb E_P[r^{\alpha-1}] = \psi(\alpha - 1)$, which gives @eq-renyi-psi.
 
-**Monotonicity is the power-mean inequality.** A larger exponent leans harder on the large values, so power means grow with their exponent: $M_{s_1} \le M_{s_2}$ for $s_1 < s_2$. Each case is one use of Jensen (Fact 2): a convex function of an average is at most the average of the function, and for a concave function (one that bends downward) the inequality is reversed.
+**Monotonicity is the power-mean inequality.** A larger exponent leans harder on the large values, so power means grow with their exponent: $m_{s_1} \le m_{s_2}$ for $s_1 < s_2$. Each case is one use of Jensen (Fact 2): a convex function of an average is at most the average of the function, and for a concave function (one that bends downward) the inequality is reversed.
 
-1. *Both exponents positive.* The function $\varphi(y) = y^{s_2/s_1}$ is convex for $y \ge 0$, because its exponent $s_2/s_1$ is above 1. Jensen applied to $Y = r^{s_1}$ gives $\big(\mathbb E_P[r^{s_1}]\big)^{s_2/s_1} \le \mathbb E_P\big[(r^{s_1})^{s_2/s_1}\big] = \mathbb E_P[r^{s_2}]$. Raising both sides to the positive power $1/s_2$ keeps the order and gives $M_{s_1} \le M_{s_2}$.
-2. *Against the geometric mean.* $\ln$ is concave, so Jensen runs the other way: for $s > 0$, $\ln\mathbb E_P[r^s] \ge \mathbb E_P[\ln r^s] = s\,\mathbb E_P[\ln r]$. Dividing by $s > 0$ gives $\ln M_s \ge \ln M_0$. For $s < 0$ the same inequality holds before dividing, and dividing by a negative $s$ flips it: $\ln M_s \le \ln M_0$.
-3. *Both exponents negative.* Now $s_2/s_1 \in (0, 1)$, so $\varphi$ is concave and step 1's inequality reverses. Raising to the negative power $1/s_2$ reverses it again, so the conclusion $M_{s_1} \le M_{s_2}$ is the same.
+1. *Both exponents positive.* The function $\varphi(y) = y^{s_2/s_1}$ is convex for $y \ge 0$, because its exponent $s_2/s_1$ is above 1. Jensen applied to $Y = r^{s_1}$ gives $\big(\mathbb E_P[r^{s_1}]\big)^{s_2/s_1} \le \mathbb E_P\big[(r^{s_1})^{s_2/s_1}\big] = \mathbb E_P[r^{s_2}]$. Raising both sides to the positive power $1/s_2$ keeps the order and gives $m_{s_1} \le m_{s_2}$.
+2. *Against the geometric mean.* $\ln$ is concave, so Jensen runs the other way: for $s > 0$, $\ln\mathbb E_P[r^s] \ge \mathbb E_P[\ln r^s] = s\,\mathbb E_P[\ln r]$. Dividing by $s > 0$ gives $\ln m_s \ge \ln m_0$. For $s < 0$ the same inequality holds before dividing, and dividing by a negative $s$ flips it: $\ln m_s \le \ln m_0$.
+3. *Both exponents negative.* Now $s_2/s_1 \in (0, 1)$, so $\varphi$ is concave and step 1's inequality reverses. Raising to the negative power $1/s_2$ reverses it again, so the conclusion $m_{s_1} \le m_{s_2}$ is the same.
 
 With $s = \alpha - 1$, this says $D_\alpha$ is non-decreasing in $\alpha$. On the die, the rows of @tbl-div-power-means increase from top to bottom.
 
@@ -240,15 +240,15 @@ With $s = \alpha - 1$, this says $D_\alpha$ is non-decreasing in $\alpha$. On th
 
 **Limit $\alpha \to 1$.** Since $\psi(0) = 0$, @eq-renyi-psi can be written $D_\alpha = \frac{\psi(\alpha - 1) - \psi(0)}{(\alpha - 1) - 0}$, the slope of $\psi$ between 0 and $\alpha - 1$. As $\alpha \to 1$ that slope tends to the derivative $\psi'(0)$, which is $D_{\mathrm{KL}}$ by step 2. (This needs $\psi$ to be finite near 0. @sec-apx-tail-renyi-kl in the appendices proves the limit from below in general, and from above whenever some $D_\alpha$ with $\alpha > 1$ is finite; van Erven & Harremoës treat every case.)
 
-**Limit $\alpha \to \infty$.** Let $M = \max_x r(x)$, the largest likelihood ratio on the support of $P$. A high power of $r$ is dominated by its largest value, so squeeze $D_\alpha$ between two bounds that both tend to $\ln M$.
+**Limit $\alpha \to \infty$.** Let $r_{\max} = \max_x r(x)$, the largest likelihood ratio on the support of $P$. A high power of $r$ is dominated by its largest value, so squeeze $D_\alpha$ between two bounds that both tend to $\ln r_{\max}$.
 
-1. *Upper bound.* Every $r(x) \le M$, so $\mathbb E_P[r^{\alpha-1}] \le M^{\alpha - 1}$, and taking logs and dividing by $\alpha - 1 > 0$ gives $D_\alpha \le \ln M$ for every $\alpha > 1$.
-2. *Lower bound.* Let $x^*$ be a point where $r(x^*) = M$. Dropping every other term of the average can only make it smaller: $\mathbb E_P[r^{\alpha - 1}] \ge p(x^*)M^{\alpha-1}$, so $D_\alpha \ge \ln M + \frac{\ln p(x^*)}{\alpha - 1}$.
-3. *Squeeze.* The last term is a fixed number divided by $\alpha - 1$, so it tends to 0 as $\alpha \to \infty$, and $D_\alpha \to \ln M$. (For densities, replace $x^*$ by a set of positive probability on which $r > M - \eta$, and let $\eta \to 0$.)
+1. *Upper bound.* Every $r(x) \le r_{\max}$, so $\mathbb E_P[r^{\alpha-1}] \le r_{\max}^{\alpha - 1}$, and taking logs and dividing by $\alpha - 1 > 0$ gives $D_\alpha \le \ln r_{\max}$ for every $\alpha > 1$.
+2. *Lower bound.* Let $x^*$ be a point where $r(x^*) = r_{\max}$. Dropping every other term of the average can only make it smaller: $\mathbb E_P[r^{\alpha - 1}] \ge p(x^*)r_{\max}^{\alpha-1}$, so $D_\alpha \ge \ln r_{\max} + \frac{\ln p(x^*)}{\alpha - 1}$.
+3. *Squeeze.* The last term is a fixed number divided by $\alpha - 1$, so it tends to 0 as $\alpha \to \infty$, and $D_\alpha \to \ln r_{\max}$. (For densities, replace $x^*$ by a set of positive probability on which $r > r_{\max} - \xi$, and let $\xi \to 0$.)
 
-**Limit $\alpha \to 0$.** As $\alpha \to 0$, $p^\alpha \to 1$ wherever $p > 0$, and the terms with $p = 0$ are 0 for every $\alpha > 0$. So $\sum_x p^\alpha q^{1-\alpha} \to \sum_{x:\,p(x) > 0}q(x) = Q(p > 0)$, the mass $Q$ puts where $P$ can land. Divide its logarithm by $\alpha - 1 \to -1$ to get $-\ln Q(p > 0)$.
+**Limit $\alpha \to 0$.** As $\alpha \to 0$, $p^\alpha \to 1$ wherever $p > 0$, and the terms with $p = 0$ are 0 for every $\alpha > 0$. So $\sum_x p^\alpha q^{1-\alpha} \to \sum_{x:\,p(x) > 0}q(x) = \Pr_Q[p(X) > 0]$, the mass $Q$ puts where $P$ can land. Divide its logarithm by $\alpha - 1 \to -1$ to get $-\ln \Pr_Q[p(X) > 0]$.
 
-**Max-divergence over events.** The largest ratio for a single outcome is also the largest ratio for any event, because an event's probability is a sum of outcomes' probabilities, each at most $M$ times its $Q$-probability. Formally, Fact 1 with the indicator of $A$ gives $P(A) = \mathbb E_Q[r\mathbf 1_A] \le M\,\mathbb E_Q[\mathbf 1_A] = M\,Q(A)$, so $P(A)/Q(A) \le M$. The event $A = \{x^*\}$ attains it.
+**Max-divergence over events.** The largest ratio for a single outcome is also the largest ratio for any event, because an event's probability is a sum of outcomes' probabilities, each at most $r_{\max}$ times its $Q$-probability. Formally, Fact 1 with the indicator of $A$ gives $\Pr_P[A] = \mathbb E_Q[r\mathbf 1[A]] \le r_{\max}\,\mathbb E_Q[\mathbf 1[A]] = r_{\max}\,\Pr_Q[A]$, so $\Pr_P[A]/\Pr_Q[A] \le r_{\max}$. The event $A = \{x^*\}$ attains it.
 
 **Additivity.** As for KL, the log-likelihood ratio of a pair is a sum, $L_1(X_1) + L_2(X_2)$, and under $P_1 \times P_2$ the two terms are independent. For independent variables the moment generating function of a sum is the product of their moment generating functions: $e^{\lambda(L_1 + L_2)} = e^{\lambda L_1}e^{\lambda L_2}$, and the average of a product of independent factors is the product of their averages (Fact 4 of [Concentration inequalities](02-concentration.md)). Taking logarithms, $\psi = \psi_1 + \psi_2$. Divide by $\alpha - 1$.
 
@@ -267,8 +267,8 @@ With $s = \alpha - 1$, this says $D_\alpha$ is non-decreasing in $\alpha$. On th
 ![Where the Rényi divergence of order $\alpha$ looks: the normalized weights $p^\alpha q^{1-\alpha}$ for $\alpha = 1, 2, 4, 8$. Left: $\mathcal N(0, 2)$ against $\mathcal N(1, 2)$; the weight is $\mathcal N(1 - \alpha, 2)$ and runs off into the left tail. Right: $\mathrm{Lap}(0, 1)$ against $\mathrm{Lap}(1, 1)$; the weight collects on $x \le 0$ (shaded), where the log-likelihood ratio is already at its maximum, and stops.](figures/divergences_renyi_tilt.svg){#fig-div-renyi-tilt}
 
 **Rényi divergence controls the tail of the evidence.** How often does a sample from $Q$ look like strong evidence for $P$, at least $c$ nats? The Chernoff method answers this kind of question. Markov's inequality says that a non-negative variable exceeds a level $k$ with probability at most its mean divided by $k$. Applying it to $e^{\alpha L}$, which is non-negative and exceeds $e^{\alpha c}$ exactly when $L \ge c$, gives a bound in terms of the average of $e^{\alpha L} = r^\alpha$ under $Q$. That average is exactly what the Rényi divergence of order $\alpha$ measures: by the definition, $\mathbb E_Q[r^\alpha] = e^{(\alpha - 1)D_\alpha(P\|Q)}$. So for any $\alpha > 0$,
-$$Q[L \ge c] \le e^{-\alpha c}\,\mathbb E_Q\big[e^{\alpha L}\big] = e^{-\alpha c}\,\mathbb E_Q[r^\alpha] = \exp\big(-\alpha c + (\alpha - 1)D_\alpha(P\|Q)\big).$$ {#eq-renyi-tail}
-At $\alpha = 1$ the divergence term drops out and this is $Q[r \ge e^c] \le e^{-c}$: Markov's inequality applied to $r$ itself, whose $Q$-mean is 1 (Fact 1). It holds for *any* pair of distributions. Larger $\alpha$ uses more about the pair and can do much better. KL alone cannot give a bound like this, because an average says nothing about how often a variable is far from it.
+$$\Pr_Q[L \ge c] \le e^{-\alpha c}\,\mathbb E_Q\big[e^{\alpha L}\big] = e^{-\alpha c}\,\mathbb E_Q[r^\alpha] = \exp\big(-\alpha c + (\alpha - 1)D_\alpha(P\|Q)\big).$$ {#eq-renyi-tail}
+At $\alpha = 1$ the divergence term drops out and this is $\Pr_Q[r \ge e^c] \le e^{-c}$: Markov's inequality applied to $r$ itself, whose $Q$-mean is 1 (Fact 1). It holds for *any* pair of distributions. Larger $\alpha$ uses more about the pair and can do much better. KL alone cannot give a bound like this, because an average says nothing about how often a variable is far from it.
 
 ### Example: the die across orders
 
@@ -313,11 +313,11 @@ The last step expands $(x - s)^2 = x^2 - 2sx + s^2$, and the $x^2$ cancels. So $
 
 **Rényi, route 1: complete the square.** The plan is to write $p^\alpha q^{1-\alpha}$ as a constant times a normal density, because a normal density integrates to 1 and only the constant survives.
 
-1. **Pull out the constants.** We need $\int p^\alpha q^{1-\alpha}\,dx$. Both densities share the factor $\frac{1}{\sigma\sqrt{2\pi}}$, and $\big(\frac{1}{\sigma\sqrt{2\pi}}\big)^\alpha\big(\frac{1}{\sigma\sqrt{2\pi}}\big)^{1-\alpha} = \frac{1}{\sigma\sqrt{2\pi}}$. What remains is $\exp\big(-\frac{1}{2\sigma^2}[\alpha x^2 + (1 - \alpha)(x - s)^2]\big)$.
+1. **Pull out the constants.** We need $\int p^\alpha q^{1-\alpha}\,\mathrm dx$. Both densities share the factor $\frac{1}{\sigma\sqrt{2\pi}}$, and $\big(\frac{1}{\sigma\sqrt{2\pi}}\big)^\alpha\big(\frac{1}{\sigma\sqrt{2\pi}}\big)^{1-\alpha} = \frac{1}{\sigma\sqrt{2\pi}}$. What remains is $\exp\big(-\frac{1}{2\sigma^2}[\alpha x^2 + (1 - \alpha)(x - s)^2]\big)$.
 2. **Expand the bracket.** $\alpha x^2 + (1-\alpha)(x^2 - 2sx + s^2) = x^2 - 2(1-\alpha)sx + (1-\alpha)s^2$.
 3. **Complete the square** with $m = (1 - \alpha)s$. Since $(x - m)^2 = x^2 - 2mx + m^2$, the bracket is $(x - m)^2 + (1-\alpha)s^2 - (1-\alpha)^2s^2 = (x - m)^2 + \alpha(1-\alpha)s^2$, using $(1 - \alpha) - (1 - \alpha)^2 = (1 - \alpha)\alpha$.
 4. **Integrate.** The factor with $(x - m)^2$, together with $\frac{1}{\sigma\sqrt{2\pi}}$, is a normal density with mean $m$ and integrates to 1. (That normal, $\mathcal N((1 - \alpha)s, \sigma^2)$, is the tilted distribution of @fig-div-renyi-tilt.) Only the constant part of the bracket is left:
-$$\int p^\alpha q^{1-\alpha}\,dx = \exp\left(-\frac{\alpha(1 - \alpha)s^2}{2\sigma^2}\right).$$
+$$\int p^\alpha q^{1-\alpha}\,\mathrm dx = \exp\left(-\frac{\alpha(1 - \alpha)s^2}{2\sigma^2}\right).$$
 5. **Take the logarithm and divide by $\alpha - 1$.** Since $\frac{-\alpha(1-\alpha)}{\alpha - 1} = \alpha$, this gives $D_\alpha = \frac{\alpha s^2}{2\sigma^2}$.
 
 **Rényi, route 2: the log-likelihood ratio is normal.** The plan is to use @eq-renyi-psi, which needs the log of the moment generating function of $L$ under $P$, and for a normal variable that is known in closed form.
@@ -342,7 +342,7 @@ The average case is finite but the worst case is infinite. Every $D_\alpha$ with
 
 Take $\mu = 1$. Then @eq-gauss-renyi gives $D_{\mathrm{KL}} = \frac12 = 0.5$, $D_2 = 1$ and $D_{10} = 5$. The script also estimates KL as the average of $L$ over a million draws from $P$ and gets 0.4990.
 
-Now ask how often an observation from $Q$ gives at least $c = 2$ nats of evidence for $P$. That is a likelihood ratio of $e^2 \approx 7.4$ in the wrong direction. The exact answer comes from solving $L \ge c$ for $x$. Since $L(x) = \frac{s^2 - 2sx}{2\sigma^2}$ decreases in $x$, $L \ge c$ when $x \le \frac s2 - \frac{c\sigma^2}{s}$. Under $Q$, $x = s + \sigma Z$ with $Z$ standard normal, so the condition is $Z \le -\frac\mu2 - \frac c\mu$. Write $\Phi$ for the standard normal cumulative distribution function, so that $\Phi(z)$ is the probability that $Z \le z$. Then $Q[L \ge c] = \Phi(-\frac\mu2 - \frac c\mu) = \Phi(-0.5 - 2) = \Phi(-2.5) = 0.0062$.
+Now ask how often an observation from $Q$ gives at least $c = 2$ nats of evidence for $P$. That is a likelihood ratio of $e^2 \approx 7.4$ in the wrong direction. The exact answer comes from solving $L \ge c$ for $x$. Since $L(x) = \frac{s^2 - 2sx}{2\sigma^2}$ decreases in $x$, $L \ge c$ when $x \le \frac s2 - \frac{c\sigma^2}{s}$. Under $Q$, $x = s + \sigma Z$ with $Z$ standard normal, so the condition is $Z \le -\frac\mu2 - \frac c\mu$. Write $\Phi$ for the standard normal cumulative distribution function, so that $\Phi(z)$ is the probability that $Z \le z$. Then $\Pr_Q[L \ge c] = \Phi(-\frac\mu2 - \frac c\mu) = \Phi(-0.5 - 2) = \Phi(-2.5) = 0.0062$.
 
 How close do the bounds of @eq-renyi-tail come? With $\alpha = 1$ the bound is Markov's, which holds for any pair and gives $e^{-2} = 0.1353$. The Gaussian pair lets you do better by choosing $\alpha$. With $D_\alpha = \alpha\mu^2/2$, the exponent of the bound is $-\alpha c + \alpha(\alpha-1)\mu^2/2$. It is a parabola in $\alpha$, and setting its derivative $-c + (2\alpha - 1)\mu^2/2$ to zero gives the best order, $\alpha = c/\mu^2 + \frac12 = 2.5$. There the exponent is $-2.5 \times 2 + 2.5 \times 1.5/2 = -3.125$, so the bound is $e^{-3.125} = 0.0439$.
 
@@ -376,10 +376,10 @@ Rescaling $x \mapsto x/b$ is a bijection: it can be undone, so it loses nothing 
 
 1. **Set up.** $D_{\mathrm{KL}} = \mathbb E_P[L] = \mathbb E|X - t| - \mathbb E|X|$ with $X \sim \mathrm{Lap}(0, 1)$. The second term is $\mathbb E|X| = 1$, because $|X|$ has the exponential density $e^{-y}$ on $y \ge 0$, whose mean is 1.
 2. **Split off the negative part.** For any number $y$, $|y| = y + 2(-y)_+$: if $y \ge 0$ both sides are $y$, and if $y < 0$ the right side is $y - 2y = -y$. With $y = X - t$, and $\mathbb E X = 0$, this gives $\mathbb E|X - t| = -t + 2\,\mathbb E(t - X)_+$.
-3. **Write the positive part as an integral.** $(t - X)_+$ is the length of the interval from $X$ up to $t$, which is $\int_{-\infty}^t\mathbf 1[X \le x]\,dx$. Averaging inside the integral gives $\mathbb E(t - X)_+ = \int_{-\infty}^t\Pr[X \le x]\,dx$. The Laplace cumulative distribution function is $\Pr[X \le x] = \frac12e^x$ for $x < 0$ and $1 - \frac12e^{-x}$ for $x \ge 0$, so this is $\int_{-\infty}^0\frac12e^x\,dx + \int_0^t\big(1 - \frac12e^{-x}\big)dx = \frac12 + t - \frac12(1 - e^{-t}) = t + \frac12e^{-t}$.
+3. **Write the positive part as an integral.** $(t - X)_+$ is the length of the interval from $X$ up to $t$, which is $\int_{-\infty}^t\mathbf 1[X \le x]\,\mathrm dx$. Averaging inside the integral gives $\mathbb E(t - X)_+ = \int_{-\infty}^t\Pr[X \le x]\,\mathrm dx$. The Laplace cumulative distribution function is $\Pr[X \le x] = \frac12e^x$ for $x < 0$ and $1 - \frac12e^{-x}$ for $x \ge 0$, so this is $\int_{-\infty}^0\frac12e^x\,\mathrm dx + \int_0^t\big(1 - \frac12e^{-x}\big)\mathrm dx = \frac12 + t - \frac12(1 - e^{-t}) = t + \frac12e^{-t}$.
 4. **Combine.** $\mathbb E|X - t| = -t + 2(t + \frac12e^{-t}) = t + e^{-t}$, and $D_{\mathrm{KL}} = t + e^{-t} - 1$.
 
-**Rényi** (can wait for a second reading; only the result is used later). We need $I(\alpha) = \int p^\alpha q^{1-\alpha} = \frac12\int\exp\big(-\alpha|x| - (1-\alpha)|x - t|\big)dx$. The absolute values change sign at 0 and $t$, and between those points each one is a plain linear function, so split the line into the three pieces of @tbl-div-laplace-pieces. On each piece the exponent is linear in $x$, and the integral of an exponential of a linear function is elementary.
+**Rényi** (can wait for a second reading; only the result is used later). We need $I(\alpha) = \int p^\alpha q^{1-\alpha} = \frac12\int\exp\big(-\alpha|x| - (1-\alpha)|x - t|\big)\mathrm dx$. The absolute values change sign at 0 and $t$, and between those points each one is a plain linear function, so split the line into the three pieces of @tbl-div-laplace-pieces. On each piece the exponent is linear in $x$, and the integral of an exponential of a linear function is elementary.
 
 | Piece | Exponent $-\alpha\lvert x\rvert - (1-\alpha)\lvert x - t\rvert$ | Integral of $e^{\text{exponent}}$ |
 | --- | --- | --- |
@@ -431,10 +431,10 @@ KL and Rényi divergences are convenient to compute, but they do not directly an
 ### Statement
 
 The total variation has four equal forms, and each says the same thing from a different side: the largest gap between the probabilities of one event, the mass where $p$ sits above $q$, half the total absolute difference between the two probability tables, and the average under $Q$ of how far $r$ exceeds 1:
-$$\mathrm{TV}(P, Q) = \max_A|P(A) - Q(A)| = \sum_x\big(p(x) - q(x)\big)_+ = \frac12\sum_x|p(x) - q(x)| = \mathbb E_Q\big[(r - 1)_+\big].$$ {#eq-tv}
+$$\mathrm{TV}(P, Q) = \max_A|\Pr_P[A] - \Pr_Q[A]| = \sum_x\big(p(x) - q(x)\big)_+ = \frac12\sum_x|p(x) - q(x)| = \mathbb E_Q\big[(r - 1)_+\big].$$ {#eq-tv}
 Equivalently, the overlap of the two curves is $\sum_x\min(p(x), q(x)) = 1 - \mathrm{TV}(P, Q)$. It has three uses and one structural property.
 
-1. **Bounded statistics.** For every $g$ with values in $[a, b]$, $|\mathbb E_Pg - \mathbb E_Qg| \le (b - a)\,\mathrm{TV}(P, Q)$.
+1. **Bounded statistics.** For every $g$ with values in $[l, u]$, $|\mathbb E_Pg - \mathbb E_Qg| \le (u - l)\,\mathrm{TV}(P, Q)$.
 2. **Best single-shot test.** Nature picks $P$ or $Q$ with probability $\frac12$ each and shows you one draw. Guessing blind is right half the time, and seeing the draw adds half the TV. The best possible guess is correct with probability
 $$\Pr[\text{correct}] = \frac12 + \frac12\mathrm{TV}(P, Q).$$ {#eq-tv-test}
 3. **TV is a metric:** symmetric, zero only if $P = Q$, and it satisfies the triangle inequality (it is half an $\ell_1$ distance, the sum of absolute differences). It is always between 0 and 1.
@@ -443,17 +443,17 @@ $$\Pr[\text{correct}] = \frac12 + \frac12\mathrm{TV}(P, Q).$$ {#eq-tv-test}
 
 **The forms of @eq-tv.** Each form follows from the previous one.
 
-1. **The best event.** Fact 3 with $\gamma = 1$ says the event that maximizes $P(A) - Q(A)$ collects every outcome where $p > q$, so $\max_A[P(A) - Q(A)] = \sum_x(p - q)_+$.
-2. **Absolute values come for free.** The differences $p - q$ sum to $1 - 1 = 0$, so the positive and negative parts have equal mass: $\sum(p - q)_+ = \sum(q - p)_+$. So $\max_A[Q(A) - P(A)]$ has the same value, which lets you put absolute values on $P(A) - Q(A)$.
+1. **The best event.** Fact 3 with $\gamma = 1$ says the event that maximizes $\Pr_P[A] - \Pr_Q[A]$ collects every outcome where $p > q$, so $\max_A[\Pr_P[A] - \Pr_Q[A]] = \sum_x(p - q)_+$.
+2. **Absolute values come for free.** The differences $p - q$ sum to $1 - 1 = 0$, so the positive and negative parts have equal mass: $\sum(p - q)_+ = \sum(q - p)_+$. So $\max_A[\Pr_Q[A] - \Pr_P[A]]$ has the same value, which lets you put absolute values on $\Pr_P[A] - \Pr_Q[A]$.
 3. **Half the absolute difference.** $|y| = y_+ + (-y)_+$, so $\sum|p - q| = \sum(p - q)_+ + \sum(q - p)_+ = 2\sum(p - q)_+$.
 4. **An average under $Q$.** $p - q = q(r - 1)$, so $\sum_x(p - q)_+ = \sum_xq\,(r - 1)_+ = \mathbb E_Q[(r - 1)_+]$.
 5. **Overlap.** At each $x$, $\min(p, q)$ is $p$ minus whatever of $p$ sticks out above $q$: $\min(p, q) = p - (p - q)_+$. Sum over $x$: $\sum\min(p, q) = 1 - \mathrm{TV}$.
 
-**Bounded statistics.** The idea is that a statistic with values in an interval is a "soft event", and Fact 3 bounds soft events as well as sharp ones. Shift $g$ by a constant, which does not change $\mathbb E_Pg - \mathbb E_Qg$, so that it takes values in $[0, b - a]$. Then $\mathbb E_Pg - \mathbb E_Qg = \sum_xg(x)(p(x) - q(x))$. The function $\phi = g/(b-a)$ has values in $[0, 1]$, and the randomized version of Fact 3 says $\sum_x\phi(x)(p(x) - q(x)) \le \sum(p - q)_+$. Multiplying by $b - a$ gives the bound $(b - a)\sum(p - q)_+$, and the same argument with $g$ replaced by $-g$ bounds the other sign.
+**Bounded statistics.** The idea is that a statistic with values in an interval is a "soft event", and Fact 3 bounds soft events as well as sharp ones. Shift $g$ by a constant, which does not change $\mathbb E_Pg - \mathbb E_Qg$, so that it takes values in $[0, u - l]$. Then $\mathbb E_Pg - \mathbb E_Qg = \sum_xg(x)(p(x) - q(x))$. The function $\phi = g/(b-a)$ has values in $[0, 1]$, and the randomized version of Fact 3 says $\sum_x\phi(x)(p(x) - q(x)) \le \sum(p - q)_+$. Multiplying by $u - l$ gives the bound $(u - l)\sum(p - q)_+$, and the same argument with $g$ replaced by $-g$ bounds the other sign.
 
 **Best single-shot test.**
 
-1. **Score a test.** A test says "$P$" when $x \in A$ and "$Q$" otherwise. It is right when the draw came from $P$ and lands in $A$, or came from $Q$ and lands outside $A$, so it is correct with probability $\frac12P(A) + \frac12(1 - Q(A)) = \frac12 + \frac12\big(P(A) - Q(A)\big)$.
+1. **Score a test.** A test says "$P$" when $x \in A$ and "$Q$" otherwise. It is right when the draw came from $P$ and lands in $A$, or came from $Q$ and lands outside $A$, so it is correct with probability $\frac12\Pr_P[A] + \frac12(1 - \Pr_Q[A]) = \frac12 + \frac12\big(\Pr_P[A] - \Pr_Q[A]\big)$.
 2. **Choose the best event.** Maximize over $A$ with Fact 3: the best test is $A^* = \{p > q\}$, "say $P$ when the observation is more likely under $P$", and it achieves @eq-tv-test.
 3. **Randomizing does not help.** A randomized test says "$P$" with probability $\phi(x) \in [0, 1]$, and by the second part of Fact 3 it does no better.
 
@@ -473,14 +473,14 @@ So $\mathrm{TV} = \frac13$, and half the absolute sum, $\frac12 \times \frac23$,
 
 TV is the bottom line for one observation. No classifier, however clever, can beat $\frac12 + \frac12\mathrm{TV}$ accuracy from a single draw with equal priors, because the best test of the derivation already reaches it.
 
-It also bounds how much any fixed procedure can change when the data distribution changes. If the test distribution moves from $Q$ to $P$ with $\mathrm{TV} \le 0.01$, then the accuracy of *any* fixed classifier moves by at most 0.01. Its accuracy is the average of a statistic with values in $[0, 1]$ (1 for a correct prediction, 0 for a wrong one), so the bounded-statistics property applies with $b - a = 1$.
+It also bounds how much any fixed procedure can change when the data distribution changes. If the test distribution moves from $Q$ to $P$ with $\mathrm{TV} \le 0.01$, then the accuracy of *any* fixed classifier moves by at most 0.01. Its accuracy is the average of a statistic with values in $[0, 1]$ (1 for a correct prediction, 0 for a wrong one), so the bounded-statistics property applies with $u - l = 1$.
 
 TV is not additive. For $n$ i.i.d. samples, $\mathrm{TV}(P^n, Q^n)$ is not $n\,\mathrm{TV}(P, Q)$. It is capped at 1 and has no simple formula. That is why you usually compute KL or a Rényi divergence for $n$ samples, where additivity makes it trivial, and convert to TV with Pinsker's inequality (@sec-div-pinsker).
 
 ### Example: telling two Gaussians apart from $n$ samples
 
-For $P = \mathcal N(0, \sigma^2)$ and $Q = \mathcal N(s, \sigma^2)$ with $s > 0$, the best event collects the outcomes more likely under $P$. The two bell curves cross at the midpoint $s/2$, so $A^* = \{p > q\} = \{x < s/2\}$. Write $\Phi$ for the standard normal cumulative distribution function, $\Phi(z) = \Pr[Z \le z]$ for a standard normal $Z$. In standard units the midpoint is $\mu/2$ above $P$'s centre and $\mu/2$ below $Q$'s, with $\mu = s/\sigma$, so $P(A^*) = \Phi(\frac\mu2)$ and $Q(A^*) = \Phi(-\frac\mu2)$. The normal curve is symmetric, so $\Phi(-z) = 1 - \Phi(z)$, and
-$$\mathrm{TV} = P(A^*) - Q(A^*) = \Phi\Big(\frac\mu2\Big) - \Phi\Big(-\frac\mu2\Big) = 2\Phi\Big(\frac\mu2\Big) - 1, \qquad \mu = s/\sigma.$$
+For $P = \mathcal N(0, \sigma^2)$ and $Q = \mathcal N(s, \sigma^2)$ with $s > 0$, the best event collects the outcomes more likely under $P$. The two bell curves cross at the midpoint $s/2$, so $A^* = \{p > q\} = \{x < s/2\}$. Write $\Phi$ for the standard normal cumulative distribution function, $\Phi(z) = \Pr[Z \le z]$ for a standard normal $Z$. In standard units the midpoint is $\mu/2$ above $P$'s centre and $\mu/2$ below $Q$'s, with $\mu = s/\sigma$, so $\Pr_P[A^*] = \Phi(\frac\mu2)$ and $\Pr_Q[A^*] = \Phi(-\frac\mu2)$. The normal curve is symmetric, so $\Phi(-z) = 1 - \Phi(z)$, and
+$$\mathrm{TV} = \Pr_P[A^*] - \Pr_Q[A^*] = \Phi\Big(\frac\mu2\Big) - \Phi\Big(-\frac\mu2\Big) = 2\Phi\Big(\frac\mu2\Big) - 1, \qquad \mu = s/\sigma.$$
 At $\mu = 1$, $\mathrm{TV} = 0.3829$, and by @eq-tv-test the best test is right with probability $\frac12 + \frac12(2\Phi(0.5) - 1) = \Phi(0.5) = 0.6915$ (@fig-div-tv-gaussians, left).
 
 Now suppose each observation is shifted by only $\mu = 0.1$ standard deviations, and you see $n$ i.i.d. samples. The evidence of the whole sample is the sum of the evidence of each sample, $\sum_iL(x_i) = \sum_i\frac{s^2 - 2sx_i}{2\sigma^2} = \frac{n(s^2 - 2s\bar x)}{2\sigma^2}$, which depends on the data only through the sample mean $\bar x$. So nothing is lost by looking only at $\bar x$. The sample mean has the same centre as one observation and a variance $n$ times smaller: it is $\mathcal N(0, \sigma^2/n)$ under $P$ and $\mathcal N(s, \sigma^2/n)$ under $Q$. That is a Gaussian pair with standardized shift $s/(\sigma/\sqrt n) = \mu\sqrt n$. So the best test thresholds the sample mean at $s/2$. @tbl-div-tv-samples gives its accuracy, exactly and by simulation.
@@ -492,7 +492,7 @@ Now suppose each observation is shifted by only $\mu = 0.1$ standard deviations,
 
 : Telling $\mathcal N(0, 1)$ from $\mathcal N(0.1, 1)$ with $n$ samples. {#tbl-div-tv-samples}
 
-A shift of a tenth of a standard deviation is invisible in one sample (TV $= 2\Phi(0.05) - 1 = 0.0399$) but clear with a few hundred. The accuracy depends on $n$ only through $\mu\sqrt n$, so reaching a given accuracy needs $n$ proportional to $1/\mu^2$, that is to $1/\mathrm{KL}$, since KL $= \mu^2/2$.
+A shift of a tenth of a standard deviation is invisible in one sample (TV $= 2\Phi(0.05) - 1 = 0.0399$) but clear with a few hundred. The accuracy depends on $n$ only through $\mu\sqrt n$, so reaching a given accuracy needs $n$ proportional to $1/\mu^2$, that is to $1/D_{\mathrm{KL}}(P\|Q)$, since $D_{\mathrm{KL}}(P\|Q) = \mu^2/2$.
 
 ![Left: two unit-variance Gaussians one standard deviation apart. The shaded area, where $p$ exceeds $q$, is the total variation, and the best test thresholds at the midpoint. Right: the best accuracy for telling $\mathcal N(0, 1)$ from $\mathcal N(0.1, 1)$ as the number of samples grows, exactly, by simulation, and as bounded through Pinsker's inequality.](figures/divergences_tv_gaussians.svg){#fig-div-tv-gaussians}
 
@@ -511,13 +511,13 @@ TV measures the mass of $p$ that sticks out above $q$. Now scale $q$ up by a fac
 
 ### Statement
 
-The hockey-stick divergence is the TV with $q$ replaced by $\gamma q$. Like the TV, it is the largest gap $P(A) - \gamma Q(A)$ over events, the mass of $p$ above $\gamma q$, and an average under $Q$ of how far $r$ exceeds the threshold. For $\gamma \ge 1$,
-$$E_\gamma(P\|Q) = \max_A\big[P(A) - \gamma Q(A)\big] = \sum_x\big(p(x) - \gamma q(x)\big)_+ = \mathbb E_Q\big[(r - \gamma)_+\big].$$
+The hockey-stick divergence is the TV with $q$ replaced by $\gamma q$. Like the TV, it is the largest gap $\Pr_P[A] - \gamma \Pr_Q[A]$ over events, the mass of $p$ above $\gamma q$, and an average under $Q$ of how far $r$ exceeds the threshold. For $\gamma \ge 1$,
+$$E_\gamma(P\|Q) = \max_A\big[\Pr_P[A] - \gamma \Pr_Q[A]\big] = \sum_x\big(p(x) - \gamma q(x)\big)_+ = \mathbb E_Q\big[(r - \gamma)_+\big].$$
 The name comes from the shape of $t \mapsto (t - \gamma)_+$: flat, then a straight line. It has four properties.
 
 1. $E_1(P\|Q) = \mathrm{TV}(P, Q)$: with no scaling it is the TV.
 2. $E_\gamma$ is non-increasing and convex in $\gamma$, and $E_\gamma = 0$ exactly when $\gamma \ge \max r = e^{D_\infty(P\|Q)}$: once $\gamma q$ covers $p$ everywhere, nothing sticks out.
-3. In terms of the log-likelihood ratio, it is a difference of two tail probabilities: $E_\gamma(P\|Q) = P[L > \ln\gamma] - \gamma\,Q[L > \ln\gamma]$.
+3. In terms of the log-likelihood ratio, it is a difference of two tail probabilities: $E_\gamma(P\|Q) = \Pr_P[L > \ln\gamma] - \gamma\,\Pr_Q[L > \ln\gamma]$.
 4. **Unequal priors.** If $P$ has prior probability $\pi \le \frac12$ and $Q$ has $1 - \pi$, the smallest possible probability of a wrong guess from one observation is $\pi\big(1 - E_\gamma(P\|Q)\big)$ with $\gamma = (1-\pi)/\pi$, the prior odds against $P$. Always guessing $Q$ errs with probability $\pi$, and the observation removes a fraction $E_\gamma$ of that.
 
 ### Derivation
@@ -525,16 +525,16 @@ The name comes from the shape of $t \mapsto (t - \gamma)_+$: flat, then a straig
 1. **The forms.** Fact 3 with weight $\gamma$ gives the maximum and the sum, and $p - \gamma q = q(r - \gamma)$ turns the sum into $\sum q(r - \gamma)_+ = \mathbb E_Q[(r - \gamma)_+]$.
 2. **Property 1:** set $\gamma = 1$ in @eq-tv.
 3. **Property 2:** for each outcome, $(r(x) - \gamma)_+$ as a function of $\gamma$ is a hockey stick turned around, a straight descending line that flattens at 0, so it is non-increasing and convex. An average of non-increasing convex functions is non-increasing and convex. Every term vanishes exactly when $\gamma \ge r(x)$ for all $x$, that is when $\gamma \ge \max r$.
-4. **Property 3:** the terms of $\sum(p - \gamma q)_+$ are non-zero only on $\{r > \gamma\} = \{L > \ln\gamma\}$. On that set the sum of $p$ is $P[L > \ln\gamma]$ and the sum of $\gamma q$ is $\gamma Q[L > \ln\gamma]$.
-5. **Property 4:** guessing "$P$" on $A$ errs when the draw came from $P$ and fell outside $A$, or came from $Q$ and fell inside $A$, so it errs with probability $\pi P(A^c) + (1 - \pi)Q(A)$. Factoring out $\pi$ and writing $\gamma = (1 - \pi)/\pi$, this is $\pi - \pi\big[P(A) - \gamma Q(A)\big]$. Minimizing the error means maximizing the bracket, which by Fact 3 is $E_\gamma$.
+4. **Property 3:** the terms of $\sum(p - \gamma q)_+$ are non-zero only on $\{r > \gamma\} = \{L > \ln\gamma\}$. On that set the sum of $p$ is $\Pr_P[L > \ln\gamma]$ and the sum of $\gamma q$ is $\gamma \Pr_Q[L > \ln\gamma]$.
+5. **Property 4:** guessing "$P$" on $A$ errs when the draw came from $P$ and fell outside $A$, or came from $Q$ and fell inside $A$, so it errs with probability $\pi \Pr_P[A^c] + (1 - \pi)\Pr_Q[A]$. Factoring out $\pi$ and writing $\gamma = (1 - \pi)/\pi$, this is $\pi - \pi\big[\Pr_P[A] - \gamma \Pr_Q[A]\big]$. Minimizing the error means maximizing the bracket, which by Fact 3 is $E_\gamma$.
 
 **Closed forms for the shifted pairs.** Property 3 turns $E_\gamma$ into two tail probabilities, and for the Gaussian and Laplace pairs both are known. Write $c = \ln\gamma$.
 
-For the Gaussian pair ($\mu = s/\sigma$), the evidence is the line $L(x) = \frac{s^2 - 2sx}{2\sigma^2}$, and $L > c$ when $x < \frac s2 - \frac{c\sigma^2}{s}$, that is when $x/\sigma < \frac\mu2 - \frac c\mu$. Under $P$, $x/\sigma$ is standard normal, so $P[L > c] = \Phi(\frac\mu2 - \frac c\mu)$. Under $Q$, $x/\sigma$ is a standard normal plus $\mu$, so $Q[L > c] = \Phi(-\frac\mu2 - \frac c\mu)$. Therefore
+For the Gaussian pair ($\mu = s/\sigma$), the evidence is the line $L(x) = \frac{s^2 - 2sx}{2\sigma^2}$, and $L > c$ when $x < \frac s2 - \frac{c\sigma^2}{s}$, that is when $x/\sigma < \frac\mu2 - \frac c\mu$. Under $P$, $x/\sigma$ is standard normal, so $\Pr_P[L > c] = \Phi(\frac\mu2 - \frac c\mu)$. Under $Q$, $x/\sigma$ is a standard normal plus $\mu$, so $\Pr_Q[L > c] = \Phi(-\frac\mu2 - \frac c\mu)$. Therefore
 $$E_\gamma = \Phi\Big(\frac\mu2 - \frac c\mu\Big) - \gamma\,\Phi\Big(-\frac\mu2 - \frac c\mu\Big).$$
 It is positive for every $\gamma$, because $D_\infty = \infty$: no finite $\gamma$ covers $p$.
 
-For the Laplace pair ($t = s/b$, $b = 1$), the evidence $L(x) = |x - t| - |x|$ is $t$ on $x \le 0$, $-t$ on $x \ge t$, and $t - 2x$ in between. For $0 \le c < t$, $L > c$ happens on that middle piece when $x < \frac{t - c}2$. Under $P = \mathrm{Lap}(0, 1)$ the probability of $X < \frac{t - c}2$, a positive point, is $P[\cdot] = 1 - \frac12e^{-(t-c)/2}$. Under $Q$, $X - t$ is a $\mathrm{Lap}(0, 1)$ variable that must be below $\frac{t - c}2 - t = -\frac{t + c}2$, so $Q[\cdot] = \frac12e^{-(t+c)/2}$. Since $\gamma e^{-(t+c)/2} = e^{c}e^{-(t+c)/2} = e^{-(t-c)/2}$, the two halves combine:
+For the Laplace pair ($t = s/b$, $b = 1$), the evidence $L(x) = |x - t| - |x|$ is $t$ on $x \le 0$, $-t$ on $x \ge t$, and $t - 2x$ in between. For $0 \le c < t$, $L > c$ happens on that middle piece when $x < \frac{t - c}2$. Under $P = \mathrm{Lap}(0, 1)$ the probability of $X < \frac{t - c}2$, a positive point, is $\Pr_P[\cdot] = 1 - \frac12e^{-(t-c)/2}$. Under $Q$, $X - t$ is a $\mathrm{Lap}(0, 1)$ variable that must be below $\frac{t - c}2 - t = -\frac{t + c}2$, so $\Pr_Q[\cdot] = \frac12e^{-(t+c)/2}$. Since $\gamma e^{-(t+c)/2} = e^{c}e^{-(t+c)/2} = e^{-(t-c)/2}$, the two halves combine:
 $$E_\gamma = 1 - e^{-(t - \ln\gamma)/2} \quad\text{for } 1 \le \gamma \le e^t, \qquad E_\gamma = 0 \text{ beyond}.$$
 At $\gamma = 1$ this gives $\mathrm{TV} = 1 - e^{-t/2}$.
 
@@ -546,17 +546,17 @@ The curve $\gamma \mapsto E_\gamma$ shows how much of the difference between $P$
 
 ### Example: rejection sampling with an envelope that is too low
 
-You want samples from the loaded die $p$, using rolls of the fair die $q$ as proposals, with envelope $\gamma q$. Propose $x \sim q$ and accept it with probability $\min\big(1, \frac{p(x)}{\gamma q(x)}\big)$. The chance of proposing $x$ and accepting it is $q(x)\min(1, p/(\gamma q)) = \min(p, \gamma q)/\gamma$, so the accepted rolls have distribution $m \propto \min(p, \gamma q)$. Where the envelope covers $p$ this is $p$; where it does not, the excess of $p$ is cut off.
+You want samples from the loaded die $p$, using rolls of the fair die $q$ as proposals, with envelope $\gamma q$. Propose $x \sim q$ and accept it with probability $\min\big(1, \frac{p(x)}{\gamma q(x)}\big)$. The chance of proposing $x$ and accepting it is $q(x)\min(1, p/(\gamma q)) = \min(p, \gamma q)/\gamma$, so the accepted rolls have distribution $\tilde p \propto \min(p, \gamma q)$. Where the envelope covers $p$ this is $p$; where it does not, the excess of $p$ is cut off.
 
-With $\gamma = 3 = \max r$, the envelope covers $p$, so $m = p$ exactly. Each proposal is accepted with total probability $\sum\min(p, 3q)/3 = 1/\gamma = \frac13$.
+With $\gamma = 3 = \max r$, the envelope covers $p$, so $\tilde p = p$ exactly. Each proposal is accepted with total probability $\sum\min(p, 3q)/3 = 1/\gamma = \frac13$.
 
-With $\gamma = 2$, the envelope $2q = \frac13$ is below $p(6) = 0.5$. The uncovered mass is $E_2(P\|Q) = 0.5 - \frac13 = \frac16$ (the script gives 0.1667). The acceptance rate rises to $\sum\min(q, p/\gamma) = (1 - E_2)/\gamma = \frac5{12}$, since $\sum\min(p, \gamma q)$ is all of $p$ except the part above $\gamma q$, which is $1 - E_\gamma$. But the output is wrong: $\min(p, 2q) = (0.1, \dots, 0.1, \frac13)$ sums to $\frac56$, and dividing by $\frac56$ gives $m = (0.12, \dots, 0.12, 0.4)$. A six now comes up 40% of the time instead of 50%: $\mathrm{TV}(P, M) = 0.5 - 0.4 = 0.1$.
+With $\gamma = 2$, the envelope $2q = \frac13$ is below $p(6) = 0.5$. The uncovered mass is $E_2(P\|Q) = 0.5 - \frac13 = \frac16$ (the script gives 0.1667). The acceptance rate rises to $\sum\min(q, p/\gamma) = (1 - E_2)/\gamma = \frac5{12}$, since $\sum\min(p, \gamma q)$ is all of $p$ except the part above $\gamma q$, which is $1 - E_\gamma$. But the output is wrong: $\min(p, 2q) = (0.1, \dots, 0.1, \frac13)$ sums to $\frac56$, and dividing by $\frac56$ gives $\tilde p = (0.12, \dots, 0.12, 0.4)$. A six now comes up 40% of the time instead of 50%: $\mathrm{TV}(P, \tilde P) = 0.5 - 0.4 = 0.1$.
 
-In general $\mathrm{TV}(P, M) \le E_\gamma(P\|Q)$ ([Exercise 4](../../book-exercises/part01-prerequisites/03-divergences.md#sec-sol-divergences-4)). The hockey-stick divergence is exactly the price of a cheap envelope.
+In general $\mathrm{TV}(P, \tilde P) \le E_\gamma(P\|Q)$ ([Exercise 4](../../book-exercises/part01-prerequisites/03-divergences.md#sec-sol-divergences-4)). The hockey-stick divergence is exactly the price of a cheap envelope.
 
 ### Check yourself
 
-- Why must $\gamma \ge 1$ in the definition? *(For $\gamma < 1$, $\max_A[P(A) - \gamma Q(A)] \ge 1 - \gamma > 0$ even when $P = Q$, by taking $A$ to be everything. The quantity no longer vanishes at $P = Q$.)*
+- Why must $\gamma \ge 1$ in the definition? *(For $\gamma < 1$, $\max_A[\Pr_P[A] - \gamma \Pr_Q[A]] \ge 1 - \gamma > 0$ even when $P = Q$, by taking $A$ to be everything. The quantity no longer vanishes at $P = Q$.)*
 - For the Gaussian pair with $\mu = 1$, the script gives $E_2 = 0.1906$, and a Monte Carlo average of $(r - 2)_+$ over a million draws from $Q$ gives 0.1892. Which form of $E_\gamma$ does the simulation use, and why does it need samples from $Q$, not $P$? *(The form $\mathbb E_Q[(r - \gamma)_+]$, which is an average under $Q$, so a sample average estimates it only when the samples come from $Q$.)*
 
 ## f-divergences {#sec-div-f}
@@ -587,7 +587,7 @@ $$D_f(P\|Q) = \mathbb E_Q\big[f(r(X))\big] = \sum_xq(x)\,f\Big(\frac{p(x)}{q(x)}
 **Non-negativity.** $D_f(P\|Q) \ge 0$, with equality when $P = Q$.
 
 **The hockey-stick curves determine every f-divergence** (can wait for a second reading). The idea is that any convex $f$ can be built from hockey-stick shapes $(t - \gamma)_+$ and $(\gamma - t)_+$, one bend at each $\gamma$, weighted by how sharply $f$ bends there, its second derivative $f''(\gamma)$. Averaging each hockey stick under $Q$ gives a hockey-stick divergence, so the f-divergence is a weighted sum of them. If $f$ is twice differentiable,
-$$D_f(P\|Q) = \int_1^\infty f''(\gamma)\,E_\gamma(P\|Q)\,d\gamma + \int_0^1 \gamma f''(\gamma)\,E_{1/\gamma}(Q\|P)\,d\gamma.$$ {#eq-f-from-hockey}
+$$D_f(P\|Q) = \int_1^\infty f''(\gamma)\,E_\gamma(P\|Q)\,\mathrm d\gamma + \int_0^1 \gamma f''(\gamma)\,E_{1/\gamma}(Q\|P)\,\mathrm d\gamma.$$ {#eq-f-from-hockey}
 
 ### Derivation
 
@@ -595,14 +595,14 @@ $$D_f(P\|Q) = \int_1^\infty f''(\gamma)\,E_\gamma(P\|Q)\,d\gamma + \int_0^1 \gam
 
 **@eq-f-from-hockey.** The plan is to write $f(t)$ as hockey sticks for each fixed $t$, then put in $t = r(X)$ and average.
 
-1. **Taylor's theorem around $t = 1$.** With the remainder written as an integral, $f(t) = f(1) + f'(1)(t - 1) + \int_1^tf''(\gamma)(t - \gamma)\,d\gamma$: the value at 1, the tangent line, and the curvature accumulated between 1 and $t$.
-2. **Rewrite the remainder with hockey sticks,** so that one formula holds for all $t$ at once: it equals $\int_1^\infty f''(\gamma)(t - \gamma)_+\,d\gamma + \int_0^1 f''(\gamma)(\gamma - t)_+\,d\gamma$. For $t \ge 1$, $(t - \gamma)_+$ is zero past $\gamma = t$, so the first integral is the remainder and the second is zero. For $t < 1$, swapping the limits of $\int_1^t$ flips the sign of $(t - \gamma)$ into $(\gamma - t)$ on $[t, 1]$, which is the second integral, and the first is zero.
+1. **Taylor's theorem around $t = 1$.** With the remainder written as an integral, $f(t) = f(1) + f'(1)(t - 1) + \int_1^tf''(\gamma)(t - \gamma)\,\mathrm d\gamma$: the value at 1, the tangent line, and the curvature accumulated between 1 and $t$.
+2. **Rewrite the remainder with hockey sticks,** so that one formula holds for all $t$ at once: it equals $\int_1^\infty f''(\gamma)(t - \gamma)_+\,\mathrm d\gamma + \int_0^1 f''(\gamma)(\gamma - t)_+\,\mathrm d\gamma$. For $t \ge 1$, $(t - \gamma)_+$ is zero past $\gamma = t$, so the first integral is the remainder and the second is zero. For $t < 1$, swapping the limits of $\int_1^t$ flips the sign of $(t - \gamma)$ into $(\gamma - t)$ on $[t, 1]$, which is the second integral, and the first is zero.
 3. **Average under $Q$.** Put $t = r(X)$ and average. $f(1) = 0$, and $\mathbb E_Q[r - 1] = 0$ by Fact 1, so the first two terms vanish.
 4. **The first integral.** $\mathbb E_Q[(r - \gamma)_+] = E_\gamma(P\|Q)$ by definition.
 5. **The second integral.** $\mathbb E_Q[(\gamma - r)_+] = \sum(\gamma q - p)_+ = \gamma\sum(q - p/\gamma)_+ = \gamma E_{1/\gamma}(Q\|P)$, the hockey-stick divergence in the other direction.
 
 **Concretely, KL on the die.** For $f(t) = t\ln t$, $f'(t) = \ln t + 1$ and $f''(\gamma) = 1/\gamma$. From @sec-div-hockey, $E_\gamma(P\|Q) = \frac12 - \frac\gamma6$ for $1 \le \gamma \le 3$ and 0 beyond. In the other direction, $q/p = \frac53$ on rolls 1–5 and $\frac13$ on the six. For $\gamma \le 1$, the term $(q - p/\gamma)_+$ is positive on a non-six when $\frac16 > \frac{0.1}\gamma$, that is when $\gamma > 0.6$, and never on the six. So $E_{1/\gamma}(Q\|P) = 5\big(\frac16 - \frac{0.1}\gamma\big)_+ = \frac56 - \frac1{2\gamma}$ for $\gamma > 0.6$. The weight $\gamma f''(\gamma)$ is 1. Then
-$$\int_1^3\frac1\gamma\Big(\frac12 - \frac\gamma6\Big)d\gamma + \int_{0.6}^1\Big(\frac56 - \frac1{2\gamma}\Big)d\gamma = \Big(\tfrac12\ln3 - \tfrac13\Big) + \Big(\tfrac13 - \tfrac12\ln\tfrac53\Big) = \tfrac12\ln1.8 = 0.2939,$$
+$$\int_1^3\frac1\gamma\Big(\frac12 - \frac\gamma6\Big)\mathrm d\gamma + \int_{0.6}^1\Big(\frac56 - \frac1{2\gamma}\Big)\mathrm d\gamma = \Big(\tfrac12\ln3 - \tfrac13\Big) + \Big(\tfrac13 - \tfrac12\ln\tfrac53\Big) = \tfrac12\ln1.8 = 0.2939,$$
 the KL computed directly. The first integral is $\frac12\ln 3 - \frac26$; the second is $\frac56 \times 0.4 - \frac12\ln\frac1{0.6}$; and $\ln 3 - \ln\frac53 = \ln 1.8$. The script repeats the integral numerically and also gets 0.2939.
 
 ### Interpretation
@@ -632,8 +632,8 @@ Processing may be random, so describe it by its output probabilities. A **channe
 $$D_f(PK\|QK) \le D_f(P\|Q).$$
 The same holds for every Rényi divergence $D_\alpha$, including $D_\infty$. Equality holds when the processing keeps the likelihood ratio: when $r(x)$ can be computed from $y$. Such a $y$ is a **sufficient statistic**.
 
-**A useful special case.** The coarsest processing reports only whether an event $A$ happened. That turns $P$ and $Q$ into two coins, with probabilities of heads $P(A)$ and $Q(A)$, and the KL between two coins with heads probabilities $a$ and $b$ is the **binary KL** $\mathrm{kl}(a, b)$. So for every event $A$,
-$$D_{\mathrm{KL}}(P\|Q) \ge \mathrm{kl}\big(P(A), Q(A)\big), \qquad \mathrm{kl}(a, b) = a\ln\frac ab + (1 - a)\ln\frac{1-a}{1-b}.$$
+**A useful special case.** The coarsest processing reports only whether an event $A$ happened. That turns $P$ and $Q$ into two coins, with probabilities of heads $\Pr_P[A]$ and $\Pr_Q[A]$, and the KL between two coins with heads probabilities $a$ and $b$ is the **binary KL** $\mathrm{kl}(a\|b)$. So for every event $A$,
+$$D_{\mathrm{KL}}(P\|Q) \ge \mathrm{kl}\big(\Pr_P[A]\,\|\,\Pr_Q[A]\big), \qquad \mathrm{kl}(a\|b) = a\ln\frac ab + (1 - a)\ln\frac{1-a}{1-b}.$$
 
 ### Derivation
 
@@ -647,14 +647,14 @@ where $(X, Y)$ is drawn as $X \sim Q$, then $Y \sim K(\cdot\mid X)$. The weights
 
 **Concretely, on the die.** Report only whether the roll is odd or even (@tbl-div-dpi-die).
 
-| $Y$ | Rolls | $P(Y)$ | $Q(Y)$ | $r_Y = P(Y)/Q(Y)$ | Average of $r$ over the rolls, $Q$-weighted |
+| $y$ | Rolls | $PK(y)$ | $QK(y)$ | $r_Y = PK(y)/QK(y)$ | Average of $r$ over the rolls, $Q$-weighted |
 | --- | --- | --- | --- | --- | --- |
 | even | 2, 4, 6 | 0.7 | 0.5 | 1.4 | $(0.6 + 0.6 + 3)/3 = 1.4$ |
 | odd | 1, 3, 5 | 0.3 | 0.5 | 0.6 | $(0.6 + 0.6 + 0.6)/3 = 0.6$ |
 
 : Processing the die roll into its parity averages the likelihood ratio within each output. {#tbl-div-dpi-die}
 
-The ratios 0.6 and 3 on the even rolls are averaged into 1.4: the strong evidence of a six is diluted by the twos and fours. The KL of the parity is computed like any KL, as the $P$-weighted average of $\ln r_Y$, and drops from 0.2939 to $0.7\ln1.4 + 0.3\ln0.6 = 0.0823$. If instead you report only whether the roll is a six, nothing is lost: $r$ depends only on that bit, so the bit is sufficient, and the KL stays at $\mathrm{kl}(0.5, \frac16) = 0.5\ln3 + 0.5\ln0.6 = 0.2939$.
+The ratios 0.6 and 3 on the even rolls are averaged into 1.4: the strong evidence of a six is diluted by the twos and fours. The KL of the parity is computed like any KL, as the $P$-weighted average of $\ln r_Y$, and drops from 0.2939 to $0.7\ln1.4 + 0.3\ln0.6 = 0.0823$. If instead you report only whether the roll is a six, nothing is lost: $r$ depends only on that bit, so the bit is sufficient, and the KL stays at $\mathrm{kl}(0.5\|\frac16) = 0.5\ln3 + 0.5\ln0.6 = 0.2939$.
 
 ### Interpretation
 
@@ -662,7 +662,7 @@ There is no free lunch from processing. A feature extractor, a summary statistic
 
 Randomized processing is included. The channel can use its own randomness, as long as that randomness does not depend on whether the input came from $P$ or $Q$: the channel $K$ is the same in both worlds.
 
-The special case gives lower bounds from a single event. $D_{\mathrm{KL}} \ge \mathrm{kl}(P(A), Q(A))$ says: if the divergence is small, then no event can have very different probabilities under $P$ and $Q$. [Hypothesis testing](04-hypothesis-testing.md) uses this form to bound the errors of any test.
+The special case gives lower bounds from a single event. $D_{\mathrm{KL}} \ge \mathrm{kl}(\Pr_P[A]\|\Pr_Q[A])$ says: if the divergence is small, then no event can have very different probabilities under $P$ and $Q$. [Hypothesis testing](04-hypothesis-testing.md) uses this form to bound the errors of any test.
 
 ### Example: binning a Gaussian
 
@@ -710,12 +710,12 @@ That is Pinsker's inequality for nearby distributions, constant included. The pr
 
 **Pinsker.** The plan is to reduce any pair to a pair of coins, where the inequality is a one-variable calculus fact.
 
-1. **Reduce to two outcomes.** Let $A^* = \{p > q\}$, $a = P(A^*)$ and $b = Q(A^*)$. By Fact 3, this event attains the TV, so $\mathrm{TV} = a - b$. Reporting only whether $x \in A^*$ turns $P$ and $Q$ into coins with heads probabilities $a$ and $b$, and by the special case of the data-processing inequality (@sec-div-dpi) this can only lower KL: $D_{\mathrm{KL}}(P\|Q) \ge \mathrm{kl}(a, b)$. So it is enough to show $\mathrm{kl}(a, b) \ge 2(a - b)^2$ for all $a, b \in (0, 1)$.
-2. **Fix $a$ and vary $b$.** Let $g(b) = \mathrm{kl}(a, b) - 2(a - b)^2$, the gap we want to show is non-negative. Then $g(a) = 0$, because two equal coins have zero KL.
-3. **Differentiate:** $\frac{d}{db}\mathrm{kl}(a, b) = -\frac ab + \frac{1-a}{1-b} = \frac{b - a}{b(1-b)}$, and $\frac{d}{db}\big(-2(a - b)^2\big) = 4(a - b)$, so
+1. **Reduce to two outcomes.** Let $A^* = \{p > q\}$, $a = \Pr_P[A^*]$ and $b = \Pr_Q[A^*]$. By Fact 3, this event attains the TV, so $\mathrm{TV} = a - b$. Reporting only whether $x \in A^*$ turns $P$ and $Q$ into coins with heads probabilities $a$ and $b$, and by the special case of the data-processing inequality (@sec-div-dpi) this can only lower KL: $D_{\mathrm{KL}}(P\|Q) \ge \mathrm{kl}(a\|b)$. So it is enough to show $\mathrm{kl}(a\|b) \ge 2(a - b)^2$ for all $a, b \in (0, 1)$.
+2. **Fix $a$ and vary $b$.** Let $g(b) = \mathrm{kl}(a\|b) - 2(a - b)^2$, the gap we want to show is non-negative. Then $g(a) = 0$, because two equal coins have zero KL.
+3. **Differentiate:** $\frac{\mathrm d}{\mathrm db}\mathrm{kl}(a\|b) = -\frac ab + \frac{1-a}{1-b} = \frac{b - a}{b(1-b)}$, and $\frac{\mathrm d}{\mathrm db}\big(-2(a - b)^2\big) = 4(a - b)$, so
 $$g'(b) = (b - a)\left(\frac{1}{b(1-b)} - 4\right).$$
 4. **Sign:** $b(1 - b) \le \frac14$ (a product of two numbers that add to 1 is largest when both are $\frac12$), so the bracket is $\ge 0$. Then $g' \le 0$ for $b < a$ and $g' \ge 0$ for $b > a$: $g$ decreases to its minimum at $b = a$, where it is 0, and increases after. So $g \ge 0$.
-5. **Combine:** $D_{\mathrm{KL}} \ge \mathrm{kl}(a, b) \ge 2(a - b)^2 = 2\,\mathrm{TV}^2$, which rearranges to @eq-pinsker.
+5. **Combine:** $D_{\mathrm{KL}} \ge \mathrm{kl}(a\|b) \ge 2(a - b)^2 = 2\,\mathrm{TV}^2$, which rearranges to @eq-pinsker.
 
 **Bretagnolle–Huber.** The plan is to bound the overlap $\sum\sqrt{pq}$ from both sides: above by TV, below by KL.
 
@@ -726,7 +726,7 @@ $$g'(b) = (b - a)\left(\frac{1}{b(1-b)} - 4\right).$$
 
 ### Interpretation: how tight are these?
 
-Near zero, Pinsker has the right shape. Take two coins with heads probabilities $\frac12 \pm \frac\delta2$. They differ by $\delta$ on each side, so TV $= \delta$. For coins near $\frac12$, the binary KL is about the squared difference divided by $2 \times \frac12 \times \frac12$, so KL $\approx 2\delta^2$, and @eq-pinsker gives $\sqrt{\delta^2} = \delta$: it is tight as $\delta \to 0$, and the constant $\frac12$ cannot be improved. In the square-root argument above, this is the case where $|h|$ is the same on every outcome, so Cauchy–Schwarz is an equality. For the Laplace pair, KL $\approx t^2/2$ and TV $= 1 - e^{-t/2} \approx t/2$ for small $t$, and Pinsker gives $\sqrt{t^2/4} = t/2$, so it is also nearly tight there.
+Near zero, Pinsker has the right shape. Take two coins with heads probabilities $\frac12 \pm \frac\xi2$. They differ by $\xi$ on each side, so TV $= \xi$. For coins near $\frac12$, the binary KL is about the squared difference divided by $2 \times \frac12 \times \frac12$, so KL $\approx 2\xi^2$, and @eq-pinsker gives $\sqrt{\xi^2} = \xi$: it is tight as $\xi \to 0$, and the constant $\frac12$ cannot be improved. In the square-root argument above, this is the case where $|h|$ is the same on every outcome, so Cauchy–Schwarz is an equality. For the Laplace pair, KL $\approx t^2/2$ and TV $= 1 - e^{-t/2} \approx t/2$ for small $t$, and Pinsker gives $\sqrt{t^2/4} = t/2$, so it is also nearly tight there.
 
 For large KL, Pinsker is useless. It passes 1 at KL $= 2$ ($\sqrt{2/2} = 1$), while TV can never exceed 1. Bretagnolle–Huber is always at most 1, and solving for where the two bounds cross shows it is better than Pinsker once KL is above 1.59 (@fig-div-pinsker).
 
@@ -736,11 +736,11 @@ For Gaussians, Pinsker loses a constant factor. KL $= \mu^2/2$ gives the bound $
 
 ### Example: how many samples to tell two distributions apart?
 
-KL is additive, so $n$ i.i.d. samples have $\mathrm{KL}_n = n\,\mathrm{KL}_1$, and Pinsker gives $\mathrm{TV}_n \le \sqrt{n\,\mathrm{KL}_1/2}$. By @eq-tv-test, the best accuracy is at most $\frac12 + \frac12\sqrt{n\,\mathrm{KL}_1/2}$. For that bound to get close to 1, $n\,\mathrm{KL}_1$ must be of order 1, so getting accuracy close to 1 needs $n$ on the order of $1/\mathrm{KL}_1$, whatever test you use.
+KL is additive, so $n$ i.i.d. samples have $D_{\mathrm{KL}}(P^n\|Q^n) = n\,D_{\mathrm{KL}}(P\|Q)$, and Pinsker gives $\mathrm{TV}(P^n, Q^n) \le \sqrt{n\,D_{\mathrm{KL}}(P\|Q)/2}$. By @eq-tv-test, the best accuracy is at most $\frac12 + \frac12\sqrt{n\,D_{\mathrm{KL}}(P\|Q)/2}$. For that bound to get close to 1, $n\,D_{\mathrm{KL}}(P\|Q)$ must be of order 1, so getting accuracy close to 1 needs $n$ on the order of $1/D_{\mathrm{KL}}(P\|Q)$, whatever test you use.
 
-For $\mathcal N(0, 1)$ against $\mathcal N(0.1, 1)$, $\mathrm{KL}_1 = 0.1^2/2 = 0.005$, and @tbl-div-pinsker compares the bounds with the exact TV. For example, at $n = 100$ Pinsker gives $\sqrt{0.5/2} = 0.5$ and Bretagnolle–Huber gives $\sqrt{1 - e^{-0.5}}$.
+For $\mathcal N(0, 1)$ against $\mathcal N(0.1, 1)$, $D_{\mathrm{KL}}(P\|Q) = 0.1^2/2 = 0.005$, and @tbl-div-pinsker compares the bounds with the exact TV. For example, at $n = 100$ Pinsker gives $\sqrt{0.5/2} = 0.5$ and Bretagnolle–Huber gives $\sqrt{1 - e^{-0.5}}$.
 
-| $n$ | $\mathrm{KL}_n$ | Exact TV | Pinsker | Bretagnolle–Huber |
+| $n$ | $D_{\mathrm{KL}}(P^n\|Q^n)$ | Exact TV | Pinsker | Bretagnolle–Huber |
 | --- | --- | --- | --- | --- |
 | 100 | 0.50 | 0.3829 | 0.5000 | 0.6273 |
 | 400 | 2.00 | 0.6827 | 1.0000 | 0.9299 |
@@ -772,7 +772,7 @@ uv run python code/part01-prerequisites/divergences.py
 | Die, KL rebuilt from the $E_\gamma$ curves (@eq-f-from-hockey) | 0.2939 |
 | Die, after processing | Parity: KL 0.0823. "Is it a six?": KL 0.2939 |
 | Gaussians, $\mu = 1$ | KL 0.5000 (Monte Carlo 0.4990); $D_2$ 1.0000; $D_{10}$ 5.0000; TV 0.3829; best accuracy 0.6915; $E_2$ 0.1906 (Monte Carlo 0.1892); $E_4$ 0.0692 |
-| Gaussians, $\mu = 1$, $Q[L \ge 2]$ | Exact 0.0062; Markov 0.1353; Rényi–Chernoff 0.0439 at $\alpha = 2.5$ |
+| Gaussians, $\mu = 1$, $\Pr_Q[L \ge 2]$ | Exact 0.0062; Markov 0.1353; Rényi–Chernoff 0.0439 at $\alpha = 2.5$ |
 | Gaussians, $\mu = 1$, binned | Width 0.5: 0.4898; width 1: 0.4618; width 2: 0.3781; one bit: 0.3090 |
 | Laplace, $t = 1$ | KL 0.3679 (Monte Carlo 0.3684); $D_{0.5}$ 0.1891; $D_2$ 0.6191; $D_{10}$ 0.9287; $D_\infty$ 1; TV 0.3935; $E_2$ 0.1422 |
 | $n$ samples, $\mu = 0.1$ | $n = 100$: accuracy 0.6915, simulated 0.6916. $n = 400$: accuracy 0.8413, simulated 0.8424 |
@@ -805,22 +805,22 @@ $r = p/q$ is the likelihood ratio and $L = \ln r$ the log-likelihood ratio, the 
 | KL | $\mathbb E_P[L]$ | $\mu^2/2$ | $t + e^{-t} - 1$ | $\ge 0$; additive; maximum likelihood minimizes it |
 | Rényi $D_\alpha$ | $\frac{1}{\alpha-1}\ln\mathbb E_Q[r^\alpha] = \ln\big(\mathbb E_P[r^{\alpha-1}]\big)^{1/(\alpha-1)}$ | $\alpha\mu^2/2$ | @eq-laplace-renyi | Log of a power mean of $r$; non-decreasing in $\alpha$; additive; $D_1 = $ KL |
 | Max-divergence $D_\infty$ | $\ln\max r = \ln\max_A\frac{P(A)}{Q(A)}$ | $\infty$ | $t$ | Worst-case ratio over all events |
-| TV | $\max_A\lvert P(A) - Q(A)\rvert = \frac12\sum\lvert p - q\rvert$ | $2\Phi(\mu/2) - 1$ | $1 - e^{-t/2}$ | Best accuracy $\frac12 + \frac12$TV; $1 - $ overlap; a metric |
-| Hockey-stick $E_\gamma$ | $\max_A[P(A) - \gamma Q(A)] = \mathbb E_Q[(r - \gamma)_+]$ | $\Phi(\frac\mu2 - \frac{\ln\gamma}\mu) - \gamma\Phi(-\frac\mu2 - \frac{\ln\gamma}\mu)$ | $\big(1 - e^{-(t - \ln\gamma)/2}\big)_+$ | $E_1 = $ TV; $0$ for $\gamma \ge e^{D_\infty}$ |
+| TV | $\max_A\lvert \Pr_P[A] - \Pr_Q[A]\rvert = \frac12\sum\lvert p - q\rvert$ | $2\Phi(\mu/2) - 1$ | $1 - e^{-t/2}$ | Best accuracy $\frac12 + \frac12$TV; $1 - $ overlap; a metric |
+| Hockey-stick $E_\gamma$ | $\max_A[\Pr_P[A] - \gamma \Pr_Q[A]] = \mathbb E_Q[(r - \gamma)_+]$ | $\Phi(\frac\mu2 - \frac{\ln\gamma}\mu) - \gamma\Phi(-\frac\mu2 - \frac{\ln\gamma}\mu)$ | $\big(1 - e^{-(t - \ln\gamma)/2}\big)_+$ | $E_1 = $ TV; $0$ for $\gamma \ge e^{D_\infty}$ |
 | f-divergence $D_f$ | $\mathbb E_Q[f(r)]$, $f$ convex, $f(1) = 0$ | — | — | Contains KL, TV, $E_\gamma$, $\chi^2$, $H^2$ |
 
 : Every divergence in this chapter, with its closed form for the shifted Gaussian and Laplace pairs. {#tbl-div-cheat}
 
 **Inequalities**
 
-- Data processing: $D(PK\|QK) \le D(P\|Q)$ for every f-divergence and every $D_\alpha$; equality for sufficient statistics.
-- Pinsker: $\mathrm{TV} \le \sqrt{\mathrm{KL}/2}$. Bretagnolle–Huber: $\mathrm{TV} \le \sqrt{1 - e^{-\mathrm{KL}}}$.
-- Log-likelihood tail: $Q[L \ge c] \le \exp(-\alpha c + (\alpha - 1)D_\alpha(P\|Q))$ for every $\alpha > 0$.
+- Data processing: $D_f(PK\|QK) \le D_f(P\|Q)$ for every f-divergence, and the same for every $D_\alpha$; equality for sufficient statistics.
+- Pinsker: $\mathrm{TV}(P, Q) \le \sqrt{D_{\mathrm{KL}}(P\|Q)/2}$. Bretagnolle–Huber: $\mathrm{TV}(P, Q) \le \sqrt{1 - e^{-D_{\mathrm{KL}}(P\|Q)}}$.
+- Log-likelihood tail: $\Pr_Q[L \ge c] \le \exp(-\alpha c + (\alpha - 1)D_\alpha(P\|Q))$ for every $\alpha > 0$.
 - Skew symmetry: $D_\alpha(P\|Q) = \frac{\alpha}{1-\alpha}D_{1-\alpha}(Q\|P)$ for $0 < \alpha < 1$.
 
 **Rules of thumb**
 
-- KL is the rate at which evidence accumulates; telling two distributions apart takes about $1/\mathrm{KL}$ samples.
+- KL is the rate at which evidence accumulates; telling two distributions apart takes about $1/D_{\mathrm{KL}}(P\|Q)$ samples.
 - Compute in KL or Rényi, where independent samples add; convert to TV at the end.
 - The Rényi order is a dial from typical evidence ($\alpha \to 1$) to the worst case ($\alpha \to \infty$).
 - A bounded likelihood ratio (Laplace) gives a finite max-divergence; an unbounded one (Gaussian) gives finite $D_\alpha$ for every finite $\alpha$ but $D_\infty = \infty$.

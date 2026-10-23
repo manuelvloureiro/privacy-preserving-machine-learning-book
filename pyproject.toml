@@ -23,6 +23,11 @@ dev = [
     "ruff>=0.17.0",
     "types-pyyaml>=6.0.12.20260906",
 ]
+# The library the study notes' synthetic-data experiment runs: Private-PGM (mbi), the graphical-model inference
+# engine behind AIM and MST. Pinned exactly, like the practitioner group. It brings in jax (CPU).
+notes = [
+    "mbi==2.0.0",
+]
 # The libraries the practitioner edition's snippets and workflow scripts run (tests marked `libs`).
 # Pinned exactly, so the numbers the book quotes stay reproducible. torch is the CPU build.
 practitioner = [
@@ -39,7 +44,7 @@ practitioner = [
 ]
 
 [tool.uv]
-default-groups = ["dev", "practitioner"]
+default-groups = ["dev", "practitioner", "notes"]
 
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
@@ -58,8 +63,9 @@ markers = ["libs: runs a library from the practitioner dependency group (torch, 
 [tool.pyright]
 include = ["code", "tests", "tools"]
 exclude = ["archive", ".venv"]
-# code/practitioner_datasets.py is shared by the practitioner scripts, which add code/ to sys.path.
-extraPaths = ["code"]
+# code/practitioner_datasets.py is shared by the practitioner scripts, which add code/ to sys.path;
+# tests/test_notation.py imports tools/notation.py the same way.
+extraPaths = ["code", "tools"]
 # Hand-written stubs for the untyped practitioner libraries (Opacus, dp-accounting, scikit-learn, SciPy, ...).
 stubPath = "typings"
 typeCheckingMode = "strict"

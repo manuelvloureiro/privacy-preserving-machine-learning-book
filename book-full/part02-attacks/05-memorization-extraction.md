@@ -85,10 +85,10 @@ The rank is what the rest of the chapter measures. Exposure is defined from the 
 
 ### Statement
 
-Let $f$ be a language model trained on a dataset $X$ of documents, and let $\mathrm{greedy}_f(c)$ be the string produced by greedy decoding from the prompt $c$: at each step, append the most likely next symbol. The definitions below are parallel options that differ in what the attacker gets to use and in how close the output must be.
+Let $f$ be a language model trained on a dataset $D$ of documents, and let $\mathrm{greedy}_f(c)$ be the string produced by greedy decoding from the prompt $c$: at each step, append the most likely next symbol. The definitions below are parallel options that differ in what the attacker gets to use and in how close the output must be.
 
 1. **Extractable** (Carlini et al. 2021): a string $s$ is extractable from $f$ if there is some prompt $c$, any prompt at all, such that $\mathrm{greedy}_f(c)$ begins with $s$.
-2. **$k$-eidetic** (Carlini et al. 2021): $s$ is $k$-eidetically memorized if it is extractable and it appears in at most $k$ documents of $X$. Small $k$ is the dangerous case: a secret seen once and given back.
+2. **$k$-eidetic** (Carlini et al. 2021): $s$ is $k$-eidetically memorized if it is extractable and it appears in at most $k$ documents of $D$. Small $k$ is the dangerous case: a secret seen once and given back.
 3. **Discoverable** (Carlini et al. 2023, named by Nasr et al. 2023): if the training data contain $[p \,\|\, x]$, a prefix $p$ followed by a suffix $x$, then $x$ is discoverably memorized if prompting with that same prefix makes greedy decoding produce the suffix: $\mathrm{greedy}_f(p)$ begins with $x$.
 4. **Approximate** (Ippolito et al. 2023): $x$ is approximately memorized if $\mathrm{greedy}_f(p)$ is within distance $\tau$ of $x$ in some string distance $d$. In this chapter's toy $d$ is the number of wrong digits and $\tau = 1$, so a pin with at most one wrong digit counts. Definitions 1 to 3 are **verbatim**: the output must match exactly.
 

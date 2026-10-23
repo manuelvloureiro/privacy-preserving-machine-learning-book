@@ -540,25 +540,25 @@ def plot_bernoulli_exp(rng: np.random.Generator) -> Figure:
     left.bar([0], [0], color="C0", alpha=0.5, label=f"odd K: output 1, total $e^{{-0.7}}$ = {math.exp(-0.7):.3f}")
     left.bar([0], [0], color="C3", alpha=0.5, label="even K: output 0")
     left.set(
-        xlabel="K, index of the first Bernoulli(γ/k) that is 0",
+        xlabel="K, index of the first Bern(λ/k) that is 0",
         ylabel="probability",
         xticks=kk,
         xlim=(0.4, 6.6),
-        title=r"Algorithm 1 for $\gamma$ = 0.7: $\Pr[K > k] = \gamma^k / k!$",
+        title=r"Algorithm 1 for $\lambda$ = 0.7: $\Pr[K > k] = \lambda^k / k!$",
     )
     left.legend(fontsize=8)
     gammas = [Fraction(i, 4) for i in range(17)]
     draws = 2000
     rates = [sum(bernoulli_exp(g, src) for _ in range(draws)) / draws for g in gammas]
     grid = [i / 100 for i in range(401)]
-    right.plot(grid, [math.exp(-g) for g in grid], "k", label=r"$e^{-\gamma}$")
-    right.plot([float(g) for g in gammas], rates, "o", color="C0", label=f"Algorithm 1, {draws:,} draws per γ")
+    right.plot(grid, [math.exp(-g) for g in grid], "k", label=r"$e^{-\lambda}$")
+    right.plot([float(g) for g in gammas], rates, "o", color="C0", label=f"Algorithm 1, {draws:,} draws per λ")
     right2 = right.twinx()
     right2.plot(grid, [bernoulli_exp_cost(g) for g in grid], "C2--", label="expected uniform draws")
     right2.set_ylabel("expected uniform draws per sample", color="C2")
     right2.set_ylim(0, 4.5)
     right.set(
-        xlabel=r"$\gamma$", ylabel="Pr[output 1]", ylim=(0, 1.05), title=r"Exact Bernoulli($e^{-\gamma}$) and its cost"
+        xlabel=r"$\lambda$", ylabel="Pr[output 1]", ylim=(0, 1.05), title=r"Exact Bern($e^{-\lambda}$) and its cost"
     )
     handles = right.get_legend_handles_labels()[0] + right2.get_legend_handles_labels()[0]
     labels = right.get_legend_handles_labels()[1] + right2.get_legend_handles_labels()[1]

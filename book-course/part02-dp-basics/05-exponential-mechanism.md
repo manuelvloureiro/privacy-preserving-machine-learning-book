@@ -16,45 +16,45 @@ Adding noise to the best price does not help, because revenue is very sensitive 
 
 In general, the input to the selection problem has three parts:
 
-- a dataset $X \in \mathcal X^n$,
-- a set $\mathcal H$ of objects,
-- a **score function** $s\colon \mathcal X^n \times \mathcal H \to \mathbb R$, where $s(X,h)$ says how good the object $h$ is for the dataset $X$.
+- a dataset $D \in \mathcal X^n$,
+- a set $\mathcal R$ of objects,
+- a **score function** $u\colon \mathcal X^n \times \mathcal R \to \mathbb R$, where $u(D,r)$ says how good the object $r$ is for the dataset $D$.
 
-In the example, $X$ is the list of valuations, $\mathcal H$ is the set of prices, and $s(X,p)$ is the revenue at price $p$. Only the dataset is private. The set of objects and the score function are public, so the sensitivity measures how much the score of a fixed object can move when one entry of the dataset changes.
+In the example, $D$ is the list of valuations, $\mathcal R$ is the set of prices, and $u(D,p)$ is the revenue at price $p$. Only the dataset is private. The set of objects and the score function are public, so the sensitivity measures how much the score of a fixed object can move when one record of the dataset changes.
 
 ::: {#def-em-sensitivity name="Sensitivity of a score function"}
-The **sensitivity** of a score function $s$ is
+The **sensitivity** of a score function $u$ is
 
 $$
-\Delta_s = \sup_{h \in \mathcal H}\ \sup_{X \sim X'} \big|s(X,h) - s(X',h)\big| ,
+\Delta u = \sup_{r \in \mathcal R}\ \sup_{D \simeq D'} \big|u(D,r) - u(D',r)\big| ,
 $$
 
-where the inner supremum is over neighbouring datasets, which differ in one entry.
+where the inner supremum is over neighbouring datasets, which differ in one record (the replace-one relation).
 :::
 
-The score is a single real number, so no choice of norm is needed, unlike the $\ell_1$ and $\ell_2$ sensitivities of the Laplace and Gaussian mechanisms. The mechanism samples an object with weight $\exp(\varepsilon s/(2\Delta))$. For an infinite set of objects, such as the real line, the weight is a density with respect to a base measure.
+The score is a single real number, so no choice of norm is needed, unlike the $\ell_1$ and $\ell_2$ sensitivities of the Laplace and Gaussian mechanisms. The mechanism gives each object $r$ a weight that grows exponentially with its score, $\exp(\varepsilon u(D,r)/(2\Delta))$. Here $\varepsilon$ is the privacy parameter, and $\Delta$ is any upper bound on the sensitivity $\Delta u$. Dividing each weight by the sum of all of them, the normalizer, turns the weights into probabilities. For an infinite set of objects, such as an interval of prices, the weights become a density. The sum is then an integral against a fixed base measure $\mu$ on $\mathcal R$, such as length on the real line.
 
 ::: {#def-em-mechanism name="Exponential mechanism"}
-Let $\varepsilon > 0$, and let $\Delta > 0$ satisfy $\Delta \ge \Delta_s$. Let $\mu$ be a measure on $\mathcal H$, the counting measure when $\mathcal H$ is finite, such that the normalizer
+Let $\varepsilon > 0$, and let $\Delta > 0$ satisfy $\Delta \ge \Delta u$. Let $\mu$ be a measure on $\mathcal R$, taken to be the counting measure, which gives each object weight $1$, when $\mathcal R$ is finite. Assume that the normalizer
 
 $$
-Z(X) = \int_{\mathcal H} \exp\!\left(\frac{\varepsilon\, s(X,h')}{2\Delta}\right) \mu(dh')
+Z(D) = \int_{\mathcal R} \exp\!\left(\frac{\varepsilon\, u(D,r')}{2\Delta}\right) \mu(\mathrm d r')
 $$
 
-is positive and finite for every $X$. The **exponential mechanism** $M_E$ outputs an object $h \in \mathcal H$ drawn with density, with respect to $\mu$,
+is positive and finite for every $D$. The **exponential mechanism** $M_E$ outputs an object $r \in \mathcal R$ drawn with density, with respect to $\mu$,
 
 $$
-p_X(h) = \frac{1}{Z(X)}\exp\!\left(\frac{\varepsilon\, s(X,h)}{2\Delta}\right) .
+p_D(r) = \frac{1}{Z(D)}\exp\!\left(\frac{\varepsilon\, u(D,r)}{2\Delta}\right) .
 $$ {#eq-em-density}
 :::
 
-For finite $\mathcal H$, @eq-em-density says that $\Pr[M_E(X) = h]$ is proportional to $\exp(\varepsilon s(X,h)/(2\Delta))$. A higher score makes an object more likely. A smaller $\varepsilon$ or a larger $\Delta$ flattens the distribution towards uniform, which is more private and less accurate.
+For finite $\mathcal R$, @eq-em-density says that $\Pr[M_E(D) = r]$ is proportional to $\exp(\varepsilon u(D,r)/(2\Delta))$. A higher score makes an object more likely. A smaller $\varepsilon$ or a larger $\Delta$ flattens the distribution towards uniform, which is more private and less accurate.
 
-The definition says nothing about how to sample. For a finite set, you can compute every weight, add them up and sample, in time proportional to $|\mathcal H|$. That is slow when $\mathcal H$ is exponentially large, which is common. For an infinite set, there is often no direct way to sample, and the usual remedy is to discretize, as @sec-em-pricing does. So the exponential mechanism always gives an algorithm, though not always an efficient one, and it is often the first step towards one.
+The definition says nothing about how to sample. For a finite set, you can compute every weight, add them up and sample, in time proportional to $|\mathcal R|$. That is slow when $\mathcal R$ is exponentially large, which is common. For an infinite set, there is often no direct way to sample, and the usual remedy is to discretize, as @sec-em-pricing does. So the exponential mechanism always gives an algorithm, though not always an efficient one, and it is often the first step towards one.
 
 ## Privacy {#sec-em-privacy}
 
-The score of $h$ changes by at most $\Delta$ between neighbours, so the weight of $h$ changes by at most a factor $e^{\varepsilon/2}$. The normalizer is a sum of such weights, so it also changes by at most $e^{\varepsilon/2}$. The two factors together give $e^\varepsilon$.
+The score of $r$ changes by at most $\Delta$ between neighbours, so the weight of $r$ changes by at most a factor $e^{\varepsilon/2}$. The normalizer is a sum of such weights, so it also changes by at most $e^{\varepsilon/2}$. The two factors together give $e^\varepsilon$.
 
 ::: {#thm-em-privacy}
 The exponential mechanism is $\varepsilon$-DP.
@@ -62,25 +62,25 @@ The exponential mechanism is $\varepsilon$-DP.
 
 ::: {.proof}
 
-1. Fix neighbours $X \sim X'$ and an object $h$. By @eq-em-density, the ratio of the densities is
+1. Fix neighbours $D \simeq D'$ and an object $r$. By @eq-em-density, the ratio of the densities is
 
    $$
-   \frac{p_X(h)}{p_{X'}(h)} = \exp\!\left(\frac{\varepsilon\,(s(X,h) - s(X',h))}{2\Delta}\right)\cdot\frac{Z(X')}{Z(X)} .
+   \frac{p_D(r)}{p_{D'}(r)} = \exp\!\left(\frac{\varepsilon\,(u(D,r) - u(D',r))}{2\Delta}\right)\cdot\frac{Z(D')}{Z(D)} .
    $$
 
-2. By @def-em-sensitivity and $\Delta \ge \Delta_s$, the difference $s(X,h) - s(X',h)$ is at most $\Delta$, so the first factor is at most $e^{\varepsilon/2}$.
-3. For every object $h'$, the same bound gives $s(X',h') \le s(X,h') + \Delta$, so $\exp(\varepsilon s(X',h')/(2\Delta)) \le e^{\varepsilon/2}\exp(\varepsilon s(X,h')/(2\Delta))$. Integrating over $h'$ gives $Z(X') \le e^{\varepsilon/2} Z(X)$, so the second factor is at most $e^{\varepsilon/2}$.
-4. So $p_X(h) \le e^\varepsilon p_{X'}(h)$ for every $h$. For an event $T \subseteq \mathcal H$, integrating over $T$ gives $\Pr[M_E(X)\in T] \le e^\varepsilon\Pr[M_E(X')\in T]$.
+2. By @def-em-sensitivity and $\Delta \ge \Delta u$, the difference $u(D,r) - u(D',r)$ is at most $\Delta$, so the first factor is at most $e^{\varepsilon/2}$.
+3. For every object $r'$, the same bound gives $u(D',r') \le u(D,r') + \Delta$, so $\exp(\varepsilon u(D',r')/(2\Delta)) \le e^{\varepsilon/2}\exp(\varepsilon u(D,r')/(2\Delta))$. Integrating over $r'$ gives $Z(D') \le e^{\varepsilon/2} Z(D)$, so the second factor is at most $e^{\varepsilon/2}$.
+4. So $p_D(r) \le e^\varepsilon p_{D'}(r)$ for every $r$. For an event $S \subseteq \mathcal R$, integrating over $S$ gives $\Pr[M_E(D)\in S] \le e^\varepsilon\Pr[M_E(D')\in S]$.
 :::
 
-Step 3 is where the factor $2$ in $2\Delta$ is spent. When the normalizer does not depend on the dataset, that half of the budget is not needed.
+Step 3 is where the factor $2$ in $2\Delta$ is spent, because it pays for the change in the normalizer. When the normalizer does not depend on the dataset, that half of the budget is not needed.
 
 ::: {#cor-em-fixed-normalizer}
-Suppose that $Z(X)$, computed with $\Delta$ in place of $2\Delta$, is the same for every dataset $X$. Then the mechanism with density proportional to $\exp(\varepsilon s(X,h)/\Delta)$ is $\varepsilon$-DP.
+Suppose that $Z(D)$, computed with $\Delta$ in place of $2\Delta$, is the same for every dataset $D$. Then the mechanism with density proportional to $\exp(\varepsilon u(D,r)/\Delta)$ is $\varepsilon$-DP.
 :::
 
 ::: {.proof}
-In step 1 of the proof of @thm-em-privacy, with $\Delta$ in place of $2\Delta$, the factor $Z(X')/Z(X)$ equals $1$, and the first factor is at most $\exp(\varepsilon\Delta/\Delta) = e^\varepsilon$. Step 4 then applies unchanged.
+In step 1 of the proof of @thm-em-privacy, with $\Delta$ in place of $2\Delta$, the factor $Z(D')/Z(D)$ equals $1$, and the first factor is at most $\exp(\varepsilon\Delta/\Delta) = e^\varepsilon$. Step 4 then applies unchanged.
 :::
 
 ## Utility {#sec-em-utility}
@@ -88,45 +88,45 @@ In step 1 of the proof of @thm-em-privacy, with $\Delta$ in place of $2\Delta$, 
 The mechanism should output an object whose score is close to the best one. Write the best score and the set of objects that attain it as
 
 $$
-\mathrm{OPT}(X) = \max_{h\in\mathcal H} s(X,h), \qquad \mathcal H^*(X) = \{h \in \mathcal H : s(X,h) = \mathrm{OPT}(X)\} .
+\mathrm{OPT}(D) = \max_{r\in\mathcal R} u(D,r), \qquad \mathcal R^*(D) = \{r \in \mathcal R : u(D,r) = \mathrm{OPT}(D)\} .
 $$
 
-The theorem says that the output's score is rarely more than about $(2\Delta/\varepsilon)\ln|\mathcal H|$ below $\mathrm{OPT}(X)$. The loss grows linearly with the sensitivity and with $1/\varepsilon$, but only logarithmically with the number of objects.
+The theorem says that the output's score is rarely more than about $(2\Delta/\varepsilon)\ln|\mathcal R|$ below $\mathrm{OPT}(D)$. The loss grows linearly with the sensitivity and with $1/\varepsilon$, but only logarithmically with the number of objects.
 
 ::: {#thm-em-utility}
-Let $\mathcal H$ be finite. For every dataset $X$ and every $t \ge 0$,
+Let $\mathcal R$ be finite. For every dataset $D$ and every $t \ge 0$,
 
 $$
-\Pr\left[s(X, M_E(X)) \le \mathrm{OPT}(X) - \frac{2\Delta}{\varepsilon}\left(\ln\frac{|\mathcal H|}{|\mathcal H^*(X)|} + t\right)\right] \le e^{-t} .
+\Pr\left[u(D, M_E(D)) \le \mathrm{OPT}(D) - \frac{2\Delta}{\varepsilon}\left(\ln\frac{|\mathcal R|}{|\mathcal R^*(D)|} + t\right)\right] \le e^{-t} .
 $$
 :::
 
 ::: {.proof}
 
-1. Fix a threshold $c$. The output has score at most $c$ exactly when it is one of the objects with $s(X,h) \le c$, so
+1. Fix a threshold $\tau$. The output has score at most $\tau$ exactly when it is one of the objects with $u(D,r) \le \tau$, so
 
    $$
-   \Pr[s(X, M_E(X)) \le c] = \frac{\sum_{h : s(X,h)\le c}\exp(\varepsilon s(X,h)/(2\Delta))}{\sum_{h'\in\mathcal H}\exp(\varepsilon s(X,h')/(2\Delta))} .
+   \Pr[u(D, M_E(D)) \le \tau] = \frac{\sum_{r : u(D,r)\le \tau}\exp(\varepsilon u(D,r)/(2\Delta))}{\sum_{r'\in\mathcal R}\exp(\varepsilon u(D,r')/(2\Delta))} .
    $$
 
-2. *Numerator.* There are at most $|\mathcal H|$ terms, and each is at most $\exp(\varepsilon c/(2\Delta))$ because its score is at most $c$.
-3. *Denominator.* Every term is positive, so keeping only the $|\mathcal H^*(X)|$ terms with score $\mathrm{OPT}(X)$ gives a lower bound of $|\mathcal H^*(X)|\exp(\varepsilon\,\mathrm{OPT}(X)/(2\Delta))$.
+2. *Numerator.* There are at most $|\mathcal R|$ terms, and each is at most $\exp(\varepsilon \tau/(2\Delta))$ because its score is at most $\tau$.
+3. *Denominator.* Every term is positive, so keeping only the $|\mathcal R^*(D)|$ terms with score $\mathrm{OPT}(D)$ gives a lower bound of $|\mathcal R^*(D)|\exp(\varepsilon\,\mathrm{OPT}(D)/(2\Delta))$.
 4. Together, steps 2 and 3 give
 
    $$
-   \Pr[s(X, M_E(X)) \le c] \le \frac{|\mathcal H|}{|\mathcal H^*(X)|}\exp\!\left(\frac{\varepsilon\,(c - \mathrm{OPT}(X))}{2\Delta}\right) .
+   \Pr[u(D, M_E(D)) \le \tau] \le \frac{|\mathcal R|}{|\mathcal R^*(D)|}\exp\!\left(\frac{\varepsilon\,(\tau - \mathrm{OPT}(D))}{2\Delta}\right) .
    $$
 
-5. Set $c = \mathrm{OPT}(X) - (2\Delta/\varepsilon)\big(\ln(|\mathcal H|/|\mathcal H^*(X)|) + t\big)$. The exponent becomes $-\ln(|\mathcal H|/|\mathcal H^*(X)|) - t$, and the right-hand side becomes $e^{-t}$.
+5. Set $\tau = \mathrm{OPT}(D) - (2\Delta/\varepsilon)\big(\ln(|\mathcal R|/|\mathcal R^*(D)|) + t\big)$. The exponent becomes $-\ln(|\mathcal R|/|\mathcal R^*(D)|) - t$, and the right-hand side becomes $e^{-t}$.
 :::
 
-At least one object attains the best score, so $|\mathcal H^*(X)| \ge 1$. Dropping it gives the form that is used most often.
+At least one object attains the best score, so $|\mathcal R^*(D)| \ge 1$. Dropping it gives the form that is used most often.
 
 ::: {#cor-em-utility}
-Let $\mathcal H$ be finite. For every dataset $X$ and every $t \ge 0$,
+Let $\mathcal R$ be finite. For every dataset $D$ and every $t \ge 0$,
 
 $$
-\Pr\left[s(X, M_E(X)) \le \mathrm{OPT}(X) - \frac{2\Delta}{\varepsilon}\big(\ln|\mathcal H| + t\big)\right] \le e^{-t} .
+\Pr\left[u(D, M_E(D)) \le \mathrm{OPT}(D) - \frac{2\Delta}{\varepsilon}\big(\ln|\mathcal R| + t\big)\right] \le e^{-t} .
 $$ {#eq-em-utility}
 :::
 
@@ -136,30 +136,30 @@ Each application below follows the same recipe. It chooses the set of objects an
 
 ### The Laplace mechanism {#sec-em-laplace}
 
-Let $f\colon\mathcal X^n \to \mathbb R$ have sensitivity $\Delta$, which means that $|f(X) - f(X')| \le \Delta$ for all neighbours. Take the real line as the set of objects, with Lebesgue measure, and score each candidate answer by its distance from the true one,
+Let $f\colon\mathcal X^n \to \mathbb R$ have sensitivity $\Delta f$, which means that $|f(D) - f(D')| \le \Delta f$ for all neighbours. Take the real line as the set of objects, with Lebesgue measure, and score each candidate answer by its distance from the true one,
 
 $$
-s(X, h) = -|f(X) - h| .
+u(D, r) = -|f(D) - r| .
 $$
 
-By the triangle inequality, $\big||f(X) - h| - |f(X') - h|\big| \le |f(X) - f(X')| \le \Delta$, so $\Delta_s \le \Delta$. The density @eq-em-density is proportional to $\exp(-\varepsilon|f(X) - h|/(2\Delta))$. That is the density of $f(X)$ plus Laplace noise of scale $2\Delta/\varepsilon$, so the exponential mechanism contains a Laplace mechanism.
+By the triangle inequality, $\big||f(D) - r| - |f(D') - r|\big| \le |f(D) - f(D')| \le \Delta f$, so $\Delta u \le \Delta f$. With $\Delta = \Delta f$, the density @eq-em-density is proportional to $\exp(-\varepsilon|f(D) - r|/(2\Delta f))$. That is the density of $f(D)$ plus Laplace noise of scale $2\Delta f/\varepsilon$, so the exponential mechanism contains a Laplace mechanism.
 
-Its noise is twice what the [Laplace mechanism](02-laplace-mechanism.md) needs, which adds noise of scale $\Delta/\varepsilon$. @cor-em-fixed-normalizer removes the extra factor.
+Its noise is twice what the [Laplace mechanism](02-laplace-mechanism.md) needs, which adds noise of scale $\Delta f/\varepsilon$. @cor-em-fixed-normalizer removes the extra factor.
 
 ::: {#prp-em-laplace}
-Let $f\colon\mathcal X^n \to \mathbb R$ have sensitivity $\Delta > 0$. The mechanism that outputs $f(X) + Y$, where $Y$ has the Laplace distribution with scale $\Delta/\varepsilon$, is $\varepsilon$-DP.
+Let $f\colon\mathcal X^n \to \mathbb R$ have sensitivity $\Delta f > 0$. The mechanism that outputs $f(D)$ plus noise from the Laplace distribution with scale $\Delta f/\varepsilon$ is $\varepsilon$-DP.
 :::
 
 ::: {.proof}
 
-1. The output has density proportional to $\exp(-\varepsilon|f(X) - h|/\Delta) = \exp(\varepsilon s(X,h)/\Delta)$, with the score above, whose sensitivity is at most $\Delta$.
-2. The normalizer is $\int_{\mathbb R}\exp(-\varepsilon|f(X)-h|/\Delta)\,dh = 2\Delta/\varepsilon$, after the substitution $u = h - f(X)$. It does not depend on $X$.
-3. @cor-em-fixed-normalizer applies and gives $\varepsilon$-DP.
+1. The output has density proportional to $\exp(-\varepsilon|f(D) - r|/(\Delta f)) = \exp(\varepsilon u(D,r)/(\Delta f))$, with the score above, whose sensitivity is at most $\Delta f$.
+2. The normalizer is $\int_{\mathbb R}\exp(-\varepsilon|f(D)-r|/(\Delta f))\,\mathrm d r = 2\Delta f/\varepsilon$, after the substitution $u = r - f(D)$. It does not depend on $D$.
+3. @cor-em-fixed-normalizer, with $\Delta = \Delta f$, applies and gives $\varepsilon$-DP.
 :::
 
 ### Pricing a digital good {#sec-em-pricing}
 
-Return to the seller of @sec-em-setting, now with valuations $v = (v_1,\dots,v_n) \in [0,1]^n$ and prices in $[0,1]$. Write $\gamma$ for the best revenue over all prices,
+Return to the seller of @sec-em-setting, now with a dataset of valuations $D = (v_1,\dots,v_n) \in [0,1]^n$ and prices in $[0,1]$. Write $\gamma$ for the best revenue over all prices,
 
 $$
 \gamma = \max_{p\in[0,1]} p\cdot|\{i : v_i \ge p\}| .
@@ -170,22 +170,26 @@ The maximum exists, because the revenue increases linearly between consecutive v
 The set of all prices is infinite, and the revenue has no structure that makes sampling easy, so the mechanism runs on a grid. Fix an integer $m \ge 1$ and the step $\alpha = 1/m$, and use the $m$ prices
 
 $$
-\mathcal H = \{\alpha, 2\alpha, \dots, 1\} .
+\mathcal R = \{\alpha, 2\alpha, \dots, 1\} .
 $$
 
+Write $\mathrm{OPT}(D)$ for the best revenue over the grid. Rounding the best price down to the grid loses a little revenue, and the next lemma bounds that loss.
+
 ::: {#lem-em-grid}
-The best revenue on the grid satisfies $\mathrm{OPT}(v) \ge \gamma - \alpha n$.
+The best revenue on the grid satisfies $\mathrm{OPT}(D) \ge \gamma - \alpha n$.
 :::
 
 ::: {.proof}
 
-1. Let $p^*$ attain $\gamma$. If $p^* < \alpha$, then $\gamma \le p^* n < \alpha n$, and $\mathrm{OPT}(v) \ge 0 > \gamma - \alpha n$, because revenue is never negative.
-2. Otherwise, round $p^*$ down to the grid, $p' = \alpha\lfloor p^*/\alpha\rfloor \in \mathcal H$, so that $p^* - \alpha < p' \le p^*$.
+1. Let $p^*$ attain $\gamma$. If $p^* < \alpha$, then $\gamma \le p^* n < \alpha n$, so $\gamma - \alpha n < 0$. Revenue is never negative, so $\mathrm{OPT}(D) \ge 0 > \gamma - \alpha n$.
+2. Otherwise, round $p^*$ down to the grid, $p' = \alpha\lfloor p^*/\alpha\rfloor \in \mathcal R$, so that $p^* - \alpha < p' \le p^*$.
 3. Every buyer with $v_i \ge p^*$ also has $v_i \ge p'$. So the revenue at $p'$ is at least $p'\cdot|\{i : v_i\ge p^*\}| \ge (p^* - \alpha)|\{i : v_i\ge p^*\}| \ge \gamma - \alpha n$.
 :::
 
+The private price therefore loses revenue twice, once to rounding and once to the random selection. The theorem adds the two losses, with a grid of about $\varepsilon n$ prices.
+
 ::: {#thm-em-pricing}
-Let $\varepsilon > 0$, $m = \lceil \varepsilon n\rceil$ and $\alpha = 1/m$. The exponential mechanism with the grid $\mathcal H$, the revenue $s(v,p) = p\cdot|\{i : v_i \ge p\}|$ as score and $\Delta = 1$ is $\varepsilon$-DP. For every $v\in[0,1]^n$ and $t \ge 0$, with probability at least $1 - e^{-t}$, the revenue at its output price is at least
+Let $\varepsilon > 0$, $m = \lceil \varepsilon n\rceil$ and $\alpha = 1/m$. The exponential mechanism with the grid $\mathcal R$, the revenue $u(D,p) = p\cdot|\{i : v_i \ge p\}|$ as score and $\Delta = 1$ is $\varepsilon$-DP. For every $D\in[0,1]^n$ and $t \ge 0$, with probability at least $1 - e^{-t}$, the revenue at its output price is at least
 
 $$
 \gamma - \frac{1 + 2\ln\lceil\varepsilon n\rceil + 2t}{\varepsilon} .
@@ -194,13 +198,13 @@ $$ {#eq-em-pricing}
 
 ::: {.proof}
 
-1. *Sensitivity.* Changing one valuation changes the number of buyers at any price $p$ by at most $1$, and $p \le 1$. So $\Delta_s \le 1 = \Delta$, and @thm-em-privacy gives $\varepsilon$-DP.
-2. *Selection.* By @cor-em-utility with $|\mathcal H| = m$, with probability at least $1 - e^{-t}$ the output has revenue at least $\mathrm{OPT}(v) - (2/\varepsilon)(\ln m + t)$.
-3. *Discretization.* By @lem-em-grid, $\mathrm{OPT}(v) \ge \gamma - n/m$, and $n/m \le n/(\varepsilon n) = 1/\varepsilon$ because $m \ge \varepsilon n$.
+1. *Sensitivity.* Changing one valuation changes the number of buyers at any price $p$ by at most $1$, and $p \le 1$. So $\Delta u \le 1 = \Delta$, and @thm-em-privacy gives $\varepsilon$-DP.
+2. *Selection.* By @cor-em-utility with $|\mathcal R| = m$, with probability at least $1 - e^{-t}$ the output has revenue at least $\mathrm{OPT}(D) - (2/\varepsilon)(\ln m + t)$.
+3. *Discretization.* By @lem-em-grid, $\mathrm{OPT}(D) \ge \gamma - n/m$, and $n/m \le n/(\varepsilon n) = 1/\varepsilon$ because $m \ge \varepsilon n$.
 4. Adding the two losses gives @eq-em-pricing.
 :::
 
-The loss is $O(\log(\varepsilon n)/\varepsilon)$. When a constant fraction of buyers values the good above a constant price, $\gamma$ grows linearly in $n$, so the loss is a vanishing fraction of the best revenue. The grid size balances the two losses. A finer grid loses less to rounding, $\alpha n$, but more to selection, $(2/\varepsilon)\ln(1/\alpha)$.
+The loss is $O(\log(\varepsilon n)/\varepsilon)$. When a constant fraction of buyers values the good above a constant price, $\gamma$ grows linearly in $n$, so the loss is a vanishing fraction of the best revenue. The grid size balances the two losses. A finer grid loses less to rounding, $\alpha n$, but more to selection, $(2/\varepsilon)\ln(1/\alpha)$. An example shows how the guarantee compares with the revenue the mechanism actually earns.
 
 ::: {#exm-em-pricing}
 Draw $n = 1{,}000$ valuations uniformly from $[0,1]$ and take $\varepsilon = 0.5$, so that the grid has $m = 500$ prices. The best revenue is $\gamma = 267.40$, and the best grid price earns $266.88$. With $t = \ln 20$, @eq-em-pricing guarantees a revenue of at least $267.40 - 38.84 = 228.56$ with probability $0.95$. The exact output distribution does much better. Its mean revenue is $263.86$, and its 5th percentile is $256.52$, a loss of $10.88$, so the guarantee is about 3.6 times too pessimistic. @fig-em-pricing shows the output distribution on a smaller example.
@@ -210,27 +214,27 @@ Draw $n = 1{,}000$ valuations uniformly from $[0,1]$ and take $\varepsilon = 0.5
 
 ### Private PAC learning {#sec-em-pac}
 
-In the probably approximately correct (PAC) model of learning, a learner sees labelled examples and must output a classifier that is accurate on new examples from the same source. Here the examples are points of the Boolean cube $\{0,1\}^d$, labelled $0$ or $1$.
+In the probably approximately correct (PAC) model of learning, a learner sees labelled records and must output a classifier that is accurate on new points from the same source. Here the records are points of the Boolean cube $\{0,1\}^d$, labelled $0$ or $1$. The definition measures accuracy by an error $\alpha$ and a failure probability $\beta$, and in this section $\alpha$ no longer denotes the grid step of the pricing example.
 
 ::: {#def-em-pac name="PAC learning"}
-A **concept class** is a finite set $\mathcal C$ of functions $c\colon\{0,1\}^d\to\{0,1\}$. An unknown **target** $c^* \in \mathcal C$ and an unknown distribution $D$ on $\{0,1\}^d$ generate the dataset $\big((x_1, y_1),\dots,(x_n,y_n)\big)$, where the $x_i$ are drawn independently from $D$ and $y_i = c^*(x_i)$. The **error** of a function $h$ is
+A **concept class** is a finite set $\mathcal C$ of functions $c\colon\{0,1\}^d\to\{0,1\}$. An unknown **target** $c^* \in \mathcal C$ and an unknown distribution $\mathcal D$ on $\{0,1\}^d$ generate the dataset. Each record is a point $x_i$, drawn independently from $\mathcal D$, together with its label $y_i = c^*(x_i)$. So the dataset is $D = (z_1, \dots, z_n)$ with labelled records $z_i = (x_i, y_i)$. The **error** of a function $h$ is
 
 $$
-\mathrm{err}(h) = \Pr_{x\sim D}[h(x) \ne c^*(x)] .
+\mathrm{err}(h) = \Pr_{x\sim \mathcal D}[h(x) \ne c^*(x)] .
 $$
 
-A learner is **$(\alpha,\beta)$-accurate** if, for every target and every $D$, it outputs a function $\hat h$ with $\mathrm{err}(\hat h) \le \alpha$ with probability at least $1-\beta$.
+A learner is **$(\alpha,\beta)$-accurate** if, for every target and every $\mathcal D$, it outputs a function $\hat h$ with $\mathrm{err}(\hat h) \le \alpha$ with probability at least $1-\beta$.
 :::
 
 For example, $\mathcal C$ might be a finite set of half-spaces, each labelling the points on one side of a hyperplane $1$. The learner sees only the labelled points, and any half-space that separates them correctly is a reasonable guess.
 
-Without privacy, the classic learner outputs any function in $\mathcal C$ that labels every example correctly. One exists, because the target does. It works because, for every function at once, the fraction of mistakes on the sample is close to the error. Write that fraction as
+Without privacy, the classic learner outputs any function in $\mathcal C$ that labels every record correctly. One exists, because the target does. It works because, for every function at once, the fraction of mistakes on the sample is close to the error. Write that fraction as
 
 $$
 \widehat{\mathrm{err}}(h) = \frac1n\big|\{i : h(x_i)\ne y_i\}\big| .
 $$
 
-The tool is again Hoeffding's inequality. Take $n$ independent random variables with values in $[0,1]$. Hoeffding's inequality says that their average falls below its mean by a margin $\tau \ge 0$ or more with probability at most $\exp(-2n\tau^2)$.
+The tool is again Hoeffding's inequality. Take $n$ independent random variables with values in $[0,1]$. Hoeffding's inequality says that their average falls below its mean by a margin $s \ge 0$ or more with probability at most $\exp(-2ns^2)$. Applied to the mistakes of one function, and combined with a union bound over $\mathcal C$, it shows that the sample error is close to the true error for every function at once.
 
 ::: {#lem-em-uniform}
 Let $\alpha, \beta \in (0,1)$ and $n \ge 2\ln(|\mathcal C|/\beta)/\alpha^2$. With probability at least $1-\beta$ over the sample, every $h\in\mathcal C$ satisfies $\mathrm{err}(h) \le \widehat{\mathrm{err}}(h) + \alpha/2$. In particular, every function in $\mathcal C$ that labels the whole sample correctly has error at most $\alpha/2$.
@@ -238,18 +242,20 @@ Let $\alpha, \beta \in (0,1)$ and $n \ge 2\ln(|\mathcal C|/\beta)/\alpha^2$. Wit
 
 ::: {.proof}
 
-1. Fix $h \in \mathcal C$. The indicators $W_i = \mathbf 1[h(x_i)\ne c^*(x_i)]$ are independent, lie in $[0,1]$, and have mean $\mathrm{err}(h)$, because the $x_i$ are independent draws from $D$. Their average is $\widehat{\mathrm{err}}(h)$.
-2. Hoeffding's inequality with $\tau = \alpha/2$ gives $\Pr[\widehat{\mathrm{err}}(h) \le \mathrm{err}(h) - \alpha/2] \le \exp(-n\alpha^2/2) \le \beta/|\mathcal C|$, by the bound on $n$.
+1. Fix $h \in \mathcal C$. The indicators $W_i = \mathbf 1[h(x_i)\ne c^*(x_i)]$ are independent, lie in $[0,1]$, and have mean $\mathrm{err}(h)$, because the $x_i$ are independent draws from $\mathcal D$. Their average is $\widehat{\mathrm{err}}(h)$.
+2. Hoeffding's inequality with $s = \alpha/2$ gives $\Pr[\widehat{\mathrm{err}}(h) \le \mathrm{err}(h) - \alpha/2] \le \exp(-n\alpha^2/2) \le \beta/|\mathcal C|$, by the bound on $n$.
 3. A union bound over the $|\mathcal C|$ functions shows that some $h$ fails with probability at most $\beta$.
 4. A function that labels the sample correctly has $\widehat{\mathrm{err}}(h) = 0$, so its error is at most $\alpha/2$.
 :::
 
-So about $\ln|\mathcal C|/\alpha^2$ examples suffice. For a function that labels the sample correctly, a multiplicative Chernoff bound improves this to about $\ln|\mathcal C|/\alpha$. For infinite classes, the uniform convergence theorem replaces $\ln|\mathcal C|$ by the Vapnik–Chervonenkis dimension.
+So about $\ln|\mathcal C|/\alpha^2$ records suffice. For a function that labels the sample correctly, a multiplicative Chernoff bound improves this to about $\ln|\mathcal C|/\alpha$. For infinite classes, the uniform convergence theorem replaces $\ln|\mathcal C|$ by the Vapnik–Chervonenkis dimension.
 
-For privacy, neighbouring datasets differ in one labelled example $(x_i, y_i)$, which may be replaced by any pair $(x_i', y_i')$. The new point need not come from $D$, and its label need not equal $c^*(x_i')$. Accuracy is proved for data drawn from the model, but privacy must hold for every dataset, so that a wrong model never costs anyone their privacy.
+For privacy, neighbouring datasets differ in one labelled record $z_i = (x_i, y_i)$, which may be replaced by any pair $z_i' = (x_i', y_i')$. The new point need not come from $\mathcal D$, and its label need not equal $c^*(x_i')$. Accuracy is proved for data drawn from the model, but privacy must hold for every dataset, so that a wrong model never costs anyone their privacy.
+
+The private learner keeps the classic learner's aim of few mistakes on the sample, but it chooses the function with the exponential mechanism. Its score is minus the sample error, so a function with fewer mistakes is more likely to be chosen.
 
 ::: {#thm-em-pac name="Private PAC learning"}
-Let $\varepsilon > 0$ and $\alpha,\beta\in(0,1)$. Run the exponential mechanism with $\mathcal H = \mathcal C$, the score $s\big((x,y),h\big) = -\widehat{\mathrm{err}}(h)$ and $\Delta = 1/n$. It is $\varepsilon$-DP for every dataset. If
+Let $\varepsilon > 0$ and $\alpha,\beta\in(0,1)$. Run the exponential mechanism with $\mathcal R = \mathcal C$, the score $u(D,h) = -\widehat{\mathrm{err}}(h)$ and $\Delta = 1/n$. It is $\varepsilon$-DP for every dataset. If
 
 $$
 n \ge \frac{2\ln(2|\mathcal C|/\beta)}{\alpha^2} \qquad\text{and}\qquad n \ge \frac{4\ln(2|\mathcal C|/\beta)}{\alpha\varepsilon},
@@ -260,7 +266,7 @@ then it is an $(\alpha,\beta)$-accurate learner.
 
 ::: {.proof}
 
-1. *Privacy.* Replacing one labelled example changes the number of mistakes of each $h$ by at most $1$, so $\Delta_s \le 1/n$. @thm-em-privacy gives $\varepsilon$-DP for all datasets, whatever their labels.
+1. *Privacy.* Replacing one labelled record changes the number of mistakes of each $h$ by at most $1$, so $\Delta u \le 1/n$. @thm-em-privacy gives $\varepsilon$-DP for all datasets, whatever their labels.
 2. *Selection.* The target makes no mistakes, so $\mathrm{OPT} = 0$. By @cor-em-utility with $t = \ln(2/\beta)$, with probability at least $1 - \beta/2$ over the mechanism's coins, the output $\hat h$ has
 
    $$
@@ -279,15 +285,15 @@ The first bound on $n$ is what learning needs without privacy, and the second is
 
 | Result | Statement |
 | --- | --- |
-| @def-em-mechanism | output $h$ with probability proportional to $\exp(\varepsilon s(X,h)/(2\Delta))$ |
+| @def-em-mechanism | output $r$ with probability proportional to $\exp(\varepsilon u(D,r)/(2\Delta))$ |
 | @thm-em-privacy | the exponential mechanism is $\varepsilon$-DP |
-| @cor-em-fixed-normalizer | with a normalizer independent of $X$, $\exp(\varepsilon s/\Delta)$ is $\varepsilon$-DP |
-| @thm-em-utility | the score falls below $\mathrm{OPT} - \frac{2\Delta}{\varepsilon}(\ln\frac{|\mathcal H|}{|\mathcal H^*|} + t)$ with probability at most $e^{-t}$ |
-| @cor-em-utility | the same with $\ln|\mathcal H|$ |
-| @prp-em-laplace | the Laplace mechanism is the exponential mechanism with score $-|f(X) - h|$ |
+| @cor-em-fixed-normalizer | with a normalizer independent of $D$, $\exp(\varepsilon u/\Delta)$ is $\varepsilon$-DP |
+| @thm-em-utility | the score falls below $\mathrm{OPT} - \frac{2\Delta}{\varepsilon}(\ln\frac{|\mathcal R|}{|\mathcal R^*|} + t)$ with probability at most $e^{-t}$ |
+| @cor-em-utility | the same with $\ln|\mathcal R|$ |
+| @prp-em-laplace | the Laplace mechanism is the exponential mechanism with score $-|f(D) - r|$ |
 | @thm-em-pricing | a private price earns $\gamma - O(\log(\varepsilon n)/\varepsilon)$ |
-| @lem-em-uniform | $2\ln(|\mathcal C|/\beta)/\alpha^2$ examples make every sample error close to the true error |
-| @thm-em-pac | private PAC learning with $O\big(\ln(|\mathcal C|/\beta)(1/\alpha^2 + 1/(\alpha\varepsilon))\big)$ examples |
+| @lem-em-uniform | $2\ln(|\mathcal C|/\beta)/\alpha^2$ records make every sample error close to the true error |
+| @thm-em-pac | private PAC learning with $O\big(\ln(|\mathcal C|/\beta)(1/\alpha^2 + 1/(\alpha\varepsilon))\big)$ records |
 
 : The chapter's results. {#tbl-em-summary}
 

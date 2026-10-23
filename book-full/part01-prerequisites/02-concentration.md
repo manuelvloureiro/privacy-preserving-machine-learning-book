@@ -29,15 +29,15 @@ Each section below follows the same arc: the question the bound answers, the sta
 
 ### Fact 1 — Probability is the expectation of an indicator
 
-The probability of an event is the average of a variable that is 1 when the event happens and 0 when it does not. Write $\mathbf 1_A$ for that 0/1 variable, the **indicator** of the event $A$, and $\mathbb E$ for the expectation (the probability-weighted average). Then
-$$\Pr[A] = \mathbb E[\mathbf 1_A].$$
+The probability of an event is the average of a variable that is 1 when the event happens and 0 when it does not. Write $\mathbf 1[A]$ for that 0/1 variable, the **indicator** of the event $A$, and $\mathbb E$ for the expectation (the probability-weighted average). Then
+$$\Pr[A] = \mathbb E[\mathbf 1[A]].$$
 This matters because it turns probabilities into averages, and averages respect inequalities: any pointwise inequality between a random variable and an indicator becomes a probability bound after taking expectations. Markov's inequality and the union bound are both this move. Because everything later depends on it, here it is slowly, with a die.
 
-**Step 1: an indicator is a 0/1 random variable.** For an event $A$, $\mathbf 1_A$ equals 1 on outcomes where $A$ happens and 0 elsewhere. Roll a fair die and let $A$ = "the roll is at least 5" (@tbl-die-indicator):
+**Step 1: an indicator is a 0/1 random variable.** For an event $A$, $\mathbf 1[A]$ equals 1 on outcomes where $A$ happens and 0 elsewhere. Roll a fair die and let $A$ = "the roll is at least 5" (@tbl-die-indicator):
 
 | Roll | 1 | 2 | 3 | 4 | 5 | 6 |
 | --- | --- | --- | --- | --- | --- | --- |
-| $\mathbf 1_A$ | 0 | 0 | 0 | 0 | 1 | 1 |
+| $\mathbf 1[A]$ | 0 | 0 | 0 | 0 | 1 | 1 |
 
 : The indicator of the event "roll at least 5" on each outcome of a fair die. {#tbl-die-indicator}
 
@@ -91,9 +91,9 @@ You will use it to reduce a sum of $n$ variables to $n$ one-variable calculation
 
 A tail bound answers "how likely is a deviation of size $t$?". In practice you usually want the reverse: "how large a deviation must I allow so that it is exceeded with probability at most $\beta$?". That number is the **width** at failure probability $\beta$, and you get it by setting the bound equal to $\beta$ and solving for $t$.
 
-Concretely, suppose the deviation $D$ satisfies $\Pr[D \ge t] \le e^{-g(t)}$ for an increasing function $g$. The bound is at most $\beta$ exactly when $g(t) \ge \ln(1/\beta)$, that is, when $t \ge g^{-1}(\ln(1/\beta))$. So with probability at least $1 - \beta$,
-$$D < g^{-1}(\ln(1/\beta)).$$
-For example, the Gaussian-shaped bound with $g(t) = t^2/(2\sigma^2)$ gives $t^2/(2\sigma^2) = \ln(1/\beta)$, so $D < \sigma\sqrt{2\ln(1/\beta)}$. Every "width at failure probability $\beta$" in this chapter is this step.
+Concretely, suppose the deviation $V$ satisfies $\Pr[V \ge t] \le e^{-g(t)}$ for an increasing function $g$. The bound is at most $\beta$ exactly when $g(t) \ge \ln(1/\beta)$, that is, when $t \ge g^{-1}(\ln(1/\beta))$. So with probability at least $1 - \beta$,
+$$V < g^{-1}(\ln(1/\beta)).$$
+For example, the Gaussian-shaped bound with $g(t) = t^2/(2\sigma^2)$ gives $t^2/(2\sigma^2) = \ln(1/\beta)$, so $V < \sigma\sqrt{2\ln(1/\beta)}$. Every "width at failure probability $\beta$" in this chapter is this step.
 
 ## Markov and Chebyshev
 
@@ -148,7 +148,7 @@ The Chebyshev width grows like a power of $1/\beta$, the Gaussian-type width onl
 
 ### Example: the error of Laplace noise
 
-A measurement is corrupted by additive noise from the **Laplace distribution** $\mathrm{Lap}(b)$, which has density $\frac{1}{2b}e^{-|x|/b}$: symmetric around 0, with scale $b$. Its variance is $2b^2$; you can check this by integrating, since $\mathbb E[X^2] = 2\int_0^\infty x^2 \frac{1}{2b}e^{-x/b}\,dx = 2b^2$ ([Probability distributions](01-distributions.md)). Chebyshev with $\sigma^2 = 2b^2$ gives $\Pr[|\text{error}| \ge t] \le 2b^2/t^2$, and setting this to $\beta$ gives the $1-\beta$ width $b\sqrt{2/\beta}$. With $b = 1$ and $\beta = 0.05$ that is $\sqrt{2/0.05} = \sqrt{40} \approx 6.3$.
+A measurement is corrupted by additive noise from the **Laplace distribution** $\mathrm{Lap}(b)$, which has density $\frac{1}{2b}e^{-|x|/b}$: symmetric around 0, with scale $b$. Its variance is $2b^2$; you can check this by integrating, since $\mathbb E[X^2] = 2\int_0^\infty x^2 \frac{1}{2b}e^{-x/b}\,\mathrm dx = 2b^2$ ([Probability distributions](01-distributions.md)). Chebyshev with $\sigma^2 = 2b^2$ gives $\Pr[|\text{error}| \ge t] \le 2b^2/t^2$, and setting this to $\beta$ gives the $1-\beta$ width $b\sqrt{2/\beta}$. With $b = 1$ and $\beta = 0.05$ that is $\sqrt{2/0.05} = \sqrt{40} \approx 6.3$.
 
 Now use the shape of the noise. Integrating the density gives the exact tail $\Pr[|X| \ge t] = e^{-t/b}$, and setting $e^{-t/b} = \beta$ gives the width $b\ln(1/\beta) = \ln 20 \approx 3.0$. At $\beta = 10^{-6}$ the two widths are 1,414 (that is, $\sqrt{2 \times 10^6}$) and 13.8 (that is, $\ln(10^6)$): ignoring the shape of the noise costs a factor of 100.
 
@@ -179,7 +179,7 @@ In practice every Chernoff bound in this chapter is computed by the same five st
 
 Think of $e^{\lambda X}$ as a lens on the tail. A large $\lambda$ magnifies the far tail but inflates $\mathbb E[e^{\lambda X}]$. A small $\lambda$ keeps the expectation tame but magnifies little. @fig-chernoff-lambda shows the trade-off for a binomial: the bound as a function of $\lambda$ has a clear minimum, and the relaxation of step 3 costs a little but moves the optimum to a closed form.
 
-![The Chernoff bound $e^{-\lambda t}\mathbb E[e^{\lambda S}]$ for $S \sim \mathrm{Binomial}(100, 0.1)$ and $t = 20$, as a function of $\lambda$, before and after the relaxation $1 + x \le e^x$. Both stay above the exact tail.](figures/chernoff_lambda.svg){#fig-chernoff-lambda}
+![The Chernoff bound $e^{-\lambda t}\mathbb E[e^{\lambda S}]$ for $S \sim \mathrm{Bin}(100, 0.1)$ and $t = 20$, as a function of $\lambda$, before and after the relaxation $1 + x \le e^x$. Both stay above the exact tail.](figures/chernoff_lambda.svg){#fig-chernoff-lambda}
 
 ### Warm-up: the Gaussian
 
@@ -193,36 +193,36 @@ Remember the shape of this calculation: a quadratic log-MGF gives a quadratic ex
 
 ### Main case: sums of Bernoullis
 
-Now the case the method is most used for: counting how many of many independent yes/no events happen. Let $X_i \sim \mathrm{Bernoulli}(p_i)$ be independent, each equal to 1 with probability $p_i$ and 0 otherwise, let $S = \sum_i X_i$ be the count, and let $\mu = \mathbb E[S] = \sum_i p_i$ be its mean. The question is how likely $S$ is to land a fraction $\delta$ above or below $\mu$.
+Now the case the method is most used for: counting how many of many independent yes/no events happen. Let $X_i \sim \mathrm{Bern}(p_i)$ be independent, each equal to 1 with probability $p_i$ and 0 otherwise, let $S = \sum_i X_i$ be the count, and let $\mu = \mathbb E[S] = \sum_i p_i$ be its mean. The question is how likely $S$ is to land a fraction $r$ above or below $\mu$.
 
-**Upper tail**, $\Pr[S \ge (1+\delta)\mu]$ for $\delta > 0$. Follow the recipe.
+**Upper tail**, $\Pr[S \ge (1+r)\mu]$ for $r > 0$. Follow the recipe.
 
 1. **One factor.** $X_i$ is 1 with probability $p_i$ and 0 otherwise, so $\mathbb E[e^{\lambda X_i}] = p_ie^\lambda + (1 - p_i) = 1 + p_i(e^\lambda - 1)$. Fact 3 with $x = p_i(e^\lambda - 1)$ bounds this by $\exp(p_i(e^\lambda - 1))$. The right side is the MGF of a Poisson variable with mean $p_i$, since a $\mathrm{Poisson}(\mu)$ variable has MGF $\exp(\mu(e^\lambda - 1))$ ([Probability distributions](01-distributions.md)). In words: as far as the MGF can tell, a Bernoulli sum is dominated by a Poisson count with the same mean.
 2. **Product.** By Fact 4 the MGF of the sum is the product of the factors, and the exponents add: $\mathbb E[e^{\lambda S}] \le \exp\big(\sum_i p_i(e^\lambda - 1)\big) = \exp(\mu(e^\lambda - 1))$.
-3. **Master bound** with $t = (1+\delta)\mu$: $\Pr[S \ge (1+\delta)\mu] \le \exp(\mu(e^\lambda - 1) - \lambda(1+\delta)\mu)$.
-4. **Minimize.** The derivative of the exponent, $\mu e^\lambda - (1+\delta)\mu$, vanishes at $e^\lambda = 1 + \delta$, so $\lambda = \ln(1+\delta)$, which is positive as required. Substituting, the exponent becomes $\mu\delta - (1+\delta)\mu\ln(1+\delta)$, so
-$$\Pr[S \ge (1+\delta)\mu] \le \left(\frac{e^\delta}{(1+\delta)^{1+\delta}}\right)^\mu = \exp\big(-\mu[(1+\delta)\ln(1+\delta) - \delta]\big).$$
-5. **Simplify.** The bracket is awkward to invert, so replace the logarithm by a simpler lower bound, $\ln(1+\delta) \ge \frac{2\delta}{2+\delta}$ for $\delta \ge 0$. To see that this holds, let $f(\delta) = \ln(1+\delta) - \frac{2\delta}{2+\delta}$. It starts at $f(0) = 0$ and never decreases, because its derivative is $f'(\delta) = \frac{1}{1+\delta} - \frac{4}{(2+\delta)^2} = \frac{\delta^2}{(1+\delta)(2+\delta)^2} \ge 0$; so $f(\delta) \ge 0$. Putting the lower bound into the bracket gives $(1+\delta)\frac{2\delta}{2+\delta} - \delta = \frac{\delta^2}{2+\delta}$, so
-$$\Pr[S \ge (1+\delta)\mu] \le \exp\left(-\frac{\delta^2\mu}{2+\delta}\right).$$
+3. **Master bound** with $t = (1+r)\mu$: $\Pr[S \ge (1+r)\mu] \le \exp(\mu(e^\lambda - 1) - \lambda(1+r)\mu)$.
+4. **Minimize.** The derivative of the exponent, $\mu e^\lambda - (1+r)\mu$, vanishes at $e^\lambda = 1 + r$, so $\lambda = \ln(1+r)$, which is positive as required. Substituting, the exponent becomes $\mu r - (1+r)\mu\ln(1+r)$, so
+$$\Pr[S \ge (1+r)\mu] \le \left(\frac{e^r}{(1+r)^{1+r}}\right)^\mu = \exp\big(-\mu[(1+r)\ln(1+r) - r]\big).$$
+5. **Simplify.** The bracket is awkward to invert, so replace the logarithm by a simpler lower bound, $\ln(1+r) \ge \frac{2r}{2+r}$ for $r \ge 0$. To see that this holds, let $f(r) = \ln(1+r) - \frac{2r}{2+r}$. It starts at $f(0) = 0$ and never decreases, because its derivative is $f'(r) = \frac{1}{1+r} - \frac{4}{(2+r)^2} = \frac{r^2}{(1+r)(2+r)^2} \ge 0$; so $f(r) \ge 0$. Putting the lower bound into the bracket gives $(1+r)\frac{2r}{2+r} - r = \frac{r^2}{2+r}$, so
+$$\Pr[S \ge (1+r)\mu] \le \exp\left(-\frac{r^2\mu}{2+r}\right).$$
 
-**Lower tail**, $\Pr[S \le (1-\delta)\mu]$ for $0 < \delta < 1$. The same recipe works if you look at $-S$ instead of $S$, because a small $S$ is a large $-S$.
+**Lower tail**, $\Pr[S \le (1-r)\mu]$ for $0 < r < 1$. The same recipe works if you look at $-S$ instead of $S$, because a small $S$ is a large $-S$.
 
 1. **Master bound for the lower tail.** For $\lambda > 0$, $S \le s$ holds exactly when $e^{-\lambda S} \ge e^{-\lambda s}$, since $e^{-\lambda x}$ is decreasing. Markov applied to $e^{-\lambda S}$, and the same per-factor bound as before with $-\lambda$ in place of $\lambda$, give $\Pr[S \le s] \le e^{\lambda s}\,\mathbb E[e^{-\lambda S}] \le \exp(\lambda s + \mu(e^{-\lambda} - 1))$.
-2. **Minimize.** With $s = (1-\delta)\mu$, the derivative $s - \mu e^{-\lambda}$ vanishes at $e^{-\lambda} = 1 - \delta$, that is, $\lambda = -\ln(1-\delta) > 0$. Substituting gives $\exp\big(-\mu[\delta + (1-\delta)\ln(1-\delta)]\big)$.
-3. **Simplify.** Expand the logarithm in its Taylor series, $\ln(1-\delta) = -\sum_{k \ge 1}\delta^k/k$, multiply by $1-\delta$ and collect powers of $\delta$: $(1-\delta)\ln(1-\delta) = -\delta + \sum_{k\ge2}\frac{\delta^k}{k(k-1)}$. Every term of the sum is non-negative, so keeping only the first one ($k = 2$, which is $\delta^2/2$) gives the lower bound $-\delta + \frac{\delta^2}{2}$. The bracket is then at least $\delta^2/2$, so
-$$\Pr[S \le (1-\delta)\mu] \le \exp\left(-\frac{\delta^2\mu}{2}\right).$$
+2. **Minimize.** With $s = (1-r)\mu$, the derivative $s - \mu e^{-\lambda}$ vanishes at $e^{-\lambda} = 1 - r$, that is, $\lambda = -\ln(1-r) > 0$. Substituting gives $\exp\big(-\mu[r + (1-r)\ln(1-r)]\big)$.
+3. **Simplify.** Expand the logarithm in its Taylor series, $\ln(1-r) = -\sum_{k \ge 1}r^k/k$, multiply by $1-r$ and collect powers of $r$: $(1-r)\ln(1-r) = -r + \sum_{k\ge2}\frac{r^k}{k(k-1)}$. Every term of the sum is non-negative, so keeping only the first one ($k = 2$, which is $r^2/2$) gives the lower bound $-r + \frac{r^2}{2}$. The bracket is then at least $r^2/2$, so
+$$\Pr[S \le (1-r)\mu] \le \exp\left(-\frac{r^2\mu}{2}\right).$$
 
 ### Interpretation
 
-The bounds depend on the expected count $\mu$, not on the number of trials $n$. A million trials with $p = 10^{-6}$ expect a single event, and the count is far from concentrated. Rare events concentrate in relative terms only once you expect enough of them, because the exponent $\delta^2\mu$ grows with $\mu$.
+The bounds depend on the expected count $\mu$, not on the number of trials $n$. A million trials with $p = 10^{-6}$ expect a single event, and the count is far from concentrated. Rare events concentrate in relative terms only once you expect enough of them, because the exponent $r^2\mu$ grows with $\mu$.
 
 Chernoff also beats Hoeffding (the range-only bound of the next section) when $p$ is small, and the reason is in step 1. That step keeps each $p_i$ in the bound instead of replacing it by the worst case, so the bound implicitly knows the variance of the count, $\mu(1-p) \approx \mu$, which is small when $p$ is small. A bound that only knows the range has to assume the largest variance the range allows. @fig-bernoulli-tails shows the gap.
 
-Finally, the two tails differ. For large $\delta$, the upper-tail exponent $\delta^2\mu/(2+\delta)$ behaves like $\delta\mu$, so the tail decays like $\exp(-\delta\mu)$, not like $\exp(-\delta^2)$. Counts have Poisson-like right tails, not Gaussian ones: they can overshoot their mean by a lot more easily than they can undershoot it.
+Finally, the two tails differ. For large $r$, the upper-tail exponent $r^2\mu/(2+r)$ behaves like $r\mu$, so the tail decays like $\exp(-r\mu)$, not like $\exp(-r^2)$. Counts have Poisson-like right tails, not Gaussian ones: they can overshoot their mean by a lot more easily than they can undershoot it.
 
 ### Example: sampled minibatch sizes
 
-A training loop forms each minibatch by including each of $n = 60{,}000$ examples independently with probability $q = 0.01$. The batch size $B$ is a sum of $\mathrm{Bernoulli}(q)$ variables, so the bounds above apply with $\mu = 60{,}000 \times 0.01 = 600$. How likely is the batch to be more than 20% off, that is, $\delta = 0.2$, so that $\delta^2 = 0.04$?
+A training loop forms each minibatch by including each of $n = 60{,}000$ records independently with probability $q = 0.01$. The batch size $B$ is a sum of $\mathrm{Bern}(q)$ variables, so the bounds above apply with $\mu = 60{,}000 \times 0.01 = 600$. How likely is the batch to be more than 20% off, that is, $r = 0.2$, so that $r^2 = 0.04$?
 
 The upper-tail bound is $\exp(-0.04 \times 600/2.2) = e^{-10.9} \approx 1.8\times10^{-5}$, and the lower-tail bound is $\exp(-0.04 \times 600/2) = e^{-12} \approx 6.1\times10^{-6}$. The two events cannot happen together, so adding them gives the chance of either: $B$ stays within $600 \pm 20\%$ except with probability about $2.4\times10^{-5}$ per step. Over 1,000 steps, the union bound (Fact 2) adds the 1,000 per-step failure probabilities, $1{,}000 \times 2.4\times10^{-5}$, so every batch stays in that range except with probability about $0.024$.
 
@@ -257,36 +257,36 @@ so the sum is $\sqrt{\sum_i\sigma_i^2}$-sub-Gaussian.
 
 ### Hoeffding's lemma: bounded variables are sub-Gaussian
 
-**Statement.** A variable trapped in an interval $[a, b]$ cannot have a heavy tail, since it cannot go beyond $b$ at all. The lemma makes this quantitative: its MGF is bounded as if it were normal with standard deviation half the width of the interval. If $X \in [a, b]$, then $X$ is $\frac{b-a}{2}$-sub-Gaussian:
-$$\mathbb E[e^{\lambda(X-\mu)}] \le \exp\big(\lambda^2(b-a)^2/8\big).$$
+**Statement.** A variable trapped in an interval $[l, u]$ cannot have a heavy tail, since it cannot go beyond $u$ at all. The lemma makes this quantitative: its MGF is bounded as if it were normal with standard deviation half the width of the interval. If $X \in [l, u]$, then $X$ is $\frac{u-l}{2}$-sub-Gaussian:
+$$\mathbb E[e^{\lambda(X-\mu)}] \le \exp\big(\lambda^2(u-l)^2/8\big).$$
 
-**Derivation.** Centre $X$ so that $\mathbb E[X] = 0$ (shifting $X$ and the interval by $\mu$ changes nothing on either side). A mean-zero variable must take values on both sides of 0, so $a \le 0 \le b$. The plan is to bound $e^{\lambda X}$ by something linear in $X$, whose average depends only on the mean, and then show that the resulting expression has a quadratic logarithm.
+**Derivation.** Centre $X$ so that $\mathbb E[X] = 0$ (shifting $X$ and the interval by $\mu$ changes nothing on either side). A mean-zero variable must take values on both sides of 0, so $l \le 0 \le u$. The plan is to bound $e^{\lambda X}$ by something linear in $X$, whose average depends only on the mean, and then show that the resulting expression has a quadratic logarithm.
 
-1. **Use convexity.** On $[a, b]$, the convex curve $e^{\lambda x}$ lies below the straight line (the chord) joining its values at the two endpoints. That line is the weighted average of the endpoint values, with weights that say how close $x$ is to each end:
-$$e^{\lambda x} \le \frac{b - x}{b - a}e^{\lambda a} + \frac{x - a}{b - a}e^{\lambda b}.$$
-2. **Take expectations.** The right side is linear in $x$, so its average only needs $\mathbb E[X] = 0$: $\mathbb E[e^{\lambda X}] \le \frac{b}{b-a}e^{\lambda a} - \frac{a}{b-a}e^{\lambda b}$. This is exactly the MGF of the two-point variable that sits at $a$ or $b$ with mean 0.
-3. **Reparametrize** to make the bound a function of one variable. Let $p = -a/(b-a) \in [0,1]$, so that $\frac{b}{b-a} = 1 - p$ and $\lambda a = -hp$, where $h = \lambda(b - a)$; then $e^{\lambda b} = e^{\lambda a}e^{h}$. The right side becomes $e^{-hp}(1 - p + pe^h) = e^{\varphi(h)}$, where
+1. **Use convexity.** On $[l, u]$, the convex curve $e^{\lambda x}$ lies below the straight line (the chord) joining its values at the two endpoints. That line is the weighted average of the endpoint values, with weights that say how close $x$ is to each end:
+$$e^{\lambda x} \le \frac{u - x}{u - l}e^{\lambda l} + \frac{x - l}{u - l}e^{\lambda u}.$$
+2. **Take expectations.** The right side is linear in $x$, so its average only needs $\mathbb E[X] = 0$: $\mathbb E[e^{\lambda X}] \le \frac{u}{u-l}e^{\lambda l} - \frac{l}{u-l}e^{\lambda u}$. This is exactly the MGF of the two-point variable that sits at $l$ or $u$ with mean 0.
+3. **Reparametrize** to make the bound a function of one variable. Let $p = -l/(u-l) \in [0,1]$, so that $\frac{u}{u-l} = 1 - p$ and $\lambda l = -hp$, where $h = \lambda(u - l)$; then $e^{\lambda u} = e^{\lambda l}e^{h}$. The right side becomes $e^{-hp}(1 - p + pe^h) = e^{\varphi(h)}$, where
 $$\varphi(h) = -hp + \ln\big(1 - p + pe^h\big).$$
 It remains to show $\varphi(h) \le h^2/8$, by a Taylor expansion around $h = 0$.
 4. **Value and slope at 0.** $\varphi(0) = 0 + \ln 1 = 0$. The derivative is $\varphi'(h) = -p + \frac{pe^h}{1 - p + pe^h}$, so $\varphi'(0) = -p + p = 0$.
-5. **Bound the curvature.** Write $u = \frac{pe^h}{1 - p + pe^h}$, a number in $[0,1]$, so that $\varphi'(h) = -p + u$. Differentiating again gives $\varphi''(h) = u(1-u)$. A product of two non-negative numbers that add up to 1 is largest when both are $\frac12$, so $\varphi''(h) \le 1/4$.
-6. **Taylor with remainder.** Taylor's theorem says $\varphi(h) = \varphi(0) + h\varphi'(0) + \frac{h^2}{2}\varphi''(\xi)$ for some $\xi$ between 0 and $h$. With the value and slope 0 and the curvature at most $\frac14$, $\varphi(h) \le h^2/8 = \lambda^2(b-a)^2/8$.
+5. **Bound the curvature.** Write $v = \frac{pe^h}{1 - p + pe^h}$, a number in $[0,1]$, so that $\varphi'(h) = -p + v$. Differentiating again gives $\varphi''(h) = v(1-v)$. A product of two non-negative numbers that add up to 1 is largest when both are $\frac12$, so $\varphi''(h) \le 1/4$.
+6. **Taylor with remainder.** Taylor's theorem says $\varphi(h) = \varphi(0) + h\varphi'(0) + \frac{h^2}{2}\varphi''(\xi)$ for some $\xi$ between 0 and $h$. With the value and slope 0 and the curvature at most $\frac14$, $\varphi(h) \le h^2/8 = \lambda^2(u-l)^2/8$.
 
-The worst case is a fair coin on the two endpoints, whose variance is exactly $((b-a)/2)^2$: it puts all its mass as far from the mean as the interval allows.
+The worst case is a fair coin on the two endpoints, whose variance is exactly $((u-l)/2)^2$: it puts all its mass as far from the mean as the interval allows.
 
 ### Hoeffding's inequality
 
-The average of $n$ bounded independent variables is sub-Gaussian with a variance proxy that shrinks like $1/n$, so its tail is Gaussian-shaped with that proxy. Concretely, combine the lemma with the rule for means: the mean of $n$ independent variables in $[a, b]$ is $\frac{b-a}{2\sqrt n}$-sub-Gaussian, so $\sigma^2 = (b-a)^2/(4n)$. Putting this into the tail bound $e^{-t^2/(2\sigma^2)}$ gives
-$$\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{2nt^2}{(b-a)^2}\right).$$
-As a two-sided confidence interval, add the matching lower tail to get $2\exp(-2nt^2/(b-a)^2)$, set it equal to $\beta$ and solve for $t$ (Fact 5): with probability at least $1-\beta$, $|\bar X_n - \mu| < (b-a)\sqrt{\ln(2/\beta)/(2n)}$.
+The average of $n$ bounded independent variables is sub-Gaussian with a variance proxy that shrinks like $1/n$, so its tail is Gaussian-shaped with that proxy. Concretely, combine the lemma with the rule for means: the mean of $n$ independent variables in $[l, u]$ is $\frac{u-l}{2\sqrt n}$-sub-Gaussian, so $\sigma^2 = (u-l)^2/(4n)$. Putting this into the tail bound $e^{-t^2/(2\sigma^2)}$ gives
+$$\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{2nt^2}{(u-l)^2}\right).$$
+As a two-sided confidence interval, add the matching lower tail to get $2\exp(-2nt^2/(u-l)^2)$, set it equal to $\beta$ and solve for $t$ (Fact 5): with probability at least $1-\beta$, $|\bar X_n - \mu| < (u-l)\sqrt{\ln(2/\beta)/(2n)}$.
 
 ### Interpretation
 
-Hoeffding needs only the range, not the variance. That is its strength, since there is nothing to estimate, and its weakness, since it assumes the worst-case variance $(b-a)^2/4$, the variance of the fair coin on the endpoints.
+Hoeffding needs only the range, not the variance. That is its strength, since there is nothing to estimate, and its weakness, since it assumes the worst-case variance $(u-l)^2/4$, the variance of the fair coin on the endpoints.
 
-When the true variance $\sigma^2$ is much smaller than that, use **Bernstein's inequality**, which keeps the variance in the bound. It is proved by the same Chernoff recipe, with a sharper bound on each factor's MGF that uses the variance and the size of the largest deviation (Boucheron, Lugosi & Massart, ch. 2, give the derivation, and @sec-apx-tail-bernstein in the appendices derives it step by step). For $|X_i - \mu| \le M$:
-$$\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{nt^2}{2\sigma^2 + \frac23 Mt}\right).$$
-The denominator shows the two regimes. For small $t$ the $2\sigma^2$ term dominates and the bound looks Gaussian with the true variance; for large $t$ the $\frac23 Mt$ term dominates and the bound decays only exponentially in $t$. Setting the bound equal to $\beta$ and solving the quadratic in $t$ shows that its width is at most $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2M\ln(1/\beta)/(3n)$: driven by the variance for moderate deviations, and by the range only at the far end.
+When the true variance $\sigma^2$ is much smaller than that, use **Bernstein's inequality**, which keeps the variance in the bound. It is proved by the same Chernoff recipe, with a sharper bound on each factor's MGF that uses the variance and the size of the largest deviation (Boucheron, Lugosi & Massart, ch. 2, give the derivation, and @sec-apx-tail-bernstein in the appendices derives it step by step). For $|X_i - \mu| \le K$:
+$$\Pr\big[\bar X_n - \mu \ge t\big] \le \exp\left(-\frac{nt^2}{2\sigma^2 + \frac23 Kt}\right).$$
+The denominator shows the two regimes. For small $t$ the $2\sigma^2$ term dominates and the bound looks Gaussian with the true variance; for large $t$ the $\frac23 Kt$ term dominates and the bound decays only exponentially in $t$. Setting the bound equal to $\beta$ and solving the quadratic in $t$ shows that its width is at most $\sqrt{2\sigma^2\ln(1/\beta)/n} + 2K\ln(1/\beta)/(3n)$: driven by the variance for moderate deviations, and by the range only at the far end.
 
 @fig-bernoulli-tails puts all the bounds so far side by side for the mean of 200 Bernoulli(0.1) variables. Hoeffding even loses to Chebyshev at small deviations here, because the true variance $0.1 \times 0.9 = 0.09$ is far below Hoeffding's worst case of $1/4 = 0.25$ for variables in $[0, 1]$.
 
@@ -294,19 +294,19 @@ The denominator shows the two regimes. For small $t$ the $2\sigma^2$ term domina
 
 ### Example: generalization for a finite class
 
-How far can a model's error on the training sample be from its error on the whole population? For one fixed model $h$ with loss in $[0,1]$, the **empirical risk** $\hat R(h)$, its average loss on $n$ independent examples, is a mean of $n$ bounded terms whose expectation is the **true risk** $R(h)$, the average loss on the population. Two-sided Hoeffding with $b - a = 1$ gives $\Pr[|\hat R(h) - R(h)| \ge t] \le 2e^{-2nt^2}$.
+How far can a model's error on the training sample be from its error on the whole population? For one fixed model $h$ with loss in $[0,1]$, the **empirical risk** $\mathcal L(h; D)$, its average loss on a dataset $D$ of $n$ records drawn independently from the population $\mathcal D$, is a mean of $n$ bounded terms whose expectation is the **true risk** $\mathcal L_{\mathcal D}(h)$, the average loss on the population. Two-sided Hoeffding with $u - l = 1$ gives $\Pr[|\mathcal L(h; D) - \mathcal L_{\mathcal D}(h)| \ge t] \le 2e^{-2nt^2}$.
 
 But a learner picks the model after seeing the data, so you need the bound for every model in the class at once. For a finite class $H$, apply the union bound (Fact 2) over its $|H|$ models: the chance that any one of them is off by $t$ or more is at most $2|H|e^{-2nt^2}$. Setting this to $\beta$ and solving for $t$ gives $t = \sqrt{\ln(2|H|/\beta)/(2n)}$, so with probability at least $1-\beta$,
-$$|\hat R(h) - R(h)| \le \sqrt{\frac{\ln(2|H|/\beta)}{2n}} \quad\text{for all } h \in H.$$
+$$|\mathcal L(h; D) - \mathcal L_{\mathcal D}(h)| \le \sqrt{\frac{\ln(2|H|/\beta)}{2n}} \quad\text{for all } h \in H.$$
 The size of the class enters only through $\ln|H|$, which is the $\ln k$ cost of Fact 2.
 
 ### Example: estimating a small error rate
 
-A classifier is tested on 1,000 negative examples and makes 1 false positive. You want a 95% upper bound on its true false-positive rate, so the failure probability is $\beta = 0.05$ and $\ln(1/\beta) = \ln 20 \approx 3.0$. Three methods give very different answers.
+A classifier is tested on 1,000 negative records and makes 1 false positive. You want a 95% upper bound on its true false-positive rate, so the failure probability is $\beta = 0.05$ and $\ln(1/\beta) = \ln 20 \approx 3.0$. Three methods give very different answers.
 
 Hoeffding, one-sided, adds the half-width $\sqrt{\ln(1/\beta)/(2n)} = \sqrt{\ln 20/2000} \approx 0.039$ to the measured rate of $1/1{,}000$. That is about 40 times the rate you measured: the range $[0, 1]$ forces it to assume a variance of $0.25$, when the true variance of a rate near $0.001$ is about $0.001$.
 
-Bernstein uses that small variance. Plugging $\sigma^2 \approx 0.001$, $M = 1$ and $n = 1{,}000$ into its width gives $\sqrt{2\times0.001\times3.0/1000} + 2\times3.0/3000 \approx 0.0045$, almost ten times tighter. This is a heuristic: $\sigma^2$ was estimated from the same data, and a rigorous version (empirical Bernstein) is wider.
+Bernstein uses that small variance. Plugging $\sigma^2 \approx 0.001$, $K = 1$ and $n = 1{,}000$ into its width gives $\sqrt{2\times0.001\times3.0/1000} + 2\times3.0/3000 \approx 0.0045$, almost ten times tighter. This is a heuristic: $\sigma^2$ was estimated from the same data, and a rigorous version (empirical Bernstein) is wider.
 
 The exact answer comes from the binomial distribution itself. The **Clopper–Pearson** upper bound is the largest true rate $p$ under which seeing 1 or fewer false positives in 1,000 trials still has probability at least $0.05$; it is $0.0047$.
 
@@ -315,7 +315,7 @@ Measuring rare rates is expensive: range-based bounds are useless near zero, and
 ### Check yourself
 
 - Is a Laplace variable sub-Gaussian? *(No. Its MGF is infinite for $|\lambda| \ge 1/b$, so no quadratic bound holds for all $\lambda$. See the next section.)*
-- Why is the fair coin on $\{a, b\}$ the worst case in Hoeffding's lemma? *(It maximizes the variance among variables on $[a, b]$, and step 5 is tight at $u = 1/2$.)*
+- Why is the fair coin on $\{l, u\}$ the worst case in Hoeffding's lemma? *(It maximizes the variance among variables on $[l, u]$, and step 5 is tight at $v = 1/2$.)*
 
 ## Gaussian and Laplace tails
 
@@ -328,12 +328,12 @@ The normal and Laplace distributions are the two standard models of additive noi
 For the normal distribution you know the density exactly, so you can bound the tail integral directly instead of going through the MGF, and do better than Chernoff. Write $Z \sim \mathcal N(0,1)$ for a standard normal variable, with density $\varphi(z) = e^{-z^2/2}/\sqrt{2\pi}$. Two bounds hold for $t \ge 0$: the first is the Chernoff bound with an extra factor $\frac12$, and the second, the **Mills ratio** bound, replaces the exponential by the density at $t$ divided by $t$:
 $$\Pr[Z \ge t] \le \tfrac12 e^{-t^2/2}, \qquad \Pr[Z \ge t] \le \frac{\varphi(t)}{t}.$$
 
-**Derivation of the first bound.** The idea is to slide the tail back to start at 0 and compare it with the right half of the whole distribution, which has probability exactly $\frac12$. Substitute $u = z - t$, so that the tail integral runs over $u \ge 0$. Expanding $(t+u)^2 = t^2 + 2tu + u^2$ splits the density into the factor $e^{-t^2/2}$, a factor $e^{-tu}$, and the standard normal density in $u$:
-$$\Pr[Z \ge t] = \int_0^\infty \varphi(t+u)\,du = e^{-t^2/2}\int_0^\infty \frac{e^{-tu - u^2/2}}{\sqrt{2\pi}}\,du \le e^{-t^2/2}\int_0^\infty \varphi(u)\,du = \tfrac12 e^{-t^2/2}.$$
-The inequality drops the factor $e^{-tu}$, which is at most 1 for $t, u \ge 0$, and the last integral is $\frac12$ because the normal density is symmetric around 0. This beats the Chernoff bound $e^{-t^2/2}$ of the warm-up by a factor of $\frac12$.
+**Derivation of the first bound.** The idea is to slide the tail back to start at 0 and compare it with the right half of the whole distribution, which has probability exactly $\frac12$. Substitute $y = z - t$, so that the tail integral runs over $y \ge 0$. Expanding $(t+y)^2 = t^2 + 2ty + y^2$ splits the density into the factor $e^{-t^2/2}$, a factor $e^{-ty}$, and the standard normal density in $y$:
+$$\Pr[Z \ge t] = \int_0^\infty \varphi(t+y)\,\mathrm dy = e^{-t^2/2}\int_0^\infty \frac{e^{-ty - y^2/2}}{\sqrt{2\pi}}\,\mathrm dy \le e^{-t^2/2}\int_0^\infty \varphi(y)\,\mathrm dy = \tfrac12 e^{-t^2/2}.$$
+The inequality drops the factor $e^{-ty}$, which is at most 1 for $t, y \ge 0$, and the last integral is $\frac12$ because the normal density is symmetric around 0. This beats the Chernoff bound $e^{-t^2/2}$ of the warm-up by a factor of $\frac12$.
 
 **Derivation of the second (Mills ratio).** The idea is to multiply the density by a factor that is at least 1 on the tail and makes the integral easy. On $z \ge t$ the factor $z/t$ is at least 1, and $z\varphi(z)$ has the simple antiderivative $-\varphi(z)$, because differentiating the density gives $\varphi'(z) = -z\varphi(z)$. So
-$$\Pr[Z \ge t] = \int_t^\infty \varphi(z)\,dz \le \int_t^\infty \frac zt\varphi(z)\,dz = \frac1t\big[-\varphi(z)\big]_t^\infty = \frac{\varphi(t)}{t}.$$
+$$\Pr[Z \ge t] = \int_t^\infty \varphi(z)\,\mathrm dz \le \int_t^\infty \frac zt\varphi(z)\,\mathrm dz = \frac1t\big[-\varphi(z)\big]_t^\infty = \frac{\varphi(t)}{t}.$$
 This bound is asymptotically exact as $t$ grows, because the tail mass sits ever closer to $t$, where the factor $z/t$ is close to 1. @fig-gaussian-tails compares the bounds with the exact tail. At $t = 3$ the exact tail is $1.35\times10^{-3}$. Chebyshev gives $1/3^2 = 0.111$, Chernoff $e^{-9/2} = 0.0111$, the halved bound $0.0056$, and Mills $\varphi(3)/3 = 0.00148$.
 
 ![The exact standard normal tail against the Chebyshev, Chernoff, halved Chernoff and Mills-ratio bounds.](figures/gaussian_tails.svg){#fig-gaussian-tails}
@@ -354,7 +354,7 @@ The union bound is nearly exact here. All $k$ independent draws stay below $t$ w
 
 ### Laplace is sub-exponential, not sub-Gaussian
 
-**MGF.** The Laplace MGF is finite only for small $\lambda$, which rules out the sub-Gaussian definition (it must hold for every $\lambda$). Integrating $e^{\lambda x}$ against the density, the right half gives $\int_0^\infty \frac{1}{2b}e^{\lambda x - x/b}\,dx = \frac{1}{2(1 - \lambda b)}$, which is finite only for $\lambda < 1/b$, and the left half gives $\frac{1}{2(1 + \lambda b)}$. Adding them, for $|\lambda| < 1/b$,
+**MGF.** The Laplace MGF is finite only for small $\lambda$, which rules out the sub-Gaussian definition (it must hold for every $\lambda$). Integrating $e^{\lambda x}$ against the density, the right half gives $\int_0^\infty \frac{1}{2b}e^{\lambda x - x/b}\,\mathrm dx = \frac{1}{2(1 - \lambda b)}$, which is finite only for $\lambda < 1/b$, and the left half gives $\frac{1}{2(1 + \lambda b)}$. Adding them, for $|\lambda| < 1/b$,
 $$\mathbb E[e^{\lambda X}] = \frac{1}{1 - \lambda^2b^2}$$
 ([Probability distributions](01-distributions.md)). It blows up as $|\lambda| \to 1/b$, so no bound of the form $e^{\lambda^2\sigma^2/2}$ can hold for all $\lambda$.
 
@@ -390,17 +390,17 @@ Azuma's inequality handles the second situation: dependent sums whose terms are 
 
 ### Azuma–Hoeffding
 
-**Setup.** A **martingale** is a running total whose next step is zero on average given everything that has happened so far, like your fortune in a sequence of fair bets where you may choose each bet based on the previous ones. Formally, $M_0, M_1, \dots, M_n$ is a martingale if each increment $D_k = M_k - M_{k-1}$ has conditional mean zero given the past, $\mathbb E[D_k \mid \text{past}] = 0$. Assume each $D_k$ lies in an interval $[A_k, A_k + d_k]$, where the position $A_k$ may depend on the past but the length $d_k$ is fixed in advance.
+**Setup.** A **martingale** is a running total whose next step is zero on average given everything that has happened so far, like your fortune in a sequence of fair bets where you may choose each bet based on the previous ones. Formally, $W_0, W_1, \dots, W_n$ is a martingale if each increment $U_k = W_k - W_{k-1}$ has conditional mean zero given the past, $\mathbb E[U_k \mid \text{past}] = 0$. Assume each $U_k$ lies in an interval $[A_k, A_k + d_k]$, where the position $A_k$ may depend on the past but the length $d_k$ is fixed in advance.
 
-**Statement.** The total drift $M_n - M_0$ obeys the same tail bound as a sum of independent bounded terms, with the step lengths $d_k$ playing the role of the ranges:
-$$\Pr[M_n - M_0 \ge t] \le \exp\left(-\frac{2t^2}{\sum_k d_k^2}\right).$$
+**Statement.** The total drift $W_n - W_0$ obeys the same tail bound as a sum of independent bounded terms, with the step lengths $d_k$ playing the role of the ranges:
+$$\Pr[W_n - W_0 \ge t] \le \exp\left(-\frac{2t^2}{\sum_k d_k^2}\right).$$
 
 **Derivation.** The Chernoff recipe needs the MGF of the total. Without independence it does not factorize, but you can still bound it one step at a time, starting from the last step and working back.
 
-1. **Bound one step given the past.** Given the past, $D_k$ is a mean-zero variable on an interval of length $d_k$, so Hoeffding's lemma (previous section) applies to it, with every expectation taken given the past: $\mathbb E[e^{\lambda D_k} \mid \text{past}] \le e^{\lambda^2d_k^2/8}$. The proof is the one in the previous section, run conditionally.
-2. **Peel off the last increment.** The **tower property** says you can average in two stages: first average over the last step with the past held fixed, then average over the past; the result is the ordinary average. Split $M_n - M_0 = (M_{n-1} - M_0) + D_n$. With the past held fixed, $e^{\lambda(M_{n-1} - M_0)}$ is a constant and comes out of the inner average, which is then bounded by step 1:
-$$\mathbb E\big[e^{\lambda(M_n - M_0)}\big] = \mathbb E\Big[e^{\lambda(M_{n-1} - M_0)}\,\mathbb E\big[e^{\lambda D_n} \mid \text{past}\big]\Big] \le e^{\lambda^2d_n^2/8}\,\mathbb E\big[e^{\lambda(M_{n-1} - M_0)}\big].$$
-3. **Repeat.** Apply the same step to $M_{n-1} - M_0$, then $M_{n-2} - M_0$, and so on, $n$ times: $\mathbb E[e^{\lambda(M_n - M_0)}] \le \exp(\lambda^2\sum_k d_k^2/8)$. Peeling replaces Fact 4, which needed independence.
+1. **Bound one step given the past.** Given the past, $U_k$ is a mean-zero variable on an interval of length $d_k$, so Hoeffding's lemma (previous section) applies to it, with every expectation taken given the past: $\mathbb E[e^{\lambda U_k} \mid \text{past}] \le e^{\lambda^2d_k^2/8}$. The proof is the one in the previous section, run conditionally.
+2. **Peel off the last increment.** The **tower property** says you can average in two stages: first average over the last step with the past held fixed, then average over the past; the result is the ordinary average. Split $W_n - W_0 = (W_{n-1} - W_0) + U_n$. With the past held fixed, $e^{\lambda(W_{n-1} - W_0)}$ is a constant and comes out of the inner average, which is then bounded by step 1:
+$$\mathbb E\big[e^{\lambda(W_n - W_0)}\big] = \mathbb E\Big[e^{\lambda(W_{n-1} - W_0)}\,\mathbb E\big[e^{\lambda U_n} \mid \text{past}\big]\Big] \le e^{\lambda^2d_n^2/8}\,\mathbb E\big[e^{\lambda(W_{n-1} - W_0)}\big].$$
+3. **Repeat.** Apply the same step to $W_{n-1} - W_0$, then $W_{n-2} - W_0$, and so on, $n$ times: $\mathbb E[e^{\lambda(W_n - W_0)}] \le \exp(\lambda^2\sum_k d_k^2/8)$. Peeling replaces Fact 4, which needed independence.
 4. **Chernoff.** The exponent to minimize is $-\lambda t + \lambda^2\sum_k d_k^2/8$. Its derivative vanishes at $\lambda = 4t/\sum_k d_k^2$, and substituting gives $\exp(-2t^2/\sum_k d_k^2)$.
 
 Hoeffding is the special case of independent increments: there the past tells you nothing, and the conditional bound of step 1 is the ordinary lemma.
@@ -409,7 +409,7 @@ Hoeffding is the special case of independent increments: there the past tells yo
 
 You have two coins, with heads probabilities 0.3 and 0.7. You flip 200 times; before each flip you pick the 0.7 coin if the previous flip was heads, and the 0.3 coin otherwise. The flips are dependent, and the number of heads is not binomial, so Hoeffding does not apply.
 
-What you can control is how far the heads count drifts from what your own choices predicted. Let $X_k$ be 1 if flip $k$ is heads, let $p_k$ be the bias of the coin chosen at step $k$, and let $M_n = \sum_{k\le n}(X_k - p_k)$: heads minus the heads you "expected" given your choices. Given the past, the coin is fixed, so $X_k - p_k$ has mean $p_k - p_k = 0$ and lies in $[-p_k, 1 - p_k]$, an interval of length 1. So $M_n$ is a martingale with $d_k = 1$, $\sum_k d_k^2 = 200$, and Azuma gives $\Pr[M_{200} \ge t] \le e^{-2t^2/200}$. At $t = 20$ the exponent is $2 \times 400/200 = 4$ and the bound is $e^{-4} = 1.83\times10^{-2}$, while simulation gives $1.12\times10^{-3}$ (@fig-azuma-adaptive). The bound pays for assuming the worst-case variance, exactly as Hoeffding does: each step's true variance is $p_k(1-p_k) = 0.21$, not the $0.25$ the interval allows.
+What you can control is how far the heads count drifts from what your own choices predicted. Let $X_k$ be 1 if flip $k$ is heads, let $p_k$ be the bias of the coin chosen at step $k$, and let $W_n = \sum_{k\le n}(X_k - p_k)$: heads minus the heads you "expected" given your choices. Given the past, the coin is fixed, so $X_k - p_k$ has mean $p_k - p_k = 0$ and lies in $[-p_k, 1 - p_k]$, an interval of length 1. So $W_n$ is a martingale with $d_k = 1$, $\sum_k d_k^2 = 200$, and Azuma gives $\Pr[W_{200} \ge t] \le e^{-2t^2/200}$. At $t = 20$ the exponent is $2 \times 400/200 = 4$ and the bound is $e^{-4} = 1.83\times10^{-2}$, while simulation gives $1.12\times10^{-3}$ (@fig-azuma-adaptive). The bound pays for assuming the worst-case variance, exactly as Hoeffding does: each step's true variance is $p_k(1-p_k) = 0.21$, not the $0.25$ the interval allows.
 
 ![Empirical tail of the martingale in the adaptive coin game against the Azuma bound.](figures/azuma_adaptive.svg){#fig-azuma-adaptive}
 
@@ -420,13 +420,13 @@ $$\Pr\big[f(X) - \mathbb E f(X) \ge t\big] \le \exp\left(-\frac{2t^2}{\sum_i c_i
 
 **Derivation via the Doob martingale.** The idea is to turn $f$ into a martingale by revealing the inputs one at a time and tracking your best guess of $f$ as you go. Each revealed input moves the guess by a bounded amount, and Azuma does the rest.
 
-1. **Build the martingale.** After seeing $X_1, \dots, X_k$, your best guess of $f(X)$ is its conditional average, $M_k = \mathbb E[f(X) \mid X_1, \dots, X_k]$. Before seeing anything, the guess is $M_0 = \mathbb E f$; after seeing everything, it is $M_n = f(X)$. So $M_n - M_0$ is exactly the deviation you want to bound. $(M_k)$ is a martingale by the tower property: averaging the next guess $M_k$ over the not-yet-seen $X_k$ gives back the current guess $M_{k-1}$, so each increment has mean zero given the past.
-2. **Bound the range of each increment.** By independence, the unseen inputs do not depend on the seen ones, so $M_k$ is the average of $f$ over fresh copies of $X_{k+1}, \dots, X_n$, with $X_1, \dots, X_k$ fixed at their observed values. Hold $X_1, \dots, X_{k-1}$ fixed. Then $M_k$ depends only on $X_k$, and changing $X_k$ changes every term of that average by at most $c_k$, so it changes the average by at most $c_k$. As $X_k$ varies, $M_k$ therefore stays in an interval of length at most $c_k$, and so does $D_k = M_k - M_{k-1}$, whose position depends on the past through $M_{k-1}$.
+1. **Build the martingale.** After seeing $X_1, \dots, X_k$, your best guess of $f(X)$ is its conditional average, $W_k = \mathbb E[f(X) \mid X_1, \dots, X_k]$. Before seeing anything, the guess is $W_0 = \mathbb E f$; after seeing everything, it is $W_n = f(X)$. So $W_n - W_0$ is exactly the deviation you want to bound. $(W_k)$ is a martingale by the tower property: averaging the next guess $W_k$ over the not-yet-seen $X_k$ gives back the current guess $W_{k-1}$, so each increment has mean zero given the past.
+2. **Bound the range of each increment.** By independence, the unseen inputs do not depend on the seen ones, so $W_k$ is the average of $f$ over fresh copies of $X_{k+1}, \dots, X_n$, with $X_1, \dots, X_k$ fixed at their observed values. Hold $X_1, \dots, X_{k-1}$ fixed. Then $W_k$ depends only on $X_k$, and changing $X_k$ changes every term of that average by at most $c_k$, so it changes the average by at most $c_k$. As $X_k$ varies, $W_k$ therefore stays in an interval of length at most $c_k$, and so does $U_k = W_k - W_{k-1}$, whose position depends on the past through $W_{k-1}$.
 3. **Apply Azuma** with $d_k = c_k$.
 
 **Interpretation.** The bounded-difference constant $c_i$ measures how much one input can move the output: a per-record influence. Small per-record influence forces the output to concentrate. The same quantity returns in later parts under the name *sensitivity*.
 
-**Example: stability.** The empirical risk of a fixed model with loss in $[0,1]$ is an average of $n$ losses, so changing one example changes it by at most $1/n$: $c_i = 1/n$, $\sum_i c_i^2 = n/n^2 = 1/n$, and McDiarmid gives concentration $\exp(-2nt^2)$. That is Hoeffding again, now as a special case. The real power is for functions that are not sums. Bousquet & Elisseeff apply McDiarmid to the risk of a model *trained* on the data: if retraining after changing one example moves the loss by at most $\beta$ (here a stability constant, not a failure probability), each input has bounded influence on the trained model's risk, and the generalization gap concentrates ([Algorithmic stability and generalization](07-stability-generalization.md)).
+**Example: stability.** The empirical risk of a fixed model with loss in $[0,1]$ is an average of $n$ losses, so changing one record changes it by at most $1/n$: $c_i = 1/n$, $\sum_i c_i^2 = n/n^2 = 1/n$, and McDiarmid gives concentration $\exp(-2nt^2)$. That is Hoeffding again, now as a special case. The real power is for functions that are not sums. Bousquet & Elisseeff apply McDiarmid to the risk of a model *trained* on the data: if retraining after changing one record moves the loss by at most $\gamma$, a stability constant, each input has bounded influence on the trained model's risk, and the generalization gap concentrates ([Algorithmic stability and generalization](07-stability-generalization.md)).
 
 ### Check yourself
 
@@ -457,7 +457,7 @@ uv run python code/part01-prerequisites/concentration.py
 
 **What to take from it**
 
-The first row shows that variance matters. The mean of 200 Bernoulli(0.1) variables has mean $0.1$ and variance $0.09/200$, and the question is how likely it is to reach $0.15$. Markov gives $0.1/0.15 = 0.67$, Chebyshev $0.09/(200 \times 0.05^2) = 0.18$, Hoeffding $e^{-2 \times 200 \times 0.05^2} = e^{-1} = 0.37$, and Chernoff, with $\mu = 20$ and $\delta = 0.5$, $e^{-0.25 \times 20/2.5} = e^{-2} = 0.135$. Hoeffding loses to Chebyshev because $p(1-p) = 0.09$ is far below the worst case $0.25$: range-based bounds pay for ignoring the variance.
+The first row shows that variance matters. The mean of 200 Bernoulli(0.1) variables has mean $0.1$ and variance $0.09/200$, and the question is how likely it is to reach $0.15$. Markov gives $0.1/0.15 = 0.67$, Chebyshev $0.09/(200 \times 0.05^2) = 0.18$, Hoeffding $e^{-2 \times 200 \times 0.05^2} = e^{-1} = 0.37$, and Chernoff, with $\mu = 20$ and $r = 0.5$, $e^{-0.25 \times 20/2.5} = e^{-2} = 0.135$. Hoeffding loses to Chebyshev because $p(1-p) = 0.09$ is far below the worst case $0.25$: range-based bounds pay for ignoring the variance.
 
 The second row shows that a union bound can be nearly exact. The bound $\ln(100/0.05) = 7.60$ fails at the empirical rate 0.0486, close to the target 0.05, because for independent draws with small individual tails the chance that any one fails is almost the sum of the individual chances.
 
@@ -483,8 +483,8 @@ The last row shows that Azuma handles adaptivity, at the price of the worst-case
 | Markov | $X \ge 0$ | $\mu/t$ (for $\Pr[X \ge t]$) | $\mu/\beta$ |
 | Chebyshev | Variance $\sigma^2$ | $\sigma^2/t^2$ (two-sided) | $\sigma/\sqrt\beta$ |
 | Sub-Gaussian | MGF $\le e^{\lambda^2\sigma^2/2}$ | $e^{-t^2/(2\sigma^2)}$ | $\sigma\sqrt{2\ln(1/\beta)}$ |
-| Hoeffding | Mean of $n$ independent variables in $[a, b]$ | $e^{-2nt^2/(b-a)^2}$ | $(b-a)\sqrt{\ln(1/\beta)/(2n)}$ |
-| Chernoff (multiplicative) | Sum of independent Bernoullis, mean $\mu$ | $e^{-\delta^2\mu/(2+\delta)}$ at $t = \delta\mu$ | $\approx\sqrt{2\mu\ln(1/\beta)}$ for small $\delta$ |
+| Hoeffding | Mean of $n$ independent variables in $[l, u]$ | $e^{-2nt^2/(u-l)^2}$ | $(u-l)\sqrt{\ln(1/\beta)/(2n)}$ |
+| Chernoff (multiplicative) | Sum of independent Bernoullis, mean $\mu$ | $e^{-r^2\mu/(2+r)}$ at $t = r\mu$ | $\approx\sqrt{2\mu\ln(1/\beta)}$ for small $r$ |
 | Gaussian $\mathcal N(0,\sigma^2)$ | — | $\frac12 e^{-t^2/(2\sigma^2)}$ | $\sigma\sqrt{2\ln(1/\beta)}$, two-sided |
 | Laplace $\mathrm{Lap}(b)$ | — | $\frac12 e^{-t/b}$; two-sided exactly $e^{-t/b}$ | $b\ln(1/\beta)$, two-sided |
 | McDiarmid | Independent inputs, bounded differences $c_i$ | $e^{-2t^2/\sum_i c_i^2}$ | $\sqrt{\sum_i c_i^2\ln(1/\beta)/2}$ |

@@ -63,8 +63,8 @@ Three things go wrong in practice. First, a correct optimizer still fails with p
 
 For a whole training run, the attack is a membership test on a planted canary. A **trial** is one training run, with or without the canary. Under $(\varepsilon, \delta)$-DP, every such test satisfies
 $$\mathrm{TPR} \le e^\varepsilon\,\mathrm{FPR} + \delta, \qquad 1 - \mathrm{FPR} \le e^\varepsilon\,(1 - \mathrm{TPR}) + \delta.$$ {#eq-audit-region}
-Solving these two inequalities for $\varepsilon$ turns measured rates into a lower bound on it. Write $\bar\alpha$ for the one-sided Clopper–Pearson upper bound on the FPR at level $\beta/2$, and $\underline\tau$ for the lower bound on the TPR at the same level. With probability at least $1 - \beta$, the code is then not $(\varepsilon, \delta)$-DP, at the claimed $\delta$, for any $\varepsilon$ below
-$$\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline\tau - \delta}{\bar\alpha},\ \ln\frac{1 - \bar\alpha - \delta}{1 - \underline\tau}\Big\}.$$ {#eq-audit-eps-lo}
+Solving these two inequalities for $\varepsilon$ turns measured rates into a lower bound on it. Write $\overline{\mathrm{FPR}}$ for the one-sided Clopper–Pearson upper bound on the FPR at level $\beta/2$, and $\underline{\mathrm{TPR}}$ for the lower bound on the TPR at the same level. With probability at least $1 - \beta$, the code is then not $(\varepsilon, \delta)$-DP, at the claimed $\delta$, for any $\varepsilon$ below
+$$\varepsilon_{\mathrm{lo}} = \max\Big\{\ln\frac{\underline{\mathrm{TPR}} - \delta}{\overline{\mathrm{FPR}}},\ \ln\frac{1 - \overline{\mathrm{FPR}} - \delta}{1 - \underline{\mathrm{TPR}}}\Big\}.$$ {#eq-audit-eps-lo}
 The bound needs independent trials, and a threshold chosen on other trials than those it counts, since one tuned on the counted trials would inflate the bound.
 
 SciPy computes it in a few lines, since a Clopper–Pearson bound is a quantile of a beta distribution. Suppose an attack catches the canary in 500 of 1,000 runs that include it, and raises one false alarm in 1,000 runs without it.

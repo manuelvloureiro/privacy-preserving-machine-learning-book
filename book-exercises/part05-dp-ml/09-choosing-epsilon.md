@@ -2,7 +2,7 @@
 
 Exercises for [the chapter on choosing ε](../../book-full/part05-dp-ml/09-choosing-epsilon.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_choosing_epsilon.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_choosing_epsilon.py`.
 
-The solutions use the chapter's notation. A mechanism satisfies differential privacy (DP) with parameters $(\varepsilon, \delta)$, or is $(\varepsilon, \delta)$-DP, when one record changes the probability of any output by at most a factor $e^\varepsilon$ plus $\delta$. A membership test has a false positive rate (FPR) and a true positive rate (TPR). The running example is stochastic gradient descent (SGD) with clipping and Gaussian noise, DP-SGD, with sampling rate $q = 0.01$ and $T = 10{,}000$ steps on 10,000 records, at $\delta = 10^{-5}$; its noise multipliers come from the Rényi differential privacy (RDP) accountant.
+The solutions use the chapter's notation. A mechanism satisfies differential privacy (DP) with parameters $(\varepsilon, \delta)$, or is $(\varepsilon, \delta)$-DP, when one record changes the probability of any output by at most a factor $e^\varepsilon$ plus $\delta$. A membership test has a false positive rate (FPR) and a true positive rate (TPR). The running example is stochastic gradient descent (SGD) with clipping and Gaussian noise, DP-SGD, with a sampling rate $q$ of 0.01 and $T = 10{,}000$ steps on 10,000 records, at $\delta = 10^{-5}$; its noise multipliers come from the Rényi differential privacy (RDP) accountant.
 
 ## What an audit can prove {#sec-sol-epsc-1}
 
@@ -22,8 +22,8 @@ The solutions use the chapter's notation. A mechanism satisfies differential pri
 > **Exercise 2.** **The advantage of Gaussian DP.** Show that the largest advantage $\mathrm{TPR} - \mathrm{FPR}$ against $\mathcal N(0, 1)$ versus $\mathcal N(\mu, 1)$ is $2\Phi(\mu/2) - 1$. Evaluate it for the Gaussian differential privacy (GDP) approximations of the $\varepsilon = 4$ and $\varepsilon = 8$ runs, $\mu = 0.847$ and 1.511 (@tbl-epsc-accountants), and find the $\varepsilon$ of randomized response, whose advantage is $(e^\varepsilon - 1)/(e^\varepsilon + 1)$, with the same advantage. *Check: 0.3281 and 0.5501; randomized response with $\varepsilon = 0.681$ and 1.237.* *(Total variation of two Gaussians)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The best test.** By the Neyman–Pearson lemma the best tests threshold the output at some $c$: $\mathrm{FPR} = 1 - \Phi(c)$, $\mathrm{TPR} = 1 - \Phi(c - \mu)$, so the advantage is $\Phi(c) - \Phi(c - \mu)$.
-2. **Maximize over $c$.** The derivative is $\varphi(c) - \varphi(c - \mu)$, with $\varphi$ the standard normal density, which is zero where the two densities cross, at $c = \mu/2$ by symmetry. There the advantage is $\Phi(\mu/2) - \Phi(-\mu/2) = 2\Phi(\mu/2) - 1$.
+1. **The best test.** By the Neyman–Pearson lemma the best tests threshold the output at some $\tau$: $\mathrm{FPR} = 1 - \Phi(\tau)$, $\mathrm{TPR} = 1 - \Phi(\tau - \mu)$, so the advantage is $\Phi(\tau) - \Phi(\tau - \mu)$.
+2. **Maximize over $\tau$.** The derivative is $\varphi(\tau) - \varphi(\tau - \mu)$, with $\varphi$ the standard normal density, which is zero where the two densities cross, at $\tau = \mu/2$ by symmetry. There the advantage is $\Phi(\mu/2) - \Phi(-\mu/2) = 2\Phi(\mu/2) - 1$.
 3. **Numbers.** $2\Phi(0.4235) - 1 = 0.3281$ and $2\Phi(0.7555) - 1 = 0.5501$. The chapter's 0.3280 for the first comes from the unrounded $\mu$.
 4. **Randomized response.** Solving $(e^\varepsilon - 1)/(e^\varepsilon + 1) = A$ for $\varepsilon$ gives $e^\varepsilon = (1 + A)/(1 - A)$: $\ln(1.3281/0.6719) = 0.681$ and $\ln(1.5501/0.4499) = 1.237$.
 
@@ -35,8 +35,8 @@ The solutions use the chapter's notation. A mechanism satisfies differential pri
 > **Exercise 3.** **When can a flag be trusted?** An attacker with prior $p = 0.01$ wants a test whose flags are right at least half the time. Using @eq-epsc-precision, find the largest FPR at which the pair $(\varepsilon, 10^{-5})$ allows a precision of 1/2, for $\varepsilon = 1$, 4 and 8. *Check: $1.04\times10^{-7}$, $2.25\times10^{-7}$, and every FPR at $\varepsilon = 8$.* *(Base rates)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The condition.** Precision at least 1/2 means $p(e^\varepsilon\alpha + \delta) \ge (1 - p)\alpha$, with $\alpha$ the FPR: the flagged members at least as many as the flagged non-members.
-2. **Solve for $\alpha$.** $\alpha\big((1 - p) - pe^\varepsilon\big) \le p\delta$. If $(1 - p) > pe^\varepsilon$, this is $\alpha \le p\delta/\big((1 - p) - pe^\varepsilon\big)$. If not, every $\alpha$ works.
+1. **The condition.** Precision at least 1/2 means $p(e^\varepsilon a + \delta) \ge (1 - p)a$, with $a$ the FPR: the flagged members at least as many as the flagged non-members.
+2. **Solve for $a$.** $a\big((1 - p) - pe^\varepsilon\big) \le p\delta$. If $(1 - p) > pe^\varepsilon$, this is $a \le p\delta/\big((1 - p) - pe^\varepsilon\big)$. If not, every $a$ works.
 3. **Numbers.** At $\varepsilon = 1$: $0.01 \times 10^{-5}/(0.99 - 0.0272) = 1.04\times10^{-7}$. At $\varepsilon = 4$: $10^{-7}/(0.99 - 0.546) = 2.25\times10^{-7}$. At $\varepsilon = 8$: $0.01e^8 = 29.8 > 0.99$, so the pair allows even odds at every FPR.
 4. **Reading it.** For $\varepsilon \le 4$, the only way the pair allows a trustworthy flag at this prior is through $\delta$, at FPRs around $10^{-7}$, where at most a fraction $\delta$ of members can be flagged.
 
@@ -63,7 +63,7 @@ The solutions use the chapter's notation. A mechanism satisfies differential pri
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Separately.** $\ln(10^{10}) = 23.026$. Persons: $2.56 + 2\sqrt{2.56 \times 23.026} = 17.915$. Housing: $0.07 + 2\sqrt{0.07 \times 23.026} = 2.609$. Sum: 20.524, at $\delta = 2 \times 10^{-10}$ by basic composition of $(\varepsilon, \delta)$ guarantees.
 2. **Together.** zCDP composes by adding $\rho$, so the combined release is $2.63$-zCDP, and one conversion gives $2.63 + 2\sqrt{2.63 \times 23.026} = 18.194$ at $\delta = 10^{-10}$.
-3. **Which is better.** Both are valid. The second is smaller and has the smaller $\delta$, because the conversion's square root is concave: $\sqrt{a} + \sqrt{b} \ge \sqrt{a + b}$, so converting once wastes less.
+3. **Which is better.** Both are valid. The second is smaller and has the smaller $\delta$, because the conversion's square root is concave: $\sqrt{\rho_1} + \sqrt{\rho_2} \ge \sqrt{\rho_1 + \rho_2}$, so converting once wastes less.
 
 *This is the same lesson as the chapter's, in another form: keep the guarantee in its richest form (here $\rho$, there the curve) as long as possible, and convert to $(\varepsilon, \delta)$ once, at the end. The Census Bureau's own 17.14 and 2.47 come from a tighter conversion than @eq-epsc-zcdp.*
 :::

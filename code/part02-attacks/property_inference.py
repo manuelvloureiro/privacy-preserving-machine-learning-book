@@ -562,10 +562,10 @@ def plot_parameter_cloud(rng: np.random.Generator) -> Figure:
         ys = meta.mid[1] - meta.w[0] / meta.w[1] * (xs - meta.mid[0])
         ax.plot(xs, ys, "k--", linewidth=1, label="linear meta-classifier")
         ax.set(
-            xlabel=r"$w_1$",
+            xlabel=r"$\theta_1$",
             title=f"n = {n}: accuracy {meta_accuracy(meta, s0[:, :2], s1[:, :2]):.2f} (on these models)",
         )
-    axes[0].set(ylabel=r"$w_2$", xlim=(0.8, 3.6), ylim=(-1.2, 1.2))
+    axes[0].set(ylabel=r"$\theta_2$", xlim=(0.8, 3.6), ylim=(-1.2, 1.2))
     axes[0].legend(fontsize=8, loc="lower right")
     return fig
 

@@ -18,7 +18,7 @@ The noise of a clipped mean is proportional to the width of the clipping range. 
 | --- | --- | --- |
 | Bounded data | Privacy adds about $1/(\alpha\varepsilon)$ records to the $1/\alpha^2$ that sampling needs | Proportions, surveys, clipped sums |
 | The naive estimator | Clipping to a known range costs records in proportion to the range | The baseline everything below improves on |
-| Coarse then fine | The range costs only about $\ln R/\varepsilon$ records | Means with unknown location; choosing clip bounds privately |
+| Coarse then fine | The range costs only about $\ln R/\varepsilon$ records | Means with unknown location; choosing clipping ranges privately |
 | Shrinking balls | In $d$ dimensions, about $d/(\alpha\varepsilon)$ records for privacy, plus $\sqrt d\ln R/\varepsilon$ for the range | Private averages of vectors, such as gradients |
 | Heavy tails | Clipping into the data, with a bias, costs about $1/(\alpha^2\varepsilon)$ records | Incomes, session lengths, gradient norms |
 
@@ -34,26 +34,26 @@ and it is **pure** $\varepsilon$-DP when $\delta = 0$ ([The definition of differ
 
 ### Fact 1 — The error splits into sampling, bias and noise
 
-Every estimator in this chapter has the same form: clip each record with some function $c$, average, and add independent noise $\eta$ with mean 0. Its error splits into three parts, each with its own cause. The average of the clipped records varies from sample to sample, clipping shifts its expected value away from $\mu$, and the noise adds its own spread. The mean squared error is the sum of the three squares:
-$$\mathbb E\big[(\hat\mu - \mu)^2\big] = \underbrace{\frac{\operatorname{Var}(c(X))}{n}}_{\text{sampling}} + \underbrace{\big(\mathbb E[c(X)] - \mu\big)^2}_{\text{bias}^2} + \underbrace{\operatorname{Var}(\eta)}_{\text{noise}}.$$ {#eq-mean-split}
-To see it, write $\hat\mu - \mu$ as the sum of three pieces: the average of $c(X_i) - \mathbb E[c(X)]$, the constant $\mathbb E[c(X)] - \mu$, and $\eta$. The first and the last have mean 0 and are independent of each other, so when you square the sum and average, every cross term contains a mean-zero factor and vanishes. The average of $n$ independent terms has variance $1/n$ times that of one term, which gives the sampling part. This is the decomposition of the clipping section of [Beyond global sensitivity](07-sensitivity.md#sec-sens-clip).
+Every estimator in this chapter has the same form: clip each record with some function $c$, average, and add independent noise $\xi$ with mean 0. Its error splits into three parts, each with its own cause. The average of the clipped records varies from sample to sample, clipping shifts its expected value away from $\mu$, and the noise adds its own spread. The mean squared error is the sum of the three squares:
+$$\mathbb E\big[(\hat\mu - \mu)^2\big] = \underbrace{\frac{\operatorname{Var}(c(X))}{n}}_{\text{sampling}} + \underbrace{\big(\mathbb E[c(X)] - \mu\big)^2}_{\text{bias}^2} + \underbrace{\operatorname{Var}(\xi)}_{\text{noise}}.$$ {#eq-mean-split}
+To see it, write $\hat\mu - \mu$ as the sum of three pieces: the average of $c(X_i) - \mathbb E[c(X)]$, the constant $\mathbb E[c(X)] - \mu$, and $\xi$. The first and the last have mean 0 and are independent of each other, so when you square the sum and average, every cross term contains a mean-zero factor and vanishes. The average of $n$ independent terms has variance $1/n$ times that of one term, which gives the sampling part. This is the decomposition of the clipping section of [Beyond global sensitivity](07-sensitivity.md#sec-sens-clip).
 
 ### Fact 2 — A clipped mean with Laplace noise
 
 If every clipped record lies in an interval of width $w$, then replacing one record moves the sum by at most $w$ and the mean by at most $w/n$. That is the sensitivity of the mean, so by the [Laplace mechanism](03-laplace-gaussian.md) adding noise $\mathrm{Lap}(w/(n\varepsilon))$ makes it $\varepsilon$-DP. A Laplace variable with scale $s$ has variance $2s^2$, so the noise term of @eq-mean-split is
-$$\operatorname{Var}(\eta) = \frac{2w^2}{n^2\varepsilon^2}.$$ {#eq-mean-laplace-noise}
+$$\operatorname{Var}(\xi) = \frac{2w^2}{n^2\varepsilon^2}.$$ {#eq-mean-laplace-noise}
 The privacy holds for every dataset, because the clipping, not an assumption, keeps the records in the interval. An interval chosen from the data must be chosen privately, as Fact 5 allows.
 
 ### Fact 3 — Normal draws stay close to their mean
 
-A standard normal variable $Z$ exceeds a threshold $t$ in absolute value with probability at most $2e^{-t^2/2}$. This is the Chernoff bound on each of its two tails. [Concentration inequalities](../part01-prerequisites/02-concentration.md) proves a bound half as large, but the factor 2 changes $\tau$ below only slightly, so the chapter keeps the simpler form. Now take $n$ draws from a normal distribution with mean $\mu$ and variance 1, and allow a failure probability $\beta$. The union bound adds the $n$ tail probabilities, so all $n$ draws lie within a distance $\tau$ of $\mu$ with probability at least $1 - \beta$ once $2ne^{-\tau^2/2} = \beta$, that is, for
+A standard normal variable $Z$ exceeds a level $t$ in absolute value with probability at most $2e^{-t^2/2}$. This is the Chernoff bound on each of its two tails. [Concentration inequalities](../part01-prerequisites/02-concentration.md) proves a bound half as large, but the factor 2 changes $\tau$ below only slightly, so the chapter keeps the simpler form. Now take $n$ draws from a normal distribution with mean $\mu$ and variance 1, and allow a failure probability $\beta$. The union bound adds the $n$ tail probabilities, so all $n$ draws lie within a distance $\tau$ of $\mu$ with probability at least $1 - \beta$ once $2ne^{-\tau^2/2} = \beta$, that is, for
 $$\tau = \sqrt{2\ln(2n/\beta)}.$$ {#eq-mean-spread}
 For $n = 1000$ and $\beta = 0.05$, $\tau = 4.604$. The bound is loose: in 20,000 simulated datasets the largest distance exceeded $\tau$ in a fraction 0.0039 of them, not 0.05. In $d$ dimensions the analogue is about the length of the vector $X - \mu$, which concentrates near $\sqrt d$ rather than near 0. The section on many dimensions uses it.
 
 ### Fact 4 — The exponential mechanism rarely picks a bad candidate
 
-The [exponential mechanism](05-selection.md) picks one of $m$ candidates with probability proportional to $e^{\varepsilon u/2}$, where $u$ is a score that one record changes by at most 1. It is $\varepsilon$-DP. Suppose the best score is $u^*$. A candidate whose score is at most $u^* - g$ has a weight at most $e^{\varepsilon(u^* - g)/2}$, while the total weight is at least that of the best candidate, $e^{\varepsilon u^*/2}$. Adding over at most $m$ such candidates,
-$$\Pr[\text{the chosen score is at most } u^* - g] \le m\,e^{-\varepsilon g/2}.$$ {#eq-mean-em-utility}
+The [exponential mechanism](05-selection.md) picks one candidate $r$ from a finite set $\mathcal R$ of candidates. It picks $r$ with probability proportional to $e^{\varepsilon u(D, r)/2}$, where $u$ is a score that one record changes by at most 1. It is $\varepsilon$-DP. Suppose the best score is $u^*$. A candidate whose score is at most $u^* - g$ has a weight at most $e^{\varepsilon(u^* - g)/2}$, while the total weight is at least that of the best candidate, $e^{\varepsilon u^*/2}$. Adding over at most $|\mathcal R|$ such candidates,
+$$\Pr[\text{the chosen score is at most } u^* - g] \le |\mathcal R|\,e^{-\varepsilon g/2}.$$ {#eq-mean-em-utility}
 
 ### Fact 5 — Budgets add, even when a step uses an earlier output
 
@@ -146,7 +146,7 @@ In total, an error $\alpha$ needs about $1/\alpha^2 + 1/(\alpha\varepsilon) + \l
 
 1. **Privacy.** Replacing one record takes it out of one bin and puts it into another, so every count changes by at most 1. The coarse step is then the exponential mechanism with a score of sensitivity 1, which is $\varepsilon_1$-DP. For each value of $J$, the fine step is a clipped mean over a window of width $3b$, which is $\varepsilon_2$-DP by Fact 2. By Fact 5 the two steps together are $\varepsilon$-DP. The window depends on the data only through $J$, which was chosen privately, so no leak of the kind seen in [Beyond global sensitivity](07-sensitivity.md) arises.
 2. **The data fill at most two bins.** By Fact 3, with probability at least $1 - \beta$ every record lies within $\tau = b/2$ of $\mu$. Then the records span an interval of length at most $b$, which meets at most two neighbouring bins. So the fullest bin holds at least $n/2$ records, and every other bin except one is empty.
-3. **The coarse step picks a non-empty bin.** An empty bin has score 0, at least $n/2$ below the best. Fact 4 with $g = n/2$ bounds the chance of picking one by $m e^{-\varepsilon_1 n/4}$. Setting this equal to $\beta$ and solving for $n$ gives @eq-mean-coarse-n.
+3. **The coarse step picks a non-empty bin.** An empty bin has score 0, at least $n/2$ below the best. Fact 4 with the $m$ bins as candidates and $g = n/2$ bounds the chance of picking one by $m e^{-\varepsilon_1 n/4}$. Setting this equal to $\beta$ and solving for $n$ gives @eq-mean-coarse-n.
 4. **The window holds every record.** A non-empty bin $J$ contains a record within $b/2$ of $\mu$, so $\mu$ lies within $b/2$ of the bin. Every record lies within $b/2$ of $\mu$, hence within $b$ of the bin, which is inside the window.
 5. **Error.** On the events of steps 2 and 3, the fine step clips nothing, so @eq-mean-split has no bias, a sampling term $1/n$, and the noise term @eq-mean-laplace-noise with $w = 3b$ and $\varepsilon_2$. That is @eq-mean-coarse.
 
@@ -191,7 +191,7 @@ Now each record is a vector in $d$ dimensions, drawn from a normal distribution 
 
 ### Statement
 
-The noise is that of the [Gaussian mechanism](03-laplace-gaussian.md), calibrated exactly. Write $\Delta_2$ for the $\ell_2$ sensitivity of a query, the most one record can move its answer in length. Gaussian noise with standard deviation $\sigma$ makes the query $(\varepsilon, \delta)$-DP when $\Delta_2/\sigma$ is at most a number $\mu(\varepsilon, \delta)$, which that chapter computes from the exact privacy curve. (This $\mu(\varepsilon, \delta)$ is a ratio, not the mean.) Two lengths set the scale. The first bounds how far records lie from the mean,
+The noise is that of the [Gaussian mechanism](03-laplace-gaussian.md), calibrated exactly. Write $\Delta_2$ for the $\ell_2$ sensitivity of a query, the most one record can move its answer in length. Gaussian noise with standard deviation $\sigma$ makes the query $(\varepsilon, \delta)$-DP when $\Delta_2/\sigma$ is at most a number $\mu(\varepsilon, \delta)$, which that chapter computes from the exact privacy profile. (This $\mu(\varepsilon, \delta)$ is a ratio, not the mean.) Two lengths set the scale. The first bounds how far records lie from the mean,
 $$\tau_d = \sqrt d + \sqrt{2\ln(2n/\beta)},$$
 and the second, $u$, is a margin for the $T + 1$ steps of the mechanism, $T$ rounds and a final step:
 $$u = \sqrt{2\ln(4(T + 1)/\beta)}.$$
@@ -221,7 +221,7 @@ Without privacy the error is $\sqrt{d/n}$. The privacy noise is about $d/(n\vare
 
 The range costs $\sqrt d\ln R/\varepsilon$, which is less than the $d\ln R/\varepsilon$ of a grid histogram, because each round makes progress in all $d$ directions at once. The rounds compose here by Fact 5, which adds the budgets. The tighter accountants of Part 4 make several rounds cheaper, and the original method uses one of them.
 
-This is the shape of every private average of vectors, including the average of clipped gradients in private training. There the clipping radius is a fixed number rather than a shrinking ball, and choosing it is the clipping trade-off of [Beyond global sensitivity](07-sensitivity.md#sec-sens-clip) in many dimensions.
+This is the shape of every private average of vectors, including the average of clipped gradients in private training. There the clipping norm is a fixed number rather than a shrinking ball, and choosing it is the clipping trade-off of [Beyond global sensitivity](07-sensitivity.md#sec-sens-clip) in many dimensions.
 
 ### Example: a thousand dimensions
 
@@ -266,7 +266,7 @@ So an error $\alpha$ needs about $\sigma^2/\alpha^2 + 8\sqrt2\,\sigma^2/(\alpha^
 
 ### Interpretation
 
-With heavy tails, privacy stops being a lower-order cost. For bounded data the privacy term in @eq-mean-bounded-n had a single $1/\alpha$. Here it has $1/\alpha^2$, the same power as sampling, divided by $\varepsilon$. Kamath, Singhal & Ullman (2020) show that this is unavoidable: no $\varepsilon$-DP mechanism does better for every distribution with bounded variance. @sec-apx-mech-heavy in the appendices derives this lower bound, and its $k$-th moment version, from a two-point distribution and group privacy. They also show what more knowledge buys. If the $k$-th moment $\mathbb E|X - \mu|^k$ is bounded for some $k > 2$, the cost falls to about $1/(\varepsilon\,\alpha^{k/(k-1)})$ records, and as $k$ grows it approaches the $1/(\alpha\varepsilon)$ of bounded data.
+With heavy tails, privacy stops being a lower-order cost. For bounded data the privacy term in @eq-mean-bounded-n had a single $1/\alpha$. Here it has $1/\alpha^2$, the same power as sampling, divided by $\varepsilon$. Kamath, Singhal & Ullman (2020) show that this is unavoidable: no $\varepsilon$-DP mechanism does better for every distribution with bounded variance. @sec-apx-mech-heavy in the appendices derives this lower bound, and its $k$-th moment version, from a two-point distribution and group privacy. They also show what more knowledge buys. If the $k$-th moment $\mathbb E[|X - \mu|^k]$ is bounded for some $k > 2$, the cost falls to about $1/(\varepsilon\,\alpha^{k/(k-1)})$ records, and as $k$ grows it approaches the $1/(\alpha\varepsilon)$ of bounded data.
 
 The bound @eq-mean-heavy is a worst case, and it is tight up to a constant factor. A sharper version of step 1 gives $\sigma^2/(4\tau)$, because $(|y| - \tau)_+ \le y^2/(4\tau)$ for every $y$, and a distribution that puts a little mass at distance $2\tau$ on one side of the mean attains that. So the worst case hides its variance in a few far-out records on one side. For an ordinary heavy-tailed distribution the bias falls faster than $\sigma^2/\tau$, the best $\tau$ is smaller than $\tau_b$, and the error is lower. But $\tau_b$ uses only $n$, $\varepsilon$ and the variance bound, so it can be set without looking at the data. Setting $\tau$ from the data, such as to the observed maximum, would bring back the leak of [Beyond global sensitivity](07-sensitivity.md#sec-sens-local).
 
@@ -335,7 +335,7 @@ uv run python code/part03-dp-foundations/mean_estimation.py
 | Normal, $\lvert\mu\rvert \le R$, naive | Clip to $[-R - \tau, R + \tau]$, Laplace | $1/\alpha^2 + R/(\alpha\varepsilon)$ |
 | Normal, $\lvert\mu\rvert \le R$, coarse then fine | Exponential mechanism on bins of width $2\tau$, then clip to 3 bins | $1/\alpha^2 + 1/(\alpha\varepsilon) + \ln R/\varepsilon$; coarse step $4\ln(m/\beta)/\varepsilon_1$ |
 | Same, approximate DP | Stability-based histogram for the coarse step | $1/\alpha^2 + 1/(\alpha\varepsilon) + \ln(1/\delta)/\varepsilon$, no $R$ |
-| $d$ dimensions, $\lVert\mu\rVert \le R$ | Shrinking balls, Gaussian noise, radius @eq-mean-shrink | $d/\alpha^2 + d\sqrt{\ln(1/\delta)}/(\alpha\varepsilon) + \sqrt d\ln R/\varepsilon$ |
+| $d$ dimensions, $\Vert\mu\Vert \le R$ | Shrinking balls, Gaussian noise, radius @eq-mean-shrink | $d/\alpha^2 + d\sqrt{\ln(1/\delta)}/(\alpha\varepsilon) + \sqrt d\ln R/\varepsilon$ |
 | Variance $\le \sigma^2$ only | Clip to $\mu \pm \tau_b$, $\tau_b = \sigma\sqrt{n\varepsilon/(2\sqrt2)}$ | $\sigma^2/\alpha^2 + 8\sqrt2\,\sigma^2/(\alpha^2\varepsilon)$ |
 | $k$-th moment bounded | Clip into the data | $1/\alpha^2 + 1/(\varepsilon\,\alpha^{k/(k-1)})$ |
 

@@ -803,9 +803,12 @@ def plot_dpi_staircase(mu: float = 1.0) -> Figure:
 def plot_pinsker() -> Figure:
     kls = [i / 100 for i in range(401)]
     fig, ax = plt.subplots(figsize=(7, 4.5))
-    ax.plot(kls, [min(pinsker_bound(k), 1.0) for k in kls], "k--", label=r"Pinsker $\sqrt{\mathrm{KL}/2}$")
+    ax.plot(kls, [min(pinsker_bound(k), 1.0) for k in kls], "k--", label=r"Pinsker $\sqrt{D_{\mathrm{KL}}/2}$")
     ax.plot(
-        kls, [bretagnolle_huber_bound(k) for k in kls], "k:", label=r"Bretagnolle–Huber $\sqrt{1 - e^{-\mathrm{KL}}}$"
+        kls,
+        [bretagnolle_huber_bound(k) for k in kls],
+        "k:",
+        label=r"Bretagnolle–Huber $\sqrt{1 - e^{-D_{\mathrm{KL}}}}$",
     )
     mus = [i / 100 for i in range(284)]
     ax.plot([gaussian_kl(m) for m in mus], [gaussian_tv(m) for m in mus], label="shifted Gaussians")

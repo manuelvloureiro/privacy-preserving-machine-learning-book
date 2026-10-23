@@ -2,7 +2,7 @@
 
 ## Why this matters
 
-You have trained a model with differential privacy (DP), and a paper or a model card needs one sentence. It says that the model is DP with a privacy level $\varepsilon$ and a small failure probability $\delta$. The same run can be reported as 6.24 or as 24,379.55, depending on the procedure that computed it, and nobody can check either value without knowing what that procedure assumed.
+You have trained a model with differential privacy (DP), and a paper or a model card needs one sentence. It says that the model is DP with a privacy level $\varepsilon$ and a small slack $\delta$. The same run can be reported as 6.24 or as 24,379.55, depending on the procedure that computed it, and nobody can check either value without knowing what that procedure assumed.
 
 The run in @tbl-choose-main is private stochastic gradient descent (SGD), called DP-SGD. Each record joins each batch with probability $q = 0.01$, the sampling rate, and the noise multiplier $\sigma$, the noise as a multiple of the clipping norm, is 1. The run has one true $\varepsilon$ that nobody can compute exactly, and a procedure that bounds or estimates it is an **accountant**. The table compares advanced composition, Rényi differential privacy (RDP) and the privacy loss distribution (PLD).
 
@@ -43,7 +43,7 @@ Roughly, treat $\delta$ as the chance that the guarantee fails for someone, poss
 
 Following the convention of Ponomareva et al. (2023), this book chooses
 $$\delta \le \frac{1}{n^{1.1}}, \quad \text{rounded down to a power of ten.}$$ {#eq-choose-delta}
-Count $n$ in the unit the claim protects, which at the user level means users, not examples.
+Count $n$ in the unit the claim protects, which at the user level means users, not records.
 
 For example, put the longer run of @tbl-choose-main on 50,000 records, which makes it 100 epochs. Then $1/n^{1.1}$ is $6.8\times10^{-6}$, which rounds down to $10^{-6}$. The comparison point $10^{-5}$ is half of $1/n$, so it fails the rule. The US National Institute of Standards and Technology (NIST) recommends the stricter $1/n^2$, so report $\varepsilon$ at both values of $\delta$.
 
@@ -54,7 +54,7 @@ Ponomareva et al. (2023) and NIST ask for the items of @tbl-choose-statement. Th
 | Item | The run on 50,000 records |
 | --- | --- |
 | Setting | DP-SGD in the central model, covering every checkpoint and the final model |
-| Unit and neighbours | One example per person; neighbours add or remove one example |
+| Unit and neighbours | One record per person; neighbours add or remove one record |
 | Training | Poisson sampling at $q = 0.01$, 10,000 steps (100 epochs), clipping norm 1, noise multiplier 1 |
 | Accountant | PLD, upper value, on the grid $10^{-5}$, with the library's version |
 | Guarantee | $(6.96, 10^{-6})$ and, at $1/n^2$, $(9.06, 4.0\times10^{-10})$; the PLD's lower values, 6.8574 and 8.9378, show how far each could still fall |
@@ -73,7 +73,7 @@ An accountant trusts that the code does what its theorem assumes. Yet many paper
 | --- | --- | --- | --- |
 | Sampler | Poisson sampling at rate $q$ | Do batch sizes vary from step to step? | The sampler's row of [Subsampling](05-subsampling.md#sec-sub-schemes): fixed-size batches at $\sigma/2$; shuffle and partition unamplified, for zero-out neighbours |
 | Neighbours | Add or remove one record | Which relation does the claim state? | Replace-one costs more per step; for Poisson sampling, compose the same steps in `PLDAccountant(NeighboringRelation.REPLACE_ONE)` |
-| Unit | One example | Can one person give several examples? | Clip and sample per user, or pay for the group ([User-level DP](../part05-dp-ml/07-user-level.md)) |
+| Unit | One record | Can one person give several records? | Clip and sample per user, or pay for the group ([User-level DP](../part05-dp-ml/07-user-level.md)) |
 | Tuning, adaptivity and steps | Settings and steps fixed in advance | Tuning on private data, early stopping, restarts? | Account for the tuning runs ([Hyperparameter tuning](../part05-dp-ml/03-hyperparameter-tuning.md)); report the planned maximum; keep the accountant's state across restarts |
 | Other data | Only the training rows are private | Pretraining, fitted preprocessing, validation rows? | Name them; preprocessing fitted on private rows needs its own budget |
 

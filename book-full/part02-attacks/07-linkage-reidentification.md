@@ -19,18 +19,18 @@ Picking one person out of $n$ takes $\log_2 n$ bits of information, because each
 | Linkage success is the number of distinct quasi-identifier combinations over $n$ | Scoring a release against an adversary who knows who is in it |
 | Inverting a hashed identifier costs $N$ hashes, $\log_2N$ bits | Why hashing names, licence or phone numbers is not anonymization |
 | Expected fraction unique, $\sum_c p_c(1 - p_c)^{n-1}$ | Predicting re-identification risk from a model of the population |
-| Uniform cells: $e^{-n/M}$, a single curve in bits minus $\log_2 n$ | The "33 bits" rule and its correction |
+| Uniform cells: $e^{-n/K}$, a single curve in bits minus $\log_2 n$ | The "33 bits" rule and its correction |
 | Collision lower bound $(1 - \sum_c p_c^2)^{n-1}$ | A guaranteed uniqueness rate from marginals alone |
 | Concentration of the fraction unique (McDiarmid) | Why one sample of the population is enough |
 | Narayanan–Shmatikov score as a likelihood ratio | De-anonymizing sparse data with noisy auxiliary information |
 | Eccentricity and its false-match rate | Deciding when the best match is the right one |
-| Correctness of a match in a sample, $1/(1 + \lambda(1 - \pi))$ and $e^{-\lambda(1 - \pi)}$ | Why releasing a small sample does not protect the people in it |
+| Correctness of a match in a sample, $1/(1 + \lambda(1 - q))$ and $e^{-\lambda(1 - q)}$ | Why releasing a small sample does not protect the people in it |
 
 : The results of this chapter and where each is used. {#tbl-link-uses}
 
 **What you need.** Every outside fact this chapter uses is restated where it is used; these links are for more detail. Entropy, the chain rule and the conversion between probabilities and bits are in [Information theory](../part01-prerequisites/05-information-theory.md). The binomial and Poisson distributions, and Poisson thinning ([Exercise 2](../../book-exercises/part01-prerequisites/01-distributions.md#sec-sol-distributions-2) of that chapter), are in [Probability distributions](../part01-prerequisites/01-distributions.md). McDiarmid's inequality is in [Concentration](../part01-prerequisites/02-concentration.md). The Neyman–Pearson lemma, the Bayesian view of a test, and why you should read a curve of true against false positive rates at small false positive rates are in [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md). The birthday bound is in [Cryptography basics](../part01-prerequisites/08-crypto-basics.md). The vocabulary of adversaries, auxiliary knowledge and games is in [Threat models](01-threat-models.md).
 
-**Notation.** A population has $n$ people. Each person has a combination of attribute values, their **cell**. Under the model of the population, a person falls in cell $c$ with probability $p_c$, independently of everyone else. There are $M$ cells. A person is **unique** when nobody else is in their cell. $U$ is the number of unique people. Logarithms are base 2 when the unit is bits and natural otherwise.
+**Notation.** A population has $n$ people. Each person has a combination of attribute values, their **cell**. Under the model of the population, a person falls in cell $c$ with probability $p_c$, independently of everyone else. There are $K$ cells. A person is **unique** when nobody else is in their cell. $U$ is the number of unique people. Logarithms are base 2 when the unit is bits and natural otherwise.
 
 ## Toolkit: three facts every derivation uses
 
@@ -40,7 +40,7 @@ To find how many people are unique on average, you do not need the distribution 
 
 $$\mathbb E U = \sum_{i=1}^n\Pr[\text{person } i \text{ is unique}].$$
 
-The rule "the average of a sum is the sum of the averages" is **linearity of expectation**, and it holds even when the terms depend on each other. Here they do: knowing that person 1 is unique changes the chance that person 2 is. Linearity does not care, because it only adds up how often each counter is 1, outcome by outcome. Walk through the smallest case to see it: $n = 3$ people, $M = 2$ equally likely cells A and B, so 8 equally likely outcomes (@tbl-link-indicator).
+The rule "the average of a sum is the sum of the averages" is **linearity of expectation**, and it holds even when the terms depend on each other. Here they do: knowing that person 1 is unique changes the chance that person 2 is. Linearity does not care, because it only adds up how often each counter is 1, outcome by outcome. Walk through the smallest case to see it: $n = 3$ people, $K = 2$ equally likely cells A and B, so 8 equally likely outcomes (@tbl-link-indicator).
 
 | Cells of (person 1, 2, 3) | `AAA` | `AAB` | `ABA` | `BAA` | `ABB` | `BAB` | `BBA` | `BBB` |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -137,7 +137,7 @@ Joining on the three columns gives Ana's asthma, Carla's depression and Dan's pn
 
 This is, in miniature, how Sweeney re-identified the governor of Massachusetts in the late 1990s. The state's Group Insurance Commission had released hospital records of about 135,000 state employees and their families without names. Sweeney bought the Cambridge voter roll for twenty dollars. Six people on it shared the governor's birth date, three of them were men, and only one of those lived in his ZIP code. Barth-Jones (2012) later pointed out that the governor was an easy target in one respect: his hospital stay had been in the news, so the adversary knew he was in the release, the assumption of the game above. For an ordinary person, whom nobody knows to be in the data, a unique match is less certain, which is the question @sec-link-sampling takes up.
 
-**In bits** (@fig-link-bits). Now count the bits of Sweeney's three attributes, treating each as uniform over its values, which gives an upper bound. There are about 40,000 ZIP codes, $365 \times 80 = 29{,}200$ birthdays in about 80 birth years, and two sexes, so the three attributes carry at most $\log_2 40{,}000 + \log_2 29{,}200 + 1 = 15.3 + 14.8 + 1.0 = 31.1$ bits, against $\log_2(248.7\times10^6) = 27.9$ bits needed to single out one American. The same count in cells: there are $M = 40{,}000 \times 29{,}200 \times 2 = 2.34\times10^9$ cells for $n = 248.7$ million people, so $n/M = 0.106$ people per cell. If everyone fell into a uniformly random cell, the next section shows that a fraction $e^{-n/M} = e^{-0.106} = 0.899$ would be unique. Sweeney's 87% is a little lower because people are not spread uniformly: ZIP codes range from a few residents to tens of thousands, and birth years are not equally common, so people crowd into the popular cells. Golle (2006) repeated the estimate with the 2000 census and found 63%. Both estimates have to model how birth dates spread within the age groups that census tables publish, and the answer is sensitive to that modelling.
+**In bits** (@fig-link-bits). Now count the bits of Sweeney's three attributes, treating each as uniform over its values, which gives an upper bound. There are about 40,000 ZIP codes, $365 \times 80 = 29{,}200$ birthdays in about 80 birth years, and two sexes, so the three attributes carry at most $\log_2 40{,}000 + \log_2 29{,}200 + 1 = 15.3 + 14.8 + 1.0 = 31.1$ bits, against $\log_2(248.7\times10^6) = 27.9$ bits needed to single out one American. The same count in cells: there are $K = 40{,}000 \times 29{,}200 \times 2 = 2.34\times10^9$ cells for $n = 248.7$ million people, so $n/K = 0.106$ people per cell. If everyone fell into a uniformly random cell, the next section shows that a fraction $e^{-n/K} = e^{-0.106} = 0.899$ would be unique. Sweeney's 87% is a little lower because people are not spread uniformly: ZIP codes range from a few residents to tens of thousands, and birth years are not equally common, so people crowd into the popular cells. Golle (2006) repeated the estimate with the 2000 census and found 63%. Both estimates have to model how birth dates spread within the age groups that census tables publish, and the answer is sensitive to that modelling.
 
 ![The three classic quasi-identifiers, in bits, against the bits needed to single out one person in the US population of 1990 and in the world population. The bits are upper bounds that treat each attribute as uniform over its values.](figures/link_bits.svg){#fig-link-bits}
 
@@ -196,11 +196,11 @@ A data custodian who wants to know the re-identification risk of a release can c
 
 $$\frac{\mathbb E U}{n} = \sum_cp_c(1 - p_c)^{n-1}.$$ {#eq-link-unique}
 
-**Uniform cells.** If all $M$ cells are equally likely, every term has $p_c = 1/M$, and the formula becomes $(1 - 1/M)^{n-1} \approx e^{-n/M}$: the chance that nobody else lands in your cell when the average cell holds $n/M$ people. Now count the cells in bits, $b = \log_2M$, so that $M = 2^b$ and $n = 2^{\log_2 n}$. The average occupancy is $n/M = 2^{\log_2n - b}$, and
+**Uniform cells.** If all $K$ cells are equally likely, every term has $p_c = 1/K$, and the formula becomes $(1 - 1/K)^{n-1} \approx e^{-n/K}$: the chance that nobody else lands in your cell when the average cell holds $n/K$ people. Now count the cells in bits, $b = \log_2K$, so that $K = 2^b$ and $n = 2^{\log_2 n}$. The average occupancy is $n/K = 2^{\log_2n - b}$, and
 
 $$\frac{\mathbb E U}{n} \approx \exp\big(-2^{\log_2n - b}\big),$$ {#eq-link-uniform}
 
-a single curve in $b - \log_2n$, the bits beyond those needed to name one person. Solving $e^{-n/M} = f$ for the bits says how many you need for a fraction $f$ of people to be unique: $b = \log_2n + \log_2\frac{1}{\ln(1/f)}$. That is half once $b$ exceeds $\log_2n$ by 0.53 bits, 90% at 3.25 bits more and 99% at 6.64 bits more.
+a single curve in $b - \log_2n$, the bits beyond those needed to name one person. Solving $e^{-n/K} = f$ for the bits says how many you need for a fraction $f$ of people to be unique: $b = \log_2n + \log_2\frac{1}{\ln(1/f)}$. That is half once $b$ exceeds $\log_2n$ by 0.53 bits, 90% at 3.25 bits more and 99% at 6.64 bits more.
 
 **A lower bound from the collision probability.** The exact formula needs every $p_c$, and there can be billions of cells. A cruder question needs much less: how likely is a random person to share a cell with one other random person? That is the collision probability $\sum_cp_c^2$ of Fact 3. If you pretend every person's cell is as crowded as average in this sense, you get a guaranteed floor on uniqueness. For any $(p_c)$,
 
@@ -223,29 +223,29 @@ $$\Pr\Big[\Big|\frac Un - \frac{\mathbb EU}{n}\Big| \ge t\Big] \le 2e^{-nt^2/2}.
 
 **Uniform cells** (@eq-link-uniform).
 
-1. **Put $p_c = 1/M$ in @eq-link-unique.** There are $M$ terms, each $\frac1M(1 - \frac1M)^{n-1}$, so the sum is $(1 - \frac1M)^{n-1}$.
-2. **Replace the power by an exponential.** Fact 2 with $p = 1/M$ and $k = n - 1$ squeezes $(1 - \frac1M)^{n-1}$ between $e^{-(n-1)/M}$ and $e^{-(n-1)/(M-1)}$. These exponents differ by $\frac{n-1}{M(M-1)}$, of order $n/M^2$, and replacing $n - 1$ by $n$ changes the exponent by only $1/M$. So $(1 - \frac1M)^{n-1} \approx e^{-n/M}$ with relative error of order $1/M + n/M^2$, negligible for $M$ in the thousands or more.
-3. **Write the exponent in bits.** $n/M = 2^{\log_2n}/2^b = 2^{\log_2n - b}$.
-4. **Find the bits for a target fraction.** Solve $e^{-n/M} = f$ for $M$: taking logarithms, $n/M = \ln(1/f)$, so $M = n/\ln(1/f)$ and $b = \log_2n - \log_2\ln(1/f)$. At $f = \frac12$, $\ln 2 = 0.693$ and $-\log_2 0.693 = 0.53$. At $f = 0.9$, $\ln\frac{1}{0.9} = 0.105$ and $-\log_2 0.105 = 3.25$. At $f = 0.99$, $\ln\frac1{0.99} = 0.0101$ and $-\log_2 0.0101 = 6.64$.
+1. **Put $p_c = 1/K$ in @eq-link-unique.** There are $K$ terms, each $\frac1K(1 - \frac1K)^{n-1}$, so the sum is $(1 - \frac1K)^{n-1}$.
+2. **Replace the power by an exponential.** Fact 2 with $p = 1/K$ and $k = n - 1$ squeezes $(1 - \frac1K)^{n-1}$ between $e^{-(n-1)/K}$ and $e^{-(n-1)/(K-1)}$. These exponents differ by $\frac{n-1}{K(K-1)}$, of order $n/K^2$, and replacing $n - 1$ by $n$ changes the exponent by only $1/K$. So $(1 - \frac1K)^{n-1} \approx e^{-n/K}$ with relative error of order $1/K + n/K^2$, negligible for $K$ in the thousands or more.
+3. **Write the exponent in bits.** $n/K = 2^{\log_2n}/2^b = 2^{\log_2n - b}$.
+4. **Find the bits for a target fraction.** Solve $e^{-n/K} = f$ for $K$: taking logarithms, $n/K = \ln(1/f)$, so $K = n/\ln(1/f)$ and $b = \log_2n - \log_2\ln(1/f)$. At $f = \frac12$, $\ln 2 = 0.693$ and $-\log_2 0.693 = 0.53$. At $f = 0.9$, $\ln\frac{1}{0.9} = 0.105$ and $-\log_2 0.105 = 3.25$. At $f = 0.99$, $\ln\frac1{0.99} = 0.0101$ and $-\log_2 0.0101 = 6.64$.
 
 **The collision lower bound** (@eq-link-collision). The idea is that @eq-link-unique is an average of the function $(1 - x)^{n-1}$ over the cell probabilities people find themselves in, and for a curve that bends upwards the average of the function is at least the function of the average.
 
-1. **Write @eq-link-unique as an average.** Draw a person's cell $C$, so $C = c$ with probability $p_c$, and look at the probability $p_C$ of the cell they landed in. Then $\frac{\mathbb EU}{n} = \mathbb E[g(p_C)]$ with $g(x) = (1 - x)^{n-1}$.
+1. **Write @eq-link-unique as an average.** Draw a person's cell $Y$, so $Y = c$ with probability $p_c$, and look at the probability $p_Y$ of the cell they landed in. Then $\frac{\mathbb EU}{n} = \mathbb E[g(p_Y)]$ with $g(x) = (1 - x)^{n-1}$.
 2. **Check that $g$ bends upwards.** $g$ is convex on $[0, 1]$, because its second derivative $g''(x) = (n-1)(n-2)(1 - x)^{n-3}$ is never negative there.
-3. **Apply Jensen's inequality.** For a convex function, the average of the function is at least the function of the average, $\mathbb E[g(X)] \ge g(\mathbb E X)$. The reason is that a convex curve lies above its tangent line at the point $\mathbb E X$; averaging the curve gives at least the average of the tangent line, which is the tangent's value at $\mathbb E X$, which is $g(\mathbb E X)$. So $\mathbb E[g(p_C)] \ge g(\mathbb E[p_C])$.
-4. **Compute the inner average.** $\mathbb E[p_C] = \sum_cp_c\cdot p_c = \sum_cp_c^2$, the collision probability. For independent attributes it factorizes by Fact 3.
+3. **Apply Jensen's inequality.** For a convex function, the average of the function is at least the function of the average, $\mathbb E[g(X)] \ge g(\mathbb E X)$. The reason is that a convex curve lies above its tangent line at the point $\mathbb E X$; averaging the curve gives at least the average of the tangent line, which is the tangent's value at $\mathbb E X$, which is $g(\mathbb E X)$. So $\mathbb E[g(p_Y)] \ge g(\mathbb E[p_Y])$.
+4. **Compute the inner average.** $\mathbb E[p_Y] = \sum_cp_c\cdot p_c = \sum_cp_c^2$, the collision probability. For independent attributes it factorizes by Fact 3.
 
-Equality in step 3 holds when $p_C$ is constant, that is, when all cells with positive probability are equally likely, because then there is nothing to average. The bound is tight for uniform cells and loose when a few cells hold most of the people: those crowded cells push the collision probability up and the bound down, while the many people in rare cells are still unique.
+Equality in step 3 holds when $p_Y$ is constant, that is, when all cells with positive probability are equally likely, because then there is nothing to average. The bound is tight for uniform cells and loose when a few cells hold most of the people: those crowded cells push the collision probability up and the bound down, while the many people in rare cells are still unique.
 
 **Concentration** (@eq-link-mcdiarmid). The tool is McDiarmid's inequality ([Concentration](../part01-prerequisites/02-concentration.md)). It applies to any function $f$ of $n$ independent inputs such that changing input $i$ alone, with the others fixed, moves $f$ by at most $c_i$. It says that $f$ is unlikely to be far from its mean: $\Pr[f - \mathbb Ef \ge t] \le \exp(-2t^2/\sum_ic_i^2)$, and the same for the lower tail. So the work is to find $c_i$.
 
-1. **Change one input.** $U$ is a function of the $n$ independent cells. Change one person's cell from $a$ to $b$; only cells $a$ and $b$ change their counts, so only they can change $U$.
-2. **Bound the change.** A cell with count $k$ contributes $\mathbf 1[k = 1]$ to $U$: it holds a unique person exactly when it holds one person. Cell $a$'s count drops by one and its contribution changes by $\mathbf 1[k_a - 1 = 1] - \mathbf 1[k_a = 1] \in \{-1, 0, 1\}$. Cell $b$'s count rises by one, and its contribution likewise changes by $-1$, 0 or 1. So $U$ changes by at most 2, and $U/n$ by at most $c_i = 2/n$. (It can change by exactly 2: move a person out of a pair and into an empty cell, and both the person and their former partner become unique.)
+1. **Change one input.** $U$ is a function of the $n$ independent cells. Change one person's cell from $u$ to $u'$; only cells $u$ and $u'$ change their counts, so only they can change $U$.
+2. **Bound the change.** A cell with count $k$ contributes $\mathbf 1[k = 1]$ to $U$: it holds a unique person exactly when it holds one person. Cell $u$'s count drops by one and its contribution changes by $\mathbf 1[k_u - 1 = 1] - \mathbf 1[k_u = 1] \in \{-1, 0, 1\}$. Cell $u'$'s count rises by one, and its contribution likewise changes by $-1$, 0 or 1. So $U$ changes by at most 2, and $U/n$ by at most $c_i = 2/n$. (It can change by exactly 2: move a person out of a pair and into an empty cell, and both the person and their former partner become unique.)
 3. **Apply McDiarmid.** With $c_i = 2/n$ for all $n$ people, $\sum_ic_i^2 = n \cdot 4/n^2 = 4/n$, so each tail is at most $\exp(-2t^2/(4/n)) = e^{-nt^2/2}$. Adding the upper and lower tails gives the factor 2.
 
 ### Interpretation
 
-For uniform cells, the bits picture is exact. @eq-link-uniform depends on $n$ and $M$ only through $b - \log_2n$, so the curve is the same for a town and for the planet (@fig-link-uniqueness, right). The often-quoted "33 bits identify anyone" is the point $b = \log_2 n$, where the average cell holds one person and the curve is at $e^{-1}$. With $2^{33}$ uniform cells for 8 billion people, $n/M = 8\times10^9/2^{33} = 0.93$ and only a fraction $e^{-0.93} = 0.394$ is unique. 33 bits are enough to *give* everyone a distinct label, but random labels of 33 bits collide often; you need $32.9 + 6.64 = 39.5$ bits for 99% of the world to be unique.
+For uniform cells, the bits picture is exact. @eq-link-uniform depends on $n$ and $K$ only through $b - \log_2n$, so the curve is the same for a town and for the planet (@fig-link-uniqueness, right). The often-quoted "33 bits identify anyone" is the point $b = \log_2 n$, where the average cell holds one person and the curve is at $e^{-1}$. With $2^{33}$ uniform cells for 8 billion people, $n/K = 8\times10^9/2^{33} = 0.93$ and only a fraction $e^{-0.93} = 0.394$ is unique. 33 bits are enough to *give* everyone a distinct label, but random labels of 33 bits collide often; you need $32.9 + 6.64 = 39.5$ bits for 99% of the world to be unique.
 
 Skew usually lowers uniqueness. When a few values are common (a big city, a common occupation), many people crowd into a few cells and are not unique, while many rare cells stay empty. In the census below, and for Sweeney's attributes, the uniform model with the same number of cells overstates uniqueness for this reason. This is not a theorem, though: with far fewer cells than people, a uniform spread leaves nobody unique, while a few rare cells would hold some uniques.
 
@@ -257,9 +257,9 @@ Finally, one population is enough. Setting the right side of @eq-link-mcdiarmid 
 
 ### Example: a synthetic census
 
-The script builds a population of $n = 10{,}000$ people with eight independent attributes, made up but shaped like real ones: sex (uniform), age in 16 five-year bands (flat, then thinning out), region (40 values with Zipf frequencies, so a few regions are large), birth month (uniform), marital status, number of children, occupation (20 values, Zipf) and blood group (real-world frequencies). It reveals them one at a time. @tbl-link-census gives, for each step, the entropy $H$ of the attributes known so far and the number of cells $M$, then the exact expected fraction unique from @eq-link-unique, the average over 20 simulated populations, the collision lower bound of @eq-link-collision, the entropy rule $e^{-n2^{-H}}$ and the uniform-cells value $e^{-n/M}$ for the same number of cells.
+The script builds a population of $n = 10{,}000$ people with eight independent attributes, made up but shaped like real ones: sex (uniform), age in 16 five-year bands (flat, then thinning out), region (40 values with Zipf frequencies, so a few regions are large), birth month (uniform), marital status, number of children, occupation (20 values, Zipf) and blood group (real-world frequencies). It reveals them one at a time. @tbl-link-census gives, for each step, the entropy $H$ of the attributes known so far and the number of cells $K$, then the exact expected fraction unique from @eq-link-unique, the average over 20 simulated populations, the collision lower bound of @eq-link-collision, the entropy rule $e^{-n2^{-H}}$ and the uniform-cells value $e^{-n/K}$ for the same number of cells.
 
-| Attributes known | Bits $H$ | Cells $M$ | Exact | Simulated | Collision bound | Entropy rule | Uniform cells |
+| Attributes known | Bits $H$ | Cells $K$ | Exact | Simulated | Collision bound | Entropy rule | Uniform cells |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | sex, age band, region | 9.31 | 1,280 | 0.0158 | 0.0160 | 0.0000 | 0.0000 | 0.0004 |
 | + birth month | 12.90 | 15,360 | 0.3328 | 0.3332 | 0.0834 | 0.2692 | 0.5215 |
@@ -276,7 +276,7 @@ Read the table along the bits column, against $\log_2n = 13.29$. With 12.90 bits
 
 ### Check yourself
 
-- With $n = 1000$ people and $M = 1000$ equally likely cells, what fraction is unique, and how many bits beyond $\log_2n$ is that? *($(1 - 0.001)^{999} = 0.368 \approx e^{-1}$, at zero bits beyond $\log_2 n$, since $M = n$.)*
+- With $n = 1000$ people and $K = 1000$ equally likely cells, what fraction is unique, and how many bits beyond $\log_2n$ is that? *($(1 - 0.001)^{999} = 0.368 \approx e^{-1}$, at zero bits beyond $\log_2 n$, since $K = n$.)*
 - Why can the indicators "person $i$ is unique" be dependent and still give $\mathbb EU = n\Pr[\text{person 1 is unique}]$? *(Linearity of expectation holds for any random variables, dependent or not. Dependence matters for the variance, which is why the concentration step needs McDiarmid rather than a sum of independent terms.)*
 
 ## Sparse, high-dimensional data: the Netflix attack {#sec-link-sparse}
@@ -293,17 +293,17 @@ $$\mathrm{Score}(\mathrm{aux}, r) = \sum_{i \in \mathrm{aux}}w_i\,\mathrm{Sim}(\
 
 where $r_i$ is the record's value for item $i$ and $\mathrm{Sim} \in [0, 1]$ measures agreement (here: 1 if $r$ rated $i$ within one star of $\mathrm{aux}_i$, else 0). Narayanan and Shmatikov use $w_i = 1/\ln\lvert\mathrm{supp}(i)\rvert$, where $\lvert\mathrm{supp}(i)\rvert$, the **support** of item $i$, is the number of records that rated it.
 
-**The eccentricity test.** The top-scoring record is the best guess, but the adversary also needs to know whether to trust it. A real match should stand out: its score should be well above the second-best one, measured against how spread out all the scores are. Let $s_1 \ge s_2$ be the two largest scores and $\sigma$ the standard deviation of all scores. The adversary declares a match only if the gap, in units of $\sigma$, clears a threshold $\varphi$,
+**The eccentricity test.** The top-scoring record is the best guess, but the adversary also needs to know whether to trust it. A real match should stand out: its score should be well above the second-best one, measured against how spread out all the scores are. Let $s_1 \ge s_2$ be the two largest scores and $\sigma$ the standard deviation of all scores. The adversary declares a match only if the gap, in units of $\sigma$, clears a threshold $\tau$,
 
-$$\frac{s_1 - s_2}{\sigma} \ge \varphi,$$ {#eq-link-eccentricity}
+$$\frac{s_1 - s_2}{\sigma} \ge \tau,$$ {#eq-link-eccentricity}
 
-and otherwise says "no match". Narayanan and Shmatikov used $\varphi = 1.5$.
+and otherwise says "no match". Narayanan and Shmatikov used $\tau = 1.5$.
 
 **Their findings on Netflix.** With 8 ratings, of which 2 may be completely wrong, and dates known to within 14 days, 99% of records are uniquely identified. With 2 ratings and dates within 3 days, 68% are.
 
-**The likelihood-ratio form of the score.** The weighting can be derived rather than guessed. For each record, the adversary is weighing two explanations: "this record is the target" against "this record is someone unrelated". The standard way to weigh two explanations of the same observations is the **likelihood ratio**, the probability of what you observed under the first explanation divided by its probability under the second. Its logarithm is a sum over items when items behave independently, so it has exactly the form of @eq-link-score. To make this precise, suppose an unrelated record agrees with the auxiliary value of item $i$ with probability $s_i$, independently across items, and the target's record agrees with probability $1 - \varepsilon$, where $\varepsilon$ covers wrong or stale auxiliary information. Then ranking records by the likelihood ratio is ranking them by @eq-link-score with
+**The likelihood-ratio form of the score.** The weighting can be derived rather than guessed. For each record, the adversary is weighing two explanations: "this record is the target" against "this record is someone unrelated". The standard way to weigh two explanations of the same observations is the **likelihood ratio**, the probability of what you observed under the first explanation divided by its probability under the second. Its logarithm is a sum over items when items behave independently, so it has exactly the form of @eq-link-score. To make this precise, suppose an unrelated record agrees with the auxiliary value of item $i$ with probability $s_i$, independently across items, and the target's record agrees with probability $1 - \rho$, where $\rho$ covers wrong or stale auxiliary information. Then ranking records by the likelihood ratio is ranking them by @eq-link-score with
 
-$$w_i = \ln\frac{1 - s_i}{s_i} + \ln\frac{1 - \varepsilon}{\varepsilon} \approx \ln\frac{1}{s_i} + \ln\frac{1 - \varepsilon}{\varepsilon},$$ {#eq-link-lr-weights}
+$$w_i = \ln\frac{1 - s_i}{s_i} + \ln\frac{1 - \rho}{\rho} \approx \ln\frac{1}{s_i} + \ln\frac{1 - \rho}{\rho},$$ {#eq-link-lr-weights}
 
 where the approximation uses $1 - s_i \approx 1$ for rare items. The record with the highest score is the most likely to be the target.
 
@@ -312,9 +312,9 @@ where the approximation uses $1 - s_i \approx 1$ for rare items. The record with
 **The weights.** The plan is to write the probability of a record's pattern of agreements under each explanation, take the log of the ratio, and collect the terms that differ from record to record.
 
 1. **Record the agreements.** Write $a_i(r) = \mathrm{Sim}(\mathrm{aux}_i, r_i) \in \{0, 1\}$: 1 if record $r$ agrees with the auxiliary information on item $i$.
-2. **Write the probability of the pattern under each explanation.** If $r$ is the target, each item agrees with probability $1 - \varepsilon$ and disagrees with probability $\varepsilon$, independently, so the pattern has probability $\Pr[a(r)] = \prod_i(1 - \varepsilon)^{a_i}\varepsilon^{1 - a_i}$ (the exponents pick the right factor for each item). If $r$ is unrelated, each item agrees with probability $s_i$, so $\Pr[a(r)] = \prod_is_i^{a_i}(1 - s_i)^{1 - a_i}$.
-3. **Take the log of the ratio.** The logarithm turns the ratio of products into a sum over items: $\sum_i\big[a_i\ln\frac{1 - \varepsilon}{s_i} + (1 - a_i)\ln\frac{\varepsilon}{1 - s_i}\big]$.
-4. **Keep only what depends on the record.** Collect the terms with $a_i$: $\sum_ia_i\big[\ln\frac{1-\varepsilon}{s_i} - \ln\frac{\varepsilon}{1 - s_i}\big] + \sum_i\ln\frac{\varepsilon}{1 - s_i}$. The last sum is the same for every record, so it does not change the ranking. The bracket, rearranged, is @eq-link-lr-weights: the log-likelihood ratio is the score with those weights, plus a constant.
+2. **Write the probability of the pattern under each explanation.** If $r$ is the target, each item agrees with probability $1 - \rho$ and disagrees with probability $\rho$, independently, so the pattern has probability $\Pr[a(r)] = \prod_i(1 - \rho)^{a_i}\rho^{1 - a_i}$ (the exponents pick the right factor for each item). If $r$ is unrelated, each item agrees with probability $s_i$, so $\Pr[a(r)] = \prod_is_i^{a_i}(1 - s_i)^{1 - a_i}$.
+3. **Take the log of the ratio.** The logarithm turns the ratio of products into a sum over items: $\sum_i\big[a_i\ln\frac{1 - \rho}{s_i} + (1 - a_i)\ln\frac{\rho}{1 - s_i}\big]$.
+4. **Keep only what depends on the record.** Collect the terms with $a_i$: $\sum_ia_i\big[\ln\frac{1-\rho}{s_i} - \ln\frac{\rho}{1 - s_i}\big] + \sum_i\ln\frac{\rho}{1 - s_i}$. The last sum is the same for every record, so it does not change the ranking. The bracket, rearranged, is @eq-link-lr-weights: the log-likelihood ratio is the score with those weights, plus a constant.
 5. **Why the likelihood ratio is the right thing to threshold.** For any single record, deciding between "target" and "unrelated" is a hypothesis test. The Neyman–Pearson lemma of [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md) says that, among all tests that wrongly accept an unrelated record with a given probability, the one that accepts when the likelihood ratio exceeds a threshold accepts the true target most often. The intuition: if you can afford only so many false accepts, spend them on the patterns that are most typical of the target relative to an unrelated record.
 
 **The best guess is the top score.** Step 5 is about one record at a time. When the adversary knows the target is one of the $n$ records and must pick one, Bayes' rule gives the answer. Suppose each record is equally likely a priori to be the target, and records are independent given who the target is.
@@ -324,7 +324,7 @@ where the approximation uses $1 - s_i \approx 1$ for rare items. The record with
 $$\Pr[\text{target} = t \mid \text{data}] = \frac{\mathrm{LR}(t)}{\sum_j\mathrm{LR}(j)}.$$ {#eq-link-posterior}
 3. **Pick the most probable record.** The maximum a posteriori (MAP) guess is the record with the largest likelihood ratio, which is the top score.
 
-**Why rare items carry the attack.** A false match is an unrelated record that happens to agree on every item the adversary knows. Take the clean case, $\varepsilon \to 0$ and exact agreement required. An unrelated record agrees on all of a set $I$ of items with probability $\prod_{i\in I}s_i$, and by Fact 1 the expected number of false matches among $n$ records is $n$ times that. Writing both factors as powers of 2 shows the bits:
+**Why rare items carry the attack.** A false match is an unrelated record that happens to agree on every item the adversary knows. Take the clean case, $\rho \to 0$ and exact agreement required. An unrelated record agrees on all of a set $I$ of items with probability $\prod_{i\in I}s_i$, and by Fact 1 the expected number of false matches among $n$ records is $n$ times that. Writing both factors as powers of 2 shows the bits:
 
 $$n\prod_{i\in I}s_i = 2^{\log_2n - \sum_{i\in I}\log_2(1/s_i)}.$$
 
@@ -336,13 +336,13 @@ Sparsity is the vulnerability. In a sparse dataset most items are rated by few p
 
 Because the score adds up evidence rather than demanding a perfect match, noise in the auxiliary information costs little. With a wrong item, the target loses one term of the score, while unrelated records rarely gain one. The score needs a margin, not a perfect match.
 
-The eccentricity test answers a different question from the score. The top score is the best guess *if the target is in the release*. If it may not be, the adversary also needs to decide whether to trust the guess, and the eccentricity asks whether the top score stands out from the crowd of scores. How often it stands out by chance depends on the shape of the score distribution, so $\varphi$ has to be calibrated on records known not to be the target. It should be read at a small false positive rate, as for any attack, because a match is only useful if the adversary can be confident in it ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). @eq-link-posterior gives the principled version. Add one more explanation, "the target is not in the release", with prior $1 - q$, and give each record prior $q/n$. Under the new explanation every record is unrelated, so its likelihood, divided by $\prod_jP_0(a(j))$ as before, is 1. Bayes' rule then gives the posterior that record $t$ is the target as $q\,\mathrm{LR}(t)/\big(q\sum_j\mathrm{LR}(j) + (1 - q)n\big)$.
+The eccentricity test answers a different question from the score. The top score is the best guess *if the target is in the release*. If it may not be, the adversary also needs to decide whether to trust the guess, and the eccentricity asks whether the top score stands out from the crowd of scores. How often it stands out by chance depends on the shape of the score distribution, so $\tau$ has to be calibrated on records known not to be the target. It should be read at a small false positive rate, as for any attack, because a match is only useful if the adversary can be confident in it ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md)). @eq-link-posterior gives the principled version. Add one more explanation, "the target is not in the release", with prior $1 - \pi$, and give each record prior $\pi/n$. Under the new explanation every record is unrelated, so its likelihood, divided by $\prod_jP_0(a(j))$ as before, is 1. Bayes' rule then gives the posterior that record $t$ is the target as $\pi\,\mathrm{LR}(t)/\big(\pi\sum_j\mathrm{LR}(j) + (1 - \pi)n\big)$.
 
 The weights matter less than the bits. Any weighting that favours rare items does about as well as any other; what decides success is whether the auxiliary information carries more bits than $\log_2n$.
 
 ### Example: a synthetic ratings matrix
 
-The script draws a sparse matrix of 5,000 users and 4,000 items. Item popularity follows a Zipf law, the number of ratings per user is log-normal (median 30, mean 40.6), and ratings are 1 to 5 stars from a user bias, an item quality and noise. The result has 203,029 ratings and density 0.0102, close to Netflix's 0.0118. An item drawn from a random user's record carries a median of 5.83 bits, against $\log_2 5000 = 12.29$ bits needed. The auxiliary information about a target is $m$ items from their record, with the rating off by one star half the time; in the noisy setting, a quarter of the items are replaced by random items drawn by popularity, which the target has almost never rated. @tbl-link-netflix gives the fraction of 400 targets whose record gets the top score (ties broken at random), for three weightings. The first is equal weights. The second is the Narayanan–Shmatikov weights. The third is the likelihood-ratio weights of @eq-link-lr-weights in their approximate form $\ln(1/s_i)$, which is close to the exact $\ln\frac{1 - s_i}{s_i}$ because every item here is rated by a small fraction of users, with $s_i = \lvert\mathrm{supp}(i)\rvert/n$, the fraction of users who rated the item, and $\varepsilon = \frac12$, which makes $\ln\frac{1-\varepsilon}{\varepsilon} = \ln 1 = 0$ and so drops the constant term.
+The script draws a sparse matrix of 5,000 users and 4,000 items. Item popularity follows a Zipf law, the number of ratings per user is log-normal (median 30, mean 40.6), and ratings are 1 to 5 stars from a user bias, an item quality and noise. The result has 203,029 ratings and density 0.0102, close to Netflix's 0.0118. An item drawn from a random user's record carries a median of 5.83 bits, against $\log_2 5000 = 12.29$ bits needed. The auxiliary information about a target is $m$ items from their record, with the rating off by one star half the time; in the noisy setting, a quarter of the items are replaced by random items drawn by popularity, which the target has almost never rated. @tbl-link-netflix gives the fraction of 400 targets whose record gets the top score (ties broken at random), for three weightings. The first is equal weights. The second is the Narayanan–Shmatikov weights. The third is the likelihood-ratio weights of @eq-link-lr-weights in their approximate form $\ln(1/s_i)$, which is close to the exact $\ln\frac{1 - s_i}{s_i}$ because every item here is rated by a small fraction of users, with $s_i = \lvert\mathrm{supp}(i)\rvert/n$, the fraction of users who rated the item, and $\rho = \frac12$, which makes $\ln\frac{1-\rho}{\rho} = \ln 1 = 0$ and so drops the constant term.
 
 | Auxiliary information | Equal weights | $1/\ln\lvert\mathrm{supp}(i)\rvert$ | $\ln(n/\lvert\mathrm{supp}(i)\rvert)$ |
 | --- | --- | --- | --- |
@@ -359,13 +359,13 @@ Read the table with the bits in mind. Two items carry about $2 \times 5.83 = 11.
 
 ![Left and centre: the scores of all 5,000 records for one target's auxiliary information (8 items, 2 wrong), on a log scale. When the target is in the release its record stands far out; when it is not, the best score is the edge of the crowd. Right: re-identification rate against the number of auxiliary items, for three weightings, and for the likelihood-ratio weights when a quarter of the items, rounded down, are wrong.](figures/link_netflix.svg){#fig-link-netflix}
 
-To test the eccentricity rule, the script also scores 400 outsiders, people drawn from the same model who are not in the release, so that any match it declares for them is false. With 8 items, 2 of them wrong, and $\varphi = 1.5$, 94.8% of insiders are correctly re-identified, but 26.3% of outsiders are also "matched" to someone. The median eccentricity is 7.32 for insiders and 0.72 for outsiders, but the outsiders' distribution has a long tail. Holding the false-match rate to 1% means raising $\varphi$ until only 1% of outsiders clear it, which happens at $\varphi = 4.83$, and that threshold still re-identifies 73.0% of insiders. @fig-link-eccentricity shows the whole trade-off, the true positive rate (insiders matched) against the false positive rate (outsiders matched) as $\varphi$ varies, with false positives on a log axis.
+To test the eccentricity rule, the script also scores 400 outsiders, people drawn from the same model who are not in the release, so that any match it declares for them is false. With 8 items, 2 of them wrong, and $\tau = 1.5$, 94.8% of insiders are correctly re-identified, but 26.3% of outsiders are also "matched" to someone. The median eccentricity is 7.32 for insiders and 0.72 for outsiders, but the outsiders' distribution has a long tail. Holding the false-match rate to 1% means raising $\tau$ until only 1% of outsiders clear it, which happens at $\tau = 4.83$, and that threshold still re-identifies 73.0% of insiders. @fig-link-eccentricity shows the whole trade-off, the true positive rate (insiders matched) against the false positive rate (outsiders matched) as $\tau$ varies, with false positives on a log axis.
 
-![True against false positive rates of the eccentricity test as the threshold $\varphi$ is swept, for 4, 6 and 8 auxiliary items with 1, 1 and 2 of them wrong. The dots mark $\varphi = 1.5$. A false positive rate of 0 is drawn at the left edge.](figures/link_eccentricity_roc.svg){#fig-link-eccentricity}
+![True against false positive rates of the eccentricity test as the threshold $\tau$ is swept, for 4, 6 and 8 auxiliary items with 1, 1 and 2 of them wrong. The dots mark $\tau = 1.5$. A false positive rate of 0 is drawn at the left edge.](figures/link_eccentricity_roc.svg){#fig-link-eccentricity}
 
 ### Check yourself
 
-- Why do the likelihood-ratio weights in @eq-link-lr-weights contain a term in $\varepsilon$ that is the same for every item, and what does it do? *(It is the evidence from agreeing at all, independent of rarity. When the auxiliary information is reliable ($\varepsilon$ small), every agreement counts a lot and a record that misses one item is heavily penalized relative to one that matches all of them.)*
+- Why do the likelihood-ratio weights in @eq-link-lr-weights contain a term in $\rho$ that is the same for every item, and what does it do? *(It is the evidence from agreeing at all, independent of rarity. When the auxiliary information is reliable ($\rho$ small), every agreement counts a lot and a record that misses one item is heavily penalized relative to one that matches all of them.)*
 - A record agrees with 3 auxiliary items, each rated by 1% of 480,189 users. How many unrelated records would you expect to agree with all three, if agreements were independent? *($480{,}189 \times 10^{-6} = 0.48$, since each unrelated record agrees on all three with probability $0.01^3 = 10^{-6}$: about half a false match, so three such items are close to, but not quite, enough.)*
 
 ## Does releasing a sample protect? {#sec-link-sampling}
@@ -376,80 +376,80 @@ Statistical agencies and companies often release a sample: 1% of a census, 5% of
 
 ### Statement
 
-Each of $n$ people is in the release independently with probability $\pi$, the **sampling fraction**. Consider a cell with probability $p$, and let $\lambda = (n - 1)p$ be the expected number of *other* people in it. There are two ways to attack, depending on which side the adversary starts from.
+Each of $n$ people is in the release independently with probability $q$, the **sampling rate**. Consider a cell with probability $p$, and let $\lambda = (n - 1)p$ be the expected number of *other* people in it. There are two ways to attack, depending on which side the adversary starts from.
 
-**From a person to the release.** The adversary knows a target's cell and finds exactly one record in that cell in the release. There are two ways that can happen. Either the target was sampled and none of the others in the cell were, and the match is right. Or the target was not sampled and exactly one of the others was, and the match is wrong. If the cell holds $J$ others, the wrong story is $J$ times as likely as the right one, because swapping who was sampled between the target and any one of the others leaves the probability unchanged. How many others should you expect? The release shows no second record in the cell, so the others who are there were all left out of the sample, and each of the $n - 1$ others is in the cell and unsampled with probability about $p(1 - \pi)$. So the cell is expected to hold about $\lambda(1 - \pi)$ others, not $\lambda$, and the wrong story is about $\lambda(1 - \pi)$ times as likely as the right one. A match is correct with probability "right over right plus wrong":
+**From a person to the release.** The adversary knows a target's cell and finds exactly one record in that cell in the release. There are two ways that can happen. Either the target was sampled and none of the others in the cell were, and the match is right. Or the target was not sampled and exactly one of the others was, and the match is wrong. If the cell holds $J$ others, the wrong story is $J$ times as likely as the right one, because swapping who was sampled between the target and any one of the others leaves the probability unchanged. How many others should you expect? The release shows no second record in the cell, so the others who are there were all left out of the sample, and each of the $n - 1$ others is in the cell and unsampled with probability about $p(1 - q)$. So the cell is expected to hold about $\lambda(1 - q)$ others, not $\lambda$, and the wrong story is about $\lambda(1 - q)$ times as likely as the right one. A match is correct with probability "right over right plus wrong":
 
-$$\kappa = \Pr[\text{correct} \mid \text{one match}] = \frac{1}{1 + \frac{(n-1)p(1 - \pi)}{1 - p\pi}} \approx \frac{1}{1 + \lambda(1 - \pi)}.$$ {#eq-link-kappa}
+$$\kappa = \Pr[\text{correct} \mid \text{one match}] = \frac{1}{1 + \frac{(n-1)p(1 - q)}{1 - pq}} \approx \frac{1}{1 + \lambda(1 - q)}.$$ {#eq-link-kappa}
 
-**From a record to the population.** The adversary takes a record that is alone in its cell in the release and looks the cell up in a register of the whole population, such as a voter roll. The record is identified if it is alone in its cell in the population too. Knowing the record is alone in the sample already tells you that nobody else in the cell was sampled. What remains is whether anyone in the cell was left out of the sample. Each of the $n - 1$ others is in the cell but unsampled with probability about $p(1 - \pi)$, so about $\lambda(1 - \pi)$ people are expected to hide there, and the chance that nobody does is
+**From a record to the population.** The adversary takes a record that is alone in its cell in the release and looks the cell up in a register of the whole population, such as a voter roll. The record is identified if it is alone in its cell in the population too. Knowing the record is alone in the sample already tells you that nobody else in the cell was sampled. What remains is whether anyone in the cell was left out of the sample. Each of the $n - 1$ others is in the cell but unsampled with probability about $p(1 - q)$, so about $\lambda(1 - q)$ people are expected to hide there, and the chance that nobody does is
 
-$$\xi = \Pr[\text{population-unique} \mid \text{sample-unique}] = \left(\frac{1 - p}{1 - p\pi}\right)^{n-1} \approx e^{-\lambda(1 - \pi)}.$$ {#eq-link-xi}
+$$\xi = \Pr[\text{population-unique} \mid \text{sample-unique}] = \left(\frac{1 - p}{1 - pq}\right)^{n-1} \approx e^{-\lambda(1 - q)}.$$ {#eq-link-xi}
 
 **The whole release.** Averaged over the release, the fraction of sample-unique records that are unique in the population is the expected number of records that are unique in both, divided by the expected number of sample-unique records:
 
-$$\frac{\sum_cp_c(1 - p_c)^{n-1}}{\sum_cp_c(1 - p_c\pi)^{n-1}},$$ {#eq-link-sample-unique}
+$$\frac{\sum_cp_c(1 - p_c)^{n-1}}{\sum_cp_c(1 - p_cq)^{n-1}},$$ {#eq-link-sample-unique}
 
-which equals the population uniqueness rate @eq-link-unique as $\pi \to 0$ and rises to 1 at $\pi = 1$.
+which equals the population uniqueness rate @eq-link-unique as $q \to 0$ and rises to 1 at $q = 1$.
 
 ### Derivation
 
 **From a person** (@eq-link-kappa). The plan is to compute the two stories, "right match" and "wrong match", given the number of others in the cell, and then average over that number.
 
-1. **Name the crowd.** Let $J$ be the number of other people in the target's cell. Each of the $n - 1$ others is in it with probability $p$, independently, so $J \sim \mathrm{Binomial}(n - 1, p)$.
-2. **The right match.** Given $J$, "exactly one match and it is the target" means the target is sampled and none of the $J$ others are: probability $\pi(1 - \pi)^J$.
-3. **The wrong match.** Given $J$, "exactly one match and it is someone else" means the target is not sampled and exactly one of the $J$ others is. There are $J$ choices of which other, each sampled with probability $\pi$ while the remaining $J - 1$ are not: probability $(1 - \pi)\cdot J\pi(1 - \pi)^{J-1} = J\pi(1 - \pi)^J$.
-4. **Form the conditional probability.** The probability of a correct match given one match is the right story over the sum of both, each averaged over $J$. The common factor $\pi$ cancels, leaving $\Pr[\text{correct} \mid \text{one match}] = \dfrac{\mathbb E[(1 - \pi)^J]}{\mathbb E[(1 + J)(1 - \pi)^J]}$.
-5. **Compute the first average.** The **probability generating function** of $J$ is $\mathbb E[z^J]$. For a binomial it is $(1 - p + pz)^{n-1}$, because $z^J$ is a product of one factor per other person, $z$ if they are in the cell and 1 if not, and each factor averages to $1 - p + pz$ independently. At $z = 1 - \pi$: $\mathbb E[(1 - \pi)^J] = (1 - p\pi)^{n-1}$.
-6. **Compute the second average.** Differentiating $z^J$ in $z$ and multiplying by $z$ gives $Jz^J$, so $\mathbb E[Jz^J] = z\frac{d}{dz}(1 - p + pz)^{n-1} = (n - 1)pz(1 - p + pz)^{n-2}$. At $z = 1 - \pi$: $\mathbb E[J(1 - \pi)^J] = (n-1)p(1 - \pi)(1 - p\pi)^{n-2}$.
-7. **Simplify.** Divide numerator and denominator of step 4 by $(1 - p\pi)^{n-1}$ to get @eq-link-kappa. For small $p$, $1 - p\pi \approx 1$ and $(n-1)p = \lambda$, which gives the approximation.
+1. **Name the crowd.** Let $J$ be the number of other people in the target's cell. Each of the $n - 1$ others is in it with probability $p$, independently, so $J \sim \mathrm{Bin}(n - 1, p)$.
+2. **The right match.** Given $J$, "exactly one match and it is the target" means the target is sampled and none of the $J$ others are: probability $q(1 - q)^J$.
+3. **The wrong match.** Given $J$, "exactly one match and it is someone else" means the target is not sampled and exactly one of the $J$ others is. There are $J$ choices of which other, each sampled with probability $q$ while the remaining $J - 1$ are not: probability $(1 - q)\cdot Jq(1 - q)^{J-1} = Jq(1 - q)^J$.
+4. **Form the conditional probability.** The probability of a correct match given one match is the right story over the sum of both, each averaged over $J$. The common factor $q$ cancels, leaving $\Pr[\text{correct} \mid \text{one match}] = \dfrac{\mathbb E[(1 - q)^J]}{\mathbb E[(1 + J)(1 - q)^J]}$.
+5. **Compute the first average.** The **probability generating function** of $J$ is $\mathbb E[z^J]$. For a binomial it is $(1 - p + pz)^{n-1}$, because $z^J$ is a product of one factor per other person, $z$ if they are in the cell and 1 if not, and each factor averages to $1 - p + pz$ independently. At $z = 1 - q$: $\mathbb E[(1 - q)^J] = (1 - pq)^{n-1}$.
+6. **Compute the second average.** Differentiating $z^J$ in $z$ and multiplying by $z$ gives $Jz^J$, so $\mathbb E[Jz^J] = z\frac{d}{dz}(1 - p + pz)^{n-1} = (n - 1)pz(1 - p + pz)^{n-2}$. At $z = 1 - q$: $\mathbb E[J(1 - q)^J] = (n-1)p(1 - q)(1 - pq)^{n-2}$.
+7. **Simplify.** Divide numerator and denominator of step 4 by $(1 - pq)^{n-1}$ to get @eq-link-kappa. For small $p$, $1 - pq \approx 1$ and $(n-1)p = \lambda$, which gives the approximation.
 
 **From a record** (@eq-link-xi).
 
-1. **Sort the others into three groups.** Each other person is, independently, in the cell and sampled (probability $p\pi$), in the cell and not sampled ($p(1 - \pi)$), or outside the cell ($1 - p$).
-2. **Condition on sample-uniqueness.** "The record is sample-unique" says that no other person is in the first group. Because each person's group is independent of the others', this condition acts on each person separately: it rules out the first group and rescales the other two by $1 - p\pi$, their total probability. So, given it, each other person is outside the cell with probability $\frac{1 - p}{1 - p\pi}$, still independently.
-3. **Ask for population-uniqueness.** Population-unique means all $n - 1$ others are outside the cell: probability $\big(\frac{1-p}{1-p\pi}\big)^{n-1}$. The ratio $\frac{1 - p}{1 - p\pi}$ is $1 - \frac{p(1 - \pi)}{1 - p\pi}$, close to $1 - p(1 - \pi)$ for small $p$, so by Fact 2 the whole power is about $e^{-(n-1)(p - p\pi)} = e^{-\lambda(1 - \pi)}$.
+1. **Sort the others into three groups.** Each other person is, independently, in the cell and sampled (probability $pq$), in the cell and not sampled ($p(1 - q)$), or outside the cell ($1 - p$).
+2. **Condition on sample-uniqueness.** "The record is sample-unique" says that no other person is in the first group. Because each person's group is independent of the others', this condition acts on each person separately: it rules out the first group and rescales the other two by $1 - pq$, their total probability. So, given it, each other person is outside the cell with probability $\frac{1 - p}{1 - pq}$, still independently.
+3. **Ask for population-uniqueness.** Population-unique means all $n - 1$ others are outside the cell: probability $\big(\frac{1-p}{1-pq}\big)^{n-1}$. The ratio $\frac{1 - p}{1 - pq}$ is $1 - \frac{p(1 - q)}{1 - pq}$, close to $1 - p(1 - q)$ for small $p$, so by Fact 2 the whole power is about $e^{-(n-1)(p - pq)} = e^{-\lambda(1 - q)}$.
 
 **The whole release** (@eq-link-sample-unique).
 
-1. **Count the records unique in both.** By Fact 1, the expected number of records that are sample-unique and population-unique is $\sum_i\Pr[i \text{ sampled and population-unique}]$. Population-unique implies sample-unique, and sampling is independent of the cells, so each term is $\pi$ times the probability of being population-unique, which is the per-person term of @eq-link-unique. The total is $n\pi\sum_cp_c(1 - p_c)^{n-1}$.
-2. **Count the sample-unique records.** Their expected number is $n\pi\sum_cp_c(1 - p_c\pi)^{n-1}$: person $i$ is sampled, and each other person is either outside $i$'s cell or not sampled, which fails only with probability $p_c\pi$.
-3. **Divide.** The factor $n\pi$ cancels. Each cell's term in the numerator is its term in the denominator times $\big(\frac{1 - p_c}{1 - p_c\pi}\big)^{n-1}$, its $\xi$ from @eq-link-xi, so the ratio is an average of $\xi$ over cells weighted by how often each is sample-unique. As $\pi \to 0$ the denominator tends to $\sum_cp_c = 1$, leaving the population uniqueness rate. At $\pi = 1$ the two sums are equal and the ratio is 1.
+1. **Count the records unique in both.** By Fact 1, the expected number of records that are sample-unique and population-unique is $\sum_i\Pr[i \text{ sampled and population-unique}]$. Population-unique implies sample-unique, and sampling is independent of the cells, so each term is $q$ times the probability of being population-unique, which is the per-person term of @eq-link-unique. The total is $nq\sum_cp_c(1 - p_c)^{n-1}$.
+2. **Count the sample-unique records.** Their expected number is $nq\sum_cp_c(1 - p_cq)^{n-1}$: person $i$ is sampled, and each other person is either outside $i$'s cell or not sampled, which fails only with probability $p_cq$.
+3. **Divide.** The factor $nq$ cancels. Each cell's term in the numerator is its term in the denominator times $\big(\frac{1 - p_c}{1 - p_cq}\big)^{n-1}$, its $\xi$ from @eq-link-xi, so the ratio is an average of $\xi$ over cells weighted by how often each is sample-unique. As $q \to 0$ the denominator tends to $\sum_cp_c = 1$, leaving the population uniqueness rate. At $q = 1$ the two sums are equal and the ratio is 1.
 
 ### Interpretation
 
-Sampling only helps when the cell is crowded. In both formulas, sampling enters only through the factor $1 - \pi$, which multiplies $\lambda$. For rare combinations, $\lambda \ll 1$, both are close to 1 whatever $\pi$ is. Because $1 - \pi \le 1$, both are at least their values at $\pi = 0$: $\kappa \ge 1/(1 + \lambda)$ and $\xi \ge e^{-\lambda}$ for every sampling fraction. Below a few percent, shrinking the sample further barely changes anything, because $1 - \pi$ is already close to 1.
+Sampling only helps when the cell is crowded. In both formulas, sampling enters only through the factor $1 - q$, which multiplies $\lambda$. For rare combinations, $\lambda \ll 1$, both are close to 1 whatever $q$ is. Because $1 - q \le 1$, both are at least their values at $q = 0$: $\kappa \ge 1/(1 + \lambda)$ and $\xi \ge e^{-\lambda}$ for every sampling rate. Below a few percent, shrinking the sample further barely changes anything, because $1 - q$ is already close to 1.
 
 Matching from a person is more forgiving than matching from a record: $\kappa \ge \xi$, since $1/(1 + x) \ge e^{-x}$ (which is $e^x \ge 1 + x$, the exponential lying above its tangent line at 0). A person-to-release match can be right even when the target is not unique in the population: the others in the cell may simply not have been sampled.
 
-At small sampling fractions, a sample unique is a population unique at the population rate. By @eq-link-sample-unique, a 1% sample gives plausible deniability exactly to the people who were not unique in the population anyway. With enough attributes, that is almost nobody.
+At small sampling rates, a sample unique is a population unique at the population rate. By @eq-link-sample-unique, a 1% sample gives plausible deniability exactly to the people who were not unique in the population anyway. With enough attributes, that is almost nobody.
 
 Finally, the adversary can tell which matches to trust. $\lambda$ depends on the cell, and the sample is a good sample of the population, so the adversary can estimate $p$ from it and compute $\kappa$ or $\xi$ for each record. Rocher et al. showed this with a copula model; the script does it with the product of the marginals estimated from a 1% sample.
 
 ### Example: a 1% sample of a synthetic census
 
-For a single cell, @tbl-link-kappa gives both probabilities in their Poisson forms, the approximations on the right of @eq-link-kappa and @eq-link-xi, for three values of $\lambda$. For instance, with $\lambda = 0.1$ and $\pi = 0.01$, $\kappa = 1/(1 + 0.1 \times 0.99) = 1/1.099 = 0.910$.
+For a single cell, @tbl-link-kappa gives both probabilities in their Poisson forms, the approximations on the right of @eq-link-kappa and @eq-link-xi, for three values of $\lambda$. For instance, with $\lambda = 0.1$ and $q = 0.01$, $\kappa = 1/(1 + 0.1 \times 0.99) = 1/1.099 = 0.910$.
 
-| $\lambda$ (expected others in the cell) | $\kappa$, $\pi = 0.01$ | $\kappa$, $\pi = 0.5$ | $\xi$, $\pi = 0.01$ | $\xi$, $\pi = 0.5$ |
+| $\lambda$ (expected others in the cell) | $\kappa$, $q = 0.01$ | $\kappa$, $q = 0.5$ | $\xi$, $q = 0.01$ | $\xi$, $q = 0.5$ |
 | --- | --- | --- | --- | --- |
 | 0.1 | 0.910 | 0.952 | 0.906 | 0.951 |
 | 0.5 | 0.669 | 0.800 | 0.610 | 0.779 |
 | 2 | 0.336 | 0.500 | 0.138 | 0.368 |
 
-: Probability that a match in a sample is correct: from a person to the release ($\kappa$) and from a sample-unique record to the population ($\xi$), for three crowding levels and two sampling fractions. {#tbl-link-kappa}
+: Probability that a match in a sample is correct: from a person to the release ($\kappa$) and from a sample-unique record to the population ($\xi$), for three crowding levels and two sampling rates. {#tbl-link-kappa}
 
 Going from a 50% to a 1% sample lowers $\kappa$ by $0.952 - 0.910 = 0.04$ for a rare cell and by $0.500 - 0.336 = 0.16$ for a crowded one.
 
-The script then draws a population of $n = 100{,}000$ with the first seven attributes of @tbl-link-census; 82.8% of its people are unique. @eq-link-sample-unique gives 0.8301 of sample uniques being population-unique at $\pi = 0.01$ (simulated: 0.8334 over 19,951 sample uniques in 20 samples), 0.8493 at $\pi = 0.1$ and 0.9235 at $\pi = 0.5$. As the formula predicts, the 1% value sits just above the population rate of 0.828. A 1% sample leaves 83% of its unique records identifiable against a population register.
+The script then draws a population of $n = 100{,}000$ with the first seven attributes of @tbl-link-census; 82.8% of its people are unique. @eq-link-sample-unique gives 0.8301 of sample uniques being population-unique at $q = 0.01$ (simulated: 0.8334 over 19,951 sample uniques in 20 samples), 0.8493 at $q = 0.1$ and 0.9235 at $q = 0.5$. As the formula predicts, the 1% value sits just above the population rate of 0.828. A 1% sample leaves 83% of its unique records identifiable against a population register.
 
-The adversary's own estimate works too. From one 1% sample with 993 sample-unique records, it estimates each attribute's frequencies, multiplies them to get an estimate $\hat p$ of each record's cell probability, and computes $\xi$ by @eq-link-xi with $n$ and $\pi$, which are public. Its mean prediction is 0.817 against an actual 0.824. The predictions also sort the records well. The 415 records it rates above 0.95 average a prediction of 0.980 and are population-unique 99.3% of the time; the 119 it rates below 0.5 average 0.284 and are unique 30.3% of the time. @fig-link-sampling shows both experiments.
+The adversary's own estimate works too. From one 1% sample with 993 sample-unique records, it estimates each attribute's frequencies, multiplies them to get an estimate $\hat p$ of each record's cell probability, and computes $\xi$ by @eq-link-xi with $n$ and $q$, which are public. Its mean prediction is 0.817 against an actual 0.824. The predictions also sort the records well. The 415 records it rates above 0.95 average a prediction of 0.980 and are population-unique 99.3% of the time; the 119 it rates below 0.5 average 0.284 and are unique 30.3% of the time. @fig-link-sampling shows both experiments.
 
-![Left: the fraction of sample-unique records that are unique in a population of 100,000, against the sampling fraction, for 5 to 8 attributes; lines are @eq-link-sample-unique, dots are simulations. As $\pi \to 0$ each curve levels off at the population's uniqueness rate. Right: the adversary's predicted probability that a sample-unique record is unique in the population, estimated from a 1% sample, against the observed fraction, in bins of width 0.1.](figures/link_sampling.svg){#fig-link-sampling}
+![Left: the fraction of sample-unique records that are unique in a population of 100,000, against the sampling rate, for 5 to 8 attributes; lines are @eq-link-sample-unique, dots are simulations. As $q \to 0$ each curve levels off at the population's uniqueness rate. Right: the adversary's predicted probability that a sample-unique record is unique in the population, estimated from a 1% sample, against the observed fraction, in bins of width 0.1.](figures/link_sampling.svg){#fig-link-sampling}
 
 ### Check yourself
 
 - A combination is expected to be shared by $\lambda = 0.05$ other people. What is $\kappa$ for a 1% sample, and for a full release? *($1/(1 + 0.05 \times 0.99) = 0.953$ and $1/(1 + 0) = 1$.)*
-- Why does @eq-link-sample-unique tend to the population uniqueness rate, not to 0, as $\pi \to 0$? *(A tiny sample has almost no collisions, so nearly every sampled record is sample-unique. The fraction of them that are population-unique is then just the fraction of the population that is unique.)*
+- Why does @eq-link-sample-unique tend to the population uniqueness rate, not to 0, as $q \to 0$? *(A tiny sample has almost no collisions, so nearly every sampled record is sample-unique. The fraction of them that are population-unique is then just the fraction of the population that is unique.)*
 
 ## Code: check every formula by simulation
 
@@ -464,14 +464,14 @@ uv run python code/part02-attacks/linkage.py
 | Experiment | Result |
 | --- | --- |
 | Bits | $\log_2(8\times10^9) = 32.9$; $\log_2(248.7\times10^6) = 27.9$; ZIP 15.3 + birth date 14.8 + sex 1.0 = 31.1 bits |
-| Sweeney, uniform cells | $M = 2.34\times10^9$; $n/M = 0.106$; fraction unique 0.899 |
+| Sweeney, uniform cells | $K = 2.34\times10^9$; $n/K = 0.106$; fraction unique 0.899 |
 | World, uniform cells | 33 bits: fraction unique 0.394. Bits needed for 50%, 90%, 99%: 33.4, 36.1, 39.5 |
 | Toy release | Classes of sizes 1, 1, 1, 2, 3: linkage success 0.625 |
 | Hashed identifiers | MD5 of "0": `cfcd2084…`. All $10^6$ six-digit identifiers (19.9 bits) hashed, 5 of 5 inverted. Taxi: 173 million trips (27.4 bits), licences 20.9 bits, medallions 24.4 bits; pickup minute 19.0 + pickup square 16.3 = 35.3 bits; phone numbers 33.2 bits |
 | Synthetic census, $n = 10^4$ | @tbl-link-census; McDiarmid 95% half-width 0.0272 |
 | Synthetic ratings, 5,000 users | 203,029 ratings, density 0.0102; median bits per item 5.83; rates in @tbl-link-netflix |
-| Eccentricity, 8 items, 2 wrong | $\varphi = 1.5$: insiders 0.948, outsiders 0.263. $\varphi = 4.83$: insiders 0.730, outsiders 0.010 |
-| Sampling, $n = 10^5$, 7 attributes | Population unique 0.828. Sample uniques that are unique: 0.8301 ($\pi = 0.01$; simulated 0.8334), 0.8493 ($\pi = 0.1$), 0.9235 ($\pi = 0.5$) |
+| Eccentricity, 8 items, 2 wrong | $\tau = 1.5$: insiders 0.948, outsiders 0.263. $\tau = 4.83$: insiders 0.730, outsiders 0.010 |
+| Sampling, $n = 10^5$, 7 attributes | Population unique 0.828. Sample uniques that are unique: 0.8301 ($q = 0.01$; simulated 0.8334), 0.8493 ($q = 0.1$), 0.9235 ($q = 0.5$) |
 | $\kappa$ and $\xi$ | @tbl-link-kappa |
 | Adversary's estimate of $\xi$, 1% sample | Mean predicted 0.817, actual 0.824; above 0.95: predicted 0.980, actual 0.993; below 0.5: predicted 0.284, actual 0.303 |
 
@@ -479,7 +479,7 @@ uv run python code/part02-attacks/linkage.py
 
 [tests/test_linkage.py](../../tests/test_linkage.py) checks that the output still matches.
 
-**What to take from it.** First, a hash of a guessable identifier is only a lookup table away from the identifier: one pass over a million hashes inverts every six-digit identifier. Second, the formulas are right: every simulated fraction agrees with its exact expectation to within 0.004. Third, the bits beyond $\log_2n$ decide uniqueness. A few bits short, a minority is unique; seven bits beyond, almost everyone is, in a census table and in a ratings matrix alike. Fourth, the shortcuts err in known directions. For real, skewed attributes the uniform model usually overstates uniqueness (in the census, at every step from four attributes on) and the collision bound understates it, so compute the exact sum; it needs only a model of the population. Fifth, the decision rule needs calibration. Picking the top score is nearly always right when the target is in the data, but the popular threshold $\varphi = 1.5$ matches a quarter of outsiders in this toy, so choose $\varphi$ from the false positive rate you can accept. Last, sampling is not a defence. It protects the people in crowded cells, who were not at much risk, and the adversary can tell who they are.
+**What to take from it.** First, a hash of a guessable identifier is only a lookup table away from the identifier: one pass over a million hashes inverts every six-digit identifier. Second, the formulas are right: every simulated fraction agrees with its exact expectation to within 0.004. Third, the bits beyond $\log_2n$ decide uniqueness. A few bits short, a minority is unique; seven bits beyond, almost everyone is, in a census table and in a ratings matrix alike. Fourth, the shortcuts err in known directions. For real, skewed attributes the uniform model usually overstates uniqueness (in the census, at every step from four attributes on) and the collision bound understates it, so compute the exact sum; it needs only a model of the population. Fifth, the decision rule needs calibration. Picking the top score is nearly always right when the target is in the data, but the popular threshold $\tau = 1.5$ matches a quarter of outsiders in this toy, so choose $\tau$ from the false positive rate you can accept. Last, sampling is not a defence. It protects the people in crowded cells, who were not at much risk, and the adversary can tell who they are.
 
 ## References
 
@@ -495,22 +495,22 @@ uv run python code/part02-attacks/linkage.py
 
 ## Cheat sheet
 
-$n$ people, cells $c$ with probabilities $p_c$, $M$ cells, $U$ the number of unique people, $\pi$ the sampling fraction, $\lambda$ the expected number of others in the target's cell. @tbl-link-cheat collects the results.
+$n$ people, cells $c$ with probabilities $p_c$, $K$ cells, $U$ the number of unique people, $q$ the sampling rate, $\lambda$ the expected number of others in the target's cell. @tbl-link-cheat collects the results.
 
 | Result | Formula | Note |
 | --- | --- | --- |
 | Linkage success | $J/n$, $J$ = number of distinct quasi-identifier combinations | Target known to be in the release; at most $1/k$ if all classes have $\ge k$ records |
 | Expected fraction unique | $\sum_cp_c(1 - p_c)^{n-1}$ | Exact for independent people |
-| Uniform cells | $(1 - 1/M)^{n-1} \approx \exp(-2^{\log_2n - b})$ | 50% at $b = \log_2n + 0.53$; 99% at $\log_2n + 6.64$ |
+| Uniform cells | $(1 - 1/K)^{n-1} \approx \exp(-2^{\log_2n - b})$ | 50% at $b = \log_2n + 0.53$; 99% at $\log_2n + 6.64$ |
 | Collision bound | $\ge(1 - \sum_cp_c^2)^{n-1}$; $\sum_cp_c^2 = \prod_j\sum_vp_j(v)^2$ | Jensen; tight for uniform cells |
 | Concentration | $\Pr[\lvert U/n - \mathbb EU/n\rvert \ge t] \le 2e^{-nt^2/2}$ | McDiarmid with $c_i = 2/n$ |
-| Netflix score | $\sum_{i\in\mathrm{aux}}w_i\,\mathrm{Sim}(\mathrm{aux}_i, r_i)$ | $w_i \approx \ln(1/s_i) + \ln\frac{1-\varepsilon}{\varepsilon}$ is the log-likelihood ratio |
-| Eccentricity | $(s_1 - s_2)/\sigma \ge \varphi$ | Calibrate $\varphi$ on outsiders at a small false positive rate |
+| Netflix score | $\sum_{i\in\mathrm{aux}}w_i\,\mathrm{Sim}(\mathrm{aux}_i, r_i)$ | $w_i \approx \ln(1/s_i) + \ln\frac{1-\rho}{\rho}$ is the log-likelihood ratio |
+| Eccentricity | $(s_1 - s_2)/\sigma \ge \tau$ | Calibrate $\tau$ on outsiders at a small false positive rate |
 | Hashed identifier | $N$ hash computations invert every pseudonym; a key stops this, not linkage | A consistent pseudonym is a join key |
 | Expected false matches | $n\prod_{i\in I}s_i = 2^{\log_2n - \sum_i\log_2(1/s_i)}$ | Each item is worth its surprisal in bits |
-| Correct match, person to release | $\kappa \approx 1/\big(1 + \lambda(1 - \pi)\big)$ | $\ge 1/(1 + \lambda)$ for every $\pi$ |
-| Sample-unique is population-unique | $\xi \approx e^{-\lambda(1 - \pi)}$ | $\ge e^{-\lambda}$ for every $\pi$ |
-| Sample uniques that are real | $\sum_cp_c(1 - p_c)^{n-1}/\sum_cp_c(1 - p_c\pi)^{n-1}$ | Population uniqueness rate as $\pi \to 0$ |
+| Correct match, person to release | $\kappa \approx 1/\big(1 + \lambda(1 - q)\big)$ | $\ge 1/(1 + \lambda)$ for every $q$ |
+| Sample-unique is population-unique | $\xi \approx e^{-\lambda(1 - q)}$ | $\ge e^{-\lambda}$ for every $q$ |
+| Sample uniques that are real | $\sum_cp_c(1 - p_c)^{n-1}/\sum_cp_c(1 - p_cq)^{n-1}$ | Population uniqueness rate as $q \to 0$ |
 
 : Every result in this chapter. {#tbl-link-cheat}
 

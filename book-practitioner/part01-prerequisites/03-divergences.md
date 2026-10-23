@@ -16,7 +16,7 @@ The **total variation (TV)** is the mass of $P$ that does not overlap with $Q$:
 $$\mathrm{TV}(P, Q) = \frac12\sum_x|p(x) - q(x)|.$$
 The hockey-stick divergence generalizes it by scaling $q$ up by a factor $\gamma$ of at least 1 and measuring the mass of $p$ that still sticks out above it. Writing $(y)_+$ for the positive part of $y$, it is
 $$E_\gamma(P\|Q) = \sum_x\big(p(x) - \gamma q(x)\big)_+.$$
-At $\gamma = 1$ it is the total variation, and it reaches zero once $\gamma$ exceeds the largest likelihood ratio. The KL divergence, the TV and $E_\gamma$ all belong to one family, the f-divergences.
+At $\gamma = 1$ it is the total variation, and it reaches zero once $\gamma$ exceeds the largest likelihood ratio. The KL divergence, the TV and $E_\gamma$ all belong to one family, the $f$-divergences.
 
 ## When you meet it
 

@@ -715,7 +715,7 @@ def plot_exposure_vs_copies(
         for row in curves:
             ax.plot(xs, row, color=f"C{j}", alpha=0.25, linewidth=1)
         ax.plot(xs, curves.mean(axis=0), "o-", color=f"C{j}", label=f"order {n} (mean of {canaries} canaries)")
-    ax.axhline(math.log2(PIN_SPACE), color="k", linestyle=":", label=r"maximum $\log_2 |R|$ = 16.6 bits")
+    ax.axhline(math.log2(PIN_SPACE), color="k", linestyle=":", label=r"maximum $\log_2 |\mathcal{R}|$ = 16.6 bits")
     ax.set_xscale("log", base=2)
     ax.set_xticks(xs, ["0"] + [str(k) for k in copies[1:]])
     ax.set(

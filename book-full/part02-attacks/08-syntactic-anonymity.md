@@ -18,7 +18,7 @@ Each definition is a property of one table, and it protects against an adversary
 | --- | --- |
 | The posterior within a class is the class's frequency | Every attack on the sensitive attribute |
 | k-anonymity caps linkage success at $1/k$ | What k-anonymity does guarantee |
-| Uniform cells: a fraction $\Pr[\mathrm{Poisson}(n/M) \le k - 2]$ violates k-anonymity | How coarse the quasi-identifiers must be, in bits |
+| Uniform cells: a fraction $\Pr[\mathrm{Poisson}(n/K) \le k - 2]$ violates k-anonymity | How coarse the quasi-identifiers must be, in bits |
 | Recursive $(c, \ell)$-diversity caps the posterior at $c/(1 + c)$ after $\ell - 2$ values are ruled out | What l-diversity guarantees against background knowledge |
 | t-closeness in total variation moves every event by at most $t$ | What t-closeness guarantees, and why rare values escape it |
 | Probability that two releases pin down a value | The composition attack |
@@ -50,7 +50,7 @@ The equality has a short reason. $P(A) - Q(A) = \sum_{v \in A}(P(v) - Q(v))$, wh
 
 ### Fact 3 — The number of others in your cell is nearly Poisson
 
-Fact 3 is the tool for counting how many people share your quasi-identifiers. Model the generalized quasi-identifiers as $M$ cells, and suppose the $n$ people fall into them independently, each cell equally likely. Fix yourself. Each of the other $n - 1$ people lands in your cell with probability $1/M$, independently, so the number of *other* people in your cell is $\mathrm{Binomial}(n - 1, 1/M)$. When there are many trials, each with a small chance, the binomial is close to the **Poisson** distribution with the same mean, $\Pr[N = j] \approx e^{-\lambda}\lambda^j/j!$ ([Probability distributions](../part01-prerequisites/01-distributions.md)). Here the mean is $\lambda = (n-1)/M \approx n/M$, the average number of people per cell. Your class then has $1 + \mathrm{Poisson}(\lambda)$ members: you plus the others. This is how the chapter counts how many records violate k-anonymity at a given coarseness.
+Fact 3 is the tool for counting how many people share your quasi-identifiers. Model the generalized quasi-identifiers as $K$ cells, and suppose the $n$ people fall into them independently, each cell equally likely. Fix yourself. Each of the other $n - 1$ people lands in your cell with probability $1/K$, independently, so the number of *other* people in your cell is $\mathrm{Bin}(n - 1, 1/K)$. When there are many trials, each with a small chance, the binomial is close to the **Poisson** distribution with the same mean, $\Pr[N = j] \approx e^{-\lambda}\lambda^j/j!$ ([Probability distributions](../part01-prerequisites/01-distributions.md)). Here the mean is $\lambda = (n-1)/K \approx n/K$, the average number of people per cell. Your class then has $1 + \mathrm{Poisson}(\lambda)$ members: you plus the others. This is how the chapter counts how many records violate k-anonymity at a given coarseness.
 
 ## k-anonymity {#sec-anon-k}
 
@@ -65,9 +65,9 @@ Sweeney and Samarati proposed the first answer to the linkage attack in 1998: ma
 **What it guarantees.** Recall the linkage game: a target is drawn uniformly from the release, the adversary is given the target's quasi-identifiers, and it wins if it picks out the target's record. @eq-link-success says the best it can do is $J/n$, where $J$ is the number of classes. The reason is that in a class of size $\lvert E\rvert$ the best guess is a random record of the class, right with probability $1/\lvert E\rvert$, and the target lands in that class with probability $\lvert E\rvert/n$, so each class contributes $1/n$ and the $J$ classes contribute $J/n$. When every class has at least $k$ records there cannot be many classes, and
 $$\Pr[\text{win}] = \frac{J}{n} \le \frac1k.$$ {#eq-anon-k-link}
 
-**What it costs, for uniform cells.** Coarse quasi-identifiers protect more but say less, so the question is how coarse they must be. Suppose the generalized quasi-identifiers split the population into $M$ equally likely cells. A record violates k-anonymity when its cell holds fewer than $k$ people, and by Fact 3 the expected fraction of such records is
-$$\Pr[\mathrm{Poisson}(n/M) \le k - 2].$$ {#eq-anon-k-violate}
-Keeping that fraction below a target $\alpha$ needs enough people per cell, $n/M \ge \lambda_k$, where $\lambda_k$ is the mean at which the fraction is exactly $\alpha$: $\Pr[\mathrm{Poisson}(\lambda_k) \le k - 2] = \alpha$. A quasi-identifier with $M$ equally likely values carries $\log_2 M$ bits of information about a person, so in bits the quasi-identifiers may carry at most $b = \log_2 M = \log_2 n - \log_2\lambda_k$.
+**What it costs, for uniform cells.** Coarse quasi-identifiers protect more but say less, so the question is how coarse they must be. Suppose the generalized quasi-identifiers split the population into $K$ equally likely cells. A record violates k-anonymity when its cell holds fewer than $k$ people, and by Fact 3 the expected fraction of such records is
+$$\Pr[\mathrm{Poisson}(n/K) \le k - 2].$$ {#eq-anon-k-violate}
+Keeping that fraction below a target $\alpha$ needs enough people per cell, $n/K \ge \lambda_k$, where $\lambda_k$ is the mean at which the fraction is exactly $\alpha$: $\Pr[\mathrm{Poisson}(\lambda_k) \le k - 2] = \alpha$. A quasi-identifier with $K$ equally likely values carries $\log_2 K$ bits of information about a person, so in bits the quasi-identifiers may carry at most $b = \log_2 K = \log_2 n - \log_2\lambda_k$.
 
 ### Derivation
 
@@ -79,16 +79,16 @@ Keeping that fraction below a target $\alpha$ needs enough people per cell, $n/M
 
 **The cost** (@eq-anon-k-violate). The idea is to compute the chance that one person's class is too small, then note that this chance is also the expected fraction of such people.
 
-1. **Size of a person's class.** A person's class is their cell. By Fact 3 it holds the person plus $N$ others, with $N$ approximately $\mathrm{Poisson}(n/M)$.
-2. **When it is too small.** The class is smaller than $k$ when $1 + N \le k - 1$, that is $N \le k - 2$, which has probability $\Pr[\mathrm{Poisson}(n/M) \le k - 2]$.
+1. **Size of a person's class.** A person's class is their cell. By Fact 3 it holds the person plus $N$ others, with $N$ approximately $\mathrm{Poisson}(n/K)$.
+2. **When it is too small.** The class is smaller than $k$ when $1 + N \le k - 1$, that is $N \le k - 2$, which has probability $\Pr[\mathrm{Poisson}(n/K) \le k - 2]$.
 3. **From one person to the fraction.** The expected number of people in small classes is the sum, over people, of each one's chance of being in one (linearity of expectation: the expected count of events is the sum of their probabilities). Every person has the same chance, so the sum is $n$ times it, and the expected fraction is that chance.
-4. **Solve for the coarseness.** As $\lambda$ grows, the Poisson count moves up and the chance of a small count, the CDF (cumulative distribution function) at $k - 2$, falls. So "at most $\alpha$" is the same as $\lambda \ge \lambda_k$. Put $M = n/\lambda$ and take $\log_2$: $\log_2 M = \log_2 n - \log_2 \lambda$, largest at $\lambda = \lambda_k$.
+4. **Solve for the coarseness.** As $\lambda$ grows, the Poisson count moves up and the chance of a small count, the CDF (cumulative distribution function) at $k - 2$, falls. So "at most $\alpha$" is the same as $\lambda \ge \lambda_k$. Put $K = n/\lambda$ and take $\log_2$: $\log_2 K = \log_2 n - \log_2 \lambda$, largest at $\lambda = \lambda_k$.
 
 ### Interpretation
 
 The guarantee is about names only. @eq-anon-k-link bounds the chance of picking out the target's *record*. It says nothing about the sensitive attribute, which is the whole point of the release, and the next two sections attack exactly that gap.
 
-k-anonymity is the mirror image of uniqueness, and the bits make the comparison exact. In the same uniform-cells model, a person is unique when nobody else is in their cell, which by Fact 3 has probability $\Pr[\mathrm{Poisson}(n/M) = 0] = e^{-n/M}$. For 99% of people to be unique you need $e^{-n/M} = 0.99$, so $n/M = \ln(1/0.99) \approx 0.01$ and $M \approx 100n$, which is $\log_2 n + \log_2 100 = \log_2n + 6.64$ bits (@sec-link-unique). At the other end, @tbl-anon-bits shows that 2-anonymity for 99% of records needs the quasi-identifiers to carry at most $\log_2n - 2.20$ bits. The window between "almost everyone is unique" and "almost everyone is hidden" is $6.64 + 2.20 = 8.84$, about 9 bits wide, and every attribute you publish uses some of it.
+k-anonymity is the mirror image of uniqueness, and the bits make the comparison exact. In the same uniform-cells model, a person is unique when nobody else is in their cell, which by Fact 3 has probability $\Pr[\mathrm{Poisson}(n/K) = 0] = e^{-n/K}$. For 99% of people to be unique you need $e^{-n/K} = 0.99$, so $n/K = \ln(1/0.99) \approx 0.01$ and $K \approx 100n$, which is $\log_2 n + \log_2 100 = \log_2n + 6.64$ bits (@sec-link-unique). At the other end, @tbl-anon-bits shows that 2-anonymity for 99% of records needs the quasi-identifiers to carry at most $\log_2n - 2.20$ bits. The window between "almost everyone is unique" and "almost everyone is hidden" is $6.64 + 2.20 = 8.84$, about 9 bits wide, and every attribute you publish uses some of it.
 
 k costs more than $\log_2 k$ bits. You might expect that hiding everyone in a class of $k$ needs $k$ people per cell, that is $\log_2 k$ bits fewer than $\log_2 n$. But cells vary in size around their mean, and the unlucky small cells are the ones that violate the definition, so you need $\lambda_k$ people per cell *on average*, and $\lambda_k$ is larger than $k$. The margin is largest for small $k$. For $k = 2$ a person violates the definition when $N = 0$, which has probability $e^{-\lambda}$; setting $e^{-\lambda} = 0.01$ gives $\lambda_2 = \ln 100 = 4.61$, more than twice $k$.
 
@@ -398,7 +398,7 @@ $n$ records, classes $E$ of size $\lvert E\rvert$, $J$ classes, $P_E$ the class'
 | --- | --- | --- |
 | Posterior in a class | $P_E(v) = n_E(v)/\lvert E\rvert$ | Ruling out values renormalizes over the rest |
 | k-anonymity | Every $\lvert E\rvert \ge k$; linkage $J/n \le 1/k$ | Says nothing about the sensitive attribute |
-| Uniform cells | Fraction in classes $< k$: $\Pr[\mathrm{Poisson}(n/M) \le k - 2]$ | 99% 2-anonymous at $\log_2n - 2.20$ bits |
+| Uniform cells | Fraction in classes $< k$: $\Pr[\mathrm{Poisson}(n/K) \le k - 2]$ | 99% 2-anonymous at $\log_2n - 2.20$ bits |
 | Distinct, entropy l-diversity | $\ge \ell$ values; $H(P_E) \ge \log_2\ell$ | Neither caps the top value's share near $1/\ell$ |
 | Recursive $(c, \ell)$-diversity | $r_1 < c(r_\ell + \dots + r_m)$ | Posterior $< c/(1 + c)$ after ruling out $\ell - 2$ values |
 | t-closeness (TV) | $\lvert P_E(A) - P(A)\rvert \le t$ for every $A$ | Additive: a 1% value may rise to $1\% + t$ |

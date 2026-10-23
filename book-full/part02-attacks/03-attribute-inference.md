@@ -29,13 +29,13 @@ The chapter rests on one claim about this baseline. **For a record that was not 
 
 **What you need.** Everything this chapter borrows is restated where it is used, so the links below are pointers for more detail. The MAP guess, vulnerability and min-entropy leakage are in [Information theory](../part01-prerequisites/05-information-theory.md). Bayes' rule, true and false positive rates, and the fact that the best advantage of a test is the total variation distance are in [Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md). Games and the vocabulary of adversaries are in [Threat models](01-threat-models.md), and the loss-threshold attack and the generalization gap are in [Membership inference](02-membership-inference.md).
 
-**Notation.** A record is $z = (s, x, y)$: a sensitive attribute $s$ that takes a few values (smoker or not), public features $x$ (the age band), and a label $y$ (the disease). Records come from a population distribution $\mathcal D$, and $p(s, x, y)$ is the probability of a record (or its density, when $x$ is continuous). A training set $S \sim \mathcal D^n$ is $n$ records drawn independently from $\mathcal D$, and a training algorithm turns it into a model $M$. The model's **confidence** in label $y$ at input $(x, s)$ is $f_y(x, s)$, the probability the model assigns to $y$.
+**Notation.** A record is $z = (s, x, y)$: a sensitive attribute $s$ that takes a few values (smoker or not), public features $x$ (the age band), and a label $y$ (the disease). Records come from a population distribution $\mathcal D$, and $p(s, x, y)$ is the probability of a record (or its density, when $x$ is continuous). A training set $D \sim \mathcal D^n$ is $n$ records drawn independently from $\mathcal D$, and a training algorithm $\mathcal T$ turns it into a model $\theta = \mathcal T(D)$. The model's **confidence** in label $y$ at input $(x, s)$ is $f_y(x, s)$, the probability the model assigns to $y$.
 
 The chapter keeps returning to one number: how often the best possible guess of $s$ is right when the guesser sees $x$ and $y$ and knows the population. For each pair $(x, y)$, the best guess is the value of $s$ with the largest probability $p(s, x, y)$, and it is right on exactly that much probability. Adding over all pairs gives the success rate, written
 
 $$V(S \mid X, Y) = \sum_{x, y}\max_s p(s, x, y).$$
 
-For continuous $x$, read it as $\mathbb E\big[\max_s p(s \mid X, Y)\big]$: the average, over records, of the probability of the most likely value of $s$ given that record's $x$ and $y$. The capital letters $S, X, Y$ stand for the random fields; the letter $S$ does double duty as the training set, and the context always says which is meant.
+For continuous $x$, read it as $\mathbb E\big[\max_s p(s \mid X, Y)\big]$: the average, over records, of the probability of the most likely value of $s$ given that record's $x$ and $y$. The capital letters $S$, $X$ and $Y$ stand for the random sensitive attribute, features and label of a record drawn from $\mathcal D$.
 
 ## Toolkit: three facts every derivation uses
 
@@ -53,11 +53,11 @@ For a concrete case, take no observation at all and a prior of 0.3 that a person
 
 ### Fact 2 — An independent observation is useless
 
-If an extra observation $M$ has nothing to do with $s$ and $o$, seeing it cannot change which value of $s$ is most likely, so it cannot raise the best success. In symbols: if $M$ is independent of $(S, O)$, then $V(S \mid O, M) = V(S \mid O)$.
+If an extra observation $U$ has nothing to do with $s$ and $o$, seeing it cannot change which value of $s$ is most likely, so it cannot raise the best success. In symbols: if $U$ is independent of $(S, O)$, then $V(S \mid O, U) = V(S \mid O)$.
 
-Independence means the probabilities multiply, $p(s, o, m) = p(s, o)\,p(m)$. Put that into Fact 1 with the observation $(o, m)$:
-$$V(S \mid O, M) = \sum_{o, m}\max_s p(s, o)\,p(m) = \sum_m p(m)\sum_o\max_s p(s, o) = V(S \mid O).$$
-The middle step pulls $p(m)$ out of the maximum, which is allowed because $p(m) \ge 0$ does not depend on $s$; the last step uses that the $p(m)$ add up to 1. For instance, a coin flip you see before guessing does not change which smoking status is more likely, so it cannot change your success. This fact is what gives the non-member ceiling: a model trained without you is, as far as your record goes, such an independent observation.
+Independence means the probabilities multiply, $p(s, o, u) = p(s, o)\,p(u)$. Put that into Fact 1 with the observation $(o, u)$:
+$$V(S \mid O, U) = \sum_{o, u}\max_s p(s, o)\,p(u) = \sum_u p(u)\sum_o\max_s p(s, o) = V(S \mid O).$$
+The middle step pulls $p(u)$ out of the maximum, which is allowed because $p(u) \ge 0$ does not depend on $s$; the last step uses that the $p(u)$ add up to 1. For instance, a coin flip you see before guessing does not change which smoking status is more likely, so it cannot change your success. This fact is what gives the non-member ceiling: a model trained without you is, as far as your record goes, such an independent observation.
 
 ### Fact 3 — Processing an observation cannot help the best guesser
 
@@ -75,27 +75,27 @@ The reason is that whoever sees $o$ can compute $g(o)$ and then guess. A rule $h
 
 **The game** (Yeom et al. 2018) is played for a training algorithm, a population $\mathcal D$, a training-set size $n$ and an adversary $\mathcal A$. It has three steps.
 
-1. The challenger draws a training set $S \sim \mathcal D^n$ and trains a model $M$ on it.
-2. It draws a hidden bit $b \in \{0, 1\}$, each value with probability $\frac12$. If $b = 1$, it picks the target $z = (s, x, y)$ uniformly from $S$, so the target is a **member** of the training set. If $b = 0$, it draws $z \sim \mathcal D$ afresh, so the target is a **non-member**.
-3. The adversary receives the target's public fields and label $(x, y)$, but not $s$, and access to $M$. It may also know some or all of $\mathcal D$: that is its auxiliary knowledge. It outputs a guess $\hat s$ of the sensitive attribute.
+1. The challenger draws a training set $D \sim \mathcal D^n$ and trains a model $\theta = \mathcal T(D)$ on it.
+2. It draws a hidden bit $b \in \{0, 1\}$, each value with probability $\frac12$. If $b = 1$, it picks the target $z = (s, x, y)$ uniformly from $D$, so the target is a **member** of the training set. If $b = 0$, it draws $z \sim \mathcal D$ afresh, so the target is a **non-member**.
+3. The adversary receives the target's public fields and label $(x, y)$, but not $s$, and access to $\theta$. It may also know some or all of $\mathcal D$: that is its auxiliary knowledge. It outputs a guess $\hat s$ of the sensitive attribute.
 
 The score should measure how much better the attack does on people who were in the training data than on people who were not, because that difference is what the model knows about its training records beyond the population. So the **attribute advantage** is the success rate on members minus the success rate on non-members,
 $$\mathrm{Adv}^{\mathrm{attr}}(\mathcal A) = \Pr[\hat s = s \mid b = 1] - \Pr[\hat s = s \mid b = 0].$$ {#eq-attr-advantage}
 Here $\Pr[\hat s = s \mid b = 1]$ is the probability that the guess equals the target's true attribute, over everything random in the game, given that the target is a member.
 
-**Attribute advantage is membership advantage.** Any attribute attack can be turned into a membership attack, by a simple observation: if the attribute attack is right more often on members, then "the attribute attack was right" is itself evidence of membership. Build the membership adversary $\mathcal B$ that receives the whole record $z = (s, x, y)$ and $M$, runs $\mathcal A$ on $(x, y)$ and $M$, and says "member" exactly when $\hat s = s$. A membership attack is described by two rates: its true positive rate (TPR), the probability that it says "member" for a member, and its false positive rate (FPR), the probability that it says "member" for a non-member. Its advantage is their difference. For $\mathcal B$ these are
+**Attribute advantage is membership advantage.** Any attribute attack can be turned into a membership attack, by a simple observation: if the attribute attack is right more often on members, then "the attribute attack was right" is itself evidence of membership. Build the membership adversary $\mathcal B$ that receives the whole record $z = (s, x, y)$ and $\theta$, runs $\mathcal A$ on $(x, y)$ and $\theta$, and says "member" exactly when $\hat s = s$. A membership attack is described by two rates: its true positive rate (TPR), the probability that it says "member" for a member, and its false positive rate (FPR), the probability that it says "member" for a non-member. Its advantage is their difference. For $\mathcal B$ these are
 $$\mathrm{TPR}_{\mathcal B} = \Pr[\hat s = s \mid b = 1], \qquad \mathrm{FPR}_{\mathcal B} = \Pr[\hat s = s \mid b = 0], \qquad \mathrm{TPR}_{\mathcal B} - \mathrm{FPR}_{\mathcal B} = \mathrm{Adv}^{\mathrm{attr}}(\mathcal A).$$
 
 Membership attacks have a ceiling: no attack can tell two distributions apart better than their **total variation distance**, which is half the total absolute difference between their probabilities, $\mathrm{TV}(P, Q) = \frac12\sum_v|p(v) - q(v)|$. Because $\mathcal B$ is a membership attack, its ceiling is also a ceiling on every attribute attack:
 $$\mathrm{Adv}^{\mathrm{attr}}(\mathcal A) \le \mathrm{TV}\big(P_{\mathrm{in}}, P_{\mathrm{out}}\big),$$ {#eq-attr-tv}
-where $P_{\mathrm{in}}$ and $P_{\mathrm{out}}$ are the distributions of the pair $(z, M)$, the target record together with the model, when $z$ is a member and when it is not.
+where $P_{\mathrm{in}}$ and $P_{\mathrm{out}}$ are the distributions of the pair $(z, \theta)$, the target record together with the model, when $z$ is a member and when it is not.
 
 ### Derivation
 
 1. **The membership test fires when the attribute guess is right.** $\mathcal B$ is given $s$, so it can check whether $\hat s = s$, and it says "member" on exactly that event.
 2. **Read off its rates.** Its TPR is the probability that it says "member" when $b = 1$, and it says "member" exactly when the guess is right, so the TPR is $\Pr[\hat s = s \mid b = 1]$. In the same way its FPR, the probability of "member" when $b = 0$, is $\Pr[\hat s = s \mid b = 0]$.
 3. **Subtract.** $\mathrm{TPR} - \mathrm{FPR}$ is the right-hand side of @eq-attr-advantage term by term.
-4. **Bound by total variation.** Why can no test beat the total variation distance? A test that says "member" on a set $A$ of views $v = (z, M)$ has $\mathrm{TPR} = P_{\mathrm{in}}(A)$ and $\mathrm{FPR} = P_{\mathrm{out}}(A)$, so its advantage is $\sum_{v \in A}\big(p_{\mathrm{in}}(v) - p_{\mathrm{out}}(v)\big)$. That sum is largest when $A$ contains exactly the views with a positive term, those more likely for members, and its largest value is the total excess of $p_{\mathrm{in}}$ over $p_{\mathrm{out}}$. Since both distributions add up to 1, the total excess one way equals the total excess the other way, so it is half the total absolute difference, $\mathrm{TV}(P_{\mathrm{in}}, P_{\mathrm{out}})$. A randomized test averages such sets and does no better. ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md) proves this in general.) Applied to $\mathcal B$, this gives @eq-attr-tv.
+4. **Bound by total variation.** Why can no test beat the total variation distance? A test that says "member" on a set $A$ of views $v = (z, \theta)$ has $\mathrm{TPR} = P_{\mathrm{in}}(A)$ and $\mathrm{FPR} = P_{\mathrm{out}}(A)$, so its advantage is $\sum_{v \in A}\big(p_{\mathrm{in}}(v) - p_{\mathrm{out}}(v)\big)$. That sum is largest when $A$ contains exactly the views with a positive term, those more likely for members, and its largest value is the total excess of $p_{\mathrm{in}}$ over $p_{\mathrm{out}}$. Since both distributions add up to 1, the total excess one way equals the total excess the other way, so it is half the total absolute difference, $\mathrm{TV}(P_{\mathrm{in}}, P_{\mathrm{out}})$. A randomized test averages such sets and does no better. ([Hypothesis testing](../part01-prerequisites/04-hypothesis-testing.md) proves this in general.) Applied to $\mathcal B$, this gives @eq-attr-tv.
 
 ### Interpretation
 
@@ -129,20 +129,20 @@ The game removes population inference by subtracting it. It is just as useful to
 On a non-member, the model was trained without the target, so it is an independent observation (Fact 2) and the best any adversary can do is the best guess from $(x, y)$ alone (Fact 1). That gives the **non-member ceiling**: for every adversary in the game,
 $$\Pr[\hat s = s \mid b = 0] \le V(S \mid X, Y) = \sum_{x, y}\max_s p(s, x, y).$$ {#eq-attr-ceiling}
 
-The second result is about attacks that never look at the model. A training record, picked at random from a training set drawn from the population, looks exactly like a fresh draw if you ignore the model, so such attacks cannot tell the two worlds apart. **Model-free attacks have zero advantage:** if $\hat s$ depends on $(x, y)$ only, not on $M$, then $\Pr[\hat s = s \mid b = 1] = \Pr[\hat s = s \mid b = 0]$, and the Bayes imputation guess $\arg\max_s p(s \mid x, y)$, the MAP guess under the true population, attains the bound @eq-attr-ceiling in both worlds.
+The second result is about attacks that never look at the model. A training record, picked at random from a training set drawn from the population, looks exactly like a fresh draw if you ignore the model, so such attacks cannot tell the two worlds apart. **Model-free attacks have zero advantage:** if $\hat s$ depends on $(x, y)$ only, not on $\theta$, then $\Pr[\hat s = s \mid b = 1] = \Pr[\hat s = s \mid b = 0]$, and the Bayes imputation guess $\arg\max_s p(s \mid x, y)$, the MAP guess under the true population, attains the bound @eq-attr-ceiling in both worlds.
 
 ### Derivation
 
 **The ceiling.**
 
-1. **A non-member is independent of the model.** When $b = 0$, $z$ is drawn afresh, separately from $S$. The model depends only on $S$ and the randomness of training, so $M$ is independent of $z = (s, x, y)$.
-2. **So the model is a useless observation for the guess.** Fact 2 says that adding an observation independent of $(s, x, y)$ does not change the best success: $V(S \mid X, Y, M) = V(S \mid X, Y)$.
-3. **No guessing rule beats the MAP guess.** The adversary's rule is a function of $(x, y, M)$, possibly randomized. By Fact 1 its success is at most the best success from that observation, $V(S \mid X, Y, M)$, which step 2 showed is $V(S \mid X, Y)$.
+1. **A non-member is independent of the model.** When $b = 0$, $z$ is drawn afresh, separately from $D$. The model depends only on $D$ and the randomness of training, so $\theta$ is independent of $z = (s, x, y)$.
+2. **So the model is a useless observation for the guess.** Fact 2 says that adding an observation independent of $(s, x, y)$ does not change the best success: $V(S \mid X, Y, \theta) = V(S \mid X, Y)$.
+3. **No guessing rule beats the MAP guess.** The adversary's rule is a function of $(x, y, \theta)$, possibly randomized. By Fact 1 its success is at most the best success from that observation, $V(S \mid X, Y, \theta)$, which step 2 showed is $V(S \mid X, Y)$.
 
 **Model-free attacks.**
 
-1. **A member is a population record.** $S$ consists of $n$ independent draws from $\mathcal D$, and the target is one of them chosen uniformly at random. Whichever one is chosen, it was drawn from $\mathcal D$, so on its own (ignoring the model) the target has distribution $\mathcal D$, the same as a fresh draw.
-2. **A rule that ignores $M$ sees the same distribution in both worlds.** Its success is $\Pr[g(X, Y) = S]$ for a record drawn from $\mathcal D$ either way, so the two terms of @eq-attr-advantage are equal and the advantage is 0.
+1. **A member is a population record.** $D$ consists of $n$ independent draws from $\mathcal D$, and the target is one of them chosen uniformly at random. Whichever one is chosen, it was drawn from $\mathcal D$, so on its own (ignoring the model) the target has distribution $\mathcal D$, the same as a fresh draw.
+2. **A rule that ignores $\theta$ sees the same distribution in both worlds.** Its success is $\Pr[g(X, Y) = S]$ for a record drawn from $\mathcal D$ either way, so the two terms of @eq-attr-advantage are equal and the advantage is 0.
 3. **Imputation attains the ceiling.** With $g$ the MAP guess under $\mathcal D$, Fact 1 says this common success is $V(S \mid X, Y)$.
 
 ### Interpretation
@@ -184,7 +184,7 @@ Every one of these numbers comes from the population. A model trained on 10,000 
 ### Check yourself
 
 - In the smoking table, which cell would the imputation guess get wrong most often, measured by probability mass? *(Old, with disease: the guess there is "smoker", which is wrong on the 0.084 of non-smokers in that cell, the largest non-bold entry.)*
-- Does the ceiling @eq-attr-ceiling hold for an adversary that sees the whole training set $S$, not only the model? *(Yes. The argument only needs the observation to be independent of the fresh target, and $S$ is.)*
+- Does the ceiling @eq-attr-ceiling hold for an adversary that sees the whole training set $D$, not only the model? *(Yes. The argument only needs the observation to be independent of the fresh target, and $D$ is.)*
 
 ## Model inversion: the MAP attack {#sec-attr-inversion}
 
@@ -206,7 +206,7 @@ If the model's confidences were exactly the population's probabilities, the seco
 $$p(s \mid x, y) = \frac{p(s \mid x)\,p(y \mid x, s)}{p(y \mid x)}.$$
 2. **The denominator does not depend on $s$.** It is the same number for every candidate, so it cannot change which candidate is largest: $\arg\max_s p(s \mid x, y) = \arg\max_s p(s \mid x)\,p(y \mid x, s)$.
 3. **Plug in the model.** Replace the unknown $p(y \mid x, s)$ by the model's estimate $f_y(x, s)$. This is @eq-attr-map-inversion.
-4. **Calibrated case.** If $f_y = p(y \mid x, s)$ exactly, step 3 changes nothing and the guess is the MAP guess of Fact 1, with success $V(S \mid X, Y)$. The guess then uses nothing about $M$ beyond the population's probabilities, so it is a model-free attack, and the argument of @sec-attr-imputation gives equal success on members and non-members.
+4. **Calibrated case.** If $f_y = p(y \mid x, s)$ exactly, step 3 changes nothing and the guess is the MAP guess of Fact 1, with success $V(S \mid X, Y)$. The guess then uses nothing about $\theta$ beyond the population's probabilities, so it is a model-free attack, and the argument of @sec-attr-imputation gives equal success on members and non-members.
 
 ### Interpretation
 

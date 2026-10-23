@@ -854,11 +854,11 @@ def plot_subsampled() -> Figure:
         left.plot([k], [mu], "ko")
         right.plot([k], [gdp_eps(mu, SGD_DELTA)], "ko")
     left.set(
-        xscale="log", yscale="log", xlabel="steps $k$", ylabel=r"CLT $\mu$", title=r"CLT $\mu$ for DP-SGD, $q = 0.01$"
+        xscale="log", yscale="log", xlabel="steps $T$", ylabel=r"CLT $\mu$", title=r"CLT $\mu$ for DP-SGD, $q = 0.01$"
     )
     right.set(
         xscale="log",
-        xlabel="steps $k$",
+        xlabel="steps $T$",
         ylabel=r"$\varepsilon$ at $\delta = 10^{-5}$",
         title="Reported ε via GDP duality (an approximation)",
     )

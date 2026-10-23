@@ -2,9 +2,9 @@
 
 Exercises for [the chapter on adaptive data analysis](../../book-full/part05-dp-ml/11-adaptive-data-analysis.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_adaptive_data_analysis.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_adaptive_data_analysis.py`.
 
-The solutions use the chapter's notation. The data are a sample $S$ of $n$ records, drawn independently from a distribution $\mathcal D$. A statistical query $q$ maps a record to $[0, 1]$. Its empirical value $q(S)$ is its average over the sample, and its population value $q(\mathcal D)$ is its average over the distribution. A mechanism answers $k$ queries, possibly chosen adaptively, and $a_j$ is its answer to query $j$.
+The solutions use the chapter's notation. The data are a sample of $n$ records, the dataset $D$, drawn independently from a distribution $\mathcal D$. A statistical query $q$ maps a record to $[0, 1]$. Its empirical value $q(D)$ is its average over the sample, and its population value $q(\mathcal D)$ is its average over the distribution. A mechanism answers $k$ queries, possibly chosen adaptively, and $a_j$ is its answer to query $j$.
 
-Privacy is differential privacy (DP) with privacy level $\varepsilon$ and slack $\delta$, under the replace relation, where a neighbour $S^{(i)}$ replaces record $x_i$ by a fresh draw $x_i'$. Zero-concentrated differential privacy (zCDP) with parameter $\rho$ converts to $(\varepsilon, \delta)$-DP with
+Privacy is differential privacy (DP) with privacy level $\varepsilon$ and slack $\delta$, under the replace-one relation, where a neighbour $D^{(i)}$ replaces record $x_i$ by a fresh draw $x_i'$. Zero-concentrated differential privacy (zCDP) with parameter $\rho$ converts to $(\varepsilon, \delta)$-DP with
 $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$
 
 ## How many point queries break a sample {#sec-sol-ada-1}
@@ -23,20 +23,20 @@ $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$
 
 ## The reverse direction, and a selection from one record {#sec-sol-ada-2}
 
-> **Exercise 2.** **The reverse direction, and a selection from one record.** (a) Prove the second inequality of the transfer lemma, $\mathbb E[q_W(\mathcal D)] \le e^\varepsilon\,\mathbb E[q_W(S)] + \delta$, by applying DP from $S^{(i)}$ to $S$. (b) Take $n = 1$ record, a uniform bit $x_1$. The algorithm $W$ keeps the bit with probability $e^\varepsilon/(1 + e^\varepsilon)$ and flips it otherwise, which gives a bit $b$, and outputs the query $q(x) = \mathbf 1[x = b]$. Show that $W$ is $\varepsilon$-DP and that its selection bias is $\tanh(\varepsilon/2)/2$, about $\varepsilon/4$. Compare it with the lemma's bounds. *Check: at $\varepsilon = 0.1$, a bias of 0.02498 against the sharper bound 0.05259 and the lemma 0.10517.* *(Transfer lemma; randomized response)*
+> **Exercise 2.** **The reverse direction, and a selection from one record.** (a) Prove the second inequality of the transfer lemma, $\mathbb E[q_W(\mathcal D)] \le e^\varepsilon\,\mathbb E[q_W(D)] + \delta$, by applying DP from $D^{(i)}$ to $D$. (b) Take $n = 1$ record, a uniform bit $x_1$. The algorithm $W$ keeps the bit with probability $e^\varepsilon/(1 + e^\varepsilon)$ and flips it otherwise, which gives a bit $y$, and outputs the query $q(x) = \mathbf 1[x = y]$. Show that $W$ is $\varepsilon$-DP and that its selection bias is $\tanh(\varepsilon/2)/2$, about $\varepsilon/4$. Compare it with the lemma's bounds. *Check: at $\varepsilon = 0.1$, a bias of 0.02498 against the sharper bound 0.05259 and the lemma 0.10517.* *(Transfer lemma; randomized response)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **(a)**
 
-1. **DP in the other direction.** Hold $S$ and $x_i'$ fixed. The samples $S^{(i)}$ and $S$ are neighbours, and the replace relation is symmetric. So Fact 3 of the chapter, applied to $f(q) = q(x_i)$, gives $\mathbb E_W[q_{W(S^{(i)})}(x_i)] \le e^\varepsilon\,\mathbb E_W[q_{W(S)}(x_i)] + \delta$.
-2. **Average.** Averaging over $S$ and $x_i'$ keeps the inequality. Averaging over $i$ turns the right side into $e^\varepsilon\,\mathbb E[q_W(S)] + \delta$, by step 1 of the lemma's derivation.
-3. **The left side.** By the renaming of Fact 2, $\mathbb E[q_{W(S^{(i)})}(x_i)] = \mathbb E[q_{W(S)}(x_i')] = \mathbb E[q_W(\mathcal D)]$, because $x_i'$ is a record that $W$ never saw. This gives the claim.
+1. **DP in the other direction.** Hold $D$ and $x_i'$ fixed. The samples $D^{(i)}$ and $D$ are neighbours, and the replace-one relation is symmetric. So Fact 3 of the chapter, applied to $f(q) = q(x_i)$, gives $\mathbb E_W[q_{W(D^{(i)})}(x_i)] \le e^\varepsilon\,\mathbb E_W[q_{W(D)}(x_i)] + \delta$.
+2. **Average.** Averaging over $D$ and $x_i'$ keeps the inequality. Averaging over $i$ turns the right side into $e^\varepsilon\,\mathbb E[q_W(D)] + \delta$, by step 1 of the lemma's derivation.
+3. **The left side.** By the renaming of Fact 2, $\mathbb E[q_{W(D^{(i)})}(x_i)] = \mathbb E[q_{W(D)}(x_i')] = \mathbb E[q_W(\mathcal D)]$, because $x_i'$ is a record that $W$ never saw. This gives the claim.
 
 **(b)**
 
-1. **Privacy.** The output is determined by $b$. Changing $x_1$ changes the probability of each value of $b$ from $e^\varepsilon/(1 + e^\varepsilon)$ to $1/(1 + e^\varepsilon)$ or back, a ratio of $e^\varepsilon$. This is randomized response, which is $\varepsilon$-DP.
-2. **The empirical value.** With one record, $q_W(S) = \mathbf 1[x_1 = b]$, which is 1 exactly when the bit was kept. Its expectation is $e^\varepsilon/(1 + e^\varepsilon)$.
-3. **The population value.** A fresh uniform bit equals $b$ with probability $\frac12$, whatever $b$ is, so $q_W(\mathcal D) = \frac12$.
+1. **Privacy.** The output is determined by $y$. Changing $x_1$ changes the probability of each value of $y$ from $e^\varepsilon/(1 + e^\varepsilon)$ to $1/(1 + e^\varepsilon)$ or back, a ratio of $e^\varepsilon$. This is randomized response, which is $\varepsilon$-DP.
+2. **The empirical value.** With one record, $q_W(D) = \mathbf 1[x_1 = y]$, which is 1 exactly when the bit was kept. Its expectation is $e^\varepsilon/(1 + e^\varepsilon)$.
+3. **The population value.** A fresh uniform bit equals $y$ with probability $\frac12$, whatever $y$ is, so $q_W(\mathcal D) = \frac12$.
 4. **The bias.** The difference is $e^\varepsilon/(1 + e^\varepsilon) - \frac12 = (e^\varepsilon - 1)/(2(e^\varepsilon + 1)) = \tanh(\varepsilon/2)/2$. For small $\varepsilon$, $\tanh(\varepsilon/2) \approx \varepsilon/2$, so the bias is about $\varepsilon/4$.
 5. **Numbers.** At $\varepsilon = 0.1$ the bias is 0.02498, against the sharper bound $(e^\varepsilon - 1)\cdot\frac12 = 0.05259$ and the lemma's $e^\varepsilon - 1 = 0.10517$. At $\varepsilon = 1$ it is 0.23106, against 0.85914 and 1.71828.
 
@@ -51,7 +51,7 @@ $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$
 1. **Without complements.** The same steps bound $\mathbb E[\max_j(q_j(\mathcal D) - a_j)]$, the largest error in one direction only: answers that are too low. Answers that are too high, with $a_j > q_j(\mathcal D)$, are invisible to this $W$. In @tbl-ada-complement, $W$ would pick $q_2$ with error 0.05 and miss $q_1$, whose answer is 0.12 too high.
 2. **A second selector.** One could instead run the proof again with a selector that maximizes $a_j - q_j(\mathcal D)$, but that needs the lemma for queries of the form $1 - q$. That is exactly what the complements provide, in one pass.
 3. **No privacy cost.** The complement answers $1 - a_j$ are computed from the answers $a_j$ alone, without touching the data. By post-processing, the extended transcript is as private as the original one, $(\varepsilon, \delta)$-DP.
-4. **Same accuracy.** The error of a complement on the sample is $|(1 - a_j) - (1 - q_j(S))| = |a_j - q_j(S)|$. So the largest error on the sample over the $2k$ queries is the same as over the original $k$, at most $\alpha$ on average.
+4. **Same accuracy.** The error of a complement on the sample is $|(1 - a_j) - (1 - q_j(D))| = |a_j - q_j(D)|$. So the largest error on the sample over the $2k$ queries is the same as over the original $k$, at most $\alpha$ on average.
 5. **The complement is a statistical query.** $1 - q_j$ maps each record to $[0, 1]$, so the lemma applies to it.
 
 *The complements are a bookkeeping trick: they let one private choice carry the largest error in either direction, at no cost in privacy or accuracy.*
@@ -102,10 +102,10 @@ $$\varepsilon = \rho + 2\sqrt{\rho\ln(1/\delta)}.$$
 
 ## Thresholdout's budget {#sec-sol-ada-7}
 
-> **Exercise 7.** **Thresholdout's budget.** In the chapter's experiment, the queries are correlations with sensitivity $\Delta = 2/n$, and Thresholdout uses $\sigma = 1/\sqrt n$ with $n = 2{,}000$. How many overfitting detections fit within $\varepsilon = 1$? How large must the holdout set be to afford 300 detections at $\varepsilon = 0.1$ with the same $\sigma = 1/\sqrt n$? *Check: 11 detections; $n = 1.44\times10^8$.* *(Sparse vector technique; basic composition)*
+> **Exercise 7.** **Thresholdout's budget.** In the chapter's experiment, the queries are correlations with sensitivity $\Delta = 2/n$, and Thresholdout uses the Laplace noise scale $b = 1/\sqrt n$ with $n = 2{,}000$. How many overfitting detections fit within $\varepsilon = 1$? How large must the holdout set be to afford 300 detections at $\varepsilon = 0.1$ with the same $b = 1/\sqrt n$? *Check: 11 detections; $n = 1.44\times10^8$.* *(Sparse vector technique; basic composition)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **The cost of one detection.** By @eq-ada-tho, one detection costs $2\Delta/\sigma = 2 \cdot (2/n) \cdot \sqrt n = 4/\sqrt n$. At $n = 2{,}000$ that is 0.0894.
+1. **The cost of one detection.** By @eq-ada-tho, one detection costs $2\Delta/b = 2 \cdot (2/n) \cdot \sqrt n = 4/\sqrt n$. At $n = 2{,}000$ that is 0.0894.
 2. **The budget.** Detections compose by adding their costs, so $\varepsilon = 1$ allows $\lfloor 1/0.0894\rfloor = 11$ detections.
 3. **The experiment.** The chapter's runs recorded 325.8 detections on average, so their total cost was $\varepsilon = 29.1$, far above 1.
 4. **A larger holdout set.** With $B$ detections, $\varepsilon = 4B/\sqrt n$. Setting $\varepsilon = 0.1$ and $B = 300$ gives $\sqrt n = 4 \times 300/0.1 = 12{,}000$, so $n = 1.44\times10^8$ records.

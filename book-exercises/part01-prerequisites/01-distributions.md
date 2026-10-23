@@ -6,7 +6,7 @@ The solutions work with the probability mass function (PMF) and the moment gener
 
 ## Binomial variance from the PMF {#sec-sol-distributions-1}
 
-> **Exercise 1.** **Binomial variance from the PMF.** Compute $\mathbb E[S(S-1)]$ for $S \sim \mathrm{Binomial}(n, p)$ directly from the PMF, and recover $\operatorname{Var}S = np(1-p)$. Compare the effort with the decomposition argument. *(Binomial)*
+> **Exercise 1.** **Binomial variance from the PMF.** Compute $\mathbb E[S(S-1)]$ for $S \sim \mathrm{Bin}(n, p)$ directly from the PMF, and recover $\operatorname{Var}S = np(1-p)$. Compare the effort with the decomposition argument. *(Binomial)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 Write $q = 1 - p$.
@@ -20,7 +20,7 @@ $$k(k-1)\binom nk = \frac{n!}{(k-2)!\,(n-k)!} = n(n-1)\binom{n-2}{k-2}.$$
 3. **Pull out $n(n-1)p^2$ and re-index with $j = k - 2$:**
 $$\mathbb E[S(S-1)] = n(n-1)p^2\sum_{j=0}^{n-2}\binom{n-2}{j}p^jq^{(n-2)-j}.$$
 
-4. **The remaining sum is a whole PMF.** It is the sum of the $\mathrm{Binomial}(n-2, p)$ PMF over all its values, which is 1 (equivalently, $(p + q)^{n-2} = 1$ by the binomial theorem). So
+4. **The remaining sum is a whole PMF.** It is the sum of the $\mathrm{Bin}(n-2, p)$ PMF over all its values, which is 1 (equivalently, $(p + q)^{n-2} = 1$ by the binomial theorem). So
 $$\mathbb E[S(S-1)] = n(n-1)p^2.$$
 
 5. **Recover the variance.** $\mathbb E S^2 = \mathbb E[S(S-1)] + \mathbb E S$, and the same trick with one factor $k$ gives $\mathbb E S = np$. So
@@ -35,9 +35,9 @@ $$\operatorname{Var}S = n(n-1)p^2 + np - n^2p^2 = np - np^2 = np(1-p).$$
 | 2 | 2 | $3p^2q$ | $6p^2q$ |
 | 3 | 6 | $p^3$ | $6p^3$ |
 
-: The terms of $\mathbb E[S(S-1)]$ for $S \sim \mathrm{Binomial}(3, p)$, with $q = 1 - p$. {#tbl-sol-distributions-binomial-n3}
+: The terms of $\mathbb E[S(S-1)]$ for $S \sim \mathrm{Bin}(3, p)$, with $q = 1 - p$. {#tbl-sol-distributions-binomial-n3}
 
-The total is $6p^2q + 6p^3 = 6p^2(q + p) = 6p^2 = n(n-1)p^2$, as step 4 says. Summed numerically over the PMF, the script gets $\mathbb E[S(S-1)] = 34.2000$ and $\operatorname{Var}S = 4.2000$ for $\mathrm{Binomial}(20, 0.3)$, and $2497.5000$ and $47.5000$ for $\mathrm{Binomial}(1000, 0.05)$, matching $n(n-1)p^2$ and $np(1-p)$.
+The total is $6p^2q + 6p^3 = 6p^2(q + p) = 6p^2 = n(n-1)p^2$, as step 4 says. Summed numerically over the PMF, the script gets $\mathbb E[S(S-1)] = 34.2000$ and $\operatorname{Var}S = 4.2000$ for $\mathrm{Bin}(20, 0.3)$, and $2497.5000$ and $47.5000$ for $\mathrm{Bin}(1000, 0.05)$, matching $n(n-1)p^2$ and $np(1-p)$.
 
 **The effort.** The PMF route needs the factorial moment $\mathbb E[S(S-1)]$ (not $\mathbb E S^2$, which does not telescope), an identity for the coefficient, a re-index, and the fact that a PMF sums to 1. The decomposition $S = X_1 + \dots + X_n$ needs one line: each Bernoulli has variance $p(1-p)$, and independent variances add.
 
@@ -51,7 +51,7 @@ The total is $6p^2q + 6p^3 = 6p^2(q + p) = 6p^2 = n(n-1)p^2$, as step 4 says. Su
 ::: {.callout-tip collapse="true" title="Solution"}
 Let $K$ be the number kept.
 
-1. **Given $N$, the count kept is binomial.** If $N = n$, then $K$ counts the successes in $n$ independent $\mathrm{Bernoulli}(q)$ trials, so $K \sim \mathrm{Binomial}(n, q)$. Its MGF is the binomial MGF from the chapter:
+1. **Given $N$, the count kept is binomial.** If $N = n$, then $K$ counts the successes in $n$ independent $\mathrm{Bern}(q)$ trials, so $K \sim \mathrm{Bin}(n, q)$. Its MGF is the binomial MGF from the chapter:
 $$\mathbb E[e^{\lambda K} \mid N = n] = \big(1 + q(e^\lambda - 1)\big)^n.$$
 
 2. **Average over $N$.** The MGF of $K$ is the average of these conditional MGFs, weighted by $\Pr[N = n]$:
@@ -77,12 +77,12 @@ The conditional average is $(1-q)^2 + 2q(1-q)e^\lambda + q^2e^{2\lambda} = \big(
 
 As a check, the script draws $N \sim \mathrm{Poisson}(4)$ a million times and keeps each event with probability $q = 0.3$. The kept count has mean 1.198 and variance 1.200, against $q\mu = 1.200$ for both, as a Poisson needs.
 
-*Randomly discarding events from a Poisson count leaves a Poisson count, with the mean scaled by the keep probability.*
+*Randomly discarding events from a Poisson count leaves a Poisson count, with the mean scaled by the sampling rate $q$.*
 :::
 
 ## Quality of the Poisson approximation {#sec-sol-distributions-3}
 
-> **Exercise 3.** **Quality of the Poisson approximation.** For $\mathrm{Binomial}(n, 5/n)$, compute the total variation distance $\frac12\sum_k|\Pr[S = k] - \Pr[N = k]|$ to $\mathrm{Poisson}(5)$ for $n = 10, 100, 1000$ using the functions in the script. *Check: it shrinks roughly like $1/n$.* *(Poisson limit)*
+> **Exercise 3.** **Quality of the Poisson approximation.** For $\mathrm{Bin}(n, 5/n)$, compute the total variation distance $\frac12\sum_k|\Pr[S = k] - \Pr[N = k]|$ to $\mathrm{Poisson}(5)$ for $n = 10, 100, 1000$ using the functions in the script. *Check: it shrinks roughly like $1/n$.* *(Poisson limit)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 1. **Split the sum at $n$.** The binomial puts no mass above $n$, so for $k > n$ each term is $\Pr[N = k]$, and those terms add up to $\Pr[N > n]$:
@@ -96,7 +96,7 @@ $$\frac12\sum_k\big|\Pr[S = k] - \Pr[N = k]\big| = \frac12\left(\sum_{k=0}^n\big
 | 100 | 0.012598 | 1.2598 |
 | 1,000 | 0.001228 | 1.2276 |
 
-: Total variation distance between $\mathrm{Binomial}(n, 5/n)$ and $\mathrm{Poisson}(5)$. {#tbl-sol-distributions-tv}
+: Total variation distance between $\mathrm{Bin}(n, 5/n)$ and $\mathrm{Poisson}(5)$. {#tbl-sol-distributions-tv}
 
 3. **Read off the rate.** Each tenfold increase in $n$ cuts the distance by about ten, and $n$ times the distance settles near 1.23. So the distance is roughly $1.23/n$, which confirms the check.
 
@@ -104,7 +104,7 @@ $$\frac12\sum_k\big|\Pr[S = k] - \Pr[N = k]\big| = \frac12\left(\sum_{k=0}^n\big
 
 (The chapter's `binomial_pmf` evaluates $\binom nk$ as an exact integer and then converts it to a float. That conversion overflows once $n$ is a little above 1,000, so going further, to $n = 10{,}000$, would need the PMF in log space, as `poisson_pmf` already does.)
 
-*The Poisson approximation to $\mathrm{Binomial}(n, \mu/n)$ is off by an amount of order $1/n$, because the two variances differ by $\mu^2/n$.*
+*The Poisson approximation to $\mathrm{Bin}(n, \mu/n)$ is off by an amount of order $1/n$, because the two variances differ by $\mu^2/n$.*
 :::
 
 ## Median from absolute loss {#sec-sol-distributions-4}
@@ -213,35 +213,35 @@ The $k = 2$ row has an exact answer. $\max(Z_1, Z_2) = \frac{Z_1 + Z_2}{2} + \fr
 > **Exercise 7.** **Random vectors are nearly orthogonal.** For independent $X, Y \sim \mathcal N(0, I_d)$, show $\langle X, Y\rangle/(\|X\|\|Y\|)$ is of order $1/\sqrt d$. Check by simulation for $d = 10, 1000$. *(Rotation invariance, norm concentration)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-Let $C = \langle X, Y\rangle/(\|X\|\|Y\|)$, the cosine of the angle between $X$ and $Y$.
+Let $\rho = \langle X, Y\rangle/(\|X\|\|Y\|)$, the cosine of the angle between $X$ and $Y$.
 
 1. **Fix $Y$.** Condition on $Y$ and let $u = Y/\|Y\|$, a fixed unit vector. Since $X$ is independent of $Y$, $X$ is still $\mathcal N(0, I_d)$, and
-$$C = \frac{\langle u, X\rangle}{\|X\|}.$$
+$$\rho = \frac{\langle u, X\rangle}{\|X\|}.$$
 
 2. **Numerator: rotation invariance.** $\langle u, X\rangle \sim \mathcal N(0, 1)$ for any unit $u$. Its distribution does not depend on $u$, so it does not depend on $Y$ either.
 
 3. **Denominator: norm concentration.** $\|X\| = \sqrt d\,\big(1 \pm O(1/\sqrt d)\big)$, by the chapter's norm result.
 
-4. **Combine.** $C \approx \langle u, X\rangle/\sqrt d$: a standard normal divided by $\sqrt d$. So $C$ is typically of size $1/\sqrt d$.
+4. **Combine.** $\rho \approx \langle u, X\rangle/\sqrt d$: a standard normal divided by $\sqrt d$. So $\rho$ is typically of size $1/\sqrt d$.
 
 **The exact standard deviation.** Steps 3 and 4 are approximate, but the second moment is exact.
 
-5. **Turn $u$ into the first coordinate.** The $\mathcal N(0, I_d)$ density $(2\pi)^{-d/2}e^{-\|x\|^2/2}$ depends on $x$ only through $\|x\|$. A rotation $R$ that maps $u$ to $e_1 = (1, 0, \dots, 0)$ preserves norms and inner products, so $RX$ has the same distribution as $X$, and $C = \langle Ru, RX\rangle/\|RX\| = \langle e_1, RX\rangle/\|RX\|$. So $C$ has the same distribution as $X_1/\|X\|$. In $d = 2$, for example, $R$ turns the plane until $u$ points along the first axis, and the circular contours of the density don't move.
+5. **Turn $u$ into the first coordinate.** The $\mathcal N(0, I_d)$ density $(2\pi)^{-d/2}e^{-\|x\|^2/2}$ depends on $x$ only through $\|x\|$. A rotation $R$ that maps $u$ to $e_1 = (1, 0, \dots, 0)$ preserves norms and inner products, so $RX$ has the same distribution as $X$, and $\rho = \langle Ru, RX\rangle/\|RX\| = \langle e_1, RX\rangle/\|RX\|$. So $\rho$ has the same distribution as $X_1/\|X\|$. In $d = 2$, for example, $R$ turns the plane until $u$ points along the first axis, and the circular contours of the density don't move.
 
 6. **Symmetry among coordinates.** The coordinates of $X$ are independent and identically distributed, so $\mathbb E[X_i^2/\|X\|^2]$ is the same for every $i$. These $d$ numbers add up to $\mathbb E[\sum_iX_i^2/\|X\|^2] = 1$, so each is $1/d$.
 
-7. **Mean and standard deviation.** $X$ and $-X$ have the same distribution, so $\mathbb E C = 0$, and $\operatorname{Var}C = \mathbb E C^2 = 1/d$. The standard deviation of $C$ is exactly $1/\sqrt d$.
+7. **Mean and standard deviation.** $X$ and $-X$ have the same distribution, so $\mathbb E \rho = 0$, and $\operatorname{Var}(\rho) = \mathbb E \rho^2 = 1/d$. The standard deviation of $\rho$ is exactly $1/\sqrt d$.
 
 **Simulation.** @tbl-sol-distributions-cosines reports 10,000 pairs for each $d$.
 
-| $d$ | Mean of $C$ | Std of $C$ | $1/\sqrt d$ | $\sqrt d \times$ std | Largest $\lvert C\rvert$ |
+| $d$ | Mean of $\rho$ | Std of $\rho$ | $1/\sqrt d$ | $\sqrt d \times$ std | Largest $\lvert \rho\rvert$ |
 | --- | --- | --- | --- | --- | --- |
 | 10 | 0.0021 | 0.3178 | 0.3162 | 1.005 | 0.908 |
 | 1,000 | −0.0003 | 0.0315 | 0.0316 | 0.997 | 0.121 |
 
-: Cosine $C$ between independent $X, Y \sim \mathcal N(0, I_d)$, over 10,000 pairs (seed 0). {#tbl-sol-distributions-cosines}
+: Cosine $\rho$ between independent $X, Y \sim \mathcal N(0, I_d)$, over 10,000 pairs (seed 0). {#tbl-sol-distributions-cosines}
 
-The standard deviation matches $1/\sqrt d$ to within 1%. At $d = 10$ some pairs are nearly parallel (largest $|C|$ 0.908). At $d = 1{,}000$, none of the 10,000 pairs has $|C|$ above 0.121, an angle within 7.0° of a right angle.
+The standard deviation matches $1/\sqrt d$ to within 1%. At $d = 10$ some pairs are nearly parallel (largest $|\rho|$ 0.908). At $d = 1{,}000$, none of the 10,000 pairs has $|\rho|$ above 0.121, an angle within 7.0° of a right angle.
 
 *In high dimension, two independent random directions are almost orthogonal: their cosine has standard deviation exactly $1/\sqrt d$.*
 :::

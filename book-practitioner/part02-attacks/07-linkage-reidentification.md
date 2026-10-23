@@ -88,10 +88,10 @@ The target may not be in the release at all. So the **eccentricity test** declar
 
 ## Does releasing a sample protect? {#sec-link-sampling}
 
-Adult is itself a sample. Agencies release samples arguing that a sample-unique record may share its attributes with someone left out, but the argument is weaker than it sounds. Suppose the adversary knows a person and finds exactly one matching record in a release that holds a share $\pi$ of the population, the **sampling fraction**. Write $\lambda$ for the expected number of other people in the population who share the target's cell. The record found can be a look-alike's only if the target was left out, which happens with probability $1 - \pi$. So for a rare cell, the probability $\kappa$ that the match is right is about
-$$\kappa \approx \frac{1}{1 + \lambda(1 - \pi)}.$$ {#eq-link-kappa}
+Adult is itself a sample. Agencies release samples arguing that a sample-unique record may share its attributes with someone left out, but the argument is weaker than it sounds. Suppose the adversary knows a person and finds exactly one matching record in a release that holds a share $q$ of the population, the **sampling rate**. Write $\lambda$ for the expected number of other people in the population who share the target's cell. The record found can be a look-alike's only if the target was left out, which happens with probability $1 - q$. So for a rare cell, the probability $\kappa$ that the match is right is about
+$$\kappa \approx \frac{1}{1 + \lambda(1 - q)}.$$ {#eq-link-kappa}
 
-For example, take a rare cell, one expected to hold $\lambda = 0.1$ other people. Even a 1% sample leaves a match right with probability 0.910, and shrinking the sample further barely helps. Sampling enters only through $1 - \pi$, which can never exceed 1, so the chance of a right match never falls below $1/(1 + \lambda)$. Sampling therefore protects only people whose cells are crowded anyway.
+For example, take a rare cell, one expected to hold $\lambda = 0.1$ other people. Even a 1% sample leaves a match right with probability 0.910, and shrinking the sample further barely helps. Sampling enters only through $1 - q$, which can never exceed 1, so the chance of a right match never falls below $1/(1 + \lambda)$. Sampling therefore protects only people whose cells are crowded anyway.
 
 So the Adult figures above are **sample uniqueness**, exact when the target is known to be in the release. The **population uniqueness** behind them is lower, but not by much for rare cells, so estimate it with a model rather than assume the risk away. The open-source tool ARX offers the Pitman and Zayatz estimators for this. The R package sdcMicro estimates each record's risk from its sampling weight, the number of people the record stands for.
 
@@ -108,7 +108,7 @@ List as quasi-identifiers every column an adversary could find next to a name el
 | Bits to name one person | $\log_2 n$ | 27.9 for the US of 1990 |
 | Risk of a release you hold | Success $J/n$; at most $1/k$ if every class has at least $k$ records | Prosecutor model |
 | Share unique, uniform cells | $\exp(-2^{\log_2 n - b})$ | 50% at $\log_2 n + 0.53$ bits, 99% at $\log_2 n + 6.64$ |
-| Releasing a sample | $\kappa \approx 1/(1 + \lambda(1 - \pi))$ | 0.910 at $\lambda = 0.1$ in a 1% sample |
+| Releasing a sample | $\kappa \approx 1/(1 + \lambda(1 - q))$ | 0.910 at $\lambda = 0.1$ in a 1% sample |
 
 : The results of this chapter. {#tbl-link-cheat}
 

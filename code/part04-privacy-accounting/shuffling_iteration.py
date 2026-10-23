@@ -791,7 +791,7 @@ def plot_hidden_state() -> Figure:
     left.set(
         xlabel="steps T",
         ylabel=r"$\mu$",
-        title=r"$w \leftarrow c\,w + b + N(0, \sigma^2)$, full batch, s/σ = 1: exact μ",
+        title=r"$\theta \leftarrow c\,\theta + b + \mathcal{N}(0, \sigma^2)$, full batch, s/σ = 1: exact μ",
     )
     left.legend(fontsize=9)
     steps = sorted({int(round(10 ** (j / 8))) for j in range(27)})

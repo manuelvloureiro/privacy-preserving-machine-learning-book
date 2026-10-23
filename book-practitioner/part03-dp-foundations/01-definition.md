@@ -10,7 +10,7 @@ The first question about any claim is what "differ in one record" means, and the
 $$\varepsilon\text{-DP under add/remove} \implies 2\varepsilon\text{-DP under replace}.$$ {#eq-dpdef-replace}
 The reverse fails, because replace never compares datasets of different sizes, so it cannot hide whether someone is in the data.
 
-You also choose the **unit of privacy**, what one record is. At the **example level**, it is one training example or one event, and at the **user level**, all the data of one person. Under example-level DP, a user who wrote 200 messages is a group of 200 records. A group of $k$ records is protected only at $k\varepsilon$ ([Post-processing, group privacy and composition](02-properties.md)), so check that the claim protects the person. The guarantee must also hide every record the data format allows, even a person aged 900. That is why private algorithms clip each input to a fixed range before they add noise.
+You also choose the **unit of privacy**, what one record is. At the **example level**, it is one training record or one event, and at the **user level**, all the data of one person. Under example-level DP, a user who wrote 200 messages is a group of 200 records. A group of $k$ records is protected only at $k\varepsilon$ ([Post-processing, group privacy and composition](02-properties.md)), so check that the claim protects the person. The guarantee must also hide every record the data format allows, even a person aged 900. That is why private algorithms clip each input to a fixed range before they add noise.
 
 ## The definition {#sec-dpdef-definition}
 
@@ -96,7 +96,7 @@ For a reported violation, ask whether the inference would differ materially with
 
 ## Writing the guarantee down {#sec-dpdef-statement}
 
-A reviewer can check only what a claim writes down, so a guarantee needs more than its two numbers. It names the unit with its neighbouring relation, and $\varepsilon$ and $\delta$ for the whole release rather than per query. It also names the mechanism, the library version, the trust model and what was treated as public, since public information is not protected. The example uses the **central model**, in which a trusted curator holds the raw data and adds the noise. For example:
+A reviewer can check only what a claim writes down, so a guarantee needs more than its two numbers. It names the unit with its neighbouring relation, and $\varepsilon$ and $\delta$ for the whole release rather than per query. It also names the mechanism, the library version, the trust model and what was treated as public, since public information is not protected. The record uses the **central model**, in which a trusted curator holds the raw data and adds the noise. For example:
 
 > This release satisfies $(1, 10^{-5})$-DP for adding or removing one customer and all their invoice lines, at most 100 per customer, under the central model, with Gaussian noise from OpenDP 0.16.0. The market list was fixed in advance.
 

@@ -2,12 +2,12 @@
 
 ## What it is {#sec-dperm-what}
 
-Most of machine learning is **empirical risk minimization (ERM)**, which picks the weights $w$ with the least average loss over the $n$ training records. Usually a ridge penalty keeps the weights small. Its strength is a number $\lambda$, and training minimizes
-$$J(w) = \frac1n\sum_{i=1}^n\ell(w, z_i) + \frac\lambda2\|w\|^2,$$
-where $\ell(w, z)$ is the loss of the weights on one record $z$. Differential privacy (DP) asks that replacing one record barely change the released weights. So noise must enter in the trained weights, in the objective or in each gradient step.
+Most of machine learning is **empirical risk minimization (ERM)**, which picks the weights $\theta$ with the least average loss over a training set. Write $D$ for that set and $n$ for its number of records. Usually a ridge penalty keeps the weights small. Its strength is a number $\lambda$, and training minimizes
+$$\mathcal L(\theta; D) = \frac1n\sum_{i=1}^n\ell(\theta; z_i) + \frac\lambda2\|\theta\|^2,$$
+where $\ell(\theta; z)$ is the loss of the weights on one record $z$. Differential privacy (DP) asks that replacing one record barely change the released weights. So noise must enter in the trained weights, in the objective or in each gradient step.
 
-**Output perturbation** trains as usual and adds Gaussian noise to the final weights, which gives a guarantee with a small slack $\delta$. The noise is scaled to the most one record can move the minimizer $w^*$. Write $D$ and $D'$ for two datasets that differ in one record. For a convex loss, the ridge limits that move to
-$$\|w^*(D) - w^*(D')\| \le \frac{2L}{\lambda n}.$$
+**Output perturbation** trains as usual and adds Gaussian noise to the final weights, which gives a guarantee with a small slack $\delta$. The noise is scaled to the most one record can move the minimizer $\theta^*$. Write $D$ and $D'$ for two datasets that differ in one record. For a convex loss, the ridge limits that move to
+$$\|\theta^*(D) - \theta^*(D')\| \le \frac{2L}{\lambda n}.$$
 Here the constant $L$ bounds the length of each record's loss gradient. It is 1 for logistic regression with labels $\pm1$ and features of length at most 1.
 
 **Objective perturbation** adds a random linear term to the objective and minimizes the result exactly. Part of the privacy budget $\varepsilon$ pays for the loss's curvature, which is at most a constant $c$, one quarter for the logistic loss. The noise is scaled to what is left,

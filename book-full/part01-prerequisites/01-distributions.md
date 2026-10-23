@@ -2,7 +2,7 @@
 
 ## Why this matters
 
-A handful of distributions do almost all the work in this book. Counts of events (errors, successes, examples drawn into a batch) are binomial, and Poisson when the events are rare. Additive noise is usually normal or Laplace. Every later chapter — concentration, divergences, hypothesis testing — is stated in terms of these few families. So you need to know each one well: its density, mean, variance, moment generating function (MGF), tails, and how it relates to the others.
+A handful of distributions do almost all the work in this book. Counts of events (errors, successes, records drawn into a batch) are binomial, and Poisson when the events are rare. Additive noise is usually normal or Laplace. Every later chapter — concentration, divergences, hypothesis testing — is stated in terms of these few families. So you need to know each one well: its density, mean, variance, moment generating function (MGF), tails, and how it relates to the others.
 
 The idea that ties the chapter together is that these families are not a zoo of unrelated formulas. They are built from one another. A binomial is a sum of coin flips. A Poisson is a binomial with many trials and a small success probability. An exponential is the waiting time for the first event in that same Poisson setting. A Laplace is two exponentials placed back to back. A normal is what any sum of many small independent pieces looks like. Because each family is built from simpler ones, its mean, variance and MGF can be computed from the pieces, and that is how this chapter derives them.
 
@@ -46,7 +46,7 @@ The mean and variance summarize a distribution by two numbers. The moment genera
 $$M_X(\lambda) = \mathbb E\big[e^{\lambda X}\big].$$
 Here $\lambda$ is a real number that *you* choose. It is not a parameter of the distribution; it is a dial. For each setting of the dial you get one number, $\mathbb E[e^{\lambda X}]$, and the MGF is the whole function $\lambda \mapsto M_X(\lambda)$. With $\lambda > 0$, the weight $e^{\lambda X}$ grows exponentially in $X$, so large values of $X$ dominate the average; the larger $\lambda$, the further into the right tail it looks. With $\lambda < 0$ it looks at the left tail instead. At $\lambda = 0$ every weight is $e^0 = 1$, so $M_X(0) = 1$ for every distribution.
 
-**A concrete case: where $e^\lambda$ comes from.** Take a coin $X \sim \mathrm{Bernoulli}(p)$, which is 1 with probability $p$ and 0 otherwise. To compute $\mathbb E[e^{\lambda X}]$, list each outcome, the value $e^{\lambda X}$ takes there, and its probability (@tbl-mgf-coin).
+**A concrete case: where $e^\lambda$ comes from.** Take a coin $X \sim \mathrm{Bern}(p)$, which is 1 with probability $p$ and 0 otherwise. To compute $\mathbb E[e^{\lambda X}]$, list each outcome, the value $e^{\lambda X}$ takes there, and its probability (@tbl-mgf-coin).
 
 | Outcome $x$ | $\Pr[X = x]$ | $e^{\lambda x}$ |
 | --- | --- | --- |
@@ -85,13 +85,13 @@ The tail and the MGF are tied together, and the link is a one-line argument. Fix
 
 ### Context
 
-The simplest random quantity is a yes/no outcome: a test example is misclassified or not, a coin lands heads or not, a record is included in a sample or not. Count the yeses over $n$ independent trials and you get a binomial. Every estimated rate in machine learning — accuracy, error rate, false-positive rate — is a binomial count divided by $n$.
+The simplest random quantity is a yes/no outcome: a test record is misclassified or not, a coin lands heads or not, a record is included in a sample or not. Count the yeses over $n$ independent trials and you get a binomial. Every estimated rate in machine learning — accuracy, error rate, false-positive rate — is a binomial count divided by $n$.
 
 ### Definitions
 
-$X \sim \mathrm{Bernoulli}(p)$ takes value 1 with probability $p$ and 0 with probability $1 - p$.
+$X \sim \mathrm{Bern}(p)$ takes value 1 with probability $p$ and 0 with probability $1 - p$.
 
-$S \sim \mathrm{Binomial}(n, p)$ is the number of ones in $n$ independent $\mathrm{Bernoulli}(p)$ trials. The probability of exactly $k$ ones is the number of ways to place $k$ ones among $n$ trials, times the probability of any one such placement. That gives the probability mass function (PMF), the table of probabilities of each count,
+$S \sim \mathrm{Bin}(n, p)$ is the number of ones in $n$ independent $\mathrm{Bern}(p)$ trials. The probability of exactly $k$ ones is the number of ways to place $k$ ones among $n$ trials, times the probability of any one such placement. That gives the probability mass function (PMF), the table of probabilities of each count,
 $$\Pr[S = k] = \binom nk p^k(1-p)^{n-k}, \qquad k = 0, 1, \dots, n.$$
 
 **Derivation of the PMF.** Any particular sequence with exactly $k$ ones has probability $p^k(1-p)^{n-k}$, because the trials are independent and the probability of a sequence is the product of the probabilities of its entries: $p$ for each one and $1 - p$ for each zero. There are $\binom nk$ such sequences — choose which $k$ positions hold the ones — and they are disjoint events, so their probabilities add.
@@ -112,18 +112,18 @@ The estimated rate $\hat p = S/n$ is the count scaled by $1/n$. By the scaling r
 
 ### Example: estimating a classifier's error rate
 
-A classifier makes an error on each test example independently with probability $p = 0.05$. On $n = 2{,}000$ test examples the error count is $\mathrm{Binomial}(2000, 0.05)$, with mean $2000 \times 0.05 = 100$ and standard deviation $\sqrt{2000 \times 0.05 \times 0.95} \approx 9.7$. Divided by $n$, that standard deviation is about $9.7/2000 \approx 0.005$ of the rate, so the measured error rate is typically within about $\pm 0.5$ percentage points of the true 5%. At $p = 0.001$ the count has mean 2 and standard deviation $\sqrt{2000 \times 0.001 \times 0.999} \approx 1.4$: the *relative* error, $1.4/2$, is now about 70%, and a single test set can easily show 0 errors (that happens with probability $0.999^{2000} \approx e^{-2}$, about one test set in seven).
+A classifier makes an error on each test record independently with probability $p = 0.05$. On $n = 2{,}000$ test records the error count is $\mathrm{Bin}(2000, 0.05)$, with mean $2000 \times 0.05 = 100$ and standard deviation $\sqrt{2000 \times 0.05 \times 0.95} \approx 9.7$. Divided by $n$, that standard deviation is about $9.7/2000 \approx 0.005$ of the rate, so the measured error rate is typically within about $\pm 0.5$ percentage points of the true 5%. At $p = 0.001$ the count has mean 2 and standard deviation $\sqrt{2000 \times 0.001 \times 0.999} \approx 1.4$: the *relative* error, $1.4/2$, is now about 70%, and a single test set can easily show 0 errors (that happens with probability $0.999^{2000} \approx e^{-2}$, about one test set in seven).
 
 ### Check yourself
 
 - Why is $\operatorname{Var}(X_1 + \dots + X_n) = n\operatorname{Var}(X_1)$ wrong if the $X_i$ are copies of the same variable? *(Then the sum is $nX_1$, whose variance is $n^2\operatorname{Var}X_1$. Independence is what makes variances add.)*
-- What is $\Pr[S = 0]$ for $\mathrm{Binomial}(n, p)$, and roughly how large must $n$ be before you expect to see at least one success? *($(1-p)^n \approx e^{-np}$, using $1 - p \approx e^{-p}$ for small $p$; this is small only once $np$ is around 1 or more, so you need $n$ on the order of $1/p$.)*
+- What is $\Pr[S = 0]$ for $\mathrm{Bin}(n, p)$, and roughly how large must $n$ be before you expect to see at least one success? *($(1-p)^n \approx e^{-np}$, using $1 - p \approx e^{-p}$ for small $p$; this is small only once $np$ is around 1 or more, so you need $n$ on the order of $1/p$.)*
 
 ## Poisson
 
 ### Context
 
-When $n$ is large and $p$ is small, the binomial depends on $n$ and $p$ only through the mean $\mu = np$, as the limit below shows. The limit is the Poisson distribution: the law of rare events. It describes the number of errors in a large test set with a tiny error rate, the number of rare tokens in a document, or the size of a minibatch when each of many examples is included independently with small probability.
+When $n$ is large and $p$ is small, the binomial depends on $n$ and $p$ only through the mean $\mu = np$, as the limit below shows. The limit is the Poisson distribution: the law of rare events. It describes the number of errors in a large test set with a tiny error rate, the number of rare tokens in a document, or the size of a minibatch when each of many records is included independently with small probability.
 
 ### Definition
 
@@ -137,7 +137,7 @@ Hold the expected count $\mu$ fixed and let the number of trials grow, so each t
 $$\binom nk\left(\frac\mu n\right)^k\left(1 - \frac\mu n\right)^{n-k} = \underbrace{\frac{n(n-1)\cdots(n-k+1)}{n^k}}_{\to\, 1}\cdot\frac{\mu^k}{k!}\cdot\underbrace{\left(1 - \frac\mu n\right)^n}_{\to\, e^{-\mu}}\cdot\underbrace{\left(1 - \frac\mu n\right)^{-k}}_{\to\, 1}.$$
 The first factor is a product of $k$ fractions $n/n, (n-1)/n, \dots$, each tending to 1, and there are only $k$ of them. The middle factor does not depend on $n$. The third is the classic limit that defines $e$: its logarithm is $n\ln(1 - \mu/n)$, and since $\ln(1 - u) \approx -u$ for small $u$, that is close to $n \cdot (-\mu/n) = -\mu$. The last factor has a fixed exponent $-k$ and a base tending to 1. The limit is $e^{-\mu}\mu^k/k!$. @fig-poisson-limit shows the convergence: at $n = 10$ the binomial is visibly narrower than the Poisson, while at $n = 100$ they almost coincide.
 
-![$\mathrm{Binomial}(n, 5/n)$ for $n = 10$ and $100$, against $\mathrm{Poisson}(5)$ and its normal approximation.](figures/poisson_limit.svg){#fig-poisson-limit}
+![$\mathrm{Bin}(n, 5/n)$ for $n = 10$ and $100$, against $\mathrm{Poisson}(5)$ and its normal approximation.](figures/poisson_limit.svg){#fig-poisson-limit}
 
 ### Moments via the MGF
 
@@ -160,7 +160,7 @@ Now take independent Bernoullis with probabilities $p_1, \dots, p_n$ and mean $\
 
 ### Example: minibatch sizes under independent sampling
 
-Some training procedures form a minibatch by including each of $n = 60{,}000$ examples independently with probability $q = 0.01$. The batch size is $\mathrm{Binomial}(60000, 0.01)$: many trials, each unlikely, so it is very close to $\mathrm{Poisson}(600)$, with mean $60000 \times 0.01 = 600$ and standard deviation $\sqrt{600}$, about 24.5. Batch sizes between 550 and 650, about two standard deviations either side, are typical; [Concentration inequalities](02-concentration.md) shows how unlikely anything outside $600 \pm 20\%$ is.
+Some training procedures form a minibatch by including each of $n = 60{,}000$ records independently with probability $q = 0.01$. The batch size is $\mathrm{Bin}(60000, 0.01)$: many trials, each unlikely, so it is very close to $\mathrm{Poisson}(600)$, with mean $60000 \times 0.01 = 600$ and standard deviation $\sqrt{600}$, about 24.5. Batch sizes between 550 and 650, about two standard deviations either side, are typical; [Concentration inequalities](02-concentration.md) shows how unlikely anything outside $600 \pm 20\%$ is.
 
 ### Check yourself
 
@@ -202,7 +202,7 @@ $$\Pr[T > t] = e^{-t/b}, \qquad t \ge 0.$$ {#eq-exponential-survival}
 
 4. **Differentiate to get the density.** The probability that the wait is at most $t$ is $\Pr[T \le t] = 1 - e^{-t/b}$, and a density is the derivative of this function, here $\frac1be^{-t/b}$.
 
-**The same answer from the Poisson count.** The first event comes after $t$ exactly when no event falls in $[0, t]$. The number of events in $[0, t]$ is a count over $\lfloor nt\rfloor$ independent slots, $\mathrm{Binomial}(\lfloor nt\rfloor, \frac{1}{bn})$, with mean about $t/b$; by the Poisson limit it tends to $\mathrm{Poisson}(t/b)$, and $\Pr[\mathrm{Poisson}(t/b) = 0] = e^{-t/b}$. Counting events in a window gives a Poisson count, and waiting for the first event gives an exponential time. Both come from the same slots.
+**The same answer from the Poisson count.** The first event comes after $t$ exactly when no event falls in $[0, t]$. The number of events in $[0, t]$ is a count over $\lfloor nt\rfloor$ independent slots, $\mathrm{Bin}(\lfloor nt\rfloor, \frac{1}{bn})$, with mean about $t/b$; by the Poisson limit it tends to $\mathrm{Poisson}(t/b)$, and $\Pr[\mathrm{Poisson}(t/b) = 0] = e^{-t/b}$. Counting events in a window gives a Poisson count, and waiting for the first event gives an exponential time. Both come from the same slots.
 
 ### Definition
 
@@ -218,14 +218,14 @@ $$f(y) = \frac1b e^{-y/b}, \qquad y \ge 0.$$
 
 Everything about the exponential follows from its density by short integrals.
 
-The **tail** is the area under the density to the right of $t$: $\Pr[Y \ge t] = \int_t^\infty \frac1be^{-y/b}\,dy = e^{-t/b}$, which is @eq-exponential-survival again.
+The **tail** is the area under the density to the right of $t$: $\Pr[Y \ge t] = \int_t^\infty \frac1be^{-y/b}\,\mathrm dy = e^{-t/b}$, which is @eq-exponential-survival again.
 
-The **mean** is easiest from the tail. A non-negative variable can be written as $Y = \int_0^\infty \mathbf 1[Y \ge t]\,dt$, where $\mathbf 1[\cdot]$ is 1 when the condition holds and 0 otherwise: the integrand is 1 for $t$ from 0 up to $Y$, so the integral is the length $Y$. Taking expectations turns each indicator into a probability, $\mathbb E Y = \int_0^\infty\Pr[Y \ge t]\,dt = \int_0^\infty e^{-t/b}\,dt = b$. So $b$ is indeed the average wait.
+The **mean** is easiest from the tail. A non-negative variable can be written as $Y = \int_0^\infty \mathbf 1[Y \ge t]\,\mathrm dt$, where $\mathbf 1[\cdot]$ is 1 when the condition holds and 0 otherwise: the integrand is 1 for $t$ from 0 up to $Y$, so the integral is the length $Y$. Taking expectations turns each indicator into a probability, $\mathbb E Y = \int_0^\infty\Pr[Y \ge t]\,\mathrm dt = \int_0^\infty e^{-t/b}\,\mathrm dt = b$. So $b$ is indeed the average wait.
 
-The **second moment** uses the Gamma integral $\int_0^\infty y^k e^{-y/b}\,dy = k!\,b^{k+1}$. Substituting $u = y/b$ turns it into $b^{k+1}\int_0^\infty u^ke^{-u}\,du$, and integrating by parts $k$ times reduces the last integral to $k!$. With $k = 2$ and the factor $\frac1b$ from the density, $\mathbb E Y^2 = 2b^2$, so $\operatorname{Var}Y = 2b^2 - b^2 = b^2$.
+The **second moment** uses the Gamma integral $\int_0^\infty y^k e^{-y/b}\,\mathrm dy = k!\,b^{k+1}$. Substituting $u = y/b$ turns it into $b^{k+1}\int_0^\infty u^ke^{-u}\,\mathrm du$, and integrating by parts $k$ times reduces the last integral to $k!$. With $k = 2$ and the factor $\frac1b$ from the density, $\mathbb E Y^2 = 2b^2$, so $\operatorname{Var}Y = 2b^2 - b^2 = b^2$.
 
 The **MGF** multiplies the density by $e^{\lambda y}$, which combines the two exponents into $-(1/b - \lambda)y$. As long as $\lambda < 1/b$ that exponent is negative and the integral converges:
-$$M_Y(\lambda) = \frac1b\int_0^\infty e^{-(1/b - \lambda)y}\,dy = \frac{1}{1 - b\lambda}.$$
+$$M_Y(\lambda) = \frac1b\int_0^\infty e^{-(1/b - \lambda)y}\,\mathrm dy = \frac{1}{1 - b\lambda}.$$
 For $\lambda \ge 1/b$ the exponent is zero or positive, the integrand does not shrink, and the integral diverges. The MGF exists only on part of the line: the hallmark of an exponential, rather than Gaussian, tail.
 
 ### Interpretation: memorylessness
@@ -263,7 +263,7 @@ The tail of $|X|$ is the exponential tail, $\Pr[|X| \ge t] = e^{-t/b}$. The even
 
 For the variance, note that $X^2 = |X|^2$, so $\mathbb E X^2$ is the exponential second moment $2b^2$. The mean is 0 by symmetry, so $\operatorname{Var}X = 2b^2$. Turned around, a Laplace variable with variance $\sigma^2$ has scale $b = \sigma/\sqrt2$.
 
-For the MGF, split the integral at 0 into the two exponential halves. On the right, $\frac{1}{2b}\int_0^\infty e^{\lambda x - x/b}\,dx = \frac{1}{2b}\cdot\frac{1}{1/b - \lambda}$, which needs $\lambda < 1/b$; the left half is the same with $-\lambda$ in place of $\lambda$, which needs $\lambda > -1/b$. So for $|\lambda| < 1/b$, putting the two fractions over the common denominator $1/b^2 - \lambda^2$,
+For the MGF, split the integral at 0 into the two exponential halves. On the right, $\frac{1}{2b}\int_0^\infty e^{\lambda x - x/b}\,\mathrm dx = \frac{1}{2b}\cdot\frac{1}{1/b - \lambda}$, which needs $\lambda < 1/b$; the left half is the same with $-\lambda$ in place of $\lambda$, which needs $\lambda > -1/b$. So for $|\lambda| < 1/b$, putting the two fractions over the common denominator $1/b^2 - \lambda^2$,
 $$M_X(\lambda) = \frac{1}{2b}\left(\frac{1}{1/b - \lambda} + \frac{1}{1/b + \lambda}\right) = \frac{1}{1 - b^2\lambda^2}.$$
 
 ### A Laplace variable is a difference of exponentials
@@ -284,7 +284,7 @@ The same fact explains why the Laplace MGF exists only for $|\lambda| < 1/b$. In
 
 ### Example: absolute-error regression
 
-Suppose $y_i = w^\top x_i + \varepsilon_i$ with $\varepsilon_i \sim \mathrm{Lap}(b)$ independent. The likelihood of the data is the product of the $n$ Laplace densities of the residuals $y_i - w^\top x_i$, and its logarithm is the sum of their log densities, $-n\ln(2b) - \frac1b\sum_i|y_i - w^\top x_i|$. Only the second term depends on $w$, and it enters with a minus sign, so the maximum-likelihood $w$ minimizes the sum of absolute errors. With no features this estimates the location by the *median*: moving a candidate location $m$ to the right lowers the absolute error of every point above $m$ and raises it for every point below, so the sum stops decreasing exactly when half the points are on each side. The median is far less sensitive to outliers than the mean, because moving one extreme point further out does not change which point is in the middle. That insensitivity is the same heavy-tail property seen in the figure: under a Laplace model, large residuals are not surprising enough to dominate the fit.
+Suppose $y_i = \theta^\top x_i + \xi_i$, with parameters $\theta$ and independent noise $\xi_i \sim \mathrm{Lap}(b)$. The likelihood of the data is the product of the $n$ Laplace densities of the residuals $y_i - \theta^\top x_i$, and its logarithm is the sum of their log densities, $-n\ln(2b) - \frac1b\sum_i|y_i - \theta^\top x_i|$. Only the second term depends on $\theta$, and it enters with a minus sign, so the maximum-likelihood $\theta$ minimizes the sum of absolute errors. With no features this estimates the location by the *median*: moving a candidate location $m$ to the right lowers the absolute error of every point above $m$ and raises it for every point below, so the sum stops decreasing exactly when half the points are on each side. The median is far less sensitive to outliers than the mean, because moving one extreme point further out does not change which point is in the middle. That insensitivity is the same heavy-tail property seen in the figure: under a Laplace model, large residuals are not surprising enough to dominate the fit.
 
 ### Check yourself
 
@@ -333,7 +333,7 @@ The last statement divides by the mean: the ratio has mean 1 and standard deviat
 
 : Mean and standard deviation of $\|X\|/\sqrt d$ over 2,000 draws of $X \sim \mathcal N(0, I_d)$. {#tbl-gaussian-norms}
 
-The standard deviation falls like $1/\sqrt{2d}$. That is half the $\sqrt{2/d}$ found for the squared norm, because taking a square root halves small relative deviations: $\sqrt{1 + e} \approx 1 + e/2$. At $d = 10{,}000$, for instance, $1/\sqrt{20000} \approx 0.007$. At $d = 1$ the mean is $\mathbb E|Z| = 2\int_0^\infty z\varphi(z)\,dz = 2/\sqrt{2\pi} = \sqrt{2/\pi} \approx 0.798$.
+The standard deviation falls like $1/\sqrt{2d}$. That is half the $\sqrt{2/d}$ found for the squared norm, because taking a square root halves small relative deviations: $\sqrt{1 + e} \approx 1 + e/2$. At $d = 10{,}000$, for instance, $1/\sqrt{20000} \approx 0.007$. At $d = 1$ the mean is $\mathbb E|Z| = 2\int_0^\infty z\varphi(z)\,\mathrm dz = 2/\sqrt{2\pi} = \sqrt{2/\pi} \approx 0.798$.
 
 ![Histograms of $\|X\|/\sqrt d$ for $X \sim \mathcal N(0, I_d)$ and $d$ from 1 to 10,000.](figures/gaussian_norms.svg){#fig-gaussian-norms}
 
@@ -358,7 +358,7 @@ The leftover lean is measured by the **skewness** $\mathbb E[(X - \mu)^3]/\sigma
 
 : How far the standardized sum of $n$ $\mathrm{Exp}(1)$ variables is from $\mathcal N(0, 1)$. The CDF gap is the maximum of $|F_n(z) - \Phi(z)|$ over $z \in [-5, 5]$ in steps of 0.01. {#tbl-clt-exponential}
 
-Multiply each gap by $\sqrt n$ and you get 0.159, 0.134, 0.133 and 0.133: the product settles to a constant, so the error decays like $1/\sqrt n$. This rate holds in general. The Berry–Esseen theorem bounds the gap by $C\,\mathbb E|X - \mu|^3/(\sigma^3\sqrt n)$ for a universal constant $C < 0.48$ (Shevtsova, 2011). @sec-apx-prob-clt in the appendices proves the central limit theorem itself, with a slower rate, by swapping one term at a time for a normal one. The numerator is a third moment, like the skewness, so the more skewed the summands, the more terms you need.
+Multiply each gap by $\sqrt n$ and you get 0.159, 0.134, 0.133 and 0.133: the product settles to a constant, so the error decays like $1/\sqrt n$. This rate holds in general. The Berry–Esseen theorem bounds the gap by $c\,\mathbb E|X - \mu|^3/(\sigma^3\sqrt n)$ for a universal constant $c < 0.48$ (Shevtsova, 2011). @sec-apx-prob-clt in the appendices proves the central limit theorem itself, with a slower rate, by swapping one term at a time for a normal one. The numerator is a third moment, like the skewness, so the more skewed the summands, the more terms you need.
 
 This is also why the normal curve in @fig-poisson-limit fits so well: $\mathrm{Poisson}(5)$ is a sum of five independent $\mathrm{Poisson}(1)$ variables, since Poisson means add, so the CLT already applies to it. A common rule of thumb is that the normal approximation to a binomial is reasonable once $np(1-p) \gtrsim 10$. The CLT is a statement about the *bulk*. In the far tails, where worst-case guarantees operate, it can be badly wrong, because the gap it controls is an absolute error of order $1/\sqrt n$, far larger than the tiny tail probabilities themselves; that is the job of the concentration inequalities in the next chapter.
 
@@ -450,8 +450,8 @@ uv run python code/part01-prerequisites/distributions.py
 
 | Distribution | Mean (formula / sample) | Variance (formula / sample) |
 | --- | --- | --- |
-| $\mathrm{Bernoulli}(0.3)$ | 0.300 / 0.301 | 0.210 / 0.210 |
-| $\mathrm{Binomial}(20, 0.3)$ | 6.000 / 6.001 | 4.200 / 4.198 |
+| $\mathrm{Bern}(0.3)$ | 0.300 / 0.301 | 0.210 / 0.210 |
+| $\mathrm{Bin}(20, 0.3)$ | 6.000 / 6.001 | 4.200 / 4.198 |
 | $\mathrm{Poisson}(4)$ | 4.000 / 3.998 | 4.000 / 4.001 |
 | $\mathrm{Exp}(2)$ | 2.000 / 2.001 | 4.000 / 4.019 |
 | $\mathrm{Lap}(0, 2)$ | 0.000 / −0.000 | 8.000 / 7.993 |
@@ -466,7 +466,7 @@ The formulas in each row are the ones derived above: $p(1-p)$, $np(1-p)$, $\mu$,
 - Blitzstein & Hwang, *Introduction to Probability* (2nd ed., 2019), ch. 3–5 and 7: every distribution here, with worked examples
 - Wasserman, *All of Statistics* (2004), ch. 2–3: a compact reference
 - Vershynin, *High-Dimensional Probability* (2018), §3.1: concentration of the norm of a normal vector
-- Shevtsova, "On the absolute constants in the Berry–Esseen type inequalities for identically distributed summands" (2011): the constant $C \le 0.4748$ in the Berry–Esseen bound
+- Shevtsova, "On the absolute constants in the Berry–Esseen type inequalities for identically distributed summands" (2011): the constant $c \le 0.4748$ in the Berry–Esseen bound
 
 ## Cheat sheet
 
@@ -474,8 +474,8 @@ The formulas in each row are the ones derived above: $p(1-p)$, $np(1-p)$, $\mu$,
 
 | Distribution | Density or PMF | Mean | Variance | MGF | Tail |
 | --- | --- | --- | --- | --- | --- |
-| $\mathrm{Bernoulli}(p)$ | $p^x(1-p)^{1-x}$, $x \in \{0, 1\}$ | $p$ | $p(1-p)$ | $1 + p(e^\lambda - 1)$ | — |
-| $\mathrm{Binomial}(n, p)$ | $\binom nk p^k(1-p)^{n-k}$ | $np$ | $np(1-p)$ | $(1 + p(e^\lambda - 1))^n$ | Chernoff, see [chapter 2](02-concentration.md) |
+| $\mathrm{Bern}(p)$ | $p^x(1-p)^{1-x}$, $x \in \{0, 1\}$ | $p$ | $p(1-p)$ | $1 + p(e^\lambda - 1)$ | — |
+| $\mathrm{Bin}(n, p)$ | $\binom nk p^k(1-p)^{n-k}$ | $np$ | $np(1-p)$ | $(1 + p(e^\lambda - 1))^n$ | Chernoff, see [chapter 2](02-concentration.md) |
 | $\mathrm{Poisson}(\mu)$ | $e^{-\mu}\mu^k/k!$ | $\mu$ | $\mu$ | $e^{\mu(e^\lambda - 1)}$ | $\approx(e\mu/k)^k$ |
 | $\mathrm{Exp}(b)$ | $\frac1be^{-y/b}$, $y \ge 0$ | $b$ | $b^2$ | $\frac{1}{1 - b\lambda}$, $\lambda < \frac1b$ | $e^{-t/b}$ |
 | $\mathrm{Lap}(\mu, b)$ | $\frac{1}{2b}e^{-\lvert x-\mu\rvert/b}$ | $\mu$ | $2b^2$ | $\frac{e^{\mu\lambda}}{1 - b^2\lambda^2}$, $\lvert\lambda\rvert < \frac1b$ | $\Pr[\lvert X - \mu\rvert \ge t] = e^{-t/b}$ |
@@ -485,9 +485,9 @@ The formulas in each row are the ones derived above: $p(1-p)$, $np(1-p)$, $\mu$,
 
 **Relationships**
 
-- $\mathrm{Binomial}(n, \mu/n) \to \mathrm{Poisson}(\mu)$ as $n \to \infty$.
-- $\mathrm{Geometric}(\frac{1}{bn})/n \to \mathrm{Exp}(b)$ as $n \to \infty$: the waiting time for the first event in the same slots as the Poisson limit.
-- $\mathrm{Binomial}(n, p) \approx \mathcal N(np, np(1-p))$ in the bulk when $np(1-p) \gtrsim 10$.
+- $\mathrm{Bin}(n, \mu/n) \to \mathrm{Poisson}(\mu)$ as $n \to \infty$.
+- $\mathrm{Geom}(\frac{1}{bn})/n \to \mathrm{Exp}(b)$ as $n \to \infty$: the waiting time for the first event in the same slots as the Poisson limit.
+- $\mathrm{Bin}(n, p) \approx \mathcal N(np, np(1-p))$ in the bulk when $np(1-p) \gtrsim 10$.
 - $\mathrm{Exp}(b) - \mathrm{Exp}(b) \sim \mathrm{Lap}(b)$, and $|\mathrm{Lap}(b)| \sim \mathrm{Exp}(b)$.
 - Independent Poissons add to a Poisson, and independent normals add to a normal.
 - CLT: $(S_n - n\mu)/(\sigma\sqrt n) \to \mathcal N(0, 1)$ for any i.i.d. summands with finite variance. The CDF error is $O(1/\sqrt n)$ and grows with the skewness (Berry–Esseen).

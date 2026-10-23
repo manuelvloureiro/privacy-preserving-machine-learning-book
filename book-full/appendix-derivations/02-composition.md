@@ -77,9 +77,9 @@ A tiny case makes this concrete. **Randomized response** at level $\varepsilon$ 
 
 Each row's loss is the first answer's loss plus the second answer's loss, where the second loss belongs to whichever mechanism was chosen. The largest loss is $2.1972 = 2\ln 3$. That equals the basic bound $\ln 3 + \ln 3$, in which the second budget is $\ln 3$, the larger of the two levels the second step could use.
 
-**Approximate DP.** An $(\varepsilon, \delta)$-DP mechanism may have outputs whose loss exceeds $\varepsilon$, or is even infinite, as long as they are rare. The Gaussian mechanism is an example: its loss is a straight line in the output, so it has no largest value. So the product argument fails, and a different one is needed. It rests on a fact that this page uses again later, the **bad-event fact**: for any threshold $c$ and any set $S$ of outputs,
-$$\Pr_D[S] \le e^c\Pr_{D'}[S] + \Pr_D[L > c].$$ {#eq-apx-ccomp-bad-event}
-To see it, split $S$ into the outputs whose loss is at most $c$ and the rest. On the first part $\ln(p/q) \le c$, so $p \le e^c q$ output by output. Adding up over that part gives at most $e^c$ times its probability under $D'$, which is at most $e^c\Pr_{D'}[S]$. The second part lies inside the event $L > c$, so its probability is at most $\Pr_D[L > c]$. So if the loss exceeds $c$ with probability at most $\delta$ when the data are $D$, then $\Pr_D[S] \le e^c\Pr_{D'}[S] + \delta$ for every $S$. DP also asks for the same bound with $D$ and $D'$ swapped, and the same argument gives it.
+**Approximate DP.** An $(\varepsilon, \delta)$-DP mechanism may have outputs whose loss exceeds $\varepsilon$, or is even infinite, as long as they are rare. The Gaussian mechanism is an example: its loss is a straight line in the output, so it has no largest value. So the product argument fails, and a different one is needed. It rests on a fact that this page uses again later, the **bad-event fact**: for any threshold $\tau$ and any set $S$ of outputs,
+$$\Pr_D[S] \le e^\tau\Pr_{D'}[S] + \Pr_D[L > \tau].$$ {#eq-apx-ccomp-bad-event}
+To see it, split $S$ into the outputs whose loss is at most $\tau$ and the rest. On the first part $\ln(p/q) \le \tau$, so $p \le e^\tau q$ output by output. Adding up over that part gives at most $e^\tau$ times its probability under $D'$, which is at most $e^\tau\Pr_{D'}[S]$. The second part lies inside the event $L > \tau$, so its probability is at most $\Pr_D[L > \tau]$. So if the loss exceeds $\tau$ with probability at most $\delta$ when the data are $D$, then $\Pr_D[S] \le e^\tau\Pr_{D'}[S] + \delta$ for every $S$. DP also asks for the same bound with $D$ and $D'$ swapped, and the same argument gives it.
 
 Now suppose each release satisfies a **tail condition**: whatever the earlier outputs were, its loss exceeds $\varepsilon_i$ with probability at most $\delta_i$. Then the composition is $(\sum\varepsilon_i, \sum\delta_i)$-DP, in three steps.
 
@@ -87,7 +87,7 @@ Now suppose each release satisfies a **tail condition**: whatever the earlier ou
 2. **Union bound.** The chance that at least one of several events happens is at most the sum of their chances. So
 $$\Pr\Big[L > \sum_i\varepsilon_i\Big] \le \sum_i\Pr[L_i > \varepsilon_i] \le \sum_i\delta_i.$$
 In the adaptive case, the chance that term $i$ exceeds $\varepsilon_i$ is an average, over the earlier outputs, of a conditional chance that is at most $\delta_i$. So it is at most $\delta_i$ too.
-3. **Bad-event fact.** @eq-apx-ccomp-bad-event with $c = \sum_i\varepsilon_i$ gives the result.
+3. **Bad-event fact.** @eq-apx-ccomp-bad-event with $\tau = \sum_i\varepsilon_i$ gives the result.
 
 The tail condition is a **sufficient condition**: it is enough for $(\varepsilon, \delta)$-DP, but it asks for more. The classic Gaussian calibration proves exactly this condition (@sec-lg-gauss-classic), so the argument covers it. But some $(\varepsilon, \delta)$-DP mechanisms do not satisfy it. For example, take a mechanism with two outputs. Output A has probability $\frac12$ on $D$ and $\frac12 e^{-1.1} = 0.1664$ on $D'$, and output B takes the rest, $\frac12$ and $0.8336$. Output A has loss 1.1, above 1, and it happens half the time, so the tail condition at $\varepsilon = 1$ fails. Yet the only set that breaks the factor $e$ is $\{A\}$, and it breaks it by just $\frac12 - e \times 0.1664 = 0.0476$. So the mechanism is $(1, 0.0476)$-DP. Basic composition still holds for releases that are only known to be $(\varepsilon_i, \delta_i)$-DP. @sec-dpprop-comp proves it with a two-step argument on events, and @sec-apx-mech-fourpoint gives a second route through four-point randomized response.
 
@@ -151,16 +151,16 @@ $$m \le \sum_y p\ln\frac pq + \sum_y q\ln\frac qp = \sum_y (p - q)\ln\frac pq.$$
 $$\mathbb E\big[e^{\lambda X}\big] \le e^{\lambda^2d^2/8} \qquad \text{for every real } \lambda.$$
 The proof compares $X$ with a variable that sits only at the two ends of the interval, which has the largest exponential average, and then bounds that average. [Concentration inequalities](../part01-prerequisites/02-concentration.md) gives the details. With $d = 2\varepsilon$ the right side is $e^{\lambda^2\varepsilon^2/2}$.
 
-5. **The bounds multiply, even when releases adapt.** Write $S_j = X_1 + \dots + X_j$ for the running sum, so that $e^{\lambda S_k} = e^{\lambda S_{k-1}}e^{\lambda X_k}$. Take the average of this product in two stages, first over the last output with the earlier ones fixed and then over the earlier ones. With the earlier outputs fixed, $e^{\lambda S_{k-1}}$ is a fixed number, and step 4 bounds the average of $e^{\lambda X_k}$ by $e^{\lambda^2\varepsilon^2/2}$ whatever the history was. So
-$$\mathbb E\big[e^{\lambda S_k}\big] \le e^{\lambda^2\varepsilon^2/2}\,\mathbb E\big[e^{\lambda S_{k-1}}\big] \le \dots \le e^{k\lambda^2\varepsilon^2/2}.$$
+5. **The bounds multiply, even when releases adapt.** Write $W_j = X_1 + \dots + X_j$ for the running sum, so that $e^{\lambda W_k} = e^{\lambda W_{k-1}}e^{\lambda X_k}$. Take the average of this product in two stages, first over the last output with the earlier ones fixed and then over the earlier ones. With the earlier outputs fixed, $e^{\lambda W_{k-1}}$ is a fixed number, and step 4 bounds the average of $e^{\lambda X_k}$ by $e^{\lambda^2\varepsilon^2/2}$ whatever the history was. So
+$$\mathbb E\big[e^{\lambda W_k}\big] \le e^{\lambda^2\varepsilon^2/2}\,\mathbb E\big[e^{\lambda W_{k-1}}\big] \le \dots \le e^{k\lambda^2\varepsilon^2/2}.$$
 This is where adaptivity is handled. Each release may depend on the past, but the bound on its own term does not. This argument is Azuma's inequality.
 
-6. **Turn the exponential average into a tail bound.** Markov's inequality says that a quantity that is never negative exceeds a level $a$ with probability at most its average divided by $a$. Apply it to $e^{\lambda S_k}$ at the level $a = e^{\lambda s}$, for a threshold $s$ to be chosen. For $\lambda > 0$ the event $S_k \ge s$ is the event $e^{\lambda S_k} \ge e^{\lambda s}$, so
-$$\Pr[S_k \ge s] \le e^{-\lambda s + k\lambda^2\varepsilon^2/2}.$$
+6. **Turn the exponential average into a tail bound.** Markov's inequality says that a quantity that is never negative exceeds a level $a$ with probability at most its average divided by $a$. Apply it to $e^{\lambda W_k}$ at the level $a = e^{\lambda s}$, for a value $s$ to be chosen. For $\lambda > 0$ the event $W_k \ge s$ is the event $e^{\lambda W_k} \ge e^{\lambda s}$, so
+$$\Pr[W_k \ge s] \le e^{-\lambda s + k\lambda^2\varepsilon^2/2}.$$
 The exponent is a parabola in $\lambda$. Its derivative $-s + k\lambda\varepsilon^2$ is zero at $\lambda = s/(k\varepsilon^2)$, where the exponent equals $-s^2/(2k\varepsilon^2)$. Setting $e^{-s^2/(2k\varepsilon^2)} = \delta'$ and solving gives the level
 $$s = \varepsilon\sqrt{2k\ln(1/\delta')}.$$
 
-7. **Convert.** If $L > \varepsilon'$, then $\sum_i X_i = L - \sum_i m_i > \varepsilon' - k\varepsilon(e^\varepsilon - 1) = s$. So $\Pr[L > \varepsilon'] \le \delta'$, and the bad-event fact @eq-apx-ccomp-bad-event with $c = \varepsilon'$ gives $(\varepsilon', \delta')$-DP. The same argument with $D$ and $D'$ swapped covers the other direction.
+7. **Convert.** If $L > \varepsilon'$, then $\sum_i X_i = L - \sum_i m_i > \varepsilon' - k\varepsilon(e^\varepsilon - 1) = s$. So $\Pr[L > \varepsilon'] \le \delta'$, and the bad-event fact @eq-apx-ccomp-bad-event with $\tau = \varepsilon'$ gives $(\varepsilon', \delta')$-DP. The same argument with $D$ and $D'$ swapped covers the other direction.
 
 When each release is $(\varepsilon, \delta)$-DP with $\delta > 0$, its loss can exceed $\varepsilon$ on rare outputs, so step 1 fails. The fix uses a fact proved in the chapter: every such release behaves like a processed version of a simple mechanism that, with probability $\delta$, announces which dataset it ran on, and otherwise runs $\varepsilon$-DP randomized response. Then the $k$ announcements cost at most $k\delta$ by the union bound, and the rest is the argument above. @sec-comp-optimal and @sec-apx-mech-fourpoint carry this out.
 
@@ -174,8 +174,8 @@ The script computes the loss of 100 randomized-response answers at $\varepsilon 
 
 ### Recipe and pitfalls
 
-To spend a total budget $(\varepsilon_{\text{total}}, \delta')$ on $k$ releases that are each $\varepsilon$-DP, set the leading term of @eq-apx-ccomp-advanced equal to the target. That gives each release roughly
-$$\varepsilon \approx \frac{\varepsilon_{\text{total}}}{\sqrt{2k\ln(1/\delta')}}.$$
+To spend a total budget $(\varepsilon_{\mathrm{total}}, \delta')$ on $k$ releases that are each $\varepsilon$-DP, set the leading term of @eq-apx-ccomp-advanced equal to the target. That gives each release roughly
+$$\varepsilon \approx \frac{\varepsilon_{\mathrm{total}}}{\sqrt{2k\ln(1/\delta')}}.$$
 Then evaluate @eq-apx-ccomp-advanced with that $\varepsilon$, and lower it a little if the second term pushes the total over the target.
 
 Advanced composition is worse than basic composition when $k$ is small. Its first term is $\varepsilon\sqrt k$ times $\sqrt{2\ln(1/\delta')}$, which is 4.80 at $\delta' = 10^{-5}$, while basic composition is $\varepsilon k = \varepsilon\sqrt k \times \sqrt k$. So $\sqrt k$ must beat 4.80 and more. Setting the two bounds equal and solving for $k$ shows that at $\varepsilon = 0.1$ advanced composition wins only once $k$ exceeds $2\ln(1/\delta')/(2 - e^\varepsilon)^2 = 28.76$. So always compute both and keep the smaller. For $\varepsilon \ge \ln 2$ the second term alone is at least $k\varepsilon$, so the $e^\varepsilon - 1$ form never wins, and you need the $\tanh$ form of the chapter. And when you know more than each release's $\varepsilon$, for example that the noise is Gaussian, the next two sections do much better.
@@ -211,7 +211,7 @@ $$L = \frac{(z - \Delta)^2 - z^2}{2\sigma^2} = \frac{\Delta^2 - 2\Delta z}{2\sig
 This is a straight line in the noise $z$. Its mean is $\Delta^2/(2\sigma^2) = \mu^2/2$, because $z$ has mean 0. Its variance is $(\Delta/\sigma^2)^2\sigma^2 = \mu^2$, because multiplying $z$ by a constant multiplies the variance by its square. A straight-line function of a normal variable is normal, so on $D$
 $$L \sim \mathcal N\Big(\frac{\mu^2}{2},\ \mu^2\Big), \qquad \mu = \frac{\Delta}{\sigma}.$$
 2. **Add $k$ independent losses.** With fresh noise for each release, the $k$ losses are independent, and the total loss is their sum (@sec-apx-ccomp-basic). Means add, and so do variances of independent terms. A sum of independent normal variables is normal (@sec-apx-prob-convolution proves it). So the total loss is normal with mean $k\mu^2/2$ and variance $k\mu^2$.
-3. **Recognise one release.** A single release with shift $\mu_k = \sqrt k\,\mu$ has, by step 1, a loss with mean $\mu_k^2/2 = k\mu^2/2$ and variance $\mu_k^2 = k\mu^2$. That is the same normal distribution as in step 2.
+3. **Recognize one release.** A single release with shift $\mu_k = \sqrt k\,\mu$ has, by step 1, a loss with mean $\mu_k^2/2 = k\mu^2/2$ and variance $\mu_k^2 = k\mu^2$. That is the same normal distribution as in step 2.
 4. **The exact $\delta$ depends only on the loss.** By the definition of $(\varepsilon, \delta)$-DP in the opening, the smallest $\delta$ at a given $\varepsilon$ is the largest gap $\Pr_D[S] - e^\varepsilon\Pr_{D'}[S]$ over sets of outputs. The gap is largest when $S$ holds exactly the outputs with $p > e^\varepsilon q$, so the smallest $\delta$ is $\sum_y(p - e^\varepsilon q)_+$, where $(x)_+ = \max(x, 0)$. Factor $p$ out of each term, and note that $e^\varepsilon q/p = e^{\varepsilon - L}$. This gives
 $$\delta(\varepsilon) = \sum_y p(y)\big(1 - e^{\varepsilon - L(y)}\big)_+ = \mathbb E_D\big[(1 - e^{\varepsilon - L})_+\big].$$
 The right side is an average over the loss alone. So two mechanisms whose losses have the same distribution on $D$ have the same $\delta(\varepsilon)$ for every $\varepsilon$. By steps 2 and 3, the $k$ releases have the $\delta(\varepsilon)$ of one release at $\mu_k$, which is @eq-apx-ccomp-gauss-k. The other direction, with $D$ and $D'$ swapped, gives the same value, because the Gaussian pair is symmetric.
@@ -238,7 +238,7 @@ To release $k$ answers with Gaussian noise under a total budget $(\varepsilon, \
 
 The other way round, given $\sigma$ and $k$, put $\mu_k = \sqrt k\,\Delta/\sigma$ into @eq-apx-ccomp-gauss-k and solve for $\varepsilon$ at your $\delta$. When the releases have different sensitivities $\Delta_i$ or noise levels $\sigma_i$, the same steps give one release with $\mu^2 = \sum_i(\Delta_i/\sigma_i)^2$, because means and variances still add.
 
-The sensitivity $\Delta$ must be the $\ell_2$ sensitivity of each release under the neighbouring relation you claim. For example, a sum of values between $-B$ and $B$, for a bound $B$, has sensitivity $B$ under add/remove but $2B$ under replacement. The result needs plain Gaussian noise. With subsampling, where each step uses only a random subset of the records, as in private stochastic gradient descent (SGD), the loss of a step is no longer normal, and @sec-apx-sgd-accounting shows what to do instead. Laplace releases do not combine into one Laplace release, so for them you need advanced composition or the accountants below.
+The sensitivity $\Delta$ must be the $\ell_2$ sensitivity of each release under the neighbouring relation you claim. For example, a sum of values between $-C$ and $C$, for a clipping norm $C$, has sensitivity $C$ under add/remove but $2C$ under replace-one. The result needs plain Gaussian noise. With subsampling, where each step uses only a random subset of the records, as in private stochastic gradient descent (SGD), the loss of a step is no longer normal, and @sec-apx-sgd-accounting shows what to do instead. Laplace releases do not combine into one Laplace release, so for them you need advanced composition or the accountants below.
 
 ## Rényi DP: a summary of the loss that adds {#sec-apx-ccomp-rdp}
 
@@ -249,13 +249,13 @@ Many pipelines mix mechanisms, or use noise whose loss is not normal, so the exa
 ### The answer
 
 **Rényi differential privacy (RDP)** summarizes the loss by averages of exponentials of it. A single number cannot capture both the typical and the rare large losses, so RDP keeps one such average for each **order** $\alpha > 1$, a dial that sets how much weight large losses get. For each order, the Rényi divergence between the two output distributions $P$ (on $D$) and $Q$ (on $D'$) is
-$$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\int p(y)^\alpha q(y)^{1-\alpha}\,dy.$$
+$$D_\alpha(P\|Q) = \frac{1}{\alpha - 1}\ln\int p(y)^\alpha q(y)^{1-\alpha}\,\mathrm dy.$$
 The integral is the average, on $D$, of $e^{(\alpha - 1)L}$, because $p^\alpha q^{1-\alpha} = p\,(p/q)^{\alpha - 1}$. So it weighs outputs with a large loss heavily, more so for larger $\alpha$.
 
-A mechanism is $(\alpha, \varepsilon_{\mathrm{RDP}}(\alpha))$-RDP when, for every neighbouring pair,
-$$D_\alpha(P\|Q) \le \varepsilon_{\mathrm{RDP}}(\alpha).$$
-The function $\alpha \mapsto \varepsilon_{\mathrm{RDP}}(\alpha)$ is its **RDP curve**. The Gaussian mechanism with sensitivity $\Delta$ and noise $\sigma$ has a straight line for its curve,
-$$\varepsilon_{\mathrm{RDP}}(\alpha) = \frac{\alpha\Delta^2}{2\sigma^2},$$ {#eq-apx-ccomp-rdp-gauss}
+A mechanism is $(\alpha, \varepsilon(\alpha))$-RDP when, for every neighbouring pair,
+$$D_\alpha(P\|Q) \le \varepsilon(\alpha).$$
+The function $\alpha \mapsto \varepsilon(\alpha)$ is its **RDP curve**. The Gaussian mechanism with sensitivity $\Delta$ and noise $\sigma$ has a straight line for its curve,
+$$\varepsilon(\alpha) = \frac{\alpha\Delta^2}{2\sigma^2},$$ {#eq-apx-ccomp-rdp-gauss}
 and RDP curves add under composition. So $k$ Gaussian releases have the curve $k\alpha\Delta^2/(2\sigma^2)$. The chapter states these as @eq-rdp-gauss and @eq-rdp-compose.
 
 ### A worked example
@@ -274,19 +274,19 @@ $$\alpha y^2 + (1 - \alpha)(y - \Delta)^2 = y^2 - 2(1 - \alpha)\Delta y + (1 - \
 $$y^2 - 2(1 - \alpha)\Delta y + (1 - \alpha)\Delta^2 = \big(y - (1 - \alpha)\Delta\big)^2 + (1 - \alpha)\Delta^2\big(1 - (1 - \alpha)\big).$$
 The last term simplifies to $(1 - \alpha)\alpha\Delta^2 = -\alpha(\alpha - 1)\Delta^2$.
 4. **Integrate.** Putting this back into step 1, the exponent is $-\big(y - (1 - \alpha)\Delta\big)^2/(2\sigma^2)$ plus the constant $+\alpha(\alpha - 1)\Delta^2/(2\sigma^2)$, whose sign flips because of the minus in front of the fraction. So
-$$\int p^\alpha q^{1-\alpha}\,dy = e^{\alpha(\alpha - 1)\Delta^2/(2\sigma^2)}\int c\,e^{-(y - (1 - \alpha)\Delta)^2/(2\sigma^2)}\,dy = e^{\alpha(\alpha - 1)\Delta^2/(2\sigma^2)}.$$
+$$\int p^\alpha q^{1-\alpha}\,\mathrm dy = e^{\alpha(\alpha - 1)\Delta^2/(2\sigma^2)}\int c\,e^{-(y - (1 - \alpha)\Delta)^2/(2\sigma^2)}\,\mathrm dy = e^{\alpha(\alpha - 1)\Delta^2/(2\sigma^2)}.$$
 The integral that remains is a normal density centred at $(1 - \alpha)\Delta$, so it equals 1.
 5. **Take the logarithm and divide by $\alpha - 1$.** This gives $D_\alpha = \alpha\Delta^2/(2\sigma^2)$. The value grows with the shift, so the worst neighbouring pair is the one whose answers are $\Delta$ apart, which gives @eq-apx-ccomp-rdp-gauss.
 
 **Why the curves add.** For two independent releases the joint density is a product, $p(y_1, y_2) = p_1(y_1)p_2(y_2)$, and the same for $q$. A power of a product is the product of the powers, so the integrand splits into a factor for $y_1$ and a factor for $y_2$. The double integral of such a product is the product of the two single integrals:
-$$\int\!\!\int p_1^\alpha q_1^{1-\alpha}\,p_2^\alpha q_2^{1-\alpha}\,dy_1\,dy_2 = \int p_1^\alpha q_1^{1-\alpha}\,dy_1 \cdot \int p_2^\alpha q_2^{1-\alpha}\,dy_2.$$
+$$\int\!\!\int p_1^\alpha q_1^{1-\alpha}\,p_2^\alpha q_2^{1-\alpha}\,\mathrm dy_1\,\mathrm dy_2 = \int p_1^\alpha q_1^{1-\alpha}\,\mathrm dy_1 \cdot \int p_2^\alpha q_2^{1-\alpha}\,\mathrm dy_2.$$
 Taking the logarithm turns this product into a sum, and dividing by $\alpha - 1$ gives $D_\alpha$ of the pair as the sum of the two divergences. When the second release is chosen from the first output, do the inner integral over $y_2$ first, with $y_1$ fixed. That inner integral is $e^{(\alpha - 1)D_\alpha}$ for the mechanism chosen after $y_1$, so it is at most $e^{(\alpha - 1)\varepsilon_2(\alpha)}$ whatever $y_1$ was. Replacing it by that bound leaves a constant times the first release's integral. So the curves still add, now as an upper bound (@sec-rdp-composition). Unlike the composition of $(\varepsilon, \delta)$ guarantees, nothing like $\delta$ is added at each step; the only slack comes in the one conversion at the end.
 
 For $k$ Gaussian releases the sum is $k\alpha\Delta^2/(2\sigma^2) = \alpha(\sqrt k\,\Delta)^2/(2\sigma^2)$, the curve of one release with $\sqrt k$ times the shift. That agrees with @sec-apx-ccomp-gaussian. Other mechanisms have their own curves. The Laplace curve, for example, levels off at the pure $\varepsilon$ of the mechanism (@eq-rdp-laplace).
 
 **Converting to $(\varepsilon, \delta)$.** At the end you convert the summed curve once. For any order $\alpha$, the mechanism is $(\varepsilon, \delta)$-DP with
-$$\varepsilon = \varepsilon_{\mathrm{RDP}}(\alpha) + \frac{\ln(1/\delta)}{\alpha - 1},$$
-and you take the order that makes this smallest. The reason is the bad-event fact @eq-apx-ccomp-bad-event, with the tail $\Pr[L > c]$ bounded by Markov's inequality applied to $e^{(\alpha - 1)L}$, whose average is what RDP controls. @sec-apx-conv-rdp derives it. For example, take 1000 Gaussian steps with sensitivity 1 and noise $\sigma = 20$. Their summed curve is $1000\alpha/800 = 1.25\alpha$. At $\delta = 10^{-5}$ you minimize $1.25\alpha + 11.5129/(\alpha - 1)$ over the grid of orders that the accounting chapters use, which runs from 1.1 to 512. The best is $\varepsilon = 8.838$, at $\alpha = 4$. The exact answer from @sec-apx-ccomp-gaussian is 7.511, so the conversion costs 18%.
+$$\varepsilon = \varepsilon(\alpha) + \frac{\ln(1/\delta)}{\alpha - 1},$$
+and you take the order that makes this smallest. The reason is the bad-event fact @eq-apx-ccomp-bad-event, with the tail $\Pr[L > \tau]$ bounded by Markov's inequality applied to $e^{(\alpha - 1)L}$, whose average is what RDP controls. @sec-apx-conv-rdp derives it. For example, take 1000 Gaussian steps with sensitivity 1 and noise $\sigma = 20$. Their summed curve is $1000\alpha/800 = 1.25\alpha$. At $\delta = 10^{-5}$ you minimize $1.25\alpha + 11.5129/(\alpha - 1)$ over the grid of orders that the accounting chapters use, which runs from 1.1 to 512. The best is $\varepsilon = 8.838$, at $\alpha = 4$. The exact answer from @sec-apx-ccomp-gaussian is 7.511, so the conversion costs 18%.
 
 ### Checking it
 
@@ -315,7 +315,7 @@ You now have four ways to add up the cost of $k$ releases: basic, advanced, RDP 
 Fix one mechanism, a Gaussian release with sensitivity 1 and noise $\sigma = 20$, and a total $\delta = 10^{-5}$. @tbl-apx-ccomp-compare gives the total $\varepsilon$ of $k$ releases under each accountant, from the script. Each accountant assumes something different. Two of them use the release's exact privacy curve, the smallest $\delta$ for each $\varepsilon$ from @eq-apx-ccomp-gauss-k with $k = 1$.
 
 - **Basic** gives each release the share $\delta/k$, reads its $\varepsilon_0$ off the release's exact curve, and adds the $k$ values of $\varepsilon_0$.
-- **Advanced** spends a fraction $s$ of $\delta$ on the releases, $s\delta/k$ each, and the rest on $\delta'$. It reads $\varepsilon_0$ off the exact curve, applies @eq-apx-ccomp-advanced, and keeps the best $s$ on a grid from $10^{-1/4}$ down to $10^{-10}$.
+- **Advanced** spends a fraction $\kappa$ of $\delta$ on the releases, $\kappa\delta/k$ each, and the rest on $\delta'$. It reads $\varepsilon_0$ off the exact curve, applies @eq-apx-ccomp-advanced, and keeps the best $\kappa$ on a grid from $10^{-1/4}$ down to $10^{-10}$.
 - **RDP** adds the curves @eq-apx-ccomp-rdp-gauss and converts once.
 - **Exact** is @eq-apx-ccomp-gauss-k with $\mu_k = \sqrt k/20$.
 

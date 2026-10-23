@@ -4,8 +4,8 @@
 
 A dashboard refreshes a hundred counts, and a training run takes thousands of noisy steps, yet you report one differential privacy (DP) guarantee for the whole run. Each step has its own privacy level $\varepsilon$ and slack $\delta$ ([The definition of differential privacy](01-definition.md)). **Basic composition** simply adds them, so a run of $k$ steps costs $k\varepsilon$ and $k\delta$ ([Post-processing, group privacy and composition](02-properties.md)). That is correct but pessimistic. The [privacy losses](01-definition.md#sec-dpdef-divergences) of the steps add up, but each depends on the noise drawn and is often negative. So they partly cancel, and their sum almost never reaches its maximum $k\varepsilon$.
 
-**Advanced composition** (Dwork, Rothblum & Vadhan 2010) uses this. You pick an extra slack $\delta'$ for the whole run. The steps are then together $(\varepsilon', k\delta + \delta')$-DP, with
-$$\varepsilon' = \varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\tanh(\varepsilon/2).$$ {#eq-comp-advanced}
+**Advanced composition** (Dwork, Rothblum & Vadhan 2010) uses this. You pick an extra slack $\delta'$ for the whole run. The steps are then together $(\varepsilon_{\mathrm{total}}, k\delta + \delta')$-DP, with
+$$\varepsilon_{\mathrm{total}} = \varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\tanh(\varepsilon/2).$$ {#eq-comp-advanced}
 The first term is the spread of the total loss, which grows only like $\sqrt k$. The second is its average, the drift.
 
 **Optimal composition** (Kairouz, Oh & Viswanath 2015) is the exact best bound for steps that are known only by their $(\varepsilon, \delta)$. For example, take a hundred counts at $\varepsilon = 0.1$ each, with no slack, on a dataset of $n = 10{,}000$ people. Basic composition gives a total of 10, still with no slack. The other two rules spend a slack $\delta' = 10^{-5}$, the book's default of $1/n^{1.1}$ rounded down to a power of ten. At that slack, advanced composition gives 5.30 and optimal composition 4.31.
@@ -28,8 +28,8 @@ You meet these rules in papers, in privacy reviews and in any library that quote
 
 ## How to use it {#sec-comp-optimal}
 
-Composition does two jobs. The first is planning, where you split a total budget $\varepsilon_{\text{total}}$ over $k$ steps. Run advanced composition backwards. When $\varepsilon\sqrt k$ is small the drift is negligible, so each step can have about
-$$\varepsilon \approx \frac{\varepsilon_{\text{total}}}{\sqrt{2k\ln(1/\delta')}}.$$
+Composition does two jobs. The first is planning, where you split a total budget $\varepsilon_{\mathrm{total}}$ over $k$ steps. Run advanced composition backwards. When $\varepsilon\sqrt k$ is small the drift is negligible, so each step can have about
+$$\varepsilon \approx \frac{\varepsilon_{\mathrm{total}}}{\sqrt{2k\ln(1/\delta')}}.$$
 Once $\varepsilon\sqrt k$ nears 1, the drift takes over and this shortcut gives each step too much.
 
 The second job is reporting. When you know the mechanism, report the accountant's number at the run's total $\delta$, and otherwise report optimal composition. This snippet plans the hundred counts within a total of $(1, 10^{-5})$, giving the whole slack to $\delta'$. It then reports the thousand Gaussian steps with the privacy loss distribution (PLD) and Rényi differential privacy (RDP) accountants of Google's `dp_accounting`.

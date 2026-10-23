@@ -51,8 +51,8 @@ The second print converts 1-GDP to $(4.3772, 10^{-5})$-DP. The third finds the n
 
 ## What goes wrong {#sec-gdp-wrong}
 
-Opacus offers `accountant="gdp"`, which estimates $\mu$ for stochastic gradient descent (SGD) made private, DP-SGD. It rests on a central limit theorem (CLT), by which many steps that each leak little compose to nearly a Gaussian curve. So for a number $k$ of steps that each sample a record with probability $q$, Bu et al. (2020) estimate
-$$\mu \approx q\sqrt{k\big(e^{1/\sigma^2} - 1\big)}.$$
+Opacus offers `accountant="gdp"`, which estimates $\mu$ for stochastic gradient descent (SGD) made private, DP-SGD. It rests on a central limit theorem (CLT), by which many steps that each leak little compose to nearly a Gaussian curve. So for a number $T$ of steps that each sample a record with probability $q$, Bu et al. (2020) estimate
+$$\mu \approx q\sqrt{T\big(e^{1/\sigma^2} - 1\big)}.$$
 It is an approximation, not a bound, and it errs on the unsafe side. A small $\delta$ is decided by rare, large losses, and a CLT fits those tails poorly. On the part's running example of 10,000 steps, the CLT gives 6.0071. But a [numerical accountant](06-numerical-accounting.md) proves that the true $\varepsilon$ is at least 6.1377, so the CLT number is false. Opacus warns that its `GaussianAccountant` is experimental, so report with its default numerical accountant, `"prv"`.
 
 A mix of Laplace and Gaussian releases needs a numerical accountant, because a curve that is not Gaussian takes the composition out of GDP. And the Rényi DP curve keeps less than the trade-off curve, even for the Gaussian. For 1-GDP, the exact $\delta$ at $\varepsilon = 1$ is 0.1269. The best [conversion from its Rényi DP curve](02-rdp-conversions.md) certifies only 0.2149 there, so account Gaussian pipelines without subsampling in GDP.

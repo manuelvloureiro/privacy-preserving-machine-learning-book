@@ -34,8 +34,8 @@ The solutions use the chapter's notation. Datasets have a fixed size $n$ and nei
 > **Exercise 3.** **The Pareto tail.** For a Pareto variable with smallest value $x_m$ and shape $a > 1$, show that $\mathbb E[(X - t)_+] = x_m^a t^{1-a}/(a - 1)$ for $t \ge x_m$. For the chapter's records (shape 3, variance 1), evaluate it at $t = \mu + \tau_b$ for $n = 1000$ and $n = 100{,}000$, compare it with the exact bias of the clipped mean, and with the bound $\sigma^2/\tau_b$. *Check: 0.001826 against the bound 0.0532 at $n = 1000$; 0.000021 against 0.0053 at $n = 100{,}000$.* *(Clipping bias)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
-1. **Write the excess as an integral of tails.** For a variable $Y \ge 0$, $\mathbb E[Y] = \int_0^\infty\Pr[Y > s]\,ds$. Applied to $Y = (X - t)_+$, which exceeds $s$ exactly when $X$ exceeds $t + s$, this gives $\mathbb E[(X - t)_+] = \int_t^\infty\Pr[X > v]\,dv$.
-2. **Insert the Pareto tail.** $\Pr[X > v] = (x_m/v)^a$ for $v \ge x_m$, so the integral is $x_m^a\int_t^\infty v^{-a}\,dv = x_m^a t^{1-a}/(a - 1)$, finite because $a > 1$.
+1. **Write the excess as an integral of tails.** For a variable $Y \ge 0$, $\mathbb E[Y] = \int_0^\infty\Pr[Y > s]\,\mathrm ds$. Applied to $Y = (X - t)_+$, which exceeds $s$ exactly when $X$ exceeds $t + s$, this gives $\mathbb E[(X - t)_+] = \int_t^\infty\Pr[X > v]\,\mathrm dv$.
+2. **Insert the Pareto tail.** $\Pr[X > v] = (x_m/v)^a$ for $v \ge x_m$, so the integral is $x_m^a\int_t^\infty v^{-a}\,\mathrm dv = x_m^a t^{1-a}/(a - 1)$, finite because $a > 1$.
 3. **Only the top is clipped.** With $\mu = 1.7321$ and $\tau_b = 18.80$ at $n = 1000$, the lower end $\mu - \tau_b$ is below the smallest value $x_m = 1.1547$, so clipping only pulls values down from $\mu + \tau_b$. The bias is minus the excess at $t = \mu + \tau_b$.
 4. **The numbers.** The formula gives 0.001826 at $n = 1000$ and 0.000021 at $n = 100{,}000$ ($\tau_b = 188.03$), equal to the exact biases the script computes, with the sign reversed. The bound $\sigma^2/\tau_b$ is 0.0532 and 0.0053.
 

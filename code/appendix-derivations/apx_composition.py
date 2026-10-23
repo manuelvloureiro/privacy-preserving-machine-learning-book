@@ -888,7 +888,7 @@ def plot_regions() -> Figure:
         1 - gaussian_region(1.0, c)[::-1],
         gaussian_region(1.0, c),
         color="0.85",
-        label="achievable $(E_Q\\psi, E_P\\psi)$, $\\mu = 1$",
+        label="achievable $(\\mathbb{E}_Q\\phi, \\mathbb{E}_P\\phi)$, $\\mu = 1$",
     )
     for gamma, color in ((0.5, "C0"), (1.0, "C1"), (math.e, "C3")):
         e1 = gdp_hockey(1.0, gamma)
@@ -905,8 +905,8 @@ def plot_regions() -> Figure:
     ax.set(
         xlim=(0, 1),
         ylim=(0, 1.05),
-        xlabel=r"$E_Q\psi$ (fires under $Q$)",
-        ylabel=r"$E_P\psi$ (fires under $P$)",
+        xlabel=r"$\mathbb{E}_Q\phi$ (fires under $Q$)",
+        ylabel=r"$\mathbb{E}_P\phi$ (fires under $P$)",
         title="Testing regions and their supporting lines",
     )
     ax.legend(fontsize=7, loc="lower right")
@@ -942,9 +942,7 @@ def plot_clt_band() -> Figure:
         eps = 1 / math.sqrt(k)
         mu, gamma = clt_mu_gamma(eps, k)
         lower, upper = band(mu, gamma, a)
-        ax.fill_between(
-            a, np.clip(lower, 0, 1), np.clip(upper, 0, 1), color="0.88", label=rf"band, $\gamma = {gamma:.4f}$"
-        )
+        ax.fill_between(a, np.clip(lower, 0, 1), np.clip(upper, 0, 1), color="0.88", label=rf"band, $w = {gamma:.4f}$")
         ax.plot(a, [gaussian_tradeoff(mu, x) for x in a.tolist()], "C0", label=rf"$G_\mu$, $\mu = {mu:.4f}$")
         ax.plot(a, rr_composed_curve(eps, k).at(a), "k", linewidth=1, label=r"exact $f_{\varepsilon_0, 0}^{\otimes k}$")
         ax.axvline(gamma, color="gray", linestyle=":", linewidth=0.8)

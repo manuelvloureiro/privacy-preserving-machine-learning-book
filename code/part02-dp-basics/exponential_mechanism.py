@@ -116,7 +116,7 @@ def plot_pricing(rng: np.random.Generator) -> Figure:
     scores = revenue(valuations, prices)
     fig, (top, bottom) = plt.subplots(2, 1, figsize=(7.5, 5.5), sharex=True)
     top.plot(prices, scores, color="C0")
-    top.set_ylabel(r"revenue $s(v, p)$")
+    top.set_ylabel(r"revenue $u(D, p)$")
     top.grid(True, alpha=0.3)
     for i, eps in enumerate((0.2, 1.0)):
         probs = exponential_probabilities(scores, eps, 1.0)
