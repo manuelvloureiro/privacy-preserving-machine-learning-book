@@ -28,6 +28,41 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -41,7 +76,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="index_files/libs/quarto-html/quarto-syntax-highlighting-bf27225e3a48a9273f3daa8f8e829971.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="index_files/libs/bootstrap/bootstrap.min.js"></script>
 <link href="index_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="index_files/libs/bootstrap/bootstrap-67a1b6612eaed44f7b934f3849f761ca.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="index_files/libs/bootstrap/bootstrap-483b4800c370d4d4f1470a598cec4fa3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 
   <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
   <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
@@ -142,6 +177,8 @@ window.Quarto = {
 <p>A retail bank is about to launch a premium credit card. The card only makes sense for customers who earn more than $50,000 a year, so the marketing team wants to send the offer to those customers and to nobody else. The bank does not record income directly, but it holds other facts about each customer, such as age, education, occupation, hours worked and marital status. The team wants a model that predicts from those facts who is likely to be eligible.</p>
 <p>The model will leave the bank’s secure environment, because an outside agency runs the campaign. The bank’s privacy policy therefore requires the model to be trained with DP, so that the model cannot be used to learn much about any single customer. The policy does not say how strict the guarantee must be. That choice is the subject of this note.</p>
 <p>We need data that behaves like the bank’s records, and the standard public dataset for this is Adult. It holds 48,842 people from the 1994 US Current Population Survey, each with the attributes above and a label saying whether their income was above $50,000 (<a href="https://archive.ics.uci.edu/dataset/2/adult">UCI Machine Learning Repository</a>). We use its training file of 32,561 people as the bank’s customer records, which the model learns from. Its test file of 16,281 people plays the customers who will receive the next campaign. Everything below is computed by one script, <a href="https://github.com/manuelvloureiro/privacy-preserving-machine-learning-book/blob/main/code/notes/privacy_utility_tradeoff.py">code/notes/privacy_utility_tradeoff.py</a>, which a reader can run to get the same numbers.</p>
+<p>Each step below shows the lines of the script that carry it out. The whole experiment runs with one command, and it takes a few minutes with all of a machine’s processor cores:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">uv</span> run python code/notes/privacy_utility_tradeoff.py</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The walk-through has six steps. It states the business goal as a number (<a href="#sec-goal" class="quarto-xref">Section&nbsp;2</a>), turns the privacy setting into a policy sentence (<a href="#sec-policy" class="quarto-xref">Section&nbsp;3</a>), and fixes everything that must not be tuned on private data (<a href="#sec-fixed" class="quarto-xref">Section&nbsp;4</a>). It then runs the experiment and reads the results, first in technical terms and then in business terms (<a href="#sec-results" class="quarto-xref">Section&nbsp;5</a>). The last steps look at how much the size of the dataset matters (<a href="#sec-size" class="quarto-xref">Section&nbsp;6</a>) and how to present the decision (<a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a>).</p>
 </section>
 <section id="sec-goal" class="level1" data-number="2">
@@ -149,9 +186,21 @@ window.Quarto = {
 <p>Engineers usually measure a model by its accuracy or its AUC, but neither tells the marketing team what it will get. The team cares about one thing, which is how many of the offers reach eligible customers. So we need to fix how many offers are sent and then count how many of them land well.</p>
 <p>The number of offers is a business input, and here is how the bank can choose it without guessing. The Census Bureau publishes the share of people who earn more than $50,000, and in Adult that share is about 24%. If the bank sends as many offers as it expects to have eligible customers, a perfect model would reach every one of them and waste nothing. For the 16,281 campaign customers we send 3,846 offers, the number of eligible customers among them, which is what this rule gives when the published share holds for the bank’s customers.</p>
 <p>That choice makes the business metric easy to read. The model scores every customer, and the bank sends the 3,846 offers to the highest scores. The metric is the number of eligible customers among those 3,846. Every offer that does not reach an eligible customer is wasted, so the waste is 3,846 minus that number.</p>
+<p>In the script, the metric is a short function. It sorts the customers by the model’s score, takes the first <code>offers</code> of them and counts the eligible ones:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-excerpt="put-reached"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> reached(scores: Array, y: npt.NDArray[np.int64], offers: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Eligible customers among the `offers` highest-scored; ties are broken by position, deterministically."""</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    top <span class="op">=</span> np.argsort(<span class="op">-</span>scores, kind<span class="op">=</span><span class="st">"stable"</span>)[:offers]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">int</span>(y[top].<span class="bu">sum</span>())</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The metric needs a baseline, and the natural one is to have no model at all. If the bank sent the 3,846 offers to customers picked at random, each offer would reach an eligible customer with probability 3,846 / 16,281, about 24%. The expected number reached would then be</p>
 <p><span class="math display">\[3{,}846 \times \frac{3{,}846}{16{,}281} \approx 909.\]</span></p>
 <p>Any model, private or not, has to beat 909 to be worth having.</p>
+<p>The script sets up the campaign the same way. It splits Adult into the bank’s records and the campaign customers, counts the eligible customers to fix the number of offers, and computes the expected reach of random offers:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-excerpt="put-campaign"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> practitioner_datasets.adult()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train, test <span class="op">=</span> df.head(TRAIN_ROWS), df.<span class="bu">slice</span>(TRAIN_ROWS)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> (features(train), labels(train), features(test), labels(test))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>eligible <span class="op">=</span> <span class="bu">int</span>(data[<span class="dv">3</span>].<span class="bu">sum</span>())</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Random offers reach an eligible customer at the base rate, eligible / campaign customers.</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>baseline <span class="op">=</span> eligible <span class="op">*</span> eligible <span class="op">/</span> <span class="bu">len</span>(data[<span class="dv">3</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The money follows from the count. Write <span class="math inline">\(V\)</span> for what the bank gains from reaching one eligible customer instead of an ineligible one. It is the chance that an eligible customer takes up the card times the margin the card earns, and the finance team estimates it, not the data team. Every comparison below is a difference in eligible customers reached, so a difference of <span class="math inline">\(k\)</span> customers is worth <span class="math inline">\(k\,V\)</span> to the bank. We never need to invent a value for <span class="math inline">\(V\)</span>, because the decision in <a href="#sec-decision" class="quarto-xref">Section&nbsp;7</a> only depends on how <span class="math inline">\(k\,V\)</span> compares with what the privacy policy protects.</p>
 </section>
 <section id="sec-policy" class="level1" data-number="3">
@@ -162,6 +211,16 @@ window.Quarto = {
 <p>At <span class="math inline">\(\varepsilon = 1\)</span> the ceiling is <span class="math inline">\(e/(1+e)\)</span>, about 73%. At <span class="math inline">\(\varepsilon = 0.1\)</span> it is about 52.5%, so the model teaches the attacker almost nothing, and at <span class="math inline">\(\varepsilon = 3\)</span> it is about 95%. That last guarantee still holds, but it is weak.</p>
 <p>This is the sentence the privacy officer signs, and in our use case they choose a ceiling of 75%. In other words, an attacker who thinks it is a coin flip whether Alice is a customer must not end up more than 75% sure. Solving the formula for <span class="math inline">\(\varepsilon\)</span> turns the sentence into a number:</p>
 <p><span class="math display">\[\frac{e^{\varepsilon}}{1+e^{\varepsilon}} \le 0.75 \quad\Longleftrightarrow\quad e^{\varepsilon} \le 3 \quad\Longleftrightarrow\quad \varepsilon \le \ln 3 \approx 1.10.\]</span></p>
+<p>The script holds both directions of this translation. The first function gives the ceiling for a given <span class="math inline">\(\varepsilon\)</span>, which labels the top axis of every figure below. The second turns the officer’s ceiling back into <span class="math inline">\(\varepsilon\)</span>, and <code>epsilon_for_belief(0.75)</code> returns the policy’s limit of 1.10:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-excerpt="put-belief"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> belief_ceiling(eps: <span class="bu">float</span>, prior: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Highest posterior that epsilon-DP allows an attacker who starts at `prior` that one customer is in the data."""</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    odds <span class="op">=</span> math.exp(eps) <span class="op">*</span> prior <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prior)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> odds <span class="op">/</span> (<span class="dv">1</span> <span class="op">+</span> odds)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> epsilon_for_belief(belief: <span class="bu">float</span>, prior: <span class="bu">float</span> <span class="op">=</span> <span class="fl">0.5</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The largest epsilon whose belief ceiling, from `prior`, is `belief`."""</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> math.log((belief <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> belief)) <span class="op">/</span> (prior <span class="op">/</span> (<span class="dv">1</span> <span class="op">-</span> prior)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>The policy is set before anyone looks at the model’s results. If the ceiling were chosen after seeing the accuracy, it would drift to wherever the model happens to do well.</p>
 <p>One technical detail completes the guarantee. The training method used below adds a second parameter, <span class="math inline">\(\delta\)</span>, which is the small probability that the guarantee fails outright. A common rule sets <span class="math inline">\(\delta\)</span> below one over the number of people, so that the guarantee is not expected to fail for anyone. For 32,561 customers this gives <span class="math inline">\(\delta = 10^{-5}\)</span>, and we use that value throughout.</p>
 </section>
@@ -169,8 +228,49 @@ window.Quarto = {
 <h1 data-number="4"><span class="header-section-number">4</span> Step 3: fix everything that must not be tuned on private data</h1>
 <p>A DP guarantee covers what the training run does with the data. It does not cover choices that someone made by looking at the private data beforehand. If an engineer tried twenty settings on the customer records and kept the best one, that choice would itself leak information. So everything apart from the training run is decided from public information.</p>
 <p>The preprocessing comes from the survey’s public codebook, not from the data. Ages are scaled within 17 to 90, years of education within 1 to 16 and weekly hours within 1 to 99. Capital gains and losses are scaled on a log scale up to the survey’s published cap of 99,999. Each category, such as an occupation, becomes a 0-or-1 column taken from the codebook’s list. Every customer’s row then lies in a known range, which DP needs, because it bounds how much one customer can change the training.</p>
-<p>The two techniques we compare are also fixed in advance. The first is <strong>DP-SGD</strong>, the standard way to train a model with DP. It trains a logistic regression, the same kind of model a bank would use without DP, in small random batches. It caps how much each customer can move the model at each step, which is called <em>clipping</em>, and it adds random noise to every update (<a href="https://opacus.ai/">Opacus</a>). The noise is set by Opacus’s privacy accountant so that the whole training run meets the target <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>. Its settings were fixed before training and never tuned on the customer records. It uses batches of about 1,000 customers, 10 passes over the data, a clipping norm of 1 and a learning rate of 0.5. The second technique is a <strong>private naive Bayes</strong> classifier from IBM’s diffprivlib, which adds noise to simple averages per class (<a href="https://github.com/IBM/differential-privacy-library">diffprivlib</a>). It gives the stronger pure <span class="math inline">\(\varepsilon\)</span> guarantee, with no <span class="math inline">\(\delta\)</span>, so it also meets the <span class="math inline">\((\varepsilon, 10^{-5})\)</span> standard, and both techniques can be placed on the same axis.</p>
+<p>The preprocessing function reads only these public ranges and lists, never a statistic of the data. Each number is clipped into <span class="math inline">\([0, 1]\)</span>, and each customer has at most one 1 per category, which is what bounds every row:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-excerpt="put-features"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> features(df: pl.DataFrame) <span class="op">-&gt;</span> Array:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Map each row to [0, 1]^d using only the codebook; a missing category is a row of zeros."""</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    cols: <span class="bu">list</span>[Array] <span class="op">=</span> []</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, (lo, hi) <span class="kw">in</span> LINEAR_BOUNDS.items():</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> df[name].cast(pl.Float64).to_numpy()</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        cols.append(np.clip((x <span class="op">-</span> lo) <span class="op">/</span> (hi <span class="op">-</span> lo), <span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name <span class="kw">in</span> LOG_COLUMNS:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> df[name].cast(pl.Float64).to_numpy()</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        cols.append(np.clip(np.log1p(np.clip(x, <span class="dv">0</span>, TOP_CODE)) <span class="op">/</span> math.log1p(TOP_CODE), <span class="fl">0.0</span>, <span class="fl">1.0</span>))</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> name, values <span class="kw">in</span> CATEGORIES.items():</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        column <span class="op">=</span> df[name].to_list()</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> value <span class="kw">in</span> values:</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            cols.append(np.array([<span class="fl">1.0</span> <span class="cf">if</span> v <span class="op">==</span> value <span class="cf">else</span> <span class="fl">0.0</span> <span class="cf">for</span> v <span class="kw">in</span> column]))</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.column_stack(cols)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The two techniques we compare are also fixed in advance. The first is <strong>DP-SGD</strong>, the standard way to train a model with DP. It trains a logistic regression, the same kind of model a bank would use without DP, in small random batches. It caps how much each customer can move the model at each step, which is called <em>clipping</em>, and it adds random noise to every update (<a href="https://opacus.ai/">Opacus</a>). The noise is set by Opacus’s privacy accountant so that the whole training run meets the target <span class="math inline">\(\varepsilon\)</span> at <span class="math inline">\(\delta = 10^{-5}\)</span>.</p>
+<p>The accountant works backwards from the target. Given <span class="math inline">\(\varepsilon\)</span>, <span class="math inline">\(\delta\)</span>, the share of customers in each batch and the number of passes, it returns the noise multiplier, the size of the noise relative to the clipping norm:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6" data-excerpt="put-calibrate"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> noise_multiplier(eps: <span class="bu">float</span>, n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">float</span>:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""The noise multiplier that makes DP-SGD with these settings (eps, DELTA)-DP, by Opacus's PRV accountant."""</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="bu">float</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        get_noise_multiplier(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            target_epsilon<span class="op">=</span>eps, target_delta<span class="op">=</span>DELTA, sample_rate<span class="op">=</span>BATCH <span class="op">/</span> n, epochs<span class="op">=</span>EPOCHS, accountant<span class="op">=</span><span class="st">"prv"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Opacus then wraps the model, the optimizer and the data loader. After that, every training step draws a random batch, clips each customer’s contribution and adds noise of that size, and the rest of the training loop is the same as without DP:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-excerpt="put-private"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.SGD(layer.parameters(), lr<span class="op">=</span>LR, momentum<span class="op">=</span>MOMENTUM)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>engine: PrivacyEngine <span class="op">|</span> <span class="va">None</span> <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model: nn.Module <span class="op">=</span> layer</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> sigma <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    engine <span class="op">=</span> PrivacyEngine(accountant<span class="op">=</span><span class="st">"prv"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    model, optimizer, loader <span class="op">=</span> engine.make_private(  <span class="co"># Poisson sampling, per-example clipping, Gaussian noise</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>        module<span class="op">=</span>layer, optimizer<span class="op">=</span>optimizer, data_loader<span class="op">=</span>loader, noise_multiplier<span class="op">=</span>sigma, max_grad_norm<span class="op">=</span>CLIP</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>DP-SGD’s settings were fixed before training and never tuned on the customer records. It uses batches of about 1,000 customers, 10 passes over the data, a clipping norm of 1 and a learning rate of 0.5. The second technique is a <strong>private naive Bayes</strong> classifier from IBM’s diffprivlib, which adds noise to simple averages per class (<a href="https://github.com/IBM/differential-privacy-library">diffprivlib</a>). It gives the stronger pure <span class="math inline">\(\varepsilon\)</span> guarantee, with no <span class="math inline">\(\delta\)</span>, so it also meets the <span class="math inline">\((\varepsilon, 10^{-5})\)</span> standard, and both techniques can be placed on the same axis.</p>
 <p>The experiment then trains each technique at ten values of <span class="math inline">\(\varepsilon\)</span> from 0.01 to 10. It repeats each setting with 20 random seeds, because DP training is random and one run can be lucky or unlucky. It also trains each model without DP, with the same settings, so that the cost of privacy can be read off directly.</p>
+<p>Each training run is one job, made of a technique, a value of <span class="math inline">\(\varepsilon\)</span> (or none, for no DP), a number of customers and a seed. The script lists the jobs and spreads them over the processor cores:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-excerpt="put-sweep"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>jobs: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">str</span>, <span class="bu">float</span> <span class="op">|</span> <span class="va">None</span>, <span class="bu">int</span>, <span class="bu">int</span>]] <span class="op">=</span> []</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> technique <span class="kw">in</span> COLOURS:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(technique, eps, TRAIN_ROWS, seed) <span class="cf">for</span> eps <span class="kw">in</span> [<span class="va">None</span>, <span class="op">*</span>EPSILONS] <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(seeds)]</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n <span class="kw">in</span> SIZES[:<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    jobs <span class="op">+=</span> [(<span class="st">"DP-SGD"</span>, eps, n, seed) <span class="cf">for</span> eps <span class="kw">in</span> [<span class="va">None</span>, <span class="op">*</span>EPSILONS] <span class="cf">for</span> seed <span class="kw">in</span> <span class="bu">range</span>(size_seeds)]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> ProcessPoolExecutor(max_workers<span class="op">=</span>os.cpu_count(), initializer<span class="op">=</span>_init, initargs<span class="op">=</span>(data,)) <span class="im">as</span> pool:</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    runs <span class="op">=</span> <span class="bu">list</span>(pool.<span class="bu">map</span>(evaluate, jobs, chunksize<span class="op">=</span><span class="dv">4</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
 <section id="sec-results" class="level1" data-number="5">
 <h1 data-number="5"><span class="header-section-number">5</span> Step 4: read the results, technical first</h1>
@@ -198,6 +298,17 @@ Figure&nbsp;2: Eligible customers reached by the campaign against the privacy se
 </figure>
 </div>
 <p>The gap between a DP curve and the upper dashed line is the cost of privacy, counted in customers. The gap between the curve and the dotted line is what the model is worth compared with sending offers at random. <a href="#tbl-frontier" class="quarto-xref">Table&nbsp;1</a> lists every private configuration. A configuration is on the <em>frontier</em> when no other configuration is at least as private and reaches more customers. Only the frontier is worth considering, and here it consists of DP-SGD alone.</p>
+<p>The frontier comes from a short filter. It sorts the configurations from most to least private and keeps each one that reaches more customers than every more private configuration before it:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-excerpt="put-frontier"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> non_dominated(points: <span class="bu">list</span>[<span class="bu">tuple</span>[<span class="bu">float</span>, <span class="bu">float</span>]]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">int</span>]:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""Indices of the (privacy loss, utility) points that no other point dominates."""</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    order <span class="op">=</span> <span class="bu">sorted</span>(<span class="bu">range</span>(<span class="bu">len</span>(points)), key<span class="op">=</span><span class="kw">lambda</span> i: (points[i][<span class="dv">0</span>], <span class="op">-</span>points[i][<span class="dv">1</span>]))</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    frontier: <span class="bu">list</span>[<span class="bu">int</span>] <span class="op">=</span> []</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    best <span class="op">=</span> <span class="bu">float</span>(<span class="st">"-inf"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> order:</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> points[i][<span class="dv">1</span>] <span class="op">&gt;</span> best:</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>            frontier.append(i)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>            best <span class="op">=</span> points[i][<span class="dv">1</span>]</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> frontier</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div id="tbl-frontier" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-tbl figure">
 <figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-frontier-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
