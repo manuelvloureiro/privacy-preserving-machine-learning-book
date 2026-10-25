@@ -115,7 +115,7 @@ Clipping without noise scores slightly above non-private SGD here, so the whole 
 - Fix $\varepsilon$, $\delta$ and the number of epochs first, since they are the contract. Then choose the batch, let the accountant set $\sigma$, and tune the learning rate last.
 - Find the $\varepsilon$ below which accuracy collapses on your task before you promise a budget.
 
-## Further reading
+## References
 
 - Abadi et al., "Deep Learning with Differential Privacy" (CCS 2016): DP-SGD and the moments accountant.
 - Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023): what to clip, how to tune and what to report.

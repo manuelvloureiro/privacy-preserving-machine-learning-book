@@ -121,7 +121,7 @@ print(f"{heavy_tail_width(1000, 1.0, 1.0):.2f}")  # 18.80
 - Never clip to the observed minimum and maximum. Take bounds from the schema or public data, or spend a quarter of the budget or less, a simple default, finding the data.
 - Bounds that clip real records bias the mean whatever $\varepsilon$ is, so put the clipping bias into every reported interval.
 
-## Further reading
+## References
 
 - Karwa & Vadhan, "Finite Sample Differentially Private Confidence Intervals" (ITCS 2018): coarse then fine for normal means and variances, under pure and approximate DP.
 - Biswas, Dong, Kamath & Ullman, "CoinPress: Practical Private Mean and Covariance Estimation" (NeurIPS 2020): shrinking balls in practice, with code.

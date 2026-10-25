@@ -40,7 +40,7 @@ Processing an output cannot add information about its source. If a variable $Z$ 
 $$I(X; Z) \le I(X; Y).$$
 The condition matters, because a $Z$ that also looked at $X$ can know more.
 
-## Further reading
+## References
 
 - Smith, "On the Foundations of Quantitative Information Flow" (FoSSaCS 2009): why one-try guessing needs min-entropy.
 

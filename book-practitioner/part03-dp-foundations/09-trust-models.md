@@ -117,7 +117,7 @@ Secure aggregation works on integers, so clients add integer noise, Skellam or t
 
 - Local noise exceeds central noise by a factor that grows like $\sqrt n$, 149 on Adult at $\ln 3$.
 
-## Further reading
+## References
 
 - Wang, Blocki, Li & Jha, "Locally Differentially Private Protocols for Frequency Estimation" (USENIX Security 2017): frequency oracles and local hashing, compared.
 - Feldman, McMillan & Talwar, "Hiding Among the Clones" (FOCS 2021): the shuffling bounds, closed form and numerical.

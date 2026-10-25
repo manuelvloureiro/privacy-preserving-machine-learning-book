@@ -54,7 +54,7 @@ Under add-or-remove neighbours, a record can be removed or added, and a subsampl
 
 A run whose number of steps or noise is chosen from the outputs needs a filter, which enforces a budget fixed in advance ([Adaptive composition](08-adaptive-composition.md)). And if two libraries' answers for the same run fall outside each other's error bars, one has a bug or a different input ([checking an accountant](09-choosing-an-accountant.md#sec-choose-check)).
 
-## Further reading
+## References
 
 - Gopi, Lee & Wutschitz, "Numerical Composition of Differential Privacy" (NeurIPS 2021): the PRV accountant, with explicit error bounds.
 

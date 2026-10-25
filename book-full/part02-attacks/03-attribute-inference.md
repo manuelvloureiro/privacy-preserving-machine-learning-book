@@ -105,7 +105,7 @@ The reduction also says which leak implies which. If a model reveals nothing abo
 
 Because the advantage is a difference, it is not enough to report it alone. Report the success on members and on non-members, as a membership attack reports its TPR and FPR. The advantage by itself hides how much of the success is population inference, which is the part common to both.
 
-Finally, the membership test $\mathcal B$ that the reduction produces is a weak one. It outputs a single bit, so when it says "member" the only evidence it carries is how much more often that happens for members than for non-members, the ratio $\mathrm{TPR}/\mathrm{FPR}$. An attack that is right on most people of the population, members or not, has an FPR close to its TPR and a ratio close to 1, so at a low FPR it is much weaker than the dedicated attacks of [Membership inference](02-membership-inference.md) ([Exercise 3](../../book-exercises/part02-attacks/03-attribute-inference.md#sec-sol-attribute-inference-3)).
+Finally, the membership test $\mathcal B$ that the reduction produces is a weak one. It outputs a single bit, so when it says "member" the only evidence it carries is how much more often that happens for members than for non-members, the ratio $\mathrm{TPR}/\mathrm{FPR}$. An attack that is right on most people of the population, members or not, has an FPR close to its TPR and a ratio close to 1, so at a low FPR it is much weaker than the dedicated attacks of [Membership inference](02-membership-inference.md) ([Exercise 3](../../book-exercises/part02-attacks/03-attribute-inference.md#sec-sol-attr-3)).
 
 ### Example: one model, 200 times
 
@@ -235,7 +235,7 @@ The member success above the ceiling is something no population-level knowledge 
 ### Check yourself
 
 - If the model ignored $s$ entirely, $f_y(x, s) = f_y(x, s')$, what would MAP inversion guess? *(The MAP guess from $x$ alone, $\arg\max_s p(s \mid x)$: the confidence is the same factor for every candidate in @eq-attr-map-inversion, so it cannot change which candidate wins.)*
-- Why does using the marginal $p(s)$ instead of $p(s \mid x)$ in @eq-attr-map-inversion lose success even with a calibrated model? *(It drops the evidence that $x$ carries about $s$, so the score is no longer proportional to $p(s \mid x, y)$. [Exercise 2](../../book-exercises/part02-attacks/03-attribute-inference.md#sec-sol-attribute-inference-2) computes the loss on the smoking table.)*
+- Why does using the marginal $p(s)$ instead of $p(s \mid x)$ in @eq-attr-map-inversion lose success even with a calibrated model? *(It drops the evidence that $x$ carries about $s$, so the score is no longer proportional to $p(s \mid x, y)$. [Exercise 2](../../book-exercises/part02-attacks/03-attribute-inference.md#sec-sol-attr-2) computes the loss on the smoking table.)*
 
 ## Confidence masking {#sec-attr-masking}
 

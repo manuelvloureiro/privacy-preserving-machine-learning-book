@@ -53,7 +53,7 @@ An odometer costs more than a filter. The **Ville odometer** converts the RDP sp
 
 Choosing hyperparameters from several runs is a separate cost ([Hyperparameter tuning](../part05-dp-ml/03-hyperparameter-tuning.md)).
 
-## Further reading
+## References
 
 - Whitehouse, Ramdas, Rogers & Wu, "Fully-Adaptive Composition in Differential Privacy" (ICML 2023).
 - Feldman & Zrnic, "Individual Privacy Accounting via a Rényi Filter" (NeurIPS 2021).

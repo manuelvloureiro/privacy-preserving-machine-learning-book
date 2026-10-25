@@ -247,7 +247,7 @@ A published statement adds what the script cannot know ([The statement](09-choos
 
 : The steps of calibrating and accounting a DP-SGD run. {#tbl-calib-checklist}
 
-## Further reading
+## References
 
 - Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023): planning a run's privacy budget, and what to report.
 - Lebeda, Regehr, Kamath & Steinke, "Avoiding Pitfalls for Privacy Accounting of Subsampled Mechanisms under Composition" (IEEE SaTML 2025): why fixed-size and shuffled batches need their own accounting.

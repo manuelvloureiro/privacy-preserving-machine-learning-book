@@ -4,7 +4,7 @@ Exercises for [Linkage and re-identification](../../book-full/part02-attacks/07-
 
 The notation is the chapter's: $n$ people, cells $c$ with probabilities $p_c$, $K$ cells, $U$ the number of unique people, $q$ the sampling rate and $\lambda$ the expected number of other people in a cell.
 
-## Linkage success and class sizes {#sec-sol-linkage-1}
+## Linkage success and class sizes {#sec-sol-link-1}
 
 > **Exercise 1.** **Linkage success and class sizes.** Show that for a fixed number of records $n$, @eq-link-success is at most $1/k$ when every class has at least $k$ records, and compute the success for a release of 8 records in classes of sizes 2, 2 and 4. When is the bound $1/k$ attained? *Check: $3/8 = 0.375$.* *(The linkage game)*
 
@@ -20,7 +20,7 @@ The same formula in the other direction: the toy release of the chapter, with cl
 *The linkage success is decided by the number of classes, so the best you can do against this adversary with classes of at least $k$ is to make them all exactly $k$.*
 :::
 
-## Bits for a target uniqueness {#sec-sol-linkage-2}
+## Bits for a target uniqueness {#sec-sol-link-2}
 
 > **Exercise 2.** **Bits for a target uniqueness.** Under uniform cells, how many bits beyond $\log_2n$ does it take to make a fraction $f$ of the population unique? Evaluate for 8 billion people at $f = 0.5$ and $0.99$, and show that at exactly $\log_2n$ bits the fraction tends to $e^{-1}$ as $n \to \infty$. *Check: 33.4 and 39.5 bits.* *(Fact 2, uniform cells)*
 
@@ -34,7 +34,7 @@ The same formula in the other direction: the toy release of the chapter, with cl
 *Six and a half bits beyond $\log_2 n$ make 99% of a population unique, whatever its size: about two extra attributes of the kind in the chapter's census.*
 :::
 
-## Collisions and the birthday bound {#sec-sol-linkage-3}
+## Collisions and the birthday bound {#sec-sol-link-3}
 
 > **Exercise 3.** **Collisions and the birthday bound.** Show that the expected number of pairs of people who share a cell is $\binom n2\sum_cp_c^2$, and deduce a union bound on the probability that *somebody* shares a cell. For 30 people and the 730 cells of (birthday, sex), compare it with the exact probability. *Check: union bound $435/730 = 0.596$.* *(Indicators, birthday bound)*
 
@@ -50,7 +50,7 @@ With birthdays alone (365 cells), the union bound is 1.192, useless as a probabi
 *The expected number of colliding pairs is $\binom n2$ times the collision probability: the quantity in the chapter's lower bound @eq-link-collision, counted over pairs instead of felt by one person.*
 :::
 
-## The variance of the number of uniques {#sec-sol-linkage-4}
+## The variance of the number of uniques {#sec-sol-link-4}
 
 > **Exercise 4.** **The variance of the number of uniques.** For $K$ uniform cells, show that $\Pr[i \text{ and } j \text{ both unique}] = (1 - \frac1K)(1 - \frac2K)^{n-2}$ for $i \ne j$, and compute $\operatorname{Var}U$. For $n = K = 10{,}000$, compare the standard deviation of $U/n$ with a simulation and with McDiarmid. *Hint: $\operatorname{Var}U = \mathbb E[U(U - 1)] + \mathbb EU - (\mathbb EU)^2$.* *(Indicators, concentration)*
 
@@ -67,7 +67,7 @@ With birthdays alone (365 cells), the union bound is 1.192, useless as a probabi
 *Pairwise indicators give the exact variance, and it shows McDiarmid's bound to be about three times too wide for the fraction unique, but valid without any calculation.*
 :::
 
-## How many rare items {#sec-sol-linkage-5}
+## How many rare items {#sec-sol-link-5}
 
 > **Exercise 5.** **How many rare items.** Each auxiliary item is rated by 1% of 480,189 users, and agreements are independent. What is the smallest number of items for which the expected number of unrelated records agreeing on all of them is below 0.01? With that many items, $\rho = 0$, and exactly one record agreeing on all of them, what is the posterior probability that this record is the target, if the target is in the release with prior probability $\frac12$? *Check: 4 items, 0.0048 expected false matches, posterior 0.9952.* *(Bits, Bayes)*
 
@@ -82,7 +82,7 @@ $$\Pr[\text{target} = t \mid \text{data}] = \frac{\pi\,\mathrm{LR}(t)}{\pi\sum_j
 *Each rare item cuts the expected false matches by its rarity factor; the posterior then says how much a perfect match is worth, which depends on whether the target is in the data at all.*
 :::
 
-## Sampling and the Poisson approximation {#sec-sol-linkage-6}
+## Sampling and the Poisson approximation {#sec-sol-link-6}
 
 > **Exercise 6.** **Sampling and the Poisson approximation.** Derive the Poisson form of @eq-link-kappa directly from Poisson thinning, and show $\kappa \ge 1/(1 + \lambda)$ for every $q$. For which $\lambda$ is $\kappa = \frac12$ in a 1% sample? *Check: $\lambda = 1/0.99 = 1.0101$.* *(Poisson thinning)*
 
@@ -98,7 +98,7 @@ $$\Pr[\text{target} = t \mid \text{data}] = \frac{\pi\,\mathrm{LR}(t)}{\pi\sum_j
 *A 1% sample protects a target only if their cell is expected to hold about one other person or more; for rarer combinations the match is right most of the time.*
 :::
 
-## Eccentricity under an exponential tail {#sec-sol-linkage-7}
+## Eccentricity under an exponential tail {#sec-sol-link-7}
 
 > **Exercise 7.** **Eccentricity under an exponential tail.** Suppose an outsider's scores against the $n$ records were independent exponential variables with mean $\mu$ (so standard deviation $\mu$). Show that the gap between the two largest is again exponential with mean $\mu$, whatever $n$, so the eccentricity test with threshold $\tau$ falsely matches with probability about $e^{-\tau}$. Compare with normally distributed scores by simulation. *Hint: memorylessness ([Probability distributions](../../book-full/part01-prerequisites/01-distributions.md)).* *Check: $e^{-1.5} = 0.2231$.* *(Exponential distribution, false positives)*
 
@@ -114,7 +114,7 @@ So the same threshold $\tau = 1.5$ falsely matches about one outsider in five wh
 *The eccentricity threshold controls false matches only relative to the tail of the null score distribution, which is why it has to be calibrated on outsiders.*
 :::
 
-## Hashed identifiers and taxi trips {#sec-sol-linkage-8}
+## Hashed identifiers and taxi trips {#sec-sol-link-8}
 
 > **Exercise 8.** **Hashed identifiers and taxi trips.** Driver licence numbers in the taxi release of @sec-link-pseudonyms have six digits, or seven digits starting with 5. (a) How many values is that, how many bits, and how long does it take to hash them all at $10^7$ hashes per second? Compare a random 10-character password over 62 symbols. (b) Treat each trip's pickup as a uniformly random cell: one of 525,600 minutes of the year and one of 78,000 squares of 100 m. Use @eq-link-uniform to find the fraction of the 173 million trips that are unique on their pickup. Why is the true fraction lower, and why does that not save the passengers? *Check: $2\times10^6$ values (20.9 bits) take 0.2 seconds. A password carries 59.5 bits and takes about 2661 years. The unique fraction is 0.9958.* *(Bits, uniqueness)*
 

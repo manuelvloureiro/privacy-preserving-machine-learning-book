@@ -4,7 +4,7 @@ Exercises for [Attribute inference and model inversion](../../book-full/part02-a
 
 The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ is the model's confidence in label $y$, and $V(S \mid O) = \sum_o\max_s p(s, o)$ is the success of the best guess of $s$ from $O$, the maximum a posteriori (MAP) guess. A membership test has a true positive rate (TPR) on members and a false positive rate (FPR) on non-members. In the smoking table of the chapter, $s = 1$ is "smoker", $x$ the age band and $y = 1$ "has the disease".
 
-## A balanced prior {#sec-sol-attribute-inference-1}
+## A balanced prior {#sec-sol-attr-1}
 
 > **Exercise 1.** **A balanced prior.** Redo the smoking table with $\Pr[\text{smoker}] = 0.5$ and everything else unchanged. Compute $V(S)$, $V(S \mid X)$, $V(S \mid X, Y)$ and the two leakages. *Check: $V(S \mid X) = 0.6$, $V(S \mid X, Y) = 0.7$.* Why does age now change the guess when it did not before? *(MAP guess, vulnerability)*
 
@@ -29,7 +29,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 *Whether a piece of evidence changes the best guess depends on the prior as much as on the evidence: a skewed prior absorbs weak evidence.*
 :::
 
-## The marginal prior {#sec-sol-attribute-inference-2}
+## The marginal prior {#sec-sol-attr-2}
 
 > **Exercise 2.** **The marginal prior.** Fredrikson et al.'s attack uses $p(s)$ in place of $p(s \mid x)$. On the smoking table, with a calibrated model, compute the success of $\arg\max_s p(s)\,f_y(x, s)$, breaking ties towards "non-smoker". *Check: 0.706, against 0.748 for imputation.* Which cell causes the loss? *(Bayes' rule, Fact 1)*
 
@@ -46,7 +46,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 *An inversion attack is only as good as the adversary's model of how the sensitive attribute relates to what it already knows.*
 :::
 
-## The reduction at low false positive rate {#sec-sol-attribute-inference-3}
+## The reduction at low false positive rate {#sec-sol-attr-3}
 
 > **Exercise 3.** **The reduction at low false positive rate.** The membership test $\mathcal B$ built from the toy attack has TPR 0.7832 at FPR 0.7262. Using the mixing of tests in [Hypothesis testing](../../book-full/part01-prerequisites/04-hypothesis-testing.md), find the best TPR it can reach at FPR $10^{-3}$. *Check: $0.00108$.* Why can it not do better? *Hint: its only output is one bit.* *(Neyman–Pearson, mixing tests)*
 
@@ -61,7 +61,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 *An attribute attack is a membership test that has thrown away everything but one bit, so its power at low false positive rate is barely above chance.*
 :::
 
-## Label-only inversion {#sec-sol-attribute-inference-4}
+## Label-only inversion {#sec-sol-attr-4}
 
 > **Exercise 4.** **Label-only inversion.** The hospital releases only a label: "disease" when $\Pr[y = 1 \mid x, s] > \frac12$. On the smoking table, the adversary queries the label at both values of $s$, scores $p(s \mid x)\,\mathbf 1[\mathrm{label}(x, s) = y]$, and breaks ties with $p(s \mid x)$. Compute its success. *Check: 0.742, a loss of 0.006 against imputation.* *(Fact 3, MAP guess)*
 
@@ -78,7 +78,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 *A coarse output costs the attacker only in the cells where the coarse answer cannot tell the candidates apart; everywhere else it is as good as the full confidence.*
 :::
 
-## Two independent clues {#sec-sol-attribute-inference-5}
+## Two independent clues {#sec-sol-attr-5}
 
 > **Exercise 5.** **Two independent clues.** Let $s \in \{-1, +1\}$ be uniform, and let $u \sim \mathcal N(as, 1)$ and $v \sim \mathcal N(bs, 1)$ be independent given $s$. Show that the imputation success from $(u, v)$ is $\Phi\big(\sqrt{a^2 + b^2}\big)$. *Check: with $a = 0.5$ and $b = 1$, $\Phi(1.1180) = 0.8682$, against $\Phi(0.5) = 0.6915$ from $u$ alone.* *Hint: the log-likelihood ratios add.* *(Likelihood ratios, Gaussian tails)*
 
@@ -93,7 +93,7 @@ The solutions use the chapter's notation. A record is $(s, x, y)$, $f_y(x, s)$ i
 *Independent clues add in squared separation, not in success probability: a weak public feature and a strong label combine to more than either, but much less than their sum.*
 :::
 
-## A model that memorizes {#sec-sol-attribute-inference-6}
+## A model that memorizes {#sec-sol-attr-6}
 
 > **Exercise 6.** **A model that memorizes.** A lookup model stores each training record under a unique record identifier, such as a patient number. Queried with a person's identifier and a candidate $(x, s, y)$, it returns $f_y(x, s) = 1$ when that person is a training member and the candidate is their stored record, and the population's $p(y \mid x, s)$ for every other query. The lookup is keyed on the identifier, not on the values, because the smoking table has only eight kinds of record and many people share each one. So a non-member's query never hits a stored record, and a member's query hits only at the member's own true values. On the smoking table, compute the success of MAP inversion on members and on non-members. *Check: 0.874 on members, 0.748 on non-members, an advantage of 0.126.* Which members does the attack still get wrong? *(The game, the non-member ceiling)*
 

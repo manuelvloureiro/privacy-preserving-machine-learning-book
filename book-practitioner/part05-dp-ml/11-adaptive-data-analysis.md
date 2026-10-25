@@ -40,7 +40,7 @@ The common failure is not an attack but a long search that picks each setting fr
 
 So count rounds, and report how many rounds a validation number has been through. Practice is often milder than the worst case, but the risk is real when records are few and rounds many.
 
-## Further reading
+## References
 
 - Dwork et al., "The Reusable Holdout" (*Science* 2015): Thresholdout.
 - Blum & Hardt, "The Ladder" (ICML 2015): the boosting attack and a leaderboard that resists it.

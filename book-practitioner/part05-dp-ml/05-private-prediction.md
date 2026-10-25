@@ -43,7 +43,7 @@ Noise this large wipes out close votes. With two labels, write $g$ for the gap b
 
 Finally, beware of a data-dependent $\varepsilon$. When teachers agree, a sharper analysis charges less, but that smaller $\varepsilon$ is computed from the votes and leaks them. Until it is released with noise, it is a measurement, not a guarantee. **Confident-GNMax** answers only queries on which a noisy check finds agreement, the cheap and accurate ones.
 
-## Further reading
+## References
 
 - Papernot et al., "Scalable Private Learning with PATE" (ICLR 2018): GNMax, its data-dependent analysis and Confident-GNMax.
 - Wu et al., "Privacy-Preserving In-Context Learning for Large Language Models" (ICLR 2024): subsampled voting over prompts.

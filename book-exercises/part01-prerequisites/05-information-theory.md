@@ -2,7 +2,7 @@
 
 Exercises for [Information theory](../../book-full/part01-prerequisites/05-information-theory.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part01-prerequisites/solutions_information_theory.py` computes every number quoted here; run it from the repository root with `uv run python code/part01-prerequisites/solutions_information_theory.py`.
 
-## Entropy of a geometric variable {#sec-sol-information-theory-1}
+## Entropy of a geometric variable {#sec-sol-min-1}
 
 > **Exercise 1.** **Entropy of a geometric variable.** $X$ takes value $j \ge 1$ with probability $2^{-j}$. Show that $H(X) = 2$ bits, while $H_\infty(X) = 1$. *Hint: $\sum_j j2^{-j} = 2$.* *(Entropy definition)*
 
@@ -18,7 +18,7 @@ The series converges fast. The partial sums up to $j = 5$, $10$ and $20$ are 1.7
 *A variable with infinitely many values can still have a small finite entropy, and its best single guess (here $X = 1$) succeeds half the time.*
 :::
 
-## Information from independent observations {#sec-sol-information-theory-2}
+## Information from independent observations {#sec-sol-min-2}
 
 > **Exercise 2.** **Information from independent observations.** If $Y_1$ and $Y_2$ are independent given $X$, show that $I(X; Y_1, Y_2) \le I(X; Y_1) + I(X; Y_2)$. Find an example where $Y_1, Y_2$ are *not* conditionally independent and the inequality fails. *Hint for the counterexample: $X = Y_1 \oplus Y_2$ for independent fair bits.* *(Chain rule)*
 
@@ -51,7 +51,7 @@ Two observations that are independent given $X$ can repeat each other's informat
 *Information about $X$ can sit in the combination of features and in neither feature alone. This is why ranking features one at a time by information gain can miss useful pairs.*
 :::
 
-## Min-capacity bounds capacity for the binary symmetric channel {#sec-sol-information-theory-3}
+## Min-capacity bounds capacity for the binary symmetric channel {#sec-sol-min-3}
 
 > **Exercise 3.** **Min-capacity bounds capacity for the binary symmetric channel.** Show that $1 - h(p) \le \log_2\big(2\max(p, 1 - p)\big)$ for every $p$. *Hint: $H_\infty \le H$ applied to a $\mathrm{Bern}(p)$ variable.* *Check: at $p = 0.25$, $0.1887 \le 0.5850$.* *(Min-entropy vs Shannon)*
 
@@ -67,7 +67,7 @@ Equality holds exactly when $H_\infty(B) = H(B)$, that is when $B$ is uniform on
 *For this channel the min-capacity is always at least the Shannon capacity. The two measures disagree, and the one-guess measure is the larger.*
 :::
 
-## The Z-channel {#sec-sol-information-theory-4}
+## The Z-channel {#sec-sol-min-4}
 
 > **Exercise 4.** **The Z-channel.** Input 0 always arrives as 0; input 1 arrives as 0 with probability $\frac12$. Show that $I(X; Y) = h(\pi_1/2) - \pi_1$ for $\pi_1 = \Pr[X = 1]$, maximize over $\pi_1$, and confirm that the uniform input is *not* optimal. *Check: the optimum is $\pi_1 = 0.4$ and the capacity is $\log_2(5/4) = 0.3219$ bits; the script confirms both with Blahut–Arimoto.* *(Capacity)*
 
@@ -94,7 +94,7 @@ The optimum puts less weight on input 1 because sending a 1 is expensive: half o
 *When a channel is not symmetric, the capacity-achieving input is not uniform.*
 :::
 
-## Capacities of the k-ary symmetric channel {#sec-sol-information-theory-5}
+## Capacities of the k-ary symmetric channel {#sec-sol-min-5}
 
 > **Exercise 5.** **Capacities of the $k$-ary symmetric channel.** Show that its Shannon capacity is $\log_2 k - h(p) - p\log_2(k - 1)$ and its min-capacity is $\log_2\big(k(1 - p)\big)$ when $1 - p \ge p/(k - 1)$. *Check: at $k = 8$ and $p = 0.3$, 1.2765 and 2.4854 bits.* *(Capacity, min-capacity)*
 
@@ -122,7 +122,7 @@ At $k = 8$, $p = 0.3$: $p/(k - 1) = 0.0429 \le 0.7$, so the condition holds, and
 *Under the same channel, a one-try guesser gains almost twice as many bits (2.4854) as the Shannon capacity (1.2765) suggests.*
 :::
 
-## Smith versus the average of logs {#sec-sol-information-theory-6}
+## Smith versus the average of logs {#sec-sol-min-6}
 
 > **Exercise 6.** **Smith versus the average of logs.** Prove that $H_\infty(X \mid Y) \le \sum_y p(y)H_\infty(X \mid Y = y)$, and find a joint table where the gap is large. *Check: the walk-through gives 0.5995 vs 0.6548.* *(Jensen)*
 
@@ -154,7 +154,7 @@ In the walk-through, Smith's value is 0.5995 bits and the average of logs is 0.6
 *Averaging the logs lets one very uncertain outcome hide an outcome that reveals everything. Smith's definition keeps the meaning "log of a success probability".*
 :::
 
-## Fano is tight on the symmetric channel {#sec-sol-information-theory-7}
+## Fano is tight on the symmetric channel {#sec-sol-min-7}
 
 > **Exercise 7.** **Fano is tight on the symmetric channel.** Show that the MAP error of the $k$-ary symmetric channel with uniform input is $p$ for $p \le (k - 1)/k$, and that @eq-fano holds with equality. *(Fano)*
 
@@ -189,7 +189,7 @@ At $p = \frac78$ the output is independent of the input, $H(X \mid Y) = \log_2 8
 *Fano's inequality cannot be improved in general: this channel attains it at every noise level.*
 :::
 
-## A sample-size lower bound {#sec-sol-information-theory-8}
+## A sample-size lower bound {#sec-sol-min-8}
 
 > **Exercise 8.** **A sample-size lower bound.** In Fano's method, how many samples must you have before the bound $P_e \ge 1 - (n\kappa + 1)/\log_2 k$ allows $P_e \le 0.1$? Express $n$ in terms of $\kappa$ and $k$. *Check: with $k = 1024$ and $\kappa = 0.01$ bits, $n \ge 800$.* *(Fano's method)*
 

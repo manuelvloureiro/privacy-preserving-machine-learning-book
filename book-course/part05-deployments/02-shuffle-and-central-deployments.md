@@ -35,8 +35,9 @@ $$
 \varepsilon = 12\,\varepsilon_0\sqrt{\frac{\ln(1/\delta)}{n}} .
 $$
 :::
+<!-- proof: cited -->
 
-The proof is in the 2019 paper by Erlingsson and coauthors listed in the notes (Theorem 7 and Corollary 9 there). It shuffles the records before randomizing them, which gives the same output distribution when everyone uses the same randomizer, and which also allows each randomizer to depend on the messages before it. The proof moves the one differing record to the front and swaps it into a uniformly random position, and then bounds how much each successive message reveals about that position.
+The proof is in the 2019 paper by Erlingsson and coauthors listed in the references (Theorem 7 and Corollary 9 there). It shuffles the records before randomizing them, which gives the same output distribution when everyone uses the same randomizer, and which also allows each randomizer to depend on the messages before it. The proof moves the one differing record to the front and swaps it into a uniformly random position, and then bounds how much each successive message reveals about that position.
 
 The gain is a factor of order $\sqrt n$, but it applies only to randomizers that are already very private. Few deployments want $\varepsilon_0 \le \frac12$ locally, because that is the regime where local accuracy is worst. The useful regime is $\varepsilon_0$ of order $\ln n$, which the theorem does not cover. A later analysis by Feldman, McMillan and Talwar (2021) does, and still yields a constant $\varepsilon$ there. It covers every $\varepsilon_0 \le \ln\big(n/(16\ln(2/\delta))\big)$, with $\varepsilon = O\big((1 - e^{-\varepsilon_0})\sqrt{e^{\varepsilon_0}\ln(1/\delta)/n}\big)$. Its proof splits each other person's randomizer into a mixture, in which with probability $e^{-\varepsilon_0}$ the message looks like a "clone" of what the differing person might have sent, and the count of clones hides that person. The next section carries out this idea in full for one simple randomizer.
 
@@ -289,7 +290,7 @@ During the Covid-19 pandemic, Google published community mobility reports, built
 
 ### A URL dataset with zero-concentrated privacy {#sec-shuf-urls}
 
-Facebook and the academic organisation Social Science One released a dataset on how users interact with web links shared on Facebook. It covers more than 38 million URLs, and researchers obtain access through a proposal process. The raw data are events, such as "a woman aged 35 to 44 in Germany shared this URL on this date". The release aggregates them by URL, month, country, age and gender, and publishes noisy counts of views, clicks, shares, likes and other reactions. A noisy count can be negative, a visible sign of the noise.
+Facebook and the academic organization Social Science One released a dataset on how users interact with web links shared on Facebook. It covers more than 38 million URLs, and researchers obtain access through a proposal process. The raw data are events, such as "a woman aged 35 to 44 in Germany shared this URL on this date". The release aggregates them by URL, month, country, age and gender, and publishes noisy counts of views, clicks, shares, likes and other reactions. A noisy count can be negative, a visible sign of the noise.
 
 The noise is Gaussian, and the guarantee is zero-concentrated differential privacy, a variant of differential privacy that suits Gaussian noise. It is stated with the Rényi divergence. For an order $\alpha > 1$ and two distributions $P$ and $Q$, write $p$ and $q$ for their densities, or their mass functions on a countable set. The **Rényi divergence** of order $\alpha$ is
 
@@ -372,7 +373,7 @@ Many other deployments exist. The largest is the US Census Bureau's use of diffe
 
 : The chapter's results. {#tbl-shuf-summary}
 
-## Notes {#sec-shuf-notes}
+## References {#sec-shuf-notes}
 
 - Andrea Bittau, Úlfar Erlingsson, Petros Maniatis, Ilya Mironov, Ananth Raghunathan, David Lie, Mitch Rudominer, Ushasree Kode, Julien Tinnes and Bernhard Seefeld, "Prochlo: Strong Privacy for Analytics in the Crowd", 2017. The encode, shuffle, analyse architecture and its implementation with hardware enclaves.
 - Albert Cheu, Adam Smith, Jonathan Ullman, David Zeber and Maxim Zhilyaev, "Distributed Differential Privacy via Shuffling", 2019. The shuffle model as defined here, a one-message protocol for sums of bits with error $O(\sqrt{\ln(1/\delta)}/\varepsilon)$, and a protocol with many one-bit messages for sums of numbers in $[0,1]$ with error $O(\ln(n/\delta)/\varepsilon)$. The constants in @thm-shuf-rr-privacy are this chapter's own.

@@ -1,6 +1,6 @@
 # Exercises: Disparate impact
 
-Exercises for [the chapter on disparate impact](../../book-full/part05-dp-ml/08-disparate-impact.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_disparate_impact.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_disparate_impact.py`.
+Exercises for [Disparate impact](../../book-full/part05-dp-ml/08-disparate-impact.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_disparate_impact.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_disparate_impact.py`.
 
 The solutions use the chapter's notation. Training with differential privacy (DP) runs stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, DP-SGD. $C$ is the clipping norm, $\sigma$ the noise multiplier, $q$ the Poisson sampling rate, $B = qn$ the expected batch size, $T$ the number of steps and $\eta$ the learning rate. A group $g$ has a share $s_g$ of the $n$ training records, and its **clipping weight** $w_g$ is the average of $\min(1, C/\|g_i\|)$ over its records. The running example uses $q = 0.01$, $C = 0.5$, $\eta = 0.5$, $T = 10{,}000$ and $\delta = 10^{-5}$; at $\varepsilon = 4$ the noise multiplier is $\sigma = 1.36$ and the noise on the averaged gradient has standard deviation $\tau = \sigma C/B = 0.0068$ per coordinate.
 

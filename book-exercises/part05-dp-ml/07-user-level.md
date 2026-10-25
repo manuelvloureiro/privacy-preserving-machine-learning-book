@@ -1,6 +1,6 @@
 # Exercises: User-level differential privacy
 
-Exercises for [the chapter on user-level differential privacy](../../book-full/part05-dp-ml/07-user-level.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_user_level.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_user_level.py`.
+Exercises for [User-level differential privacy](../../book-full/part05-dp-ml/07-user-level.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_user_level.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_user_level.py`.
 
 The solutions use the chapter's notation. A guarantee of differential privacy (DP) is **example-level** when neighbouring datasets differ in one record and **user-level** when they differ in all the records of one user. Stochastic gradient descent (SGD) with per-example clipping and Gaussian noise is DP-SGD; $q$ is its Poisson sampling rate, $\sigma$ its noise multiplier, $C$ its clipping norm and $T$ its number of steps. A user has $k$ records, and $H \sim \mathrm{Bin}(k, q)$ of them land in a batch. Rényi differential privacy (RDP) is the accountant's currency. The running example's model is example-level $(6.71, 10^{-5})$-DP, from $q = 0.01$, $\sigma = 1$ and $T = 10{,}000$, and its population has 1,000 users with between 1 and 348 records each.
 

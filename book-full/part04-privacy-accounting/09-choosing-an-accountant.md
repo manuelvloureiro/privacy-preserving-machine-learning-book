@@ -150,7 +150,7 @@ The plan is to show that more noise never raises any accountant's $\varepsilon$,
 3. **The bracket for the PLD comes from the other accountants.** The RDP value serves as the upper end: RDP was above the PLD upper bound at every $T$ in @tbl-choose-main, so it should need more noise, though the theory does not guarantee it (@eq-choose-order). Ninety percent of the smaller of the RDP and CLT values serves as the lower end. Because neither end is guaranteed, the solver checks that the two ends really bracket the root, with the function positive at one end and negative at the other, and stops with an error if they do not.
 4. **The CLT has a closed form.** First find the $\mu^*$ whose GDP curve @eq-gdp-delta gives $\varepsilon^*$ at $\delta$. Then solve $\mu = q\sqrt{T(e^{1/\sigma^2} - 1)}$ for $\sigma$: squaring gives $q^2T(e^{1/\sigma^2} - 1) = \mu^{*2}$, so $e^{1/\sigma^2} = 1 + \mu^{*2}/(q^2T)$, and taking logs and square roots, $\sigma = 1/\sqrt{\ln(1 + \mu^{*2}/(q^2T))}$.
 
-As a check, the RDP column reproduces $\sigma = 4.126$ for $\varepsilon = 1$ from [Exercise 4](../../book-exercises/part04-privacy-accounting/05-subsampling.md#sec-sol-subsampling-4) of [Amplification by subsampling](05-subsampling.md), and the PLD upper bound at $\sigma = 3.9884$ is 1.0000, as the solution of $\varepsilon_A(\sigma) = 1$ should give.
+As a check, the RDP column reproduces $\sigma = 4.126$ for $\varepsilon = 1$ from [Exercise 4](../../book-exercises/part04-privacy-accounting/05-subsampling.md#sec-sol-sub-4) of [Amplification by subsampling](05-subsampling.md), and the PLD upper bound at $\sigma = 3.9884$ is 1.0000, as the solution of $\varepsilon_A(\sigma) = 1$ should give.
 
 ### Interpretation
 

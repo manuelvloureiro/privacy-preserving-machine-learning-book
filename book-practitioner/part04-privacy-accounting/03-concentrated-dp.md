@@ -56,7 +56,7 @@ Several records of one user cost more: a group of $m$ records costs $m^2\rho$, s
 
 A budget never renews, because next year's releases about the same people compose with this year's, so fix the period and its total in advance ([Release and governance](../part05-dp-ml/12-release-governance.md#sec-relgov-after)). Diffprivlib's `BudgetAccountant` ([Keeping a budget](../part03-dp-foundations/02-properties.md#sec-dpprop-budget)) adds $\varepsilon$ by plain composition, so keep a long ledger in $\rho$.
 
-## Further reading
+## References
 
 - Bun & Steinke, "Concentrated Differential Privacy: Simplifications, Extensions, and Lower Bounds" (TCC 2016): the definition.
 - Canonne, Kamath & Steinke, "The Discrete Gaussian for Differential Privacy" (NeurIPS 2020): the improved conversion.

@@ -30,7 +30,7 @@ The commonest error is to report one success rate, such as the 0.7832 on members
 
 Dropping the sensitive column from the inputs does not stop population inference, because its correlates remain. **Confidence masking**, which rounds the confidences or returns only the top label, puts no bound on the gap between members and non-members, and that gap can grow. In the same experiment, returning labels only raised the advantage from 0.0569 to 0.0650, because success fell more on non-members than on members. Less overfitting shrinks the member gap, and [differential privacy](../part03-dp-foundations/01-definition.md) bounds it for every attacker and every output format.
 
-## Further reading
+## References
 
 - Fredrikson, Jha & Ristenpart, "Model Inversion Attacks that Exploit Confidence Information and Basic Countermeasures" (CCS 2015): inversion from confidences, and rounding as a countermeasure.
 - Jayaraman & Evans, "Are Attribute Inference Attacks Just Imputation?" (CCS 2022): the imputation baseline, and what it takes to beat it.

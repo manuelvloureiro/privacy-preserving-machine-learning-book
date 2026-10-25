@@ -37,6 +37,7 @@ $$
 \tilde\varepsilon = \varepsilon\sqrt{2k\ln(1/\delta')} + k\varepsilon\,\frac{e^\varepsilon - 1}{e^\varepsilon + 1}, \qquad \tilde\delta = k\delta + \delta' .
 $$ {#eq-ac-advanced}
 :::
+<!-- proof: in @sec-ac-binary -->
 
 The first term of $\tilde\varepsilon$ is the important one, and it grows as $\varepsilon\sqrt k$ instead of $k\varepsilon$. The second term is small when $\varepsilon$ is small. Its factor is $(e^\varepsilon-1)/(e^\varepsilon+1) = \tanh(\varepsilon/2)$, and $\tanh x \le x$ for $x \ge 0$, so the second term is at most $k\varepsilon^2/2$. That is also at most $k\varepsilon(e^\varepsilon - 1)$, because $e^\varepsilon - 1 \ge \varepsilon$, so the theorem implies the weaker form with $k\varepsilon(e^\varepsilon-1)$ that [the previous chapter](03-approximate-dp.md) quoted. The extra slack $\delta'$ is a free parameter. A larger $\delta'$ makes $\ln(1/\delta')$ smaller and so lowers $\tilde\varepsilon$, which means the theorem trades a bigger $\delta$ for a smaller $\varepsilon$.
 
@@ -266,7 +267,7 @@ The two terms of $\tilde\delta$ now have a meaning. The term $k\delta$ pays for 
 
 : The chapter's results. {#tbl-ac-summary}
 
-## Notes {#sec-ac-notes}
+## References {#sec-ac-notes}
 
 - Cynthia Dwork, Guy N. Rothblum and Salil Vadhan, "Boosting and Differential Privacy", 2010. The advanced composition theorem, first proved there.
 - Peter Kairouz, Sewoong Oh and Pramod Viswanath, "The Composition Theorem for Differential Privacy", 2015. The simulation of every private pair by the four-outcome pair, by hypothesis testing, and the exact optimal composition.

@@ -129,7 +129,7 @@ print(f"{log((0.05 - 1e-5) / 1e-3):.2f}")  # 3.91
 - An $\varepsilon$ is never a probability of re-identification. Under pure DP it bounds how far any output can shift an attacker's odds.
 
 
-## Further reading
+## References
 
 - Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014), ch. 2: the definition and what DP promises.
 - Kairouz, Oh & Viswanath, "The Composition Theorem for Differential Privacy" (ICML 2015): the hypothesis-testing reading behind the attack cap.

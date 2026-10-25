@@ -552,7 +552,7 @@ With $\gamma = 3 = \max r$, the envelope covers $p$, so $\tilde p = p$ exactly. 
 
 With $\gamma = 2$, the envelope $2q = \frac13$ is below $p(6) = 0.5$. The uncovered mass is $E_2(P\|Q) = 0.5 - \frac13 = \frac16$ (the script gives 0.1667). The acceptance rate rises to $\sum\min(q, p/\gamma) = (1 - E_2)/\gamma = \frac5{12}$, since $\sum\min(p, \gamma q)$ is all of $p$ except the part above $\gamma q$, which is $1 - E_\gamma$. But the output is wrong: $\min(p, 2q) = (0.1, \dots, 0.1, \frac13)$ sums to $\frac56$, and dividing by $\frac56$ gives $\tilde p = (0.12, \dots, 0.12, 0.4)$. A six now comes up 40% of the time instead of 50%: $\mathrm{TV}(P, \tilde P) = 0.5 - 0.4 = 0.1$.
 
-In general $\mathrm{TV}(P, \tilde P) \le E_\gamma(P\|Q)$ ([Exercise 4](../../book-exercises/part01-prerequisites/03-divergences.md#sec-sol-divergences-4)). The hockey-stick divergence is exactly the price of a cheap envelope.
+In general $\mathrm{TV}(P, \tilde P) \le E_\gamma(P\|Q)$ ([Exercise 4](../../book-exercises/part01-prerequisites/03-divergences.md#sec-sol-div-4)). The hockey-stick divergence is exactly the price of a cheap envelope.
 
 ### Check yourself
 

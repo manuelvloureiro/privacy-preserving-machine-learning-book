@@ -4,7 +4,7 @@ Exercises for [Amplification by subsampling](../../book-full/part04-privacy-acco
 
 The solutions use the chapter's notation. $q$ is the sampling rate, never a density. $P_0 = \mathcal N(0, \sigma^2)$ and $P_1 = \mathcal N(1, \sigma^2)$ are the outputs of one Gaussian step without and with the record, and $\varepsilon(\alpha)$ is the Rényi differential privacy (RDP) curve of the subsampled step. Stochastic gradient descent (SGD) with per-example clipping and Gaussian noise gives differential privacy (DP), and is called DP-SGD.
 
-## Subsampling twice {#sec-sol-subsampling-1}
+## Subsampling twice {#sec-sol-sub-1}
 
 > **Exercise 1.** **Subsampling twice.** Show that a Poisson sample with rate $q_2$ of a Poisson sample with rate $q_1$ is a Poisson sample with rate $q_1q_2$, and that applying @eq-sub-amplify twice gives the same $(\varepsilon', \delta')$ as applying it once with $q_1q_2$. *Check: $\varepsilon = 1$, $q_1 = q_2 = 0.1$ gives 0.1586 after one stage and 0.01704 after two.* *(Composition of the amplification map)*
 
@@ -17,7 +17,7 @@ The solutions use the chapter's notation. $q$ is the sampling rate, never a dens
 *The amplification map is consistent: in the coordinate $e^\varepsilon - 1$ it is multiplication by $q$, so stages of sampling compose by multiplying their rates. This is consistent with @eq-sub-amplify being exact, though consistency alone does not prove it; exactness comes from randomized response attaining the formula (@sec-sub-eps-delta).*
 :::
 
-## The binomial sum at α = 3 {#sec-sol-subsampling-2}
+## The binomial sum at α = 3 {#sec-sol-sub-2}
 
 > **Exercise 2.** **The binomial sum at $\alpha = 3$.** Write out the four terms of @eq-sub-binomial for $\alpha = 3$, $q = 0.01$, $\sigma = 1$, and compute $\varepsilon(3)$. *Check: $\varepsilon(3) = 2.6464 \times 10^{-4}$.* Which term carries most of the privacy cost? *(Binomial expansion, Gaussian moments)*
 
@@ -41,7 +41,7 @@ $$A_3 = (1 - q)^3 + 3q(1 - q)^2 + 3q^2(1 - q)e^{1/\sigma^2} + q^3e^{3/\sigma^2}.
 *At small orders the whole privacy cost of a subsampled Gaussian step is the $j = 2$ term, the chance that the record is drawn, squared, times the $\chi^2$ divergence $e^{1/\sigma^2} - 1$ of the unsubsampled step.*
 :::
 
-## Replace-one under Poisson sampling, exactly {#sec-sol-subsampling-3}
+## Replace-one under Poisson sampling, exactly {#sec-sol-sub-3}
 
 > **Exercise 3.** **Replace-one under Poisson sampling, exactly.** Let $M$ be $\varepsilon$-DP ($\delta = 0$) for add/remove neighbours, and run it on a Poisson sample with rate $q$. Show that for replace-one neighbours the subsampled mechanism is $\varepsilon'$-DP with $\varepsilon'$ from @eq-sub-replace-pure, and that the Laplace mechanism on a sum of values in $[-1, 1]$ attains it. Compare with the group-privacy bound $\ln(1 + q(e^{2\varepsilon} - 1))$ for small and large $\varepsilon$. *Hint: the ratio of two mixtures that share the part $R$ is largest when one component ratio is as large and the other as small as DP allows.* *Check: at $q = 0.01$, $\varepsilon = 1$, 0.02338 against 0.06193, and 0.01704 for add/remove.* *(Likelihood-ratio bounds on mixtures)*
 
@@ -68,7 +68,7 @@ For small $\varepsilon$ both are about twice the add/remove value. For large $\v
 *Group privacy charges every part of the mixture the two-step price, but only the pair $(P, P')$ is two steps apart; each of them is one step from the shared part $R$. Replacing a record under Poisson sampling costs about twice as much as adding one when $\varepsilon$ is small, and almost nothing extra when $\varepsilon$ is large.*
 :::
 
-## Inverting the accountant {#sec-sol-subsampling-4}
+## Inverting the accountant {#sec-sol-sub-4}
 
 > **Exercise 4.** **Inverting the accountant.** Find the smallest $\sigma$ for which DP-SGD with $q = 0.01$, 10,000 steps and $\delta = 10^{-5}$ has $\varepsilon \le 1$ under the RDP accountant with the improved conversion. *Hint: $\varepsilon$ decreases in $\sigma$; bisect.* *Check: $\sigma = 4.126$.* *(Monotonicity, bisection)*
 
@@ -89,7 +89,7 @@ For small $\varepsilon$ both are about twice the add/remove value. For large $\v
 *Calibration runs the accountant backwards, and it inherits the accountant's slack: a tighter accountant reports a smaller $\varepsilon$ at each $\sigma$, so it allows a smaller $\sigma$ for the same target, and the model trains with less noise.*
 :::
 
-## Fixed-size batches, honestly {#sec-sol-subsampling-5}
+## Fixed-size batches, honestly {#sec-sol-sub-5}
 
 > **Exercise 5.** **Fixed-size batches, honestly.** A team trains with a fresh random batch of exactly 1% of the data at every step, $\sigma = 1$, for 10,000 steps, and reports the Poisson value 6.71. Using @tbl-sub-matching, what is the honest RDP value, and what noise multiplier would make the honest value equal 6.71? *Check: 47.42; $\sigma = 2$.* *(Matching sampling scheme and neighbouring relation)*
 
@@ -102,7 +102,7 @@ For small $\varepsilon$ both are about twice the add/remove value. For large $\v
 *Reporting the Poisson number for fixed-size batches is equivalent to claiming you added twice as much noise as you did. The fix is either to sample with Poisson, or to double $\sigma$, or to report the honest number.*
 :::
 
-## The first direction, exactly {#sec-sol-subsampling-6}
+## The first direction, exactly {#sec-sol-sub-6}
 
 > **Exercise 6.** **The first direction, exactly.** Show that for any pair $(P_0, P_1)$ and $e^{\varepsilon'} = 1 + q(e^\varepsilon - 1)$, $E_{e^{\varepsilon'}}((1 - q)P_0 + qP_1\|P_0) = q\,E_{e^\varepsilon}(P_1\|P_0)$, and that the other direction is 0 whenever $e^{\varepsilon'} \ge 1/(1-q)$. Check it numerically for the subsampled Gaussian with $q = 0.01$, $\sigma = 1$. *Check: at $\varepsilon = 2$, both sides equal $2.09236 \times 10^{-4}$.* *(Hockey-stick divergence, the mixture lemma with equality)*
 

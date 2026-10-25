@@ -8,7 +8,7 @@ A property can leak when no single record does. Write $n$ for the number of trai
 
 ## When you meet it
 
-You meet it when you share a model trained on your organisation's data, or publish it. The first decision is whether the property is a secret at all. Learning that smokers get more lung cancer is the point of a medical study, not a breach. A property is harmful to reveal only when it describes the *data owner* rather than the world, such as one hospital's patient mix. If it is not a secret, record that in the threat model of [Pre-release privacy risk assessment](10-risk-assessment.md) and move on.
+You meet it when you share a model trained on your organization's data, or publish it. The first decision is whether the property is a secret at all. Learning that smokers get more lung cancer is the point of a medical study, not a breach. A property is harmful to reveal only when it describes the *data owner* rather than the world, such as one hospital's patient mix. If it is not a secret, record that in the threat model of [Pre-release privacy risk assessment](10-risk-assessment.md) and move on.
 
 If it is a secret, differential privacy (DP) does not protect it. DP protects one record at a time, and its guarantee for a group multiplies the privacy level $\varepsilon$ by the group's size ([Post-processing, group privacy and composition](../part03-dp-foundations/02-properties.md)). For a hospital of 1,000 patients and shares a tenth apart, the group is the $n g = 100$ patients that differ between the two datasets. So the property gets only $100\varepsilon$, which promises nothing at any useful $\varepsilon$. A site's data volume is a property too, and the group is then the records by which the two candidate sizes differ.
 
@@ -24,7 +24,7 @@ The commonest error is to assume that DP, or a passed membership audit, covers t
 
 There is no cheap defence. Removing the group column leaves its correlates, which still move the model, and noise large enough to hide $n g$ records destroys the model's use. If the property is a secret, the strongest option is not to release a model trained on that mix. If you must release, report the attack's accuracy and state in the release notes that DP protects individuals only.
 
-## Further reading
+## References
 
 - Ganju, Wang, Yang, Gunter & Borisov, "Property Inference Attacks on Fully Connected Neural Networks using Permutation Invariant Representations" (CCS 2018): the practical attack on neural networks, and why raw weights fail.
 - Zhang, Tople & Ohrimenko, "Leakage of Dataset Properties in Multi-Party Machine Learning" (USENIX Security 2021): property inference through queries alone.

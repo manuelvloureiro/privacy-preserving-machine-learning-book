@@ -284,7 +284,7 @@ A reviewer can only check a claim whose inputs are written down, so the script w
 
 : The steps of training with DP-SGD, their defaults and their checks. {#tbl-trainwf-checklist}
 
-## Further reading
+## References
 
 - Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023): the decisions of this chapter, with what to report.
 - The Opacus documentation and tutorials (opacus.ai): the privacy engine, `BatchMemoryManager`, ghost clipping and the validator.

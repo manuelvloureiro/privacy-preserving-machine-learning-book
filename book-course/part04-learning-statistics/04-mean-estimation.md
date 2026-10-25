@@ -483,7 +483,7 @@ and with $n = 4{,}000$, $\varepsilon = 1$ and $\beta = 0.05$ it is $C^\ast = 25.
 
 : The chapter's results. {#tbl-mean-summary}
 
-## Notes {#sec-mean-notes}
+## References {#sec-mean-notes}
 
 - Cynthia Dwork, Frank McSherry, Kobbi Nissim and Adam Smith, "Calibrating Noise to Sensitivity in Private Data Analysis", 2006. The Laplace mechanism and the sensitivity of the mean of bounded data.
 - Vishesh Karwa and Salil Vadhan, "Finite Sample Differentially Private Confidence Intervals", 2018. The histogram approach to the Gaussian mean with an unknown location, and lower bounds that show the rate @eq-mean-rate is optimal up to logarithmic factors.

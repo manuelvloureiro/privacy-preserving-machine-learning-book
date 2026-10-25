@@ -2,7 +2,7 @@
 
 Exercises for [Cryptography basics](../../book-full/part01-prerequisites/08-crypto-basics.md), each with a worked solution. Try each exercise before opening its solution. The numbers below, from the total variation (TV) distances of the coin distinguisher to the toy pseudorandom function (PRF) and the learning with errors (LWE) noise budget, come from `uv run python code/part01-prerequisites/solutions_crypto_basics.py` (seed 0).
 
-## Which are negligible? {#sec-sol-crypto-basics-1}
+## Which are negligible? {#sec-sol-crypto-1}
 
 > **Exercise 1.** **Which are negligible?** Decide for $\lambda^{-\log_2\log_2\lambda}$, $2^{-(\log_2\lambda)^2}$, $1/\lambda^{100}$ and $\mu(\lambda) = 2^{-\lambda}$ for even and $\lambda^{-2}$ for odd $\lambda$. *Check: yes, yes, no, no.* *(Negligible functions)*
 
@@ -30,7 +30,7 @@ It is negligible only barely. Against $\lambda^{-10}$ it needs $\lambda > 2^{102
 *A function is negligible only if it is small for all large $\lambda$, not just for most of them: one bad subsequence is enough for an adversary to win on those parameters.*
 :::
 
-## Hybrids for TV {#sec-sol-crypto-basics-2}
+## Hybrids for TV {#sec-sol-crypto-2}
 
 > **Exercise 2.** **Hybrids for TV.** Prove $\mathrm{TV}(P_0^{\otimes m}, P_1^{\otimes m}) \le m\,\mathrm{TV}(P_0, P_1)$ directly with the chain $H_i$ and Fact 3. Then show that for two coins the true value grows like $\sqrt m$ when $\mathrm{TV}(P_0, P_1)$ is small. *(Hybrid argument)*
 
@@ -70,7 +70,7 @@ Each fourfold increase in $m$ (100 to 400) doubles the TV distance, as $\sqrt m$
 *The hybrid bound is tight for one sample and loose by a factor of order $\sqrt m$ afterwards, because the per-step losses in Fact 3 do not add up in the same direction.*
 :::
 
-## The best threshold {#sec-sol-crypto-basics-3}
+## The best threshold {#sec-sol-crypto-3}
 
 > **Exercise 3.** **The best threshold.** For $m$ flips of a $(\frac12 + \xi)$-coin against a fair coin, show that the likelihood ratio is increasing in the number of heads, so the best test is a threshold, and find where the two binomial probabilities cross. *Check: about $m/2 + m\xi/2$; for $m = 10{,}000$ and $\xi = 0.01$ the best advantage is 0.683.* *(Distinguishers and TV)*
 
@@ -92,7 +92,7 @@ Majority vote is the threshold at $\frac m2$ instead of $k^*$. Its exact advanta
 *The best distinguisher is a likelihood-ratio test, and for coins that test is a threshold on the head count, placed midway between the two means.*
 :::
 
-## Birthday for 32 bits {#sec-sol-crypto-basics-4}
+## Birthday for 32 bits {#sec-sol-crypto-4}
 
 > **Exercise 4.** **Birthday for 32 bits.** How many random 32-bit identifiers can you draw before a collision has probability $\frac12$? *Check: $\sqrt{2\cdot2^{32}\ln 2} \approx 77{,}000$.* *(Birthday bound)*
 
@@ -109,7 +109,7 @@ So about 77,000 identifiers, in agreement with the check. A table of 100,000 rec
 *Random $\kappa$-bit values collide after about $2^{\kappa/2}$ draws: 32-bit identifiers are safe only for tables of a few thousand rows.*
 :::
 
-## Two-time pad {#sec-sol-crypto-basics-5}
+## Two-time pad {#sec-sol-crypto-5}
 
 > **Exercise 5.** **Two-time pad.** Two messages of English text are encrypted with the same pad. Show what an eavesdropper learns, and why guessing a common word in one message reveals the other at the same position. *(Perfect secrecy)*
 
@@ -141,14 +141,14 @@ From "d is" an attacker guesses "password is" and extends both messages a few le
 *Perfect secrecy holds for one message per key; reuse leaks $m_1 \oplus m_2$, and the redundancy of natural language turns that into both plaintexts.*
 :::
 
-## Toy GGM {#sec-sol-crypto-basics-6}
+## Toy GGM {#sec-sol-crypto-6}
 
 > **Exercise 6.** **Toy GGM.** Implement the GGM tree with SHA-256 as a length-doubling generator ($G_0(s) = \mathrm{SHA256}(s\,\|\,0)$, $G_1(s) = \mathrm{SHA256}(s\,\|\,1)$). How many generator calls does one evaluation on $n$-bit inputs cost, and what does the proof lose? *Check: $n$ calls; the loss factor is $nq$.* *(PRFs)*
 
 ::: {.callout-tip collapse="true" title="Solution"}
 **Implementation.** A seed is 32 bytes and each half $G_b$ returns 32 bytes, so $G = G_0\,\|\,G_1$ maps 32 bytes to 64: a length-doubling pseudorandom generator (PRG), in the toy model where the hash is treated as one. The tree walk is three lines:
 
-```python
+```text
 def ggm_eval(gen: CountingGenerator, key: bytes, bits: list[int]) -> bytes:
     node = key
     for b in bits:
@@ -169,7 +169,7 @@ Concretely, with $n = 128$ input bits and $Q = 2^{40}$ queries, $nq = 2^7\cdot2^
 *The GGM tree turns any length-doubling generator into a PRF at $n$ generator calls per input, but the reduction is loose by $nq$, so the generator needs a large security margin.*
 :::
 
-## Threshold sharing {#sec-sol-crypto-basics-7}
+## Threshold sharing {#sec-sol-crypto-7}
 
 > **Exercise 7.** **Threshold sharing.** In Shamir's 2-out-of-3 scheme over prime $\mathbb Z_p$, the dealer picks a uniform $c$ and gives holder $i$ the value $x + ci$. Show by counting that any single share is uniform, and that any two shares determine $x$. *(Simulation by counting)*
 
@@ -208,7 +208,7 @@ Geometrically, the shares are points on the line $y = x + ct$ at $t = 1, 2, 3$, 
 *Counting shows perfect security for one share; two shares are not uniform on $\mathbb Z_p^2$, since they lie on a line through the secret.*
 :::
 
-## Regev's budget {#sec-sol-crypto-basics-8}
+## Regev's budget {#sec-sol-crypto-8}
 
 > **Exercise 8.** **Regev's budget.** Using the normal approximation, find the $k$ at which the failure rate for $p = 4096$, $B = 32$ reaches 1%. Then change the script's error distribution to a rounded normal with $\sigma = 3.2$ and redo it. *Check for the first part: $1024^2/(2.576^2\cdot352) \approx 450$.* *(Noise growth)*
 
@@ -236,7 +236,7 @@ There is no worst-case analogue of @eq-crypto-regev-budget for a rounded normal,
 *Under random errors the noise budget is set by the variance, not the bound: $k \approx (p/4)^2/(z^2\sigma^2)$ additions for failure rate $\Pr[|Z| > z]$.*
 :::
 
-## Odd modulus {#sec-sol-crypto-basics-9}
+## Odd modulus {#sec-sol-crypto-9}
 
 > **Exercise 9.** **Odd modulus.** Modify the addition experiment to use a prime $p$ and the encoding $\lfloor p/2\rfloor$. Measure the extra drift and compare with the prediction of about $-k/4$. *(LWE arithmetic)*
 

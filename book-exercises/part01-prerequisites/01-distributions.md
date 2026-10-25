@@ -4,7 +4,7 @@ Exercises for [Probability distributions](../../book-full/part01-prerequisites/0
 
 The solutions work with the probability mass function (PMF) and the moment generating function (MGF) of each family, exactly as the chapter defines them.
 
-## Binomial variance from the PMF {#sec-sol-distributions-1}
+## Binomial variance from the PMF {#sec-sol-dist-1}
 
 > **Exercise 1.** **Binomial variance from the PMF.** Compute $\mathbb E[S(S-1)]$ for $S \sim \mathrm{Bin}(n, p)$ directly from the PMF, and recover $\operatorname{Var}S = np(1-p)$. Compare the effort with the decomposition argument. *(Binomial)*
 
@@ -44,7 +44,7 @@ The total is $6p^2q + 6p^3 = 6p^2(q + p) = 6p^2 = n(n-1)p^2$, as step 4 says. Su
 *Factorial moments are the moments that a PMF with factorials sums easily, but decomposing into independent pieces is shorter.*
 :::
 
-## Poisson thinning {#sec-sol-distributions-2}
+## Poisson thinning {#sec-sol-dist-2}
 
 > **Exercise 2.** **Poisson thinning.** $N \sim \mathrm{Poisson}(\mu)$ events occur, and each is kept independently with probability $q$. Show the number kept is $\mathrm{Poisson}(q\mu)$. *Hint: condition on $N$ and use the MGF.* *(Poisson)*
 
@@ -80,7 +80,7 @@ As a check, the script draws $N \sim \mathrm{Poisson}(4)$ a million times and ke
 *Randomly discarding events from a Poisson count leaves a Poisson count, with the mean scaled by the sampling rate $q$.*
 :::
 
-## Quality of the Poisson approximation {#sec-sol-distributions-3}
+## Quality of the Poisson approximation {#sec-sol-dist-3}
 
 > **Exercise 3.** **Quality of the Poisson approximation.** For $\mathrm{Bin}(n, 5/n)$, compute the total variation distance $\frac12\sum_k|\Pr[S = k] - \Pr[N = k]|$ to $\mathrm{Poisson}(5)$ for $n = 10, 100, 1000$ using the functions in the script. *Check: it shrinks roughly like $1/n$.* *(Poisson limit)*
 
@@ -107,7 +107,7 @@ $$\frac12\sum_k\big|\Pr[S = k] - \Pr[N = k]\big| = \frac12\left(\sum_{k=0}^n\big
 *The Poisson approximation to $\mathrm{Bin}(n, \mu/n)$ is off by an amount of order $1/n$, because the two variances differ by $\mu^2/n$.*
 :::
 
-## Median from absolute loss {#sec-sol-distributions-4}
+## Median from absolute loss {#sec-sol-dist-4}
 
 > **Exercise 4.** **Median from absolute loss.** Show that $\sum_i|y_i - m|$ is minimized at any median of $y_1, \dots, y_n$. *Hint: look at the slope in $m$.* *(Laplace)*
 
@@ -143,7 +143,7 @@ With three points the slope changes sign at $m = 2$, the middle value, where $f(
 *Minimizing absolute error balances the count of points on each side, not their distances, so a median is the minimizer.*
 :::
 
-## Laplace kurtosis {#sec-sol-distributions-5}
+## Laplace kurtosis {#sec-sol-dist-5}
 
 > **Exercise 5.** **Laplace kurtosis.** Show that $\mathbb E X^4/(\mathbb E X^2)^2$ is 6 for the Laplace and 3 for the normal. What does the larger value say about the shape? *(Laplace, normal)*
 
@@ -171,7 +171,7 @@ The ratio is the same for every location-0 member of each family, since scaling 
 *A larger fourth-moment ratio at the same variance means heavier tails and a sharper peak.*
 :::
 
-## Maximum of normals {#sec-sol-distributions-6}
+## Maximum of normals {#sec-sol-dist-6}
 
 > **Exercise 6.** **Maximum of normals.** For $Z_1, \dots, Z_k \sim \mathcal N(0, 1)$ (not necessarily independent), show $\mathbb E\max_i Z_i \le \sqrt{2\ln k}$. *Hint: $e^{\lambda\mathbb E\max} \le \mathbb E e^{\lambda\max} \le \sum_i\mathbb E e^{\lambda Z_i} = ke^{\lambda^2/2}$, then optimize $\lambda$.* *(Normal MGF)*
 
@@ -208,7 +208,7 @@ The $k = 2$ row has an exact answer. $\max(Z_1, Z_2) = \frac{Z_1 + Z_2}{2} + \fr
 *The maximum of $k$ standard normals grows only like $\sqrt{2\ln k}$, whatever their dependence, because the normal MGF is $e^{\lambda^2/2}$.*
 :::
 
-## Random vectors are nearly orthogonal {#sec-sol-distributions-7}
+## Random vectors are nearly orthogonal {#sec-sol-dist-7}
 
 > **Exercise 7.** **Random vectors are nearly orthogonal.** For independent $X, Y \sim \mathcal N(0, I_d)$, show $\langle X, Y\rangle/(\|X\|\|Y\|)$ is of order $1/\sqrt d$. Check by simulation for $d = 10, 1000$. *(Rotation invariance, norm concentration)*
 

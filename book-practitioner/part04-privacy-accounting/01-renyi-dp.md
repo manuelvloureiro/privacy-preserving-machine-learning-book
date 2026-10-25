@@ -108,7 +108,7 @@ Two more checks catch most mistakes. Make sure the event matches the sampler you
 - Check that the best order is not at either end of the grid, and extend the grid if it is.
 - In Opacus, name the accountant in both `PrivacyEngine` and `get_noise_multiplier`.
 
-## Further reading
+## References
 
 - Mironov, "Rényi Differential Privacy" (IEEE CSF 2017): the definition, composition, the curves of the basic mechanisms and group privacy.
 - Abadi et al., "Deep Learning with Differential Privacy" (CCS 2016): DP-SGD and the moments accountant.

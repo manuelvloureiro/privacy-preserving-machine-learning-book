@@ -1,6 +1,6 @@
 # Exercises: Adaptive data analysis
 
-Exercises for [the chapter on adaptive data analysis](../../book-full/part05-dp-ml/11-adaptive-data-analysis.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_adaptive_data_analysis.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_adaptive_data_analysis.py`.
+Exercises for [Adaptive data analysis](../../book-full/part05-dp-ml/11-adaptive-data-analysis.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_adaptive_data_analysis.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_adaptive_data_analysis.py`.
 
 The solutions use the chapter's notation. The data are a sample of $n$ records, the dataset $D$, drawn independently from a distribution $\mathcal D$. A statistical query $q$ maps a record to $[0, 1]$. Its empirical value $q(D)$ is its average over the sample, and its population value $q(\mathcal D)$ is its average over the distribution. A mechanism answers $k$ queries, possibly chosen adaptively, and $a_j$ is its answer to query $j$.
 

@@ -294,7 +294,7 @@ The rate is now $1/T$ instead of $1/\sqrt T$, so to halve the error you need twi
 
 The constant $G$ depends on the domain. For a regularized loss $\ell + \frac\lambda2\|\theta\|^2$ with $\ell$ $L$-Lipschitz, the gradient is $\nabla\ell + \lambda \theta$, which on the ball $\|\theta\| \le R$ has length at most $L + \lambda R$. As in @sec-opt-definitions, a strongly convex function has no bound on its gradient over all of $\mathbb R^d$, so the bound needs a bounded set, and that is the reason for the projection.
 
-The $1/(\lambda T)$ is not an artefact of the proof. [Exercise 3](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-optimization-3) gives a one-dimensional noisy quadratic on which SGD's error is exactly $\sigma^2/(2\lambda T)$, where $\sigma^2$ is the gradient variance.
+The $1/(\lambda T)$ is not an artefact of the proof. [Exercise 3](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-3) gives a one-dimensional noisy quadratic on which SGD's error is exactly $\sigma^2/(2\lambda T)$, where $\sigma^2$ is the gradient variance.
 
 ### Example: regularized logistic regression
 
@@ -349,7 +349,7 @@ A batch of $B$ divides the variance by $B$, and sampling without replacement rem
 
 Noise shrinks the best step. $\eta^*$ scales like $1/\sqrt{L^2 + \sigma^2}$, so noisier gradients call for smaller steps and longer runs. To see how much longer, set the bound $R\sqrt{L^2 + \sigma^2}/\sqrt T$ equal to a target accuracy $\tau$ and solve for $T$: reaching $\tau$ takes $R^2(L^2 + \sigma^2)/\tau^2$ steps. Noise of size $\sigma = 3L$ makes $L^2 + \sigma^2 = L^2 + 9L^2 = 10L^2$, so it multiplies the number of steps by 10.
 
-Larger batches are not free. A batch of $B$ costs $B$ gradient evaluations and divides the variance by $B$, so per gradient evaluation the variance reduction is exactly cancelled. Batches help mainly because the $B$ evaluations can run in parallel. [Exercise 6](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-optimization-6) makes this precise for the non-convex bound: beyond a critical batch size, larger batches waste computation.
+Larger batches are not free. A batch of $B$ costs $B$ gradient evaluations and divides the variance by $B$, so per gradient evaluation the variance reduction is exactly cancelled. Batches help mainly because the $B$ evaluations can run in parallel. [Exercise 6](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-6) makes this precise for the non-convex bound: beyond a critical batch size, larger batches waste computation.
 
 ### Example
 
@@ -501,7 +501,7 @@ Read @tbl-opt-erm in both directions. Down a column, $n$ grows tenfold and the m
 
 ### Why strong convexity is needed
 
-Without the regularizer, convexity alone does not stop the minimizer from jumping, because a convex function can be flat, and on a flat stretch a tiny change in the data can move the minimizer a long way. Take the absolute loss $\ell(\theta; z) = |\theta - z|$, which is convex and 1-Lipschitz. The minimizer of $\frac1n\sum_i|\theta - z_i|$ is the median: moving $\theta$ up by a little increases $|\theta - z_i|$ for each value below $\theta$ and decreases it for each value above, so the risk stops decreasing when half the values are on each side. With $n = 2k + 1$ values, $k + 1$ of them 0 and $k$ of them 1, the median is 0. Replace one 0 by a 1 and the majority switches, so the median is 1. The minimizer moves by 1 for every $n$: no $1/n$ at all. With $\frac\lambda2 \theta^2$ added, @eq-erm-sensitivity caps the move at $2/(\lambda n)$ ([Exercise 8](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-optimization-8) finds the actual move).
+Without the regularizer, convexity alone does not stop the minimizer from jumping, because a convex function can be flat, and on a flat stretch a tiny change in the data can move the minimizer a long way. Take the absolute loss $\ell(\theta; z) = |\theta - z|$, which is convex and 1-Lipschitz. The minimizer of $\frac1n\sum_i|\theta - z_i|$ is the median: moving $\theta$ up by a little increases $|\theta - z_i|$ for each value below $\theta$ and decreases it for each value above, so the risk stops decreasing when half the values are on each side. With $n = 2k + 1$ values, $k + 1$ of them 0 and $k$ of them 1, the median is 0. Replace one 0 by a 1 and the majority switches, so the median is 1. The minimizer moves by 1 for every $n$: no $1/n$ at all. With $\frac\lambda2 \theta^2$ added, @eq-erm-sensitivity caps the move at $2/(\lambda n)$ ([Exercise 8](../../book-exercises/part01-prerequisites/06-optimization.md#sec-sol-opt-8) finds the actual move).
 
 ### Why no such bound exists for non-convex objectives
 

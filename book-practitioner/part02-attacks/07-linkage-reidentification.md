@@ -118,7 +118,7 @@ List as quasi-identifiers every column an adversary could find next to a name el
 - Estimate uniqueness for the population, not just the sample.
 - Hashing an identifier is not anonymization. Key the hash, and use a new key for each release.
 
-## Further reading
+## References
 
 - Sweeney, "Simple Demographics Often Identify People Uniquely" (2000): the 87% estimate and its variants with coarser geography.
 - Narayanan & Shmatikov, "Robust De-anonymization of Large Sparse Datasets" (2008): the Netflix attack.

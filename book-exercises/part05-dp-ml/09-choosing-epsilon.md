@@ -1,6 +1,6 @@
 # Exercises: Choosing ε
 
-Exercises for [the chapter on choosing ε](../../book-full/part05-dp-ml/09-choosing-epsilon.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_choosing_epsilon.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_choosing_epsilon.py`.
+Exercises for [Choosing ε](../../book-full/part05-dp-ml/09-choosing-epsilon.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_choosing_epsilon.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_choosing_epsilon.py`.
 
 The solutions use the chapter's notation. A mechanism satisfies differential privacy (DP) with parameters $(\varepsilon, \delta)$, or is $(\varepsilon, \delta)$-DP, when one record changes the probability of any output by at most a factor $e^\varepsilon$ plus $\delta$. A membership test has a false positive rate (FPR) and a true positive rate (TPR). The running example is stochastic gradient descent (SGD) with clipping and Gaussian noise, DP-SGD, with a sampling rate $q$ of 0.01 and $T = 10{,}000$ steps on 10,000 records, at $\delta = 10^{-5}$; its noise multipliers come from the Rényi differential privacy (RDP) accountant.
 

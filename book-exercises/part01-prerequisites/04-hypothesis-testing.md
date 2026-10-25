@@ -2,7 +2,7 @@
 
 Exercises for [Hypothesis testing](../../book-full/part01-prerequisites/04-hypothesis-testing.md), each with a worked solution. Try each exercise before opening its solution. The notation is the chapter's: $T = T(P, Q)$ is the trade-off function, $\Phi$ the standard normal cumulative distribution function (CDF), and the summaries are the total variation (TV), the true positive rate (TPR), the false positive rate (FPR), the receiver operating characteristic (ROC) curve and the area under the curve (AUC). Every number that is not a one-line hand calculation comes from [code/solutions_hypothesis_testing.py](../../code/part01-prerequisites/solutions_hypothesis_testing.py), which you run with `uv run python code/part01-prerequisites/solutions_hypothesis_testing.py`.
 
-## Symmetry of the Gaussian curve {#sec-sol-hypothesis-testing-1}
+## Symmetry of the Gaussian curve {#sec-sol-ht-1}
 
 > **Exercise 1.** Show that $T(T(a)) = a$ for @eq-ht-gaussian-tradeoff. *Hint: use $1 - \Phi(x) = \Phi(-x)$.* *Check: at $\mu = 1$, $T(0.05) = 0.7405$ and $T(0.7405) = 0.0500$.* *(Gaussian trade-off)*
 
@@ -20,7 +20,7 @@ Fix $a \in (0, 1)$. At the ends, $T(0) = 1$ and $T(1) = 0$, so $T(T(0)) = 0$ and
 *Geometrically, the point $(a, b)$ is on the curve exactly when $(b, a)$ is: the Gaussian curve is symmetric about the diagonal $a = b$. With Exercise 2, this says that swapping which normal is the null hypothesis does not make the problem easier or harder.*
 :::
 
-## Swapping the hypotheses {#sec-sol-hypothesis-testing-2}
+## Swapping the hypotheses {#sec-sol-ht-2}
 
 > **Exercise 2.** Show that if $T(P, Q)$ is strictly decreasing on $[0, 1]$, then $T(Q, P)$ is its inverse function. *Hint: a test $\phi$ for $P$ against $Q$ with errors $(a, b)$ gives the test $1 - \phi$ for $Q$ against $P$ with errors $(b, a)$.* *(Trade-off functions)*
 
@@ -47,7 +47,7 @@ Write $f = T(P, Q)$ and $g = T(Q, P)$.
 *Swapping null and alternative reflects the trade-off curve across the diagonal. Exercise 1 is the special case where the reflection gives back the same curve.*
 :::
 
-## Laplace total variation {#sec-sol-hypothesis-testing-3}
+## Laplace total variation {#sec-sol-ht-3}
 
 > **Exercise 3.** Compute $\frac12\int|q - p|$ directly for $\mathrm{Lap}(0, s)$ and $\mathrm{Lap}(m_1, s)$, with scale $s$ and shift $m_1$ as in the chapter, and confirm $1 - e^{-m_1/(2s)}$. *Check: 0.3935 at $m_1 = s$.* *(Total variation)*
 
@@ -73,7 +73,7 @@ $$\int|q - p| = (1 - c^2) + (1 - c)^2 = 2 - 2c, \qquad \tfrac12\int|q - p| = 1 -
 *Most of the $L^1$ distance sits in the two tails, where the likelihood ratio is flat at $e^{\pm\kappa}$. The result matches the chapter's route through the trade-off curve, which maximized $1 - a - T(a)$ on the middle piece of @eq-ht-laplace-tradeoff.*
 :::
 
-## Sample size {#sec-sol-hypothesis-testing-4}
+## Sample size {#sec-sol-ht-4}
 
 > **Exercise 4.** How many readings does the drift monitor need for power 0.9 at $a = 0.01$ when $h/\sigma = 0.25$? Rederive the formula, then halve $h$: by what factor does $n$ grow? *Check: $n = 209$; halving $h$ multiplies $n$ by 4.* *(Gaussian trade-off, many observations)*
 
@@ -90,7 +90,7 @@ $$n \ge \left(\frac{\Phi^{-1}(1 - a) + \Phi^{-1}(1 - b')}{h/\sigma}\right)^2.$$
 *Distinguishability grows like $\sqrt n$, so the number of readings grows like $1/h^2$. Detecting half the drift costs four times the data.*
 :::
 
-## A detector that AUC undersells {#sec-sol-hypothesis-testing-5}
+## A detector that AUC undersells {#sec-sol-ht-5}
 
 > **Exercise 5.** Negatives score $\mathcal N(0, 1)$. Positives score $\mathcal N(0, 1)$ too, except a fraction $w = 0.05$ that scores $\mathcal N(6, 1)$. Show that $\mathrm{AUC} = (1 - w)\frac12 + w\,\Phi(6/\sqrt2)$ and find the TPR at FPR $10^{-3}$. Compare with a Gaussian-shift detector of the same AUC. *Check: AUC 0.5250 and TPR 0.0509; the equal-AUC shift is $\mu = 0.0887$, with TPR 0.0013.* *(AUC, ROC at low FPR)*
 
@@ -118,7 +118,7 @@ The threshold test is in fact the best possible test here. The likelihood ratio 
 *AUC averages over all FPRs. A detector that is excellent on a small subpopulation and blind elsewhere gets an AUC near 0.5 and can still dominate where false alarms must be rare.*
 :::
 
-## A curve that starts below 1 {#sec-sol-hypothesis-testing-6}
+## A curve that starts below 1 {#sec-sol-ht-6}
 
 > **Exercise 6.** For $P = U[0, 1]$ and $Q = U[s, 1 + s]$ with $0 < s < 1$, show that $T(a) = \max(0, 1 - s - a)$. Which outcomes have $\Lambda = \infty$, $\Lambda = 1$ and $\Lambda = 0$? *Check: at $s = 0.2$, $T(0) = 0.8$ and $\mathrm{TV} = 0.2$.* *(Neyman–Pearson with $p = 0$, continuity at 0)*
 
@@ -146,7 +146,7 @@ $p = 1$ on $[0, 1]$ and $q = 1$ on $[s, 1 + s]$, so the line splits into the thr
 *Mass that only $Q$ can produce is free power: a test catches it with no false alarms, so the curve starts at $1 - \Pr_Q[p = 0]$ instead of 1.*
 :::
 
-## Bayes error and total variation {#sec-sol-hypothesis-testing-7}
+## Bayes error and total variation {#sec-sol-ht-7}
 
 > **Exercise 7.** Prove that with equal priors the smallest achievable error probability is $\frac12(1 - \mathrm{TV}(P, Q))$. *Check: 0.3085 for the Gaussian pair at $\mu = 1$.* *(Bayesian view, best advantage)*
 
@@ -162,7 +162,7 @@ $p = 1$ on $[0, 1]$ and $q = 1$ on $[s, 1 + s]$, so the line splits into the thr
 *With equal priors, the best accuracy is $\frac12 + \frac12\mathrm{TV}$, which is @eq-tv-test. TV is exactly what a single balanced decision can extract.*
 :::
 
-## Errors decay at the KL rate {#sec-sol-hypothesis-testing-8}
+## Errors decay at the KL rate {#sec-sol-ht-8}
 
 > **Exercise 8.** For $n$ draws from $\mathcal N(0, 1)$ against $\mathcal N(1, 1)$ and a fixed $a = 0.05$, the optimal test has $b_n = \Phi(\Phi^{-1}(0.95) - \sqrt n)$. Compute $-\ln(b_n)/n$ and compare its limit with $D_{\mathrm{KL}}(P\|Q) = \mu^2/2$ from [Divergences](../../book-full/part01-prerequisites/03-divergences.md). This is the Chernoff–Stein lemma. *Check: 0.2740, 0.3796 and 0.4537 at $n = 10$, 100 and 1,000, approaching 0.5 slowly.* *(Many observations, Gaussian tails)*
 
@@ -195,7 +195,7 @@ The Mills lower bound is within $10^{-4}$ of the exact rate at $n = 100$ and agr
 *At a fixed level, the type II error of the best test decays like $e^{-n\,D_{\mathrm{KL}}(P\|Q)}$: KL divergence is the exponent of distinguishability. The convergence is slow, so read it as the rate for large $n$, not as a formula for $b_n$ at moderate $n$.*
 :::
 
-## Certifying a low rate {#sec-sol-hypothesis-testing-9}
+## Certifying a low rate {#sec-sol-ht-9}
 
 > **Exercise 9.** How many negatives with zero false positives do you need to claim FPR $< 10^{-3}$ at 95% confidence? *Check: 2,995.* *(Clopper–Pearson, rule of three)*
 

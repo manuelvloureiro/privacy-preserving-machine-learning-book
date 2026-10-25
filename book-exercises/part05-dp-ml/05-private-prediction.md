@@ -1,6 +1,6 @@
-# Exercises: Private prediction
+# Exercises: Private prediction: PATE and in-context learning
 
-Exercises for [the chapter on private prediction](../../book-full/part05-dp-ml/05-private-prediction.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_private_prediction.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_private_prediction.py`.
+Exercises for [the chapter on private prediction with private aggregation of teacher ensembles (PATE) and in-context learning](../../book-full/part05-dp-ml/05-private-prediction.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_private_prediction.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_private_prediction.py`.
 
 The solutions use the chapter's notation. To give differential privacy (DP) to predictions, $k$ teachers are trained on disjoint shards of the private data and each query is answered by a noisy vote: LNMax adds $\mathrm{Lap}(b)$ noise to every vote count, GNMax adds $\mathcal N(0, \sigma^2)$, and only the label with the largest noisy count is released. The gap $g$ is the difference between the top two counts, $Q$ the number of answered queries, and $\delta = 10^{-5}$. Costs are measured in Rényi differential privacy (RDP) of order $\alpha$; one GNMax answer is $(\alpha, \alpha/\sigma^2)$-RDP. Private aggregation of teacher ensembles (PATE) trains a student on public inputs labelled this way.
 

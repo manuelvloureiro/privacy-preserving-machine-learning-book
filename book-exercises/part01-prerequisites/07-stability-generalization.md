@@ -2,7 +2,7 @@
 
 Exercises for [Algorithmic stability and generalization](../../book-full/part01-prerequisites/07-stability-generalization.md), each with a worked solution. Try each exercise before opening its solution. The numbers come from [code/solutions_stability.py](../../code/part01-prerequisites/solutions_stability.py); run it from the repository root with `uv run python code/part01-prerequisites/solutions_stability.py`. Exercises 5 and 7 are about stochastic gradient descent (SGD), Exercise 5 compares it with regularized empirical risk minimization (ERM), and Exercise 6 is about nearest neighbour (NN) rules.
 
-## Removal against replacement {#sec-sol-stability-generalization-1}
+## Removal against replacement {#sec-sol-stability-1}
 
 > **Exercise 1.** **Removal against replacement.** Define removal stability by $|\ell(\mathcal T(D); z) - \ell(\mathcal T(D^{\setminus i}); z)| \le \gamma_{\text{remove}}$, where $D^{\setminus i}$ drops $z_i$. Show that $\mathcal T$ is then $2\gamma_{\text{remove}}$-uniformly stable in the replace-one sense. *Hint: go from $D$ to $D^{(i)}$ through $D^{\setminus i}$.* *(Triangle inequality)*
 
@@ -31,7 +31,7 @@ For a randomized $\mathcal T$, the same steps go through with $\mathbb E_{\mathc
 *Removal and replacement stability are interchangeable up to a factor of 2, which is why the Bousquet–Elisseeff bound can be stated in either form.*
 :::
 
-## The renaming table for every $p$ {#sec-sol-stability-generalization-2}
+## The renaming table for every $p$ {#sec-sol-stability-2}
 
 > **Exercise 2.** **The renaming table for every $p$.** Redo @tbl-stability-renaming with general $p$ and show that the expected gap is $p(1 - p)$. *Check: $0.21$ at $p = 0.3$, and the largest gap is $0.25$, at $p = \frac12$.* *(Renaming trick)*
 
@@ -70,7 +70,7 @@ The stability is $\gamma = 0.75$ for every $p$, since it is a worst case over ou
 *The gap is largest when $z_1$ is least predictable: a coin with $p = \frac12$ makes the training point most different, on average, from a fresh one.*
 :::
 
-## The sample mean {#sec-sol-stability-generalization-3}
+## The sample mean {#sec-sol-stability-3}
 
 > **Exercise 3.** **The sample mean.** Let $z_i \in [0, 1]$ with variance $\sigma^2$, $\mathcal T(D) = \frac1n\sum_iz_i$ and $\ell(\theta; z) = (\theta - z)^2$. Show that $\gamma = 2/n$, and that the expected gap is exactly $2\sigma^2/n$. *Check: for fair coins and $n = 10$, the gap is $0.05$ and the bound $0.2$.* *(Uniform stability, bias of the training loss)*
 
@@ -101,7 +101,7 @@ $$\mathbb E\big[\mathcal L_{\mathcal D}(\bar z)\big] = \frac{n + 1}{n}\sigma^2.$
 *The sample mean overfits by $2\sigma^2/n$, the familiar bias of the uncorrected sample variance counted twice: once because the training points pull $\bar z$ towards themselves, once because a fresh point does not. Stability gets the $1/n$ rate right and is loose by the factor $(2/n)/(2\sigma^2/n) = 1/\sigma^2$, which is at least 4 because $\sigma^2 \le \frac14$ on $[0, 1]$.*
 :::
 
-## Leave-one-out is unbiased {#sec-sol-stability-generalization-4}
+## Leave-one-out is unbiased {#sec-sol-stability-4}
 
 > **Exercise 4.** **Leave-one-out is unbiased.** Show that $\mathbb E[\ell(\mathcal T(D^{\setminus i}); z_i)] = \mathbb E[\mathcal L_{\mathcal D}(\mathcal T(\tilde D))]$, where $\tilde D$ is a training set of size $n - 1$. Why does this make leave-one-out cross-validation an almost unbiased estimate of the test loss? *(Independence, step 1 of the renaming trick)*
 
@@ -130,7 +130,7 @@ The leave-one-out estimate overshoots the test loss at size 10 by $\sigma^2/(n(n
 *Leaving the evaluated point out removes the dependence that biases the training loss; what remains is the small cost of training on one fewer record. (Unbiasedness says nothing about variance: the $n$ terms share most of their training data, so they are correlated.)*
 :::
 
-## SGD with a strongly convex loss {#sec-sol-stability-generalization-5}
+## SGD with a strongly convex loss {#sec-sol-stability-5}
 
 > **Exercise 5.** **SGD with a strongly convex loss.** If each $\ell(\cdot; z)$ is $\lambda$-strongly convex and $\beta_s$-smooth (on a bounded domain, since a strongly convex function cannot be Lipschitz everywhere), the gradient step with $\eta \le 2/(\beta_s + \lambda)$ is $(1 - \eta\beta_s\lambda/(\beta_s + \lambda))$-contractive (Hardt, Recht & Singer 2016, Lemma 3.7). With constant $\eta$, show that $\mathbb E r_T \le \frac{2L}{n}\cdot\frac{\beta_s + \lambda}{\beta_s\lambda}$ for every $T$. *Check: for $\lambda \ll \beta_s$ this is about $2L/(\lambda n)$, the ERM bound: with strong convexity, training longer no longer costs stability.* *(SGD coupling, geometric series)*
 
@@ -166,7 +166,7 @@ The measured divergence levels off after a few epochs at about 0.055 (it fluctua
 *With strong convexity, the contraction forgets old differences at a geometric rate, so each new use of the differing record adds a shrinking amount and the divergence saturates.*
 :::
 
-## $k$-nearest neighbours {#sec-sol-stability-generalization-6}
+## $k$-nearest neighbours {#sec-sol-stability-6}
 
 > **Exercise 6.** **$k$-nearest neighbours.** Change the script to use $k = 15$ neighbours with majority vote, and compare its gap with 1-NN for $n = 200$ and $n = 1000$. Then show that its worst-case uniform stability is still $\gamma = 1$. What does this say about uniform stability as a measure? *(Unstable algorithms, worst case against average case)*
 
@@ -196,7 +196,7 @@ The script builds this configuration (15 points near $e_1$, test point $e_1$) an
 *Uniform stability is sufficient for a small gap but far from necessary: it misses algorithms that are stable on typical data.*
 :::
 
-## The decaying learning rate {#sec-sol-stability-generalization-7}
+## The decaying learning rate {#sec-sol-stability-7}
 
 > **Exercise 7.** **The decaying learning rate.** For $\eta_t = c/t$, show that the bound @eq-stability-hrs is at most $\frac{2L^2c(1 + \ln T)}{n}$. With $T = n$ and constant $\eta = 1/\sqrt n$ instead, show $\gamma \le 2L^2/\sqrt n$, and explain why @eq-stability-be is then vacuous while the bounds of Feldman & Vondrák and of Bousquet, Klochkov & Zhivotovskiy are not. *(SGD stability, high-probability rates)*
 
@@ -231,7 +231,7 @@ Both depend on $\gamma$ linearly or through a square root, not through $n\gamma$
 *One pass of SGD with step $1/\sqrt n$ has $\gamma \sim 1/\sqrt n$, exactly where McDiarmid's worst-case charging breaks down and the sharper bounds are needed.*
 :::
 
-## Self-influence and label noise {#sec-sol-stability-generalization-8}
+## Self-influence and label noise {#sec-sol-stability-8}
 
 > **Exercise 8.** **Self-influence and label noise.** Change the label probability to $\sigma(20x_1)$, which makes labels less noisy, and rerun the self-influence experiment at $\lambda = 0.01$. Predict before running: does the gap go up or down, and what happens to the share of records against the trend? *(Memorization)*
 
@@ -255,7 +255,7 @@ Both predictions hold (@tbl-sol-stability-generalization-noise). The gap falls b
 *The gap is driven by the records whose label could have gone either way; less label noise means fewer of them to memorize.*
 :::
 
-## The best of $k$ models on a validation set {#sec-sol-stability-generalization-9}
+## The best of $k$ models on a validation set {#sec-sol-stability-9}
 
 > **Exercise 9.** **The best of $k$ models on a validation set.** You trained $k = 100$ models on other data, and each is right on a new record with probability $p = 0.8$, independently of the others. You score them on a validation set of $m = 1{,}000$ records and report the best score. Using the derivation of @eq-stability-fixed-questions, show that the winner's validation accuracy overstates its true accuracy by at most $\sqrt{\ln k/(2m)}$ on average. Compare this bound with a simulation and with a normal approximation, and show that scoring the winner again on a fresh test set of $m$ records removes the bias. *Check: the bound is 0.0480; the simulated bias is 0.0313 and the normal approximation 0.0317; on the fresh test set the bias is $-0.0001 \pm 0.0002$.* *(Maximal inequality)*
 

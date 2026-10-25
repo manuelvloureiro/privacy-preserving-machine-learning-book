@@ -126,7 +126,7 @@ Some of the cost cannot be avoided by any algorithm. Learning a small group's ow
 - Report accuracy and privacy cost per group, with intervals, next to the non-private model's.
 - Never report the gap alone, because levelling down closes it too.
 
-## Further reading
+## References
 
 - Bagdasaryan, Poursaeed & Shmatikov, "Differential Privacy Has Disparate Impact on Model Accuracy" (NeurIPS 2019): the observation.
 - Esipova, Ghomi, Luo & Cresswell, "Disparate Impact in Differential Privacy from Gradient Misalignment" (ICLR 2023): global scaling.

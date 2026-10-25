@@ -103,7 +103,7 @@ The strongest natural guarantee is that the privacy loss is small at every outpu
 The definition is usually stated for events rather than single outputs. An **event** $S$ is a set of possible outputs, such as "the released count is above 100".
 
 ::: {#def-pure name="Pure differential privacy"}
-Let $\varepsilon \ge 0$. A mechanism is **$\varepsilon$-differentially private**, or $\varepsilon$-DP, if for every pair of neighbouring datasets $D \simeq D'$, in either order, and every event $S$,
+Let $\varepsilon \ge 0$. A mechanism satisfies **$\varepsilon$-differential privacy (DP)**, and is called $\varepsilon$-DP, if for every pair of neighbouring datasets $D \simeq D'$, in either order, and every event $S$,
 $$\Pr_P[S] \le e^{\varepsilon}\, \Pr_Q[S].$$
 :::
 
@@ -289,6 +289,7 @@ Second, each step fluctuates around its average, and fluctuations partly cancel.
 Suppose that for every history, each of $k$ releases is $\varepsilon$-DP. Then for every $\delta'$ between $0$ and $1$, the sequence of releases is $(\varepsilon_{\mathrm{total}}, \delta')$-DP with
 $$\varepsilon_{\mathrm{total}} = \varepsilon\sqrt{2k\ln(1/\delta')} + \frac{k\varepsilon(e^\varepsilon - 1)}{2}.$$
 :::
+<!-- proof: in the four steps below -->
 
 The first term is the fluctuation, and the factor $\sqrt{2\ln(1/\delta')}$ is the slowly growing multiplier: halving $\delta'$ increases it only a little. The second term is the sum of the averages. It is close to $k\varepsilon^2/2$ when $\varepsilon$ is small, because $e^\varepsilon - 1$ is then close to $\varepsilon$. Dwork, Rothblum and Vadhan (2010) proved the theorem with a second term twice as large, and Dwork and Rothblum (2016) gave the form above.
 
@@ -406,7 +407,7 @@ $$\mathbb E\bigl[e^{\lambda(X - \mathbb E[X])}\bigr] \le e^{\lambda^2\tau^2/2} \
 A normal variable with standard deviation $\tau$ meets this with equality. And Hoeffding's lemma @eq-hoeffding says that a variable confined to an interval of width $2\varepsilon$ is $\varepsilon$-subgaussian. Requiring the bound for negative $\lambda$ as well as positive controls fluctuations below the mean as well as above it.
 
 ::: {#def-cdp name="Concentrated differential privacy"}
-A mechanism is **$(\mu, \tau)$-CDP** if for every pair of neighbouring datasets, in either order, the privacy loss $L$ under $P$ has mean at most $\mu$ and is $\tau$-subgaussian.
+A mechanism satisfies **$(\mu, \tau)$-concentrated differential privacy (CDP)**, and is called $(\mu, \tau)$-CDP, if for every pair of neighbouring datasets, in either order, the privacy loss $L$ under $P$ has mean at most $\mu$ and is $\tau$-subgaussian.
 :::
 
 The parameter $\mu$ bounds the average loss, and $\tau$ bounds how far the loss spreads around that average. In the literature this definition is also called mean-concentrated differential privacy.

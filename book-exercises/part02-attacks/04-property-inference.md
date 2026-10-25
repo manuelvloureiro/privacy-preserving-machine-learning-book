@@ -4,7 +4,7 @@ Exercises for [Property inference](../../book-full/part02-attacks/04-property-in
 
 The solutions use the chapter's notation. $\mathcal D_t$ mixes a majority group and a subgroup of share $t$, a dataset is $n$ independent records from $\mathcal D_t$, and the attacker must tell $t_0$ from $t_1$, with $\bar t = \frac{t_0 + t_1}2$. Its advantage is the true positive rate minus the false positive rate, its accuracy with a fair bit is $\frac12(1 + \text{advantage})$, and the best advantage is the total variation (TV) distance between the two laws of what it sees. $\Phi$ is the standard normal distribution function.
 
-## Shifting a unimodal pmf {#sec-sol-property-inference-1}
+## Shifting a unimodal pmf {#sec-sol-prop-1}
 
 > **Exercise 1.** **Shifting a unimodal pmf.** Prove that $\mathrm{TV}(\mathrm{Law}(X), \mathrm{Law}(X + 1)) = \max_k\Pr[X = k]$ for any integer-valued $X$ whose pmf rises to a mode and then falls, and deduce @eq-prop-membership. *Check: for $X \sim \mathrm{Bin}(99, \frac12)$ both sides are 0.0796, and the membership advantage at $n = 100$ is half of that, 0.0398.* Find a pmf for which the identity fails. *(Total variation, membership)*
 
@@ -25,7 +25,7 @@ with $p_k = 0$ outside the support.
 *A shift by one record is invisible exactly to the extent that the distribution is spread out; for a unimodal count, the height of the mode measures how spread out it is.*
 :::
 
-## How much data does the property attacker need? {#sec-sol-property-inference-2}
+## How much data does the property attacker need? {#sec-sol-prop-2}
 
 > **Exercise 2.** **How much data does the property attacker need?** With $t_0 = 0.45$ and $t_1 = 0.55$, use @eq-prop-property to find the $n$ at which the best attacker on the released count reaches accuracy 0.95. Then find the smallest such $n$ exactly. *Check: the approximation gives $n = 270.6$; the exact answer is 269.* *(Normal approximation)*
 
@@ -41,7 +41,7 @@ The approximation is off by two records. It uses the variance at the midpoint, $
 *A few hundred records suffice to tell a 45% share from a 55% share with 95% accuracy. A dataset of that size is small by any standard.*
 :::
 
-## Leakage in records {#sec-sol-property-inference-3}
+## Leakage in records {#sec-sol-prop-3}
 
 > **Exercise 3.** **Leakage in records.** Suri & Evans measure a model's leakage by the number $k$ of records, with their groups visible, that an attacker would need to see to match the model's accuracy. Show that for a small gap, $k \approx n(\kappa\sqrt{\bar t(1 - \bar t)})^2$, which is $n(\kappa/2)^2$ at $\bar t = \frac12$. *Check: for the logistic regression at $n = 1{,}000$ and gap 0.1, the predicted accuracy is 0.8467 and the exact $k$ is 105, against $n(\kappa/2)^2 = 104.6$.* *(Scaling law)*
 
@@ -56,7 +56,7 @@ $$k = n\,\kappa^2\,\bar t(1 - \bar t).$$
 *The logistic regression, which never sees the group, gives the property away as well as one record in ten would with its group label attached.*
 :::
 
-## Symmetries of a tanh network {#sec-sol-property-inference-4}
+## Symmetries of a tanh network {#sec-sol-prop-4}
 
 > **Exercise 4.** **Symmetries of a tanh network.** Show that $h!\,2^h$ parameter vectors represent the same generic network, and evaluate it for $h = 8$ and $h = 100$. Verify that $\sum_ju_ju_j^\top$ is invariant and that $\sum_ju_j$ is not invariant under sign flips. *Check: $h = 8$ gives 10,321,920.* *(Symmetry)*
 
@@ -72,7 +72,7 @@ $$k = n\,\kappa^2\,\bar t(1 - \bar t).$$
 *For a network of realistic width, the number of equivalent parameter vectors is astronomically larger than any number of shadow models, so a meta-classifier cannot learn the symmetry from examples; it has to be built in.*
 :::
 
-## Several released models {#sec-sol-property-inference-5}
+## Several released models {#sec-sol-prop-5}
 
 > **Exercise 5.** **Several released models.** The victim releases $k$ models, each trained on its own dataset of $n$ records from the same $\mathcal D_t$. Show that the best attack sums the $k$ linear scores, and that its accuracy is $\Phi(\sqrt k\,\gamma/2)$, where $\gamma$ is the Mahalanobis distance of @eq-prop-delta for one model. Compare with one model trained on $kn$ records. *Check: for the logistic regression at $n = 200$ and gap 0.2, $\gamma = 1.827$; with $k = 4$ the predicted accuracy is 0.966.* *(Fact 3, additivity)*
 
@@ -87,7 +87,7 @@ $$k = n\,\kappa^2\,\bar t(1 - \bar t).$$
 *Every release adds evidence. A victim who retrains and republishes a model on fresh data from the same population leaks the property as if it had trained one model on all of the data.*
 :::
 
-## Noise sized for one record {#sec-sol-property-inference-6}
+## Noise sized for one record {#sec-sol-prop-6}
 
 > **Exercise 6.** **Noise sized for one record.** The hospital adds $\mathcal N(0, \sigma^2)$ noise to the released count, with $n = 10{,}000$, $t_0 = 0.45$, $t_1 = 0.55$. Using normal approximations, find the property and membership advantages at $\sigma = 10$, and the $\sigma$ at which the property advantage falls to 0.1. *Check: at $\sigma = 10$ the property advantage is still 1.0000; hiding the property needs $\sigma \approx 3{,}979$.* *(Normal approximation, group size)*
 

@@ -270,7 +270,7 @@ records. This matches the offline algorithm, with the length $k$ of the stream i
 
 : The chapter's results. {#tbl-svt-summary}
 
-## Notes {#sec-svt-notes}
+## References {#sec-svt-notes}
 
 - Cynthia Dwork, Moni Naor, Omer Reingold, Guy N. Rothblum and Salil Vadhan, "On the Complexity of Differentially Private Data Release: Efficient Algorithms and Hardness Results", 2009. The first use of the sparse vector idea.
 - Aaron Roth and Tim Roughgarden, "Interactive Privacy via the Median Mechanism", 2010, and Moritz Hardt and Guy N. Rothblum, "A Multiplicative Weights Mechanism for Privacy-Preserving Data Analysis", 2010. Online query answering with sparse vector, including online private multiplicative weights.

@@ -254,7 +254,7 @@ The theorems of this chapter do not apply to these queries as stated, because a 
 
 : The chapter's results. {#tbl-rec-summary}
 
-## Notes {#sec-rec-notes}
+## References {#sec-rec-notes}
 
 - Simson Garfinkel, John M. Abowd and Christian Martindale, "Understanding Database Reconstruction Attacks on Public Data", 2019. Reconstruction of census blocks from published tables with a satisfiability solver.
 - John M. Abowd, "Staring Down the Database Reconstruction Theorem", 2019. The Census Bureau's reconstruction and re-identification experiment on the 2010 census.

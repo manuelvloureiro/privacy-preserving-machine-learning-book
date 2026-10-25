@@ -168,7 +168,7 @@ The five cases point to three requirements for a definition. It must hold whatev
 
 : The chapter's results. {#tbl-att-summary}
 
-## Notes {#sec-att-notes}
+## References {#sec-att-notes}
 
 - Vijay Pandurangan, "On Taxis and Rainbows", 2014. The inversion of the hashed medallion and licence numbers.
 - Arvind Narayanan and Vitaly Shmatikov, "Robust De-anonymization of Large Sparse Datasets", 2008. The linkage of the Netflix Prize data with public reviews, and the statistics of how few ratings identify a record.

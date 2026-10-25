@@ -4,7 +4,7 @@ Exercises for [Divergences](../../book-full/part01-prerequisites/03-divergences.
 
 The solutions use the chapter's notation and its three acronyms: the Kullback–Leibler (KL) divergence, the total variation (TV) distance and the data processing inequality (DPI). $r = p/q$ is the likelihood ratio and $L = \ln r$ the log-likelihood ratio, logarithms are natural, and on the die $P$ is the loaded die and $Q$ the fair one (@tbl-div-die).
 
-## Chain rule for KL {#sec-sol-divergences-1}
+## Chain rule for KL {#sec-sol-div-1}
 
 > **Exercise 1.** **Chain rule for KL.** For joint distributions $P_{XY}$ and $Q_{XY}$, show $D_{\mathrm{KL}}(P_{XY}\|Q_{XY}) = D_{\mathrm{KL}}(P_X\|Q_X) + \mathbb E_{x\sim P_X}\big[D_{\mathrm{KL}}(P_{Y\mid x}\|Q_{Y\mid x})\big]$, and recover additivity as the special case of independent coordinates. *Hint: factor $p(x, y) = p(x)p(y\mid x)$ inside the logarithm.* *(KL, additivity)*
 
@@ -32,7 +32,7 @@ The expected conditional KL is $0.7 \times 0.3023 = 0.2116$, and $0.0823 + 0.211
 *The chain rule says exactly how much the data-processing inequality loses: the KL dropped by keeping only $X$ is the expected KL of what you threw away.*
 :::
 
-## Gaussians with different variances {#sec-sol-divergences-2}
+## Gaussians with different variances {#sec-sol-div-2}
 
 > **Exercise 2.** **Gaussians with different variances.** Show $D_{\mathrm{KL}}(\mathcal N(m_0, \sigma_0^2)\|\mathcal N(m_1, \sigma_1^2)) = \ln\frac{\sigma_1}{\sigma_0} + \frac{\sigma_0^2 + (m_0 - m_1)^2}{2\sigma_1^2} - \frac12$. *Check: $D_{\mathrm{KL}}(\mathcal N(0, 1)\|\mathcal N(0, 4)) = \ln2 + \frac18 - \frac12 = 0.3181$.* For the Rényi divergence, repeat route 1 of the Gaussian section and find the condition on $\alpha$ under which the integral is finite. *Hint: the coefficient of $x^2$ must stay negative: $\alpha/\sigma_0^2 + (1-\alpha)/\sigma_1^2 > 0$.* *(Completing the square)*
 
@@ -81,7 +81,7 @@ For $\mathcal N(0, 4)\|\mathcal N(0, 1)$ the limit is $\alpha < \frac{4}{4 - 1} 
 *A wider $P$ against a narrower $Q$ makes the likelihood ratio grow like $e^{cx^2}$, and then only low Rényi orders are finite.*
 :::
 
-## Bhattacharyya and Hellinger {#sec-sol-divergences-3}
+## Bhattacharyya and Hellinger {#sec-sol-div-3}
 
 > **Exercise 3.** **Bhattacharyya and Hellinger.** Show $D_{1/2}(P\|Q) = -2\ln\big(1 - \frac12H^2\big)$ with $H^2 = \sum(\sqrt p - \sqrt q)^2$, and check it on the die using @tbl-div-f and @tbl-div-die-renyi. For the Gaussian pair, show $D_{1/2} = \mu^2/4$. *(Rényi, f-divergences)*
 
@@ -103,7 +103,7 @@ At $\mu = 1/\sqrt2$ (the Gaussian pair with the variance of the Laplace pair at 
 *Rényi divergence of order $\frac12$ and squared Hellinger distance carry the same information: each is an increasing function of the other.*
 :::
 
-## Rejection sampling {#sec-sol-divergences-4}
+## Rejection sampling {#sec-sol-div-4}
 
 > **Exercise 4.** **Rejection sampling.** In the rejection-sampling example, show in general that $\mathrm{TV}(P, \tilde P) \le E_\gamma(P\|Q)$. *Hint: write $\min(p, \gamma q) = p - e$ with $e = (p - \gamma q)_+$, so $\tilde p = (p - e)/(1 - E_\gamma)$, and use $e \le p$.* *(Hockey-stick)*
 
@@ -132,7 +132,7 @@ The bound is loose by the factor $1 - E$ lost in step 4: the deficit $e$ is not 
 *A low envelope costs at most $E_\gamma$ in total variation, so $E_\gamma$ tells you how low an envelope you can afford.*
 :::
 
-## DPI for $E_\gamma$ directly {#sec-sol-divergences-5}
+## DPI for $E_\gamma$ directly {#sec-sol-div-5}
 
 > **Exercise 5.** **DPI for $E_\gamma$ directly.** Without the f-divergence machinery, show $E_\gamma(PK\|QK) \le E_\gamma(P\|Q)$. *Hint: $PK(B) - \gamma QK(B) = \sum_xK(B\mid x)\big(p(x) - \gamma q(x)\big)$ with $K(B\mid x) \in [0, 1]$; use the randomized version of Fact 3.* *(Fact 3, DPI)*
 
@@ -153,7 +153,7 @@ $$PK(B) - \gamma QK(B) = \sum_xK(B\mid x)\big(p(x) - \gamma q(x)\big).$$
 *Any processing only lowers the whole $E_\gamma$ curve, so every statement made through the $E_\gamma$ curves survives processing.*
 :::
 
-## Pinsker's constant is sharp {#sec-sol-divergences-6}
+## Pinsker's constant is sharp {#sec-sol-div-6}
 
 > **Exercise 6.** **Pinsker's constant is sharp.** For $P = \mathrm{Bern}(\frac12 + \xi)$ and $Q = \mathrm{Bern}(\frac12)$, show $\mathrm{kl}(\frac12 + \xi\|\frac12)/(2\xi^2) \to 1$ as $\xi \to 0$. *Hint: expand $\ln(1 \pm 2\xi)$ to second order.* *(Pinsker)*
 
@@ -178,7 +178,7 @@ $$(\tfrac12 + \xi)(2\xi - 2\xi^2) = \xi - \xi^2 + 2\xi^2 + O(\xi^3), \qquad (\tf
 *Near two fair coins, Pinsker's inequality is an equality to first order, so its constant cannot be improved.*
 :::
 
-## Samples needed for two coins {#sec-sol-divergences-7}
+## Samples needed for two coins {#sec-sol-div-7}
 
 > **Exercise 7.** **Samples needed for two coins.** You flip a coin that is either fair or has heads probability 0.6. Use additivity and Pinsker to find how many flips $n$ are necessary before the TV between $n$ flips of the two coins can reach 0.8. *Check: $\mathrm{kl}(0.6\|0.5) = 0.02014$, so $n \ge 2\times0.8^2/0.02014$, that is $n \ge 64$.* Is this a lower or an upper bound on the flips you need? *(Additivity, Pinsker)*
 
@@ -193,7 +193,7 @@ $$(\tfrac12 + \xi)(2\xi - 2\xi^2) = \xi - \xi^2 + 2\xi^2 + O(\xi^3), \qquad (\tf
 *Pinsker turns "KL is small" into "no test can succeed yet", which is always a statement about necessary, not sufficient, sample sizes.*
 :::
 
-## Monotonicity of TV over samples {#sec-sol-divergences-8}
+## Monotonicity of TV over samples {#sec-sol-div-8}
 
 > **Exercise 8.** **Monotonicity of TV over samples.** Show that $\mathrm{TV}(P^n, Q^n)$ is non-decreasing in $n$. *Hint: dropping the last sample is a channel.* *(DPI)*
 

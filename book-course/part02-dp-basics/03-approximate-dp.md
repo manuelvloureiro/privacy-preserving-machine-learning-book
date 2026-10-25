@@ -226,6 +226,7 @@ $$ {#eq-adp-sigma}
 
 is $(\varepsilon,\delta)$-DP.
 :::
+<!-- proof: in @sec-adp-gaussian-proof -->
 
 The proof is in @sec-adp-gaussian-proof. Asymptotically the noise level is $\sigma = \frac{\Delta_2 f}{\varepsilon}\sqrt{2\ln(1/\delta)}\,(1 + o(1))$ as $\delta \to 0$. Compared with the Laplace mechanism, whose noise has scale $\Delta_1 f/\varepsilon$ in each coordinate, there are two differences. The Gaussian mechanism pays a factor $\sqrt{2\ln(1/\delta)}$ and gives only approximate DP, and it measures sensitivity in $\ell_2$, which can save a factor $\sqrt d$. The next example shows that the saving can be the larger effect.
 
@@ -488,7 +489,7 @@ When $\varepsilon$ is of order $1/\sqrt k$ or smaller, the second term is of the
 
 : The chapter's results. {#tbl-adp-summary}
 
-## Notes {#sec-adp-notes}
+## References {#sec-adp-notes}
 
 - Cynthia Dwork, Krishnaram Kenthapadi, Frank McSherry, Ilya Mironov and Moni Naor, "Our Data, Ourselves: Privacy via Distributed Noise Generation", 2006. The definition of $(\varepsilon,\delta)$-DP and the first analysis of Gaussian noise.
 - Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. The privacy loss random variable (Section 3.5), the Gaussian mechanism with the constant $\sqrt{2\ln(1.25/\delta)}$ (Theorem A.1), and the composition theorems (Theorems 3.16 and 3.20).

@@ -57,7 +57,7 @@ It is an approximation, not a bound, and it errs on the unsafe side. A small $\d
 
 A mix of Laplace and Gaussian releases needs a numerical accountant, because a curve that is not Gaussian takes the composition out of GDP. And the Rényi DP curve keeps less than the trade-off curve, even for the Gaussian. For 1-GDP, the exact $\delta$ at $\varepsilon = 1$ is 0.1269. The best [conversion from its Rényi DP curve](02-rdp-conversions.md) certifies only 0.2149 there, so account Gaussian pipelines without subsampling in GDP.
 
-## Further reading
+## References
 
 - Dong, Roth & Su, "Gaussian Differential Privacy" (Journal of the Royal Statistical Society Series B, 2022).
 

@@ -286,7 +286,7 @@ The statement names everything a reviewer needs to recompute the claim ([Writing
 
 : The release checklist: each step, its default and its check. {#tbl-relstat-checklist}
 
-## Further reading
+## References
 
 - The OpenDP documentation, "Polars" and "Grouping" in its user guide: contexts, margins and partition selection.
 - Wilson et al., "Differentially Private SQL with Bounded User Contribution" (PETS 2020): contribution bounding in a production SQL engine.

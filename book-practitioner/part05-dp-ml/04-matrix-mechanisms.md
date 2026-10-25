@@ -49,7 +49,7 @@ The neighbouring relation changes the numbers too. The analysis here leaves a ne
 
 The accounting library enforces this. In `dp_accounting` 0.6.0, the event for tree aggregation, `SingleEpochTreeAggregationDpEvent`, is accepted only by the Rényi differential privacy (RDP) accountant built with `NeighboringRelation.REPLACE_SPECIAL`, under which a neighbour replaces the record with an empty one. An accountant built for add/remove, the default for DP-SGD, raises `UnsupportedEventError`, and the privacy loss distribution (PLD) accountant does not support the event at all. So DP-FTRL and DP-SGD runs cannot share one add/remove ledger.
 
-## Further reading
+## References
 
 - Choquette-Choo et al., "(Amplified) Banded Matrix Factorizations: A Unified Approach to Private Training" (NeurIPS 2023): banding, min-separation and amplification.
 

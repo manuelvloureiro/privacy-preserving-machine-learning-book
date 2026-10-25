@@ -211,7 +211,7 @@ Give each model version its own record and statement, and name in advance the in
 
 : The release checklist: each step, its default and its check. {#tbl-relgov-checklist}
 
-## Further reading
+## References
 
 - Near, Darais, Lefkovitz & Howarth, *Guidelines for Evaluating Differential Privacy Guarantees* (NIST SP 800-226, 2025): what to ask of any DP claim.
 - European Data Protection Board, *Opinion 28/2024 on certain data protection aspects related to the processing of personal data in the context of AI models* (December 2024): when a model can count as anonymous.

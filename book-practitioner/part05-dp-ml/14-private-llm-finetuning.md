@@ -259,7 +259,7 @@ The folder holds only the adapter, so the statement names the base checkpoint an
 
 : The steps of fine-tuning a language model privately, their defaults and their checks. {#tbl-llmwf-checklist}
 
-## Further reading
+## References
 
 - Yu et al., "Differentially Private Fine-tuning of Language Models" (ICLR 2022): LoRA and other adapters with DP-SGD, and their accuracy.
 - Li, Tramèr, Liang & Hashimoto, "Large Language Models Can Be Strong Differentially Private Learners" (ICLR 2022): full fine-tuning with ghost clipping, and the hyperparameters that make it work.

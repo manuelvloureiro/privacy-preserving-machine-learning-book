@@ -374,7 +374,7 @@ Over many days, the bits depend on the data only through the sequence of rounded
 
 : The chapter's results. {#tbl-ldp-summary}
 
-## Notes {#sec-ldp-notes}
+## References {#sec-ldp-notes}
 
 - Stanley L. Warner, "Randomized Response: A Survey Technique for Eliminating Evasive Answer Bias", 1965. The first local protocol.
 - Alexandre Evfimievski, Johannes Gehrke and Ramakrishnan Srikant, "Limiting Privacy Breaches in Privacy Preserving Data Mining", 2003. A ratio condition on a person's randomized data that anticipates the local definition.

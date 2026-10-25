@@ -102,7 +102,7 @@ The search itself, run with `uv run python code/part05-dp-ml/practitioner_tuning
 - Tune on public or proxy data when you can. Otherwise fix the search before touching the private data, and never extend it.
 - Report the whole search's $\varepsilon$, never the selected run's alone.
 
-## Further reading
+## References
 
 - Papernot & Steinke, "Hyperparameter Tuning with Renyi Differential Privacy" (ICLR 2022): the Poisson and truncated negative binomial bounds for DP-SGD.
 - Liu & Talwar, "Private Selection from Private Candidates" (STOC 2019): random stopping and its bound of three times one run.

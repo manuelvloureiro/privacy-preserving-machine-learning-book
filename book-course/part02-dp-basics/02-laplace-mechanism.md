@@ -256,7 +256,7 @@ Basic composition recovers the analysis of @prp-lap-counting. Answering each cou
 
 : The chapter's results. {#tbl-lap-summary}
 
-## Notes {#sec-lap-notes}
+## References {#sec-lap-notes}
 
 - Cynthia Dwork, Frank McSherry, Kobbi Nissim and Adam Smith, "Calibrating Noise to Sensitivity in Private Data Analysis", 2006. The Laplace mechanism and the notion of sensitivity.
 - Irit Dinur and Kobbi Nissim, "Revealing Information while Preserving Privacy", 2003. The reconstruction attacks that the error of the Laplace mechanism is compared with.

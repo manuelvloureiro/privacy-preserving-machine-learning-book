@@ -112,7 +112,7 @@ Differential privacy does help, because [private training](../part05-dp-ml/02-dp
 
 - Audit with LiRA. A failed weak attack, such as a global loss threshold, is not evidence of safety.
 
-## Further reading
+## References
 
 - Carlini, Chien, Nasr, Song, Terzis & Tramèr, "Membership Inference Attacks From First Principles" (IEEE S&P 2022): LiRA, the global variance, and the audit protocol.
 - Yeom, Giacomelli, Fredrikson & Jha, "Privacy Risk in Machine Learning: Analyzing the Connection to Overfitting" (IEEE CSF 2018): the loss attack and its link to the generalization gap.

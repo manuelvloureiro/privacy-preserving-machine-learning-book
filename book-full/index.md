@@ -1,6 +1,6 @@
 # Preface {.unnumbered}
 
-Notes and code for a book on privacy-preserving machine learning.
+This is the full edition of *Privacy-Preserving Machine Learning*: every result is derived step by step. Two companions share its parts and chapter files: the [exercise book](../book-exercises/index.md), with a worked solution for every exercise, and the [practitioner edition](../book-practitioner/index.md), which states the same results without proofs and shows how to use them with real libraries. A separate [course in differential privacy](../book-course/index.md) teaches the subject one topic per chapter, with complete proofs and little else.
 
 The figures and the numbers quoted in the text are produced by each chapter's script, in the repository's `code/` directory, one folder per part.
 

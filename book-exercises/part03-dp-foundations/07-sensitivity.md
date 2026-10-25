@@ -4,7 +4,7 @@ Exercises for [Beyond global sensitivity](../../book-full/part03-dp-foundations/
 
 The solutions use the chapter's notation. Datasets have a fixed size $n$, neighbours differ in one replaced record, $d$ is the Hamming distance, and $\varepsilon$, $\delta$ are the parameters of differential privacy (DP). Sorted values are $x_1 \le \dots \le x_n$ in $[0, \Lambda]$, padded with $x_i = 0$ for $i \le 0$ and $x_i = \Lambda$ for $i > n$. $A^{(k)}(D)$ is the largest local sensitivity within distance $k$ of $D$, and $S^*_\beta(D) = \max_k e^{-k\beta}A^{(k)}(D)$. "The ages" are the chapter's 1,001 synthetic ages (seed 0), with $\Lambda = 100$ and $\varepsilon = 1$.
 
-## Local sensitivity of the mean {#sec-sol-sensitivity-1}
+## Local sensitivity of the mean {#sec-sol-sens-1}
 
 > **Exercise 1.** **Local sensitivity of the mean.** For values in $[0, \Lambda]$ under the replace relation, show $\mathrm{LS}_{\mathrm{mean}}(D) = \max_i\max(x_i, \Lambda - x_i)/n$, and deduce $\Lambda/(2n) \le \mathrm{LS}_{\mathrm{mean}}(D) \le \Lambda/n$. Why can smooth sensitivity never gain more than a factor of 2 over global sensitivity for the mean? *Check: the 1,001 ages of the chapter include an age clipped to 0, so $\mathrm{LS} = \Delta = 0.0999$.* *(Local sensitivity)*
 
@@ -19,7 +19,7 @@ The solutions use the chapter's notation. Datasets have a fixed size $n$, neighb
 *Local sensitivity helps when the statistic is insensitive on typical data but not in the worst case. For the mean, every dataset is within a factor of 2 of the worst case, so clipping, not smoothing, is the tool.*
 :::
 
-## A sharper Cauchy {#sec-sol-sensitivity-2}
+## A sharper Cauchy {#sec-sol-sens-2}
 
 > **Exercise 2.** **A sharper Cauchy.** Show that $\sup_{u \ge 0}\gamma u^{\gamma-1}/(1 + u^\gamma) = (\gamma - 1)^{(\gamma-1)/\gamma}$, so for the Cauchy the sliding constant is 1 rather than $\gamma = 2$. Redo the pure-DP condition with this constant and find the largest $\alpha$ for $\beta = \varepsilon/6$. *Check: $\alpha = \varepsilon/2$, and the noise scale for the median age drops from 0.979 to 0.326.* *(Admissible noise)*
 
@@ -43,7 +43,7 @@ $$(\gamma - 1)u^{\gamma-2}(1 + u^\gamma) = \gamma u^{\gamma-1}\cdot u^{\gamma-1}
 *Constants in admissibility lemmas are usually stated for convenience, not optimality. A direct bound on the privacy loss of your one noise distribution can recover a constant factor in the error.*
 :::
 
-## Other quantiles {#sec-sol-sensitivity-3}
+## Other quantiles {#sec-sol-sens-3}
 
 > **Exercise 3.** **Other quantiles.** Generalize @eq-sens-median-ak to the $r$-th order statistic and compute the smooth sensitivity of the 90th percentile ($r = 901$) of the 1,001 ages with $\beta = 1/6$. Why is it larger than the median's although its local sensitivity is smaller? *Check: $\mathrm{LS} = 0.0114$, $S^* = 0.2666$ at $k = 7$.* *(Smooth sensitivity)*
 
@@ -58,7 +58,7 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 *Smooth sensitivity reflects the density of the data around the statistic, not one lucky gap. Quantiles in the tails cost more noise than the median.*
 :::
 
-## Sizing the proposal {#sec-sol-sensitivity-4}
+## Sizing the proposal {#sec-sol-sens-4}
 
 > **Exercise 4.** **Sizing the proposal.** With $\varepsilon = 1$ and $\delta = 10^{-6}$, how large must $\operatorname{dist}_b(D)$ be for propose-test-release to answer with probability at least 0.99? For the ages, what is the smallest $b$ that achieves it? *Check: distance 18 (17.73 rounded up), pass probability 0.9924; $b = A^{(17)} = 0.7892$.* *(Propose-test-release)*
 
@@ -72,7 +72,7 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 *Propose-test-release needs stability against about $\ln(1/\delta)/\varepsilon$ changes plus a few more for reliability. The proposal has to cover the local sensitivity at that distance, not at distance 1.*
 :::
 
-## The number of blocks {#sec-sol-sensitivity-5}
+## The number of blocks {#sec-sol-sens-5}
 
 > **Exercise 5.** **The number of blocks.** Approximate @eq-sens-saa-error by $(\theta B/n)^2 + \theta^2/n + 2(R/(B\varepsilon))^2$ and find the minimizing $B$ in closed form. Compare with the exact optimum over the divisors of $n = 10{,}000$. *Check: $B^* = (2R^2n^2/(\theta\varepsilon)^2)^{1/4} = 265.9$; the best divisor is 250.* *(Bias–variance trade-off)*
 
@@ -86,7 +86,7 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 *At the optimum, bias and noise are of the same size, and $B^*$ grows like $\sqrt{n}$: more data buys more, smaller blocks.*
 :::
 
-## Clipping exponential data {#sec-sol-sensitivity-6}
+## Clipping exponential data {#sec-sol-sens-6}
 
 > **Exercise 6.** **Clipping exponential data.** For $X \sim \mathrm{Exp}(1)$, show $\mathbb E[(X - C)_+] = e^{-C}$ and, ignoring the sampling term, that the best clipping norm solves $e^{-2C} = 2C/(n\varepsilon)^2$. *Check: $C^* = 5.692$ for $n = 1000$, $\varepsilon = 1$; $3.616$ for $n = 100$ and $7.834$ for $n = 10{,}000$.* *(Clipping)*
 
@@ -100,7 +100,7 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 *For a light (exponential) tail, the clipping norm grows only logarithmically with $n\varepsilon$. For heavier tails, such as the chapter's log-normal incomes, it grows much faster.*
 :::
 
-## Smoothness at work {#sec-sol-sensitivity-7}
+## Smoothness at work {#sec-sol-sens-7}
 
 > **Exercise 7.** **Smoothness at work.** For the degenerate pair $D = (0, 0, 0, 0, 100)$ and $D' = (0, 0, 0, 100, 100)$ with $\beta = 1/6$, compute $A^{(k)}$ for both and the smooth sensitivities. Check that their ratio is at most $e^\beta$, and explain why it is exactly $e^\beta$ here. *Check: $S^*(D) = 84.648$ at $k = 1$, $S^*(D') = 100$, ratio $1.1814 = e^{1/6}$.* *(Smooth sensitivity)*
 
@@ -123,7 +123,7 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 *Compare with local sensitivity, which jumps from 0 to 100 on this pair and makes the release on $D$ deterministic. Smooth sensitivity sees $D'$ coming and already adds noise of scale 84.6/α on $D$.*
 :::
 
-## Inverse sensitivity for a quantile {#sec-sol-sensitivity-8}
+## Inverse sensitivity for a quantile {#sec-sol-sens-8}
 
 > **Exercise 8.** **Inverse sensitivity for a quantile.** Generalize @eq-sens-inverse-median from the median to the $r$-th order statistic: show that a candidate $t$ in the gap $(x_i, x_{i+1})$ needs $r - i$ changes when $i < r$ and $i - r + 1$ when $i \ge r$. Then release the 90th percentile of the ages ($r = 901$) with $\varepsilon = 1$ and compare its median absolute error with the smooth-sensitivity noise scale of Exercise 3. *Check: 0.1592 years, against 1.599; for $r = 501$ the formula gives back the chapter's 0.0783.* *(Inverse sensitivity)*
 
@@ -136,7 +136,7 @@ with the same padding: the windows now slide around rank $r$. The script's funct
 *The 90th percentile sits where the ages are sparser than at the median, so its gaps are wider and its error is about twice the median's. Smooth sensitivity loses by a factor of ten here, as it did at the median.*
 :::
 
-## The stable mode under add/remove {#sec-sol-sensitivity-9}
+## The stable mode under add/remove {#sec-sol-sens-9}
 
 > **Exercise 9.** **The stable mode under add/remove.** Under add/remove neighbours, one dataset has one more record than the other. Show that $s(D) = \max(0, g - 1)$, with $g$ the lead of the mode, works for the stability-based release of the mode, and find the smallest lead that answers with probability 0.95 at $\varepsilon = 1$ and $\delta = 10^{-6}$. Why is it about half the 35 records needed under replacement? *Check: a lead of 18 records; at a lead of 20 the release answers with probability 0.9972 under add/remove, and 0.004052 under replacement.* *(Stability-based release)*
 

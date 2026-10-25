@@ -132,7 +132,7 @@ The detector catches 56 of the 63 malignant test cases, a TPR of 0.889 with a 95
 - Plan for $100/a$ negatives, and use Clopper–Pearson, never Wald.
 - Report TPR at fixed low FPRs on log–log axes, never AUC alone.
 
-## Further reading
+## References
 
 - Fawcett, "An introduction to ROC analysis" (Pattern Recognition Letters, 2006): ROC curves and their pitfalls.
 - Brown, Cai & DasGupta, "Interval Estimation for a Binomial Proportion" (Statistical Science, 2001): why Wald fails and what to use.

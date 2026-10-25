@@ -115,7 +115,7 @@ Shared noise is the clearest case. Release the number of smokers and the number 
 - Fix the total budget before the first release, and let one accountant refuse what exceeds it.
 - Never share a random seed between mechanisms, and never fix one in production.
 
-## Further reading
+## References
 
 - Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014): post-processing, group privacy and basic composition, the standard reference.
 - McSherry, "Privacy Integrated Queries" (SIGMOD 2009): parallel composition, and a query system built on post-processing and composition as its only rules.

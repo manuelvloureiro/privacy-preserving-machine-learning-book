@@ -162,7 +162,7 @@ The three questions settle most cases. The most useful is the second. If an alle
 
 : The chapter's results. {#tbl-viol-summary}
 
-## Notes {#sec-viol-notes}
+## References {#sec-viol-notes}
 
 - Frank McSherry, "Statistical Inference Considered Harmful", 2016. A blog post arguing that inference from public facts, such as the cast, is not a privacy violation.
 - Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Section 2.3 discusses what the definition promises and the smoking example.

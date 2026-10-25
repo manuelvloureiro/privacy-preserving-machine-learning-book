@@ -1,6 +1,6 @@
 # Exercises: From Rényi DP to (ε, δ) and to tests
 
-Exercises for [the chapter on converting Rényi differential privacy](../../book-full/part04-privacy-accounting/02-rdp-conversions.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part04-privacy-accounting/solutions_rdp_conversions.py` computes every number quoted here; run it with `uv run python code/part04-privacy-accounting/solutions_rdp_conversions.py`.
+Exercises for [the chapter on converting Rényi differential privacy (DP) to (ε, δ) and to tests](../../book-full/part04-privacy-accounting/02-rdp-conversions.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part04-privacy-accounting/solutions_rdp_conversions.py` computes every number quoted here; run it with `uv run python code/part04-privacy-accounting/solutions_rdp_conversions.py`.
 
 The solutions use the chapter's notation. Rényi differential privacy (RDP) is converted to $(\varepsilon, \delta)$-differential privacy (DP). $P = M(D)$ and $Q = M(D')$, $L = \ln(P/Q)$ is the privacy loss, and under $P$ it is the privacy loss random variable (PRV). $\alpha$ is always the Rényi order, $\varepsilon(\alpha)$ the RDP curve, and $\delta = 10^{-5}$ unless stated otherwise.
 

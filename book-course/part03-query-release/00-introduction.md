@@ -15,4 +15,4 @@ The last chapter turns from algorithms to limits. [Packing arguments](04-packing
 | [Beyond global sensitivity](03-beyond-global-sensitivity.md) | When can the noise follow the sensitivity of the actual dataset instead of the worst case? |
 | [Packing lower bounds](04-packing-lower-bounds.md) | How much error must any pure DP mechanism incur on marginals and histograms? |
 
-: The chapters of this part. {#tbl-query-release-chapters}
+: The chapters of this part. {#tbl-p3-chapters}

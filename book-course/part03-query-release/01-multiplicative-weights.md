@@ -387,7 +387,7 @@ Take records with $d = 20$ binary features, so $|\mathcal X| = 2^{20}$, and $\al
 
 : The chapter's results. {#tbl-pmw-summary}
 
-## Notes {#sec-pmw-notes}
+## References {#sec-pmw-notes}
 
 - Moritz Hardt and Guy N. Rothblum, "A Multiplicative Weights Mechanism for Privacy-Preserving Data Analysis", 2010. Private multiplicative weights and its sample-size bound.
 - Anupam Gupta, Aaron Roth and Jonathan Ullman, "Iterative Constructions and Private Data Release", 2012, and Moritz Hardt, Katrina Ligett and Frank McSherry, "A Simple and Practical Algorithm for Differentially Private Data Release", 2012. The offline version used here, which selects queries with the exponential mechanism, and a practical variant.

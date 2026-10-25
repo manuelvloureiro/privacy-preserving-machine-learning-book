@@ -115,7 +115,7 @@ Move to differential privacy when other releases of the same people exist, when 
 - k-anonymity protects names, not attributes, so check what each class's sensitive values reveal.
 - Assume another release exists, because a guarantee about one table is not a guarantee about a person.
 
-## Further reading
+## References
 
 - Machanavajjhala and colleagues, "l-Diversity" (2006), and Li, Li & Venkatasubramanian, "t-Closeness" (2007): the attacks and the definitions that answer them.
 - Ganta, Kasiviswanathan & Smith, "Composition Attacks and Auxiliary Information in Data Privacy" (2008): the intersection attack.

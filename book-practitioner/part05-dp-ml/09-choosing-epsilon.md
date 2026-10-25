@@ -121,7 +121,7 @@ So it would be wrong to call the running example's $\varepsilon = 8$ run "less t
 - A budget of at most 1 is strong for any mechanism. A budget between 1 and 10 needs DP-SGD's curve as justification, and a budget above 10 needs the curve and an audit (Ponomareva et al. 2023).
 - Never quote $\varepsilon$ without its unit, $\delta$ and period.
 
-## Further reading
+## References
 
 - Near, Darais, Lefkovitz & Howarth, *Guidelines for Evaluating Differential Privacy Guarantees* (NIST SP 800-226, 2025): privacy units, $\delta$, and the hazards of large budgets.
 - Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023): tiers and reporting.

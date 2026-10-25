@@ -2,7 +2,7 @@
 
 Exercises for [Optimization](../../book-full/part01-prerequisites/06-optimization.md), each with a worked solution. Try each exercise before opening its solution. The solutions use gradient descent (GD), stochastic gradient descent (SGD) and regularized empirical risk minimization (ERM) exactly as the chapter defines them. The numbers come from the script `code/part01-prerequisites/solutions_optimization.py`; run it with `uv run python code/part01-prerequisites/solutions_optimization.py`.
 
-## Constants of regularized logistic regression {#sec-sol-optimization-1}
+## Constants of regularized logistic regression {#sec-sol-opt-1}
 
 > **Exercise 1.** Show that $\ell(\theta) + \frac\lambda2\|\theta\|^2$, with $\ell$ the logistic loss and $\|x\| \le 1$, is $\lambda$-strongly convex and $(\frac14 + \lambda)$-smooth on $\mathbb R^d$, and $(1 + \lambda R)$-Lipschitz on the ball of radius $R$. *Check: for $\lambda = 0.1$ and $R = 5$, the constants are 0.1, 0.35 and 1.5.* *(Hessian bounds)*
 
@@ -24,7 +24,7 @@ The Lipschitz constant is nearly attained. Take $\|x\| = 1$, $y = +1$ and $\thet
 *The regularizer shifts every curvature up by $\lambda$, which helps strong convexity and costs smoothness, and its gradient $\lambda \theta$ is what limits the Lipschitz constant to a bounded set.*
 :::
 
-## GD on a smooth convex function {#sec-sol-optimization-2}
+## GD on a smooth convex function {#sec-sol-opt-2}
 
 > **Exercise 2.** Show that GD with $\eta = 1/\beta$ on a convex $\beta$-smooth $\mathcal L$ satisfies $\mathcal L(\theta_{T+1}) - \mathcal L^* \le \beta\|\theta_1 - \theta^*\|^2/(2T)$. *Hint: combine the descent lemma with Fact 1 to get $\mathcal L(\theta_{t+1}) - \mathcal L^* \le \frac\beta2(\|\theta_t - \theta^*\|^2 - \|\theta_{t+1} - \theta^*\|^2)$, telescope, and use that $\mathcal L(\theta_t)$ decreases.* *(Descent lemma, telescoping)*
 
@@ -60,7 +60,7 @@ The bound in @tbl-sol-optimization-gd holds and is loose by a factor of 11 at $T
 *Smoothness alone gives GD a $1/T$ rate on convex functions, against $1/\sqrt T$ for SGD with noisy gradients.*
 :::
 
-## The $1/(\lambda T)$ rate is exact for a noisy quadratic {#sec-sol-optimization-3}
+## The $1/(\lambda T)$ rate is exact for a noisy quadratic {#sec-sol-opt-3}
 
 > **Exercise 3.** Let $\mathcal L(\theta) = \frac\lambda2 \theta^2$ on $\mathbb R$ and $g_t = \lambda \theta_t + \xi_t$ with independent $\xi_t$, $\mathbb E\xi_t = 0$, $\mathbb E\xi_t^2 = \sigma^2$. With $\eta_t = 1/(\lambda t)$, show that $t\,\theta_{t+1} = (t - 1)\theta_t - \xi_t/\lambda$, hence $\theta_{T+1} = -\frac{1}{\lambda T}\sum_{t\le T}\xi_t$ and $\mathbb E \mathcal L(\theta_{T+1}) = \sigma^2/(2\lambda T)$. *Check: $\lambda = 1$, $\sigma^2 = 1$, $T = 100$ gives 0.005.* *(Strongly convex SGD)*
 
@@ -84,7 +84,7 @@ For $\lambda = 1$, $\sigma^2 = 1$, $T = 100$: $1/200 = 0.005$. The script runs t
 *The $1/(\lambda T)$ dependence in @eq-sgd-strong is not slack: on this problem, SGD's error is exactly of that order.*
 :::
 
-## Smoothness of the sigmoid loss {#sec-sol-optimization-4}
+## Smoothness of the sigmoid loss {#sec-sol-opt-4}
 
 > **Exercise 4.** Show that $|\sigma''(s)| \le 1/(6\sqrt3)$ for all $s$, with equality where $\sigma(s) = \frac12 \pm \frac{\sqrt3}{6}$. *Check: $1/(6\sqrt3) \approx 0.0962$.* *(Calculus of $\sigma$)*
 
@@ -101,7 +101,7 @@ In terms of $s$: $\sigma(s) = u$ means $s = \ln\frac{u}{1 - u}$, and $\frac{1/2 
 *The sigmoid loss is about 2.6 times smoother than the logistic loss ($0.0962$ against $\frac14$), but non-convex: $\sigma''$ takes both signs.*
 :::
 
-## Covariance under sampling without replacement {#sec-sol-optimization-5}
+## Covariance under sampling without replacement {#sec-sol-opt-5}
 
 > **Exercise 5.** For a finite population with $\sum_i u_i = 0$, show that two distinct uniform draws have $\mathbb E\langle u_{I}, u_{J}\rangle = -\sigma_1^2/(n - 1)$, and verify @eq-minibatch at $B = n$. Then check it by enumeration on the toy data with $B = 2$. *Check: $7/6$.* *(Minibatch variance)*
 
@@ -132,7 +132,7 @@ The script enumerates every batch in exact fractions:
 *The negative covariance is what the factor $(n - B)/(n - 1)$ in @eq-minibatch accounts for: once one record is in the batch, the rest are tilted the other way.*
 :::
 
-## Critical batch size {#sec-sol-optimization-6}
+## Critical batch size {#sec-sol-opt-6}
 
 > **Exercise 6.** Fix a budget of $N = TB$ gradient evaluations and put $\sigma^2/B$ in place of $\sigma^2$ in @eq-nonconvex. Show that the optimized bound equals $2\sqrt{2\beta\Gamma\sigma^2/N}$, independent of $B$, as long as $B \le \sigma\sqrt{N/(2\beta\Gamma)}$, and grows with $B$ beyond that. *Check: for the sigmoid-loss record ($\beta = 0.0962$, $\Gamma = 0.5$, $\sigma^2 = 1/16$) and $N = 10^4$, the critical batch size is about 81.* *(Non-convex SGD)*
 
@@ -162,7 +162,7 @@ In @tbl-sol-optimization-batch, the bound is flat up to $B = 80$, where the best
 *Up to the critical batch size, batches trade steps for noise one for one, so they cost nothing per gradient evaluation and pay off through parallelism; beyond it they waste computation.*
 :::
 
-## A sharper sensitivity bound {#sec-sol-optimization-7}
+## A sharper sensitivity bound {#sec-sol-opt-7}
 
 > **Exercise 7.** Redo the ERM derivation assuming $\mathcal L_\lambda(\cdot; D)$ is $\lambda'$-strongly convex and the two replaced gradients differ by at most $K$ at $\theta'$. Show that the movement is at most $K/(\lambda' n)$. Using $\lambda' \approx \lambda + 0.0233$ and $K \approx 1$, predict the ratio observed/bound at $\lambda = 0.01$ and compare with @tbl-opt-erm. *(Strong monotonicity)*
 
@@ -189,7 +189,7 @@ If the sharper bound were nearly attained, the observed/bound ratio at $\lambda 
 *Most of the gap between @eq-erm-sensitivity and reality is the curvature of the data, which the bound ignores; with the true $\lambda'$ and $K$ the bound is within a factor of 1.4 of the observed movement.*
 :::
 
-## The regularized median {#sec-sol-optimization-8}
+## The regularized median {#sec-sol-opt-8}
 
 > **Exercise 8.** For $n = 2k + 1$ values, $k + 1$ zeros and $k$ ones, minimize $\frac1n\sum_i|\theta - z_i| + \frac\lambda2 \theta^2$ before and after replacing one 0 by a 1. *Hint: the subgradient at 0 before the change is $[-1, 1/n]$, which contains 0; after it, the derivative on $(0, 1)$ is $-1/n + \lambda \theta$.* *Check: the move is $1/(\lambda n)$, half the bound; for $n = 101$ and $\lambda = 0.1$, 0.099 against 0.198.* *(Subgradients, sensitivity)*
 

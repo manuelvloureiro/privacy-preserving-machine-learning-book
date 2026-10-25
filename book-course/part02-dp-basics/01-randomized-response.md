@@ -250,7 +250,7 @@ Randomized response gives more than the definition asks for. Each person randomi
 
 : The chapter's results. {#tbl-rr-summary}
 
-## Notes {#sec-rr-notes}
+## References {#sec-rr-notes}
 
 - Stanley L. Warner, "Randomized Response: A Survey Technique for Eliminating Evasive Answer Bias", 1965. The original protocol, designed for surveys on sensitive questions.
 - Cynthia Dwork, Frank McSherry, Kobbi Nissim and Adam Smith, "Calibrating Noise to Sensitivity in Private Data Analysis", 2006. The definition of differential privacy.

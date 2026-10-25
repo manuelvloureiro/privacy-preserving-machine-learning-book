@@ -4,7 +4,7 @@ Exercises for [Reconstruction attacks](../../book-full/part02-attacks/09-reconst
 
 The solutions use the chapter's notation: $d \in \{0, 1\}^n$ is the secret database, a query is a subset $S$ with indicator $f$, the curator answers $a = Ad + e$, $E$ bounds every $|e_j|$, $\gamma$ is a fraction of wrong bits and $\beta$ a failure probability. We write $\ln$ for the natural logarithm and $\log_2$ for the logarithm in base 2.
 
-## A rounding curator {#sec-sol-reconstruction-1}
+## A rounding curator {#sec-sol-recon-1}
 
 > **Exercise 1.** **A rounding curator.** A curator answers all $2^n$ subset sums rounded to the nearest multiple of $w$, so its error is at most $w/2$. Explain why the worst-case analysis allows $4E = 2w$ wrong bits while, on the database of @tbl-recon-exp with $w = 4$, only $d$ itself is consistent. *Hint: flipping bit $i$ changes the sum of every subset containing $i$ by 1, and rounding to multiples of 4 separates $s$ from $s + 1$ when $s \equiv 1 \pmod 4$. Check: at least 128 of the 1024 subsets separate $d$ from every one-bit change of it.* *(Exponential attack)*
 
@@ -21,7 +21,7 @@ The solutions use the chapter's notation: $d \in \{0, 1\}^n$ is the secret datab
 *An error bound alone does not describe a curator. Deterministic errors that the attacker can recompute leak as much as exact answers; only errors the attacker cannot predict can hide anything.*
 :::
 
-## Another Paley–Zygmund threshold {#sec-sol-reconstruction-2}
+## Another Paley–Zygmund threshold {#sec-sol-recon-2}
 
 > **Exercise 2.** **Another Paley–Zygmund threshold.** Redo the lemma with $\lambda = \frac19$. Show that the escape probability becomes $(8/9)^2/3 = 64/243$ at threshold $\sqrt{\gamma n}/18$, and compute the error tolerance and the number of queries the theorem then needs at $n = 1000$, $\gamma = 0.1$, $\beta = 0.01$. *Check: escape 0.2634, $E \le 0.0278$, $m \ge 22\,617$.* Which choice is better? *(Paley–Zygmund, union bound)*
 
@@ -44,7 +44,7 @@ so at least 22 617 queries.
 *A smaller $\lambda$ makes each query a likelier catch, so fewer queries are needed, but only for a much smaller error. Since the point of the theorem is the error scale, the larger $\lambda = \frac14$ is the better choice; neither changes the $\sqrt{\gamma n}$ scaling.*
 :::
 
-## The fourth moment {#sec-sol-reconstruction-3}
+## The fourth moment {#sec-sol-recon-3}
 
 > **Exercise 3.** **The fourth moment.** Prove $\mathbb E\big(\sum_is_ia_i\big)^4 = 3(\sum_ia_i^2)^2 - 2\sum_ia_i^4$ by counting index patterns, and check it by enumeration for $a = (1, 2)$ and $a = (\frac12, \frac12, \frac12, \frac12)$. *Check: 41 and 2.5.* *(Fact 2)*
 
@@ -63,7 +63,7 @@ so at least 22 617 queries.
 *The ratio of the fourth moment to the squared second moment is at most 3, the value for a normal variable. That ratio is what the Paley–Zygmund step needs, and it holds for every weight vector, not just for large $n$.*
 :::
 
-## The inverse of $I + b\mathbf 1\mathbf 1^\top$ {#sec-sol-reconstruction-4}
+## The inverse of $I + b\mathbf 1\mathbf 1^\top$ {#sec-sol-recon-4}
 
 > **Exercise 4.** **The inverse of $I + b\mathbf 1\mathbf 1^\top$.** Show $(I + b\mathbf 1\mathbf 1^\top)^{-1} = I - \frac{b}{1 + nb}\mathbf 1\mathbf 1^\top$, and deduce that the diagonal of $\big(\mathbb E[A^\top A]\big)^{-1}$ is $\frac4m\cdot\frac{n}{n + 1}$. *Check: $\frac{n}{n + 1} = 0.9980$ at $n = 500$.* *(Linear algebra for least squares)*
 
@@ -78,7 +78,7 @@ so at least 22 617 queries.
 *The all-ones direction carries the total count, which every random query measures with a large weight, so it is estimated well. Every other direction is estimated with variance about $4\sigma^2/m$, and the correction $\frac{n}{n + 1}$ is negligible.*
 :::
 
-## Queries that beat noise {#sec-sol-reconstruction-5}
+## Queries that beat noise {#sec-sol-recon-5}
 
 > **Exercise 5.** **Queries that beat noise.** Using @eq-recon-ls-random, find the number of queries per person at which least squares recovers 90% of the bits when $\sigma = 5\sqrt n$. Then check the prediction for $\sigma = 2\sqrt n$ by simulation at $n = 100$. *Check: $m/n = 657.9$; at $\sigma = 2\sqrt n$, $m = 10\,611$ queries give 0.9100 in simulation against 0.9011 predicted.* *(Least squares under random noise)*
 
@@ -91,7 +91,7 @@ so at least 22 617 queries.
 *A curator that adds independent noise of fixed size to each answer protects nobody against an attacker with enough queries: the number needed grows only with the square of the noise.*
 :::
 
-## Information bound for rounded counts {#sec-sol-reconstruction-6}
+## Information bound for rounded counts {#sec-sol-recon-6}
 
 > **Exercise 6.** **Information bound for rounded counts.** A curator rounds every count of $n = 1000$ bits to a multiple of 10. How many queries does any attack need to get at most 1% of the bits wrong? *Check: $h(0.01) = 0.0808$, $V = 102$, $m \ge 137.8$, so at least 138.* *(Fano, entropy)*
 
@@ -104,7 +104,7 @@ so at least 22 617 queries.
 *Coarsening the answers raises the number of queries any attack needs, but only by the factor $\log_2(n + 1)/\log_2(n/w + 2)$; it does not change its order.*
 :::
 
-## A sampling curator that keeps more {#sec-sol-reconstruction-7}
+## A sampling curator that keeps more {#sec-sol-recon-7}
 
 > **Exercise 7.** **A sampling curator that keeps more.** Repeat the sampling-curator analysis with the sampling rate $q$ raised to 0.9. Find the Hoeffding error bound at $n = 500$, $m = 2000$, failure probability $\beta = 0.05$, and the ceiling on the fraction any attacker recovers. *Check: 59.03 and 0.95; in simulation the largest error is 12.00 and least squares recovers 0.9420.* *(Hoeffding, union bound)*
 
@@ -118,7 +118,7 @@ $$u = \sqrt{\frac{n\ln(2m/\beta)}{2q^2}} = \sqrt{\frac{500\ln80\,000}{2 \times 0
 *Keeping more people lowers the error and exposes more of them. The curator's hiding power is exactly the fraction it leaves out, and it buys that by making each answer less accurate.*
 :::
 
-## Redundant statistics {#sec-sol-reconstruction-8}
+## Redundant statistics {#sec-sol-recon-8}
 
 > **Exercise 8.** **Redundant statistics.** Show that withholding any one of the total, female and male means from @tbl-recon-census-published leaves the attacker's information unchanged, and explain why withholding the married mean does not. *Check: withholding the married mean leaves 45 consistent blocks; withholding any of the other five means leaves 1.* *(Census reconstruction)*
 
@@ -131,7 +131,7 @@ $$u = \sqrt{\frac{n\ln(2m/\beta)}{2q^2}} = \sqrt{\frac{500\ln80\,000}{2 \times 0
 *Published statistics are rarely independent. Before withholding a number to protect a table, check whether the rest of the table implies it; most of the time it does.*
 :::
 
-## Queries for a deployed system {#sec-sol-reconstruction-9}
+## Queries for a deployed system {#sec-sol-recon-9}
 
 > **Exercise 9.** **Queries for a deployed system.** The attack of @sec-recon-diffix targets $n = 142$ records with digit-predicate queries. Each query includes some fraction $\rho$ of the records, and the average of $\rho(1 - \rho)$ over the queries, the information $v$ of @eq-recon-diffix, is 0.2, and the system adds noise of standard deviation $\sigma = 4$. Using @eq-recon-diffix, how many queries does least squares need to recover 99% of the bits? How many would it need if every query included each record with probability $\frac12$? *Check: 1875 and 1529. In simulation, 1875 digit-predicate queries recover 0.9923 of the bits against 0.9900 predicted.* *(Least squares, inclusion rate)*
 
@@ -147,7 +147,7 @@ With $\sigma = 4$, the numerator is $(8 \times 2.3263)^2 = 346.4$.
 *An attacker who knows the noise level can budget the attack in advance: the number of queries grows with the square of the noise and falls with the information $v$ each query carries.*
 :::
 
-## Noise that grows with the number of queries {#sec-sol-reconstruction-10}
+## Noise that grows with the number of queries {#sec-sol-recon-10}
 
 > **Exercise 10.** **Noise that grows with the number of queries.** A designer wants least squares to recover at most 75% of $n = 73$ bits, against digit-predicate queries with $v = 0.2$. What noise standard deviation does that take if the attacker asks 3,500 queries, and what if it asks 35,000? What does this say about a system that fixes its noise in advance? *Check: 19.4 and 62.0, a ratio of 3.19.* *(Fundamental Law)*
 

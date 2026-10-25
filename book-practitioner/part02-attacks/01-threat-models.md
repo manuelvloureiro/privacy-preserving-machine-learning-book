@@ -98,7 +98,7 @@ Averaging over targets hides the worst-treated person in the same way, because e
 - Fill in the worksheet, including the blocking threshold, before running or reading any attack.
 - Assume the adversary knows the other records, and audit with worst-case canaries.
 
-## Further reading
+## References
 
 - Salem et al., "SoK: Let the Privacy Games Begin! A Unified Treatment of Data Inference Privacy in Machine Learning" (IEEE S&P 2023): every inference attack written as a game.
 - Carlini, Chien, Nasr, Song, Terzis & Tramèr, "Membership Inference Attacks From First Principles" (IEEE S&P 2022): the case for reporting TPR at a low FPR on log-scaled ROC curves.

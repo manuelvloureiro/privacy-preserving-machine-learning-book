@@ -107,7 +107,7 @@ An attacker without the prefix extracts less than the discoverable rate suggests
 
 - A verbatim rate is a lower bound on the leak, not a measure of it.
 
-## Further reading
+## References
 
 - Carlini, Liu, Erlingsson, Kos & Song, "The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks" (USENIX Security 2019): canaries, exposure and how to estimate it.
 - Carlini, Ippolito, Jagielski, Lee, Tramèr & Zhang, "Quantifying Memorization Across Neural Language Models" (ICLR 2023): how memorization scales with duplication, model size and prompt length.

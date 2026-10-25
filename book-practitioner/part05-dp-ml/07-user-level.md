@@ -127,7 +127,7 @@ Its 15.35 is a little above the table's 15.32, because the two accountants compu
 - Name the privacy unit with every $\varepsilon$, and set $\delta$ from the number of users.
 - Never use group privacy for DP-SGD; screen a user at rate $kq$ instead.
 
-## Further reading
+## References
 
 - Charles et al., "Fine-Tuning Large Language Models with User-Level Differential Privacy" (arXiv 2407.07737, 2024): the tight user accountant, and sampling records against sampling users.
 - Chua et al., "Mind the Privacy Unit! User-Level Differential Privacy for Language Model Fine-Tuning" (Conference on Language Modeling 2024): contribution bounding against user-level DP-SGD.

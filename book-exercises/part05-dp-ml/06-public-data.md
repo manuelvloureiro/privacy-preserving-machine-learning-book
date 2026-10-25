@@ -1,6 +1,6 @@
 # Exercises: Public data and private fine-tuning
 
-Exercises for [the chapter on public data and private fine-tuning](../../book-full/part05-dp-ml/06-public-data.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_public_data.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_public_data.py`.
+Exercises for [Public data and private fine-tuning](../../book-full/part05-dp-ml/06-public-data.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_public_data.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_public_data.py`.
 
 The solutions use the chapter's notation. Models are trained with differential privacy (DP) by stochastic gradient descent (SGD) with per-example clipping and Gaussian noise, DP-SGD. $p$ is the number of weights, $d$ the number of trainable weights, $C$ the clipping norm, $\sigma$ the noise multiplier, $B$ the expected batch size, $s = \sigma C/B$ the noise standard deviation per coordinate on the averaged gradient, $\eta$ the learning rate and $T$ the number of steps. The running example has $n = 10{,}000$ private records, $p = 3{,}329$, $q = 0.01$, $C = 0.5$ and $T = 10{,}000$; its student is pretrained on a related public task, and the last layer has $d = 65$ weights.
 

@@ -92,6 +92,7 @@ $$
 \sigma \ge c_2\,\frac{q\sqrt{T\ln(1/\delta)}}{\varepsilon}.
 $$
 :::
+<!-- proof: cited -->
 
 The proof is Theorem 1 of Abadi and coauthors, 2016. In the composition bound, the Gaussian mechanism of [the approximate DP chapter](../part02-dp-basics/03-approximate-dp.md) gives $\varepsilon_0$ with $\sigma = \sqrt{2\ln(1/\delta_0) + \varepsilon_0}/\varepsilon_0$, so $\varepsilon_0$ is about $\sqrt{2\ln(1/\delta_0)}/\sigma$, and the composition route needs $\sigma$ larger by a factor of order $\sqrt{\ln(1/\delta_0)}$, and it pays $Tq\delta_0$ in failure probability. These look like small gains, but constant and logarithmic factors in $\varepsilon$ separate a meaningful guarantee from an empty one. The rest of this section proves the ingredients of the accountant and shows the gain numerically.
 
@@ -183,8 +184,9 @@ $$
 \kappa(\lambda) \le \ln A_{\lambda+1}, \qquad A_{a} = \sum_{k=0}^{a}\binom{a}{k}(1-q)^{a-k}q^k\exp\left(\frac{k^2 - k}{2\sigma^2}\right).
 $$
 :::
+<!-- proof: cited -->
 
-The quantity $A_a$ is computed by expanding the $a$-th power of the density ratio between the mixture and $\mathcal N(0,\sigma^2)$ with the binomial theorem. Each term is then a Gaussian integral, $\mathbb E[e^{k\xi/\sigma^2}] = e^{k^2/(2\sigma^2)}$ for $\xi \sim \mathcal N(0,\sigma^2)$. The hard part is to show that this pair, in this order, is the worst case over all neighbours and over the reverse order. Mironov, Talwar and Zhang prove it in "Rényi Differential Privacy of the Sampled Gaussian Mechanism", 2019. Earlier, Abadi and coauthors proved, for $\sigma \ge 1$, small $q$ and moderate $\lambda$, the asymptotic bound $\kappa(\lambda) \le q^2\lambda(\lambda+1)/((1-q)\sigma^2) + O(q^3\lambda^3/\sigma^3)$ that yields @thm-dpdl-abadi.
+The full computation is Section 3.3 of Mironov, Talwar and Zhang (2019), listed in the references; in outline, the quantity $A_a$ is computed by expanding the $a$-th power of the density ratio between the mixture and $\mathcal N(0,\sigma^2)$ with the binomial theorem. Each term is then a Gaussian integral, $\mathbb E[e^{k\xi/\sigma^2}] = e^{k^2/(2\sigma^2)}$ for $\xi \sim \mathcal N(0,\sigma^2)$. The hard part is to show that this pair, in this order, is the worst case over all neighbours and over the reverse order. Mironov, Talwar and Zhang prove it in "Rényi Differential Privacy of the Sampled Gaussian Mechanism", 2019. Earlier, Abadi and coauthors proved, for $\sigma \ge 1$, small $q$ and moderate $\lambda$, the asymptotic bound $\kappa(\lambda) \le q^2\lambda(\lambda+1)/((1-q)\sigma^2) + O(q^3\lambda^3/\sigma^3)$ that yields @thm-dpdl-abadi.
 
 Putting the pieces together gives the **moments accountant**. Compute the log-moment of one step for every $\lambda$, multiply by $T$ by @lem-dpdl-compose, and convert with @thm-dpdl-convert, choosing the best $\lambda$:
 
@@ -297,7 +299,7 @@ The privately labelled points then serve a further purpose. The answers $(x_1,\h
 
 : The chapter's results. {#tbl-dpdl-summary}
 
-## Notes {#sec-dpdl-notes}
+## References {#sec-dpdl-notes}
 
 - Martín Abadi, Andy Chu, Ian Goodfellow, H. Brendan McMahan, Ilya Mironov, Kunal Talwar and Li Zhang, "Deep Learning with Differential Privacy", 2016. DP-SGD with clipping and Poisson sampling, the moments accountant, and pretraining on public data.
 - Ilya Mironov, "Rényi Differential Privacy", 2017. The privacy notion built on the moments of the privacy loss, and its composition and conversion rules.

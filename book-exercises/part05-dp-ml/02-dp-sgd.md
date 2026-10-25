@@ -1,6 +1,6 @@
 # Exercises: DP-SGD
 
-Exercises for [the chapter on private stochastic gradient descent](../../book-full/part05-dp-ml/02-dp-sgd.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_dp_sgd.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_dp_sgd.py`.
+Exercises for [the chapter on differential privacy (DP) in stochastic gradient descent (SGD), DP-SGD](../../book-full/part05-dp-ml/02-dp-sgd.md), each with a worked solution. Try each exercise before opening its solution. The script `code/part05-dp-ml/solutions_dp_sgd.py` computes every number quoted here; run it with `uv run python code/part05-dp-ml/solutions_dp_sgd.py`.
 
 The solutions use the chapter's notation. To give differential privacy (DP), stochastic gradient descent (SGD) is run with per-example clipping and Gaussian noise, as DP-SGD. $C$ is the clipping norm, $\sigma$ the noise multiplier, $q$ the Poisson sampling rate, $B = qn$ the expected batch size, $T$ the number of steps, $\eta$ the learning rate and $d$ the number of parameters $\theta$. The running example has $n = 10{,}000$, $d = 3{,}329$, $q = 0.01$ and $C = 0.5$, and its averaged clipped gradient has length about 0.026 during training. Rényi differential privacy (RDP) is the accountant's currency.
 

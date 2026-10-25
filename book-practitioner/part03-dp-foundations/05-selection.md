@@ -126,7 +126,7 @@ So review the accounting, not just the noise. An implementation must draw fresh 
 - Release positions, not values.
 - Fix the candidate list, and the range of any number you pick, before you look at the data.
 
-## Further reading
+## References
 
 - Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014), §3.3, §3.4 and §3.6: the three mechanisms in their standard form.
 - Lyu, Su & Li, "Understanding the Sparse Vector Technique for Differential Privacy" (VLDB 2017): the budget split and the survey of broken variants.

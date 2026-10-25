@@ -103,7 +103,7 @@ Check three things before you train and when you report.
 
 **Rule of thumb.** Measure the linear probe's ceiling before anything else. Then use large batches and a smaller learning rate than for training from scratch. Tune the learning rate by DP-SGD runs at the target noise on public data, since a non-private sweep does not show how the noise moves the best step.
 
-## Further reading
+## References
 
 - Tramèr & Boneh, "Differentially Private Learning Needs Better Features (or Much More Data)" (ICLR 2021): linear probing on good features.
 - Li, Tramèr, Liang & Hashimoto, "Large Language Models Can Be Strong Differentially Private Learners" (ICLR 2022), and Yu et al., "Differentially Private Fine-tuning of Language Models" (ICLR 2022): full and adapter-based private fine-tuning.

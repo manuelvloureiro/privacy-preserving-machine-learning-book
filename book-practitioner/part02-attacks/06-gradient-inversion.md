@@ -114,7 +114,7 @@ To assess your own deployment, start by finding out what the server sees, single
 
 - Secure aggregation needs a minimum cohort, and only client-level DP bounds what any update reveals.
 
-## Further reading
+## References
 
 - Zhu, Liu & Han, "Deep Leakage from Gradients" (NeurIPS 2019): the gradient-matching attack.
 - Geiping, Bauermeister, Dröge & Moeller, "Inverting Gradients — How easy is it to break privacy in federated learning?" (NeurIPS 2020): cosine matching with an image prior, on trained networks, local steps and batches.

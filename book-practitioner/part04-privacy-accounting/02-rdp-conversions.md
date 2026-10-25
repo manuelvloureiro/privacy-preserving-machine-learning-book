@@ -43,7 +43,7 @@ The conversion also works in one direction only. A guarantee with $\delta$ above
 
 Converting also throws away what the curve says about attacks. Take a membership attack on the single release above, run at a false-positive rate of $10^{-3}$. The curve caps its true-positive rate at $2.4910 \times 10^{-2}$, while the pair at $\varepsilon = 4.729$ only caps it at 0.1131 ([f-DP and Gaussian differential privacy](04-gaussian-dp.md)).
 
-## Further reading
+## References
 
 - Balle, Barthe, Gaboardi, Hsu & Sato, "Hypothesis Testing Interpretations and Rényi Differential Privacy" (AISTATS 2020): the improved conversion, and what an RDP curve says about tests.
 

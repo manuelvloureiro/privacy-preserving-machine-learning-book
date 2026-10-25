@@ -230,7 +230,7 @@ So under pure DP the Laplace histogram is optimal up to a constant factor, and t
 
 : The chapter's results. All lower bounds hold for every $\varepsilon$-DP mechanism that meets the accuracy requirement with probability at least $1/2$. {#tbl-pack-summary}
 
-## Notes {#sec-pack-notes}
+## References {#sec-pack-notes}
 
 - Moritz Hardt and Kunal Talwar, "On the Geometry of Differential Privacy", 2010. Packing lower bounds for linear queries under pure DP, stated geometrically.
 - Amos Beimel, Hai Brenner, Shiva Prasad Kasiviswanathan and Kobbi Nissim, "Bounds on the Sample Complexity for Private Learning and Private Data Release", 2014. Packing arguments for the sample size of private learning and of releasing point functions, the histogram problem.

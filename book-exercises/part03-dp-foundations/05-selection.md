@@ -4,7 +4,7 @@ Exercises for [Selection: exponential mechanism, report-noisy-max, sparse vector
 
 The solutions use the chapter's notation. A selection problem has $|\mathcal R|$ candidates with scores $u(D, r)$ of sensitivity $\Delta$, and $\mathrm{OPT}(D) = \max_r u(D, r)$. $\mathrm{Lap}(b)$ and $\mathrm{Gumbel}(\kappa)$ are given by their scales, and logarithms are natural. AboveThreshold is the sparse vector algorithm of the chapter.
 
-## The factor 2 is needed {#sec-sol-selection-1}
+## The factor 2 is needed {#sec-sol-sel-1}
 
 > **Exercise 1.** **The factor 2 is needed.** Use weights $e^{\varepsilon u}$ (no 2) with $\Delta = 1$ on $|\mathcal R|$ candidates and the neighbours $u(D) = (1, 0, \dots, 0)$, $u(D') = (0, 1, \dots, 1)$. Compute the privacy loss of the output "candidate 1" and show that it tends to $2\varepsilon$ as $|\mathcal R| \to \infty$. *Check: at $\varepsilon = 1$ it is 1.3106 for $|\mathcal R| = 3$ and 1.9977 for $|\mathcal R| = 1000$.* *(Exponential mechanism, the two factors)*
 
@@ -22,7 +22,7 @@ With the correct weights $e^{\varepsilon u/2}$ the same calculation gives at mos
 *The two factors of the privacy proof are both reached here: candidate 1's weight drops by $e^\varepsilon$, and the normalizer, dominated by the $|\mathcal R| - 1$ competitors, rises by nearly $e^\varepsilon$. Monotone scores cannot do both at once, which is why only they may drop the 2.*
 :::
 
-## A private median {#sec-sol-selection-2}
+## A private median {#sec-sol-sel-2}
 
 > **Exercise 2.** **A private median.** Records take values in $\{0, 1, \dots, 100\}$. Use the exponential mechanism over $r \in \{0, \dots, 100\}$ with score $u(D, r) = -\big|\#\{i : x_i < r\} - \#\{i : x_i > r\}\big|$. Show that $\Delta u = 1$ under add/remove, and use @eq-sel-em-utility to show that with probability at least 0.95 at $\varepsilon = 1$ the output's score is within 15.22 of the best score. When some candidate splits the data evenly, this means $\big|\#\{x_i < r\} - \#\{x_i > r\}\big| \le 15.22$. *Hint: $|\mathcal R| = 101$ and $t = \ln 20$.* *(Utility theorem)*
 
@@ -55,7 +55,7 @@ Only candidates 24 and 25 are within the bound of 15.22. The exact probability o
 *The utility theorem bounds the error in rank, not in value: with heavily repeated values, the candidates adjacent to the median can be far off in score, and the mechanism almost never picks them.*
 :::
 
-## The noisy maximum value {#sec-sol-selection-3}
+## The noisy maximum value {#sec-sol-sel-3}
 
 > **Exercise 3.** **The noisy maximum value.** For independent $G_r \sim \mathrm{Gumbel}(\kappa)$, show that $\max_r(u_r + G_r)$ is Gumbel with scale $\kappa$ and location $\kappa\ln\sum_re^{u_r/\kappa}$, so its mean is $\kappa\big(\ln\sum_re^{u_r/\kappa} + \gamma\big)$ with $\gamma = 0.5772$ the Euler–Mascheroni constant. Check it on the five scores of @tbl-sel-gumbel with $\kappa = 2$. *Hint: $\Pr[\max \le x] = \prod_rF(x - u_r)$.* *(Gumbel-max)*
 
@@ -71,7 +71,7 @@ The location $\ell$ is the "soft maximum" of the scores: it lies between $\max_r
 *The noisy maximum is a smooth function of all the scores, not of the winner's alone. Releasing it is a separate numeric query, which needs its own budget; report-noisy-max releases only the index.*
 :::
 
-## Splitting the budget of AboveThreshold {#sec-sol-selection-4}
+## Splitting the budget of AboveThreshold {#sec-sol-sel-4}
 
 > **Exercise 4.** **Splitting the budget of AboveThreshold.** With $\rho \sim \mathrm{Lap}(\Delta/\varepsilon_1)$ and $\nu_i \sim \mathrm{Lap}(2\Delta/\varepsilon_2)$, redo the accuracy derivation to get $\alpha = \max\big(2\Delta\ln(2/\beta)/\varepsilon_1,\ 4\Delta\ln(2k/\beta)/\varepsilon_2\big)$, and minimize it over $\varepsilon_1 + \varepsilon_2 = \varepsilon$. *Check: for $k = 1000$, $\beta = 0.05$, $\varepsilon = 1$, $\Delta = 1$, the equal split gives 84.77 and the best split gives 49.76, with $\varepsilon_1 = 0.148$.* *(Laplace tails, union bound)*
 
@@ -86,7 +86,7 @@ $$\alpha^* = \frac{a + c}{\varepsilon} = \frac{2\Delta\ln(2/\beta) + 4\Delta\ln(
 *The threshold noise is drawn once and the query noise $k$ times, so the union bound makes the query noise the bottleneck. Giving it 85% of the budget improves the accuracy by 41% at the same privacy.*
 :::
 
-## No query noise {#sec-sol-selection-5}
+## No query noise {#sec-sol-sel-5}
 
 > **Exercise 5.** **No query noise.** In the two-query counterexample for Algorithm 5 of @tbl-sel-svt-variants, with $\tau = 0$ and $\rho \sim \mathrm{Lap}(2)$, compute $\Pr[\bot\top \mid D]$ and $\Pr[\bot\top \mid D']$. *Check: 0.1967 and 0.* *(Reading a proof for the step that fails)*
 
@@ -99,7 +99,7 @@ $$\alpha^* = \frac{a + c}{\varepsilon} = \frac{2\Delta\ln(2/\beta) + 4\Delta\ln(
 *A probability that is positive on one dataset and zero on its neighbour has infinite privacy loss: one observation of $\bot\top$ proves the data are $D$, not $D'$.*
 :::
 
-## Two candidates {#sec-sol-selection-6}
+## Two candidates {#sec-sol-sel-6}
 
 > **Exercise 6.** **Two candidates.** For two candidates whose scores differ by $d$, compute the probability that the better one is selected by the exponential mechanism with weights $e^{u/b}$ and by Laplace report-noisy-max with scale $b$. *Hint: the difference of two independent $\mathrm{Lap}(b)$ variables has $\Pr[Z_1 - Z_2 > x] = \frac12e^{-x/b}(1 + \frac{x}{2b})$ for $x \ge 0$.* *Check: at $d = b$, 0.7311 against 0.7241.* Compare with the 50-model example, where Laplace noise did better. *(Gumbel-max, Laplace differences)*
 
@@ -124,7 +124,7 @@ A million simulated runs at $d = b$ give 0.7308 for the Gumbel noisy max and 0.7
 *Neither private argmax dominates the other: which one selects better depends on how many competitors are close to the top. Both have the same privacy guarantee, so the choice is about accuracy on the score profiles you expect.*
 :::
 
-## The Laplace mechanism as an exponential mechanism {#sec-sol-selection-7}
+## The Laplace mechanism as an exponential mechanism {#sec-sol-sel-7}
 
 > **Exercise 7.** **The Laplace mechanism as an exponential mechanism.** Take a query $f$ with sensitivity $\Delta = 1$, candidates on the whole real line, and the score $u(D, h) = -|f(D) - h|$ (@sec-sel-apps). Show that the exponential mechanism with the generic weights $e^{\varepsilon u/2}$ adds $\mathrm{Lap}(2/\varepsilon)$ noise, that its normalizer does not depend on $f(D)$, and that its privacy loss is therefore only $\varepsilon/2$. Then drop the 2 and check that the result is the Laplace mechanism at $\varepsilon$. *Check: at $\varepsilon = 1$, with $f(D) = 0$ and $f(D') = 1$, both normalizers are 4.0000 with the 2 and 2.0000 without; the largest log ratio of the densities is 0.5000 and 1.0000; the root-mean-square errors are 2.8284 and 1.4142.* *(Exponential mechanism, the normalizer factor)*
 
@@ -138,7 +138,7 @@ A million simulated runs at $d = b$ give 0.7308 for the Gumbel noisy max and 0.7
 *The factor 2 pays for a normalizer that can move against the candidate. When the scores are a shifted copy of one another, as here, the normalizer cannot move, and the generic recipe adds twice the noise it needs.*
 :::
 
-## Records for a private learner {#sec-sol-selection-8}
+## Records for a private learner {#sec-sol-sel-8}
 
 > **Exercise 8.** **Records for a private learner.** For the private learner of @eq-sel-learner, find the number of records each term needs for an excess error of $\alpha = 0.05$ at $\beta = 0.05$, for the class of 1,001 thresholds and for a class of $10^6$. Then find the $\varepsilon$ below which the privacy term needs more records than the sampling term. *Check: 33,913 and 793 records at $\varepsilon = 1$ for 1,001 thresholds; 56,015 and 1,345 for $10^6$; privacy dominates below $\varepsilon = 0.0234$.* *(Utility of the exponential mechanism, uniform convergence)*
 
@@ -151,7 +151,7 @@ A million simulated runs at $d = b$ give 0.7308 for the Gumbel noisy max and 0.7
 *Since the two logarithms are close, privacy dominates roughly when $\varepsilon < \alpha/2$. At the accuracies machine learning cares about, a few percent, that means strong privacy, $\varepsilon$ around 0.01; at $\varepsilon = 1$ privacy is a small surcharge on the records you need anyway.*
 :::
 
-## Sparse with basic and advanced composition {#sec-sol-selection-9}
+## Sparse with basic and advanced composition {#sec-sol-sel-9}
 
 > **Exercise 9.** **Sparse with basic and advanced composition.** For $k = 1000$ queries, $\beta = 0.05$, $\varepsilon = 1$ and $\delta = 10^{-6}$, compare the margin of Sparse with basic composition (@eq-sel-sparse-alpha) and with advanced composition, as the number $c$ of answers above grows. Find the smallest $c$ at which advanced composition gives the smaller margin, and explain where it comes from. *Check: advanced composition wins from $c = 29$ (margins 3,240 against 3,218), and at $c = 1000$ the margins are 140,035 and 23,691.* *(Composition of AboveThreshold runs)*
 

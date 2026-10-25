@@ -396,7 +396,7 @@ The privacy cost per step is about $\varepsilon/n$, and composition over $n^2$ s
 
 : The chapter's results. {#tbl-erm-summary}
 
-## Notes {#sec-erm-notes}
+## References {#sec-erm-notes}
 
 - Kamalika Chaudhuri, Claire Monteleoni and Anand Sarwate, "Differentially Private Empirical Risk Minimization", 2011. Output and objective perturbation for regularized convex losses, with the sensitivity bound of @thm-erm-sensitivity for averaged losses.
 - Benjamin Rubinstein, Peter Bartlett, Ling Huang and Nina Taft, "Learning in a Large Function Space: Privacy-Preserving Mechanisms for SVM Learning", 2012. Output perturbation for support vector machines.

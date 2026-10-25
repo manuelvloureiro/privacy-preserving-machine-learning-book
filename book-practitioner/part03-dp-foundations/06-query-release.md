@@ -127,7 +127,7 @@ A query server that receives queries one at a time, perhaps chosen after earlier
 - Add noise to whole tables, scaled to the set of tables, and post-process freely afterwards.
 - Fit synthetic data once, and never pick the best of several runs on the private data.
 
-## Further reading
+## References
 
 - McKenna, Mullins, Sheldon & Miklau, "AIM: An Adaptive and Iterative Mechanism for Differentially Private Synthetic Data" (VLDB 2022): the select, measure and generate loop as used in practice.
 - Hardt, Ligett & McSherry, "A Simple and Practical Algorithm for Differentially Private Data Release" (NeurIPS 2012): MWEM, with experiments on real tables.

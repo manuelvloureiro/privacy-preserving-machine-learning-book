@@ -175,7 +175,7 @@ The script checks the lemma by brute force. It draws 200,000 random tests, $\phi
 
 **The slope of the curve is $-\tau$.** Plot the LR tests as points $(a, b)$. Moving along a segment of this curve means rejecting one more outcome $x$ with a little more probability. That spends $p(x)$ of false-positive budget per unit of extra rejection probability and gains $q(x)$ of power, so $b$ falls by $\Lambda(x)$ for each unit $a$ rises: the slope of the segment is $-\Lambda(x)$. In @fig-ht-discrete-tradeoff the segments have slopes $-4$, $-1.5$, $-0.667$ and $-0.25$: the likelihood ratios, largest first. Because the LR test adds outcomes in decreasing order of exchange rate, each segment is less steep than the last, and a curve whose slope keeps increasing is convex.
 
-**Many observations.** For $n$ independent observations the joint probability of the sample is the product of the individual probabilities, under $P$ and under $Q$. So the likelihood ratio of the whole sample is $\prod_i \Lambda(x_i)$, and the LR test thresholds its logarithm $\sum_i \ln \Lambda(x_i)$, a sum of independent terms. Sums of independent terms concentrate, so the errors decay exponentially in $n$. With the false positive rate held fixed, the type II error decays like $e^{-n\,D_{\mathrm{KL}}(P\|Q)}$, where the KL divergence $D_{\mathrm{KL}}(P\|Q) = \mathbb E_P[\ln(p(X)/q(X))]$ is the average log-ratio by which a ham observation favours ham over spam (the Chernoff–Stein lemma; Cover & Thomas, ch. 11, @sec-apx-tail-cramer-stein in the appendices, and [Exercise 8](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-hypothesis-testing-8)).
+**Many observations.** For $n$ independent observations the joint probability of the sample is the product of the individual probabilities, under $P$ and under $Q$. So the likelihood ratio of the whole sample is $\prod_i \Lambda(x_i)$, and the LR test thresholds its logarithm $\sum_i \ln \Lambda(x_i)$, a sum of independent terms. Sums of independent terms concentrate, so the errors decay exponentially in $n$. With the false positive rate held fixed, the type II error decays like $e^{-n\,D_{\mathrm{KL}}(P\|Q)}$, where the KL divergence $D_{\mathrm{KL}}(P\|Q) = \mathbb E_P[\ln(p(X)/q(X))]$ is the average log-ratio by which a ham observation favours ham over spam (the Chernoff–Stein lemma; Cover & Thomas, ch. 11, @sec-apx-tail-cramer-stein in the appendices, and [Exercise 8](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-8)).
 
 **What the lemma needs.** Both hypotheses must be simple. A composite alternative such as "the mean is positive" contains many distributions, each with its own LR test, and one test is optimal against all of them at once only in special cases. The main one is a one-sided test in a family with a monotone likelihood ratio, where every member's LR test is the same threshold on one statistic (Karlin–Rubin; Casella & Berger, §8.3).
 
@@ -232,7 +232,7 @@ The two extremes of the curve are the two extremes of difficulty. $T(a) = 1 - a$
 
 Between the extremes, the further $T$ bends below the diagonal, the easier the problem. A pair $(P, Q)$ is **harder to distinguish** than $(P', Q')$ if $T(P, Q) \ge T(P', Q')$ everywhere: at every budget, the best test misses more. This is only a partial order, because two curves can cross, and then neither problem is uniformly harder.
 
-The curve need not start at 1. If $Q$ puts mass where $P$ has none, a test catches that mass with no false alarms, so $T(0) = 1 - \Pr_Q[p = 0]$ is below 1 ([Exercise 6](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-hypothesis-testing-6)). And the curve depends on which distribution is the null: swapping the roles of $P$ and $Q$ reflects the curve across the diagonal, so $T(Q, P)$ is the inverse function of $T(P, Q)$ when $T(P, Q)$ is strictly decreasing ([Exercise 2](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-hypothesis-testing-2)).
+The curve need not start at 1. If $Q$ puts mass where $P$ has none, a test catches that mass with no false alarms, so $T(0) = 1 - \Pr_Q[p = 0]$ is below 1 ([Exercise 6](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-6)). And the curve depends on which distribution is the null: swapping the roles of $P$ and $Q$ reflects the curve across the diagonal, so $T(Q, P)$ is the inverse function of $T(P, Q)$ when $T(P, Q)$ is strictly decreasing ([Exercise 2](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-2)).
 
 ### Check yourself
 
@@ -262,7 +262,7 @@ $$\Lambda(x) = \frac{\varphi(x - \mu)}{\varphi(x)} = \exp\Big(\frac{x^2 - (x - \
 4. **Type II error.** Under $Q$, $X - \mu \sim \mathcal N(0, 1)$, so the test misses with probability $b = \Pr_Q[X \le \tau] = \Pr[X - \mu \le \tau - \mu] = \Phi(\tau - \mu)$.
 5. **Substitute** step 3 into step 4 to get @eq-ht-gaussian-tradeoff.
 
-**Checks.** At $\mu = 0$ the two hypotheses coincide, and indeed $\Phi(\Phi^{-1}(1 - a)) = 1 - a$, the diagonal. As $\mu \to \infty$, $T \to 0$ for every $a > 0$. And $T$ is symmetric about the diagonal, $T(T(a)) = a$ ([Exercise 1](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-hypothesis-testing-1)). In short: Fact 4 turns $\Phi^{-1}(1 - T(a))$ into $-\Phi^{-1}(T(a)) = -\big(\Phi^{-1}(1 - a) - \mu\big)$, so $T(T(a)) = \Phi\big(-\Phi^{-1}(1 - a)\big) = 1 - (1 - a) = a$.
+**Checks.** At $\mu = 0$ the two hypotheses coincide, and indeed $\Phi(\Phi^{-1}(1 - a)) = 1 - a$, the diagonal. As $\mu \to \infty$, $T \to 0$ for every $a > 0$. And $T$ is symmetric about the diagonal, $T(T(a)) = a$ ([Exercise 1](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-1)). In short: Fact 4 turns $\Phi^{-1}(1 - T(a))$ into $-\Phi^{-1}(T(a)) = -\big(\Phi^{-1}(1 - a) - \mu\big)$, so $T(T(a)) = \Phi\big(-\Phi^{-1}(1 - a)\big) = 1 - (1 - a) = a$.
 
 ### Interpretation
 
@@ -438,7 +438,7 @@ The AUC hides this because it averages over all FPRs equally. The region FPR $\l
 
 Neither curve here is the best possible for its detector. B's score threshold is not the optimal test for its own $P$ and $Q$: with unequal variances the log likelihood ratio, $\ln$ of the $\mathcal N(m, \sigma^2)$ density over the $\mathcal N(0, 1)$ density, has the term $\frac12(1 - 1/\sigma^2)s^2$, which is quadratic in the score $s$ and positive for $\sigma = 2$. So the ratio is large at both ends, and the optimal test also flags very *low* scores. Neyman–Pearson says the optimal ROC is at least as good as the one plotted.
 
-An extreme case is in [Exercise 5](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-hypothesis-testing-5): a detector with AUC only 0.525 that catches 5% of positives at FPR $10^{-3}$.
+An extreme case is in [Exercise 5](../../book-exercises/part01-prerequisites/04-hypothesis-testing.md#sec-sol-ht-5): a detector with AUC only 0.525 that catches 5% of positives at FPR $10^{-3}$.
 
 ### Check yourself
 

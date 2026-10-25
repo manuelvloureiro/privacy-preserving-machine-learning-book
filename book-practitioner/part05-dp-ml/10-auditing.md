@@ -122,7 +122,7 @@ Stronger black-box attacks, such as the likelihood ratio attack (LiRA) of [Pre-r
 
 : Which audit answers which question, and its rule. {#tbl-audit-cheat}
 
-## Further reading
+## References
 
 - Nasr et al., "Tight Auditing of Differentially Private Machine Learning" (USENIX Security 2023): Dirac canaries, per-step audits and real bugs.
 - Steinke, Nasr & Jagielski, "Privacy Auditing with One (1) Training Run" (NeurIPS 2023): the one-run audit.

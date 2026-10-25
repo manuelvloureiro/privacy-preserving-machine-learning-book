@@ -46,7 +46,7 @@ The usual mistake is to treat rounding, swapping households or small-cell suppre
 
 A second is to test one table at a time, when the risk lies in the union of all releases. A third is to trust least squares alone, because errors chosen against it hurt it more than random noise does. So reconstruct your own release with both decoders before publishing it, and record the result in [Pre-release privacy risk assessment](10-risk-assessment.md).
 
-## Further reading
+## References
 
 - Cohen & Nissim, "Linear Program Reconstruction in Practice" (Journal of Privacy and Confidentiality, 2020): the attack on Diffix.
 - Garfinkel, Abowd & Martindale, "Understanding Database Reconstruction Attacks on Public Data" (2019): a census block rebuilt with a solver.

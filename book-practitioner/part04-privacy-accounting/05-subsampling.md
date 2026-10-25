@@ -94,7 +94,7 @@ Plan in this order, then. First fix the batch size $B$ and the number of epochs 
 - Account for the sampler you run, and state the neighbouring relation next to $\varepsilon$.
 - Check that the loader's batches vary in size. Constant batch sizes mean it is not Poisson sampling.
 
-## Further reading
+## References
 
 - Balle, Barthe & Gaboardi, "Privacy Amplification by Subsampling: Tight Analyses via Couplings and Divergences" (NeurIPS 2018): amplification for each sampler and neighbouring relation.
 - Lebeda, Regehr, Kamath & Steinke, "Avoiding Pitfalls for Privacy Accounting of Subsampled Mechanisms under Composition" (IEEE SaTML 2025): fixed-size batches and other accounting pitfalls.

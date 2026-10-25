@@ -47,7 +47,7 @@ Amplification by iteration covers one pass of noisy stochastic gradient descent 
 
 Deep learning breaks both conditions. Checkpoints, logged models and a best checkpoint picked from several all release more than the final model, and non-convex losses are not contractions. Annamalai (2024) builds a non-convex loss whose final model leaks as much as all the intermediate models together. So never report an $\varepsilon$ from amplification by iteration for deep learning, only for convex models, such as logistic regression, that release just their final weights.
 
-## Further reading
+## References
 
 - Feldman, McMillan & Talwar, "Hiding Among the Clones" (FOCS 2021): the clone bound and how to compute it.
 

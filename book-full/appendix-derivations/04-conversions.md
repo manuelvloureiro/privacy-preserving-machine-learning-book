@@ -309,7 +309,7 @@ For a pipeline of Gaussian releases, compute $\mu_i = \Delta_i/\sigma_i$ for eac
 
 The formula is exact only for Gaussian noise with the $\ell_2$ sensitivity $\Delta$, the largest Euclidean distance between the query's values on neighbours. For subsampled DP-SGD, GDP comes from a central limit theorem and is only an approximation (@sec-gdp-sgd). And one reported $(\varepsilon, \delta)$ pair keeps one touching line and forgets the rest of the curve. @sec-gdp-duality shows that the whole family of lines rebuilds $G_\mu$.
 
-## Summary
+## Summary {#sec-apx-conv-summary}
 
 @tbl-apx-conv-summary puts the four definitions side by side. Each one tracks a different summary of the privacy loss, and each converts to $(\varepsilon, \delta)$ at the end.
 

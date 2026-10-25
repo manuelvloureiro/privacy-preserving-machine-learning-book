@@ -1,4 +1,4 @@
-# Report and review an ε claim
+# Choosing an accountant
 
 ## Why this matters
 
@@ -152,7 +152,7 @@ The libraries agree. Each PLD value lies inside the full edition's bracket, and 
 
 - Never publish $\varepsilon$ without $\delta$, the unit, the relation, the accountant and its version, and the inputs to recompute it.
 
-## Further reading
+## References
 
 - Ponomareva et al., "How to DP-fy ML: A Practical Guide to Machine Learning with Differential Privacy" (JAIR 2023): matching the accounting to the pipeline, and what to report.
 - Near, Darais, Lefkovitz & Howarth, "Guidelines for Evaluating Differential Privacy Guarantees" (NIST SP 800-226, 2025): what an evaluator will ask of your claim.

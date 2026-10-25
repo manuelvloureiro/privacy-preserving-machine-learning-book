@@ -107,6 +107,7 @@ $$
 \Pr\big[\exists i \colon |a_i - q_i(\mathcal D)| > \alpha\big] \le \beta .
 $$
 :::
+<!-- proof: cited -->
 
 This is Theorem 3.4 of Bassily, Nissim, Smith, Steinke, Stemmer and Ullman (2016), for queries of sensitivity $1/n$. The failure probability on the sample must be of order $\alpha\beta$, not $\beta$, for the conclusion to hold with failure probability $\beta$. The proof is long, so only its plan is given here. It runs about $1/\beta$ independent copies of the interaction, each on its own sample. It then imagines a monitor, which knows $\mathcal D$ and exists only in the proof, and which picks the copy and the query with the largest error on the population. The monitor only post-processes the outputs of DP interactions, so its choice is itself DP. A version of @lem-ada-key below for several samples shows that such a choice cannot find a large population error on average. Hence each copy errs with probability $O(\beta)$. A shorter proof of a stronger theorem is in Jung et al. (2020).
 
@@ -174,6 +175,7 @@ $$
 \mathbb E\Big[\max_{i \le k} |a_i - q_i(\mathcal D)|\Big] \le \alpha + e^{\varepsilon} - 1 + \delta .
 $$
 :::
+<!-- proof: after @lem-ada-key -->
 
 For small $\varepsilon$, the excess is about $\varepsilon + \delta$. Most of the work is in a lemma about one query. It says that a query chosen by a DP algorithm takes about the same value on the sample as on the population, on average. The last query of @prp-ada-overfit is exactly a query on which the two disagree, so a DP algorithm cannot produce it.
 
@@ -283,7 +285,7 @@ which the condition on $n$ makes at most $\alpha$. Hence the expected worst erro
 
 : The chapter's results. {#tbl-ada-summary}
 
-## Notes {#sec-ada-notes}
+## References {#sec-ada-notes}
 
 - John P. A. Ioannidis, "Why Most Published Research Findings Are False", 2005. The reproducibility problem that motivates the chapter.
 - Cynthia Dwork, Vitaly Feldman, Moritz Hardt, Toniann Pitassi, Omer Reingold and Aaron Roth, "Preserving Statistical Validity in Adaptive Data Analysis", 2015. The first use of differential privacy to answer adaptively chosen queries with guarantees on the population.

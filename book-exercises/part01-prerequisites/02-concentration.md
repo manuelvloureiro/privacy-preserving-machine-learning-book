@@ -140,7 +140,7 @@ The lower tail works the same way: the Bernoulli lower-tail step 1 also reduced 
 ::: {.callout-tip collapse="true" title="Solution"}
 **The modification.** Make the rule a parameter. A rule sees only the past (the last two flips and the running martingale) and says, for each simulated game, whether the next flip uses the 0.7 coin:
 
-```python
+```text
 Rule = Callable[[BoolArray, BoolArray, FloatArray], BoolArray]
 
 def rule_after_two_heads(last: BoolArray, before: BoolArray, m: FloatArray) -> BoolArray:

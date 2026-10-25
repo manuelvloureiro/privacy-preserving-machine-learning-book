@@ -295,7 +295,7 @@ The Cauchy distribution has such heavy tails that it has no mean. Its tail is $\
 
 : The chapter's results. {#tbl-bgs-summary}
 
-## Notes {#sec-bgs-notes}
+## References {#sec-bgs-notes}
 
 - Kobbi Nissim, Sofya Raskhodnikova and Adam Smith, "Smooth Sensitivity and Sampling in Private Data Analysis", 2007. Local and smooth sensitivity, the failure of naive local noise, and noise distributions for smooth sensitivity under pure and approximate DP.
 - Cynthia Dwork and Jing Lei, "Differential Privacy and Robust Statistics", 2009. The propose-test-release framework.

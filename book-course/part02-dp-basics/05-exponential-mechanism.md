@@ -130,6 +130,10 @@ $$
 $$ {#eq-em-utility}
 :::
 
+::: {.proof}
+1. At least one object attains the best score, so $|\mathcal R^*(D)| \ge 1$ and $\ln(|\mathcal R|/|\mathcal R^*(D)|) \le \ln|\mathcal R|$. The threshold in @eq-em-utility is therefore at most the threshold of @thm-em-utility for the same $t$, so the event here is contained in the event there, and its probability is at most $e^{-t}$.
+:::
+
 ## Applications {#sec-em-applications}
 
 Each application below follows the same recipe. It chooses the set of objects and the score function, bounds the sensitivity, and reads off the privacy and accuracy from @thm-em-privacy and @cor-em-utility.
@@ -297,7 +301,7 @@ The first bound on $n$ is what learning needs without privacy, and the second is
 
 : The chapter's results. {#tbl-em-summary}
 
-## Notes {#sec-em-notes}
+## References {#sec-em-notes}
 
 - Frank McSherry and Kunal Talwar, "Mechanism Design via Differential Privacy", 2007. The exponential mechanism, with the digital goods auction and its approximate truthfulness.
 - Cynthia Dwork and Aaron Roth, *The Algorithmic Foundations of Differential Privacy*, 2014. Section 3.4 presents the exponential mechanism and its privacy and utility theorems, and Section 10.1 the link with truthful mechanism design.

@@ -170,7 +170,7 @@ The residual-risk entry, most often left out, names the attacks that were not ru
 
 : The steps of a pre-release risk assessment, their defaults and their checks. {#tbl-risk-checklist}
 
-## Further reading
+## References
 
 - Carlini et al., "Membership Inference Attacks From First Principles" (IEEE S&P 2022): LiRA, and why attacks are reported by their TPR at a low FPR.
 - Carlini et al., "The Secret Sharer: Evaluating and Testing Unintended Memorization in Neural Networks" (USENIX Security 2019): canaries, exposure and the skew-normal extrapolation.
