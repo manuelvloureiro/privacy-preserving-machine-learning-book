@@ -1,19 +1,14 @@
 """code/part03-query-release/multiplicative_weights.py runs, writes its figure, and reproduces the numbers in book-course/part03-query-release/01-multiplicative-weights.md."""
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part03-query-release"
 
 
 def test_multiplicative_weights_matches_chapter(tmp_path: Path) -> None:
-    out = subprocess.run(
-        [sys.executable, str(CODE / "multiplicative_weights.py"), "--out", str(tmp_path)],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    out = run(CODE / "multiplicative_weights.py", tmp_path)
     for expected in (
         "T=354892",
         "|Q|=1e+06: basic=3.362e+08  advanced=3.535e+06  pmw=4.292e+07",

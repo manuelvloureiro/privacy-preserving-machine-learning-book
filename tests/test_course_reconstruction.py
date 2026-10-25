@@ -1,19 +1,14 @@
 """code/part01-privacy-failures/reconstruction.py runs, writes its figure, and reproduces the numbers in book-course/part01-privacy-failures/02-reconstruction.md."""
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part01-privacy-failures"
 
 
 def test_reconstruction_matches_chapter(tmp_path: Path) -> None:
-    out = subprocess.run(
-        [sys.executable, str(CODE / "reconstruction.py"), "--out", str(tmp_path)],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    out = run(CODE / "reconstruction.py", tmp_path)
     for expected in (
         "sorted triples=341376  with median 35=3276  with mean 47 too=36",
         "first=(0, 35, 106)  last=(35, 35, 71)",

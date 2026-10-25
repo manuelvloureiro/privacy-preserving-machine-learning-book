@@ -1,0 +1,180 @@
+# The skeletons tools/structure.py checks, per book: what AGENTS.md says a page of each kind looks like,
+# written as rules a tool can keep. A page is matched to the first glob that fits it; README.md,
+# glossary.md and term-index.md are never checked. Pages under a book's `legacy` list have not been
+# converted to their skeleton yet: `check` skips them (`--strict` does not), and a conversion removes
+# the page's line. Headings are compared by the text before a colon, ignoring case, so "## Code: what
+# the script checks" is "## Code".
+
+[books.book-full]
+pages = [
+  { glob = "index.md", skeleton = "preface" },
+  { glob = "part*/00-introduction.md", skeleton = "part-page" },
+  { glob = "part*/[0-9][0-9]-*.md", skeleton = "full-chapter" },
+  { glob = "appendix-derivations/0[1-4]-*.md", skeleton = "core-appendix" },
+  { glob = "appendix-derivations/*.md", skeleton = "appendix" },
+]
+# Every chapter, until it is converted to the environment skeleton (AGENTS.md, Chapter structure).
+legacy = [
+  "part01-prerequisites/00-introduction.md",
+  "part01-prerequisites/01-distributions.md",
+  "part01-prerequisites/02-concentration.md",
+  "part01-prerequisites/03-divergences.md",
+  "part01-prerequisites/04-hypothesis-testing.md",
+  "part01-prerequisites/05-information-theory.md",
+  "part01-prerequisites/06-optimization.md",
+  "part01-prerequisites/07-stability-generalization.md",
+  "part01-prerequisites/08-crypto-basics.md",
+  "part02-attacks/00-introduction.md",
+  "part02-attacks/01-threat-models.md",
+  "part02-attacks/02-membership-inference.md",
+  "part02-attacks/03-attribute-inference.md",
+  "part02-attacks/04-property-inference.md",
+  "part02-attacks/05-memorization-extraction.md",
+  "part02-attacks/06-gradient-inversion.md",
+  "part02-attacks/07-linkage-reidentification.md",
+  "part02-attacks/08-syntactic-anonymity.md",
+  "part02-attacks/09-reconstruction.md",
+  "part03-dp-foundations/00-introduction.md",
+  "part03-dp-foundations/01-definition.md",
+  "part03-dp-foundations/02-properties.md",
+  "part03-dp-foundations/03-laplace-gaussian.md",
+  "part03-dp-foundations/04-composition.md",
+  "part03-dp-foundations/05-selection.md",
+  "part03-dp-foundations/06-query-release.md",
+  "part03-dp-foundations/07-sensitivity.md",
+  "part03-dp-foundations/08-discrete-mechanisms.md",
+  "part03-dp-foundations/09-trust-models.md",
+  "part03-dp-foundations/10-lower-bounds.md",
+  "part03-dp-foundations/11-mean-estimation.md",
+  "part04-privacy-accounting/00-introduction.md",
+  "part04-privacy-accounting/01-renyi-dp.md",
+  "part04-privacy-accounting/02-rdp-conversions.md",
+  "part04-privacy-accounting/03-concentrated-dp.md",
+  "part04-privacy-accounting/04-gaussian-dp.md",
+  "part04-privacy-accounting/05-subsampling.md",
+  "part04-privacy-accounting/06-numerical-accounting.md",
+  "part04-privacy-accounting/07-shuffling-iteration.md",
+  "part04-privacy-accounting/08-adaptive-composition.md",
+  "part04-privacy-accounting/09-choosing-an-accountant.md",
+  "part05-dp-ml/00-introduction.md",
+  "part05-dp-ml/01-dp-erm.md",
+  "part05-dp-ml/02-dp-sgd.md",
+  "part05-dp-ml/03-hyperparameter-tuning.md",
+  "part05-dp-ml/04-matrix-mechanisms.md",
+  "part05-dp-ml/05-private-prediction.md",
+  "part05-dp-ml/06-public-data.md",
+  "part05-dp-ml/07-user-level.md",
+  "part05-dp-ml/08-disparate-impact.md",
+  "part05-dp-ml/09-choosing-epsilon.md",
+  "part05-dp-ml/10-auditing.md",
+  "part05-dp-ml/11-adaptive-data-analysis.md",
+]
+
+[books.book-exercises]
+pages = [
+  { glob = "index.md", skeleton = "preface" },
+  { glob = "part*/[0-9][0-9]-*.md", skeleton = "exercise-page" },
+]
+legacy = []
+
+[books.book-practitioner]
+pages = [
+  { glob = "index.md", skeleton = "preface" },
+  { glob = "part*/00-introduction.md", skeleton = "part-page" },
+  { glob = "part*/[0-9][0-9]-*.md", skeleton = "practitioner-page" },
+]
+legacy = []
+
+[books.book-course]
+pages = [
+  { glob = "index.md", skeleton = "preface" },
+  { glob = "part*/00-introduction.md", skeleton = "part-page" },
+  { glob = "part*/[0-9][0-9]-*.md", skeleton = "course-chapter" },
+]
+legacy = []
+
+[books.notes]
+pages = [{ glob = "*/index.md", skeleton = "note" }]
+legacy = []
+
+# --- Skeletons ----------------------------------------------------------------------------------
+
+[skeletons.preface]
+tables_captioned = true
+
+[skeletons.part-page]
+forbidden_h3 = ["Context", "Statement", "Derivation", "Interpretation", "Check yourself"]
+tables_captioned = true
+max_words = 2000
+
+# A full-edition chapter: an opening without a heading, one ## per topic made of numbered
+# environments and prose, then Code, Summary and References, and the pointer to the exercise book.
+[skeletons.full-chapter]
+opening = true
+tail = ["Code", "Summary", "References"]
+forbidden_h2 = ["Why this matters", "Toolkit", "Cheat sheet", "Check yourself", "Further reading", "Notes", "Exercises"]
+forbidden_h3 = ["Context", "Statement", "Derivation", "Interpretation", "Example", "Check yourself", "Definition", "Fact *", "The one idea*", "Notation"]
+section_ids = "sec"
+labels_use_prefix = true
+environments = ["def", "thm", "lem", "prp", "cor", "exm"]
+min_environments_per_topic = 1
+proof_after = ["thm", "lem", "prp", "cor"]
+forbid_bold_results = true
+tables_captioned = true
+summary_table = "tbl-{prefix}-summary"
+max_words = 8000
+max_section_words = 2500
+warn_below_words = 3500
+last_line = '^\*\*Practice\.\*\* Exercises for this chapter, each with a worked solution, are in \[the exercise book\]\(\.\./\.\./book-exercises/(?P<page>[^)]+)\.md\)\.$'
+last_line_page = true
+
+# The first four appendices derive the core formulas from scratch (AGENTS.md, Appendices of derivations).
+[skeletons.core-appendix]
+tail = ["Code", "References"]
+required_h3_per_section = ["The question", "The answer", "A worked example", "Why it works", "Checking it", "Recipe and pitfalls"]
+section_ids = "sec"
+tables_captioned = true
+
+[skeletons.appendix]
+tail = ["Code", "References"]
+required_h3_per_section = ["What the chapter uses", "The idea", "Derivation", "Checking it"]
+optional_h3 = ["What it does not cover"]
+section_ids = "sec"
+tables_captioned = true
+
+# An exercise page: one ## per exercise, numbered from 1, each a quoted statement and a collapsed solution.
+[skeletons.exercise-page]
+title_prefix = "# Exercises: "
+exercise_sections = "sec-sol-{prefix}-{n}"
+exercise_quote = '^> \*\*Exercise {n}\.\*\*'
+solution_div = '^::: \{\.callout-tip collapse="true" title="Solution"\}'
+tables_captioned = true
+
+# The practitioner edition has three kinds of page (AGENTS.md); they share what is forbidden and the pointer.
+[skeletons.practitioner-page]
+forbidden_h2 = ["Toolkit", "Check yourself", "Further reading", "Notes"]
+forbidden_h3 = ["Context", "Statement", "Derivation", "Interpretation", "Check yourself"]
+tables_captioned = true
+max_words = 3800
+last_line_any = ['^\*\*Derivations\.\*\* ']
+
+[skeletons.course-chapter]
+opening = true
+tail = ["Summary", "References"]
+forbidden_h2 = ["Why this matters", "Toolkit", "Cheat sheet", "Check yourself", "Code", "Notes", "Further reading"]
+forbidden_h3 = ["Context", "Statement", "Derivation", "Interpretation", "Check yourself"]
+section_ids = "sec"
+labels_use_prefix = true
+environments = ["def", "thm", "lem", "prp", "cor", "exm"]
+proof_after = ["thm", "lem", "prp", "cor"]
+forbid_bold_results = true
+tables_captioned = true
+summary_table = "tbl-{prefix}-summary"
+max_words = 7000
+
+[skeletons.note]
+single_title = false
+environments = ["def", "thm", "lem", "prp", "cor", "exm"]
+proof_after = ["thm", "lem", "prp", "cor"]
+forbid_bold_results = true
+tables_captioned = true

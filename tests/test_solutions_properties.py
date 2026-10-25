@@ -1,16 +1,10 @@
 """code/part03-dp-foundations/solutions_properties.py runs and reproduces the numbers in book-exercises/part03-dp-foundations/02-properties.md."""
 
-import subprocess
-import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "part03-dp-foundations"
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_solutions_properties_matches_page(tmp_path: Path) -> None:

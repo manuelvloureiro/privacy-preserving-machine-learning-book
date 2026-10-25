@@ -1,19 +1,14 @@
 """code/part02-dp-basics/advanced_composition.py runs, writes its figure, and reproduces the numbers in book-course/part02-dp-basics/04-advanced-composition.md."""
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part02-dp-basics"
 
 
 def test_advanced_composition_matches_chapter(tmp_path: Path) -> None:
-    out = subprocess.run(
-        [sys.executable, str(CODE / "advanced_composition.py"), "--out", str(tmp_path)],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    out = run(CODE / "advanced_composition.py", tmp_path)
     for expected in (
         "eps=0.1 k=100 delta'=1e-06: basic=10.00  lead=5.257  second=0.500  advanced=5.756",
         "eps=0.1 k=1000 delta'=1e-06: basic=100.00  lead=16.623  second=4.996  advanced=21.618",

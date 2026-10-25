@@ -1,19 +1,14 @@
 """code/part02-dp-basics/exponential_mechanism.py runs, writes its figure, and reproduces the numbers in book-course/part02-dp-basics/05-exponential-mechanism.md."""
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part02-dp-basics"
 
 
 def test_exponential_mechanism_matches_chapter(tmp_path: Path) -> None:
-    out = subprocess.run(
-        [sys.executable, str(CODE / "exponential_mechanism.py"), "--out", str(tmp_path)],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    out = run(CODE / "exponential_mechanism.py", tmp_path)
     for expected in (
         "n=1000 eps=0.5 m=500: gamma=267.40  OPT=266.88",
         "guarantee at 95%=228.56  loss allowed=38.84",

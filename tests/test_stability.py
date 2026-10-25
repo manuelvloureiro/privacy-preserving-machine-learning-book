@@ -1,16 +1,10 @@
 """code/part01-prerequisites/stability.py runs, writes its figures, and reproduces the numbers in book-full/part01-prerequisites/07-stability-generalization.md."""
 
-import subprocess
-import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "part01-prerequisites"
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_stability_matches_section(tmp_path: Path) -> None:

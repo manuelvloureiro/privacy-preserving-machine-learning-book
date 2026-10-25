@@ -4,7 +4,7 @@
     uv run python tools/terms.py candidates      # suggest index terms not yet in terms.toml
     uv run python tools/terms.py check           # exit 1 on any acronym or index problem
     uv run python tools/terms.py build           # write glossary.md, term-index.md, _terms.json
-    uv run python tools/terms.py check --book book-exercises            # another of the three books
+    uv run python tools/terms.py check --book book-exercises            # another book, or notes/<name>
     uv run python tools/terms.py build --book _build/full-pdf --profile pdf   # into a staged copy
 
 The book's files are read from book-full/ unless --book names another book (book-exercises/,
@@ -14,7 +14,7 @@ targets build from staged copies in _build/, so generated files never land among
 book; the default is the website profile. A book whose chapters and appendices don't list
 term-index.md has no index, so check skips the index terms for it.
 
-The curated list, shared by the three books, is terms.toml at the repository's root:
+The curated list, shared by every book and note, is terms.toml at the repository's root:
 
     [acronyms]
     MGF = "moment generating function"                      # must be expanded on every page
@@ -102,6 +102,8 @@ class Page:
 def book_files(include_generated: bool = False) -> list[str]:
     """Chapters and appendices in reading order, from _quarto.yml and the profile's file."""
     config = cast(dict[str, Any], yaml.safe_load((layout.book / "_quarto.yml").read_text()))
+    if "book" not in config:  # a study note: one page, no chapters
+        return ["index.md"]
     profile_file = layout.book / f"_quarto-{layout.profile}.yml"
     if profile_file.exists():  # a profile's book keys extend the base ones, as Quarto merges them
         extra = cast(dict[str, Any], yaml.safe_load(profile_file.read_text()) or {})

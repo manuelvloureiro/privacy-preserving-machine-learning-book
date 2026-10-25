@@ -1,6 +1,6 @@
 # PROSE.md
 
-How to make, and prove, that a page of any of the three books reads well. [AGENTS.md](AGENTS.md) says what to write; this file says how to check that it is written clearly, and how to fix it when it is not. It applies to the full edition, the exercise book and the practitioner edition alike; only the thresholds differ.
+How to make, and prove, that a page of any of the four books, or a study note, reads well. [AGENTS.md](AGENTS.md) says what to write; this file says how to check that it is written clearly, and how to fix it when it is not. It applies to every book and note alike; only the thresholds differ (`tools/prose.toml`).
 
 ## Why this process exists
 
@@ -141,7 +141,7 @@ The author reads at least one page per part, chosen from those the analyzer rank
 
 A page is ready to commit when:
 
-- `make prose-check BOOK=... ` passes for it;
+- `make prose-check BOOK=...` and `make structure-check BOOK=...` pass for it (the second checks the page's shape against its kind's skeleton in `tools/structure.toml`);
 - every cold-reader stall is fixed or explained;
 - every editorial rewrite is applied or rejected with a reason;
 - for the practitioner edition, the correctness review against the full edition has no open items;

@@ -5,17 +5,13 @@ description = "Notes and code for a book on privacy-preserving machine learning"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "ipykernel>=7.4.0",
     "matplotlib>=3.11.2",
-    "mplfonts>=0.0.11",
     "numpy>=2.5.4",
-    "pandas>=3.0.6",
     "scipy>=1.18.1",
 ]
 
 [dependency-groups]
 dev = [
-    "jupyter>=1.1.1",
     "pyright>=1.1.414",
     "pytest>=9.1.1",
     "pyyaml>=6.0.3",
@@ -31,6 +27,7 @@ notes = [
 # The libraries the practitioner edition's snippets and workflow scripts run (tests marked `libs`).
 # Pinned exactly, so the numbers the book quotes stay reproducible. torch is the CPU build.
 practitioner = [
+    "adversarial-robustness-toolbox==1.20.1",  # membership and attribute inference attacks (Part 2)
     "dp-accounting==0.6.0",
     "diffprivlib==0.6.6",
     "fastexcel==0.21.0",
@@ -64,8 +61,8 @@ markers = ["libs: runs a library from the practitioner dependency group (torch, 
 include = ["code", "tests", "tools"]
 exclude = ["archive", ".venv"]
 # code/practitioner_datasets.py is shared by the practitioner scripts, which add code/ to sys.path;
-# tests/test_notation.py imports tools/notation.py the same way.
-extraPaths = ["code", "tools"]
+# tests/test_notation.py imports tools/notation.py the same way, and every test imports tests/helpers.py.
+extraPaths = ["code", "tools", "tests"]
 # Hand-written stubs for the untyped practitioner libraries (Opacus, dp-accounting, scikit-learn, SciPy, ...).
 stubPath = "typings"
 typeCheckingMode = "strict"

@@ -1,19 +1,14 @@
 """code/part05-deployments/shuffle_and_central_deployments.py runs, writes its figure, and reproduces the numbers in book-course/part05-deployments/02-shuffle-and-central-deployments.md."""
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part05-deployments"
 
 
 def test_shuffle_and_central_deployments_matches_chapter(tmp_path: Path) -> None:
-    out = subprocess.run(
-        [sys.executable, str(CODE / "shuffle_and_central_deployments.py"), "--out", str(tmp_path)],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    out = run(CODE / "shuffle_and_central_deployments.py", tmp_path)
     for expected in (
         "eps=1 delta=1e-06: tau=0.4621  min n=1140",
         "n=1000000: q=0.001139  expected coins nq=1139  local eps of one message=7.47",

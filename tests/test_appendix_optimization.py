@@ -1,16 +1,10 @@
 """code/appendix-derivations/apx_optimization.py runs, writes its figures, and reproduces the numbers in book-full/appendix-derivations/07-optimization-estimation.md."""
 
-import subprocess
-import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "appendix-derivations"
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_appendix_optimization_matches_page(tmp_path: Path) -> None:

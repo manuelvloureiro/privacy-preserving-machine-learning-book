@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
 # The public functions, called as chapter 37 calls them: a Gaussian δ, and the sandwich for a short DP-SGD run.
@@ -18,7 +20,6 @@ assert down <= 0.3800 <= up and math.isclose(up - down, 10 * 1e-4, abs_tol=1e-6)
 pld = compose_pld(discretize_subsampled_gaussian_pld(0.01, 1.0, 1e-4, True), 10)
 assert math.isclose(pld_delta(pld, pld_epsilon(pld, 1e-5)), 1e-5, rel_tol=1e-9)
 """
-
 
 # Regression: a sharply peaked PLD whose FFT round-off noise used to stretch the composed grid down to
 # ℓ ≈ -2200, where e^{-ℓ} overflowed in pld_epsilon and the add direction came out NaN (q = 0.001, σ = 0.8,
@@ -41,12 +42,6 @@ wide = PLD(-100_000, 1e-2, np.full(100_100, 1 / 100_100), 0.0, True)  # uniform 
 eps = pld_epsilon(wide, 1e-4)
 assert 0 < eps < 1 and math.isclose(pld_delta(wide, eps), 1e-4, rel_tol=1e-9), eps
 """
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_public_functions() -> None:

@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
 # The public functions, called as chapter 37 would call them, plus closed-form checks.
@@ -28,12 +30,6 @@ assert abs(noisy_gd_last_iterate_mu(1.0, 25, 1.0, 1.0, 1) - 5.0) < 1e-12
 assert abs(noisy_gd_last_iterate_mu(0.5, 200, 1.0, 1.0, 1) - hidden_state_limit_mu(0.5, 1.0, 1.0)) < 1e-12
 assert abs(noisy_gd_one_pass_mu(1.0, 16, 2.0, 1.0, 5) - 1 / 8) < 1e-12
 """
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_shuffling_iteration_matches_section(tmp_path: Path) -> None:

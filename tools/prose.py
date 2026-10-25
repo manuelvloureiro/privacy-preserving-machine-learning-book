@@ -96,14 +96,26 @@ def prose_blocks(raw: str) -> list[tuple[str, str]]:
     return blocks
 
 
+REFERENCE_WORDS = {
+    "fig": "Figure",
+    "tbl": "Table",
+    "eq": "Equation",
+    "sec": "Section",
+    "thm": "Theorem",
+    "lem": "Lemma",
+    "def": "Definition",
+    "prp": "Proposition",
+    "cor": "Corollary",
+    "exm": "Example",
+}
+
+
 def plain(text: str) -> tuple[str, list[str], list[str]]:
     """The paragraph's prose with formulas as placeholders, its formulas, and its bold terms."""
     bold = [re.sub(r"[*_`]", "", b) for b in re.findall(r"\*\*(.+?)\*\*", text)]
     text = re.sub(r"!?\[([^\]]*)\]\([^)]*\)", r"\1", text)
     text = re.sub(r"\{[#.][^}]*\}", "", text)
-    text = re.sub(
-        r"@(fig|tbl|eq|sec)-[\w-]+", lambda m: {"fig": "Figure", "tbl": "Table"}.get(m.group(1), "Section"), text
-    )
+    text = re.sub(r"@(fig|tbl|eq|sec|thm|lem|def|prp|cor|exm)-[\w-]+", lambda m: REFERENCE_WORDS[m.group(1)], text)
     text = re.sub(r"`[^`]*`", "code", text)
     math: list[str] = []
 
@@ -508,13 +520,16 @@ def introduced(text: str, index: int, formula: str) -> bool:
 
 def load(book: str) -> tuple[dict[str, Any], set[str]]:
     config = tomllib.loads(CONFIG.read_text())
-    profile = cast(dict[str, str], config["books"]).get(book, "full")
+    profile = cast(dict[str, str], config["books"]).get(book, "full")  # a study note takes the full edition's limits
     limits = cast(dict[str, Any], config["profiles"])[profile]
     allowed = set(cast(dict[str, list[str]], config.get("allowed_symbols", {})).get(book, []))
     return limits, allowed
 
 
 def pages_of(book: str) -> list[str]:
+    """A book's chapters and appendices (not its preface), or a study note's one page."""
+    if book.startswith("notes/"):
+        return ["index.md"]
     terms.layout.book = ROOT / book
     return [f for f in terms.book_files() if Path(f).name != "index.md"]
 
@@ -554,7 +569,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=["report", "check", "text"])
     parser.add_argument("text", nargs="?", help="for `text`: the prose to analyse")
-    parser.add_argument("--book", default="book-practitioner", help="book-full, book-exercises or book-practitioner")
+    parser.add_argument("--book", default="book-full", help="a book folder, or notes/<name> for a study note")
     parser.add_argument("--page", help="one page, relative to the book's folder")
     parser.add_argument("--worst", type=int, default=5, help="paragraphs to show per page")
     parser.add_argument("--json", action="store_true", help="machine-readable output")

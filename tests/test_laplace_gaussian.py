@@ -1,16 +1,10 @@
 """code/part03-dp-foundations/laplace_gaussian.py runs, writes its figures, and reproduces the numbers in book-full/part03-dp-foundations/03-laplace-gaussian.md."""
 
-import subprocess
-import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "part03-dp-foundations"
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_laplace_gaussian_matches_section(tmp_path: Path) -> None:

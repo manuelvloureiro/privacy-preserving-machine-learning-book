@@ -3,9 +3,10 @@
     uv run python tools/xrefs.py --site _book/book-full --book book-full \
         --skip-defined-in _build/exercises-website --out _build/exercises-website/_xrefs.json
 
-Quarto resolves @eq-name, @sec-name, @fig-name and @tbl-name only within one book, so the
-exercise book cannot reference the full edition's equations directly. This reads the full
-edition's HTML and writes, for each label, the text Quarto gives a reference to it ("Equation 20.3")
+Quarto resolves @eq-name, @sec-name, @fig-name, @tbl-name and the numbered environments (@thm-name,
+@def-name, ...) only within one book, so the exercise book cannot reference the full edition's
+equations directly. This reads the full edition's HTML and writes, for each label, the text Quarto
+gives a reference to it ("Equation 20.3", "Theorem 20.2")
 and its page and anchor. filters/xrefs.lua turns the exercise book's references into links with it.
 Labels the referring book defines itself (--skip-defined-in) are left out, so Quarto resolves them.
 """
@@ -20,13 +21,19 @@ EQUATION = re.compile(r'<span id="(eq-[\w-]+)">\s*<span class="math display">.*?
 SECTION = re.compile(r'<section id="(sec-[\w-]+)"[^>]*\bdata-number="([\d.]+)"')
 FLOAT = re.compile(r'<div id="((?:fig|tbl)-[\w-]+)"[^>]*class="quarto-float')
 FLOAT_NUMBER = re.compile(r"(Figure|Table)&nbsp;([\d.]+)")
-DEFINED = re.compile(r"\{#((?:eq|sec|fig|tbl)-[\w-]+)")
+# Quarto's numbered environments: <div id="thm-x" class="theorem"> ... <strong>Theorem 4.1 (Name)</strong>
+THEOREM = re.compile(
+    r'<div id="((?:thm|lem|def|prp|cor|exm)-[\w-]+)" class="theorem[^"]*">\s*<p><span class="theorem-title">'
+    r"<strong>(Theorem|Lemma|Definition|Proposition|Corollary|Example) ([\d.]+)"
+)
+DEFINED = re.compile(r"\{#((?:eq|sec|fig|tbl|thm|lem|def|prp|cor|exm)-[\w-]+)")
 
 
 def labels_in_page(html: str) -> dict[str, str]:
     """Each numbered label on one rendered page, with the text a reference to it shows."""
     found = {m.group(1): f"Equation{NBSP}{m.group(2)}" for m in EQUATION.finditer(html)}
     found |= {m.group(1): f"Section{NBSP}{m.group(2)}" for m in SECTION.finditer(html)}
+    found |= {m.group(1): f"{m.group(2)}{NBSP}{m.group(3)}" for m in THEOREM.finditer(html)}
     for m in FLOAT.finditer(html):
         number = FLOAT_NUMBER.search(html, m.end())
         if number:

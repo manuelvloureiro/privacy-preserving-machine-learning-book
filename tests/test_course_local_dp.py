@@ -1,19 +1,14 @@
 """code/part05-deployments/local_dp.py runs, writes its figure, and reproduces the numbers in book-course/part05-deployments/01-local-dp.md."""
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part05-deployments"
 
 
 def test_local_dp_matches_chapter(tmp_path: Path) -> None:
-    out = subprocess.run(
-        [sys.executable, str(CODE / "local_dp.py"), "--out", str(tmp_path)],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    out = run(CODE / "local_dp.py", tmp_path)
     for expected in (
         "eps=1 alpha=0.01 beta=0.05: central n=300",
         "eps=1 alpha=0.01 beta=0.05: local n=86370",

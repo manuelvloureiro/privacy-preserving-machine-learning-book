@@ -1,19 +1,14 @@
 """code/part03-query-release/packing_lower_bounds.py runs, writes its figure, and reproduces the numbers in book-course/part03-query-release/04-packing-lower-bounds.md."""
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part03-query-release"
 
 
 def test_packing_lower_bounds_matches_chapter(tmp_path: Path) -> None:
-    out = subprocess.run(
-        [sys.executable, str(CODE / "packing_lower_bounds.py"), "--out", str(tmp_path)],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    out = run(CODE / "packing_lower_bounds.py", tmp_path)
     for expected in (
         "k=1000 eps=1: n >= 6.21",
         "d=1000 alpha=0.1 eps=1: lower=3458  upper=76010  ratio=22.0",

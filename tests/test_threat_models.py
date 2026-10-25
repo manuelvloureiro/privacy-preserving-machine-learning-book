@@ -1,16 +1,10 @@
 """code/part02-attacks/threat_models.py runs, writes its figures, and reproduces the numbers in book-full/part02-attacks/01-threat-models.md."""
 
-import subprocess
-import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "part02-attacks"
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_threat_models_matches_section(tmp_path: Path) -> None:

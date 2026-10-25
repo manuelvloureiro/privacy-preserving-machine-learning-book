@@ -1,16 +1,10 @@
 """code/part04-privacy-accounting/solutions_renyi_dp.py runs and reproduces the numbers in book-exercises/part04-privacy-accounting/01-renyi-dp.md."""
 
-import subprocess
-import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_solutions_renyi_dp_matches_page(tmp_path: Path) -> None:

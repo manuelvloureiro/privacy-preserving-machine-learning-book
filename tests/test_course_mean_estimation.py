@@ -1,19 +1,14 @@
 """code/part04-learning-statistics/mean_estimation.py runs, writes its figures, and reproduces the numbers in book-course/part04-learning-statistics/04-mean-estimation.md."""
 
-import subprocess
-import sys
 from pathlib import Path
+
+from helpers import run
 
 CODE = Path(__file__).resolve().parent.parent / "code" / "part04-learning-statistics"
 
 
 def test_mean_estimation_matches_chapter(tmp_path: Path) -> None:
-    out = subprocess.run(
-        [sys.executable, str(CODE / "mean_estimation.py"), "--out", str(tmp_path)],
-        capture_output=True,
-        text=True,
-        check=True,
-    ).stdout
+    out = run(CODE / "mean_estimation.py", tmp_path)
     for expected in (
         "n=4000 eps=1 beta=0.002: tau=5.51  sampling=0.0588",
         "R=1e6: naive bound=3107",

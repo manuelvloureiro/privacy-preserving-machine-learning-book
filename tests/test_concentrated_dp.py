@@ -4,6 +4,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from helpers import run
+
 CODE = Path(__file__).resolve().parent.parent / "code" / "part04-privacy-accounting"
 
 # Checks of the public functions, run in a subprocess with the code directory on the path.
@@ -27,12 +29,6 @@ assert math.isclose(cdp.subsampled_gaussian_rdp_int(7, 1 - 1e-15, 2.0), 7 / 8, r
 assert cdp.smallest_zcdp_rho([2.0, 4.0], [1.0, 3.0]) == 0.75
 print("ok")
 """
-
-
-def run(script: Path, out: Path) -> str:
-    return subprocess.run(
-        [sys.executable, str(script), "--out", str(out)], capture_output=True, text=True, check=True
-    ).stdout
 
 
 def test_public_functions() -> None:
