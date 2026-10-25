@@ -56,11 +56,11 @@ One nomenclature for all four books and the study notes: the symbol for each con
 | --- | --- | --- |
 | Dataset; its records | $D = (x_1, \dots, x_n)$ | $X$, $x$, $S$ for a dataset |
 | Number of records | $n$ | $N$ |
-| Data universe (the set of possible records) | $\mathcal X$, so $D \in \mathcal X^n$ | $\mathcal U$, $\mathcal D$ |
+| Data universe (the set of possible records); the set of datasets | $\mathcal X$, so $D \in \mathcal X^n$; a mechanism's domain is $\mathcal X^n$, or $\bigcup_n \mathcal X^n$ when the size is not fixed | $\mathcal U$, $\Omega$, $\mathbb X$ for the universe; $\mathcal D$ for the set of datasets (AIM's use) |
 | Neighbouring datasets | $D \simeq D'$ | $D \sim D'$, $X \sim X'$, "adjacent" |
 | Under add/remove, the dataset with the record $x$ | $D' = D \cup \{x\}$ | |
 | Records drawn at random from a distribution | $X_1, \dots, X_n \sim P$ i.i.d., with $D = (X_1, \dots, X_n)$ | |
-| Data distribution (a population) | $\mathcal D$ | $\pi$ for a population |
+| Data distribution (a population) | $\mathcal D$ | $\pi$ for a population; $\mathcal D$ never names the set of datasets |
 | A labelled record in learning | $z = (x, y)$: features $x$, label $y$, so $D = (z_1, \dots, z_n)$ | |
 | Group size in group privacy | $k$; $m$ on a page where $k$ counts composed mechanisms | |
 

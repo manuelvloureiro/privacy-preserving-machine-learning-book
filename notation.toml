@@ -94,6 +94,16 @@ use = "D \\simeq D'"
 
 [[rule]]
 in = "math"
+find = "(?<![\\w\\\\])M\\(X'?\\)|(?<![\\w])X\\s*\\\\simeq\\s*X'"
+use = "M(D), D \\simeq D': the dataset is D, never X"
+
+[[rule]]
+in = "page"
+find = '(?:set|space|collection) of (?:all )?(?:possible )?datasets,? \$\\mathcal D\$|\\mathcal D\$ (?:be|is|denotes?) the set of (?:all )?(?:possible )?datasets'
+use = 'the set of datasets \mathcal X^n; \mathcal D is the data distribution'
+
+[[rule]]
+in = "math"
 find = '\\Delta_\{?[12]\}?\s*\(|\\Delta_\{?f\}?|\\operatorname\{sens\}|\\mathrm\{GS\}'
 use = '\Delta_1 f, \Delta_2 f, \Delta_2 R'
 
