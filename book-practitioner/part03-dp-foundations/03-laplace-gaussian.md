@@ -139,7 +139,7 @@ To add the noise, call the mechanism on the value, as in `laplace(1234.0)`.
 
 - When $n$ is not public, never use $B/n$ as the sensitivity of a mean.
 
-## Further reading
+## References
 
 - Dwork & Roth, *The Algorithmic Foundations of Differential Privacy* (2014), §3.3 and Appendix A: the Laplace mechanism and the classic Gaussian calibration.
 - Balle & Wang, "Improving the Gaussian Mechanism for Differential Privacy" (ICML 2018): the exact privacy curve and the bisection calibration.
