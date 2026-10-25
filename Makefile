@@ -1,20 +1,24 @@
 # Common tasks. Everything runs through uv, so `make setup` is the only install step.
 # Run `make` or `make help` for the list.
 #
-# The repository holds four Quarto books, which share code/, filters/ and terms.toml:
+# The repository holds five Quarto books, which share code/, filters/, terms.toml and _common.yml:
 #   book-full/          the full edition, with every derivation (website and PDF)
 #   book-exercises/     the full edition's exercises with worked solutions (website only)
 #   book-practitioner/  the practitioner edition, without proofs (website and PDF)
 #   book-course/        the course: differential privacy one topic per chapter, every proof (website and PDF)
-# Each website renders to _book/<book>/, so the sites link to each other by relative path.
+# and the study notes, one page each, in notes/<name>/ (website and PDF). Each website renders to
+# _book/<book>/ or _book/notes/<name>/, so the sites link to each other by relative path.
 
 OUT       := _book
 BUILD     := _build
+BOOKS     := book-full book-exercises book-practitioner book-course
+NOTE_DIRS := $(patsubst %/,%,$(wildcard notes/*/))
 # The chapter scripts that draw figures. The practitioner workflows (practitioner_*.py) are slow, need the
 # datasets in data/ and draw no figures, so their tests run them instead (pytest marker `libs`).
-# The study notes' scripts (code/notes/) run only when their note is built.
+# (pytest marker `libs`). The study notes' scripts (code/notes/) run only when their note is built.
 SCRIPTS   := $(foreach f,$(filter-out code/notes/%,$(wildcard code/*/*.py)),$(if $(findstring /practitioner_,$(f)),,$(f)))
 QUARTO    := uv run quarto
+# The PDF file names, as each book's _quarto.yml sets them in `output-file`.
 PDF_full         := $(OUT)/Privacy-Preserving-Machine-Learning.pdf
 PDF_practitioner := $(OUT)/Privacy-Preserving-Machine-Learning-Practitioner.pdf
 PDF_course       := $(OUT)/A-Course-in-Differential-Privacy.pdf
@@ -35,7 +39,8 @@ TEX_PKGS  := svg imakeidx makeindex trimspaces catchfile transparent caption kom
 
 .DEFAULT_GOAL := help
 .PHONY: help setup hooks tex-deps datasets test-fast figures figures-force full full-pdf exercises practitioner practitioner-pdf course course-pdf \
-        website pdf book notes note preview publish terms-check acronyms index-candidates prose prose-check format test typecheck check all clean
+        website pdf book notes note preview publish terms-check acronyms index-candidates prose prose-check notation notation-check \
+        structure structure-check format test typecheck check all clean
 
 help: ## List the targets
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-17s %s\n", $$1, $$2}'
@@ -82,90 +87,75 @@ figures-force: ## Rerun every chapter script, regenerating all the figures
 	@rm -rf $(BUILD)/logs $(BUILD)/figures
 	@$(MAKE) --no-print-directory figures
 
-# A book is rendered from a staged copy in $(BUILD)/<name>-<profile>/, never from its own folder,
+# A book is rendered from a staged copy in $(BUILD)/<name>-<format>/, never from its own folder,
 # so Quarto's caches, LaTeX's intermediate files and the generated glossary and index stay out of
 # the source tree. The staged copy sits two levels below the repository, as the rendered site does
 # in $(OUT)/<book>/, so filters/links.lua can rewrite links that leave the book the same way for both.
-# STAGE(book folder, stage name, profile, extra rsync options)
+# The shared settings (_common.yml, _book-common.yml) and filters/ are copied in next to the sources.
+# STAGE(source folder, stage name)
 define STAGE
 	@mkdir -p $(BUILD)/$(2)
-	@rsync -a --delete --exclude .quarto/ --exclude _book/ --exclude __pycache__/ $(4) $(1)/ $(BUILD)/$(2)/
+	@rsync -a --delete --exclude .quarto/ --exclude _book/ --exclude _site/ --exclude __pycache__/ $(1)/ $(BUILD)/$(2)/
 	@rsync -a filters/ $(BUILD)/$(2)/filters/
+	@cp _common.yml _book-common.yml $(BUILD)/$(2)/
 	@for part in $(BUILD)/$(2)/part*/ $(BUILD)/$(2)/appendix*/; do \
 	  [ -d "$$part" ] || continue; name=$$(basename "$$part"); \
 	  if [ -d "$(BUILD)/figures/$$name" ]; then rsync -a $(BUILD)/figures/$$name/ $$part/figures/; fi; \
 	done
 endef
 
-# RENDER(stage name, profile, format): fails on any Quarto or LaTeX warning or error.
+# RENDER(stage name, format): fails on any Quarto or LaTeX warning or error.
 define RENDER
-	@if ! $(QUARTO) render $(BUILD)/$(1) --profile $(2) --to $(3) >$(BUILD)/$(1).log 2>&1; then \
+	@if ! $(QUARTO) render $(BUILD)/$(1) --to $(2) >$(BUILD)/$(1).log 2>&1; then \
 	  cat $(BUILD)/$(1).log; exit 1; fi
 	@if grep -E 'WARN|ERROR' $(BUILD)/$(1).log; then echo "$(1): warnings, see $(BUILD)/$(1).log"; exit 1; fi
 endef
 
-full: figures ## Build the full edition's website into _book/book-full/
-	$(call STAGE,book-full,full-website,website)
-	@uv run python tools/terms.py build --book $(BUILD)/full-website --profile website
-	$(call RENDER,full-website,website,html)
-	@mkdir -p $(OUT)/book-full
-	@rsync -a --delete --exclude '*.pdf' $(BUILD)/full-website/_book/ $(OUT)/book-full/
-	@echo "Website: $(OUT)/book-full/index.html"
+# BOOK_TARGETS(name, source folder): the targets `name` (website) and `name-pdf` for one book.
+# tools/terms.py writes the book's glossary, index page and _terms.json into the staged copy first.
+define BOOK_TARGETS
+$(1): figures
+	$$(call STAGE,$(2),$(1)-website)
+	@uv run python tools/terms.py build --book $$(BUILD)/$(1)-website
+	$$(call RENDER,$(1)-website,html)
+	@mkdir -p $$(OUT)/$(2)
+	@rsync -a --delete --exclude '*.pdf' $$(BUILD)/$(1)-website/_book/ $$(OUT)/$(2)/
+	@echo "Website: $$(OUT)/$(2)/index.html"
 
-full-pdf: figures ## Build the full edition's PDF
-	$(call STAGE,book-full,full-pdf,pdf,--exclude _quarto-website.yml)
-	@uv run python tools/terms.py build --book $(BUILD)/full-pdf --profile pdf
-	$(call RENDER,full-pdf,pdf,pdf)
-	@mkdir -p $(OUT)
-	@cp $(BUILD)/full-pdf/_book/$(notdir $(PDF_full)) $(PDF_full)
-	@echo "PDF: $(PDF_full)"
+$(1)-pdf: figures
+	$$(call STAGE,$(2),$(1)-pdf)
+	@uv run python tools/terms.py build --book $$(BUILD)/$(1)-pdf
+	$$(call RENDER,$(1)-pdf,pdf)
+	@mkdir -p $$(OUT)
+	@cp $$(BUILD)/$(1)-pdf/_book/$$(notdir $$(PDF_$(1))) $$(PDF_$(1))
+	@echo "PDF: $$(PDF_$(1))"
+endef
+
+$(eval $(call BOOK_TARGETS,full,book-full))
+$(eval $(call BOOK_TARGETS,practitioner,book-practitioner))
+$(eval $(call BOOK_TARGETS,course,book-course))
+
+full: ## Build the full edition's website into _book/book-full/
+full-pdf: ## Build the full edition's PDF
+practitioner: ## Build the practitioner edition's website into _book/book-practitioner/
+practitioner-pdf: ## Build the practitioner edition's PDF
+course: ## Build the course's website into _book/book-course/
+course-pdf: ## Build the course's PDF
 
 # The exercise book cross-references the full edition's equations, so it needs the rendered full
 # edition: tools/xrefs.py reads its labels and numbers into _xrefs.json for filters/xrefs.lua.
 exercises: full ## Build the exercise book's website into _book/book-exercises/ (builds the full edition first)
-	$(call STAGE,book-exercises,exercises-website,website)
+	$(call STAGE,book-exercises,exercises-website)
 	@uv run python tools/xrefs.py --site $(OUT)/book-full --book book-full \
 	  --skip-defined-in $(BUILD)/exercises-website --out $(BUILD)/exercises-website/_xrefs.json
-	$(call RENDER,exercises-website,website,html)
+	$(call RENDER,exercises-website,html)
 	@mkdir -p $(OUT)/book-exercises
 	@rsync -a --delete $(BUILD)/exercises-website/_book/ $(OUT)/book-exercises/
 	@echo "Website: $(OUT)/book-exercises/index.html"
 
-practitioner: figures ## Build the practitioner edition's website into _book/book-practitioner/
-	$(call STAGE,book-practitioner,practitioner-website,website)
-	@uv run python tools/terms.py build --book $(BUILD)/practitioner-website --profile website
-	$(call RENDER,practitioner-website,website,html)
-	@mkdir -p $(OUT)/book-practitioner
-	@rsync -a --delete --exclude '*.pdf' $(BUILD)/practitioner-website/_book/ $(OUT)/book-practitioner/
-	@echo "Website: $(OUT)/book-practitioner/index.html"
+website: full exercises practitioner course ## Build every website into _book/
 
-practitioner-pdf: figures ## Build the practitioner edition's PDF
-	$(call STAGE,book-practitioner,practitioner-pdf,pdf,--exclude _quarto-website.yml)
-	@uv run python tools/terms.py build --book $(BUILD)/practitioner-pdf --profile pdf
-	$(call RENDER,practitioner-pdf,pdf,pdf)
-	@mkdir -p $(OUT)
-	@cp $(BUILD)/practitioner-pdf/_book/$(notdir $(PDF_practitioner)) $(PDF_practitioner)
-	@echo "PDF: $(PDF_practitioner)"
-
-course: figures ## Build the course's website into _book/book-course/
-	$(call STAGE,book-course,course-website,website)
-	@uv run python tools/terms.py build --book $(BUILD)/course-website --profile website
-	$(call RENDER,course-website,website,html)
-	@mkdir -p $(OUT)/book-course
-	@rsync -a --delete --exclude '*.pdf' $(BUILD)/course-website/_book/ $(OUT)/book-course/
-	@echo "Website: $(OUT)/book-course/index.html"
-
-course-pdf: figures ## Build the course's PDF
-	$(call STAGE,book-course,course-pdf,pdf,--exclude _quarto-website.yml)
-	@uv run python tools/terms.py build --book $(BUILD)/course-pdf --profile pdf
-	$(call RENDER,course-pdf,pdf,pdf)
-	@mkdir -p $(OUT)
-	@cp $(BUILD)/course-pdf/_book/$(notdir $(PDF_course)) $(PDF_course)
-	@echo "PDF: $(PDF_course)"
-
-website: full exercises $(if $(wildcard book-practitioner),practitioner) course ## Build every website into _book/
-
-pdf: full-pdf $(if $(wildcard book-practitioner),practitioner-pdf) course-pdf ## Build every PDF into _book/
+pdf: full-pdf practitioner-pdf course-pdf ## Build every PDF into _book/
 
 book: website pdf notes ## Build every website and PDF, and the study notes
 
@@ -186,7 +176,7 @@ note:
 	$(call STAGE,notes/$(NOTE),notes-$(NOTE))
 	@if [ -d $(BUILD)/figures/notes/$(NOTE) ]; then \
 	  rsync -a $(BUILD)/figures/notes/$(NOTE)/ $(BUILD)/notes-$(NOTE)/figures/; fi
-	$(call RENDER,notes-$(NOTE),default,all)
+	$(call RENDER,notes-$(NOTE),all)
 	@mkdir -p $(OUT)/notes/$(NOTE)
 	@rsync -a --delete $(BUILD)/notes-$(NOTE)/_site/ $(OUT)/notes/$(NOTE)/
 	@echo "Note: $(OUT)/notes/$(NOTE)/index.html"
@@ -213,11 +203,14 @@ publish: ## Publish _book/ to the gh-pages branch for GitHub Pages (run make boo
 	@git worktree remove --force $(PAGES)
 
 preview: full ## Serve the full edition from its staged copy (rerun after editing book-full/)
-	$(QUARTO) preview $(BUILD)/full-website --profile website
+	$(QUARTO) preview $(BUILD)/full-website
 
-terms-check: ## Fail if an acronym isn't expanded at its first use on a page, or isn't in terms.toml
-	@for b in book-full book-exercises $(wildcard book-practitioner) book-course; do \
-	  echo "== $$b"; uv run python tools/terms.py check --book $$b || exit 1; done
+# The checks below run over every book and every note unless BOOK= names one (a book folder, or
+# notes/<name>); a page-level report takes PAGE= as well.
+CHECKED   := $(or $(BOOK),$(BOOKS) $(NOTE_DIRS))
+
+terms-check: ## Fail if an acronym isn't expanded at its first use on a page, or isn't in terms.toml (BOOK=)
+	@for b in $(CHECKED); do echo "== $$b"; uv run python tools/terms.py check --book $$b || exit 1; done
 
 acronyms: ## Report every acronym, its expansion and the pages that use it (BOOK=book-full)
 	uv run python tools/terms.py acronyms --book $(or $(BOOK),book-full)
@@ -225,8 +218,11 @@ acronyms: ## Report every acronym, its expansion and the pages that use it (BOOK
 index-candidates: ## Suggest index terms (bold phrases) not yet in terms.toml (BOOK=book-full)
 	uv run python tools/terms.py candidates --book $(or $(BOOK),book-full)
 
-prose: ## Report hard-to-read prose, worst paragraphs first (BOOK=book-practitioner, PAGE=part../NN-x.md); see PROSE.md
-	uv run python tools/prose.py report --book $(or $(BOOK),book-practitioner) $(if $(PAGE),--page $(PAGE)) --worst $(or $(WORST),5)
+prose: ## Report hard-to-read prose, worst paragraphs first (BOOK=book-full, PAGE=part../NN-x.md); see PROSE.md
+	uv run python tools/prose.py report --book $(or $(BOOK),book-full) $(if $(PAGE),--page $(PAGE)) --worst $(or $(WORST),5)
+
+prose-check: ## Fail if a page's prose is past its book's limits in tools/prose.toml (BOOK=)
+	@for b in $(CHECKED); do echo "== $$b"; uv run python tools/prose.py check --book $$b || exit 1; done
 
 notation-check: ## Fail on notation that NOTATION.md forbids, in every book and note (notation.toml)
 	uv run python tools/notation.py check
@@ -234,8 +230,11 @@ notation-check: ## Fail on notation that NOTATION.md forbids, in every book and 
 notation: ## Report how often each notation rule fires, per book
 	uv run python tools/notation.py report
 
-prose-check: ## Fail if a page's prose is past its book's limits in tools/prose.toml (BOOK=book-practitioner)
-	uv run python tools/prose.py check --book $(or $(BOOK),book-practitioner)
+structure-check: ## Fail if a page breaks its book's skeleton in tools/structure.toml (headings, ids, budget, pointer; BOOK=)
+	uv run python tools/structure.py check $(if $(BOOK),--book $(BOOK))
+
+structure: ## Report words per page and section, environments and budget, longest first (BOOK=book-full)
+	uv run python tools/structure.py report --book $(or $(BOOK),book-full)
 
 format: ## Format all Python with ruff, as VSCode and the pre-commit hook do
 	uv run ruff check --fix --exit-zero --quiet .
@@ -250,7 +249,7 @@ test-fast: ## Run the tests without the practitioner libraries' (no torch, Opacu
 typecheck: ## Run strict pyright
 	uv run pyright
 
-check: test typecheck terms-check notation-check prose-check website ## Tests, type checks, the acronym, notation and prose checks and a clean render of every website
+check: test typecheck terms-check notation-check prose-check structure-check website ## Tests, types, acronyms, notation, prose, structure, and a clean render of every website
 
 all: check pdf ## Check everything, then build the PDFs too
 

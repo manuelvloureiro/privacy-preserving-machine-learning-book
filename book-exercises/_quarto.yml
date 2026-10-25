@@ -13,9 +13,6 @@ project:
 
 book:
   title: "Privacy-Preserving Machine Learning: Exercises"
-  author: "Manuel V. Loureiro"
-  date: today
-  date-format: "[Version] YYYY-MM-DD"
   chapters:
     - index.md
     - part: "Prerequisites"
@@ -83,10 +80,8 @@ filters:
   - filters/book-checks.lua  # numbers every equation, warns on uncaptioned tables and figures
   - quarto
 
-crossref:
-  chapters: true  # number as 2.1, 2.2, ... per chapter
-
-format:
-  html:
-    theme: cosmo
-    html-math-method: mathjax
+# Fonts, theme, PDF class and the dated version on the cover: shared by every book, copied into
+# the staged copy by the Makefile.
+metadata-files:
+  - _common.yml
+  - _book-common.yml

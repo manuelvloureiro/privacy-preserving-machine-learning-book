@@ -1,99 +1,71 @@
 # CLAUDE.md
 
-How the books are built. For how to write book content (chapter structure, voice, derivations, code and figure rules), see [AGENTS.md](AGENTS.md); for how to check and fix the readability of the prose, see [PROSE.md](PROSE.md); for the symbols, names and spelling every book and note shares, see [NOTATION.md](NOTATION.md).
+How the books are built and checked. The other three documents cover the rest: [AGENTS.md](AGENTS.md) says what to write (the books, the shape of every kind of page, code and figures), [PROSE.md](PROSE.md) how to make and prove that a page reads well, and [NOTATION.md](NOTATION.md) which symbol, spelling and word to use for each concept. Each rule lives in one of the four; the others link to it.
 
-## Build: Quarto
+## The projects
 
-The repository holds four [Quarto](https://quarto.org) book projects side by side, and they share `code/`, `filters/` and `terms.toml`:
+Four [Quarto](https://quarto.org) book projects sit side by side and share `code/`, `filters/`, `terms.toml`, `notation.toml` and the Quarto settings in `_common.yml` and `_book-common.yml`:
 
-- `book-full/` (`book-full/_quarto.yml`): the full edition, with every derivation. Website and PDF.
-- `book-exercises/` (`book-exercises/_quarto.yml`): the full edition's exercises with worked solutions, one page per chapter. Website only.
-- `book-practitioner/` (`book-practitioner/_quarto.yml`): the practitioner edition, the same parts and chapters without proofs. Website and PDF.
-- `book-course/` (`book-course/_quarto.yml`): a course in differential privacy, one topic per chapter, light in text and complete in its proofs. It stands alone and links to no other book. Website and PDF.
+- `book-full/`: the full edition, with every derivation. Website and PDF.
+- `book-exercises/`: the full edition's exercises with worked solutions, one page per chapter. Website only.
+- `book-practitioner/`: the practitioner edition, the same parts and topics without proofs, plus workflow chapters that run real libraries. Website and PDF.
+- `book-course/`: a course in differential privacy, one topic per chapter, light in text and complete in its proofs. It links to no other book. Website and PDF.
 
-Next to the books, `notes/<name>/` holds standalone study notes: each is a one-page Quarto project (`_quarto.yml` and `index.md`) that `make notes` stages and renders into `_book/notes/<name>/`, a web page with its PDF. `make book` builds them too, so `make publish` keeps them on the site, and the landing page links to each. [AGENTS.md](AGENTS.md) says how to write one.
+Next to them, `notes/<name>/` holds standalone study notes: each is a one-page Quarto project (`_quarto.yml` and `index.md`, with a script in `code/notes/` when it computes anything) that renders to a web page with its PDF. The landing page `site/index.html` links to every book, PDF and note.
+
+Each `_quarto.yml` holds only what is its own: the title, the PDF's `output-file`, the chapter list and the filters it runs. Everything shared comes from `_common.yml` (filters' companions: fonts, theme, PDF engine and header) and, for the books, `_book-common.yml` (author, the dated version on the cover, chapter-wise numbering, the KOMA book class), pulled in through `metadata-files`. The Makefile copies both into each staged copy, which is why a project can name a file that does not sit in its folder. There are no Quarto profiles.
 
 Do not add another build system (MkDocs, Jupyter Book, a hand-rolled pandoc script).
 
+## Building
+
 ```bash
-make website   # every website, into _book/book-full/, _book/book-exercises/, _book/book-practitioner/
-make pdf       # the full and practitioner PDFs, into _book/
-make book      # both
-make notes     # the study notes in notes/, into _book/notes/<name>/
-make full      # one book: full, full-pdf, exercises, practitioner, practitioner-pdf, course, course-pdf
-make preview   # serve the full edition from its staged copy (rerun after editing book-full/)
+make website      # every website, into _book/<book>/
+make pdf          # the three PDFs, into _book/
+make notes        # the study notes, into _book/notes/<name>/
+make book         # all of the above
+make full         # one target: full, full-pdf, exercises, practitioner, practitioner-pdf, course, course-pdf
+make preview      # serve the full edition from its staged copy (rerun after editing book-full/)
+make help         # every target
 ```
 
-`make publish` puts `_book/` on the `gh-pages` branch and pushes it, and GitHub Pages serves it publicly, one book per address: `https://manuelvloureiro.github.io/privacy-preserving-machine-learning-book/book-full/` and so on. The site's root shows `site/index.html`, a landing page that links to the books and the PDFs. It publishes whatever is in `_book/`, so run `make book` first.
+`make publish` puts `_book/` and `site/` on the `gh-pages` branch and pushes it; GitHub Pages serves it at `https://manuelvloureiro.github.io/privacy-preserving-machine-learning-book/`, one book per folder. It publishes whatever is in `_book/`, so run `make book` first.
 
-Never render a book's folder in place. The make targets copy it to `_build/<name>-<profile>/` (for example `_build/full-website/`), add `filters/` and the figures, and render there, so Quarto's cache, LaTeX's intermediate files and the generated glossary and index never land among the sources. The rendered website is then copied to `_book/<book>/`, the PDF to `_book/`. A render fails on any Quarto warning or error, so a clean build has none.
+**Never render a project's folder in place.** The targets copy it to `_build/<name>-<format>/`, add `filters/`, the shared settings and the figures, and render there, so Quarto's cache, LaTeX's intermediate files and the generated glossary and index never land among the sources. The website is then copied to `_book/<book>/`, the PDF to `_book/`. A render fails on any Quarto warning or error, so a clean build has none.
 
-**Links between the books.** A page links to another book, to `code/` or to `tests/` by its relative path in the repository (`../../book-exercises/part03-dp-foundations/03-laplace-gaussian.md#sec-sol-lapgauss-2`), so the links also work when browsing the source. `filters/links.lua` rewrites them for the output: a link to `code/` or `tests/` points to the file on GitHub (`blob/main/`), in every format; on a website a link to another book points to its page there, since `_book/` mirrors the repository's layout; in a PDF it becomes plain text followed by "in the exercise book", "in the full edition", "in the practitioner edition" or "in the course". The exercise book also cross-references the full edition's equations, sections, figures and tables as `@eq-name` and so on, which Quarto resolves only within one book: `make exercises` therefore builds the full edition first, `tools/xrefs.py` reads its labels and numbers into the staged `_xrefs.json`, and `filters/xrefs.lua` turns each reference into a link that reads "Equation 20.9".
+**Figures are build output.** Each script in `code/<folder>/` writes its SVG figures into `_build/figures/<folder>/`, deterministically, and staging copies them into the book folder of the same name (`<part>/figures/`, `appendix-derivations/figures/`), so a page references a figure as `figures/<name>.svg` and no figure is committed. Every build runs `make figures` first, which reruns a script only when a file in its folder changed; its printed tables go to `_build/logs/`, which doubles as the up-to-date marker. Regenerating everything takes about ten minutes, so pass `-j`. `make figures-force` reruns them all.
 
-The full edition's two formats set their appendices in Quarto profiles: `book-full/_quarto-website.yml` (the default) and `book-full/_quarto-pdf.yml`.
+**Two naming schemes share `code/`.** The full, exercise and practitioner books use the parts `part01-prerequisites` … `part05-dp-ml`; the course has its own, `part01-privacy-failures` … `part05-deployments`. Both sets of folders sit in `code/`, and only the folder name ties a script's figures to a book's part, so a new part must not reuse a name from the other scheme. The practitioner workflows (`code/<part>/practitioner_*.py`) and the notes' scripts (`code/notes/`) draw no figures and are not run by `make figures`.
 
-Quarto comes from the `quarto-cli` dev dependency, so there's nothing to install globally. The PDF is built with LaTeX (lualatex, TinyTeX in `~/.TinyTeX`) and needs `rsvg-convert` (`librsvg2-bin`) to embed SVG figures. If a render stops on `File 'x.sty' not found`, install the package with `~/.TinyTeX/bin/x86_64-linux/tlmgr --repository https://ctan.math.illinois.edu/systems/texlive/tlnet install <pkg>`. The default mirror on this machine is stale, so Quarto can't install packages by itself. Typst was tried and dropped: pandoc's LaTeX-to-Typst math conversion mistranslates some commands, for example `\approx` after a superscript.
+**Links between the books.** A page links to another book, to `code/` or to `tests/` by its relative path in the repository (`../../book-exercises/part03-dp-foundations/03-laplace-gaussian.md#sec-sol-lg-2`), so the links also work when browsing the source. `filters/links.lua` rewrites them for the output: a link to `code/` or `tests/` points to the file on GitHub; on a website a link to another book points to its page there, since `_book/` mirrors the repository's layout; in a PDF it becomes plain text followed by "in the exercise book", "in the full edition", "in the practitioner edition" or "in the course". The exercise book also cross-references the full edition's labels as `@eq-name`, `@thm-name` and so on, which Quarto resolves only within one book: `make exercises` therefore builds the full edition first, `tools/xrefs.py` reads its labels and numbers into the staged `_xrefs.json`, and `filters/xrefs.lua` turns each reference into a link that reads "Equation 20.9" or "Theorem 20.2".
 
-The SVG figures are build output too. Each script in `code/<part>/` writes its figures into `_build/figures/<part>/`, deterministically, and staging copies them into each book's `<part>/figures/`, so every book references a figure as `figures/<name>.svg` and a figure is never committed. Every build runs `make figures` first, which reruns a script only when a file in its `code/<part>/` folder has changed (its printed tables go to `_build/logs/`, which marks it as up to date). Regenerating everything takes about ten minutes, so pass `-j`. `make figures-force` reruns them all. A figure must therefore come from a script: no hand-drawn or downloaded SVGs.
+**LaTeX.** The PDF is built with lualatex from TinyTeX in `~/.TinyTeX` and needs `rsvg-convert` (`librsvg2-bin`) to embed SVG figures; `make tex-deps` installs the packages. If a render stops on `File 'x.sty' not found`, install the package with `~/.TinyTeX/bin/x86_64-linux/tlmgr --repository https://ctan.math.illinois.edu/systems/texlive/tlnet install <pkg>`: the default mirror on this machine is stale, so Quarto cannot install packages by itself. Typst was tried and dropped, because pandoc's LaTeX-to-Typst math conversion mistranslates some commands.
 
-`_book/` and `_build/` are build output and are git-ignored. Python's bytecode caches go to `_build/pycache/` when you run through make. When `.qmd` files with code exist, their `_freeze/` cache is written in the staged copy; copy it back to the book's `_freeze/` to commit it.
+`_book/` and `_build/` are build output and git-ignored. Python's bytecode caches go to `_build/pycache/` when you run through make. Every page is a `.md` file; the books have no `.qmd` files and no code cells. If one is ever needed, keep its cells thin (import from `code/`, compute nothing in the cell) and commit its `_freeze/` cache.
 
-## Adding a chapter
+## Adding a chapter or a book
 
-The book's units are Quarto's: a folder `partNN-<topic>/` is a **part**, each file in it is a **chapter** (numbered 1, 2, … across the whole book), and each `##` heading in a file is a **section** (31.2).
-
-
-- List every new file in `book-full/_quarto.yml` under its part in the `chapters:` list, its exercise-book page (`book-exercises/<part>/NN-<topic>.md`) in `book-exercises/_quarto.yml`, and its practitioner chapter in `book-practitioner/_quarto.yml`. A course chapter goes in `book-course/_quarto.yml` only. Quarto does not pick up new files on its own.
-- Write internal links as relative links to the source file (`[divergences](03-divergences.md)`). Quarto rewrites them for each output, and `filters/links.lua` rewrites links to the other books.
-
-## Appendices
-
-The full edition's appendices of derivations live in `book-full/appendix-derivations/`, one file per appendix, listed under `appendices:` in both `book-full/_quarto-website.yml` and `book-full/_quarto-pdf.yml`, before the generated glossary and index. Their scripts are in `code/appendix-derivations/`, and staging copies their figures into `appendix-derivations/figures/` as it does for a part. [AGENTS.md](AGENTS.md) says what an appendix contains.
-
-## `.md` or `.qmd`
-
-- **`.md`:** text with no computed content. Figures that a chapter script generates go in with `![caption](figures/name.svg){#fig-name}`.
-- **`.qmd`:** a chapter that draws figures or quotes numbers computed by code. Quarto runs its Python cells at build time.
-
-In a `.qmd`:
-
-- **Keep cells thin.** The logic stays in typed pure functions in `code/<part>/<topic>.py`, where strict pyright and pytest cover it. A cell imports and calls those functions. It never defines math or plotting logic itself.
-- **Put computed numbers in with inline expressions,** such as `` `{python} f"{delta:.1e}"` ``. Never copy them into the text by hand. A test is only needed for numbers that still appear as literal text.
-- **Hide code by default** (`echo: false`). Show it only when the code itself is the point.
-- **Use the same seeds as the scripts:** seed 0 for quoted numbers, seed + 1 for figures, so the book and `uv run python code/<part>/<topic>.py` agree.
-
-## Cross-references
-
-Use Quarto's syntax everywhere, in `.md` and `.qmd`, within a book:
-
-- Figures: `![caption](path){#fig-name}` or a cell with `#| label: fig-name`, referenced as `@fig-name`.
-- Equations: `$$ ... $$ {#eq-name}`, referenced as `@eq-name`.
-- Sections: `## Title {#sec-name}`, referenced as `@sec-name`.
-
-Don't write "the figure below" or "equation (3)" by hand.
+- List a new file in its book's `_quarto.yml` (Quarto does not pick up files on its own): a full chapter also gets its exercise page in `book-exercises/_quarto.yml` and its practitioner page in `book-practitioner/_quarto.yml`; a course chapter goes in `book-course/_quarto.yml` only. Then add the page to `legacy` in `tools/structure.toml` only if it is not yet in its skeleton's shape (see Checks).
+- A new book needs: its folder with `_quarto.yml` and `index.md`, a `PDF_<name>` line and a `$(eval $(call BOOK_TARGETS,<name>,<folder>))` line plus two documented stubs in the Makefile, its name in `BOOKS`, an entry in `tools/structure.toml`, `tools/prose.toml` and `notation.py`'s `BOOKS`, and a card in `site/index.html`. A new note needs only its folder (and its script in `code/notes/` if it computes anything) and the card.
 
 ## Acronyms, glossary and index
 
-`terms.toml`, shared by the four books, is the curated list of acronyms (with their expansions), names that aren't acronyms (venues, tools, organizations) and index terms. `tools/terms.py` reads it:
-
-- `make terms-check` checks each book and fails on an acronym missing from `terms.toml` or not expanded at its first use on a page. Each page is a web page a reader can land on directly, so every page expands its acronyms once, as "moment generating function (MGF)" or "PPT (probabilistic polynomial time)", using the wording in `terms.toml`. An acronym used only once in the book is spelled out instead.
-- `make acronyms` reports each acronym with its uses per page. `make index-candidates` suggests bold phrases not yet indexed.
-- The build targets first generate `glossary.md`, `term-index.md` and `_terms.json` in each staged copy (`tools/terms.py build`), never in a book's folder, using that book's and profile's pages. The exercise book has no glossary or index.
-
-The web index links each term to the section that names it on each page. The PDF index has real page numbers: `filters/term-index.lua` marks every paragraph that mentions a term (it reads `_terms.json`), and LaTeX's `imakeidx` prints the index.
-
-Every display equation is numbered by `filters/book-checks.lua`. Label one yourself (`{#eq-name}`) only to reference it.
+`terms.toml`, shared by every project, is the curated list of acronyms with their expansions, names that are not acronyms (venues, tools, organizations) and index terms. `tools/terms.py` reads it: `make terms-check` fails on an acronym missing from `terms.toml` or not expanded at its first use on a page (each page is a web page a reader can land on directly, so every page expands its acronyms once, using the wording in `terms.toml`; an acronym used only once in a book is spelled out instead); `make acronyms` reports each acronym's uses per page; `make index-candidates` suggests bold phrases not yet indexed. The build targets generate `glossary.md`, `term-index.md` and `_terms.json` in each staged copy, never in a source folder. The web index links each term to the section that names it; the PDF index has page numbers, from `filters/term-index.lua` and LaTeX's `imakeidx`. The exercise book and the notes have no glossary or index.
 
 ## Checks
 
-`make check` runs everything below plus the acronym check and the notation check (`make notation-check`, which reads `notation.toml`; see [NOTATION.md](NOTATION.md)). `make help` lists all targets.
+`make check` runs all of these, over every book and every note, and a chapter that fails any of them is not done:
 
 ```bash
-uv run pytest
-uv run pyright
-make website                          # a chapter that fails to render, or warns, is a broken chapter
+make test               # uv run pytest, including the practitioner libraries (make test-fast skips them)
+make typecheck          # strict pyright over code/, tests/ and tools/
+make terms-check        # acronyms expanded and listed (BOOK= for one book or notes/<name>)
+make notation-check     # the notation NOTATION.md fixes (notation.toml)
+make prose-check        # readability within the book's limits (tools/prose.toml); see PROSE.md
+make structure-check    # every page in its kind's shape (tools/structure.toml); see AGENTS.md
+make website            # a chapter that fails to render, or warns, is a broken chapter
 ```
 
-**The practitioner edition's code** runs real libraries (Opacus, CPU PyTorch, `dp-accounting`, OpenDP, diffprivlib, `peft`, `transformers`, scikit-learn, SciPy), pinned in the `practitioner` dependency group, which `uv` installs by default. Its tests are marked `libs`; `make test-fast` skips them. The workflow scripts `code/<part>/practitioner_<topic>.py` read public datasets through `code/practitioner_datasets.py`, which caches them in `data/` (git-ignored); `make datasets` fills the cache and `make test` runs it first. These scripts draw no figures, so `make figures` skips them. Untyped libraries are typed by hand-written stubs in `typings/`. `tests/test_practitioner_excerpts.py` checks that every code block on a practitioner page is a snippet, a `text` or `bash` block, or an excerpt that matches a marked region of a script. [AGENTS.md](AGENTS.md) has the rules.
+`make structure-check` reads `tools/structure.toml`: for each book, which skeleton each page follows (full chapter, part page, appendix, exercise page, practitioner page, course chapter, note) and what the skeleton requires. Pages listed under a book's `legacy` have not been converted to their skeleton yet and are skipped until their line is removed; `make structure BOOK=book-full` reports words per page and section.
 
-Prose quality has its own process, [PROSE.md](PROSE.md): `make prose BOOK=... PAGE=...` reports hard-to-read sentences, `make prose-check BOOK=...` gates a book, and `tests/test_prose.py` keeps the checks calibrated to passages the author accepted or rejected.
+**The practitioner edition's code** runs real libraries (Opacus, CPU PyTorch, `dp-accounting`, OpenDP, diffprivlib, `peft`, `transformers`, scikit-learn, SciPy, ART), pinned in the `practitioner` dependency group, which `uv` installs by default. Its tests are marked `libs`. The workflow scripts read public datasets through `code/practitioner_datasets.py`, which caches them in `data/` (git-ignored); `make datasets` fills the cache and `make test` runs it first. Untyped libraries are typed by hand-written stubs in `typings/`. `tests/test_practitioner_excerpts.py` checks that every code block on a practitioner page is a snippet, a `text` or `bash` block, or an excerpt that matches a marked region of a script; `tests/test_practitioner_snippets.py` runs the snippets. [AGENTS.md](AGENTS.md) has the rules.

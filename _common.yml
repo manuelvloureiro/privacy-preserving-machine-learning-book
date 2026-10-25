@@ -1,0 +1,44 @@
+# Settings every book and study note shares, pulled in by each project's _quarto.yml through
+# `metadata-files`; each project lists its own `filters`, since the lists differ. The index macros are
+# harmless in a note, which has no index. The Makefile copies this file into the staged copy next to filters/ (make
+# renders from _build/<name>/, never from a source folder), so a project's _quarto.yml refers to it
+# as `_common.yml` even though it does not sit in the project's folder in the repository.
+
+format:
+  html:
+    theme: cosmo
+    html-math-method: mathjax
+  pdf:
+    pdf-engine: lualatex
+    papersize: a4
+    fontsize: 11pt
+    fig-pos: "htbp"  # let figures float to the top of a page instead of leaving gaps
+    include-in-header:
+      text: |
+        % New Computer Modern: Latin Modern's successor, which also has Greek, so ε and δ in
+        % headings and text render. Symbols it lacks (⇒, ≈, superscript digits) fall back to the
+        % math font, then to DejaVu Sans.
+        \directlua{luaotfload.add_fallback("textfallback", {"NewCMMath-Regular.otf:mode=harf;", "DejaVuSans.ttf:mode=harf;"})}
+        \setmainfont{NewCM10-Regular.otf}[RawFeature={fallback=textfallback}, BoldFont=NewCM10-Bold.otf,
+          ItalicFont=NewCM10-Italic.otf, BoldItalicFont=NewCM10-BoldItalic.otf]
+        \setsansfont{NewCMSans10-Regular.otf}[RawFeature={fallback=textfallback}, BoldFont=NewCMSans10-Bold.otf,
+          ItalicFont=NewCMSans10-Oblique.otf, BoldItalicFont=NewCMSans10-BoldOblique.otf]
+        \setmonofont{NewCMMono10-Regular.otf}[RawFeature={fallback=textfallback}, BoldFont=NewCMMono10-Bold.otf,
+          ItalicFont=NewCMMono10-Italic.otf, BoldItalicFont=NewCMMono10-BoldOblique.otf]
+        \setmathfont{NewCMMath-Regular.otf}
+        \usepackage{imakeidx}
+        \makeindex[title={}]
+        \indexsetup{level=\relax, noclearpage}  % term-index.md supplies the heading
+        \RedeclareSectionCommand[tocnumwidth=3em]{section}  % room in the contents for numbers like 28.10
+        % LuaLaTeX reads a heading's Greek letters (ε, δ) back from the .aux with different
+        % character codes than it writes them, so LaTeX sees those labels as changed on every
+        % run and asks for reruns forever. Compare labels as strings instead.
+        \makeatletter
+        \AtBeginDocument{\def\@testdef#1#2#3{%
+          \edef\reserved@a{\detokenize{#3}}%
+          \expandafter\ifx\csname #1@#2\endcsname\relax\@tempswatrue\else
+            \edef\reserved@b{\expandafter\expandafter\expandafter\detokenize
+              \expandafter\expandafter\expandafter{\csname #1@#2\endcsname}}%
+            \ifx\reserved@a\reserved@b\else\@tempswatrue\fi
+          \fi}}
+        \makeatother

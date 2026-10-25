@@ -1,0 +1,20 @@
+# Settings the four books share on top of _common.yml: the author and the dated version on the
+# cover, chapter-wise numbering, and the KOMA book class. Pulled in through
+# `metadata-files` and copied into the staged copy by the Makefile, like _common.yml.
+
+book:
+  author: "Manuel V. Loureiro"
+  # The version is the date the book was built, shown on the cover of the PDF and the website.
+  date: today
+  date-format: "[Version] YYYY-MM-DD"
+
+crossref:
+  chapters: true  # number as 2.1, 2.2, ... per chapter
+
+format:
+  pdf:
+    documentclass: scrbook
+    # Standard KOMA options, set to waste less space: one-sided (no binding margin),
+    # chapters start on the next page instead of the next right-hand page, wider text block.
+    classoption: [oneside, open=any, DIV=13]
+    toc-depth: 2  # chapters and sections; subsections made the contents five pages long
